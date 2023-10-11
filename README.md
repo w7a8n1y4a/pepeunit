@@ -3,10 +3,11 @@
 
 ## Типы нод
 
-0. `Unit`
-1. `Input variable`
-2. `Output variable`
+0. `unit`
+1. `input_variable`
+2. `output_variable`
 3. `repo_unit`
+4. `daemon_unit`
 
 ## Типы связей
 
