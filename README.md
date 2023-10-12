@@ -7,7 +7,6 @@
 1. `input_variable`
 2. `output_variable`
 3. `repo_unit`
-4. `daemon_unit`
 
 ## Типы связей
 
