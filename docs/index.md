@@ -6,8 +6,11 @@ hero:
   tagline: From device to network
   actions:
     - theme: brand
-      text: Get Started
-      link: /markdown-examples
+      text: What is Pepeunit?
+      link: /overview
+    - theme: alt
+      text: Fediverse state
+      link: https://fediverse.observer/
   image:
     src: /main_icon_big.webp
     alt: Pepeunit
