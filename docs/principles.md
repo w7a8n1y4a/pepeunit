@@ -30,7 +30,7 @@
 
 ### Redis
 
-[Redis](definition#redis) - обеспечивает кэширование и хранение промежуточной информации о состоянии [UnitNode](definitions#unitnode), при общении [Unit](definitions#unit) c [MQTT Broker](definitions#mqtt-broker). Взаимодействует напрямую с [Backend](definitions#backend).
+[Redis](definitions#redis) - обеспечивает кэширование и хранение промежуточной информации о состоянии [UnitNode](definitions#unitnode), при общении [Unit](definitions#unit) c [MQTT Broker](definitions#mqtt-broker). Взаимодействует напрямую с [Backend](definitions#backend).
 
 ## Сущности
 
