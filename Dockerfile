@@ -6,9 +6,10 @@ COPY package*.json ./
 
 RUN npm install
 RUN npm add -D vitepress
-RUN npm run docs:build
 
 COPY . .
+
+RUN npm run docs:build
 
 FROM nginx:alpine
 EXPOSE 80
