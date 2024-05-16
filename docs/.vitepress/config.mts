@@ -12,15 +12,24 @@ export default defineConfig({
     logo: '/main_icon_small.png',
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Examples', link: '/markdown-examples' }
+      { text: 'Docs', link: '/overview' }
     ],
 
     sidebar: [
       {
-        text: 'Examples',
+        text: 'Conceptions',
+        items: [
+          { text: 'Overview', link: '/overview' },
+          { text: 'Functions', link: '/functions' },
+          { text: 'Principles', link: '/principles' },
+          { text: 'Definitions', link: '/definitions' }
+        ]
+      },
+      {
+        text: 'Docs Example',
         items: [
           { text: 'Markdown Examples', link: '/markdown-examples' },
-          { text: 'Runtime API Examples', link: '/api-examples' }
+          { text: 'Runtime API Examples', link: '/api-examples' },
         ]
       }
     ],
