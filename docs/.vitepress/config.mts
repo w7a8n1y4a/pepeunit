@@ -5,6 +5,8 @@ export default defineConfig({
   head:[
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/vitepress-logo-mini.svg' }],
     ['link', { rel: 'icon', type: 'image/png', href: '/favicon.ico'}],
+    ['meta', { name: 'theme-color', content: '#00bf30' }],
+    ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:locale', content: 'en' }],
     ['meta', { property: 'og:title', content: 'Pepeunit | Federative IoT Platform' }],
     ['meta', { property: 'og:site_name', content: 'Pepeunit' }],
