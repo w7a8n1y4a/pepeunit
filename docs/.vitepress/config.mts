@@ -10,6 +10,7 @@ export default defineConfig({
     ['meta', { property: 'og:locale', content: 'en' }],
     ['meta', { property: 'og:title', content: 'Pepeunit | Federative IoT Platform' }],
     ['meta', { property: 'og:site_name', content: 'Pepeunit' }],
+    ['meta', { property: 'og:description', content: 'Federative IoT Platform' }],
     ['meta', { property: 'og:image', content: 'https://pepeunit.com/pepeunit-og.jpg' }],
     ['meta', { property: 'og:url', content: 'https://pepeunit.com/' }],
   ],
