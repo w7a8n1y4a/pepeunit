@@ -2,8 +2,14 @@ import { defineConfig } from 'vitepress'
 
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
-  head: [
-    ['link', { rel: 'icon', href: '/favicon.ico' }],
+  head:[
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/vitepress-logo-mini.svg' }],
+    ['link', { rel: 'icon', type: 'image/png', href: '/favicon.ico'}],
+    ['meta', { property: 'og:locale', content: 'en' }],
+    ['meta', { property: 'og:title', content: 'Pepeunit | Federative IoT Platform' }],
+    ['meta', { property: 'og:site_name', content: 'Pepeunit' }],
+    ['meta', { property: 'og:image', content: 'https://pepeunit.com/pepeunit-og.jpg' }],
+    ['meta', { property: 'og:url', content: 'https://pepeunit.com/' }],
   ],
 
   title: 'Pepeunit',
