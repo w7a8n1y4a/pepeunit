@@ -35,6 +35,13 @@ export default defineConfig({
         ]
       },
       {
+        text: 'Tests',
+        items: [
+          { text: 'Integration', link: '/integration-test' },
+          { text: 'Load', link: '/load-test' },
+        ]
+      },
+      {
         text: 'Docs Example',
         items: [
           { text: 'Markdown Examples', link: '/markdown-examples' },
