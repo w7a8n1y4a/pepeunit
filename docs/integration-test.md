@@ -149,24 +149,23 @@
 ### Cценарий 1 - Модификация UnitNode
 - Обновить видимость
 - Обновить для Input презаписываемость
-- Обновить для Output презаписываемость
+- Попробовать обновить для Output презаписываемость
 
-### Сценарий 2 - Установить значения
+### Сценарий 2 - Установка связей
+- UnitNode Output -> Input - Public - Public
+- UnitNode Output -> Input - Public - Internal
+- UnitNode Output -> Input - Public - Private
+
+### Сценарий 3 - Взаимодействие
+- Каждое взаимодействие - это установка input UnitNode, который автоматически передаётся в output UnitNode на стороне Unit, с логированием в json файл
+
+### Сценарий 4 - Установить значения
 - Получить некоторый UnitNode
 - Установить значение в state
 - Установить значение по топику
 
-### Сценарий 3 - Взаимодействие
-- Каждое взаимодействие - это установка input UnitNode, который автоматически передаётся в output UnitNode на стороне Unit, с логированием в json файл
-- Взаимодействие двух UnitNode - Public - Public
-- Взаимодействие двух UnitNode - Internal - Internal
-- Взаимодействие двух UnitNode - Private - Private
-- Взаимодействие двух UnitNode - Public - Internal
-- Взаимодействие двух UnitNode - Internal - Private
-- Взаимодействие двух UnitNode - Public - Private
-
-### Сценарий 4 - Множественная выборка UnitNode
+### Сценарий 5 - Множественная выборка UnitNode
 - Выборка по Unit
 
-### Сценарий 5 - Удаление
+### Сценарий 6 - Удаление Unit
 - Удалить Unit
