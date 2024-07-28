@@ -1,7 +1,8 @@
 import { defineConfig } from 'vitepress'
+import { withMermaid } from 'vitepress-plugin-mermaid'
 
 // https://vitepress.dev/reference/site-config
-export default defineConfig({
+export default withMermaid(defineConfig({
   head:[
     ['link', { rel: 'icon', type: 'image/svg+xml', href: '/vitepress-logo-mini.svg' }],
     ['link', { rel: 'icon', type: 'image/png', href: '/favicon.ico'}],
@@ -64,3 +65,4 @@ export default defineConfig({
     ]
   }
 })
+)
