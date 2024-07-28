@@ -20,17 +20,26 @@
 1. Управление [Unit](definitions#unit), при помощи публикации в опредённые топики
 :::
 
-[Unit](definitions#unit) могут взаимодействовать напрямую между собой через [MQTT Broker](definitions#mqtt-broker), если это определено политиками доступа к топикам, а [MQTT Broker](definitions#mqtt-broker) в свою очередь запрашивает авторизацию у [Backend](definitions#backend).
+[Unit](definitions#unit) могут взаимодействовать напрямую между собой через [MQTT Broker](definitions#mqtt-broker), если это определено политиками доступа к топикам, а [MQTT Broker](definitions#mqtt-broker) в свою очередь запрашивает авторизацию у [Backend](definitions#backend) для каждого из топиков.
 
-Перевичное конфигурирование [MQTT Broker](definitions#mqtt-broker) осуществляется вручную, при помощи генератора `.env` файла в [Backend](definitions#backend). Последующее взаимодействие идёт по средствам [API](definitions#api) запросов. Брокер `EMQX` на два порядка производительней чем [Backend](definitions#backend), но благодаря системе кэширования авторизации `EMQX` и кэшированию через [Redis](definitions#redis), [Backend](definitions#backend) может справится с нагрузкой.
+Брокер `EMQX` на два порядка производительней чем [Backend](definitions#backend), но благодаря системе кэширования авторизации `EMQX` и кэшированию через [Redis](definitions#redis), [Backend](definitions#backend) может справится с нагрузкой.
 
 ### База данных Postgresql
 
-[Postgresql](definitions#postgresql) - обеспечивает хранение информации о всех сущностях, и доступах. Также обеспечивает сохранение статистической информации о состояниях [UnitNode](definitions#unitnode) и данных о существующих [Узлах](definitions#instance) [Pepeunit](definitions#pepeunit). Взаимодействует напрямую с [Backend](definitions#backend).
+[Postgresql](definitions#postgresql) - обеспечивает хранение информации о всех сущностях. Также обеспечивает сохранение статистической информации о состояниях [UnitNode](definitions#unitnode) и данных о существующих [Узлах](definitions#instance) [Pepeunit](definitions#pepeunit). Взаимодействует напрямую с [Backend](definitions#backend).
 
 ### Redis
 
-[Redis](definitions#redis) - обеспечивает кэширование и хранение промежуточной информации о состоянии [UnitNode](definitions#unitnode), при общении [Unit](definitions#unit) c [MQTT Broker](definitions#mqtt-broker). Взаимодействует напрямую с [Backend](definitions#backend).
+[Redis](definitions#redis) - обеспечивает кэширование и хранение промежуточной информации о состоянии [UnitNode](definitions#unitnode), во время общения [Unit](definitions#unit) c [MQTT Broker](definitions#mqtt-broker). Используется также для авторизации [Backend](definitions#backend) в момент подписки на основные топики `example.com/+/pepeunit` и `example.com/+/+/+/pepeunit` в [MQTT Broker](definitions#mqtt-broker). Взаимодействует напрямую с [Backend](definitions#backend) и [MQTT Broker](definitions#mqtt-broker).
+
+
+```mermaid
+flowchart LR
+  Unit <--> Brocker
+  Brocker <--> Pepeunit
+  Redis --> Brocker
+  Pepeunit <--> Redis
+```
 
 ## Сущности
 
@@ -44,24 +53,24 @@
 
 Репозиторий [Git](definitions#git) может быть размещён на [Узле](definitions#instance) [Gitlab](definitions#gitlab) или [Github](definitions#github). [Pepeunit](definitions#pepeunit) умеет скачивать не только публичные репозитории, но и закрытые, для этого требуется указать токен доступа до репозитория. Токены доступа хранятся в шифрованном виде и доступны только создателю [Repo](definitions#repo).
 
-По умолчанию [Repo](definitions#repo) будет синхронизироваться с удалённым репозиторием каждые 24 часа, но это время можно сократить до 10 минут или отменить синхронизацию вовсе и делать её только вручную. У создателя всегда есть возможность заставить [Repo](definitions#repo) принудительно синхронизироваться по нажатию кнопки.
+[Repo](definitions#repo) синхронизируется с удалённым репозиторием каждый час. У создателя всегда есть возможность заставить [Repo](definitions#repo) принудительно синхронизироваться по нажатию кнопки.
 
 При настройке [Repo](definitions#repo) требуется указать ветку по умолчанию - это позволит автоматически обновляться отстыкованным [Unit](definitions#unit), у которых стоит флаг о автоматическом обновлении. Важно отметить, что отстыковать [Unit](definitions#unit) от [Repo](definitions#repo) нельзя пока не указана ветка по умолчанию.
 
-Так же есть возможность указать флаг, который бы заставлял [Unit](definitions#unit) обновляться только при появлении нового [Тега](definitions#git-tag)
+Так же есть возможность указать флаг, который бы заставлял все автоматически обвновляемые [Unit](definitions#unit) обновляться только при появлении нового [Тега](definitions#git-tag)
 
 ::: tip Механизм работы обновлений
 1. Происходит автоматическая или ручная инициализация обновления [Repo](definitions#repo)
-1. [Pepeunit](definitions#pepeunit) проверяет [schema.json](definitions#schema-json) и [env_example.json](definitions#env-example-json) в выбранной версии на корректность
+1. [Pepeunit](definitions#pepeunit) проверяет [schema_example.json](definitions#schema-example-json) и [env_example.json](definitions#env-example-json) в выбранной версии на корректность
 1. [Pepeunit](definitions#pepeunit) последовательно проходит по каждому отстыкованному [Unit](definitions#unit) и актуализирует следующую информацию:
-    - [schema.json](definitions#schema-json) в выбранной версии [Repo](definitions#repo) проверяется на наличие нужных категорий топиков.Если топиков нет, то создаётся сущность [UnitNode](definitions#unitnode). Если сущность [UnitNode](definitions#unitnode) существует, но её нет в [schema.json](definitions#schema-json) она будет удалена.
+    - [schema_example.json](definitions#schema-example-json) в выбранной версии [Repo](definitions#repo) проверяется на наличие нужных категорий топиков. Если топиков нет, то создаётся сущность [UnitNode](definitions#unitnode). Если сущность [UnitNode](definitions#unitnode) существует, но её нет в [schema_example.json](definitions#schema-example-json) она будет удалена.
     - [env_example.json](definitions#env-example-json) в версии [Repo](definitions#repo) сверяется с зашифрованным [env.json](definitions#env-json) на наличие нужных для работы переменных.
 1. [Pepeunit](definitions#pepeunit) последовательно отправляет каждому подходящему [Unit](definitions#unit) требование об обновлении по [OTA](definitions#ota), через топик [MQTT](definitions#mqtt)
-1. [Unit](definitions#unit) видят требование о обновлении, сравнивают версию своей текущей микропрограммы и новой версии от [Pepeunit](definitions#pepeunit). При не совпадении версий - обновляют свою микропрограмму по [OTA](definitions#ota). При совпадении версий - игнорируют.
+1. [Unit](definitions#unit) видят требование о обновлении, сравнивают версию своей текущей микропрограммы и новой версии от [Pepeunit](definitions#pepeunit). При не совпадении версий - обновляют свою микропрограмму по [OTA](definitions#ota). При совпадении версий - игнорируют. Данный этап может быть модифицирован разработчиками так как проходит на стороне [Unit](definitions#unit)
 :::
 
 :::warning Важно
-[Repo](definitions#repo) невозможно его удалить, если на него ссылается хотябы один [Unit](definitions#unit)
+[Repo](definitions#repo) невозможно удалить, если на него ссылается хотябы один [Unit](definitions#unit)
 :::
 
 ### Unit
@@ -72,9 +81,9 @@
 
 [Unit](definitions#unit) можно настроить, указав будет ли он обновляться автоматически при обновлении [Repo](definitions#repo) или же обновление будет происходить исключительно вручную с указанием [Ветки](definitions#git-branch) и [Коммита](definitions#git-commit).
 
-В момент создания [Unit](definitions#unit), на основании выбранной версии и [schema.json](definitions#schema-json) - будут сгенерированы [UnitNode](definitions#unitnode) отвечающие за точки взаимодействия с [Unit](definitions#unit)
+В момент создания [Unit](definitions#unit), на основании выбранной версии и [schema_example.json](definitions#schema-example-json) - будут сгенерированы [UnitNode](definitions#unitnode) отвечающие за точки взаимодействия с [Unit](definitions#unit)
 
-Настройка [Unit](definitions#unit) по мимо видимости, доступов и настройки обновлений -  включает в себя заполнение файла [env.json](definitions#env-json). Файл является очень важным, так как содержит конфиденциальные данные о подключении физического устройства к [Pepeunit](definitions#pepeunit), в том числе пароли от `WiFi`.
+Настройка [Unit](definitions#unit) по мимо видимости, доступов и настройки обновлений - включает в себя заполнение файла [env.json](definitions#env-json). Файл является очень важным, так как содержит конфиденциальные данные о подключении физического устройства к [Pepeunit](definitions#pepeunit), в том числе пароли от `WiFi` в случае физических устройств по типу `esp8266`.
 
 ::: tip Механизм заполнения файла окружения Unit
 1. Пользователь первично видит только те переменные, которые [Pepeunit](definitions#pepeunit) не может заполнить сам, обычно это данные о подключении к `WiFi`.
@@ -84,16 +93,15 @@
 1. [env.json](definitions#env-json) отправляется в [Pepeunit](definitions#pepeunit) где шифруется и сохраняется до востребования.
 :::
 
-Когда настройка виртуального [Unit](definitions#unit) в [Pepeunit](definitions#pepeunit) завершена, следует создать ваше [IoT](definitions#iot) устройство физически. После установки [Micropython](definitions#micropython) на ваше устройство, вам нужно загрузить на него микропрограмму. Её можно получить напрямую из интерфейса [Unit](definitions#unit).
+Когда настройка виртуального [Unit](definitions#unit) в [Pepeunit](definitions#pepeunit) завершена, следует создать ваше [IoT](definitions#iot) устройство физически. После установки [Micropython](definitions#micropython) на ваше устройство, вам нужно загрузить на него микропрограмму. Её можно получить напрямую из интерфейса [Unit](definitions#unit) в вашем [Узле](definitions#instance) [Pepeunit](definitions#pepeunit).
 
 Вы можете скачать микропрограмму в формате `zip` или `tar`, и при помощи вспомогательного `ПО` загрузить его на устройство [IoT](definitions#iot) c уже предустановленным [Micropython](definitions#micropython), после чего ваше [IoT](definitions#iot) устройство начнёт работу.
 
 ### UnitNode
 
-[UnitNode](definitions#unitnode) - это автоматически генерируемые сущности связанные с [Unit](definitions#unit), они cоздаются на основе файла [schema.json](definitions#schema-json), который содержится в разных версиях [Repo](definitions#repo).
+[UnitNode](definitions#unitnode) - это автоматически генерируемые сущности связанные с [Unit](definitions#unit), они cоздаются на основе файла [schema_example.json](definitions#schema-example-json), который содержится в разных версиях [Repo](definitions#repo).
 
 Каждая сущность [UnitNode](definitions#unitnode) может иметь два типа `Input` или `Output`. При этом между [UnitNode](definitions#unitnode) разных [Unit](definitions#unit), могут быть связи - от одного `Output` к многим `Input`. Всё взаимодействие между [UnitNode](definitions#unitnode) происходит при этом через [MQTT Broker](definitions#mqtt-broker). [Backend](definitions#backend) при этом заниматся только авторизацией [Unit](definitions#unit) для доступа до определённых топиков.
-
 
 ::: warning Нюансы работы UnitNode
 `Input` тип для [UnitNode](definitions#unitnode) можно понимать как точку из которой [Unit](definitions#unit) получает данные от внешнего мира. Положить данные в данную точку можно любым из [API](definitions#api), которые поддерживаются в [Backend](definitions#backend).
@@ -103,6 +111,8 @@
 В `Output` информацию может помещать только сам [Unit](definitions#unit), которому принадлежит [UnitNode](definitions#unitnode). [Unit](definitions#unit) может это осуществить через любой доступный [API](definitions#api) в [Backend](definitions#backend).
 
 `Output` [UnitNode](definitions#unitnode) с определёнными названиями, могут заставлять [Pepeunit](definitions#pepeunit) накапливать статистику по их состоянию во времени. Это могут быть например датчики температуры - отправляющие сообщения каждую секунду, [Pepeunit](definitions#pepeunit) позволит найти средне часовые температуры.
+
+[Backend](definitions#backend) обновляет значения только у топиков с префиксом `/pepeunit` в конце. При этом в [Postgresql](definitions#postgresql) сохраняются только новые значения, по сравнению с ранее пришедшими.
 :::
 
 ---
@@ -123,7 +133,7 @@
 
 ### Private
 
-- предоставляет доступ до сущности только создателю и указанным доверенным пользователям [Узла](definitions#instance) или отдельным [Unit](definitions#unit)
+- предоставляет доступ до сущности только создателю и указанным доверенным пользователям [Узла](definitions#instance) или отдельным [Unit](definitions#unit) у которых есть доступ
 
 ---
 
