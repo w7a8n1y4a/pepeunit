@@ -20,7 +20,7 @@
 1. Управление [Unit](definitions#unit), при помощи публикации в опредённые топики
 :::
 
-[Unit](definitions#unit) могут взаимодействовать напрямую между собой через [MQTT Broker](definitions#mqtt-broker), если это определено политиками доступа к топикам, а [MQTT Broker](definitions#mqtt-broker) в свою очередь запрашивает авторизацию у [Backend](definitions#backend) или в автономном режиме из сгенерированного [ACL List](definitions#acl-list).
+[Unit](definitions#unit) могут взаимодействовать напрямую между собой через [MQTT Broker](definitions#mqtt-broker), если это определено политиками доступа к топикам, а [MQTT Broker](definitions#mqtt-broker) в свою очередь запрашивает авторизацию у [Backend](definitions#backend).
 
 Перевичное конфигурирование [MQTT Broker](definitions#mqtt-broker) осуществляется вручную, при помощи генератора `.env` файла в [Backend](definitions#backend). Последующее взаимодействие идёт по средствам [API](definitions#api) запросов. Брокер `EMQX` на два порядка производительней чем [Backend](definitions#backend), но благодаря системе кэширования авторизации `EMQX` и кэшированию через [Redis](definitions#redis), [Backend](definitions#backend) может справится с нагрузкой.
 
