@@ -16,7 +16,7 @@ export default withMermaid(defineConfig({
     ['meta', { property: 'og:url', content: 'https://pepeunit.com/' }],
   ],
 
-  title: 'Pepeunit',
+  title: 'Pepeunit | Docs',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     logo: '/main_icon_small.png',
