@@ -9,14 +9,14 @@ export default withMermaid(defineConfig({
     ['meta', { name: 'theme-color', content: '#00bf30' }],
     ['meta', { property: 'og:type', content: 'website' }],
     ['meta', { property: 'og:locale', content: 'en' }],
-    ['meta', { property: 'og:title', content: 'Pepeunit | Docs' }],
-    ['meta', { property: 'og:site_name', content: 'Pepeunit | Docs' }],
-    ['meta', { property: 'og:description', content: 'Documentation for Federative IoT Platform' }],
+    ['meta', { property: 'og:title', content: 'Pepeunit Docs' }],
+    ['meta', { property: 'og:site_name', content: 'Pepeunit Docs' }],
+    ['meta', { property: 'og:description', content: 'Documentation of Federative IoT Platform | Open-Source | AGPL v3' }],
     ['meta', { property: 'og:image', content: 'https://pepeunit.com/pepeunit-og.jpg' }],
     ['meta', { property: 'og:url', content: 'https://pepeunit.com/' }],
   ],
 
-  title: 'Pepeunit | Docs',
+  title: 'Pepeunit Docs',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     logo: '/main_icon_small.png',
