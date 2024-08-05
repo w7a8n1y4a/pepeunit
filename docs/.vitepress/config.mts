@@ -17,6 +17,7 @@ export default withMermaid(defineConfig({
   ],
 
   title: 'Pepeunit Docs',
+  description: 'Documentation of Federative IoT Platform | Open-Source | AGPL v3',
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
     logo: '/main_icon_small.png',
