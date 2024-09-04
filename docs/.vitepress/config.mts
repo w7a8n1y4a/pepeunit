@@ -30,10 +30,16 @@ export default withMermaid(defineConfig({
       {
         text: 'Conceptions',
         items: [
-          { text: 'Overview', link: '/overview' },
+          { text: 'Обзор', link: '/overview' },
           { text: 'Функционал', link: '/functions' },
           { text: 'Принципы', link: '/principles' },
           { text: 'Определения', link: '/definitions' }
+        ]
+      },
+      {
+        text: 'Вклад',
+        items: [
+          { text: 'Соглашения', link: '/contribution' },
         ]
       },
       {
