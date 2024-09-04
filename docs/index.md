@@ -2,7 +2,7 @@
 layout: home
 hero:
   name: "Pepeunit"
-  text: "Federative IoT Platform"
+  text: "Federated IoT Platform"
   tagline: From device to network
   actions:
     - theme: brand
