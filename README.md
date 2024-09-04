@@ -1,4 +1,4 @@
-# Pepeunut - Federated IoT Platform
+# Pepeunit - Federated IoT Platform
 
 <div align="center">
     <img align="center" src="https://pepeunit.com/pepeunit-og.jpg"  width="640" height="320">
