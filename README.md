@@ -1,7 +1,7 @@
 # Pepeunut - Federative IoT Platform
 
 <p align="center">
-    <img src="https://pepeunit.com/pepeunit-og.jpg"  width="640" height="320">
+    <img align="center" src="https://pepeunit.com/pepeunit-og.jpg"  width="640" height="320">
 </p>
 
 Pepeunit - платформа с открытым исходным кодом, основанная на приниципах Fediverse и IoT, предназначенная для организации устройств в единую, управляемую информационную систему, позволяющую своим пользователям гибко настраивать взаимодействие между Unit.
