@@ -3,7 +3,6 @@ layout: home
 hero:
   name: "Pepeunit"
   text: "Федеративная IoT Платформа"
-  tagline: От устройств к сети
   actions:
     - theme: brand
       text: Что такое Pepeunit?
