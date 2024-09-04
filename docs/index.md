@@ -2,14 +2,14 @@
 layout: home
 hero:
   name: "Pepeunit"
-  text: "Federative IoT Platform"
-  tagline: From device to network
+  text: "Федеративная IoT Платформа"
+  tagline: От устройств к сети
   actions:
     - theme: brand
-      text: What is Pepeunit?
+      text: Что такое Pepeunit?
       link: /overview
     - theme: alt
-      text: Fediverse state
+      text: Состояние Федерации
       link: https://fediverse.observer/
   image:
     src: /main_icon_big.webp
@@ -17,15 +17,15 @@ hero:
 
 features:
   - title: CI/CD
-    details: Automatic generation of IoT device firmware based on your github and gitlab repositories
+    details: Автоматическая генерация прошивки для IoT-устройств на основе ваших репозиториев github и gitlab
   - title: IoT device management
-    details: Manage your devices via MQTT, REST, GQL, Telegram Bot and Frontend
+    details:  Управление устройствами через MQTT, REST, GQL, Telegram Bot и Frontend
   - title: Accumulate data and monitor
-    details: Topic naming system, for collecting statistics and/or fast interaction between IoT
+    details: Система именования тем для сбора статистики и/или быстрого взаимодействия между IoT
   - title: Access policies
-    details: Adjust User-Unit and Unit-Unit access levels with user roles and visibility levels of Repo, Unit and UnitNode
+    details: Настройка уровней доступа User-Unit и Unit-Unit с учетом ролей пользователей и уровней видимости Repo, Unit и UnitNode
   - title: Federation
-    details: Connect instances into a single Federated Network for communication between IoT devices
+    details: Соединяйте экземпляры Pepeunit в единую федеративную сеть для связи между IoT-устройствами
 ---
 
 <style>
