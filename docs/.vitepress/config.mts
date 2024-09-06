@@ -49,6 +49,12 @@ export default withMermaid(defineConfig({
         ]
       },
       {
+        text: 'Идеи',
+        items: [
+          { text: 'Идеи Unit', link: '/idea-unit' },
+        ]
+      },
+      {
         text: 'Docs Example',
         items: [
           { text: 'Markdown Examples', link: '/markdown-examples' },
