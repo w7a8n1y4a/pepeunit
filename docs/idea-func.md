@@ -47,19 +47,19 @@ mindmap
                     Unit
                         UnitNode<br/>Input
                         UnitNode<br/>Output
-                    Unit
-                        UnitNode<br/>Input
-                        UnitNode<br/>Output
-                Repo
-                    Unit
-                        UnitNode<br/>Input
-                        UnitNode<br/>Output
+        User
             LinkRepo
                 Repo
                     Unit
                         UnitNode<br/>Input
                         UnitNode<br/>Output
-        User
+                    Unit
+                        UnitNode<br/>Input
+                        UnitNode<br/>Output
+                Repo
+                    Unit
+                        UnitNode<br/>Input
+                        UnitNode<br/>Output
             LinkRepo
                 Repo
                     Unit
@@ -74,20 +74,15 @@ mindmap
 ```mermaid
 mindmap
     root((Domain))
-        Repo
-            Unit
-                UnitNode<br/>Input
-                UnitNode<br/>Output
         LinkRepo
             Repo
                 Unit
                     UnitNode<br/>Input
                     UnitNode<br/>Output
-        User
-            Repo
-                Unit
-                    UnitNode<br/>Input
-                    UnitNode<br/>Output
+        Repo
+            Unit
+                UnitNode<br/>Input
+                UnitNode<br/>Output
         User
             Repo
                 Unit
