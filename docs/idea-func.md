@@ -29,8 +29,68 @@
 
 ## Функционал Фронтенда
 
-1. Линковка по запросу от отдельных элементов, запрошено только от Unit, показываю все связи, запросили новый Unit, беру все связи и перерисовываю
-2. При создании Repo, добавить окно пикер для link по уже существующим Repo
-3. Сжатие отдельных категорий, например добавить node слои, которые отделяют link, по нажатию на них показывать Repo, с такими link
-4. Аналогичные слои c создателями
-5. Раздельный поиск, c пикером по link, repo, unit, user
+1. При создании Repo, добавить окно пикер для link по уже существующим Repo
+1. Первые два слоя не сжимаются, остальные в глубину отображаются только при клике
+1. Раздельный поиск, c пикером по link, repo, unit, user. Обдумать первичнуб node для разных стратегий поиска
+1. Для UnitNode добавить поиск по другим UnitNode у из доступных Unit
+1. Добавить отображение UnitNode связанных с выбранным
+1. Рассмотреть возможность поска по единичным элементам вне структуры, с отображением только пикнутого
+
+### Общая модель отображения
+
+```mermaid
+mindmap
+    root((Domain))
+        User
+            LinkRepo
+                Repo
+                    Unit
+                        UnitNode<br/>Input
+                        UnitNode<br/>Output
+                    Unit
+                        UnitNode<br/>Input
+                        UnitNode<br/>Output
+                Repo
+                    Unit
+                        UnitNode<br/>Input
+                        UnitNode<br/>Output
+            LinkRepo
+                Repo
+                    Unit
+                        UnitNode<br/>Input
+                        UnitNode<br/>Output
+        User
+            LinkRepo
+                Repo
+                    Unit
+                        UnitNode<br/>Input
+                        UnitNode<br/>Output
+```
+
+### Возможности кастомизации структуры
+
+- Для каждой роли должны быть установлены определённые пресеты отображения
+
+```mermaid
+mindmap
+    root((Domain))
+        Repo
+            Unit
+                UnitNode<br/>Input
+                UnitNode<br/>Output
+        LinkRepo
+            Repo
+                Unit
+                    UnitNode<br/>Input
+                    UnitNode<br/>Output
+        User
+            Repo
+                Unit
+                    UnitNode<br/>Input
+                    UnitNode<br/>Output
+        User
+            Repo
+                Unit
+                    UnitNode<br/>Input
+                    UnitNode<br/>Output
+```
