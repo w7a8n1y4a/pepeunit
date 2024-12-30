@@ -33,61 +33,33 @@
     - Первые 2 не сжимаемые, остальные отображаются при клике
     - Нужны настройки пользователя, как он хочет видеть свой первичный граф
 1. Поиск по графу:
-    - нужен пикер поиска link, repo, unit, user, domain
-    - нужно окно поиска текстом
-    - нужен zoom в точку которую выберет пользователь из списка
     - пагинация в поиске по node
     - поиск только по своим
     - сортировки
+1. Модификаторы поиска
+    - Всегда идут в строгом порядке - Domain, User, Repo, Unit, UnitNode
+    - Пользователю подсвечивается текущее положение
+    - Пользователю подсвечиваются активные модификаторы
+    - Пользователю видны крайние от подсвеченых - которые можно включить - например включен Repo, и отображены все его Unit. Это означает что пользователю будут доступны для клика 4 модификатора - User, Repo, Unit, UnitNode. User добавит на граф Создателя, Repo отобразит модалку Repo, Unit - уберёт с графа все Unit, UnitNode отобразит все UnitNode у Unit.
 
-### Общая модель отображения
+### Общая иерархия
 
 ```mermaid
 mindmap
     root((Domain))
         User
-            LinkRepo
-                Repo
-                    Unit
-                        UnitNode<br/>Input
-                        UnitNode<br/>Output
-        User
-            LinkRepo
-                Repo
-                    Unit
-                        UnitNode<br/>Input
-                        UnitNode<br/>Output
-                    Unit
-                        UnitNode<br/>Input
-                        UnitNode<br/>Output
-                Repo
-                    Unit
-                        UnitNode<br/>Input
-                        UnitNode<br/>Output
-            LinkRepo
-                Repo
-                    Unit
-                        UnitNode<br/>Input
-                        UnitNode<br/>Output
-```
-
-### Возможности кастомизации структуры
-
-- Для каждой роли должны быть установлены определённые пресеты отображения
-
-```mermaid
-mindmap
-    root((Domain))
-        LinkRepo
             Repo
                 Unit
                     UnitNode<br/>Input
                     UnitNode<br/>Output
-        Repo
-            Unit
-                UnitNode<br/>Input
-                UnitNode<br/>Output
         User
+            Repo
+                Unit
+                    UnitNode<br/>Input
+                    UnitNode<br/>Output
+                Unit
+                    UnitNode<br/>Input
+                    UnitNode<br/>Output
             Repo
                 Unit
                     UnitNode<br/>Input
