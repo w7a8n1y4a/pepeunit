@@ -16,11 +16,11 @@ hero:
 
 features:
   - title: CI/CD
-    details: Автоматическая генерация прошивки для IoT-устройств на основе ваших репозиториев github и gitlab
+    details: Автоматическая генерация ПО для IoT-устройств на основе ваших репозиториев github и gitlab
   - title: IoT device management
-    details:  Управление устройствами через MQTT, REST, GQL, Telegram Bot и Frontend
-  - title: Accumulate data and monitor
-    details: Система именования тем для сбора статистики и/или быстрого взаимодействия между IoT
+    details: Управление устройствами через MQTT, REST, GQL и Frontend
+  - title: Topic Managment
+    details: Система именования тем для отбражения данных и/или быстрого взаимодействия между IoT устройствами
   - title: Access policies
     details: Настройка уровней доступа User-Unit и Unit-Unit с учетом ролей пользователей и уровней видимости Repo, Unit и UnitNode
   - title: Federation
