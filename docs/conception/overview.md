@@ -1,6 +1,6 @@
-# Что такое Pepeunit?
+# Pepeunit
 
-:::tip
+:::info Что такое Pepeunit?
 Pepeunit - платформа с открытым исходным кодом, основанная на принципах [Fediverse](/definitions#fediverse) и [IoT](/definitions#iot), предназначенная для организации устройств в единую, управляемую информационную систему.
 :::
 
