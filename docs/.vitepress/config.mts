@@ -23,44 +23,61 @@ export default withMermaid(defineConfig({
     logo: '/main_icon_small.png',
     nav: [
       { text: 'Home', link: '/' },
-      { text: 'Docs', link: '/overview' }
+      { text: 'Docs', link: '/conception/overview' }
     ],
 
     sidebar: [
       {
-        text: 'Conceptions',
+        text: 'Концепция',
         items: [
-          { text: 'Обзор', link: '/overview' },
-          { text: 'Функционал', link: '/functions' },
-          { text: 'Принципы', link: '/principles' },
+          { text: 'Обзор', link: '/conception/overview' },
           { text: 'Определения', link: '/definitions' }
         ]
       },
       {
-        text: 'Вклад',
+        text: 'Развёртывание',
         items: [
-          { text: 'Соглашения', link: '/contribution' },
+          { text: 'Зависимости', link: '/deployment/dependencies' },
+          { text: 'Docker Compose', link: '/deployment/docker' },
+        ]
+      },
+      {
+        text: 'Функционал',
+        items: [
+          { text: 'Repo', link: '/functions/repo' },
+          { text: 'Unit', link: '/functions/unit' },
+          { text: 'UnitNode', link: '/functions/unit-node' },
+          { text: 'Система Ролей', link: '/functions/roles' },
+          { text: 'Система Видимости', link: '/functions/visibility' },
+          { text: 'Шифрование', link: '/functions/cipher' },
+
         ]
       },
       {
         text: 'Тесты',
         items: [
-          { text: 'Интеграционные', link: '/integration-test' },
-          { text: 'Нагрузочные', link: '/load-test' },
+          { text: 'Интеграционные', link: '/tests/integration-test' },
+          { text: 'Нагрузочные', link: '/tests/load-test' },
         ]
       },
       {
         text: 'Идеи',
         items: [
-          { text: 'Идеи Unit', link: '/idea-unit' },
-          { text: 'Идеи Функционала', link: '/idea-func' },
+          { text: 'Идеи Функционала', link: '/ideas/idea-func' },
+          { text: 'Идеи Unit', link: '/ideas/idea-unit' },
         ]
       },
       {
-        text: 'Docs Example',
+        text: 'Вклад',
         items: [
-          { text: 'Markdown Examples', link: '/markdown-examples' },
-          { text: 'Runtime API Examples', link: '/api-examples' },
+          { text: 'Соглашения', link: '/contribution/contribution' },
+        ]
+      },
+      {
+        text: 'VitePress Example',
+        items: [
+          { text: 'Markdown Examples', link: '/example/markdown-examples' },
+          { text: 'Runtime API Examples', link: '/example/api-examples' },
         ]
       }
     ],

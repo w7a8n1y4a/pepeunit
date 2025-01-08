@@ -6,7 +6,7 @@ hero:
   actions:
     - theme: brand
       text: Что такое Pepeunit?
-      link: /overview
+      link: /conception/overview
     - theme: alt
       text: Состояние Федерации
       link: https://fediverse.observer/
