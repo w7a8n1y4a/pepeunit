@@ -42,14 +42,14 @@ export default withMermaid(defineConfig({
         ]
       },
       {
-        text: 'Функционал',
+        text: 'Механики',
         items: [
-          { text: 'Repo', link: '/functions/repo' },
-          { text: 'Unit', link: '/functions/unit' },
-          { text: 'UnitNode', link: '/functions/unit-node' },
-          { text: 'Система Ролей', link: '/functions/roles' },
-          { text: 'Система Видимости', link: '/functions/visibility' },
-          { text: 'Шифрование', link: '/functions/cipher' },
+          { text: 'Repo', link: '/mechanics/repo' },
+          { text: 'Unit', link: '/mechanics/unit' },
+          { text: 'UnitNode', link: '/mechanics/unit-node' },
+          { text: 'Система Ролей', link: '/mechanics/roles' },
+          { text: 'Система Видимости', link: '/mechanics/visibility' },
+          { text: 'Шифрование', link: '/mechanics/cipher' },
 
         ]
       },
