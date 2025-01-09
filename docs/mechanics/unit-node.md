@@ -11,7 +11,7 @@
 
 В `Output` информацию может помещать только сам [Unit](/definitions#unit), которому принадлежит [UnitNode](/definitions#unitnode). [Unit](/definitions#unit) может это осуществить через любой доступный [API](/definitions#api) в [Backend](/definitions#backend).
 
-`Output` [UnitNode](/definitions#unitnode) с определёнными названиями, могут заставлять [Pepeunit](/definitions#pepeunit) накапливать статистику по их состоянию во времени. Это могут быть например датчики температуры - отправляющие сообщения каждую секунду, [Pepeunit](/definitions#pepeunit) позволит найти средне часовые температуры.
+`Output` [UnitNode](/definitions#unitnode) с определёнными названиями, могут заставлять [Pepeunit](/conception/overview) накапливать статистику по их состоянию во времени. Это могут быть например датчики температуры - отправляющие сообщения каждую секунду, [Pepeunit](/conception/overview) позволит найти средне часовые температуры.
 
 [Backend](/definitions#backend) обновляет значения только у топиков с префиксом `/pepeunit` в конце. При этом в [Postgresql](/definitions#postgresql) сохраняются только новые значения, по сравнению с ранее пришедшими.
 :::
