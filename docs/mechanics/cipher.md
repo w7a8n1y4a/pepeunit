@@ -1,6 +1,6 @@
 # Шифрование
 
-[Pepeunit](/definitions#pepeunit) использует шифрование `AES256` с `16 байтовым` инициирующим вектором и `32 байтовым` ключом - схема шифрования `CBC`
+[Pepeunit](/conception/overview) использует шифрование `AES256` с `16 байтовым` инициирующим вектором и `32 байтовым` ключом - схема шифрования `CBC`
 
 ```python
 def aes_encode(data: str, key: str = settings.encrypt_key) -> str:

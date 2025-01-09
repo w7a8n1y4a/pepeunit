@@ -3,28 +3,28 @@
 ## Роли
 
 ::: tip Какую функцию несут роли пользователей в системе?
-Роль пользователя влияет на его возможности при использовании [Узла](/definitions#instance) [Pepeunit](/definitions#pepeunit), а также на взаимодействие с [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode)
+Роль пользователя влияет на его возможности при использовании [Узла](/definitions#instance) [Pepeunit](/conception/overview), а также на взаимодействие с [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode)
 :::
 
 ### Admin
 
-Aдминистратор - владелец, выполняющий функции модератора, имеет полномочия полного управления [Узлом](/definitions#instance) [Pepeunit](/definitions#pepeunit).
+Aдминистратор - владелец, выполняющий функции модератора, имеет полномочия полного управления [Узлом](/definitions#instance) [Pepeunit](/conception/overview).
 
 :::tip Возможности Администратора
 - блокирование пользователей, при нарушении условий использования [Узла](/definitions#instance)
 - блокирование работы отдельных [Unit](/definitions#unit), при нарушении условий использования [Узла](/definitions#instance)
-- блокирование взаимодействия [Узел](/definitions#instance)-[Узел](/definitions#instance), если это нарушает работу текущего [Узла](/definitions#instance) [Pepeunit](/definitions#pepeunit)
+- блокирование взаимодействия [Узел](/definitions#instance)-[Узел](/definitions#instance), если это нарушает работу текущего [Узла](/definitions#instance) [Pepeunit](/conception/overview)
 - имеет доступ к настройке лимитов для создания [Unit](/definitions#unit)
-- имеет доступ ко всем сущностям, но не может получить информацию о зашифрованных данных напрямую через [Pepeunit](/definitions#pepeunit)
+- имеет доступ ко всем сущностям, но не может получить информацию о зашифрованных данных напрямую через [Pepeunit](/conception/overview)
 :::
 
 :::danger Очень важно!!!!
-Стоит понимать что имея досутп до `.env` файла [Pepeunit](/definitions#pepeunit), Администратор может расшифровать ваши [env.json](/definitions#env-json) файлы. Поэтому используйте только [Pepeunit](/definitions#pepeunit) [Узлы](/definitions#instance), которым вы можете доверить информацию из своих [env.json](/definitions#env-json) файлов.
+Стоит понимать что имея досутп до `.env` файла [Pepeunit](/conception/overview), Администратор может расшифровать ваши [env.json](/definitions#env-json) файлы. Поэтому используйте только [Pepeunit](/conception/overview) [Узлы](/definitions#instance), которым вы можете доверить информацию из своих [env.json](/definitions#env-json) файлов.
 :::
 
 ### User
 
-Пользователь - человек, зарегистрированный на [Узле](/definitions#instance) [Pepeunit](/definitions#pepeunit).
+Пользователь - человек, зарегистрированный на [Узле](/definitions#instance) [Pepeunit](/conception/overview).
 
 ::: tip Возможности обычного пользователя
 - имеет доступ к созданию [Repo](/definitions#repo), [Unit](/definitions#unit) и [UnitNode](/definitions#unitnode)

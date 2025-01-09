@@ -1,7 +1,7 @@
 # Зависимости Pepeunit
 
 ::: tip Для чего нужны зависимости приложению Pepeunit?
-Зависимости - дополнительные приложения требующиеся для корректной работы [Pepeunit](/definitions#pepeunit)
+Зависимости - дополнительные приложения требующиеся для корректной работы [Pepeunit](/conception/overview)
 :::
 
 ### [Postgresql](/definitions#postgresql)
