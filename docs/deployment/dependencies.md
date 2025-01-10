@@ -1,42 +1,35 @@
-# Зависимости Pepeunit
+# Зависимости
 
-::: tip Для чего нужны зависимости приложению Pepeunit?
-Зависимости - дополнительные приложения требующиеся для корректной работы [Pepeunit](/conception/overview)
-:::
+## Postgresql
 
-### [Postgresql](/definitions#postgresql)
+[Postgresql](https://www.postgresql.org/docs/) - открытая, кластерная реляционная база данных с языком запросов `SQL`. [Pepeunit](/conception/overview) использует её для:
 
-1. Хранит информацию о всех сущностях - [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode)
-1. Хранит шифрованную информацию.
-1. Хранит информацию о доступах и видимости.
-1. Взаимодействует напрямую с [Backend](/definitions#backend).
+1. Хранения информации о всех сущностях - [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode)
+1. Хранения шифрованной информации
+1. Хранения информации о доступах и видимости
 
----
+## EMQX MQTT Broker
 
-### [Redis](/definitions#redis)
+[EMQX MQTT Broker](https://docs.emqx.com/en/emqx/latest/) - это серверное приложение, которое координирует сообщения между издателями и подпищиками [MQTT](/definitions#mqtt-broker) протокола. Брокер обеспечивает взаимодействие через `1883` и `8883` порты между [Unit](/definitions#unit) и [Backend](/definitions#backend). Его можно назвать рельсой данных, на которую завязано основное взаимодействие.
 
-1. Обеспечивает кэширование и хранение промежуточной информации о состоянии [UnitNode](/definitions#unitnode), во время общения [Unit](/definitions#unit) к [MQTT Broker](/definitions#mqtt-broker).
-1. Используется также для авторизации [Backend](/definitions#backend) в момент подписки на основные топики `example.com/+/pepeunit` и `example.com/+/+/+/pepeunit` в [MQTT Broker](/definitions#mqtt-broker).
-1. Взаимодействует напрямую с [Backend](/definitions#backend) и [MQTT Broker](/definitions#mqtt-broker).
-
----
-
-### [MQTT Broker](/definitions#mqtt-broker)
-
-1. Обеспечивает прямое взаимодействие через 1883 и 8883 порты между [Unit](/definitions#unit) и [Backend](/definitions#backend). Его можно назвать рельсой данных, на которую завязано основное взаимодействие.
-
-::: tip Ключевые моменты взаимодействия [MQTT Broker](/definitions#mqtt-broker) и [Backend](/definitions#backend)
-[Backend](/definitions#backend) выполняет функцию регулятора, а именно:
+::: tip Ключевые моменты взаимодействия [MQTT Broker](/definitions#mqtt-broker), [Backend](/definitions#backend) и [Unit](/definitions#unit)
+[Backend](/definitions#backend) выполняет административные функции, а именно:
 1. Авторизация всех [Unit](/definitions#unit) для доступа к определённым топикам
 1. Агрегация данных из определённых топиков, согласно политике имён топиков
-1. Управление [Unit](/definitions#unit), при помощи системы комманд, которые позволяют публиковать в опредённые топики задания на обновление schema.json, env.json или программы целиком.
+1. Управление [Unit](/definitions#unit), при помощи системы комманд, позволяющей публиковать в топики задания на обновление `schema.json`, `env.json` или программы целиком.
+1. Получение состояний [Unit](/definitions#unit) через специальный топик.
 :::
 
 Брокер `EMQX` на два порядка производительней чем [Backend](/definitions#backend), но благодаря системе кэширования авторизации `EMQX` и кэшированию через [Redis](/definitions#redis), [Backend](/definitions#backend) может справится с нагрузкой.
 
----
+## Redis
 
-### Общая схема взаимодействия
+[Redis](https://redis.io/) - NoSQL кластерная база данных использующая парадигму key-value
+
+1. Обеспечивает кэширование и хранение промежуточной информации о состоянии [UnitNode](/definitions#unitnode), во время обращения [Unit](/definitions#unit) к [MQTT Broker](/definitions#mqtt-broker) через топики.
+1. Используется также для авторизации [Backend](/definitions#backend) в момент подписки на основные топики `unit.example.com/+/pepeunit` и `unit.example.com/+/+/+/pepeunit` в [MQTT Broker](/definitions#mqtt-broker).
+
+## Общая схема взаимодействия
 
 ```mermaid
 flowchart LR
