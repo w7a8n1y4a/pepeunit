@@ -23,6 +23,7 @@ export default withMermaid(defineConfig({
     logo: '/main_icon_small.png',
     nav: [
       { text: 'Home', link: '/' },
+      { text: 'Demo', link: 'https://unit.pepeunit.com' },
       { text: 'Docs', link: '/conception/overview' }
     ],
 
@@ -42,6 +43,33 @@ export default withMermaid(defineConfig({
         ]
       },
       {
+        text: 'Руководство Пользователя',
+        items: [
+          { text: 'Создание Repo', link: '/user/create-repo' },
+          { text: 'Настройка Repo', link: '/user/settings-repo' },
+          { text: 'Настройка Видимости', link: '/user/visibility-settings' },
+          { text: 'Создание Unit', link: '/user/create-unit' },
+          { text: 'Настройка Unit', link: '/user/settings-unit' },
+          { text: 'Обновление Unit', link: '/user/update-unit' },
+          { text: 'Создание Output->Input между UnitNode', link: '/user/create-edge-unit-node' },
+          { text: 'Предоставление доступов', link: '/user/permission' },
+        ]
+      },
+      {
+        text: 'Руководство Разработчика Unit',
+        items: [
+          { text: 'Алгоритм создания Unit', link: '/developer/alg-create-unit' },
+          { text: 'Структура GIT репозитория', link: '/developer/struct-git-repo' },
+          { text: 'Readme', link: '/developer/struct-readme' },
+          { text: 'Структура env.json и env_example.json', link: '/developer/struct-env-json' },
+          { text: 'Структура schema.json и schema_example.json', link: '/developer/struct-schema-json' },
+          { text: 'Структура архивов c обновлениями', link: '/developer/struct-archive-update' },
+          { text: 'Стандартные MQTT команды Pepeunit', link: '/developer/default-mqtt-command' },
+          { text: 'Хранилище состояний Unit', link: '/developer/state-storage-unit' },
+          { text: 'Аспекты системы обновлений', link: '/developer/tip-update-system' },
+        ]
+      },
+      {
         text: 'Механики',
         items: [
           { text: 'Repo', link: '/mechanics/repo' },
@@ -50,7 +78,6 @@ export default withMermaid(defineConfig({
           { text: 'Система Ролей', link: '/mechanics/roles' },
           { text: 'Система Видимости', link: '/mechanics/visibility' },
           { text: 'Шифрование', link: '/mechanics/cipher' },
-
         ]
       },
       {

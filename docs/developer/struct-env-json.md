@@ -1,0 +1,1 @@
+# Структура env.json и env_example.json
