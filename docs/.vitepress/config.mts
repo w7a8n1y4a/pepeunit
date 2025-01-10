@@ -88,10 +88,10 @@ export default withMermaid(defineConfig({
         ]
       },
       {
-        text: 'Идеи',
+        text: 'Дорожная карта',
         items: [
-          { text: 'Идеи Функционала', link: '/ideas/idea-func' },
-          { text: 'Идеи Unit', link: '/ideas/idea-unit' },
+          { text: 'Функционал', link: '/roadmap/functions' },
+          { text: 'Unit', link: '/roadmap/units' },
         ]
       },
       {
