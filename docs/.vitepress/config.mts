@@ -22,7 +22,6 @@ export default withMermaid(defineConfig({
     // https://vitepress.dev/reference/default-theme-config
     logo: '/main_icon_small.png',
     nav: [
-      { text: 'Home', link: '/' },
       { text: 'Demo', link: 'https://unit.pepeunit.com' },
       { text: 'Docs', link: '/conception/overview' }
     ],
@@ -65,6 +64,7 @@ export default withMermaid(defineConfig({
           { text: 'Структура schema.json и schema_example.json', link: '/developer/struct-schema-json' },
           { text: 'Структура архивов c обновлениями', link: '/developer/struct-archive-update' },
           { text: 'Стандартные MQTT команды Pepeunit', link: '/developer/default-mqtt-command' },
+          { text: 'Отправка состояния Unit через MQTT', link: '/developer/state-mqtt-send' },
           { text: 'Хранилище состояний Unit', link: '/developer/state-storage-unit' },
           { text: 'Аспекты системы обновлений', link: '/developer/tip-update-system' },
         ]
