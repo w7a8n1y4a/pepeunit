@@ -8,8 +8,8 @@ hero:
       text: Что такое Pepeunit?
       link: /conception/overview
     - theme: alt
-      text: Состояние Федерации
-      link: https://fediverse.observer/
+      text: Demo Instance
+      link: https://unit.pepeunit.com/
   image:
     src: /main_icon_big.webp
     alt: Pepeunit
