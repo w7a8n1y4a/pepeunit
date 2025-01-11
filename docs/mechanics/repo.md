@@ -17,7 +17,7 @@
     - [schema_example.json](/definitions#schema-example-json) в выбранной версии `Repo` проверяется на наличие нужных категорий топиков. Если топиков нет, то создаётся сущность [UnitNode](/definitions#unitnode). Если сущность [UnitNode](/definitions#unitnode) существует, но её нет в [schema_example.json](/definitions#schema-example-json) она будет удалена.
     - [env_example.json](/definitions#env-example-json) в версии `Repo` сверяется с [зашифрованным](/mechanics/cipher) [env.json](/definitions#env-json) на наличие нужных для работы переменных.
 1. [Pepeunit](/conception/overview) последовательно отправляет каждому подходящему [Unit](/definitions#unit) команду обновления, через топик [MQTT](/definitions#mqtt)
-1. [Unit](/definitions#unit) видят требование о обновлении, сравнивают версию своей текущей программы и новой версии от [Pepeunit](/conception/overview). При не совпадении версий - обновляются запрашивая нужные файлы через REST. При совпадении версий - игнорируют. Данный этап может быть модифицирован разработчиками так как проходит на стороне [Unit](/definitions#unit)
+1. [Unit](/definitions#unit) видят требование о обновлении, сравнивают версию своей текущей программы и новой версии от [Pepeunit](/conception/overview). При не совпадении версий - обновляются запрашивая нужные файлы через [REST](/definitions#rest). При совпадении версий - игнорируют. Данный этап может быть модифицирован разработчиками так как проходит на стороне [Unit](/definitions#unit)
 :::
 
 :::warning Важно
