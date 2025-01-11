@@ -63,6 +63,7 @@ export default withMermaid(defineConfig({
           { text: 'Структура архивов c обновлениями', link: '/developer/struct-archive-update' },
           { text: 'Стандартные MQTT команды Pepeunit', link: '/developer/default-mqtt-command' },
           { text: 'Отправка состояния Unit через MQTT', link: '/developer/state-mqtt-send' },
+          { text: 'Структура сообщений в MQTT топиках', link: '/developer/struct-topic-messages' },
           { text: 'Хранилище состояний Unit', link: '/developer/state-storage-unit' },
           { text: 'Аспекты системы обновлений', link: '/developer/tip-update-system' },
         ]
