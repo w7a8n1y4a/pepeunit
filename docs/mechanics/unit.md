@@ -4,7 +4,7 @@
 
 `Unit` можно создать только отстыковав его от [Repo](/definitions#repo) - это может сделать любой позователь при наличии доступов - через [Frontend](/definitions#frontend) или [API](/definitions#api).
 
-`Unit` можно настроить, указав будет ли он обновляться автоматически при обновлении [Repo](/definitions#repo) или же обновление будет происходить исключительно вручную с указанием [Ветки](/definitions#git-branch) и [Коммита](/definitions#git-commit).
+`Unit` можно настроить, указав будет ли он обновляться автоматически при обновлении [Repo](/definitions#repo) или же обновление будет происходить исключительно вручную с указанием [ветки](/definitions#git-branch) и [коммита](/definitions#git-commit).
 
 В момент создания `Unit`, на основании выбранной версии и [schema_example.json](/definitions#schema-example-json) генерируются [UnitNode](/definitions#unitnode) отвечающие за точки взаимодействия с `Unit`.
 
