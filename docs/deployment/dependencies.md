@@ -5,7 +5,7 @@
 [Postgresql](https://www.postgresql.org/docs/) - открытая, кластерная реляционная база данных с языком запросов `SQL`. [Pepeunit](/conception/overview) использует её для:
 
 1. Хранения информации о всех сущностях - [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode)
-1. Хранения шифрованной информации
+1. Хранения [шифрованной](/mechanics/cipher) информации
 1. Хранения информации о доступах и видимости
 
 ## EMQX MQTT Broker
@@ -20,11 +20,11 @@
 1. Получение состояний [Unit](/definitions#unit) через специальный топик.
 :::
 
-Брокер `EMQX` на два порядка производительней чем [Backend](/definitions#backend), но благодаря системе кэширования авторизации `EMQX` и кэшированию через [Redis](/definitions#redis), [Backend](/definitions#backend) может справится с нагрузкой.
+Брокер `EMQX` на два порядка производительней чем [Backend](/definitions#backend), но благодаря системе кэширования авторизации `EMQX` и кэшированию через `Redis`, [Backend](/definitions#backend) может справится с нагрузкой.
 
 ## Redis
 
-[Redis](https://redis.io/) - NoSQL кластерная база данных использующая парадигму key-value
+[Redis](https://redis.io/) - `NoSQL` кластерная база данных использующая парадигму `key-value`
 
 1. Обеспечивает кэширование и хранение промежуточной информации о состоянии [UnitNode](/definitions#unitnode), во время обращения [Unit](/definitions#unit) к [MQTT Broker](/definitions#mqtt-broker) через топики.
 1. Используется также для авторизации [Backend](/definitions#backend) в момент подписки на основные топики `unit.example.com/+/pepeunit` и `unit.example.com/+/+/+/pepeunit` в [MQTT Broker](/definitions#mqtt-broker).
