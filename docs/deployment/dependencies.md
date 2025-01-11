@@ -6,7 +6,7 @@
 
 1. Хранения информации о всех сущностях - [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode)
 1. Хранения [шифрованной](/mechanics/cipher) информации
-1. Хранения информации о доступах и видимости
+1. Хранения информации о доступах и [видимости](/mechanics/visibility)
 
 ## EMQX MQTT Broker
 
