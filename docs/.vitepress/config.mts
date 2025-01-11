@@ -46,9 +46,7 @@ export default withMermaid(defineConfig({
         items: [
           { text: 'Создание Repo', link: '/user/create-repo' },
           { text: 'Настройка Repo', link: '/user/settings-repo' },
-          { text: 'Настройка Видимости', link: '/user/visibility-settings' },
           { text: 'Создание Unit', link: '/user/create-unit' },
-          { text: 'Настройка Unit', link: '/user/settings-unit' },
           { text: 'Обновление Unit', link: '/user/update-unit' },
           { text: 'Создание Output->Input между UnitNode', link: '/user/create-edge-unit-node' },
           { text: 'Предоставление доступов', link: '/user/permission' },
