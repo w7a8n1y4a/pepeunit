@@ -46,9 +46,9 @@ def aes_decode(data: str, key: str = settings.encrypt_key) -> str:
 :::
 
 :::danger
-[Администратор](/mechanics/roles#admin) имеющий доступ к `.env` файлу бэкенда инстанса [Pepeunit](/conception/overview), имеет возможность расшифровать данные хранящиеся в шифрованном виде на его инстансе.
+[Администратор](/mechanics/roles#admin) имеющий доступ к `.env` файлу [Backend](/definitions#backend) [инстанса](/definitions#instance) [Pepeunit](/conception/overview), имеет возможность расшифровать данные хранящиеся в шифрованном виде на его [инстансе](/definitions#instance).
 
-Поэтому используйте только инстансы [Pepeunit](/conception/overview) [администраторам](/mechanics/roles#admin) которых вы доверяете.
+Поэтому используйте только [инстансами](/definitions#instance) [Pepeunit](/conception/overview) [администраторам](/mechanics/roles#admin) которых вы доверяете.
 
-Шифрованная информация не передаётся между инстансами и хранится на инстансе, где были созданы ваши сущности, остальные инстансы получают ограниченное представление о первичной сущности.
+Шифрованная информация не передаётся между [инстансами](/definitions#instance) и хранится на [инстансе](/definitions#instance), где были созданы ваши сущности, остальные [инстансы](/definitions#instance) получают ограниченное представление о первичной сущности.
 :::
