@@ -21,7 +21,7 @@
 
 ## Настройка политик доступа
 
-`Pepeunit` позволяет регулировать уровни доступа `Пользователь`-`Unit` и `Unit`-`Unit`. Глубина взаимодействия с платформой определяется ролью пользователя и [видимостью](/mechanics/visibility) отдельных сушностей [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode).
+`Pepeunit` позволяет регулировать уровни [доступа](/user/permission) `Пользователь`-`Unit` и `Unit`-`Unit`. Глубина взаимодействия с платформой определяется ролью пользователя и [видимостью](/mechanics/visibility) отдельных сушностей [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode).
 
 
 ## Федеративное взаимодействие

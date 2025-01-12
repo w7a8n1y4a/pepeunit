@@ -2,7 +2,7 @@
 
 `Unit` - это центральная сущность обладающая уникальным именем на [Узле](/definitions#instance) [Pepeunit](/conception/overview). Она представляет из себя интерфейс управления физичеcким устройством внутри системы [Pepeunit](/conception/overview).
 
-`Unit` можно создать только отстыковав его от [Repo](/definitions#repo) - это может сделать любой позователь при наличии доступов - через [Frontend](/definitions#frontend) или [API](/definitions#api).
+`Unit` можно создать только отстыковав его от [Repo](/definitions#repo) - это может сделать любой позователь при наличии [доступов](/user/permission) - через [Frontend](/definitions#frontend) или [API](/definitions#api).
 
 `Unit` можно настроить, указав будет ли он обновляться автоматически при обновлении [Repo](/definitions#repo) или же обновление будет происходить исключительно вручную с указанием [ветки](/definitions#git-branch) и [коммита](/definitions#git-commit).
 
