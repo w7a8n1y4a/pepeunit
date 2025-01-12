@@ -11,7 +11,7 @@
 ::: warning Нюансы работы UnitNode
 `Input` тип для `UnitNode` можно понимать как точку из которой [Unit](/definitions#unit) получает данные от внешнего мира. Положить данные в данную точку можно любым из [API](/definitions#api), которые поддерживаются в [Backend](/definitions#backend).
 
-`Input` `UnitNode` могут ограничить доступ на свою перезапись для других [Unit](/definitions#unit)  - это нужно когда есть потребность обеспечить доступ только для пользователей, с такими `UnitNode` нельзя создать связь.
+`Input` `UnitNode` могут ограничить доступ на свою перезапись для других [Unit](/definitions#unit)  - это нужно когда есть потребность обеспечить доступ только для пользователей. С такими `UnitNode` нельзя создать связь.
 
 В `Output` информацию может помещать только сам [Unit](/definitions#unit) от которого отстыкован `Output`. [Unit](/definitions#unit) может это осуществить через любой доступный [API](/definitions#api) в [Backend](/definitions#backend).
 
