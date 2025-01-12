@@ -26,4 +26,4 @@
 
 ## Федеративное взаимодействие
 
-`Pepeunit` - федеративная платформа, отдельные [Узлы](/definitions#instance) которой, могут узнавать о других [Узлах](/definitions#instance) и объединятся в большую сеть для взаимодействия. [Unit](/definitions#unit) могут взаимодействовать с другими [Unit](/definitions#unit) даже если они находятся на разных [Узлах](/definitions#instance).
+`Pepeunit` - федеративная платформа, отдельные [инстансы](/definitions#instance) которой, могут узнавать о других [инстансах](/definitions#instance) и объединятся в большую сеть для взаимодействия. [Unit](/definitions#unit) могут взаимодействовать с другими [Unit](/definitions#unit) даже если они находятся на разных [инстансах](/definitions#instance).
