@@ -1,6 +1,6 @@
 # Всё о сущности Unit
 
-`Unit` - это центральная сущность обладающая уникальным именем на [Узле](/definitions#instance) [Pepeunit](/conception/overview). Она представляет из себя интерфейс управления физичеcким устройством внутри системы [Pepeunit](/conception/overview).
+`Unit` - это центральная сущность обладающая уникальным именем в [инстансе](/definitions#instance) [Pepeunit](/conception/overview). Она представляет из себя интерфейс управления физичеcким устройством внутри системы [Pepeunit](/conception/overview).
 
 `Unit` можно создать только отстыковав его от [Repo](/definitions#repo) - это может сделать любой позователь при наличии [доступов](/user/permission) - через [Frontend](/definitions#frontend) или [API](/definitions#api).
 
