@@ -1,1 +1,1 @@
-# Развёртываине через Docker Compose
+# Развёртывание через Docker Compose
