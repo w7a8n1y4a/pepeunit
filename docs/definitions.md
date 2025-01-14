@@ -85,61 +85,8 @@
 Он создаётся владельцем [Unit](#unit) совместно с [Pepeunit](/conception/overview) и хранится в 
 [шифрованном](/mechanics/cipher) виде внутри сущности [Unit](#unit).
 
-::: danger
-Никогда и никому не передавайте `env.json` файл, любой имеющий его, может эмулировать ваше устройство [Unit](#unit).
-:::
-
 ## schema_example.json
-`schema_example.json` - файл схемы, описывающий [MQTT](#mqtt) топики нужные [Unit](#unit). Данный файл создаётся разработчиком [Unit](#unit) и помещается в каждую версию [Repo](#repo). Благодаря данному файлу [Pepeunit](/conception/overview) создаёт [UnitNode](#unitnode) сущности, отвечающие за взаимодействие с [Unit](#unit) и регламентирующие политики доступа до топиков [Unit](#unit). Пример:
-```json
-{
-    "input_base_topic": [
-        "update/pepeunit",
-        "schema_update/pepeunit"
-    ],
-    "output_base_topic": [
-        "state/pepeunit"
-    ],
-    "input_topic": [
-        "input/pepeunit"
-    ],
-    "output_topic": [
-        "output/pepeunit"
-    ]
-}
-```
+`schema_example.json` - файл схемы, описывающий [MQTT](#mqtt) топики нужные [Unit](#unit). Данный файл создаётся разработчиком [Unit](#unit) и помещается в каждую версию [Repo](#repo). Благодаря данному файлу [Pepeunit](/conception/overview) создаёт [UnitNode](#unitnode) сущности, отвечающие за взаимодействие с [Unit](#unit) и регламентирующие политики доступа до топиков [Unit](#unit).
 
 ## schema.json
-`schema.json` - готовый файл схемы для [Unit](#unit) генерируемый [Pepeunit](/conception/overview), содержит в себе ссылки на [UnitNode](#unitnode) и базовые топики для взаимодействия с [Pepeunit](/conception/overview). Пример готовой схемы:
-
-```json
-{
-    "input_base_topic": {
-        "update/pepeunit": [
-            "example.com/input_base_topic/5e1a4151-515e-4926-8b8a-5e821713e25e/update/pepeunit"
-        ],
-        "schema_update/pepeunit": [
-            "example.com/input_base_topic/5e1a4151-515e-4926-8b8a-5e821713e25e/schema_update/pepeunit"
-        ]
-    },
-    "output_base_topic": {
-        "state/pepeunit": [
-            "example.com/output_base_topic/5e1a4151-515e-4926-8b8a-5e821713e25e/state/pepeunit"
-        ]
-    },
-    "input_topic": {
-        "input/pepeunit": [
-            "example.com/dc2d6f5e-90b3-4cdb-91a4-5ae12db1887f/pepeunit",
-            "example.com/f06bcaa8-bb00-45ea-aba8-0fc0eba41e08/pepeunit"
-        ]
-    },
-    "output_topic": {
-        "output/pepeunit": [
-            "example.com/4114a3f8-65c1-4d42-8d1d-481785d0dcca/pepeunit"
-        ]
-    }
-}
-```
-- `5e1a4151-515e-4926-8b8a-5e821713e25e` - при этом `uuid` [Unit](#unit)
-- `dc2d6f5e-90b3-4cdb-91a4-5ae12db1887f`, `f06bcaa8-bb00-45ea-aba8-0fc0eba41e08`, `4114a3f8-65c1-4d42-8d1d-481785d0dcca` - при этом `uuid` разных [UnitNode](#unitnode)
-- `input/pepeunit` - имеет сразу два топика, это означает что один из этих [UnitNode](#unitnode) принадлежит к текущему [Unit](#unit) с `uuid=5e1a4151-515e-4926-8b8a-5e821713e25e`, а второй другому [UnitNode](#unitnode)
+`schema.json` - готовый файл схемы для [Unit](#unit) генерируемый [Pepeunit](/conception/overview), содержит в себе ссылки на [UnitNode](#unitnode) и базовые топики для взаимодействия с [Pepeunit](/conception/overview).
