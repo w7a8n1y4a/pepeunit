@@ -32,7 +32,7 @@
 1. Cекреты которые не должны быть опубликованы, применимо к Pepeunit - это env.json и schema.json, в других репозиториях аналогичную функцию часто выполняют `.env` файлы.
 
 Пример минимального `.gitignore` файла для Pepeunit:
-```.gitignore
+```gitignore
 .idea
 .nvim
 env.json
