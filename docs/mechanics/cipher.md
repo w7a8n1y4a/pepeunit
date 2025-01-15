@@ -45,6 +45,12 @@ def aes_decode(data: str, key: str = settings.encrypt_key) -> str:
 1. Внешнее хранилище внутреннего состояния [Unit](/definitions#unit)
 :::
 
+:::warning Ограничение размера шифруемых объектов
+Все шифруемые объекты имеют стандартное ограничение в `50000` символов. Администратор инстанса может изменить этот объём установив переменную окружения `MAX_CIPHER_LENGTH` в файле .env у Backend.
+
+Размер в `50000` выбран из-за приемлимой скокрости шифрования-дешифрования алгоритмом `AES256`.
+:::
+
 :::danger
 [Администратор](/mechanics/roles#admin) имеющий доступ к `.env` файлу [Backend](/definitions#backend) [инстанса](/definitions#instance) [Pepeunit](/conception/overview), имеет возможность расшифровать данные хранящиеся в шифрованном виде на его [инстансе](/definitions#instance).
 
