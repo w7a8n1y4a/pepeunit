@@ -15,6 +15,11 @@ export default withMermaid(defineConfig({
     ['meta', { property: 'og:image', content: 'https://pepeunit.com/pepeunit-og.jpg' }],
     ['meta', { property: 'og:url', content: 'https://pepeunit.com/' }],
   ],
+  markdown: {
+    languageAlias: {
+      'micropython': 'python'
+    }
+  },
   title: 'Pepeunit Docs',
   description: 'Documentation of Federated IoT Platform | Open-Source | AGPL v3',
   themeConfig: {
