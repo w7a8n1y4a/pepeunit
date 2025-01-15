@@ -19,7 +19,7 @@ Pepeunit умеет генеририровать готовые архивы с 
 1. Создаётся файл Архива - tgz, tar или zip
 
 Набор файлов и дирректорий которые Pepeunit удаляет:
-```.txt
+```txt
 .gitignore
 env_example.json
 .git
