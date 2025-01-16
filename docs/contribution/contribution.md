@@ -8,7 +8,7 @@
 
 Актуален на период создания `MVP`
 
-![](https://git.pepemoss.com/universitat/master/docs/-/raw/main/gitflow/images/appgitflow.png)
+![](/schemas/app_gitflow.svg)
 
 Вы создаёте `feature` [ветку](/definitions#git-branch) от `dev`, вносите изменения, далее создаёте `MR` в `dev` [ветку](/definitions#git-branch). Старший разработчик примет его или сообщит о правках.
 
