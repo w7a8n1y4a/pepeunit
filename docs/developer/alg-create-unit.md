@@ -109,7 +109,7 @@ tmp
 [Подробно о заполнении env_example.json](/developer/struct-env-json#env-example-json)
 :::
 
-Копируем в файл [env_example.json](/definitions#env-example-json) стандартные переменные [Pepeunit](/conception/overview), так как это пример для заполнения пользователями - все значения должны быть обезличены:
+Копируем в файл [env_example.json](/definitions#env-example-json) стандартные переменные [Pepeunit](/conception/overview), так как это пример для заполнения [Пользователями](/mechanics/roles.html#user) - все значения должны быть обезличены:
 ```json
 {
     "PEPEUNIT_URL": "unit.example.com",
@@ -155,7 +155,7 @@ tmp
 ```
 
 :::warning
-Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [Readme](/developer/struct-readme). [Pepeunit](/conception/overview) отобразит новые переменные пользователям для ввода, когда они изменят таргет версию.
+Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [Readme](/developer/struct-readme). [Pepeunit](/conception/overview) отобразит новые переменные [Пользователям](/mechanics/roles.html#user) для ввода, когда они изменят таргет версию.
 :::
 
 ## Первичное заполнение Readme
@@ -205,7 +205,7 @@ tmp
 
 ## Актуализация документации
 
-Актуализируйте и дозаполните все пункты документации, согласно [руководству](/developer/struct-readme). Пользователи скажут вам `Большое Спасибо`.
+Актуализируйте и дозаполните все пункты документации, согласно [руководству](/developer/struct-readme). [Пользователи](/mechanics/roles.html#user) скажут вам `Большое Спасибо`.
 
 ## Присвоение Тега
 
@@ -223,4 +223,4 @@ tmp
 1. Выполняем команду `git tag 1.0.0`
 1. Выполняем команду отправки во внешний репозиторий `git push --tags`
 
-[Тег](/definitions#git-tag) будет сигнализировать пользователям, что всё готово к эксплуатации и протестировано разработчиком. Пользователи будут ожидать, что выбрав последний [Тег](/definitions#git-tag) - получат самую рабочую, самую актуальную версию [Unit](/definitions#unit).
+[Тег](/definitions#git-tag) будет сигнализировать [Пользователям](/mechanics/roles.html#user), что всё готово к эксплуатации и протестировано разработчиком. [Пользователи](/mechanics/roles.html#user) будут ожидать, что выбрав последний [Тег](/definitions#git-tag) - получат самую рабочую, самую актуальную версию [Unit](/definitions#unit).

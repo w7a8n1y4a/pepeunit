@@ -10,7 +10,7 @@
 
 ### Internal
 
-- предоставляет [доступ](/user/permission) до сущности только авторизованным пользователям [инстанса](/definitions#instance) или всем [Unit](/definitions#unit) находящихся в [инстансе](/definitions#instance)
+- предоставляет [доступ](/user/permission) до сущности только авторизованным [Пользователям](/mechanics/roles.html#user) [инстанса](/definitions#instance) или всем [Unit](/definitions#unit) находящихся в [инстансе](/definitions#instance)
 
 ### Private
 

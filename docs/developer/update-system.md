@@ -22,7 +22,7 @@
 
 ### Автоматический или по запросу Администратора
 
-1. Каждый час или по запросу Администратора [Pepeunit](/conception/overview) запускает задачу обновления Repo
+1. Каждый час или по запросу [Администратора](/mechanics/roles#admin) [Pepeunit](/conception/overview) запускает задачу обновления Repo
 1. [Pepeunit](/conception/overview) получает выборку Repo у которых выставлено автоматическое обновление
 1. [Pepeunit](/conception/overview) синхронизирует каждый локальный репозиторий из выборки
 1. [Pepeunit](/conception/overview) выполняет вызывов [MQTT](/definitions#mqtt) команды UPDATE - update/pepeunit - для каждого [Unit](/definitions#unit) у которого указано автоматическое обновление и родительский Repo которого присутствует в выборке

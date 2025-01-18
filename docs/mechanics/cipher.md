@@ -39,14 +39,14 @@ def aes_decode(data: str, key: str = settings.encrypt_key) -> str:
 
 ::: tip Какие данные шифрует [Pepeunit](/conception/overview)?
 Все конфиденциальные данные, а именно:
-1. Динамическая соль, использующаяся для хэширования пароля пользователя
+1. Динамическая соль, использующаяся для хэширования пароля [Пользователя](/mechanics/roles.html#user)
 1. Авторизационные данные, отвестветвенные за доступ до удалённых приватных репозиториев
 1. Файлы окружений - [env.json](/definitions#env-json) от [Unit](/definitions#unit)
 1. Внешнее хранилище внутреннего состояния [Unit](/definitions#unit)
 :::
 
 :::warning Ограничение размера шифруемых объектов
-Все шифруемые объекты имеют стандартное ограничение в `50000` символов. Администратор [инстанса](/definitions#instance) может изменить этот объём установив переменную окружения `MAX_CIPHER_LENGTH` в файле .env у [Backend](/definitions#backend).
+Все шифруемые объекты имеют стандартное ограничение в `50000` символов. [Администратор](/mechanics/roles#admin) [инстанса](/definitions#instance) может изменить этот объём установив переменную окружения `MAX_CIPHER_LENGTH` в файле .env у [Backend](/definitions#backend).
 
 Размер в `50000` выбран из-за приемлимой скокрости шифрования-дешифрования алгоритмом `AES256`.
 :::
@@ -54,7 +54,7 @@ def aes_decode(data: str, key: str = settings.encrypt_key) -> str:
 :::danger
 [Администратор](/mechanics/roles#admin) имеющий доступ к `.env` файлу [Backend](/definitions#backend) [инстанса](/definitions#instance) [Pepeunit](/conception/overview), имеет возможность расшифровать данные хранящиеся в шифрованном виде на его [инстансе](/definitions#instance).
 
-Поэтому используйте только [инстансами](/definitions#instance) [Pepeunit](/conception/overview) [администраторам](/mechanics/roles#admin) которых вы доверяете.
+Поэтому используйте только [инстансами](/definitions#instance) [Pepeunit](/conception/overview) [Администраторам](/mechanics/roles#admin) которых вы доверяете.
 
 Шифрованная информация не передаётся между [инстансами](/definitions#instance) и хранится на [инстансе](/definitions#instance), где были созданы ваши сущности, остальные [инстансы](/definitions#instance) получают ограниченное представление о первичной сущности.
 :::

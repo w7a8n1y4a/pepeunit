@@ -22,7 +22,7 @@ features:
   - title: Topic managment
     details: Система именования тем для отбражения данных и/или быстрого взаимодействия между IoT устройствами
   - title: Access policies
-    details: Настройка уровней доступа User-Unit и Unit-Unit с учетом ролей пользователей и уровней видимости Repo, Unit и UnitNode
+    details: Настройка уровней доступа User-Unit и Unit-Unit с учетом ролей Пользователей и уровней видимости Repo, Unit и UnitNode
   - title: Federation
     details: Соединяйте экземпляры Pepeunit в единую федеративную сеть для связи между IoT-устройствами
 ---

@@ -1,6 +1,6 @@
 # Всё о сущности Repo
 
-`Repo` - это создаваемая пользователем сущность с уникальным именем в [инстансе](/definitions#instance) [Pepeunit](/conception/overview), содержащая в себе информацию о внешнем репозитории [Git](/definitions#git).
+`Repo` - это создаваемая [Пользователем](/mechanics/roles.html#user) сущность с уникальным именем в [инстансе](/definitions#instance) [Pepeunit](/conception/overview), содержащая в себе информацию о внешнем репозитории [Git](/definitions#git).
 
 Репозиторий [Git](/definitions#git) может быть размещён в [инстансе](/definitions#instance) [Gitlab](/definitions#gitlab) или [Github](/definitions#github). [Pepeunit](/conception/overview) умеет скачивать не только публичные репозитории, но и закрытые, для этого требуется указать токен доступа до репозитория. Токены доступа хранятся в [шифрованном](/mechanics/cipher) виде и доступны только создателю.
 
