@@ -1,15 +1,15 @@
 # Алгоритм создания Unit
 
-Пройдя последовательно данный алгоритм, вы создадите свой первый [Unit](/definitions#unit).
+Пройдя последовательно данный алгоритм, вы создадите свой первый [Unit](/definitions#unit)
 
 ## Проработка идеи
 
 Перед началом разработки [Unit](/definitions#unit) ответьте себе на следующие вопросы:
-1. Какую основную задачу будет решать ваш [Unit](/definitions#unit)?
-1. Какие физические элементы будут у вашего [Unit](/definitions#unit)?
-1. Какие данные [Unit](/definitions#unit) будет публиковать?
-1. Какое управляющее воздействие будет допускать [Unit](/definitions#unit)?
-1. [Компилируемый](/definitions#compilable) или [Интерпритируемый](/definitions#interpreterable) будет ваш [Unit](/definitions#unit)?
+1. Какую основную задачу будет решать ваш [Unit](/definitions#unit) ?
+1. Какие физические элементы будут у вашего [Unit](/definitions#unit) ?
+1. Какие данные [Unit](/definitions#unit) будет публиковать ?
+1. Какое управляющее воздействие будет допускать [Unit](/definitions#unit) ?
+1. [Компилируемый](/definitions#compilable) или [Интерпритируемый](/definitions#interpreterable) будет ваш [Unit](/definitions#unit) ?
 
 :::info Например
 1. Регулирование температуры при помощи вентилятора
@@ -68,16 +68,17 @@ tmp
 ```
 
 ### Стандартные топики
+Какие топики хочется реализовать?
 - Хочется рабочую [систему обновлений](/developer/update-system)
 - Хочется обновлять схему и окружение при помощи [стандартных MQTT команд](/developer/default-mqtt-command)
-- Состояние [Unit также было бы хорошо отслеживать](/developer/state-mqtt-send)
+- Хочется отправлять [состояние](/developer/state-mqtt-send), чтобы его потом читать в меню [Pepeunit](/conception/overview)
 
 Исходя из хотелок - оставляем все топики, которые мы уже добавили на схему, вы можете удалить те, которые вам не хочется реализовывать
 
 ### Пользовательские топики
 
-- `input_topic` добавим `set_fan_state/pepeunit`, [Unit](/definitions#unit) подпишется на него и будет получать управляющие команды
-- `output_topic` добавим два: `current_fan_speed_percentage/pepeunit`, `current_temp/pepeunit` - в эти топики будем публиковать текущее состояние
+- В `input_topic` добавим `set_fan_state/pepeunit`, [Unit](/definitions#unit) подпишется на него и будет получать управляющие команды
+- В `output_topic` добавим два: `current_fan_speed_percentage/pepeunit`, `current_temp/pepeunit` - в эти топики будем публиковать текущее состояние
 
 Добавляем нужные топики в [schema_example.json](/definitions#schema-example-json):
 ```json
@@ -126,7 +127,7 @@ tmp
 Мотивация для добавления дополнительных переменных:
 - `WIFI_SSID` - для подключения к `WiFi` точно понадобится название сети
 - `WIFI_PASS` - для подключения к `WiFi` точно будет нужен пароль
-- `PUBLISH_SEND_INTERVAL` - хочу настраивать часту отравки сообщений в [Pepeunit](/conception/overview)
+- `PUBLISH_SEND_INTERVAL` - хочу настраивать частоту отравки сообщений в [Pepeunit](/conception/overview)
 - `DUTY_MIN` - хочу иметь возможность ограничить минимальную скорость вентилятора
 - `DUTY_MAX` - хочу иметь возможность ограничить максимальную скорость вентилятора
 - `TEMP_MIN` - хочу настраивать температуру ниже которой скорость будет `DUTY_MIN`
@@ -155,12 +156,12 @@ tmp
 ```
 
 :::warning
-Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [Readme](/developer/struct-readme). [Pepeunit](/conception/overview) отобразит новые переменные [Пользователям](/mechanics/roles.html#user) для ввода, когда они изменят таргет версию.
+Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [Readme](/developer/struct-readme). [Pepeunit](/conception/overview) отобразит новые переменные [Пользователям](/mechanics/roles.html#user) для ввода, когда они изменят [таргет версию](/developer/update-system#алгоритм-вычисления-текущеи-версии-unit)
 :::
 
 ## Первичное заполнение Readme
 
-Используя [документацию по общей структуре Readme](/developer/struct-readme) первично заполните пункты:
+Используя [документацию по общей структуре Readme](/developer/struct-readme) заполните пункты:
 - `Description`
 - `Firmware format`
 - `Hardware platform`
@@ -181,13 +182,15 @@ tmp
 Для продолжения разработки нам нужно будет отправлять и получать управляющее воздействие на [Unit](/definitions#unit). Очень удобно для этого использовать [инстанс](/definitions#instance) [Pepeunit](/conception/overview), которому вы доверяете. Нужно выполнить два шага на этом [инстасе](/definitions#instance):
 1. Создайте [Repo](/definitions#repo) на основе вашего [Git](/definitions#git) репозитория из [Gitlab](/definitions#gitlab) и [Github](/definitions#github)
 1. Создайте [Unit](/definitions#unit):
-    - Обязательно [сделайте его обновляемым в ручную](/user/create-unit), чтобы чётко контролировать версию
+    - Обязательно [сделайте его обновляемым в ручную](/user/create-unit), чтобы чётко контролировать [таргет версию](/developer/update-system#алгоритм-вычисления-текущеи-версии-unit)
     - Заполните [переменные окружения](/user/create-unit.html)
     - Скачайте [архив](/developer/struct-archive-update) с [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json)
 
 Полученные файлы [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) нужно будет поместить в каталог вашего локального [Git](/definitions#git) репозитория. Данные файлы будут содержать данные для подключения к [инстансу](/definitions#instance), а также топики для публикации. По сути теперь вы готовы разрабатывать программный код вашего [Unit](/definitions#unit).
 
+:::info
 В процессе разработки вы сможете заходить в тестовый [Unit](/definitions#unit) и видеть какие данные он отправляет в `Output` [UnitNode](/definitions#unitnode), создавать для него управляющее воздействие через `Input` [UnitNode](/definitions#unitnode), а также же отлаживать [систему обновлений](/developer/update-system).
+:::
 
 ## Наполнение Unit функционалом
 
@@ -209,18 +212,24 @@ tmp
 
 ## Присвоение Тега
 
-:::info
-[Тег](/definitions#git-tag) может иметь любую структуру, на усмотрение авторов [Unit](/definitions#unit).
+:::info Есть ли ограничение на формат Тега ?
+[Тег](/definitions#git-tag) может иметь любую структуру.
+:::
 
-Для примера [Pepeunit](/conception/overview) использует везде: `major.minor.fix`:
+:::info
+[Pepeunit](/conception/overview) использует везде: `major.minor.fix`:
 - `< 1.0.0` являются `beta` версиями
 - `>= 1.0.0` стабильны
 :::
 
-[Readme](/developer/struct-readme) заполнен, функционал готов, всё работает корректно. Самое время присвоить [Тег](/definitions#git-tag) для вашего последнего [коммита](/definitions#git-commit).
+[Readme](/developer/struct-readme) заполнен, функционал готов, всё работает корректно. Самое время присвоить [Тег](/definitions#git-tag) для вашего последнего [коммита](/definitions#git-commit):
 
 1. Переходим в консоль дирректории вашего проекта
 1. Выполняем команду `git tag 1.0.0`
 1. Выполняем команду отправки во внешний репозиторий `git push --tags`
 
-[Тег](/definitions#git-tag) будет сигнализировать [Пользователям](/mechanics/roles.html#user), что всё готово к эксплуатации и протестировано разработчиком. [Пользователи](/mechanics/roles.html#user) будут ожидать, что выбрав последний [Тег](/definitions#git-tag) - получат самую рабочую, самую актуальную версию [Unit](/definitions#unit).
+:::danger
+[Тег](/definitions#git-tag) будет сигнализировать [Пользователям](/mechanics/roles.html#user), что всё готово к эксплуатации и протестировано разработчиком.
+
+[Пользователи](/mechanics/roles.html#user) будут ожидать, что выбрав последний [Тег](/definitions#git-tag) - получат самую рабочую, самую актуальную версию [Unit](/definitions#unit).
+:::
