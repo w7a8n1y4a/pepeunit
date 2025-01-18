@@ -3,10 +3,10 @@
 :::warning
 Поддерживаемые топики состояний должны быть отражены в [schema_example.json](/definitions#schema-example-json)  в разделе `output_base_topic`.
 
-[Unit](/definitions#unit) должен отправлять форматированные данные в топики, котоыре указаны. Pepeunit обязуется обработать их по единому паттерну, описанному в данном разделе.
+[Unit](/definitions#unit) должен отправлять форматированные данные в топики, котоыре указаны. [Pepeunit](/conception/overview) обязуется обработать их по единому паттерну, описанному в данном разделе.
 :::
 
-Всего в Pepeunit есть один топик отвечающий за отправку состояния:
+Всего в [Pepeunit](/conception/overview) есть один топик отвечающий за отправку состояния:
 1. `output_base_topic` - `state/pepeunit`
 
 ## output_base_topic - state/pepeunit
@@ -15,7 +15,7 @@
 1. Каждые `STATE_SEND_INTERVAL` секунд указанные в [env.json](/definitions#env-json).
 :::
 
-Данные отправляемые [Unit](/definitions#unit), преобразуются на стороне Pepeunit в отображение состояния в меню [Unit](/definitions#unit). Также данное состояние можно получить через REST и GQL.
+Данные отправляемые [Unit](/definitions#unit), преобразуются на стороне [Pepeunit](/conception/overview) в отображение состояния в меню [Unit](/definitions#unit). Также данное состояние можно получить через REST и GQL.
 
 ## Формат сообщений в топки `state/pepeunit`
 
@@ -57,7 +57,7 @@
 Для корректной работы статусов обновлений у [Unit](/definitions#unit), требуется отправлять `commit_version`
 :::
 :::info
-Pepeunit не обязывает отправлять все ключи указанные в примере, можно отправить например только два ключа `millis` и `commit_version`
+[Pepeunit](/conception/overview) не обязывает отправлять все ключи указанные в примере, можно отправить например только два ключа `millis` и `commit_version`
 :::
 
 ## Алгоритм отправки

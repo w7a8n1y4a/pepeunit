@@ -14,15 +14,15 @@
 
 Обновление локального Repo
 1. Создатель Repo нажимает кнопку `Update local Repo` в меню Repo
-1. Pepeunit принудительно заменяет локальный репозиторий новым
+1. [Pepeunit](/conception/overview) принудительно заменяет локальный репозиторий новым
 
 Обновление связанных [Unit](/definitions#unit)
 1. Создатель Repo нажимает кнопку `Update related Unit` в меню Repo
-1. Pepeunit выполняет вызывов [MQTT](/definitions#mqtt) команды UPDATE - update/pepeunit - для каждого [Unit](/definitions#unit) у которого указано автоматическое обновление
+1. [Pepeunit](/conception/overview) выполняет вызывов [MQTT](/definitions#mqtt) команды UPDATE - update/pepeunit - для каждого [Unit](/definitions#unit) у которого указано автоматическое обновление
 
 ### Автоматический или по запросу Администратора
 
-1. Каждый час или по запросу Администратора Pepeunit запускает задачу обновления Repo
-1. Pepeunit получает выборку Repo у которых выставлено автоматическое обновление
-1. Pepeunit синхронизирует каждый локальный репозиторий из выборки
-1. Pepeunit выполняет вызывов [MQTT](/definitions#mqtt) команды UPDATE - update/pepeunit - для каждого [Unit](/definitions#unit) у которого указано автоматическое обновление и родительский Repo которого присутствует в выборке
+1. Каждый час или по запросу Администратора [Pepeunit](/conception/overview) запускает задачу обновления Repo
+1. [Pepeunit](/conception/overview) получает выборку Repo у которых выставлено автоматическое обновление
+1. [Pepeunit](/conception/overview) синхронизирует каждый локальный репозиторий из выборки
+1. [Pepeunit](/conception/overview) выполняет вызывов [MQTT](/definitions#mqtt) команды UPDATE - update/pepeunit - для каждого [Unit](/definitions#unit) у которого указано автоматическое обновление и родительский Repo которого присутствует в выборке

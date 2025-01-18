@@ -26,15 +26,15 @@
 
 ### Зарезервированные переменные Pepeunit
 
-Pepeunit резервирует под нужды связи и стандартные процедуры следующий набор переменных окружения [Unit](/definitions#unit):
-- `PEPEUNIT_URL` - доменное имя или ip адрес инстанса Pepeunit. Полностью соответствует `BACKEND_DOMAIN` из .env файла Pepeunit
-- `HTTP_TYPE` - тип соединения с доменным именем или адресом инстанса Pepeunit. Полностью соответствует `SECURE` из .env файла Pepeunit
-- `MQTT_URL` - доменное имя или ip адресс инстанса EMQX MQTT Brocker. Полностью соответствует `MQTT_URL` из .env файла Pepeunit
-- `PEPEUNIT_TOKEN` - jwt токен доступа для [Unit](/definitions#unit) на инстансе Pepeunit. Данный токен позволяет пройти авторизацию на публикацию и подписку у топиков EMQX MQTT Brocker
+[Pepeunit](/conception/overview) резервирует под нужды связи и стандартные процедуры следующий набор переменных окружения [Unit](/definitions#unit):
+- `PEPEUNIT_URL` - доменное имя или ip адрес инстанса [Pepeunit](/conception/overview). Полностью соответствует `BACKEND_DOMAIN` из .env файла [Pepeunit](/conception/overview)
+- `HTTP_TYPE` - тип соединения с доменным именем или адресом инстанса [Pepeunit](/conception/overview). Полностью соответствует `SECURE` из .env файла [Pepeunit](/conception/overview)
+- `MQTT_URL` - доменное имя или ip адресс инстанса EMQX MQTT Brocker. Полностью соответствует `MQTT_URL` из .env файла [Pepeunit](/conception/overview)
+- `PEPEUNIT_TOKEN` - jwt токен доступа для [Unit](/definitions#unit) на инстансе [Pepeunit](/conception/overview). Данный токен позволяет пройти авторизацию на публикацию и подписку у топиков EMQX MQTT Brocker
 - `SYNC_ENCRYPT_KEY` - 16 битный ключ синхронного шифрования - уникальный для каждого [Unit](/definitions#unit). Удобно использовать при шифровании чего-либо
 - `SECRET_KEY` - 16 битный секретный ключ устройства - уникальный для каждого [Unit](/definitions#unit)
 - `PING_INTERVAL` - частота [MQTT](/definitions#mqtt) пинга в секундах
-- `STATE_SEND_INTERVAL` - частота отправки состояния в стандартный топик Pepeunit. Полностью соответствует `STATE_SEND_INTERVAL` из .env файла Pepeunit
+- `STATE_SEND_INTERVAL` - частота отправки состояния в стандартный топик [Pepeunit](/conception/overview). Полностью соответствует `STATE_SEND_INTERVAL` из .env файла [Pepeunit](/conception/overview)
 - `COMMIT_VERSION` - уникальная переменная, не отображается пользователю, но при этом добавляется каждый раз когда [env.json](/definitions#env-json) предоставляется [Unit](/definitions#unit) в формате архива.
 
 ### Переменные окружения разработчика [Unit](/definitions#unit)
@@ -46,10 +46,10 @@ Pepeunit резервирует под нужды связи и стандарт
 :::
 
 :::warning Какое функциональное назначание у env_example.json?
-Данный файл - это контракт между разработчиком [Unit](/definitions#unit) и Pepeunit:
-1. Разработчик гарантирует, что он реализует в функционале [Unit](/definitions#unit) зарезервированные переменные Pepeunit, позволяющие взаимодействовать с Pepeunit
-1. Pepeunit гарантирует возможность пользователей установить переменные указанные разработчиком
-1. Pepeunit гарантирует что автоматически установит зарезервированные переменные указанные в файле при первом сохранении со стороны пользователя.
+Данный файл - это контракт между разработчиком [Unit](/definitions#unit) и [Pepeunit](/conception/overview):
+1. Разработчик гарантирует, что он реализует в функционале [Unit](/definitions#unit) зарезервированные переменные [Pepeunit](/conception/overview), позволяющие взаимодействовать с [Pepeunit](/conception/overview)
+1. [Pepeunit](/conception/overview) гарантирует возможность пользователей установить переменные указанные разработчиком
+1. [Pepeunit](/conception/overview) гарантирует что автоматически установит зарезервированные переменные указанные в файле при первом сохранении со стороны пользователя.
 :::
 
 :::info Пользовательский опыт
@@ -61,23 +61,23 @@ Pepeunit резервирует под нужды связи и стандарт
 Файлы окружения, такие как [env.json](/definitions#env-json) или .env, представляют собой механизм индивидуализации общего кода под конкретное устройство или экземпляр приложения.
 
 :::warning Какое функциональное назначание у [env.json](/definitions#env-json)?
-Данный файл - это четырёхсторонний контракт между [Unit](/definitions#unit), Pepeunit, Пользователем и Администратором Инстанса Pepeunit:
+Данный файл - это четырёхсторонний контракт между [Unit](/definitions#unit), [Pepeunit](/conception/overview), Пользователем и Администратором Инстанса [Pepeunit](/conception/overview):
 1. [Unit](/definitions#unit) гарантирует всем сторонам, что будет использовать для соответствующих значений из [env_example.json](/definitions#env-example-json) значения из [env.json](/definitions#env-json)
-1. Pepeunit гарантирует всем сторонам, что при первой установке переменных окружения в [env.json](/definitions#env-json), сгенерирует зарезервированные переменные
-1. Pepeunit гарантирует всем сторонам, что [Unit](/definitions#unit) сможет пройти авторизацию для топиков и соединений в EMQX MQTT Brocker, авторизацию Backend с использованием `PEPEUNIT_TOKEN`
-1. Pepeunit гарантирует всем сторонам, возможность изменения [env.json](/definitions#env-json)
-1. Pepeunit гарантирует всем сторонам, что [env.json](/definitions#env-json) будет храниться в шифрованном виде
-1. Pepeunit гарантирует всем сторонам, что доступ до [env.json](/definitions#env-json) будет предоставлен только создателю [Unit](/definitions#unit)
+1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что при первой установке переменных окружения в [env.json](/definitions#env-json), сгенерирует зарезервированные переменные
+1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что [Unit](/definitions#unit) сможет пройти авторизацию для топиков и соединений в EMQX MQTT Brocker, авторизацию Backend с использованием `PEPEUNIT_TOKEN`
+1. [Pepeunit](/conception/overview) гарантирует всем сторонам, возможность изменения [env.json](/definitions#env-json)
+1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что [env.json](/definitions#env-json) будет храниться в шифрованном виде
+1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что доступ до [env.json](/definitions#env-json) будет предоставлен только создателю [Unit](/definitions#unit)
 1. Aдминистратор гарантирует всем сторонам, что [env.json](/definitions#env-json) ни в каком виде не будет передан тем кто не явялется стороной данного контракта.
 :::
 
 ::: danger
-Используйте только доверенные инстансы Pepeunit. Следите, чтобы Администратор инстанса Pepeunit выполнял свои контрактные обязательства, связанные с [env.json](/definitions#env-json).
+Используйте только доверенные инстансы [Pepeunit](/conception/overview). Следите, чтобы Администратор инстанса [Pepeunit](/conception/overview) выполнял свои контрактные обязательства, связанные с [env.json](/definitions#env-json).
 :::
 
 :::info Какие основные свойства можно выделить у [env.json](/definitions#env-json)?
 1. [env.json](/definitions#env-json) файл секретен, его нельзя передавать кому-либо
 1. [env.json](/definitions#env-json) файл позволяет удобно конфигурировать и обновлять [Unit](/definitions#unit)
-1. [env.json](/definitions#env-json) файл позволяет [Unit](/definitions#unit) знать какому инстансу Pepeunit он принадлежит
-1. [env.json](/definitions#env-json) файл при помощи переменной PEPEUNIT_TOKEN позволяет Pepeunit производить авторизацию для конкретных [Unit](/definitions#unit)
+1. [env.json](/definitions#env-json) файл позволяет [Unit](/definitions#unit) знать какому инстансу [Pepeunit](/conception/overview) он принадлежит
+1. [env.json](/definitions#env-json) файл при помощи переменной PEPEUNIT_TOKEN позволяет [Pepeunit](/conception/overview) производить авторизацию для конкретных [Unit](/definitions#unit)
 :::

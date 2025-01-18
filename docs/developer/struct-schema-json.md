@@ -32,15 +32,15 @@
 - `output_topic` - Output [UnitNode](/definitions#unitnode) - набор [UnitNode](/definitions#unitnode) в которые [Unit](/definitions#unit) будет публиковать данные
 
 :::warning Какое функциональное назначание у [schema_example.json](/definitions#schema-example-json) ?
-Данный файл - это контракт между разработчиком [Unit](/definitions#unit) и Pepeunit:
-1. Разработчик гарантирует, что он реализует в функционале [Unit](/definitions#unit), работу указанных в [schema_example.json](/definitions#schema-example-json) стандартных топиков Pepeunit `input_base_topic` и `output_base_topic`
+Данный файл - это контракт между разработчиком [Unit](/definitions#unit) и [Pepeunit](/conception/overview):
+1. Разработчик гарантирует, что он реализует в функционале [Unit](/definitions#unit), работу указанных в [schema_example.json](/definitions#schema-example-json) стандартных топиков [Pepeunit](/conception/overview) `input_base_topic` и `output_base_topic`
 1. Разработчик гарантирует работу `input_topic` и `output_topic` в соответствии с [Readme](/developer/struct-readme)
-1. Pepeunit гарантирует корректное взаимодействие со стандартными топиками `input_base_topic` и `output_base_topic`
-1. Pepeunit гарантирует, что будет поддерживать актуальный набор [UnitNode](/definitions#unitnode) в соответствии с `input_topic` и `output_topic` указанных разработчиком в [schema_example.json](/definitions#schema-example-json) , для каждой версии [Unit](/definitions#unit).
+1. [Pepeunit](/conception/overview) гарантирует корректное взаимодействие со стандартными топиками `input_base_topic` и `output_base_topic`
+1. [Pepeunit](/conception/overview) гарантирует, что будет поддерживать актуальный набор [UnitNode](/definitions#unitnode) в соответствии с `input_topic` и `output_topic` указанных разработчиком в [schema_example.json](/definitions#schema-example-json) , для каждой версии [Unit](/definitions#unit).
 :::
 
 :::info Пользовательский опыт
-При создании [Unit](/definitions#unit) или изменении его версии, Pepeunit автоматически создаёт и удаляет недостающие Input и Output [UnitNode](/definitions#unitnode) в соответствии с [schema_example.json](/definitions#schema-example-json) .
+При создании [Unit](/definitions#unit) или изменении его версии, [Pepeunit](/conception/overview) автоматически создаёт и удаляет недостающие Input и Output [UnitNode](/definitions#unitnode) в соответствии с [schema_example.json](/definitions#schema-example-json) .
 :::
 
 ## schema.json
@@ -106,10 +106,10 @@
 :::
 
 :::warning Какое функциональное назначание у [schema.json](/definitions#schema-json)?
-Данный файл - это контракт между конкретным экземпляром [Unit](/definitions#unit) и Pepeunit:
+Данный файл - это контракт между конкретным экземпляром [Unit](/definitions#unit) и [Pepeunit](/conception/overview):
 1. [Unit](/definitions#unit) гарантирует что он подпишется на все стандартные топики указанные в `input_base_topic` и все [UnitNode](/definitions#unitnode) указанные в `input_topic`
 1. [Unit](/definitions#unit) гарантирует, что он будет публиковать данные в стандартные топики из `output_base_topic` и в [UnitNode](/definitions#unitnode) указанные в `output_topic`
-1. Pepeunit гарантирует, что будет отправлять корректные данные в `input_base_topic` и то что подпишется на все топики в `output_base_topic`
-1. Pepeunit гарантирует, что он будет производить авторизацию для публикации и подписки на все без исключения топики адресованные на инстанс EMQX MQTT Brocker используемый Backend
-1. Pepeunit гарантирует, что будет подписан на все топики соответствующие паттернам: `unit.example.com/+/+/+/pepeunit` и `unit.example.com/+/pepeunit`
+1. [Pepeunit](/conception/overview) гарантирует, что будет отправлять корректные данные в `input_base_topic` и то что подпишется на все топики в `output_base_topic`
+1. [Pepeunit](/conception/overview) гарантирует, что он будет производить авторизацию для публикации и подписки на все без исключения топики адресованные на инстанс EMQX MQTT Brocker используемый Backend
+1. [Pepeunit](/conception/overview) гарантирует, что будет подписан на все топики соответствующие паттернам: `unit.example.com/+/+/+/pepeunit` и `unit.example.com/+/pepeunit`
 :::

@@ -6,7 +6,7 @@
 [Unit](/definitions#unit) должен быть подписан на эти топики, при получении сообщения [Unit](/definitions#unit)`ы должны следовать единому паттерну поведения описанному в данном разделе.
 :::
 
-Всего в Pepeunit есть три команды - топика:
+Всего в [Pepeunit](/conception/overview) есть три команды - топика:
 1. `UPDATE` - `update/pepeunit`
 1. `SCHEMA_UPDATE` - `schema_update/pepeunit`
 1. `ENV_UPDATE` - `env_update/pepeunit`
