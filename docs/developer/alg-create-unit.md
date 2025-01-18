@@ -101,7 +101,7 @@ tmp
 ```
 
 :::warning
-В процессе разработки может потребоваться изменение [schema_example.json](/definitions#schema-example-json) - это абсолютно нормально. Добавьте или удалите топики и актуализируйте [Readme](/developer/struct-readme). [Pepeunit](/conception/overview) подстроится и добавит/удалит [UnitNode](/definitions#unitnode).
+В процессе разработки может потребоваться изменение [schema_example.json](/definitions#schema-example-json) - это абсолютно нормально. Добавьте или удалите топики и актуализируйте [Readme](/definitions#readme-file). [Pepeunit](/conception/overview) подстроится и добавит/удалит [UnitNode](/definitions#unitnode).
 :::
 
 ## Заполнение env_example.json
@@ -156,12 +156,12 @@ tmp
 ```
 
 :::warning
-Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [Readme](/developer/struct-readme). [Pepeunit](/conception/overview) отобразит новые переменные [Пользователям](/mechanics/roles.html#user) для ввода, когда они изменят [таргет версию](/developer/update-system#алгоритм-вычисления-текущеи-версии-unit)
+Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [Readme](/definitions#readme-file). [Pepeunit](/conception/overview) отобразит новые переменные [Пользователям](/mechanics/roles.html#user) для ввода, когда они изменят [таргет версию](/developer/update-system#алгоритм-вычисления-текущеи-версии-unit)
 :::
 
 ## Первичное заполнение Readme
 
-Используя [документацию по общей структуре Readme](/developer/struct-readme) заполните пункты:
+Используя [документацию по общей структуре Readme](/definitions#readme-file) заполните пункты:
 - `Description`
 - `Firmware format`
 - `Hardware platform`
@@ -222,7 +222,7 @@ tmp
 - `>= 1.0.0` стабильны
 :::
 
-[Readme](/developer/struct-readme) заполнен, функционал готов, всё работает корректно. Самое время присвоить [Тег](/definitions#git-tag) для вашего последнего [коммита](/definitions#git-commit):
+[Readme](/definitions#readme-file) заполнен, функционал готов, всё работает корректно. Самое время присвоить [Тег](/definitions#git-tag) для вашего последнего [коммита](/definitions#git-commit):
 
 1. Переходим в консоль дирректории вашего проекта
 1. Выполняем команду `git tag 1.0.0`
