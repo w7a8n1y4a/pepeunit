@@ -26,21 +26,21 @@
 ```
 
 Всего в schema_example.json есть 4 типа топиков:
-- `input_base_topic` - топики стандартных MQTT команд, которые Unit может выполнить
-- `output_base_topic` - топики стандартной публикации данных, в которые Unit может публиковать данные
-- `input_topic` - топики Input UnitNode - набор UnitNode на которые Unit будет подписан
-- `output_topic` - Output UnitNode - набор UnitNode в которые Unit будет публиковать данные
+- `input_base_topic` - топики стандартных [MQTT](/definitions#mqtt) команд, которые [Unit](/definitions#unit) может выполнить
+- `output_base_topic` - топики стандартной публикации данных, в которые [Unit](/definitions#unit) может публиковать данные
+- `input_topic` - топики Input [UnitNode](/definitions#unitnode) - набор [UnitNode](/definitions#unitnode) на которые [Unit](/definitions#unit) будет подписан
+- `output_topic` - Output [UnitNode](/definitions#unitnode) - набор [UnitNode](/definitions#unitnode) в которые [Unit](/definitions#unit) будет публиковать данные
 
 :::warning Какое функциональное назначание у schema_example.json?
-Данный файл - это контракт между разработчиком Unit и Pepeunit:
-1. Разработчик гарантирует, что он реализует в функционале Unit, работу указанных в schema_example.json стандартных топиков Pepeunit `input_base_topic` и `output_base_topic`
-1. Разработчик гарантирует работу `input_topic` и `output_topic` в соответствии с readme
+Данный файл - это контракт между разработчиком [Unit](/definitions#unit) и Pepeunit:
+1. Разработчик гарантирует, что он реализует в функционале [Unit](/definitions#unit), работу указанных в schema_example.json стандартных топиков Pepeunit `input_base_topic` и `output_base_topic`
+1. Разработчик гарантирует работу `input_topic` и `output_topic` в соответствии с [Readme](/developer/struct-readme)
 1. Pepeunit гарантирует корректное взаимодействие со стандартными топиками `input_base_topic` и `output_base_topic`
-1. Pepeunit гарантирует, что будет поддерживать актуальный набор UnitNode в соответствии с `input_topic` и `output_topic` указанных разработчиком в schema_example.json, для каждой версии Unit.
+1. Pepeunit гарантирует, что будет поддерживать актуальный набор [UnitNode](/definitions#unitnode) в соответствии с `input_topic` и `output_topic` указанных разработчиком в schema_example.json, для каждой версии [Unit](/definitions#unit).
 :::
 
 :::info Пользовательский опыт
-При создании Unit или изменении его версии, Pepeunit автоматически создаёт и удаляет недостающие Input и Output UnitNode в соответствии с schema_example.json.
+При создании [Unit](/definitions#unit) или изменении его версии, Pepeunit автоматически создаёт и удаляет недостающие Input и Output [UnitNode](/definitions#unitnode) в соответствии с schema_example.json.
 :::
 
 ## schema.json
@@ -79,9 +79,9 @@
 }
 ```
 
-Топики можно разделить на две категории, стандартные и соответствующие UnitNode:
+Топики можно разделить на две категории, стандартные и соответствующие [UnitNode](/definitions#unitnode):
 - `input_base_topic` и `output_base_topic` - стандартные
-- `input_topic` и `output_topic` - соответствующие UnitNode
+- `input_topic` и `output_topic` - соответствующие [UnitNode](/definitions#unitnode)
 
 Стандарнтые топики:
 1. Всегда состоят из 5 основных элементов
@@ -93,22 +93,22 @@
 ```
 :::
 
-UnitNode топики:
+ [UnitNode](/definitions#unitnode)топики:
 - Могут состоять из 2 ли 3 элементов
 - Каждому `output_topic` из schema_example.json соответствует только один топик из EMQX MQTT Brocker
 - Каждому `input_topic` из schema_example.json может соответствовать несколько топиков из EMQX MQTT Brocker. Они подставляются на основании созданых связей `Output->Input`
 
-:::info Структура UnitNode топиков
+:::info Структура [UnitNode](/definitions#unitnode) топиков
 ```txt
 Доменное имя инстанса / UnitNode.uuid 
 Доменное имя инстанса / UnitNode.uuid / pepeunit
 ```
 :::
 
-:::warning Какое функциональное назначание у schema.json?
-Данный файл - это контракт между конкретным экземпляром Unit и Pepeunit:
-1. Unit гарантирует что он подпишется на все стандартные топики указанные в `input_base_topic` и все UnitNode указанные в `input_topic`
-1. Unit гарантирует, что он будет публиковать данные в стандартные топики из `output_base_topic` и в UnitNode указанные в `output_topic`
+:::warning Какое функциональное назначание у [schema.json](/definitions#schema-json)?
+Данный файл - это контракт между конкретным экземпляром [Unit](/definitions#unit) и Pepeunit:
+1. [Unit](/definitions#unit) гарантирует что он подпишется на все стандартные топики указанные в `input_base_topic` и все [UnitNode](/definitions#unitnode) указанные в `input_topic`
+1. [Unit](/definitions#unit) гарантирует, что он будет публиковать данные в стандартные топики из `output_base_topic` и в [UnitNode](/definitions#unitnode) указанные в `output_topic`
 1. Pepeunit гарантирует, что будет отправлять корректные данные в `input_base_topic` и то что подпишется на все топики в `output_base_topic`
 1. Pepeunit гарантирует, что он будет производить авторизацию для публикации и подписки на все без исключения топики адресованные на инстанс EMQX MQTT Brocker используемый Backend
 1. Pepeunit гарантирует, что будет подписан на все топики соответствующие паттернам: `unit.example.com/+/+/+/pepeunit` и `unit.example.com/+/pepeunit`
