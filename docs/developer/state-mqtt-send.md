@@ -12,7 +12,7 @@
 ## output_base_topic - state/pepeunit
 
 :::info Когда [Unit](/definitions#unit) отправляет данные в этот топик?
-1. Каждые `STATE_SEND_INTERVAL` секунд указанные в env.json.
+1. Каждые `STATE_SEND_INTERVAL` секунд указанные в [env.json](/definitions#env-json).
 :::
 
 Данные отправляемые [Unit](/definitions#unit), преобразуются на стороне Pepeunit в отображение состояния в меню [Unit](/definitions#unit). Также данное состояние можно получить через REST и GQL.
