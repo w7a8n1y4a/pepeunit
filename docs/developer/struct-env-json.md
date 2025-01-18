@@ -27,10 +27,10 @@
 ### Зарезервированные переменные Pepeunit
 
 [Pepeunit](/conception/overview) резервирует под нужды связи и стандартные процедуры следующий набор переменных окружения [Unit](/definitions#unit):
-- `PEPEUNIT_URL` - доменное имя или ip адрес инстанса [Pepeunit](/conception/overview). Полностью соответствует `BACKEND_DOMAIN` из .env файла [Pepeunit](/conception/overview)
-- `HTTP_TYPE` - тип соединения с доменным именем или адресом инстанса [Pepeunit](/conception/overview). Полностью соответствует `SECURE` из .env файла [Pepeunit](/conception/overview)
-- `MQTT_URL` - доменное имя или ip адресс инстанса EMQX MQTT Brocker. Полностью соответствует `MQTT_URL` из .env файла [Pepeunit](/conception/overview)
-- `PEPEUNIT_TOKEN` - jwt токен доступа для [Unit](/definitions#unit) на инстансе [Pepeunit](/conception/overview). Данный токен позволяет пройти авторизацию на публикацию и подписку у топиков EMQX MQTT Brocker
+- `PEPEUNIT_URL` - доменное имя или ip адрес [инстанса](/definitions#instance) [Pepeunit](/conception/overview). Полностью соответствует `BACKEND_DOMAIN` из .env файла [Pepeunit](/conception/overview)
+- `HTTP_TYPE` - тип соединения с доменным именем или адресом [инстанса](/definitions#instance) [Pepeunit](/conception/overview). Полностью соответствует `SECURE` из .env файла [Pepeunit](/conception/overview)
+- `MQTT_URL` - доменное имя или ip адресс [инстанса](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker). Полностью соответствует `MQTT_URL` из .env файла [Pepeunit](/conception/overview)
+- `PEPEUNIT_TOKEN` - jwt токен доступа для [Unit](/definitions#unit) на [инстансе](/definitions#instance) [Pepeunit](/conception/overview). Данный токен позволяет пройти авторизацию на публикацию и подписку у топиков [EMQX MQTT Broker](/definitions#mqtt-broker)
 - `SYNC_ENCRYPT_KEY` - 16 битный ключ синхронного шифрования - уникальный для каждого [Unit](/definitions#unit). Удобно использовать при шифровании чего-либо
 - `SECRET_KEY` - 16 битный секретный ключ устройства - уникальный для каждого [Unit](/definitions#unit)
 - `PING_INTERVAL` - частота [MQTT](/definitions#mqtt) пинга в секундах
@@ -61,10 +61,10 @@
 Файлы окружения, такие как [env.json](/definitions#env-json) или .env, представляют собой механизм индивидуализации общего кода под конкретное устройство или экземпляр приложения.
 
 :::warning Какое функциональное назначание у [env.json](/definitions#env-json)?
-Данный файл - это четырёхсторонний контракт между [Unit](/definitions#unit), [Pepeunit](/conception/overview), Пользователем и Администратором Инстанса [Pepeunit](/conception/overview):
+Данный файл - это четырёхсторонний контракт между [Unit](/definitions#unit), [Pepeunit](/conception/overview), Пользователем и Администратором [инстанса](/definitions#instance) [Pepeunit](/conception/overview):
 1. [Unit](/definitions#unit) гарантирует всем сторонам, что будет использовать для соответствующих значений из [env_example.json](/definitions#env-example-json) значения из [env.json](/definitions#env-json)
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что при первой установке переменных окружения в [env.json](/definitions#env-json), сгенерирует зарезервированные переменные
-1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что [Unit](/definitions#unit) сможет пройти авторизацию для топиков и соединений в EMQX MQTT Brocker, авторизацию Backend с использованием `PEPEUNIT_TOKEN`
+1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что [Unit](/definitions#unit) сможет пройти авторизацию для топиков и соединений в [EMQX MQTT Broker](/definitions#mqtt-broker), авторизацию [Backend](/definitions#backend) с использованием `PEPEUNIT_TOKEN`
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, возможность изменения [env.json](/definitions#env-json)
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что [env.json](/definitions#env-json) будет храниться в шифрованном виде
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что доступ до [env.json](/definitions#env-json) будет предоставлен только создателю [Unit](/definitions#unit)
@@ -72,12 +72,12 @@
 :::
 
 ::: danger
-Используйте только доверенные инстансы [Pepeunit](/conception/overview). Следите, чтобы Администратор инстанса [Pepeunit](/conception/overview) выполнял свои контрактные обязательства, связанные с [env.json](/definitions#env-json).
+Используйте только доверенные [инстансы](/definitions#instance) [Pepeunit](/conception/overview). Следите, чтобы Администратор [инстанса](/definitions#instance) [Pepeunit](/conception/overview) выполнял свои контрактные обязательства, связанные с [env.json](/definitions#env-json).
 :::
 
 :::info Какие основные свойства можно выделить у [env.json](/definitions#env-json)?
 1. [env.json](/definitions#env-json) файл секретен, его нельзя передавать кому-либо
 1. [env.json](/definitions#env-json) файл позволяет удобно конфигурировать и обновлять [Unit](/definitions#unit)
-1. [env.json](/definitions#env-json) файл позволяет [Unit](/definitions#unit) знать какому инстансу [Pepeunit](/conception/overview) он принадлежит
+1. [env.json](/definitions#env-json) файл позволяет [Unit](/definitions#unit) знать какому [инстансу](/definitions#instance) [Pepeunit](/conception/overview) он принадлежит
 1. [env.json](/definitions#env-json) файл при помощи переменной PEPEUNIT_TOKEN позволяет [Pepeunit](/conception/overview) производить авторизацию для конкретных [Unit](/definitions#unit)
 :::

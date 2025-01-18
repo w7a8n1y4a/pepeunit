@@ -33,10 +33,10 @@
 
 ```mermaid
 flowchart LR
-  Brocker <--> Unit
-  Brocker <--> Pepeunit
+  Broker <--> Unit
+  Broker <--> Pepeunit
   Pepeunit <--> Unit
   Pepeunit <--> Postgresql
-  Brocker <--> Redis
+  Broker <--> Redis
   Pepeunit <--> Redis
 ```

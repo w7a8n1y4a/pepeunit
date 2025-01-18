@@ -85,7 +85,7 @@
 
 Стандарнтые топики:
 1. Всегда состоят из 5 основных элементов
-1. Каждому наименованию топика в [schema_example.json](/definitions#schema-example-json) соответствует только один топик из EMQX MQTT Brocker:
+1. Каждому наименованию топика в [schema_example.json](/definitions#schema-example-json) соответствует только один топик из [EMQX MQTT Broker](/definitions#mqtt-broker):
 
 :::info Структура стандарнтных топиков
 ```txt
@@ -95,8 +95,8 @@
 
  [UnitNode](/definitions#unitnode)топики:
 - Могут состоять из 2 ли 3 элементов
-- Каждому `output_topic` из [schema_example.json](/definitions#schema-example-json) соответствует только один топик из EMQX MQTT Brocker
-- Каждому `input_topic` из [schema_example.json](/definitions#schema-example-json) может соответствовать несколько топиков из EMQX MQTT Brocker. Они подставляются на основании созданых связей `Output->Input`
+- Каждому `output_topic` из [schema_example.json](/definitions#schema-example-json) соответствует только один топик из [EMQX MQTT Broker](/definitions#mqtt-broker)
+- Каждому `input_topic` из [schema_example.json](/definitions#schema-example-json) может соответствовать несколько топиков из [EMQX MQTT Broker](/definitions#mqtt-broker). Они подставляются на основании созданых связей `Output->Input`
 
 :::info Структура [UnitNode](/definitions#unitnode) топиков
 ```txt
@@ -110,6 +110,6 @@
 1. [Unit](/definitions#unit) гарантирует что он подпишется на все стандартные топики указанные в `input_base_topic` и все [UnitNode](/definitions#unitnode) указанные в `input_topic`
 1. [Unit](/definitions#unit) гарантирует, что он будет публиковать данные в стандартные топики из `output_base_topic` и в [UnitNode](/definitions#unitnode) указанные в `output_topic`
 1. [Pepeunit](/conception/overview) гарантирует, что будет отправлять корректные данные в `input_base_topic` и то что подпишется на все топики в `output_base_topic`
-1. [Pepeunit](/conception/overview) гарантирует, что он будет производить авторизацию для публикации и подписки на все без исключения топики адресованные на инстанс EMQX MQTT Brocker используемый Backend
+1. [Pepeunit](/conception/overview) гарантирует, что он будет производить авторизацию для публикации и подписки на все без исключения топики адресованные на [инстанс](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker) используемый [Backend](/definitions#backend)
 1. [Pepeunit](/conception/overview) гарантирует, что будет подписан на все топики соответствующие паттернам: `unit.example.com/+/+/+/pepeunit` и `unit.example.com/+/pepeunit`
 :::
