@@ -1,7 +1,7 @@
 # Отправка состояния Unit через MQTT
 
 :::warning
-Поддерживаемые топики состояний должны быть отражены в schema_example.json в разделе `output_base_topic`.
+Поддерживаемые топики состояний должны быть отражены в [schema_example.json](/definitions#schema-example-json)  в разделе `output_base_topic`.
 
 [Unit](/definitions#unit) должен отправлять форматированные данные в топики, котоыре указаны. Pepeunit обязуется обработать их по единому паттерну, описанному в данном разделе.
 :::

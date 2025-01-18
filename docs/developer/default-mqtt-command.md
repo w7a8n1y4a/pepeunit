@@ -1,7 +1,7 @@
 # Стандартные MQTT команды Pepeunit
 
 :::warning
-Команды которые поддерживает [Unit](/definitions#unit) должны быть отражены в schema_example.json в разделе `input_base_topic`.
+Команды которые поддерживает [Unit](/definitions#unit) должны быть отражены в [schema_example.json](/definitions#schema-example-json) в разделе `input_base_topic`.
 
 [Unit](/definitions#unit) должен быть подписан на эти топики, при получении сообщения [Unit](/definitions#unit)`ы должны следовать единому паттерну поведения описанному в данном разделе.
 :::

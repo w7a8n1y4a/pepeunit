@@ -135,7 +135,7 @@
 
 ## schema_example.json
 
-Отобразите schema_example.json. Это нужно для опытных пользователей, по данной схеме можно очень быстро оценить что может [Unit](/definitions#unit). Подробное описание структуры schema_example.json.
+Отобразите [schema_example.json](/definitions#schema-example-json) . Это нужно для опытных пользователей, по данной схеме можно очень быстро оценить что может [Unit](/definitions#unit). Подробное описание структуры [schema_example.json](/definitions#schema-example-json) .
 
 :::info Пример
 ```json

@@ -62,7 +62,7 @@ Pepeunit резервирует под нужды связи и стандарт
 
 :::warning Какое функциональное назначание у [env.json](/definitions#env-json)?
 Данный файл - это четырёхсторонний контракт между [Unit](/definitions#unit), Pepeunit, Пользователем и Администратором Инстанса Pepeunit:
-1. [Unit](/definitions#unit) гарантирует всем сторонам, что будет использовать для соответствующих значений из env_example.json значения из [env.json](/definitions#env-json)
+1. [Unit](/definitions#unit) гарантирует всем сторонам, что будет использовать для соответствующих значений из [env_example.json](/definitions#env-example-json) значения из [env.json](/definitions#env-json)
 1. Pepeunit гарантирует всем сторонам, что при первой установке переменных окружения в [env.json](/definitions#env-json), сгенерирует зарезервированные переменные
 1. Pepeunit гарантирует всем сторонам, что [Unit](/definitions#unit) сможет пройти авторизацию для топиков и соединений в EMQX MQTT Brocker, авторизацию Backend с использованием `PEPEUNIT_TOKEN`
 1. Pepeunit гарантирует всем сторонам, возможность изменения [env.json](/definitions#env-json)

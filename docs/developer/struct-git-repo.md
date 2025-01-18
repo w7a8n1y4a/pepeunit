@@ -20,8 +20,8 @@
 
 Рассмотрим каждый файл:
 - [readme.md](/developer/struct-readme) - описание проекта, содержащее основную информацию о его назначении, установке и использовании, [требования к структуре](/developer/struct-readme)
-- env_example.json - отвечает за требующиеся для [Unit](/definitions#unit) переменные окруженияю, [требования к структуре](/developer/struct-env-json)
-- schema_example.json - отвечает за схему взаимодействия [Unit](/definitions#unit) с Pepeunit, а также за `Input` и `Output` которые будут у [Unit](/definitions#unit), [требования к структуре](/developer/struct-schema-json)
+- [env_example.json](/definitions#env-example-json) - отвечает за требующиеся для [Unit](/definitions#unit) переменные окруженияю, [требования к структуре](/developer/struct-env-json)
+- [schema_example.json](/definitions#schema-example-json) - отвечает за схему взаимодействия [Unit](/definitions#unit) с Pepeunit, а также за `Input` и `Output` которые будут у [Unit](/definitions#unit), [требования к структуре](/developer/struct-schema-json)
 - LICENSE - лицензия на усмотрение автора, все репозитории Pepeunit имеют лицензию `AGPL v3`
 - .gitignore - перечисляет файлы и папки, которые [Git](/definitions#git) должен игнорировать и не включать в контроль версий. Пример заполнения чуть ниже
 
