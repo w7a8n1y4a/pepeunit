@@ -24,10 +24,10 @@
 
 ### Формат сообщения в топик `update/pepeunit`
 :::danger
-Формат сообщения для компилируемых и интерпритируемых [Repo](/definitions#repo) отличается:
+Формат сообщения для [Компилируемых](/definitions#compilable) и [Интерпритируемых](/definitions#interpreterable) [Repo](/definitions#repo) отличается:
 :::
 
-Компилируемые:
+[Компилируемые](/definitions#compilable):
 
 ```json
 {
@@ -37,7 +37,7 @@
 }
 ```
 
-Интерпритируемые:
+[Интерпритируемые](/definitions#interpreterable):
 
 ```json
 {
@@ -48,10 +48,10 @@
 
 ### Алгоритм действий Unit
 :::danger
-Алгоритм [Unit](/definitions#unit) различается для компилируемых и интерпритируемых [Repo](/definitions#repo) .
+Алгоритм [Unit](/definitions#unit) различается для [Компилируемых](/definitions#compilable) и [Интерпритируемых](/definitions#interpreterable) [Repo](/definitions#repo)
 :::
 
-Компилируемые:
+[Компилируемые](/definitions#compilable):
 
 1. Сверить версию `NEW_COMMIT_VERSION` с текущей версией `COMMIT_VERSION` из [env.json](/definitions#env-json), если совпали пропускаем обновление, если нет переходим дальше
 1. Вычислить uuid [Unit](/definitions#unit) на основе jwt токена `PEPEUNIT_TOKEN` из [env.json](/definitions#env-json)
@@ -65,7 +65,7 @@
 1. Скачать новую скомпилированную часть по ссылке из `COMPILED_FIRMWARE_LINK` 
 1. Запустить новую скомпилированную часть c прекращением работы старой
 
-Интерпритируемые:
+[Интерпритируемые](/definitions#interpreterable):
 
 1. Сверить версию `NEW_COMMIT_VERSION` с текущей версией `COMMIT_VERSION` из [env.json](/definitions#env-json), если совпали пропускаем обновление, если нет переходим дальше
 1. Вычислить uuid [Unit](/definitions#unit) на основе jwt токена `PEPEUNIT_TOKEN` из [env.json](/definitions#env-json)

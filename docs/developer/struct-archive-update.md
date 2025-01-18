@@ -1,6 +1,6 @@
 # Структура архивов c обновлениями
 
- [Pepeunit](/conception/overview) умеет генеририровать готовые архивы с обновлениями для [Unit](/definitions#unit), при этом алгоритм генерации разный для компилируемых и интерпритируемых [Repo](/definitions#repo) ,
+ [Pepeunit](/conception/overview) умеет генеририровать готовые архивы с обновлениями для [Unit](/definitions#unit), при этом алгоритм генерации разный для компилируемых и [Интерпритируемых](/definitions#interpreterable) [Repo](/definitions#repo) ,
 
 ## Компилируемые
 
