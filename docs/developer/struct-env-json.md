@@ -67,7 +67,7 @@
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что при первой установке переменных окружения в [env.json](/definitions#env-json), сгенерирует зарезервированные переменные
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что [Unit](/definitions#unit) сможет пройти авторизацию для топиков и соединений в [EMQX MQTT Broker](/definitions#mqtt-broker), авторизацию [Backend](/definitions#backend) с использованием `PEPEUNIT_TOKEN`
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, возможность изменения [env.json](/definitions#env-json)
-1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что [env.json](/definitions#env-json) будет храниться в шифрованном виде
+1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что [env.json](/definitions#env-json) будет храниться в [шифрованном виде](/mechanics/cipher#шифрование)
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что доступ до [env.json](/definitions#env-json) будет предоставлен только создателю [Unit](/definitions#unit)
 1. [Aдминистратор](/mechanics/roles#admin) гарантирует всем сторонам, что [env.json](/definitions#env-json) ни в каком виде не будет передан тем кто не явялется стороной данного контракта.
 :::
