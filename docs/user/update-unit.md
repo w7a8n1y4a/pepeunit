@@ -8,9 +8,9 @@
 
 Для обновления [Unit](/definitions#unit) в основном меню есть вкладка `Send update MQTT message`. Команды указанные там отвечают за принудительное обновление [Unit](/definitions#unit):
 
-1. `Firmware` - отправляет [Unit](/definitions#unit) [MQTT](/definitions#mqtt) запрос на полное обновление прграммы, как если бы вы сделали это в ручную при создании [Unit](/definitions#unit)
+1. `Firmware` - отправляет [Unit](/definitions#unit) [MQTT](/definitions#mqtt) запрос на полное обновление прграммы, как если бы вы сделали это вручную при создании [Unit](/definitions#unit)
 2. `Schema` - отправляет [Unit](/definitions#unit) [MQTT](/definitions#mqtt) запрос на обновление схемы взаимодействия `Output->Input`. Полезно когда была добавлен новая связь, при этом не потребуется полного обновления программы
-3. `Env` - отправляет [Unit](/definitions#unit) [MQTT](/definitions#mqtt) запрос на обновление [env.json](/definitions#env-json) файла. Данная команда особенно полезна когда все нужные переменные вынесены в [env_example.json](/definitions#env-example-json) разработчиом, при этомм не потребуется полного обновления программы [Unit](/definitions#unit)
+3. `Env` - отправляет [Unit](/definitions#unit) [MQTT](/definitions#mqtt) запрос на обновление [env.json](/definitions#env-json) файла. Данная команда особенно полезна когда все нужные переменные вынесены в [env_example.json](/definitions#env-example-json) разработчиком, при этомм не потребуется полного обновления программы [Unit](/definitions#unit)
 
 ## Автоматическое
 
