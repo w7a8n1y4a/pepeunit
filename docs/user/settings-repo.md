@@ -6,7 +6,7 @@
 
 ## Ветка
 
-Для работы обновлений и возможности создавать [Unit](/definitions#unit) нужно выбрать [ветку](/definitions#git-branch) по умолчанию. Обычно - это `main`, `release` или `master`
+Для работы обновлений и возможности создавать [Unit](/definitions#unit) нужно выбрать [ветку](/definitions#git-branch) по умолчанию. Обычно - это `main`, `release` или `master`.
 
 ## Флаги массовых обновлений
 

@@ -20,7 +20,7 @@
 
 ::: tip Возможности обычного `Пользователя`
 - Имеет доступ к созданию [Repo](/definitions#repo), [Unit](/definitions#unit) и [UnitNode](/definitions#unitnode)
-- Имеет доступ к сущностям чей [уровень видимости](/mechanics/visibility) `Public`, `Internal` или `Private` если предоставлен [доступ](/user/permission)
+- Имеет доступ к сущностям чей [уровень видимости](/mechanics/visibility) `Public`, `Internal` или `Private` с предоставленым [доступом](/user/permission)
 :::
 
 ### Admin
