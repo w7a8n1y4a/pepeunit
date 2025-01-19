@@ -41,7 +41,7 @@
 `Instance или Узел` - полностью работоспособное, настроенное и запущенное веб приложение - способное отвечать на запросы клиентов.
 
 ## API
-`Application Programming Interface` - это контракт, проедоставляемый программами и описывающий взаимодействие c ними. [Backend](#backend) предоставляет - [REST](#rest) [GQL](#gql), [MQTT](#mqtt)
+`Application Programming Interface` - это контракт, проедоставляемый программами и описывающий взаимодействие c ними. Например [Backend](#backend) Pepeunit предоставляет - [REST](#rest), [GQL](#gql), [MQTT](#mqtt)
 
 ## REST
 `REST API` - контракт описывающий взаимодействие программы с клиентами через `HTTP` запросы. Pepeunit [Backend](#backend) использует пакет [Pydantic](https://docs.pydantic.dev/latest/) и интерфейс [Swagger OpenAPI](https://swagger.io/docs/) для предоставления `REST API`.

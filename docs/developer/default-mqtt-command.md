@@ -62,7 +62,7 @@
     - `HTTP_TYPE://PEPEUNIT_URL/pepeunit/api/v1/units/firmware/tar/{Unit.uuid}`
     - `HTTP_TYPE://PEPEUNIT_URL/pepeunit/api/v1/units/firmware/zip/{Unit.uuid}`
 1. Распаковать из архива файлы [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json)
-1. Скачать новую скомпилированную часть по ссылке из `COMPILED_FIRMWARE_LINK` 
+1. Скачать новую скомпилированную часть по ссылке из `COMPILED_FIRMWARE_LINK` - [подробнее о предварительной компиляции](/developer/release-assets)
 1. Запустить новую скомпилированную часть c прекращением работы старой
 
 [Интерпритируемые](/definitions#interpreterable):
