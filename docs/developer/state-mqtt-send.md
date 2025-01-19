@@ -15,7 +15,7 @@
 1. Каждые `STATE_SEND_INTERVAL` секунд указанные в [env.json](/definitions#env-json).
 :::
 
-Данные отправляемые [Unit](/definitions#unit), преобразуются на стороне [Pepeunit](/conception/overview) в отображение состояния в меню [Unit](/definitions#unit). Также данное состояние можно получить через REST и GQL.
+Данные отправляемые [Unit](/definitions#unit), преобразуются на стороне [Pepeunit](/conception/overview) в отображение состояния в меню [Unit](/definitions#unit). Также данное состояние можно получить через [REST](/definitions#rest) и [GQL](/definitions#gql).
 
 ## Формат сообщений в топки `state/pepeunit`
 

@@ -1,7 +1,15 @@
 # Структура env.json и env_example.json
 
 ## env_example.json
-### структура
+
+:::warning Какое функциональное назначание у [env_example.json](/definitions#env-example-json)?
+Данный файл - это контракт между разработчиком [Unit](/definitions#unit) и [Pepeunit](/conception/overview):
+1. Разработчик гарантирует, что он реализует в функционале [Unit](/definitions#unit) зарезервированные переменные [Pepeunit](/conception/overview), позволяющие взаимодействовать с [Pepeunit](/conception/overview)
+1. [Pepeunit](/conception/overview) гарантирует возможность [Пользователей](/mechanics/roles.html#user) установить переменные указанные разработчиком
+1. [Pepeunit](/conception/overview) гарантирует, что автоматически установит зарезервированные переменные указанные в файле при первом сохранении со стороны [Пользователя](/mechanics/roles.html#user).
+:::
+
+### Структура
 ```json
 {
     "WIFI_SSID": "My_Perfect_Wifi_SSID",
@@ -22,20 +30,20 @@
 }
 ```
 
-Переменные можно разделить на две категории - `зарезервированные` и `переменные разработчика`.
+Переменные можно разделить на две категории - `зарезервированные` и `переменные разработчика`
 
 ### Зарезервированные переменные Pepeunit
 
 [Pepeunit](/conception/overview) резервирует под нужды связи и стандартные процедуры следующий набор переменных окружения [Unit](/definitions#unit):
-- `PEPEUNIT_URL` - доменное имя или ip адрес [инстанса](/definitions#instance) [Pepeunit](/conception/overview). Полностью соответствует `BACKEND_DOMAIN` из .env файла [Pepeunit](/conception/overview)
-- `HTTP_TYPE` - тип соединения с доменным именем или адресом [инстанса](/definitions#instance) [Pepeunit](/conception/overview). Полностью соответствует `SECURE` из .env файла [Pepeunit](/conception/overview)
-- `MQTT_URL` - доменное имя или ip адресс [инстанса](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker). Полностью соответствует `MQTT_URL` из .env файла [Pepeunit](/conception/overview)
-- `PEPEUNIT_TOKEN` - jwt токен доступа для [Unit](/definitions#unit) на [инстансе](/definitions#instance) [Pepeunit](/conception/overview). Данный токен позволяет пройти авторизацию на публикацию и подписку у топиков [EMQX MQTT Broker](/definitions#mqtt-broker)
-- `SYNC_ENCRYPT_KEY` - 16 битный ключ синхронного шифрования - уникальный для каждого [Unit](/definitions#unit). Удобно использовать при шифровании чего-либо
-- `SECRET_KEY` - 16 битный секретный ключ устройства - уникальный для каждого [Unit](/definitions#unit)
+- `PEPEUNIT_URL` - доменное имя или `ip` адрес [инстанса](/definitions#instance) [Pepeunit](/conception/overview). Полностью соответствует `BACKEND_DOMAIN` из `.env` файла [Pepeunit](/conception/overview)
+- `HTTP_TYPE` - тип соединения с доменным именем или адресом [инстанса](/definitions#instance) [Pepeunit](/conception/overview). Полностью соответствует `SECURE` из `.env` файла [Pepeunit](/conception/overview)
+- `MQTT_URL` - доменное имя или `ip` адрес [инстанса](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker). Полностью соответствует `MQTT_URL` из `.env` файла [Pepeunit](/conception/overview)
+- `PEPEUNIT_TOKEN` - `jwt` токен доступа для [Unit](/definitions#unit) на [инстансе](/definitions#instance) [Pepeunit](/conception/overview). Данный токен позволяет пройти авторизацию на публикацию и подписку у топиков [EMQX MQTT Broker](/definitions#mqtt-broker)
+- `SYNC_ENCRYPT_KEY` - `32 байтовый` ключ синхронного шифрования - уникальный для каждого [Unit](/definitions#unit). Удобно использовать при шифровании чего-либо
+- `SECRET_KEY` - `32 байтовый` секретный ключ устройства - уникальный для каждого [Unit](/definitions#unit). Удобно использовать для подписи или генерации `jwt`
 - `PING_INTERVAL` - частота [MQTT](/definitions#mqtt) пинга в секундах
-- `STATE_SEND_INTERVAL` - частота отправки состояния в стандартный топик [Pepeunit](/conception/overview). Полностью соответствует `STATE_SEND_INTERVAL` из .env файла [Pepeunit](/conception/overview)
-- `COMMIT_VERSION` - уникальная переменная, не отображается [Пользователю](/mechanics/roles.html#user), но при этом добавляется каждый раз когда [env.json](/definitions#env-json) предоставляется [Unit](/definitions#unit) в формате архива.
+- `STATE_SEND_INTERVAL` - частота отправки состояния в стандартный топик [Pepeunit](/conception/overview). Полностью соответствует `STATE_SEND_INTERVAL` из `.env` файла [Pepeunit](/conception/overview)
+- `COMMIT_VERSION` - уникальная переменная, не отображается [Пользователю](/mechanics/roles.html#user), но подставляется каждый раз когда [env.json](/definitions#env-json) предоставляется [Unit](/definitions#unit) в формате архива.
 
 ### Переменные окружения разработчика [Unit](/definitions#unit)
 
@@ -45,20 +53,13 @@
 Так как Пользователь имеет возможность заполнять значение переменных окружения, очень желательно заполнить readme репозитория, который вы создаёте.
 :::
 
-:::warning Какое функциональное назначание у [env_example.json](/definitions#env-example-json)?
-Данный файл - это контракт между разработчиком [Unit](/definitions#unit) и [Pepeunit](/conception/overview):
-1. Разработчик гарантирует, что он реализует в функционале [Unit](/definitions#unit) зарезервированные переменные [Pepeunit](/conception/overview), позволяющие взаимодействовать с [Pepeunit](/conception/overview)
-1. [Pepeunit](/conception/overview) гарантирует возможность [Пользователей](/mechanics/roles.html#user) установить переменные указанные разработчиком
-1. [Pepeunit](/conception/overview) гарантирует что автоматически установит зарезервированные переменные указанные в файле при первом сохранении со стороны [Пользователя](/mechanics/roles.html#user).
-:::
-
 :::info Пользовательский опыт
 При первой попытке [Пользователя](/mechanics/roles.html#user) установить переменные окружения, он изначально видит только переменные которые добавил разработчик [Unit](/definitions#unit) через [env_example.json](/definitions#env-example-json).
 :::
 
 ## env.json
 
-Файлы окружения, такие как [env.json](/definitions#env-json) или .env, представляют собой механизм индивидуализации общего кода под конкретное устройство или экземпляр приложения.
+Файлы окружения, такие как [env.json](/definitions#env-json) или `.env`, представляют собой механизм индивидуализации общего кода под конкретное устройство или экземпляр приложения.
 
 :::warning Какое функциональное назначание у [env.json](/definitions#env-json)?
 Данный файл - это четырёхсторонний контракт между [Unit](/definitions#unit), [Pepeunit](/conception/overview), [Пользователем](/mechanics/roles.html#user) и [Администратором](/mechanics/roles#admin) [инстанса](/definitions#instance) [Pepeunit](/conception/overview):
