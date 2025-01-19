@@ -6,15 +6,15 @@
 
 ### Public
 
-- предоставляет [доступ](/user/permission) всем
+- предоставляет [доступ](/mechanics/permission) всем
 
 ### Internal
 
-- предоставляет [доступ](/user/permission) до сущности только авторизованным [Пользователям](/mechanics/roles.html#user) [инстанса](/definitions#instance) или всем [Unit](/definitions#unit) находящихся в [инстансе](/definitions#instance)
+- предоставляет [доступ](/mechanics/permission) до сущности только авторизованным [Пользователям](/mechanics/roles.html#user) [инстанса](/definitions#instance) или всем [Unit](/definitions#unit) находящихся в [инстансе](/definitions#instance)
 
 ### Private
 
-- предоставляет [доступ](/user/permission) до сущности только создателю и агентам которых укажет создатель. Работает в пределах [инстанса](/definitions#instance)
+- предоставляет [доступ](/mechanics/permission) до сущности только создателю и агентам которых укажет создатель. Работает в пределах [инстанса](/definitions#instance)
 
 ---
 
@@ -29,7 +29,7 @@
 - Обновление [Git](/definitions#git) репозитория внутри [Pepeunit](/conception/overview)
 - Обновление всех связанных [Unit](/definitions#unit)
 - Настройки [Repo](/definitions#repo)
-- Выдача [доступов](/user/permission)
+- Выдача [доступов](/mechanics/permission)
 - Удаление [Repo](/definitions#repo)
 
 ### Unit
@@ -40,7 +40,7 @@
 - Скачивание `Firmware` и скомпилированных пакетов
 - Команды обновления по [MQTT](/definitions#mqtt) - `Firmware`, `Schema` и `Env`
 - Настройки [Unit](/definitions#unit)
-- Выдача [доступов](/user/permission)оступов
+- Выдача [доступов](/mechanics/permission)оступов
 - Удаление [Unit](/definitions#unit)
 
 ### UnitNode
@@ -49,13 +49,13 @@
 - Установка значений с отправкой в `Input` через [MQTT](/definitions#mqtt)
 - Создание связей для `Input`
 - Настройки [UnitNode](/definitions#unitnode)
-- Выдача [доступов](/user/permission)
+- Выдача [доступов](/mechanics/permission)
 
 ---
 
 # Возможности агентов для видимых сущностей
 
-Агенты имеют ограниченный [доступ](/user/permission) до чужих сущностей, которые они видят с помощью `системы видимости`:
+Агенты имеют ограниченный [доступ](/mechanics/permission) до чужих сущностей, которые они видят с помощью `системы видимости`:
 
 ### Repo
 

@@ -43,7 +43,7 @@
 - Интерпритируемый
 - Компилируемый
 
-Данный параметр при создании [Repo](/definitions#repo) в [Pepeunit](/conception/overview) влияет на [первую установку](/user/create-unit#получение-фаилов-развертывания) и [способ доставки программных обновлений](/developer/update-system)
+Данный параметр при создании [Repo](/definitions#repo) в [Pepeunit](/conception/overview) влияет на [первую установку](/user/create-unit#получение-фаилов-развертывания) и [способ доставки программных обновлений](/mechanics/update-system)
 
 ## Hardware platform
 

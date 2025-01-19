@@ -14,8 +14,8 @@
 
 ## Настройка Перезаписываемости для Input
 
-Если состояние флага перезаписываемости `False` то [Unit](/definitions#unit) у которых есть [доступ](/user/permission), несмогут записать новое значение через [REST](/definitions#rest) и [GQL](/definitions#gql). Т.е. возможность установить значение будет только у [Пользователей](/mechanics/roles.html#user) с [доступом](/user/permission) и связанных через `Output->Input` топиков.
+Если состояние флага перезаписываемости `False` то [Unit](/definitions#unit) у которых есть [доступ](/mechanics/permission), несмогут записать новое значение через [REST](/definitions#rest) и [GQL](/definitions#gql). Т.е. возможность установить значение будет только у [Пользователей](/mechanics/roles.html#user) с [доступом](/mechanics/permission) и связанных через `Output->Input` топиков.
 
 :::info
-Данная настройка нужна, чтобы ограничить возможности [Unit](/definitions#unit) по перезаписи информации в [доступных](/user/permission) им [UnitNode](/definitions#unitnode).
+Данная настройка нужна, чтобы ограничить возможности [Unit](/definitions#unit) по перезаписи информации в [доступных](/mechanics/permission) им [UnitNode](/definitions#unitnode).
 :::

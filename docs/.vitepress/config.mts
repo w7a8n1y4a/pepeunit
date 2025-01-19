@@ -53,7 +53,6 @@ export default withMermaid(defineConfig({
           { text: 'Обновление Unit', link: '/user/update-unit' },
           { text: 'Настройки UnitNode', link: '/user/settings-unit-node' },
           { text: 'Cвязи Output->Input между UnitNode', link: '/user/edge-unit-node' },
-          { text: 'Доступы', link: '/user/permission' },
         ]
       },
       {
@@ -69,7 +68,6 @@ export default withMermaid(defineConfig({
           { text: 'Отправка состояния Unit через MQTT', link: '/developer/state-mqtt-send' },
           { text: 'Структура сообщений в MQTT топиках', link: '/developer/struct-topic-messages' },
           { text: 'Хранилище состояний Unit', link: '/developer/state-storage-unit' },
-          { text: 'Система обновлений', link: '/developer/update-system' },
         ]
       },
       {
@@ -80,6 +78,8 @@ export default withMermaid(defineConfig({
           { text: 'UnitNode', link: '/mechanics/unit-node' },
           { text: 'Система Ролей', link: '/mechanics/roles' },
           { text: 'Система Видимости', link: '/mechanics/visibility' },
+          { text: 'Система Доступов', link: '/mechanics/permission' },
+          { text: 'Система Обновлений', link: '/mechanics/update-system' },
           { text: 'Шифрование', link: '/mechanics/cipher' },
         ]
       },
