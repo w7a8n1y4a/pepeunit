@@ -4,7 +4,7 @@
     <img align="center" src="https://pepeunit.com/pepeunit-og.jpg"  width="640" height="320">
 </div>
 
-[Pepeunit](https://pepeunit.com/) - платформа с открытым исходным кодом, основанная на приниципах `Fediverse` и `IoT`, предназначенная для организации устройств в единую, управляемую информационную систему, позволяющую своим [Пользователям](https://pepeunit.com/mechanics/roles.html#user) гибко настраивать взаимодействие между [Unit](https://pepeunit.com/mechanics/unit.html).
+[Pepeunit](https://pepeunit.com/) - платформа с открытым исходным кодом, основанная на приниципах `Fediverse` и `IoT`, предназначенная для организации устройств в единую, управляемую информационную систему, позволяющую своим [Пользователям](https://pepeunit.com/mechanics/roles.html#user) гибко настраивать взаимодействие между [Unit](https://pepeunit.com/definitions.html#unit).
 
 ## Основные репозитории
 

@@ -73,9 +73,6 @@ export default withMermaid(defineConfig({
       {
         text: 'Механики',
         items: [
-          { text: 'Repo', link: '/mechanics/repo' },
-          { text: 'Unit', link: '/mechanics/unit' },
-          { text: 'UnitNode', link: '/mechanics/unit-node' },
           { text: 'Система Ролей', link: '/mechanics/roles' },
           { text: 'Система Видимости', link: '/mechanics/visibility' },
           { text: 'Система Доступов', link: '/mechanics/permission' },

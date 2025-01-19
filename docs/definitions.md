@@ -68,13 +68,13 @@
 `Backend` - приложение размещаемое на сервере, обеспечивающее обработку, хранение и анализ информации, а так же предоставляющее разные [API](#api) для взаимодействия. [Pepeunit Backend Repository](https://git.pepemoss.com/pepe/pepeunit/pepeunit_backend.git)
 
 ## Repo
-`Repo` - это представление [Pepeunit](/conception/overview) о внешнем [Git](#git) репозитории, например из [Gitlab](#gitlab) или [Github](#github). Данная сущность содержит в себе полный клон репозитория и синхронизирует своё состояние с внешним репозиторием, что позволяет [Pepeunit](/conception/overview) быстро создавать микропрограммы для [Unit](#unit). Более подробная [информация о Repo](/mechanics/repo).
+`Repo` - это представление [Pepeunit](/conception/overview) о внешнем [Git](#git) репозитории, например из [Gitlab](#gitlab) или [Github](#github). Данная сущность содержит в себе полный клон репозитория и синхронизирует своё состояние с внешним репозиторием, что позволяет [Pepeunit](/conception/overview) быстро создавать микропрограммы для [Unit](#unit).
 
 ## Unit
-`Unit` - это представление о физичеcком [IoT](#iot) устройстве в [Pepeunit](/conception/overview), данная сущность создаётся на основе [Repo](#repo) и несёт в себе информацию о конкретном физическом [IoT](#iot) устройстве, а так же о версии микропрограммы доступной в [Repo](#repo). Более подробная [информация о Unit](/mechanics/unit).
+`Unit` - это представление о физичеcком [IoT](#iot) устройстве в [Pepeunit](/conception/overview), данная сущность создаётся на основе [Repo](#repo) и несёт в себе информацию о конкретном физическом [IoT](#iot) устройстве, а так же о версии микропрограммы доступной в [Repo](#repo).
 
 ## UnitNode
-`UnitNode` - это предстваление о [MQTT](#mqtt) топике для [Pepeunit](/conception/overview), данная сущность описывает точку взаимодействия с [Unit](#unit). `UnitNode` может быть двух типов `Input` и `Output`. Между `UnitNode` разных [Unit](#unit) могут быть связи: от одного `Output` к многим `Input`. Более подробная [информация о UnitNode](/mechanics/unit-node).
+`UnitNode` - это предстваление о [MQTT](#mqtt) топике для [Pepeunit](/conception/overview), данная сущность описывает точку взаимодействия с [Unit](#unit). `UnitNode` может быть двух типов `Input` и `Output`. Между `UnitNode` разных [Unit](#unit) могут быть связи: от одного `Output` к многим `Input`.
 
 ## env_example.json
 `env_example.json`- файл, описывающий переменные окружения нужные для корректной работы [Unit](#unit), он создаётся разработчиком [Unit](#unit) и помещается в каждую версию [Repo](#repo). На основе данного файла и ввода Пользователя, [Pepeunit](/conception/overview) может сгенерировать [env.json](#envjson) файл для [Unit](#unit). Более подробная [информация о env_example.json](/developer/struct-env-json#env-example-json).
