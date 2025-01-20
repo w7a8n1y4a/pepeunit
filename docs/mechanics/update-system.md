@@ -9,10 +9,7 @@
 - [Как Pepeunit узнаёт о текущей версии Unit?](/developer/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit)
 - [Как Unit получают ссылку на скомпилированные версии?](/developer/release-assets.html)
 
-## Алгоритм вычисления текущей версии Unit
-![img](/schemas/update_schema.svg)
-
-## Процесс обновления Repo и Unit
+## Процесс обновления всех Unit связанных с Repo
 
 ### Ручной
 
@@ -30,3 +27,6 @@
 1. [Pepeunit](/conception/overview) получает выборку [Repo](/definitions#repo) у которых выставлено автоматическое обновление
 1. [Pepeunit](/conception/overview) синхронизирует каждый локальный репозиторий из выборки
 1. [Pepeunit](/conception/overview) выполняет вызыов [MQTT](/definitions#mqtt) команды [UPDATE - update/pepeunit](/developer/default-mqtt-command#update-update-pepeunit) - для каждого [Unit](/definitions#unit) у которого указано автоматическое обновление и родительский [Repo](/definitions#repo) которого присутствует в выборке
+
+## Алгоритм вычисления текущей версии Unit
+![img](/schemas/update_schema.svg)
