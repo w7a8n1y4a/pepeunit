@@ -17,7 +17,7 @@
 
 Данные отправляемые [Unit](/definitions#unit), преобразуются на стороне [Pepeunit](/conception/overview) в отображение состояния в меню [Unit](/definitions#unit). Также данное состояние можно получить через [REST](/definitions#rest) и [GQL](/definitions#gql).
 
-## Формат сообщений в топки `state/pepeunit`
+## Формат сообщений в топик `state/pepeunit`
 
 ```json
 {
@@ -51,7 +51,7 @@
         f_namemax,  # maximum filename length
     ]
     ```
-- `commit_version` - хэш [коммита](/definitions#git-commit) установленного на [Unit](/definitions#unit). Данный ключ используется в [системе обновлений](/mechanics/update-system) [Pepeunit](/conception/overview), для отслеживания текущей версии [Unit](/definitions#unit).
+- `commit_version` - ключ `COMMIT_VERSION` из [env.json](/definitions#env-json) файла [Unit](/definitions#unit). Данный ключ используется в [системе обновлений](/mechanics/update-system) [Pepeunit](/conception/overview), для отслеживания текущей версии [Unit](/definitions#unit).
 
 :::danger
 Для корректной работы статусов обновлений у [Unit](/definitions#unit), требуется отправлять `commit_version`
