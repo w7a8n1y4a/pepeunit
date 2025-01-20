@@ -4,7 +4,7 @@
     <img align="center" src="https://pepeunit.com/pepeunit-og.jpg"  width="640" height="320">
 </div>
 
-[Pepeunit](https://pepeunit.com/) - платформа с открытым исходным кодом, основанная на приниципах `Fediverse` и `IoT`, предназначенная для организации устройств в единую, управляемую информационную систему, позволяющую своим [Пользователям](https://pepeunit.com/mechanics/roles.html#user) гибко настраивать взаимодействие между [Unit](https://pepeunit.com/definitions.html#unit).
+[Pepeunit](https://pepeunit.com/) - платформа с открытым исходным кодом, основанная на принципах [Fediverse](/definitions#fediverse) и [IoT](/definitions#iot), предназначенная для организации устройств в единую, управляемую информационную систему.
 
 ## Основные репозитории
 
@@ -15,6 +15,7 @@
 
 ## Репозитории Unit
 
-1. [Test Unit](https://git.pepemoss.com/pepe/pepeunit/units/universal_test_unit.git) - Unit для интеграционных тестов
-1. [Wifi Relay](https://git.pepemoss.com/pepe/pepeunit/units/wifi_relay.git) - Пробный репозиторий для Micropython
-1. [Go Client](https://git.pepemoss.com/pepe/pepeunit/units/go_mqtt_client.git) - Тестовый клиент на Go
+1. [Test Unit](https://git.pepemoss.com/pepe/pepeunit/units/universal_test_unit.git) - `Unit` для интеграционных тестов
+1. [WiFi Temp sensor](https://git.pepemoss.com/pepe/pepeunit/units/wifi_temp_sensor.git) - Сенсор температуры `esp8266`
+1. [Wifi 4pin PWM вентилятор](https://git.pepemoss.com/pepe/pepeunit/units/wifi_pc_fan_4_pin.git) - Регулятор температуры на `esp32`
+1. [Go Hotkeys](https://git.pepemoss.com/pepe/pepeunit/units/go_hotkeys.git) - Отправка значений в `UnitNode` через `Desktop` приложение
