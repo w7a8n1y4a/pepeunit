@@ -43,7 +43,7 @@
 - `SECRET_KEY` - `32 байтовый` секретный ключ устройства - уникальный для каждого [Unit](/definitions#unit). Удобно использовать для подписи или генерации `jwt`
 - `PING_INTERVAL` - частота [MQTT](/definitions#mqtt) пинга в секундах
 - `STATE_SEND_INTERVAL` - частота отправки состояния в стандартный топик [Pepeunit](/conception/overview). Полностью соответствует `STATE_SEND_INTERVAL` из `.env` файла [Pepeunit](/conception/overview)
-- `COMMIT_VERSION` - уникальная переменная, не отображается [Пользователю](/mechanics/roles.html#user), но подставляется каждый раз когда [env.json](/definitions#env-json) предоставляется [Unit](/definitions#unit) в формате архива.
+- `COMMIT_VERSION` - уникальная переменная, не отображается [Пользователю](/mechanics/roles.html#user), но подставляется каждый раз когда [env.json](/definitions#env-json) отдаётся [Unit](/definitions#unit) в формате [архива](/developer/struct-archive-update).
 
 ### Переменные окружения разработчика [Unit](/definitions#unit)
 

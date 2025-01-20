@@ -51,11 +51,12 @@
         f_namemax,  # maximum filename length
     ]
     ```
-- `commit_version` - хэш [коммита](/definitions#git-commit) текущей версии программы
+- `commit_version` - хэш [коммита](/definitions#git-commit) установленного на [Unit](/definitions#unit). Данный ключ используется в [системе обновлений](/mechanics/update-system) [Pepeunit](/conception/overview), для отслеживания текущей версии [Unit](/definitions#unit).
 
 :::danger
 Для корректной работы статусов обновлений у [Unit](/definitions#unit), требуется отправлять `commit_version`
 :::
+
 :::info
 [Pepeunit](/conception/overview) не обязывает отправлять все ключи указанные в примере, можно отправить например только два ключа `millis` и `commit_version`
 :::

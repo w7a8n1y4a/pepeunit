@@ -184,7 +184,7 @@ tmp
 Для продолжения разработки вам нужно будет отправлять и получать управляющее воздействие на [Unit](/definitions#unit). Очень удобно для этого использовать [инстанс](/definitions#instance) [Pepeunit](/conception/overview), которому вы доверяете. Нужно выполнить два шага на этом [инстасе](/definitions#instance):
 1. Создайте [Repo](/definitions#repo) на основе вашего [Git](/definitions#git) репозитория из [Gitlab](/definitions#gitlab) и [Github](/definitions#github)
 1. Создайте [Unit](/definitions#unit):
-    - Обязательно [сделайте его обновляемым в ручную](/user/create-unit), чтобы чётко контролировать [таргет версию](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
+    - Обязательно [сделайте его обновляемым в ручную](/user/create-unit.html#блок-автообновлении), чтобы чётко контролировать [таргет версию](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
     - Заполните [переменные окружения](/user/create-unit.html)
     - Скачайте [архив](/developer/struct-archive-update) с [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json)
 
