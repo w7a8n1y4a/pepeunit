@@ -7,6 +7,7 @@
 1. Внизу модального окна найдите кнопку `Pick Agent` и нажмите на неё - появится модальное окно поиска по [Unit](/definitions#unit)
 1. При нажатии на конкретный [Unit](/definitions#unit) раскроются доступные `Output`
 1. Нажмите `add` напротив `Output` с которым вы хотите создать связь
+1. [Pepeunit](/conception/overview) автоматически отправит команду [SCHEMA_UPDATE - schema_update/pepeunit](http://localhost:5173/developer/default-mqtt-command#schema-update-schema-update-pepeunit) обязующую [Unit](/definitions#unit) обновить схему взаимодействия на своей стороне
 
 ## Удаление связи
 
@@ -14,6 +15,7 @@
 1. Найдите зелёную кнопку `Related Output` и нажмите её - появится спсок [Unit](/definitions#unit) `Output` которых передают данные в текущий `Input`
 1. Нажмите на нужный вам [Unit](/definitions#unit) - откроется набор `Output`
 1. Выберите `Output` и нажмите `delete`
+1. [Pepeunit](/conception/overview) автоматически отправит команду [SCHEMA_UPDATE - schema_update/pepeunit](http://localhost:5173/developer/default-mqtt-command#schema-update-schema-update-pepeunit) обязующую [Unit](/definitions#unit) обновить схему взаимодействия на своей стороне
 
 :::warning Почему существуют только связи `Output->Input`?
 В парадигме протокола [MQTT](/definitions#mqtt) в топик информацию публикует издатель, а получить информацию из топика могут подпищики. Если перенести эту логику на [Pepeunit](/conception/overview) можно сделать следующий вывод:
