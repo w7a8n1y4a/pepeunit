@@ -19,9 +19,12 @@
     "DUTY_MAX": 65535,
     "TEMP_MIN": 30,
     "TEMP_MAX": 60,
-    "PEPEUNIT_URL": "unit.pepemoss.com",
+    "PEPEUNIT_URL": "unit.example.com",
+    "PEPEUNIT_APP_PREFIX": "/pepeunit",
+    "PEPEUNIT_API_ACTUAL_PREFIX": "/api/v1",
     "HTTP_TYPE": "https",
-    "MQTT_URL": "emqx.pepemoss.com",
+    "MQTT_URL": "emqx.example.com",
+    "MQTT_PORT": 1883,
     "PEPEUNIT_TOKEN": "jwt_token",
     "SYNC_ENCRYPT_KEY": "32_bit_encrypt_key",
     "SECRET_KEY": "32_bit_secret_key",
@@ -36,14 +39,17 @@
 
 [Pepeunit](/conception/overview) резервирует под нужды связи и стандартные процедуры следующий набор переменных окружения [Unit](/definitions#unit):
 - `PEPEUNIT_URL` - доменное имя или `ip` адрес [инстанса](/definitions#instance) [Pepeunit](/conception/overview). Полностью соответствует `BACKEND_DOMAIN` из `.env` файла [Pepeunit](/conception/overview)
+- `PEPEUNIT_APP_PREFIX` - префикс [Backend](/definitions#backend). Полностью соответствует `APP_PREFIX` из `.env` файла [Pepeunit](/conception/overview)
+- `PEPEUNIT_API_ACTUAL_PREFIX` - префикс актауальной версии [API](/definitions#api) для [Backend](/definitions#backend). Полностью соответствует последней доступной версии [API](/definitions#api), например: `API_V1_PREFIX` из `.env` файла [Pepeunit](/conception/overview)
 - `HTTP_TYPE` - тип соединения с доменным именем или адресом [инстанса](/definitions#instance) [Pepeunit](/conception/overview). Полностью соответствует `SECURE` из `.env` файла [Pepeunit](/conception/overview)
 - `MQTT_URL` - доменное имя или `ip` адрес [инстанса](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker). Полностью соответствует `MQTT_URL` из `.env` файла [Pepeunit](/conception/overview)
+- `MQTT_PORT` - порт для взаимодействия с [EMQX MQTT Broker](/definitions#mqtt-broker), по умолчанию `1883`. Полностью соответствует `MQTT_PORT` из `.env` файла [Pepeunit](/conception/overview)
 - `PEPEUNIT_TOKEN` - `jwt` токен доступа для [Unit](/definitions#unit) на [инстансе](/definitions#instance) [Pepeunit](/conception/overview). Данный токен позволяет пройти авторизацию на публикацию и подписку у топиков [EMQX MQTT Broker](/definitions#mqtt-broker)
 - `SYNC_ENCRYPT_KEY` - `32 байтовый` ключ синхронного шифрования - уникальный для каждого [Unit](/definitions#unit). Удобно использовать при шифровании чего-либо
 - `SECRET_KEY` - `32 байтовый` секретный ключ устройства - уникальный для каждого [Unit](/definitions#unit). Удобно использовать для подписи или генерации `jwt`
 - `PING_INTERVAL` - частота [MQTT](/definitions#mqtt) пинга в секундах
 - `STATE_SEND_INTERVAL` - частота отправки состояния в стандартный топик [Pepeunit](/conception/overview). Полностью соответствует `STATE_SEND_INTERVAL` из `.env` файла [Pepeunit](/conception/overview)
-- `COMMIT_VERSION` - хэш [коммита](/definitions#git-commit). Уникальная переменная, не отображается [Пользователю](/mechanics/roles.html#user), но подставляется каждый раз в [env.json](/definitions#env-json) когда создаётся [архив с обновлением](/developer/struct-archive-update).
+- `COMMIT_VERSION` - хэш [коммита](/definitions#git-commit). Уникальная переменная, её нельзя изменить вручную в меню изменения [env.json](/definitions#env-json), она будет игнорироваться при сохранении. Данная переменная отображает текущую [таргет версию](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) [Unit](/definitions#unit).
 
 ### Переменные окружения разработчика [Unit](/definitions#unit)
 
