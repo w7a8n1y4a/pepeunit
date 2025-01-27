@@ -90,3 +90,6 @@
 
 ## schema.json
 `schema.json` - готовый файл схемы для [Unit](#unit) генерируемый [Pepeunit](/conception/overview), содержит в себе ссылки на [UnitNode](#unitnode) и базовые топики для взаимодействия с [Pepeunit](/conception/overview). Более подробная [информация о schema.json](/developer/struct-schema-json#schema-json).
+
+## .pepeignore
+`.pepeignore` - файл [Git](#git) репозиториев [Unit](#unit) аналогичный по синтаксису [.gitignore](https://git-scm.com/docs/gitignore), но позволяющий удалить все указанные в нём файлы и дирректории из репозитория в момент генерации [архива с программой](/developer/struct-archive-update) для [Интерпритируемых](#interpreterable) [Unit](#unit). Более подробная [информация о .pepeignore](/developer/struct-archive-update#pepeignore).

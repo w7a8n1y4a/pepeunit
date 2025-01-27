@@ -23,7 +23,7 @@
 - [env_example.json](/definitions#env-example-json) - отвечает за требующиеся для [Unit](/definitions#unit) переменные окруженияю, [требования к структуре](/developer/struct-env-json)
 - [schema_example.json](/definitions#schema-example-json) - отвечает за схему взаимодействия [Unit](/definitions#unit) с [Pepeunit](/conception/overview), а также за `Input` и `Output` которые будут у [Unit](/definitions#unit), [требования к структуре](/developer/struct-schema-json)
 - `LICENSE` - лицензия на усмотрение автора. Все репозитории [Pepeunit](/conception/overview) имеют лицензию `AGPL v3`
-- `.gitignore` - перечисляет файлы и папки, которые [Git](/definitions#git) должен игнорировать и не включать в контроль версий
+- `.gitignore` - перечисляет файлы и папки, которые [Git](/definitions#git) должен игнорировать и не включать в контроль версий, [подробнее .gitignore](https://git-scm.com/docs/gitignore).
 
 ## Как заполнить .gitignore
 
@@ -31,7 +31,7 @@
 1. Окружения из библиотек как например `.venv` из `python`
 1. Cекреты которые не должны быть опубликованы, применимо к [Pepeunit](/conception/overview) - это [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json), в других репозиториях аналогичную функцию часто выполняют `.env` файлы.
 
-Пример минимального `.gitignore` файла для [Pepeunit](/conception/overview):
+Пример минимального [.gitignore](https://git-scm.com/docs/gitignore) файла для [Pepeunit](/conception/overview):
 ```gitignore
 .idea
 .nvim
@@ -42,7 +42,7 @@ tmp
 
 ## Размер репозиториев для Pepeunit
 
-У [Pepeunit](/conception/overview) достаточно строгие требования к размеру репозиториев. Это связано с тем что данные придётся хранить на стороне [Pepeunit](/conception/overview). Cтандартное ограничение `25МБ`, [Администраторы](/mechanics/roles#admin) [инстансов](/definitions#instance) могут увеличить данный лимит, но это может привести к задержке некоторых операций.
+У [Pepeunit](/conception/overview) достаточно строгие требования к размеру репозиториев. Это связано с тем что данные придётся хранить на стороне [Pepeunit](/conception/overview). Cтандартное ограничение `50МБ`, но [Администраторы](/mechanics/roles#admin) [инстансов](/definitions#instance) могут увеличить данный лимит установив значение `MAX_EXTERNAL_REPO_SIZE` в `.env` файле [Pepeunit](/conception/overview).
 
 :::danger
 Для выполнения такого строгого требования не рекомендуется хранить в репозиториях картинки и бинарные файлы.
