@@ -38,17 +38,17 @@
 ### Зарезервированные переменные Pepeunit
 
 [Pepeunit](/conception/overview) резервирует под нужды связи и стандартные процедуры следующий набор переменных окружения [Unit](/definitions#unit):
-- `PEPEUNIT_URL` - доменное имя или `ip` адрес [инстанса](/definitions#instance) [Pepeunit](/conception/overview). Полностью соответствует `BACKEND_DOMAIN` из `.env` файла [Pepeunit](/conception/overview)
-- `PEPEUNIT_APP_PREFIX` - префикс [Backend](/definitions#backend). Полностью соответствует `APP_PREFIX` из `.env` файла [Pepeunit](/conception/overview)
-- `PEPEUNIT_API_ACTUAL_PREFIX` - префикс актауальной версии [API](/definitions#api) для [Backend](/definitions#backend). Полностью соответствует последней доступной версии [API](/definitions#api), например: `API_V1_PREFIX` из `.env` файла [Pepeunit](/conception/overview)
-- `HTTP_TYPE` - тип соединения с доменным именем или адресом [инстанса](/definitions#instance) [Pepeunit](/conception/overview). Полностью соответствует `SECURE` из `.env` файла [Pepeunit](/conception/overview)
-- `MQTT_URL` - доменное имя или `ip` адрес [инстанса](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker). Полностью соответствует `MQTT_URL` из `.env` файла [Pepeunit](/conception/overview)
-- `MQTT_PORT` - порт для взаимодействия с [EMQX MQTT Broker](/definitions#mqtt-broker), по умолчанию `1883`. Полностью соответствует `MQTT_PORT` из `.env` файла [Pepeunit](/conception/overview)
+- `PEPEUNIT_URL` - доменное имя или `ip` адрес [инстанса](/definitions#instance) [Pepeunit](/conception/overview). Полностью соответствует `BACKEND_DOMAIN` из [Backend ENV](/deployment/env-variables#backend)
+- `PEPEUNIT_APP_PREFIX` - префикс [Backend](/definitions#backend). Полностью соответствует `BACKEND_APP_PREFIX` из [Backend ENV](/deployment/env-variables#backend)
+- `PEPEUNIT_API_ACTUAL_PREFIX` - префикс актауальной версии [API](/definitions#api) для [Backend](/definitions#backend). Полностью соответствует последней доступной версии [API](/definitions#api), например: `BACKEND_API_V1_PREFIX` из [Backend ENV](/deployment/env-variables#backend)
+- `HTTP_TYPE` - тип соединения `https/http` с доменным именем или `ip` адресом [Backend](/definitions#backend). Полностью соответствует `BACKEND_SECURE` из [Backend ENV](/deployment/env-variables#backend)
+- `MQTT_URL` - доменное имя или `ip` адрес [инстанса](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker). Полностью соответствует `MQTT_HOST` из [Backend ENV](/deployment/env-variables#backend)
+- `MQTT_PORT` - порт для взаимодействия с [EMQX MQTT Broker](/definitions#mqtt-broker), по умолчанию `1883`. Полностью соответствует `MQTT_PORT` из [Backend ENV](/deployment/env-variables#backend)
 - `PEPEUNIT_TOKEN` - `jwt` токен доступа для [Unit](/definitions#unit) на [инстансе](/definitions#instance) [Pepeunit](/conception/overview). Данный токен позволяет пройти авторизацию на публикацию и подписку у топиков [EMQX MQTT Broker](/definitions#mqtt-broker)
 - `SYNC_ENCRYPT_KEY` - `32 байтовый` ключ синхронного шифрования - уникальный для каждого [Unit](/definitions#unit). Удобно использовать при шифровании чего-либо
 - `SECRET_KEY` - `32 байтовый` секретный ключ устройства - уникальный для каждого [Unit](/definitions#unit). Удобно использовать для подписи или генерации `jwt`
-- `PING_INTERVAL` - частота [MQTT](/definitions#mqtt) пинга в секундах
-- `STATE_SEND_INTERVAL` - частота отправки состояния в стандартный топик [Pepeunit](/conception/overview). Полностью соответствует `STATE_SEND_INTERVAL` из `.env` файла [Pepeunit](/conception/overview)
+- `PING_INTERVAL` - частота [MQTT](/definitions#mqtt) пинга в секундах, `30` секунд для всех.
+- `STATE_SEND_INTERVAL` - частота отправки состояния в [стандартный топик состояния](/developer/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit). Полностью соответствует `BACKEND_STATE_SEND_INTERVAL` из [Backend ENV](/deployment/env-variables#backend)
 - `COMMIT_VERSION` - хэш [коммита](/definitions#git-commit). Уникальная переменная, её нельзя изменить вручную в меню изменения [env.json](/definitions#env-json), она будет игнорироваться при сохранении. Данная переменная отображает текущую [таргет версию](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) [Unit](/definitions#unit).
 
 ### Переменные окружения разработчика [Unit](/definitions#unit)
@@ -65,7 +65,7 @@
 
 ## env.json
 
-Файлы окружения, такие как [env.json](/definitions#env-json) или `.env`, представляют собой механизм индивидуализации общего кода под конкретное устройство или экземпляр приложения.
+Файлы окружения, такие как [env.json](/definitions#env-json) или [Backend ENV](/deployment/env-variables#backend), представляют собой механизм индивидуализации общего кода под конкретное устройство или экземпляр приложения.
 
 :::warning Какое функциональное назначание у [env.json](/definitions#env-json)?
 Данный файл - это четырёхсторонний контракт между [Unit](/definitions#unit), [Pepeunit](/conception/overview), [Пользователем](/mechanics/roles.html#user) и [Администратором](/mechanics/roles#admin) [инстанса](/definitions#instance) [Pepeunit](/conception/overview):

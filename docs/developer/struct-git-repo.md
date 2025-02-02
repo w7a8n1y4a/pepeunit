@@ -42,7 +42,7 @@ tmp
 
 ## Размер репозиториев для Pepeunit
 
-У [Pepeunit](/conception/overview) достаточно строгие требования к размеру репозиториев. Это связано с тем что данные придётся хранить на стороне [Pepeunit](/conception/overview). Cтандартное ограничение `50МБ`, но [Администраторы](/mechanics/roles#admin) [инстансов](/definitions#instance) могут увеличить данный лимит установив значение `MAX_EXTERNAL_REPO_SIZE` в `.env` файле [Pepeunit](/conception/overview).
+У [Pepeunit](/conception/overview) достаточно строгие требования к размеру репозиториев. Это связано с тем что данные придётся хранить на стороне [Pepeunit](/conception/overview). Cтандартное ограничение `50МБ`, но [Администраторы](/mechanics/roles#admin) [инстансов](/definitions#instance) могут увеличить данный лимит установив значение `BACKEND_MAX_EXTERNAL_REPO_SIZE` в [Backend ENV](/deployment/env-variables#backend).
 
 :::danger
 Для выполнения такого строгого требования не рекомендуется хранить в репозиториях картинки и бинарные файлы.

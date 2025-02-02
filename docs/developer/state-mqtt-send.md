@@ -58,7 +58,7 @@
 :::
 
 :::warning
-Размер передаваемого [Unit](/definitions#unit) состояния ограничен количеством символов указанных в переменной окружения `MQTT_MAX_PAYLOAD_SIZE` из `.env` файла [Backend](/definitions#backend). По умолчанию это значение составляет `50000` символов.
+Размер передаваемого [Unit](/definitions#unit) состояния ограничен количеством символов указанных в переменной окружения `MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables#backend). По умолчанию это значение составляет `50000` символов.
 :::
 
 :::info

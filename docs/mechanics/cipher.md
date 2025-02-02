@@ -46,13 +46,13 @@ def aes_decode(data: str, key: str = settings.encrypt_key) -> str:
 :::
 
 :::warning Ограничение размера шифруемых объектов
-Все шифруемые объекты имеют стандартное ограничение в `50000` символов. [Администратор](/mechanics/roles#admin) [инстанса](/definitions#instance) может изменить этот объём установив переменную окружения `MAX_CIPHER_LENGTH` в файле `.env` у [Backend](/definitions#backend).
+Все шифруемые объекты имеют стандартное ограничение в `50000` символов. [Администратор](/mechanics/roles#admin) [инстанса](/definitions#instance) может изменить этот объём установив переменную окружения `BACKEND_MAX_CIPHER_LENGTH` в файле [Backend ENV](/deployment/env-variables#backend).
 
 Размер в `50000` выбран из-за приемлимой скорости шифрования-дешифрования алгоритмом `AES256`.
 :::
 
 :::danger
-[Администратор](/mechanics/roles#admin) имеющий доступ к `.env` файлу [Backend](/definitions#backend) [инстанса](/definitions#instance) [Pepeunit](/conception/overview), имеет возможность расшифровать данные хранящиеся в шифрованном виде на его [инстансе](/definitions#instance).
+[Администратор](/mechanics/roles#admin) имеющий доступ к [Backend ENV](/deployment/env-variables#backend) [инстанса](/definitions#instance) [Pepeunit](/conception/overview), имеет возможность расшифровать данные хранящиеся в шифрованном виде на его [инстансе](/definitions#instance).
 
 Поэтому пользуйтесь только [инстансами](/definitions#instance) [Pepeunit](/conception/overview) [Администраторам](/mechanics/roles#admin) которых вы доверяете.
 
