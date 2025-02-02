@@ -38,18 +38,21 @@
 ### Зарезервированные переменные Pepeunit
 
 [Pepeunit](/conception/overview) резервирует под нужды связи и стандартные процедуры следующий набор переменных окружения [Unit](/definitions#unit):
-- `PEPEUNIT_URL` - доменное имя или `ip` адрес [инстанса](/definitions#instance) [Pepeunit](/conception/overview). Полностью соответствует `BACKEND_DOMAIN` из [Backend ENV](/deployment/env-variables#backend)
-- `PEPEUNIT_APP_PREFIX` - префикс [Backend](/definitions#backend). Полностью соответствует `BACKEND_APP_PREFIX` из [Backend ENV](/deployment/env-variables#backend)
-- `PEPEUNIT_API_ACTUAL_PREFIX` - префикс актауальной версии [API](/definitions#api) для [Backend](/definitions#backend). Полностью соответствует последней доступной версии [API](/definitions#api), например: `BACKEND_API_V1_PREFIX` из [Backend ENV](/deployment/env-variables#backend)
-- `HTTP_TYPE` - тип соединения `https/http` с доменным именем или `ip` адресом [Backend](/definitions#backend). Полностью соответствует `BACKEND_SECURE` из [Backend ENV](/deployment/env-variables#backend)
-- `MQTT_URL` - доменное имя или `ip` адрес [инстанса](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker). Полностью соответствует `MQTT_HOST` из [Backend ENV](/deployment/env-variables#backend)
-- `MQTT_PORT` - порт для взаимодействия с [EMQX MQTT Broker](/definitions#mqtt-broker), по умолчанию `1883`. Полностью соответствует `MQTT_PORT` из [Backend ENV](/deployment/env-variables#backend)
-- `PEPEUNIT_TOKEN` - `jwt` токен доступа для [Unit](/definitions#unit) на [инстансе](/definitions#instance) [Pepeunit](/conception/overview). Данный токен позволяет пройти авторизацию на публикацию и подписку у топиков [EMQX MQTT Broker](/definitions#mqtt-broker)
-- `SYNC_ENCRYPT_KEY` - `32 байтовый` ключ синхронного шифрования - уникальный для каждого [Unit](/definitions#unit). Удобно использовать при шифровании чего-либо
-- `SECRET_KEY` - `32 байтовый` секретный ключ устройства - уникальный для каждого [Unit](/definitions#unit). Удобно использовать для подписи или генерации `jwt`
-- `PING_INTERVAL` - частота [MQTT](/definitions#mqtt) пинга в секундах, `30` секунд для всех.
-- `STATE_SEND_INTERVAL` - частота отправки состояния в [стандартный топик состояния](/developer/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit). Полностью соответствует `BACKEND_STATE_SEND_INTERVAL` из [Backend ENV](/deployment/env-variables#backend)
-- `COMMIT_VERSION` - хэш [коммита](/definitions#git-commit). Уникальная переменная, её нельзя изменить вручную в меню изменения [env.json](/definitions#env-json), она будет игнорироваться при сохранении. Данная переменная отображает текущую [таргет версию](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) [Unit](/definitions#unit).
+
+Переменная | Значение | Зачем нужна?
+-- | -- | --
+`PEPEUNIT_URL` | `BACKEND_DOMAIN` из [Backend ENV](/deployment/env-variables#backend) | Доменное имя или `ip` адрес [инстанса](/definitions#instance) [Pepeunit](/conception/overview)
+`PEPEUNIT_APP_PREFIX` | `BACKEND_APP_PREFIX` из [Backend ENV](/deployment/env-variables#backend) | Префикс [Backend](/definitions#backend)
+`PEPEUNIT_API_ACTUAL_PREFIX` | `BACKEND_API_V1_PREFIX` из [Backend ENV](/deployment/env-variables#backend) | Префикс актауальной версии [API](/definitions#api) для [Backend](/definitions#backend). Полностью соответствует последней версии [API](/definitions#api)
+`HTTP_TYPE` | `BACKEND_SECURE` из [Backend ENV](/deployment/env-variables#backend) | Тип соединения `https/http` с доменным именем или `ip` адресом [Backend](/definitions#backend) в формате `https/http`
+`MQTT_URL` | `MQTT_HOST` из [Backend ENV](/deployment/env-variables#backend) | Доменное имя или `ip` - адрес [инстанса](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker)
+`MQTT_PORT` | `MQTT_PORT` из [Backend ENV](/deployment/env-variables#backend) | Порт для взаимодействия с [EMQX MQTT Broker](/definitions#mqtt-broker), по умолчанию `1883`
+`PEPEUNIT_TOKEN` | - | Вечный `jwt` токен доступа [Unit](/definitions#unit) к [инстансу](/definitions#instance) [Pepeunit](/conception/overview). Данный токен позволяет пройти авторизацию на подписку и публикацию у топиков [EMQX MQTT Broker](/definitions#mqtt-broker)
+`SYNC_ENCRYPT_KEY` | - | `32 байтовый ключ` в формате `base64`. Уникальный для каждого [Unit](/definitions#unit). Удобно использовать при шифровании чего-либо
+`SECRET_KEY` | - | `32 байтовый ключ` в формате `base64`. Уникальный для каждого [Unit](/definitions#unit). Удобно использовать для подписи или генерации `jwt`
+`PING_INTERVAL` | - | Частота [MQTT](/definitions#mqtt) пинга в секундах, `30` секунд для всех
+`STATE_SEND_INTERVAL` | `BACKEND_STATE_SEND_INTERVAL` из [Backend ENV](/deployment/env-variables#backend) | Частота отправки состояния в [стандартный топик состояния](/developer/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit)
+`COMMIT_VERSION` | - | `Hash` [коммита](/definitions#git-commit). Отображает текущую [таргет версию](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) [Unit](/definitions#unit). Имеет уникальный функционал, её нельзя изменить вручную в меню изменения [env.json](/definitions#env-json), она будет игнорироваться при сохранении
 
 ### Переменные окружения разработчика [Unit](/definitions#unit)
 
