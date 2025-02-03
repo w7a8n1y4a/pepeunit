@@ -7,11 +7,11 @@
 [Pepeunit](https://pepeunit.com/) - платформа с открытым исходным кодом, основанная на принципах [Fediverse](https://pepeunit.com/definitions.html#fediverse) и [IoT](https://pepeunit.com/definitions.html#iot), предназначенная для организации устройств в единую, управляемую информационную систему.
 
 ## Основные репозитории
-
+1. [Deploy](https://git.pepemoss.com/pepe/pepeunit/pepeunit_deploy.git) - Развёртывание через `Docker Compose`
 1. [SPA](https://git.pepemoss.com/pepe/pepeunit/pepeunit.git) - Статический Лэндинг с Документацией
 1. [Frontend](https://git.pepemoss.com/pepe/pepeunit/pepeunit_frontend.git) - Фронтенд для инстансов
 1. [Backend](https://git.pepemoss.com/pepe/pepeunit/pepeunit_backend.git) - Бэкенд для инстансов
-1. [Load Tests](https://git.pepemoss.com/pepe/pepeunit/pepeunit_load_check.git) - Дубина, чтобы отрабатывать отдельные механики работы Бэкенда
+1. [Load Check](https://git.pepemoss.com/pepe/pepeunit/pepeunit_load_check.git) - Дубина, чтобы отрабатывать отдельные механики работы Бэкенда
 
 ## Репозитории Unit
 
