@@ -5,6 +5,7 @@ variables:
 stages:
   - build
   - deploy
+  - tag
 
 build:image:dev:
   stage: build
@@ -72,8 +73,8 @@ deploy:image:release:
     - docker run -d --name=$PROJ -p 5403:80 --restart=always $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
     - docker system prune -a -f
 
-build:image:dev:
-  stage: build
+tag:
+  stage: tag
   tags:
     - shell-main-pc
   rules:
