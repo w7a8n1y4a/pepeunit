@@ -42,6 +42,9 @@ export default withMermaid(defineConfig({
         text: 'Развёртывание',
         items: [
           { text: 'Зависимости', link: '/deployment/dependencies' },
+          { text: 'Docker Compose', link: '/deployment/docker' },
+          { text: 'Nginx', link: '/deployment/nginx' },
+          { text: 'Переменные окружения', link: '/deployment/env-variables' },
         ]
       },
       {
