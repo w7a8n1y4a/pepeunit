@@ -1,13 +1,11 @@
-# Docker Compose
-
-## Установка Docker и Docker Compose
+# Docker Compose установка Pepeunit
 
 :::info
-Пример для `debian 12`, подойдёт почти для всех `Linux`.
+Данное руководство для `debian 12`, но подойдёт почти для всех `unix` систем.
 :::
 
 :::warning
-Если сомневаетесь, спросите для вашей платформы у доступной вам `LLM` следующий промт:
+Если сомневаетесь, спросите для вашей платформы у доступной вам `LLM`, следующий промт:
 
 ```text
 Напиши гайд как установить docker и docker compose на машину <Название дистрибутива>
@@ -23,15 +21,16 @@ curl -fsSL https://get.docker.com -o get-docker.sh
 sh ./get-docker.sh
 ```
 
-Проверьте работу `Docker`:
+Проверьте установку `Docker`:
 
 ```bash
 docker --version
 docker run hello-world
 ```
 
-Если права для использования команды `docker` нужно предоставить другому пользователю - можно воспользоваться командой, выполнять нужно из консоли пользоватля `root`:
+Если права для использования команды `docker` нужно предоставить другому пользователю - можно воспользоваться командой:
 ```bash
+sudo su
 sudo usermod -aG docker <user-name>
 ```
 
@@ -44,20 +43,20 @@ sudo systemctl enable docker
 
 ## Устновка Docker Compose
 
+Выполните команды:
 ```bash
 sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 sudo chmod +x /usr/local/bin/docker-compose
 ```
 
-Проверьте установку Docker Compose:
+Проверьте установку `Docker Compose`:
 ```bash
 docker-compose --version
 ```
 
-## Установка Pepeunit через Docker Compose
+## Репозиторий Pepeunit Deploy
 
-## Скачивание репозитория Pepeunit Deploy
-
+Хранит в себе все файлы и примеры нужные для запуска инстанса [Pepeunit](/conception/overview) при помощи `docker compose`, чтобы склонировать репозиторий выполните команды:
 ```bash
 git clone https://git.pepemoss.com/pepe/pepeunit/pepeunit_deploy.git
 cd pepeunit_deploy
@@ -69,7 +68,7 @@ cd pepeunit_deploy
 1. Для локального использования на основе `.env.local.example`
 1. Для глобавльно использования на основе `.env.global.example`
 
-Отличие состоит в том, что локальный рассчитан на эксплуатацию в локальной сети, а глобальный позволяет обращаться к Pepeunit инстасу по доменному имени через https.
+Отличие состоит в том, что локальный рассчитан на эксплуатацию в локальной сети, а глобальный позволяет обращаться к инстансу [Pepeunit](/conception/overview) по доменному имени через `https`.
 
 Выберите один из файлов и уберите у него приставу `.example`
 - `.env.local.example` -> `.env.local`
@@ -80,21 +79,21 @@ cd pepeunit_deploy
 mv .env.local.example .env.local
 ```
 
-В файлах `.env.local` и `.env.global` используется уменьшенное число переменных окружения, т.к. на его основе генирируются файлы для всех docker compose сервисов:
+В файлах `.env.local` и `.env.global` используется уменьшенное число переменных окружения, т.к. на его основе генирируются файлы для всех `docker compose` сервисов:
 
 Переменная | Пример для `.env.local` | Пример для `.env.global` | Зачем нужна?
 -- | -- | -- | --
 POSTGRES_USER | `pepeunit-admin` | `pepeunit-admin` | Имя пользователя, от имени которого будет создана база данных
 POSTGRES_PASSWORD | `f6prBUMbhvNnlLZ0f0HN` | `f6prBUMbhvNnlLZ0f0HN` | Пароль пользователя, от имени которого будет создана база данных
 POSTGRES_DB | `pepeunit-db` | `pepeunit-db` | Название базы данных
-BACKEND_DOMAIN | `192.168.0.22` | `unit.pepeunit.com` | Доменное имя от инстанса Pepeunit
-BACKEND_SECURE | `False` | - | Выбирает `http` или `https` для `BACKEND_DOMAIN` инстанса Pepeunit, по умолчанию `https`
+BACKEND_DOMAIN | `192.168.0.22` | `unit.pepeunit.com` | Доменное имя от [инстанса](/definitions#instance) [Pepeunit](/conception/overview)
+BACKEND_SECURE | `False` | - | Выбирает `http` или `https` для `BACKEND_DOMAIN` [инстанса](/definitions#instance) [Pepeunit](/conception/overview), по умолчанию `https`
 TELEGRAM_TOKEN | `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | Токен `Telegram Bot` можно получить у [Bot Father](https://t.me/BotFather)
 TELEGRAM_BOT_LINK | `https://t.me/PepeUnitRobot` | `https://t.me/PepeUnitRobot` | Ccылка на бота, которого вы создаёте в [Bot Father](https://t.me/BotFather)
-MQTT_HOST | `192.168.0.22` | `emqx.pepeunit.com` | Доменное имя от инстанса EMQX MQTT Broker
-MQTT_SECURE | `False` | - | Выбирает `http` или `https` для `MQTT_HOST` инстанса Pepeunit, по умолчанию `https`
-MQTT_USERNAME | `YabJTlmvQ4tvweuTl0gn` | `YabJTlmvQ4tvweuTl0gn` | Имя администратора EMQX MQTT Broker
-MQTT_PASSWORD | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | Пароль администратора EMQX MQTT Broker
+MQTT_HOST | `192.168.0.22` | `emqx.pepeunit.com` | Доменное имя от [инстансa](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker)
+MQTT_SECURE | `False` | - | Выбирает `http` или `https` для `MQTT_HOST` [инстансa](/definitions#instance) [Pepeunit](/conception/overview), по умолчанию `https`
+MQTT_USERNAME | `YabJTlmvQ4tvweuTl0gn` | `YabJTlmvQ4tvweuTl0gn` | Имя администратора [EMQX MQTT Broker](/definitions#mqtt-broker)
+MQTT_PASSWORD | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | Пароль администратора [EMQX MQTT Broker](/definitions#mqtt-broker)
 
 ## Генерация env/.env.service
 
@@ -133,13 +132,13 @@ ip a
 
 ## Открытие портов
 
-Для корректной работы Pepeunit, нужно открыть следующие порты:
+Для корректной работы [Pepeunit](/conception/overview), нужно открыть следующие порты:
 1. `80` - для работы по `http`
 1. `443` - для работы по `https`
 1. `1883` - для работы по протоколу MQTT
 
 :::danger
-Если у вас публичный инстанс Pepeunit с доменом - вам потребуется прокинуть данные порты наружу
+Если у вас публичный [инстанс](/definitions#instance) [Pepeunit](/conception/overview) с доменом - вам потребуется прокинуть данные порты наружу
 :::
 
 ## Первый запуск
@@ -149,13 +148,13 @@ ip a
 sudo chmod 777 -R data
 ```
 
-Выполните команду запуска Pepeunit:
+Выполните команду запуска [Pepeunit](/conception/overview):
 ```bash
 docker compose up
 ```
 
 :::info
-Пример корреткного запуска Backend на основе конфига `.env.local`. Для `.env.global` будут отличаться только `ip` адреса и установка `webhook` для `Telegram Bot`:
+Пример корреткного запуска [Backend](/definitions#backend) на основе конфига `.env.local`. Для `.env.global` будут отличаться только `ip` адреса и установка `webhook` для `Telegram Bot`:
 ```bash
 backend | INFO 2025-02-03 10:16:30.936: fastapi_mqtt.handlers:on_message: on_message handler accepted
 backend | INFO 2025-02-03 10:16:31.215: app.configs.emqx:__init__: Check state EMQX Broker http://192.168.0.6:18083
@@ -200,15 +199,15 @@ gmqtt.mqtt.handler:_handle_suback_packet: [SUBACK] 1 (0,)
 gmqtt.mqtt.handler:_handle_suback_packet: [SUBACK] 2 (0,)
 ```
 
-Они отображают смог ли Backend подписаться на топики `192.168.0.6/+/+/+/pepeunit` и `192.168.0.6/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то Backend `не смог` подписаться на основные топики. Обычно это связано со следующими нюансами:
+Они отображают смог ли [Backend](/definitions#backend) подписаться на топики `192.168.0.6/+/+/+/pepeunit` и `192.168.0.6/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/definitions#backend) `не смог` подписаться на основные топики. Обычно это связано со следующими нюансами:
 1. Закрытым портом `1883`
 1. Настройкой портов сервиса `emqx` в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
-1. Ошибками в настройках EMQX MQTT Broker и Backend, например `MQTT_REDIS_AUTH_URL` или `REDIS_URL`. [подробнее о переменных окружения Backend Env](/deployment/env-variables#backend). Данные переменные должны смотреть строго на один и тот же инстанас Redis.
+1. Ошибками в настройках [EMQX MQTT Broker](/definitions#mqtt-broker) и [Backend](/definitions#backend), например `MQTT_REDIS_AUTH_URL` или `REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables#backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies#redis).
 :::
 
 ## Создание Администратора
 
-Первый созданный пользователь на инстансе Pepeunit автоматически становится Администратором. Для этого достаточно пройти стандартную форму регистрации Пользователя.
+Первый созданный пользователь на [инстансе](/definitions#instance) [Pepeunit](/conception/overview) автоматически становится [Администратором](/mechanics/roles#admin). Для этого достаточно пройти стандартную форму регистрации.
 
 ## Полезные команды для дебага
 
