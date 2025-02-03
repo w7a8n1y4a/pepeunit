@@ -23,7 +23,6 @@
 
 `Pepeunit` позволяет регулировать уровни [доступа](/mechanics/permission) `Пользователь-Unit` и `Unit-Unit`. Глубина взаимодействия с платформой определяется [ролью Пользователя](/mechanics/roles) и [видимостью](/mechanics/visibility) отдельных сушностей [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode).
 
-
 ## Федеративное взаимодействие
 
 `Pepeunit` - федеративная платформа, отдельные [инстансы](/definitions#instance) которой, могут узнавать о других [инстансах](/definitions#instance) и объединятся в большую сеть для взаимодействия. [Unit](/definitions#unit) могут взаимодействовать с другими [Unit](/definitions#unit) даже если они находятся на разных [инстансах](/definitions#instance).

@@ -54,27 +54,26 @@ http {
 
 ```conf
 server {
-        listen 443;
-        server_name unit.pepeunit.com;
+    listen 443;
+    server_name unit.pepeunit.com;
 
-        location / {
-                proxy_pass http://192.168.0.22:80;
-        }
+    location / {
+        proxy_pass http://192.168.0.22:80;
+    }
 
-        ssl_certificate /etc/letsencrypt/live/pepeunit.com-0001/fullchain.pem; # managed by Certbot
-        ssl_certificate_key /etc/letsencrypt/live/pepeunit.com-0001/privkey.pem; # managed by Certbot
-        include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-        ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/pepeunit.com-0001/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/pepeunit.com-0001/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 }
 
 server {
-        listen 80;
-        server_name unit.pepeunit.com;
+    listen 80;
+    server_name unit.pepeunit.com;
 
-        location /pepeunit {
-                proxy_pass http://192.168.0.22:80;
-
-        }
+    location /pepeunit {
+        proxy_pass http://192.168.0.22:80;
+    }
 }
 ```
 
@@ -88,55 +87,53 @@ server {
 
 ```conf
 server {
-        listen 443;
-        server_name unit.pepeunit.com;
+    listen 443;
+    server_name unit.pepeunit.com;
 
-        location /pepeunit {
-                add_header 'Access-Control-Allow-Origin' "$http_origin" always;
-                add_header 'Access-Control-Allow-Credentials' 'true' always;
+    location /pepeunit {
+        add_header 'Access-Control-Allow-Origin' "$http_origin" always;
+        add_header 'Access-Control-Allow-Credentials' 'true' always;
 
-                if ($request_method = 'OPTIONS') {
-                        add_header 'Access-Control-Allow-Origin' '*';
-                        add_header 'Access-Control-Allow-Credentials' 'true';
-                        add_header 'Access-Control-Allow-Methods' '*';
-                        add_header 'Access-Control-Allow-Headers' '*';
-                        add_header 'Access-Control-Max-Age' 86400;
-                        add_header 'Content-Type' 'text/plain charset=UTF-8';
-                        add_header 'Content-Length' 0;
-                        return 204; break;
-                }
-
-                proxy_pass http://192.168.0.22:5291;
-                proxy_read_timeout 90;
-                proxy_connect_timeout 90;
-                proxy_redirect off;
-                proxy_set_header X-Real-IP $remote_addr;
-                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-                proxy_set_header X-Forwarded-Proto $scheme;
-                proxy_set_header Host blog.example.com;
-                proxy_set_header X-NginX-Proxy true;
-                proxy_set_header Connection "";
+        if ($request_method = 'OPTIONS') {
+            add_header 'Access-Control-Allow-Origin' '*';
+            add_header 'Access-Control-Allow-Credentials' 'true';
+            add_header 'Access-Control-Allow-Methods' '*';
+            add_header 'Access-Control-Allow-Headers' '*';
+            add_header 'Access-Control-Max-Age' 86400;
+            add_header 'Content-Type' 'text/plain charset=UTF-8';
+            add_header 'Content-Length' 0;
+            return 204; break;
         }
 
-        location / {
-                proxy_pass http://192.168.0.22:5292;
-        }
+        proxy_pass http://192.168.0.22:5291;
+        proxy_read_timeout 90;
+        proxy_connect_timeout 90;
+        proxy_redirect off;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Host blog.example.com;
+        proxy_set_header X-NginX-Proxy true;
+        proxy_set_header Connection "";
+    }
 
-        ssl_certificate /etc/letsencrypt/live/pepeunit.com-0001/fullchain.pem; # managed by Certbot
-        ssl_certificate_key /etc/letsencrypt/live/pepeunit.com-0001/privkey.pem; # managed by Certbot
-        include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-        ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+    location / {
+        proxy_pass http://192.168.0.22:5292;
+    }
+
+    ssl_certificate /etc/letsencrypt/live/pepeunit.com-0001/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/pepeunit.com-0001/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 }
 server {
-        listen 80;
-        server_name devunit.pepeunit.com;
+    listen 80;
+    server_name devunit.pepeunit.com;
 
-        location /pepeunit {
-                proxy_pass http://192.168.0.15:5291;
-
-        }
+    location /pepeunit {
+        proxy_pass http://192.168.0.15:5291;
+    }
 }
-
 ```
 
 :::warning
