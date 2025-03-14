@@ -158,40 +158,106 @@ docker compose up
 ```
 
 :::info
-Пример корреткного запуска [Backend](/definitions#backend) на основе конфига `.env.local`. Для `.env.global` будут отличаться только `ip` адреса и установка `webhook` для `Telegram Bot`:
+Пример корреткного запуска [Backend](/definitions#backend) на основе конфига `.env.global`. Для `.env.local` будут отличаться только `ip` адреса и установка `pooling` для `Telegram Bot`:
 ```bash
-backend | INFO 2025-02-03 10:16:30.936: fastapi_mqtt.handlers:on_message: on_message handler accepted
-backend | INFO 2025-02-03 10:16:31.215: app.configs.emqx:__init__: Check state EMQX Broker http://192.168.0.6:18083
-backend | INFO 2025-02-03 10:16:31.339: httpx._client:_send_single_request: HTTP Request: GET http://192.168.0.6:18083/api-docs/swagger.json "HTTP/1.1 200 OK"
-backend | INFO 2025-02-03 10:16:32.344: app.configs.emqx:__init__: EMQX Broker http://192.168.0.6:18083 - Ready to work
-backend | INFO 2025-02-03 10:16:32.360: httpx._client:_send_single_request: HTTP Request: POST http://192.168.0.6:18083/api/v5/login "HTTP/1.1 200 OK"
-backend | INFO 2025-02-03 10:16:32.361: app.configs.emqx:delete_auth_hooks: Del file auth hook MQTT Broker
-backend | INFO 2025-02-03 10:16:32.406: httpx._client:_send_single_request: HTTP Request: DELETE http://192.168.0.6:18083/api/v5/authorization/sources/file "HTTP/1.1 204 No Content"
-backend | INFO 2025-02-03 10:16:32.407: app.configs.emqx:delete_auth_hooks: Del http auth hook MQTT Broker
-backend | INFO 2025-02-03 10:16:32.443: httpx._client:_send_single_request: HTTP Request: DELETE http://192.168.0.6:18083/api/v5/authorization/sources/http "HTTP/1.1 204 No Content"
-backend | INFO 2025-02-03 10:16:32.445: app.configs.emqx:delete_auth_hooks: Del redis auth hook MQTT Broker
-backend | INFO 2025-02-03 10:16:32.488: httpx._client:_send_single_request: HTTP Request: DELETE http://192.168.0.6:18083/api/v5/authorization/sources/redis "HTTP/1.1 204 No Content"
-backend | INFO 2025-02-03 10:16:32.489: app.configs.emqx:set_file_auth_hook: Set ACL file auth hook MQTT Broker
-backend | INFO 2025-02-03 10:16:32.532: httpx._client:_send_single_request: HTTP Request: POST http://192.168.0.6:18083/api/v5/authorization/sources "HTTP/1.1 204 No Content"
-backend | INFO 2025-02-03 10:16:32.533: app.configs.emqx:set_http_auth_hook: Set http auth hook MQTT Broker
-backend | INFO 2025-02-03 10:16:32.683: httpx._client:_send_single_request: HTTP Request: POST http://192.168.0.6:18083/api/v5/authorization/sources "HTTP/1.1 204 No Content"
-backend | INFO 2025-02-03 10:16:32.684: app.configs.emqx:set_redis_auth_hook: Set redis auth hook MQTT Broker
-backend | INFO 2025-02-03 10:16:32.831: httpx._client:_send_single_request: HTTP Request: POST http://192.168.0.6:18083/api/v5/authorization/sources "HTTP/1.1 204 No Content"
-backend | INFO 2025-02-03 10:16:32.833: app.configs.emqx:set_auth_cache_ttl: Set cache settings auth hook MQTT Broker
-backend | INFO 2025-02-03 10:16:33.217: httpx._client:_send_single_request: HTTP Request: PUT http://192.168.0.6:18083/api/v5/authorization/settings "HTTP/1.1 200 OK"
-backend | INFO 2025-02-03 10:16:33.246: app.main:_lifespan: Get current TG bot webhook info
-backend | INFO 2025-02-03 10:16:33.246: app.main:run_polling_bot: Delete webhook before run polling
-backend | INFO 2025-02-03 10:16:33.248: app.main:run_mqtt_client: Connect to mqtt server: 192.168.0.6:1883
-backend | INFO 2025-02-03 10:16:33.249: gmqtt.mqtt.protocol:connection_made: [CONNECTION MADE]
-backend | INFO 2025-02-03 10:16:33.252: gmqtt.mqtt.package:build_package: [SEND SUB] 1 [b'192.168.0.6/+/+/+/pepeunit']
-backend | INFO 2025-02-03 10:16:33.253: gmqtt.mqtt.package:build_package: [SEND SUB] 2 [b'192.168.0.6/+/pepeunit']
-backend | INFO 2025-02-03 10:16:33.265: app.services.repo_service:sync_local_repo_storage: run sync local repo storage
-backend | INFO 2025-02-03 10:16:33.330: app.services.repo_service:sync_local_repo_storage: end sync local repo storage
-backend | INFO 2025-02-03 10:16:33.333: gmqtt.mqtt.handler:_handle_suback_packet: [SUBACK] 1 (0,)
-backend | INFO 2025-02-03 10:16:33.334: gmqtt.mqtt.handler:_handle_suback_packet: [SUBACK] 2 (0,)
-backend | INFO 2025-02-03 10:16:33.548: app.main:run_polling_bot: Run polling
-backend | INFO 2025-02-03 10:16:33.549: aiogram.dispatcher.dispatcher:start_polling: Start polling
-backend | INFO 2025-02-03 10:16:33.622: aiogram.dispatcher.dispatcher:_polling: Run polling for bot @PepeUnitDevRobot id=8192216998 - 'PepeUnitDevRobot'
+INFO - 2025-03-14 01:11:48,419 - HTTP Request: GET https://dcemqx.pepemoss.com/api-docs/swagger.json "HTTP/1.1 200 OK"
+INFO - 2025-03-14 01:11:49,541 - EMQX Broker https://dcemqx.pepemoss.com - Ready to work
+INFO - 2025-03-14 01:11:49,594 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/login "HTTP/1.1 200 OK"
+INFO - 2025-03-14 01:11:49,594 - Del file auth hook MQTT Broker
+INFO - 2025-03-14 01:11:49,677 - HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/file "HTTP/1.1 204 No Content"
+INFO - 2025-03-14 01:11:49,678 - Del http auth hook MQTT Broker
+INFO - 2025-03-14 01:11:49,749 - HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/http "HTTP/1.1 204 No Content"
+INFO - 2025-03-14 01:11:49,750 - Del redis auth hook MQTT Broker
+INFO - 2025-03-14 01:11:49,838 - HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/redis "HTTP/1.1 204 No Content"
+INFO - 2025-03-14 01:11:49,838 - Set ACL file auth hook MQTT Broker
+INFO - 2025-03-14 01:11:49,911 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources "HTTP/1.1 204 No Content"
+INFO - 2025-03-14 01:11:49,912 - Set http auth hook MQTT Broker
+INFO - 2025-03-14 01:11:50,144 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources "HTTP/1.1 204 No Content"
+INFO - 2025-03-14 01:11:50,145 - Set redis auth hook MQTT Broker
+INFO - 2025-03-14 01:11:50,342 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources "HTTP/1.1 204 No Content"
+INFO - 2025-03-14 01:11:50,343 - Set cache settings auth hook MQTT Broker
+INFO - 2025-03-14 01:11:50,485 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/authorization/settings "HTTP/1.1 200 OK"
+INFO - 2025-03-14 01:11:50,486 - Disable ssl listener MQTT Broker
+INFO - 2025-03-14 01:11:50,555 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/listeners/ssl:default/stop "HTTP/1.1 200 OK"
+INFO - 2025-03-14 01:11:50,556 - Disable ws listener MQTT Broker
+INFO - 2025-03-14 01:11:50,620 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/listeners/ws:default/stop "HTTP/1.1 200 OK"
+INFO - 2025-03-14 01:11:50,620 - Disable wss listener MQTT Broker
+INFO - 2025-03-14 01:11:50,692 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/listeners/wss:default/stop "HTTP/1.1 200 OK"
+INFO - 2025-03-14 01:11:50,692 - Set settings for tcp listener
+INFO - 2025-03-14 01:11:50,776 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/listeners/tcp:default "HTTP/1.1 200 OK"
+INFO - 2025-03-14 01:11:50,777 - Set global mqtt settings
+INFO - 2025-03-14 01:11:50,813 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/configs/global_zone "HTTP/1.1 200 OK"
+INFO - 2025-03-14 01:11:50,814 - Disable retainer
+INFO - 2025-03-14 01:11:50,876 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/mqtt/retainer "HTTP/1.1 200 OK"
+INFO - 2025-03-14 01:11:50,883 - Get current TG bot webhook info
+INFO - 2025-03-14 01:11:50,883 - Delete webhook before set new webhook
+INFO - 2025-03-14 01:11:51,107 - Set new TG bot webhook url: https://dcunit.pepeunit.com/pepeunit/api/v1/bot
+INFO - 2025-03-14 01:11:51,177 - Success set TG bot webhook url
+INFO - 2025-03-14 01:11:51,196 - run sync local repo storage
+INFO - 2025-03-14 01:11:51,234 - end sync local repo storage
+INFO - 2025-03-14 01:11:51,235 - 
+            
+                           ........:                                   
+                          :......::-                                   
+                           .....::.:                                   
+                           .....::.-                                   
+                      :.........::.-****                               
+                    :........::::--==++###%                            
+                  :::-++*++=======++*#@@%%-::                          
+                ....:-=---==++******###%%*-...:                        
+              :....:--===++=*=+**%@@%@%%%%*+:..:                       
+            :....::=====+====+==*##%@%%%#*##+=...:                     
+          -...........:-===++*=++**#%*:....::---...:                   
+         :......-..:*##%%*+++===+#*-.:-..+#%%%#*+:...:                 
+       :......=..++*##%%%%#**++--=..-.--*##%%*%@#+=....-               
+      :..:-:.+-+=+#%%***+#@#*=---..+:=**+%@%%*%@@*+=-...:              
+     =--===-.%%=#*#%-.=:+@@%**==-::%%#==#@@#%@@+@%**+=:::              
+     =-=====.+@%%+@@%:.-#@@##***+-:%@%*%@%@%%=%@@#++::-::              
+     =--====-.#@@*@+@@*@@@#***#**#-:%@*%%+@=@*@@#*==-..::              
+     ==+*=+++=::#@@@@@@@########*#%==+%@@@@@@@#**++++*+::-             
+     *@*+++++++++****#####%##%###%#%%%%#########*##+==*#--             
+     -*@%**==+=+*#=+**###%%%%####%%##%%%%%%%#%%%#####@@%=+             
+  :::-=--+%%@*##*.-.*#####%%%########%%%%%%%###%%@@%*++=+****          
+  ....:---------==***#%%%%%*%#%%#%%%%%%%%%#*++=====+**#######%         
+  ....:-:::-=====-----------------------===+++***+++*#%@@%###%         
+  :--=:=++++====---::::---------===========++*##%@@@@@@@@@@@@@         
+     =--+*++++***+=+*****###########%%%%%%%%%#%%%#@@@@@@@@             
+       +==++++**+...:*=+=*=+==*++##++=+++#%-:-*%#%@@@@@@               
+          %#*****#####*##*-+-=*==#--+#**%*%%%%@@@@@@@                  
+            *##%@@@@@@@%%%%%%%%%%%%%%@@@@@@@@@@@@@@                    
+            *###%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@                    
+                %%@@@@@@@@@@@@@@@@@@@@@@@@@@@@       
+             _____                            _ _   
+            |  __ \                          (_) |  
+            | |__) |__ _ __   ___ _   _ _ __  _| |_ 
+            |  ___/ _ \ '_ \ / _ \ | | | '_ \| | __|
+            | |  |  __/ |_) |  __/ |_| | | | | | |_ 
+            |_|   \___| .__/ \___|\__,_|_| |_|_|\__|
+                      | |                           
+                      |_|   
+                   
+     v0.3.0 - AGPL v3 License
+     Federated IoT Platform
+     Front: https://dcunit.pepeunit.com
+     REST:  https://dcunit.pepeunit.com/pepeunit/docs
+     GQL:   https://dcunit.pepeunit.com/pepeunit/graphql
+     TG:    https://t.me/PepeUnitDevRobot
+     Docs:  https://pepeunit.com
+            
+INFO - 2025-03-14 01:11:51,235 - Connect to mqtt server: dcemqx.pepemoss.com:1885
+[2025-03-14 01:11:51 +0000] [35] [INFO] Used broker version is 5
+INFO - 2025-03-14 01:11:51,239 - [CONNECTION MADE]
+INFO - 2025-03-14 01:11:51,257 - Connect to mqtt server: dcemqx.pepemoss.com:1885
+[2025-03-14 01:11:51 +0000] [36] [INFO] Used broker version is 5
+INFO - 2025-03-14 01:11:51,264 - [CONNECTION MADE]
+INFO - 2025-03-14 01:11:53,243 - MQTT subscriptions initialized in this worker
+INFO - 2025-03-14 01:11:53,243 - [SEND SUB] 1 [b'dcunit.pepeunit.com/+/+/+/pepeunit']
+INFO - 2025-03-14 01:11:53,244 - [SEND SUB] 2 [b'dcunit.pepeunit.com/+/pepeunit']
+[2025-03-14 01:11:53 +0000] [35] [INFO] Application startup complete.
+INFO - 2025-03-14 01:11:53,249 - [SUBACK] 1 (0,)
+INFO - 2025-03-14 01:11:53,249 - [SUBACK] 2 (0,)
+INFO - 2025-03-14 01:11:53,268 - Another worker already subscribed to MQTT topics
+[2025-03-14 01:11:53 +0000] [36] [INFO] Application startup complete.
 ```
 :::
 
@@ -199,11 +265,11 @@ backend | INFO 2025-02-03 10:16:33.622: aiogram.dispatcher.dispatcher:_polling: 
 Стоит обратить особое внимание на строчки:
 
 ```bash
-gmqtt.mqtt.handler:_handle_suback_packet: [SUBACK] 1 (0,)
-gmqtt.mqtt.handler:_handle_suback_packet: [SUBACK] 2 (0,)
+INFO - 2025-03-14 01:11:53,249 - [SUBACK] 1 (0,)
+INFO - 2025-03-14 01:11:53,249 - [SUBACK] 2 (0,)
 ```
 
-Они отображают смог ли [Backend](/definitions#backend) подписаться на топики `192.168.0.6/+/+/+/pepeunit` и `192.168.0.6/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/definitions#backend) `не смог` подписаться на основные топики. Обычно это связано со следующими нюансами:
+Они отображают смог ли [Backend](/definitions#backend) подписаться на топики `dcunit.pepeunit.com/+/+/+/pepeunit` и `dcunit.pepeunit.com/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/definitions#backend) `не смог` подписаться на основные топики. Обычно это связано со следующими нюансами:
 1. Закрытым портом `1883`
 1. Настройкой портов сервиса `emqx` в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
 1. Ошибками в настройках [EMQX MQTT Broker](/definitions#mqtt-broker) и [Backend](/definitions#backend), например `MQTT_REDIS_AUTH_URL` или `REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables#backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies#redis).
