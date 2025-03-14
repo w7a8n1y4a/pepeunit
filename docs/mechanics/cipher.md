@@ -1,40 +1,43 @@
 # Шифрование
 
-[Pepeunit](/conception/overview) использует шифрование `AES256` с `16 байтовым` инициирующим вектором и `32 байтовым` ключом - схема шифрования `CBC`
+[Pepeunit](/conception/overview) использует шифрование `AES256` с `12 байтовым` инициирующим вектором и `32 байтовым` ключом - схема шифрования `GCM`
 
 ```python
-def aes_encode(data: str, key: str = settings.encrypt_key) -> str:
+def aes_gcm_encode(data: str, key: str = settings.backend_encrypt_key) -> str:
     """
     data: any python str
     key: (base64 str) 16, 24, 32 bytes sync encrypt key
-    return: (base64 str - iv).(base64 str - encrypted data)
+    return: (base64 str - nonce).(base64 str - encrypted data).(base64 str - tag)
     """
+    len_content = len(data)
+    if len_content > settings.backend_max_cipher_length:
+        app_errors.cipher_error.raise_exception(
+            f'The encryption content is {len_content} long, although only <= {settings.backend_max_cipher_length} is allowed'
+        )
+
     key = base64.b64decode(key.encode())
-    iv = os.urandom(16)
+    nonce = os.urandom(12)  # 96-bit nonce for AES-GCM
+    aesgcm = AESGCM(key)
 
-    # set encrypter
-    encrypter = pyaes.Encrypter(pyaes.AESModeOfOperationCBC(key, iv))
-    # encrypted binary to base64 str
-    cipher = base64.b64encode(encrypter.feed(data) + encrypter.feed()).decode('utf-8')
+    cipher = aesgcm.encrypt(nonce, data.encode(), None)  # Encrypt data
 
-    return f"{base64.b64encode(iv).decode('utf-8')}.{cipher}"
+    return f"{base64.b64encode(nonce).decode()}.{base64.b64encode(cipher).decode()}"
 
 
-def aes_decode(data: str, key: str = settings.encrypt_key) -> str:
+def aes_gcm_decode(data: str, key: str = settings.backend_encrypt_key) -> str:
     """
-    data: (base64 str - iv).(base64 str - encrypted data)
+    data: (base64 str - nonce).(base64 str - encrypted data)
     key: (base64 str) 16, 24, 32 bytes sync encrypt key
     return: decode python str
     """
     key = base64.b64decode(key.encode())
-    iv = base64.b64decode(data.split('.')[0].encode())
+    nonce, cipher = data.split('.')
+    nonce = base64.b64decode(nonce.encode())
+    cipher = base64.b64decode(cipher.encode())
 
-    # set decrypter
-    decrypter = pyaes.Decrypter(pyaes.AESModeOfOperationCBC(key, iv))
-    # data (iv).(encrypted text) to binary encrypted text
-    cipher = base64.b64decode(data.split('.')[1].encode())
+    aesgcm = AESGCM(key)
 
-    return (decrypter.feed(cipher) + decrypter.feed()).decode('utf-8')
+    return aesgcm.decrypt(nonce, cipher, None).decode('utf-8')
 ```
 
 ::: tip Какие данные шифрует [Pepeunit](/conception/overview)?
@@ -46,9 +49,7 @@ def aes_decode(data: str, key: str = settings.encrypt_key) -> str:
 :::
 
 :::warning Ограничение размера шифруемых объектов
-Все шифруемые объекты имеют стандартное ограничение в `50000` символов. [Администратор](/mechanics/roles#admin) [инстанса](/definitions#instance) может изменить этот объём установив переменную окружения `BACKEND_MAX_CIPHER_LENGTH` в файле [Backend ENV](/deployment/env-variables#backend).
-
-Размер в `50000` выбран из-за приемлимой скорости шифрования-дешифрования алгоритмом `AES256`.
+Все шифруемые объекты имеют стандартное ограничение в `1000000` символов. [Администратор](/mechanics/roles#admin) [инстанса](/definitions#instance) может изменить этот объём установив переменную окружения `BACKEND_MAX_CIPHER_LENGTH` в файле [Backend ENV](/deployment/env-variables#backend).
 :::
 
 :::danger
