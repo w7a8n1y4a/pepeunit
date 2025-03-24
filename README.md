@@ -11,7 +11,6 @@
 1. [Pepeunit SPA](https://git.pepemoss.com/pepe/pepeunit/pepeunit.git) - Статический Лэндинг с Документацией
 1. [Frontend](https://git.pepemoss.com/pepe/pepeunit/pepeunit_frontend.git) - Фронтенд для инстансов
 1. [Backend](https://git.pepemoss.com/pepe/pepeunit/pepeunit_backend.git) - Бэкенд для инстансов
-1. [Load Check](https://git.pepemoss.com/pepe/pepeunit/pepeunit_load_check.git) - Дубина, чтобы отрабатывать отдельные механики работы Бэкенда
 
 ## Репозитории Unit
 
