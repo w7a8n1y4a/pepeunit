@@ -96,19 +96,13 @@ export default withMermaid(defineConfig({
         items: [
           { text: 'Функционал', link: '/roadmap/functions' },
           { text: 'Unit', link: '/roadmap/units' },
+          { text: 'Статья на Хабр', link: '/roadmap/habr' },
         ]
       },
       {
         text: 'Вклад',
         items: [
           { text: 'Соглашения', link: '/contribution/contribution' },
-        ]
-      },
-      {
-        text: 'VitePress Example',
-        items: [
-          { text: 'Markdown Examples', link: '/example/markdown-examples' },
-          { text: 'Runtime API Examples', link: '/example/api-examples' },
         ]
       }
     ],
