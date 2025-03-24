@@ -14,7 +14,6 @@
 
 ## Репозитории Unit
 
-1. [Test Unit](https://git.pepemoss.com/pepe/pepeunit/units/universal_test_unit.git) - [Unit](https://pepeunit.com/definitions.html#unit) для интеграционных тестов
 1. [WiFi Temp sensor](https://git.pepemoss.com/pepe/pepeunit/units/wifi_temp_sensor.git) - Сенсор температуры `esp8266`
 1. [Wifi 4pin PWM вентилятор](https://git.pepemoss.com/pepe/pepeunit/units/wifi_pc_fan_4_pin.git) - Регулятор температуры на `esp32`
 1. [Go Hotkeys](https://git.pepemoss.com/pepe/pepeunit/units/go_hotkeys.git) - Отправка значений в [UnitNode](https://pepeunit.com/definitions.html#unitnode) через `Desktop` приложение
