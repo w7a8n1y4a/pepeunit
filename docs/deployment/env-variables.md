@@ -26,6 +26,7 @@
 `BACKEND_MIN_TOPIC_UPDATE_TIME` | `30` | Частота обновления сообщений в `domain.com/+/pepeunit` топиках [MQTT](/definitions#mqtt)
 `TELEGRAM_TOKEN` | - | Токен `Telegram Bot API`, можно получить через `Telegram Bot Father`. Секретный, никому не показывайте
 `TELEGRAM_BOT_LINK` | - | Ссылка на `Telegram Bot` которым управляет [Backend](/definitions#backend). Используется для генерации верификационных ссылок для пользователей бота. Передаётся в `openapi.json`
+`PROMETHEUS_MULTIPROC_DIR` | `./prometheus_metrics` | Дирректория, которую `Prometheus` использует для хранения статистик с нескольких `worker` - `uvicorn`. При старте приложения содержимое дирректории отчищается
 `REDIS_URL` | `redis://redis:6379/0` | Ссылка для доступа к [Redis](/deployment/dependencies#redis), которую использует [Backend](/definitions#backend) для соединения c [Redis](/deployment/dependencies#redis). Инстанс [Redis](/deployment/dependencies#redis) должен быть единым с `MQTT_REDIS_AUTH_URL`
 `MQTT_HOST` | - | Доменное имя или `ip`. Позволяет [Backend](/definitions#backend) управлять и подписываться на топики [EMQX MQTT Broker](/definitions#mqtt-broker). Позволяет Unit связываться с [EMQX MQTT Broker](/definitions#mqtt-broker). Устанавливается в [Unit ENV](/developer/struct-env-json) - в поле `MQTT_URL`
 `MQTT_SECURE` | `True` | Если `True`, то [Backend](/definitions#backend) будет использовать `https` для настройки [EMQX MQTT Broker](/definitions#mqtt-broker)
@@ -45,6 +46,13 @@
 `MQTT_MAX_TOPIC_LEVELS` | `5` | Максимальная вложенность топиков [EMQX MQTT Broker](/definitions#mqtt-broker)
 `MQTT_MAX_LEN_MESSAGE_QUEUE` | `128` | Максимальная длинна очереди сообщений [EMQX MQTT Broker](/definitions#mqtt-broker)
 `MQTT_MAX_TOPIC_ALIAS` | `128` | Максимальное число топиков-ссылок [EMQX MQTT Broker](/definitions#mqtt-broker)
+
+:::info
+Для тестирования [Backend](/definitions#backend) также выделены переменные:
+- [Переменные интеграционного тестирования](/tests/integration-test#запуск)
+- [Переменные нагрузочного тестирования MQTT](/tests/load-test#тестирование-mqtt)
+- [Переменные нагрузочного тестирования REST и GQL](/tests/load-test#тестирование-rest-и-gql)
+:::
 
 ## Frontend
 
