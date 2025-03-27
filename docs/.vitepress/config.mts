@@ -87,6 +87,7 @@ export default withMermaid(defineConfig({
       {
         text: 'Тесты',
         items: [
+          { text: 'Модульные', link: '/tests/module-test' },
           { text: 'Интеграционные', link: '/tests/integration-test' },
           { text: 'Нагрузочные', link: '/tests/load-test' },
         ]

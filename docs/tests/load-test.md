@@ -1,26 +1,25 @@
 # Нагрузочные тесты - Backend
 
-[Подробнее о развёртывании нагрузочного репозитория](https://git.pepemoss.com/pepe/pepeunit/pepeunit_load_check.git)
+:::info
+Нагрузочные тесты - это часть репозитория [Backend](/definitions#backend), единственная задача, которой проверка выдерживает ли [Backend](/definitions#backend) заданные число запросов в секунду. 
+:::
 
 ## Тестирование MQTT
 
+Команда для запуска:
 ```bash
-python load_test.py --url "https://localunit.pepeunit.com" --duration 120 --type mqtt --unit-count 40 --rps 100 --workers 10 --mqtt-admin "admin" --mqtt-password "password"
+python -m tests.load.load_test_mqtt
 ```
 
-Позволяет создать синтетическую нагрузку в виде [Unit](/definitions#unit), отправляющих [MQTT](/definitions#mqtt) сообщения со следующими параметрами:
-Параметр | Что делает ?
+Позволяет создать синтетическую нагрузку в виде [Unit](/definitions#unit), отправляющих [MQTT](/definitions#mqtt) сообщения. Дополнительные [ENV переменные Backend](/deployment/env-variables#backend) позволяют настроить нагрузку по следующим параметрам:
+Переменная Backend | Что делает ?
 -- | --
-`--url` | Ссылка на [Backend](/definitions#backend)
-`--duration` | Время выполнения теста в секундах
-`--type` | Тип - `mqtt`
-`--unit-count` | Число [Unit](/definitions#unit) которые будут выполнять запросы
-`--rps` | Нагрузка которую будет создавать каждый [Unit](/definitions#unit)
-`--duplicate-count` | Число повторяюшихся сообщений подряд
-`--message-size` | Размер [MQTT](/definitions#mqtt) сообщений в символах
-`--workers` | Число процессов `multiprocessing` создающих нагрузку
-`--mqtt-admin` | Имя администратора [EMQX MQTT Broker](/definitions#mqtt-broker), позволяет тесту, самому отследить момент, когда [Backend](/definitions#backend) отключится от привышения нагрузки
-`--mqtt-password` | Пароль администратора [EMQX MQTT Broker](/definitions#mqtt-broker), позволяет тесту, самому отследить момент, когда [Backend](/definitions#backend) отключится от привышения нагрузки
+`TEST_LOAD_MQTT_DURATION` | Время выполнения теста в секундах
+`TEST_LOAD_MQTT_UNIT_COUNT` | Число [Unit](/definitions#unit) которые будут выполнять запросы
+`TEST_LOAD_MQTT_RPS` | Нагрузка которую будет создавать каждый [Unit](/definitions#unit)
+`TEST_LOAD_MQTT_DUPLICATE_COUNT` | Число повторяюшихся сообщений подряд
+`TEST_LOAD_MQTT_MESSAGE_SIZE` | Размер [MQTT](/definitions#mqtt) сообщений в символах
+`TEST_LOAD_MQTT_WORKERS` | Число процессов `multiprocessing` создающих нагрузку
 
 :::danger
 [Backend](/definitions#backend) использует только `1` воркер `Gunicorn` для обработки [MQTT](/definitions#mqtt) сообщений. Он способен обработать `~4000rps` пользовательских топиков `domain.com/+/pepeunit`.
@@ -28,19 +27,19 @@ python load_test.py --url "https://localunit.pepeunit.com" --duration 120 --type
 
 ## Тестирование REST и GQL
 
-Позволяет создать синтетическую нагрузку в виде [GQL](/definitions#gql) и [REST](/definitions#rest) запросов, на наиболее нагруженные участки:
-
+Команда для запуска:
 ```bash
-locust -H "https://localunit.pepeunit.com" --headless -u 400 -r 10 --run-time 2m
+locust -f tests/load/locustfile.py
 ```
 
-Параметр | Что делает ?
+Позволяет создать синтетическую нагрузку в виде [GQL](/definitions#gql) и [REST](/definitions#rest) запросов, на наиболее нагруженные участки. Дополнительные [ENV переменные Backend](/deployment/env-variables#backend) позволяют настроить нагрузку по следующим параметрам:
+
+Переменная Backend | Что делает ?
 -- | --
-`-H` | Ссылка на Бэкенд
-`--headless` | `CLI` формат работы `locust`
-`-u` | Число пользователей, которые будут создавать нагрузку
-`-r` | Нарастание числа пользователей, от `0` до `400`, c шагом `10`, т.е. нарастание нагрузки займёт `~= 40 секунд`
-`--run-time` | Время выполнения теста
+`LOCUST_HEADLESS` | `CLI` формат работы `locust`
+`LOCUST_USERS` | Число пользователей, которые будут создавать нагрузку
+`LOCUST_SPAWN_RATE` | Нарастание числа пользователей, от `0` до `400`, c шагом `10`, т.е. нарастание нагрузки займёт `~= 40 секунд`
+`LOCUST_RUN_TIME` | Время выполнения теста в секундах
 
 :::info
 По умолчанию проверяются:
