@@ -2,7 +2,7 @@
 
 ## Nginx Docker Compose
 
-Объединяет [Backend](/definitions#backend) и [Frontend](/definitions#frontend) в единый `80` порт.
+Объединяет [Backend](/definitions#backend), [Frontend](/definitions#frontend) и [Grafana](/definitions#grafana) в единый `80` порт.
 
 ```nginx.conf
 events {
@@ -12,7 +12,6 @@ events {
 http {
     server {
         listen 80;
-        server_name 192.168.0.22;
 
         location /pepeunit {
             add_header 'Access-Control-Allow-Origin' "$http_origin" always;
@@ -44,6 +43,17 @@ http {
         location / {
             proxy_pass http://frontend:80;
         }
+
+        location /grafana/ {
+            proxy_pass http://grafana:3000;
+
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+            proxy_set_header X-Forwarded-Host $host;
+            proxy_set_header X-Script-Name /grafana;
+        }
     }
 }
 ```
@@ -59,6 +69,11 @@ server {
 
     location / {
         proxy_pass http://192.168.0.22:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+        proxy_set_header X-Forwarded-Host $host;
     }
 
     ssl_certificate /etc/letsencrypt/live/pepeunit.com-0001/fullchain.pem; # managed by Certbot
@@ -117,6 +132,17 @@ server {
         proxy_set_header Connection "";
     }
 
+    location /grafana/ {
+        proxy_pass http://192.168.0.22:3000;
+
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header X-Script-Name /grafana;
+    }
+
     location / {
         proxy_pass http://192.168.0.22:5292;
     }
@@ -128,7 +154,7 @@ server {
 }
 server {
     listen 80;
-    server_name devunit.pepeunit.com;
+    server_name unit.pepeunit.com;
 
     location /pepeunit {
         proxy_pass http://192.168.0.15:5291;
@@ -137,5 +163,5 @@ server {
 ```
 
 :::warning
-Подразумевается что контейнер `nginx` отключен - `ip` взяты напрямую, порты взяты из `Docker Compose`.
+Подразумевается что контейнер `nginx` отключен в `docker-compose.yml` - `ip` взяты напрямую, порты взяты из `Docker Compose`.
 :::

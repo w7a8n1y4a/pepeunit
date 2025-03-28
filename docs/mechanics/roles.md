@@ -30,6 +30,7 @@
 :::tip Возможности `Администратора`
 - Блокирование Пользователей, при нарушении условий использования [инстанса](/definitions#instance)
 - Видимость всех сущностей [Repo](/definitions#repo), [Unit](/definitions#unit) и [UnitNode](/definitions#unitnode), возможности взаимодействия сводятся к аналогичным при предоставлении [видимости](/mechanics/visibility)
+- Возможность просмотра нагрузки на [инстансе](/definitions#instance) через [Grafana](/definitions#grafana), достаточно перейти на [Frontend](/definitions#frontend) в ноду отображающую текущий домен, и нажать кнопку `Grafana`.
 - Принудительный запуск процесса [автоматического обновления](/mechanics/update-system#автоматическии-или-по-запросу-администратора) всех [Repo](/definitions#repo)
 - Не может получить информацию о [зашифрованных](/mechanics/cipher) данных напрямую через [Pepeunit](/conception/overview), но имеет техническую возможность дешифровать любую [шифрованную](/mechanics/cipher) информацию [инстанса](/definitions#instance)
 :::

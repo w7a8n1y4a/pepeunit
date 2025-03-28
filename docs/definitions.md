@@ -67,6 +67,9 @@
 ## Backend
 `Backend` - приложение размещаемое на сервере, обеспечивающее обработку, хранение и анализ информации, а так же предоставляющее разные [API](#api) для взаимодействия. [Pepeunit Backend Repository](https://git.pepemoss.com/pepe/pepeunit/pepeunit_backend.git)
 
+## Grafana
+[Grafana](https://grafana.com/) - платформа с открытым исходным кодом, для визуализации данных и их анализа. В рамках [Pepeunit](/conception/overview) поставщиком данных выступает `Prometheus`. Доступ до интерфейса `Grafana` есть только у [Администратора](/mechanics/roles#admin), при входе требуется пароль.
+
 ## Repo
 `Repo` - это представление [Pepeunit](/conception/overview) о внешнем [Git](#git) репозитории, например из [Gitlab](#gitlab) или [Github](#github). Данная сущность содержит в себе полный клон репозитория и синхронизирует своё состояние с внешним репозиторием, что позволяет [Pepeunit](/conception/overview) быстро создавать микропрограммы для [Unit](#unit).
 
