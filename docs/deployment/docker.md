@@ -41,7 +41,7 @@ sudo systemctl start docker
 sudo systemctl enable docker
 ```
 
-## Устновка Docker Compose
+## Установка Docker Compose
 
 Выполните команды:
 ```bash
@@ -86,6 +86,9 @@ mv .env.local.example .env.local
 `POSTGRES_USER` | `pepeunit-admin` | `pepeunit-admin` | Имя пользователя, от имени которого будет создана база данных
 `POSTGRES_PASSWORD` | `f6prBUMbhvNnlLZ0f0HN` | `f6prBUMbhvNnlLZ0f0HN` | Пароль пользователя, от имени которого будет создана база данных
 `POSTGRES_DB` | `pepeunit-db` | `pepeunit-db` | Название базы данных
+`CLICKHOUSE_USER` | `pepeunit-admin` | `pepeunit-admin` | Имя пользователя, от имени которого будет создана база данных
+`CLICKHOUSE_PASSWORD` | `f6prBUMbhvNnlLZ0f0HN` | `f6prBUMbhvNnlLZ0f0HN` | Пароль пользователя, от имени которого будет создана база данных
+`CLICKHOUSE_DB` | `default` | `default` | Название базы данных
 `BACKEND_DOMAIN` | `192.168.0.22` | `unit.pepeunit.com` | Доменное имя от [инстанса](/definitions#instance) [Pepeunit](/conception/overview)
 `BACKEND_SECURE` | `False` | - | Выбирает `http` или `https` для `BACKEND_DOMAIN` [инстанса](/definitions#instance) [Pepeunit](/conception/overview), по умолчанию `https`
 `TELEGRAM_TOKEN `| `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | Токен `Telegram Bot` можно получить у [Bot Father](https://t.me/BotFather)
@@ -332,9 +335,14 @@ INFO - 2025-03-14 01:11:53,249 - [SUBACK] 2 (0,)
     docker exec -it postgres /bin/bash
     docker exec -it redis /bin/bash
     docker exec -it nginx /bin/bash
+    docker exec -it clickhouse /bin/bash
     ```
 - Зайти в консоль базы данных, `POSTGRES_USER` и `POSTGRES_DB` можно найти в `env/.env.postgres`
     ```bash
     docker exec -it postgres psql -U <POSTGRES_USER> -d <POSTGRES_DB>
     psql -U <POSTGRES_USER> -d <POSTGRES_DB>
+    ```
+- Отправить запрос в clickhouse через curl:
+    ```bash
+    curl "http://admin:mypassword@127.0.0.1:8123/?query=SHOW+TABLES"
     ```
