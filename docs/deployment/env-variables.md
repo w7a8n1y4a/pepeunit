@@ -17,6 +17,7 @@
 `BACKEND_AUTH_TOKEN_EXPIRATION` | `2678400` | Время жизни токенов авторизации [Пользователей](/mechanics/roles.html#user) в секундах
 `BACKEND_SAVE_REPO_PATH` | `repo_cache` | Путь по которому [Backend](/definitions#backend) хранит внешние [Git](/definitions#git) репозитории. Устанавливается относительно корневой дирректории [Backend](/definitions#backend)
 `SQLALCHEMY_DATABASE_URL` | - | Ссылка для подключения к [Postgresql](/deployment/dependencies#postgresql)
+`CLICKHOUSE_DATABASE_URL` | - | Ссылка для подключения к [Clickhouse](/deployment/dependencies#clickhouse)
 `BACKEND_SECRET_KEY` | - | `32 байтовый ключ` в формате `base64`. Отвечает за подпись токенов авторизации. В случае изменения все `jwt` токены созданные до изменения - становятся не действительными
 `BACKEND_ENCRYPT_KEY` | - | `32 байтовый ключ` в формате `base64`. Отвечает за шифрование всех данных. В случае изменения все шифрованные записи - становится невозможно расшифровать
 `BACKEND_STATIC_SALT` | - | `32 байтовый ключ` в формате `base64`. Отвечает за генерацию `hash` для паролей пользователей. В случае изменения все учётные записи созданные до момента изменения - потеряют возможность авторизоваться
@@ -24,6 +25,7 @@
 `BACKEND_MAX_EXTERNAL_REPO_SIZE` | `50` | Значение в `МБ`, ограничивающее размер внешних [Git](/definitions#git) репозиториев для скачивания
 `BACKEND_MAX_CIPHER_LENGTH` | `1000000` | Максимальная длинна в символах для шифруемой информации
 `BACKEND_MIN_TOPIC_UPDATE_TIME` | `30` | Частота обновления сообщений в `domain.com/+/pepeunit` топиках [MQTT](/definitions#mqtt)
+`BACKEND_UNIT_LOG_EXPIRATION` | `86400` | Вермя жизни логов, которые присылают [Unit](/definitions#unit) в секундах
 `TELEGRAM_TOKEN` | - | Токен `Telegram Bot API`, можно получить через `Telegram Bot Father`. Секретный, никому не показывайте
 `TELEGRAM_BOT_LINK` | - | Ссылка на `Telegram Bot` которым управляет [Backend](/definitions#backend). Используется для генерации верификационных ссылок для пользователей бота. Передаётся в `openapi.json`
 `PROMETHEUS_MULTIPROC_DIR` | `./prometheus_metrics` | Дирректория, которую `Prometheus` использует для хранения статистик с нескольких `worker` - `uvicorn`. При старте приложения содержимое дирректории отчищается
@@ -57,7 +59,7 @@
 ## Frontend
 
 :::warning
-На фронтенде нет значений по умолчанию.
+У [Frontend](/definitions#frontend) нет значений по умолчанию.
 :::
 
 Переменная | Пример | Зачем нужна?

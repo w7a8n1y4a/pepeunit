@@ -22,6 +22,10 @@
 
 Брокер `EMQX` на два порядка производительней чем [Backend](/definitions#backend), но благодаря системе кэширования авторизации `EMQX` и кэшированию через `Redis`, [Backend](/definitions#backend) может справится с нагрузкой.
 
+## Clickhouse
+
+[Clickhouse](https://clickhouse.com/) - это колончатая аналитическая СУБД с открытым исходным кодом, позволяющая выполнять аналитические запросы на структурированных данных. Используется [Backend](/definitions#backend) для хранения логов [Unit](/definitions#unit).
+
 ## Redis
 
 [Redis](https://redis.io/) - `NoSQL` кластерная база данных использующая парадигму `key-value`
@@ -37,6 +41,7 @@ flowchart LR
   Broker <--> Pepeunit
   Pepeunit <--> Unit
   Pepeunit <--> Postgresql
+  Pepeunit <--> Clickhouse
   Broker <--> Redis
   Pepeunit <--> Redis
 ```

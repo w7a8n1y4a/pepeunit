@@ -6,10 +6,11 @@
 [Unit](/definitions#unit) должен отправлять форматированные данные в топики, которые указаны. [Pepeunit](/conception/overview) обязуется обработать их по единому паттерну, описанному в данном разделе.
 :::
 
-Всего в [Pepeunit](/conception/overview) есть один топик отвечающий за отправку состояния:
-1. `output_base_topic` - `state/pepeunit`
+Всего в [Pepeunit](/conception/overview) есть два топика отвечающий за отправку состояния:
+1. `state/pepeunit` - `output_base_topic`
+1. `log/pepeunit` `output_base_topic`
 
-## output_base_topic - state/pepeunit
+## state/pepeunit - output_base_topic
 
 :::info Когда [Unit](/definitions#unit) отправляет данные в этот топик?
 1. Каждые `STATE_SEND_INTERVAL` секунд указанные в [env.json](/definitions#env-json).
@@ -17,7 +18,7 @@
 
 Данные отправляемые [Unit](/definitions#unit), преобразуются на стороне [Pepeunit](/conception/overview) в отображение состояния в меню [Unit](/definitions#unit). Также данное состояние можно получить через [REST](/definitions#rest) и [GQL](/definitions#gql).
 
-## Формат сообщений в топик `state/pepeunit`
+### Формат сообщений в топик `state/pepeunit`
 
 ```json
 {
@@ -27,7 +28,8 @@
     "mem_alloc": 25648.0,
     "freq": 80000000.0,
     "statvfs": [4096, 4096, 763, 716, 716, 0, 0, 0, 0, 255],
-    "commit_version": "7f1b6564c4885432a17e5892e3c98f3a2ad33658"}
+    "commit_version": "7f1b6564c4885432a17e5892e3c98f3a2ad33658"
+}
 ```
 
 Разберём каждый ключ:
@@ -65,8 +67,92 @@
 [Pepeunit](/conception/overview) не обязывает отправлять все ключи указанные в примере, можно отправить например только два ключа `millis` и `commit_version`
 :::
 
-## Алгоритм отправки
+### Алгоритм отправки
 
 1. Каждые `STATE_SEND_INTERVAL` секунд опросить состояние системы
 1. Отформатировать данные для отправки в `json` формате
 1. Отправить данные в топик `state/pepeunit` из `output_base_topic`, указанный в [schema.json](/definitions#schema-json)
+
+## log/pepeunit - output_base_topic
+
+:::info Когда [Unit](/definitions#unit) отправляет данные в этот топик?
+1. Если [Unit](/definitions#unit) сам считает нужным отправить лог или набор логов для отображения [Пользователю](/mechanics/roles.html#user)
+2. В случае получения команды в топике `log_sync/pepeunit`, [подробнее](/developer/default-mqtt-command#формат-сообщения-в-топик-log-sync-pepeunit)
+:::
+
+Данные отправляемые [Unit](/definitions#unit), преобразуются на стороне [Pepeunit](/conception/overview) в меню логов [Unit](/definitions#unit). Также данные логи можно получить через [REST](/definitions#rest) и [GQL](/definitions#gql).
+
+### Формат сообщений в топик `log/pepeunit`
+
+Поддерживается несколько форматов отправки логов:
+
+1. Отправка одного лога напрямую:
+    ```json
+    {
+        "level": "Info",
+        "text": "Subscribed: 83 (0, 0, 0, 0, 0)",
+        "create_datetime": "2025-04-08T11:27:52.044394"
+    }
+    ```
+1. Отправка одного лога напрямую, без указания времени:
+    ```json
+    {
+        "level": "Info",
+        "text": "Subscribed: 83 (0, 0, 0, 0, 0)"
+    }
+    ```
+1. Отправка множества логов:
+    ```json
+    [
+        {
+            "level": "Info",
+            "text": "Subscribed: 5 (0, 0, 0, 0, 0)",
+            "create_datetime": "2025-04-08T11:37:55.087036"
+        },
+        {
+            "level": "Debug",
+            "text": "Unit 7d99d194-fe09-4737-b991-0a67cff966d7 get msg from topic log_sync",
+            "create_datetime": "2025-04-08T11:38:22.828806"
+        },
+        {
+            "level": "Debug",
+            "text": "Unit 7d99d194-fe09-4737-b991-0a67cff966d7 get msg from topic env_update",
+            "create_datetime": "2025-04-08T11:41:15.974031"
+        }
+    ]
+    ```
+1. Отправка множества логов, без указания времени:
+    ```json
+    [
+        {
+            "level": "Info",
+            "text": "Subscribed: 5 (0, 0, 0, 0, 0)"
+        },
+        {
+            "level": "Debug",
+            "text": "Unit 7d99d194-fe09-4737-b991-0a67cff966d7 get msg from topic log_sync"
+        },
+        {
+            "level": "Debug",
+            "text": "Unit 7d99d194-fe09-4737-b991-0a67cff966d7 get msg from topic env_update"
+        }
+    ]
+    ```
+
+Разберём каждый ключ и логику обработки на стороне [Pepeunit](/conception/overview):
+- `level` - указывает уровень логирования и может принимать следующие значения: `Debug, Info, Warning, Error, Critical`
+- `text` - содержание лога в текстовом формате, желательно укладывать в `256` символов для корректного отображения в [Frontend](/definitions#frontend)
+- `create_datetime` - необязательный ключ, указывающий временную метку для [Pepeunit](/conception/overview). Именно данная метка отображается [Пользователю](/mechanics/roles.html#user), в случае отсутствия [Pepeunit](/conception/overview) действует по следующим алгоритмам:
+    1. Если сообщение содержит один лог и данный ключ отсутствует, берётся время когда [Pepeunit](/conception/overview) получил сообщение.
+    2. Если отправлено множество логов и данный ключ отсутствует, [Pepeunit](/conception/overview) берёт текущее время для самого первого элемента листа и добавляет по 1 секунде для каждого последующего элемента c целью сохранить порядок логов полученный от [Unit](/definitions#unit).
+
+:::warning
+Размер передаваемого [Unit](/definitions#unit) лога ограничен количеством символов указанных в переменной окружения `MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables#backend). По умолчанию это значение составляет `50000` символов.
+
+По умолчанию время жизни логов ограничено `86400` секундами. За это отвечает переменная `BACKEND_UNIT_LOG_EXPIRATION` из [Backend ENV](/deployment/env-variables#backend).
+:::
+
+### Алгоритм отправки
+
+1. Отформатировать данные для отправки в `json` формате
+1. Отправить данные в топик `log/pepeunit` из `output_base_topic`, указанный в [schema.json](/definitions#schema-json)

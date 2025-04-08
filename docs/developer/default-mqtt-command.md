@@ -6,10 +6,11 @@
 [Unit](/definitions#unit) должен быть подписан на эти топики, при получении сообщения [Unit](/definitions#unit) должны следовать единому паттерну поведения описанному в данном разделе.
 :::
 
-Всего в [Pepeunit](/conception/overview) есть три команды - топика:
+Всего в [Pepeunit](/conception/overview) есть четыре команды - топика:
 1. `UPDATE` - `update/pepeunit`
 1. `SCHEMA_UPDATE` - `schema_update/pepeunit`
 1. `ENV_UPDATE` - `env_update/pepeunit`
+1. `LOG_SYNC` - `log_sync/pepeunit`
 
 ## UPDATE - update/pepeunit
 
@@ -96,7 +97,7 @@
 }
 ```
 
-### Алгоритм действий
+### Алгоритм действий Unit
 
 1. Скачать новую версию файла [schema.json](/definitions#schema-json) через [REST](/definitions#rest). Переменные `HTTP_TYPE` и `PEPEUNIT_URL` доступны внутри [env.json](/definitions#env-json):
     - `HTTP_TYPE://PEPEUNIT_URL/pepeunit/api/v1/units/get_current_schema/{Unit.uuid}`
@@ -119,8 +120,34 @@
 }
 ```
 
-### Алгоритм действий
+### Алгоритм действий Unit
 
 1. Скачать новую версию файла [env.json](/definitions#env-json) через [REST](/definitions#rest). Переменные `HTTP_TYPE` и `PEPEUNIT_URL` доступны внутри существующего [env.json](/definitions#env-json):
     - `HTTP_TYPE://PEPEUNIT_URL/pepeunit/api/v1/units/env/{Unit.uuid}`
 1. Установить новое состояние для [env.json](/definitions#env-json) у [Unit](/definitions#unit)
+
+## LOG_SYNC - log_sync/pepeunit
+
+:::info Когда вызывается данная команда?
+1. Если команда была вызвана через отдельную кнопку в меню [Unit](/definitions#unit)
+1. Если команда была вызвана через [REST](/definitions#rest) или [GQL](/definitions#gql)
+:::
+
+Данная команда отправляет [Unit](/definitions#unit) запрос на синхронизацию всех логов, которые есть в распоряжении [Unit](/definitions#unit) локально. При этом [Pepeunit](/conception/overview) принудительно удаляет все логи из [Clickhouse](/deployment/dependencies#clickhouse). [Unit](/definitions#unit) в ответ должен собрать все существующие логи и отправить их через [MQTT](/definitions#mqtt) в [Pepeunit](/conception/overview).
+
+### Формат сообщения в топик `log_sync/pepeunit`
+
+```json
+{
+    "COMMAND": "LogSync"
+}
+```
+
+### Алгоритм действий Unit
+
+1. Подготовить логи в нужном формате - [подробнее в разделе с топиком `log/pepeunit`](http://localhost:5173/developer/state-mqtt-send#log-pepeunit-output-base-topic)
+1. Отправить подготовленные логи в топик `log/pepeunit` из раздела `output_base_topic`
+
+:::info
+Данная команда создана с целью упрощения отладки и контроля за [Unit](/definitions#unit). Т.к. не все ошибки можно получить через [MQTT](/definitions#mqtt) сразу же в момент их возникновения.
+:::
