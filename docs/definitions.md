@@ -58,8 +58,8 @@
 ## ACL List
 `ACL List` - это файл, определяющий правила авторизации для [MQTT Broker](#mqtt-broker)
 
-## ChatBot
-`ChatBot` - приложение, позволяющее взаимодействовать с [Backend](#backend) через диалог в чате. Pepeunit [Backend](#backend) использует пакет [AioGram](https://github.com/aiogram/aiogram) как клиент, для взаимодействия с [Telegram Bot API](https://core.telegram.org/bots/api).
+## Chat Bot
+`Chat Bot` - приложение, позволяющее взаимодействовать с [Backend](#backend) через диалог в чате. Pepeunit [Backend](#backend) использует пакет [AioGram](https://github.com/aiogram/aiogram) как клиент, для взаимодействия с [Telegram Bot API](https://core.telegram.org/bots/api).
 
 ## Frontend
 `Frontend` - веб приложение, доступное для скачивания открытым способом и предназаначенное для обеспечения взаимодействия Пользователей c [Backend](#backend) приложением. [Pepeunit Frontend Repository](https://git.pepemoss.com/pepe/pepeunit/pepeunit_frontend)

@@ -28,6 +28,9 @@
 `BACKEND_UNIT_LOG_EXPIRATION` | `86400` | Вермя жизни логов, которые присылают [Unit](/definitions#unit) в секундах
 `TELEGRAM_TOKEN` | - | Токен `Telegram Bot API`, можно получить через `Telegram Bot Father`. Секретный, никому не показывайте
 `TELEGRAM_BOT_LINK` | - | Ссылка на `Telegram Bot` которым управляет [Backend](/definitions#backend). Используется для генерации верификационных ссылок для пользователей бота. Передаётся в `openapi.json`
+`TELEGRAM_ITEMS_PER_PAGE` | `7` | Число пагинируемых элементов при отображении за один раз в `Telegram Bot`
+`TELEGRAM_HEADER_ENTITY_LENGTH` | `15` | Предельная длинна наименований сущностей при отображении в `Telegram Bot`
+`TELEGRAM_GIT_HASH_LENGTH` | `8` | Предельная длинна `hash` [Git Commit](/definitions#git-commit) при отображении в `Telegram Bot`
 `PROMETHEUS_MULTIPROC_DIR` | `./prometheus_metrics` | Дирректория, которую `Prometheus` использует для хранения статистик с нескольких `worker` - `uvicorn`. При старте приложения содержимое дирректории отчищается
 `REDIS_URL` | `redis://redis:6379/0` | Ссылка для доступа к [Redis](/deployment/dependencies#redis), которую использует [Backend](/definitions#backend) для соединения c [Redis](/deployment/dependencies#redis). Инстанс [Redis](/deployment/dependencies#redis) должен быть единым с `MQTT_REDIS_AUTH_URL`
 `MQTT_HOST` | - | Доменное имя или `ip`. Позволяет [Backend](/definitions#backend) управлять и подписываться на топики [EMQX MQTT Broker](/definitions#mqtt-broker). Позволяет Unit связываться с [EMQX MQTT Broker](/definitions#mqtt-broker). Устанавливается в [Unit ENV](/developer/struct-env-json) - в поле `MQTT_URL`

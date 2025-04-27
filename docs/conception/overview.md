@@ -15,6 +15,7 @@
 - [Frontend](/definitions#frontend) - `React`
 - [REST](/definitions#rest) - `Swagger`
 - [GQL](/definitions#gql) - `Strawberry`
+- [ChatBot](/definitions#chat-bot) - `AioGram`
 
 ## Управление топиками
 `Pepeunit` позволяет отслеживать состояние [Unit](/definitions#unit) при помощи системы именования топиков. [UnitNode](/definitions#unitnode) могут образовывать связи `Output` -> `Input` для передачи информации между разными [Unit](/definitions#unit).
