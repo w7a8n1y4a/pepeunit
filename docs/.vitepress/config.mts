@@ -95,11 +95,25 @@ export default withMermaid(defineConfig({
       {
         text: 'Дорожная карта',
         items: [
-          { text: '0.7.0', link: '/roadmap/0_7_0' },
-          { text: '0.8.0', link: '/roadmap/0_8_0' },
-          { text: 'Функционал', link: '/roadmap/functions' },
-          { text: 'Unit', link: '/roadmap/units' },
-          { text: 'Статья на Хабр', link: '/roadmap/habr' },
+          { text: 'Агрегация', link: '/roadmap/agregation' },
+          { text: 'Реестр Репозиториев', link: '/roadmap/regestry-repo' },
+          { text: 'Борды Grafana', link: '/roadmap/boards' },
+          { text: 'Типизация', link: '/roadmap/typing' },
+          { text: 'Библиотеки', link: '/roadmap/libs' },
+          { text: 'Динамическое состояние', link: '/roadmap/dynamic-state' },
+          { text: 'Анализ нагрузки', link: '/roadmap/load-analyse' },
+          { text: 'Алерты', link: '/roadmap/alerts' },
+          { text: 'Монетизация', link: '/roadmap/monetisation' },
+          { text: 'Система грейдов', link: '/roadmap/instance-grade' },
+          { text: 'Федерация', link: '/roadmap/federation' },
+          { text: 'Units', link: '/roadmap/units' },
+        ]
+      },
+      {
+        text: 'Для общественности',
+        items: [
+          { text: 'Статья на Хабр', link: '/society/habr' },
+          { text: 'Видео YouTube', link: '/society/video' },
         ]
       },
       {
