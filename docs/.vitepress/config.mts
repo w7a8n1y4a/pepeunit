@@ -95,6 +95,8 @@ export default withMermaid(defineConfig({
       {
         text: 'Дорожная карта',
         items: [
+          { text: '0.7.0', link: '/roadmap/0_7_0' },
+          { text: '0.8.0', link: '/roadmap/0_8_0' },
           { text: 'Функционал', link: '/roadmap/functions' },
           { text: 'Unit', link: '/roadmap/units' },
           { text: 'Статья на Хабр', link: '/roadmap/habr' },
