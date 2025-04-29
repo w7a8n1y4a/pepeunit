@@ -98,7 +98,6 @@ export default withMermaid(defineConfig({
           { text: 'Агрегация', link: '/roadmap/agregation' },
           { text: 'Реестр Репозиториев', link: '/roadmap/regestry-repo' },
           { text: 'Борды Grafana', link: '/roadmap/boards' },
-          { text: 'Типизация', link: '/roadmap/typing' },
           { text: 'Библиотеки', link: '/roadmap/libs' },
           { text: 'Динамическое состояние', link: '/roadmap/dynamic-state' },
           { text: 'Анализ нагрузки', link: '/roadmap/load-analyse' },
@@ -107,6 +106,12 @@ export default withMermaid(defineConfig({
           { text: 'Система грейдов', link: '/roadmap/instance-grade' },
           { text: 'Федерация', link: '/roadmap/federation' },
           { text: 'Units', link: '/roadmap/units' },
+        ]
+      },
+      {
+        text: 'Анализ решений',
+        items: [
+          { text: 'Внедрение типизации', link: '/analyse/typing' },
         ]
       },
       {
