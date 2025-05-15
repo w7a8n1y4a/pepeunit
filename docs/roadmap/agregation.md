@@ -33,7 +33,7 @@
     - Буферизация
     - Сохранение
 1. После работы go приложения в системе есть обогащённые данные
-1. Конвейер должно быть можно сохранять в json, чтобы создатели Unit могли оставлять их в репозиториях
+1. Конвейер должно быть можно сохранять в yml, чтобы создатели Unit могли оставлять их в репозиториях
 1. На стороне python должна быть возможность получать эти обогащённые данные в зависимости от их типа и настроек конвейера
 1. Должна быть возможность экспорта данных для конкретных топиков
 1. Таблицы clickhose сделать отдельными для каждого рода политики, чтобы запросы были эффективнее
@@ -133,8 +133,74 @@
 1. Расчитывает размер сохраняемых данных, и вписывает его clickhouse или postgres
 
 ## Лимитирование
+- скрытый от пользователя этап
 
 1. Для ёмких конвейеров, нужна система лимитирования
+
+## Пример yml
+
+```yml
+version: 1.0  # Версия схемы конфигурации
+
+pipeline:
+  active_period:
+    type: "date_range"  # permanent/from_date/to_date/date_range
+    start: 2023-11-15T00:00:00Z
+    end: 2024-11-15T00:00:00Z
+
+  filters:
+    type_input_value: "number" # number/text/image/binary
+    type_value_filtering: "whitelist" # null/whitelist/blacklist
+        values: [1,2,3,4,5]
+    type_value_threshold: "range" # null/min/max/range
+        min: -40
+        max: 120
+    max_rate: "10s" # Ns/Nm/Nh
+    last_unique_check: false
+    max_size: 10 # in symbols
+
+  transformations:
+    - type: "numeric"  # numeric/image/file
+      multiplication: true
+        coefficient: 0.3
+      round: true
+        decimal_point: 3
+    - type: "image"  # numeric/image/file
+      resize: true
+        width: 640
+        hight: 320
+      pixel_density: true
+        dpi: 300
+      clipping: true
+        x: 50
+        y: 50
+        width: 240
+        hight: 120
+      format: "jpg" # null/png/jpg/svg/webp
+    - type: "file"  # numeric/image/file
+      compression: tgz # null/tgz/tar/zip
+        wbits: 0
+        level: 15
+
+  processing_policy:
+    - type: "last_value"
+    - type: "n_records"
+      count_records: 1024  # 1-8192
+    - type: "time_window"
+      start: 2023-11-15T00:00:00Z
+      end: 2024-11-15T00:00:00Z
+    - type: "aggregation"
+      window_size: "1h"  # 1m, 5m, 1h, 12h
+      aggregation_functions: "avg" # avg/min/max/sum
+    - type: "video"
+      frame_rate_per_second: dynamic # dynamic/Nframe
+      codec: H.264/AVC # из ffmpeg
+
+  save_buffering:
+    # stage only for n_records and time_window
+    - max_items: 10 # 1-2048
+    - accumulation_time: 5m # 1m-12h
+```
 
 ## Ожидания
 
