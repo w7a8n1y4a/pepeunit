@@ -224,8 +224,7 @@ pipeline:
     - type: "n_records"
       count_records: 1024  # 1-8192
     - type: "time_window"
-      relative:
-        window_size: "1h" # 1m, 5m, 1h, 12h
+      window_size: "1h" # 1m, 5m, 1h, 12h
     - type: "aggregation"
       window_size: "1h"  # 1m, 5m, 1h, 12h
       aggregation_functions: "avg" # avg/min/max/sum
