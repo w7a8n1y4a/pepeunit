@@ -1,4 +1,4 @@
-# Публичные Repo из github и gitlab
+# 0.8.0 Публичные Repo из github и gitlab
 
 ## Реализация
 Создаётся repository_regestry:
