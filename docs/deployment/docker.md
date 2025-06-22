@@ -70,7 +70,7 @@ cd pepeunit_deploy
 
 Отличие состоит в том, что локальный рассчитан на эксплуатацию в локальной сети, а глобальный позволяет обращаться к инстансу [Pepeunit](/conception/overview) по доменному имени через `https`.
 
-Выберите один из файлов и уберите у него приставу `.example`
+Выберите один из файлов и уберите у него приставку `.example`
 - `.env.local.example` -> `.env.local`
 - `.env.global.example` -> `.env.global`
 
@@ -103,20 +103,30 @@ mv .env.local.example .env.local
 
 Выполните команду генерирующую итоговые `.env.service` файлы в дирректории `env/.env.service`:
 ```bash
-$> python3 make_env.py
-2025-02-03 04:35:32,123 - INFO - Run make envs
-2025-02-03 04:35:32,123 - INFO - Run search .env.local or .env.global
-2025-02-03 04:35:32,123 - INFO - The .env.local file was found
-2025-02-03 04:35:32,123 - INFO - Load variables from .env.local
-2025-02-03 04:35:32,123 - INFO - Generate .env.emqx
-2025-02-03 04:35:32,123 - INFO - Save env/.env.emqx
-2025-02-03 04:35:32,123 - INFO - Generate .env.postgres
-2025-02-03 04:35:32,124 - INFO - Save env/.env.postgres
-2025-02-03 04:35:32,124 - INFO - Generate .env.frontend
-2025-02-03 04:35:32,124 - INFO - Save env/.env.frontend
-2025-02-03 04:35:32,124 - INFO - Generate .env.backend
-2025-02-03 04:35:32,124 - INFO - Save env/.env.backend
-2025-02-03 04:35:32,124 - INFO - Environment file generation is complete
+$> python make_env.py
+2025-06-22 18:22:58,575 - INFO - Run make envs
+2025-06-22 18:22:58,575 - INFO - Run search .env.local or .env.global
+2025-06-22 18:22:58,575 - INFO - The .env.global file was found
+2025-06-22 18:22:58,576 - INFO - Load variables from .env.global
+2025-06-22 18:22:58,576 - INFO - Generate .env.emqx
+2025-06-22 18:22:58,576 - INFO - Save env/.env.emqx
+2025-06-22 18:22:58,576 - INFO - Generate .env.postgres
+2025-06-22 18:22:58,576 - INFO - Save env/.env.postgres
+2025-06-22 18:22:58,576 - INFO - Generate .env.frontend
+2025-06-22 18:22:58,576 - INFO - Save env/.env.frontend
+2025-06-22 18:22:58,577 - INFO - Generate .env.backend
+2025-06-22 18:22:58,577 - INFO - Existing .env.backend found, loading sensitive keys
+2025-06-22 18:22:58,577 - INFO - Load variables from env/.env.backend
+2025-06-22 18:22:58,577 - INFO - Save env/.env.backend
+2025-06-22 18:22:58,577 - INFO - Generate .env.grafana
+2025-06-22 18:22:58,577 - INFO - Save env/.env.grafana
+2025-06-22 18:22:58,577 - INFO - Generate .env.clickhouse
+2025-06-22 18:22:58,577 - INFO - Save env/.env.clickhouse
+2025-06-22 18:22:58,577 - INFO - Generate .env.backend_data_pipe
+2025-06-22 18:22:58,578 - INFO - Existing .env.backend found, loading sensitive keys
+2025-06-22 18:22:58,578 - INFO - Load variables from env/.env.backend
+2025-06-22 18:22:58,578 - INFO - Save env/.env.backend_data_pipe
+2025-06-22 18:22:58,578 - INFO - Environment file generation is complete
 ```
 
 :::danger
@@ -124,7 +134,7 @@ $> python3 make_env.py
 :::
 
 :::danger
-Вам может потребоваться внести изменения в конфигурацию отдельных сервисов для тонкой настройки. [Подробнее о переменных окружения Backend и Frontend](/deployment/env-variables)
+Вам может потребоваться внести изменения в конфигурацию отдельных сервисов для тонкой настройки. [Подробнее о переменных окружения Backend, Backend Data Pipe и Frontend](/deployment/env-variables)
 :::
 
 ## Настройка Nginx
@@ -252,24 +262,21 @@ INFO - 2025-03-14 01:11:51,257 - Connect to mqtt server: dcemqx.pepemoss.com:188
 INFO - 2025-03-14 01:11:51,264 - [CONNECTION MADE]
 INFO - 2025-03-14 01:11:53,243 - MQTT subscriptions initialized in this worker
 INFO - 2025-03-14 01:11:53,243 - [SEND SUB] 1 [b'dcunit.pepeunit.com/+/+/+/pepeunit']
-INFO - 2025-03-14 01:11:53,244 - [SEND SUB] 2 [b'dcunit.pepeunit.com/+/pepeunit']
 [2025-03-14 01:11:53 +0000] [35] [INFO] Application startup complete.
 INFO - 2025-03-14 01:11:53,249 - [SUBACK] 1 (0,)
-INFO - 2025-03-14 01:11:53,249 - [SUBACK] 2 (0,)
 INFO - 2025-03-14 01:11:53,268 - Another worker already subscribed to MQTT topics
 [2025-03-14 01:11:53 +0000] [36] [INFO] Application startup complete.
 ```
 :::
 
 :::warning
-Стоит обратить особое внимание на строчки:
+Стоит обратить особое внимание на строчку:
 
 ```bash
 INFO - 2025-03-14 01:11:53,249 - [SUBACK] 1 (0,)
-INFO - 2025-03-14 01:11:53,249 - [SUBACK] 2 (0,)
 ```
 
-Они отображают смог ли [Backend](/definitions#backend) подписаться на топики `dcunit.pepeunit.com/+/+/+/pepeunit` и `dcunit.pepeunit.com/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/definitions#backend) `не смог` подписаться на основные топики. Обычно это связано со следующими недочётами:
+Она отображает смог ли [Backend](/definitions#backend) подписаться на топик `dcunit.pepeunit.com/+/+/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/definitions#backend) `не смог` подписаться на основной топик. Обычно это связано со следующими недочётами:
 1. Закрытым портом `1883`
 1. Настройкой портов сервиса `emqx` в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
 1. Ошибками в настройках [EMQX MQTT Broker](/definitions#mqtt-broker) и [Backend](/definitions#backend), например `MQTT_REDIS_AUTH_URL` или `REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables#backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies#redis). За первичную авторизацию отвечает именно [Redis](/deployment/dependencies#redis).
@@ -331,6 +338,7 @@ INFO - 2025-03-14 01:11:53,249 - [SUBACK] 2 (0,)
     ```bash
     docker exec -it frontend /bin/sh
     docker exec -it backend /bin/bash
+    docker exec -it datapipe /bin/sh
     docker exec -it emqx /bin/bash
     docker exec -it postgres /bin/bash
     docker exec -it redis /bin/bash

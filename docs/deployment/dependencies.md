@@ -4,7 +4,7 @@
 
 [Postgresql](https://www.postgresql.org/docs/) - открытая, кластерная реляционная база данных с языком запросов `SQL`. [Pepeunit](/conception/overview) использует её для:
 
-1. Хранения информации о всех сущностях - [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode)
+1. Хранения информации о всех сущностях - [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode), [DataPipe](/definitions#datapipe)
 1. Хранения [шифрованной](/mechanics/cipher) информации
 1. Хранения информации о [доступах](/mechanics/permission) и [видимости](/mechanics/visibility)
 

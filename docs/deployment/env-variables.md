@@ -59,6 +59,27 @@
 - [Переменные нагрузочного тестирования REST и GQL](/tests/load-test#тестирование-rest-и-gql)
 :::
 
+## Backend Data Pipe
+
+:::warning
+Пример заполнения переменных есть в [Backend Data Pipe](/definitions#backend-data-pipe), файл `.env_example`. Обычно нужно заполнить только основные переменные т.к. есть [файл генерации .env файлов для сервисов](/deployment/docker)
+:::
+
+Переменная | По умолчанию | Зачем нужна?
+-- | -- | -- 
+`BACKEND_DOMAIN` | - | Доменное имя или `ip`. Влияет на ссылки которые генерирует [Backend](/definitions#backend). Позволяет [Unit](/definitions#unit) связываться с [Backend](/definitions#backend). Устанавливается в [Unit ENV](/developer/struct-env-json) - в поле `PEPEUNIT_URL`
+`BACKEND_SECRET_KEY` | - | `32 байтовый ключ` в формате `base64`. Отвечает за подпись токенов авторизации. В случае изменения все `jwt` токены созданные до изменения - становятся не действительными
+`SQLALCHEMY_DATABASE_URL` | - | Ссылка для подключения к [Postgresql](/deployment/dependencies#postgresql)
+`CLICKHOUSE_DATABASE_URL` | - | Ссылка для подключения к [Clickhouse](/deployment/dependencies#clickhouse)
+`REDIS_URL` | `redis://redis:6379/0` | Ссылка для доступа к [Redis](/deployment/dependencies#redis), которую использует [Backend](/definitions#backend) для соединения c [Redis](/deployment/dependencies#redis). Инстанс [Redis](/deployment/dependencies#redis) должен быть единым с `MQTT_REDIS_AUTH_URL`
+`MQTT_HOST` | - | Доменное имя или `ip`. Позволяет [Backend](/definitions#backend) управлять и подписываться на топики [EMQX MQTT Broker](/definitions#mqtt-broker). Позволяет Unit связываться с [EMQX MQTT Broker](/definitions#mqtt-broker). Устанавливается в [Unit ENV](/developer/struct-env-json) - в поле `MQTT_URL`
+`MQTT_PORT` | `1883` | Порт по которому [Unit](/definitions#unit) и [Backend](/definitions#backend) связываются c [EMQX MQTT Broker](/definitions#mqtt-broker). Устанавливается в [Unit ENV](/developer/struct-env-json) - в поле `MQTT_PORT`
+`MQTT_KEEPALIVE` | `60` | Максимальный период в секундах между отправками `ping` от [Backend](/definitions#backend) до [EMQX MQTT Broker](/definitions#mqtt-broker)
+`CONFIG_SYNC_INTERVAL` | `60` | Период времени в секундах между повторными запросами конфигурации [YML](/definitions#yml)
+`NRECORDS_CLEANUP_INTERVAL` | `60` | Период времени в секундах между запусками задачи удаления накопившихся всверх предела записей `N Records`
+`BUFFER_FLUSH_INTERVAL` | `5` | Период времени в секундах, по истечении которого, не зависимо от числа пришедших записей, данные будут сохранены в [Clickhouse](/deployment/dependencies#clickhouse) или [Postgresql](/deployment/dependencies#postgresql)
+`BUFFER_MAX_SIZE` | `1000` | Предельная длинна очереди, при превышении которой запись в [Clickhouse](/deployment/dependencies#clickhouse) или [Postgresql](/deployment/dependencies#postgresql) выполняется не дожидаясь интервала `BUFFER_FLUSH_INTERVAL`
+
 ## Frontend
 
 :::warning

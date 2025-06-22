@@ -70,6 +70,9 @@
 ## Backend
 `Backend` - приложение размещаемое на сервере, обеспечивающее обработку, хранение и анализ информации, а так же предоставляющее разные [API](#api) для взаимодействия. [Pepeunit Backend Repository](https://git.pepemoss.com/pepe/pepeunit/pepeunit_backend.git)
 
+## Backend Data Pipe
+`Backend Data Pipe` - отдельное от `Backend` приложение размещаемое на сервере, обеспечивающее работу `DataPipe`. [Pepeunit Backend Data Pipe Repository](https://git.pepemoss.com/pepe/pepeunit/pepeunit_data_pipe.git)
+
 ## Grafana
 [Grafana](https://grafana.com/) - платформа с открытым исходным кодом, для визуализации данных и их анализа. В рамках [Pepeunit](/conception/overview) поставщиком данных выступает `Prometheus`. Доступ до интерфейса `Grafana` есть только у [Администратора](/mechanics/roles#admin), при входе требуется пароль.
 
