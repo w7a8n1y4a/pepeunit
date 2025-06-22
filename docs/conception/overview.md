@@ -17,7 +17,16 @@
 - [GQL](/definitions#gql) - `Strawberry`
 - [ChatBot](/definitions#chat-bot) - `AioGram`
 
+## Конвейеры обработки данных
+
+`Pepeunit` способен производительно накапливать, предварительно отчищенные и трансформированные данные в [Clickhouse](/deployment/dependencies#clickhouse) и [Postgresql](/deployment/dependencies#postgresql). Обработка производится на основании конвейерных конфигураций в [YML](/definitions#yml) формате. Cкорость обработки обеспечивает отдельный микросервис написанный на [Golang](/definitions#golang). Доступно `4` основных типа накопления данных:
+- `Last Value` - сохранение последнего значения
+- `N Records` - сохранение `N` последних записей
+- `Time Window` - сохранение всех записей за установленное временное окно
+- `Aggregation` - сохранение данных аггрегированных при помощи фукнций: `avg, sum, min, max` - за выбранное временное окно
+
 ## Управление топиками
+
 `Pepeunit` позволяет отслеживать состояние [Unit](/definitions#unit) при помощи системы именования топиков. [UnitNode](/definitions#unitnode) могут образовывать связи `Output` -> `Input` для передачи информации между разными [Unit](/definitions#unit).
 
 ## Настройка политик доступа
