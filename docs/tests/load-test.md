@@ -1,7 +1,7 @@
 # Нагрузочные тесты - Backend
 
 :::info
-Нагрузочные тесты - это часть репозитория [Backend](/definitions#backend), единственная задача, которой проверка выдерживает ли [Backend](/definitions#backend) заданные число запросов в секунду. 
+Нагрузочные тесты - это часть репозитория [Backend](/definitions#backend), единственная задача, которой проверка выдерживает ли [Backend](/definitions#backend) заданное число запросов в секунду. 
 :::
 
 ## Тестирование MQTT
@@ -17,12 +17,14 @@ python -m tests.load.load_test_mqtt
 `TEST_LOAD_MQTT_DURATION` | Время выполнения теста в секундах
 `TEST_LOAD_MQTT_UNIT_COUNT` | Число [Unit](/definitions#unit) которые будут выполнять запросы
 `TEST_LOAD_MQTT_RPS` | Нагрузка которую будет создавать каждый [Unit](/definitions#unit)
+`TEST_LOAD_MQTT_VALUE_TYPE` | Тип отправляемых переменных `Text` или `Number`
 `TEST_LOAD_MQTT_DUPLICATE_COUNT` | Число повторяюшихся сообщений подряд
 `TEST_LOAD_MQTT_MESSAGE_SIZE` | Размер [MQTT](/definitions#mqtt) сообщений в символах
+`TEST_LOAD_MQTT_POLICY_TYPE` | Тип политики для обработки всех сообщений в тесте: `LastValue`, `NRecords`, `TimeWindow`, `Aggregation`
 `TEST_LOAD_MQTT_WORKERS` | Число процессов `multiprocessing` создающих нагрузку
 
 :::danger
-[Backend](/definitions#backend) использует только `1` воркер `Gunicorn` для обработки [MQTT](/definitions#mqtt) сообщений. Он способен обработать `~4000rps` пользовательских топиков `domain.com/+/pepeunit`.
+[Backend](/definitions#backend) использует всегда только `1` воркер `Gunicorn` для обработки [MQTT](/definitions#mqtt) сообщений. Он способен обработать `~4000 rps` сообщений из системных топиков `domain.com/+/+/+/pepeunit`. Для топиков [DataPipe](/definitions#datapipe) c паттерном `domain.com/+/pepeunit` количество сообщений может составлять `~25000 rps`.
 :::
 
 ## Тестирование REST и GQL
