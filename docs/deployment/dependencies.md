@@ -31,7 +31,7 @@
 [Redis](https://redis.io/) - `NoSQL` кластерная база данных использующая парадигму `key-value`
 
 1. Обеспечивает кэширование и хранение промежуточной информации о состоянии [UnitNode](/definitions#unitnode), во время обращения [Unit](/definitions#unit) к [MQTT Broker](/definitions#mqtt-broker) через топики.
-1. Используется также для авторизации [Backend](/definitions#backend) в момент подписки на основные топики `unit.example.com/+/pepeunit` и `unit.example.com/+/+/+/pepeunit` в [MQTT Broker](/definitions#mqtt-broker).
+1. Используется также для авторизации [Backend](/definitions#backend) в момент подписки на основной топик `unit.example.com/+/+/+/pepeunit` в [MQTT Broker](/definitions#mqtt-broker). Подписка на `unit.example.com/+/pepeunit` осуществляется стандартными средствами через rest.
 
 ## Общая схема взаимодействия
 

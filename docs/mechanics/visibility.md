@@ -50,6 +50,7 @@
 - Создание связей для `Input`
 - Настройки [UnitNode](/definitions#unitnode)
 - Выдача [доступов](/mechanics/permission)
+- Все аспекты управления [DataPipe](/definitions#datapipe)
 
 ---
 
