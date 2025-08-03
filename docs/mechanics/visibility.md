@@ -16,21 +16,31 @@
 
 - предоставляет [доступ](/mechanics/permission) до сущности только создателю и агентам которых укажет создатель. Работает в пределах [инстанса](/definitions#instance)
 
+:::danger
+Сущность [RepositoryRegisty](/definitions#repositoryregistry) уникальная и имеет только два типа `Public` и `Private`. Предоставление доступа к `Private` сущности отличается, и завязано на ввод пользователями [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория). Создатель не может сам предоставить доступ, это связано с бизнес логикой работы этой сущности
+:::
+
 ---
 
 # Возможности создателя сущностей
 
 Создатель имеет `абсолютно полный доступ` по управлению своими cущностями.
 
+### RepositoryRegistry
+- Изменение своих [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория)
+- Просмотр размера репозитория
+- Создание [Repo](/definitions#repo) на основе [RepositoryRegisty](/definitions#repositoryregistry)
+- Обновление [Git](/definitions#git) репозитория внутри [Pepeunit](/conception/overview)
+- Удаление [RepositoryRegisty](/definitions#repositoryregistry) если у него нет связанных [Repo](/definitions#repo)
+
 ### Repo
 
 - Просмотр распределения [Unit](/definitions#unit) по версиям
 - Создание [Unit](/definitions#unit) на основе [Repo](/definitions#repo)
-- Обновление [Git](/definitions#git) репозитория внутри [Pepeunit](/conception/overview)
 - Обновление всех связанных [Unit](/definitions#unit)
 - Настройки [Repo](/definitions#repo)
 - Выдача [доступов](/mechanics/permission)
-- Удаление [Repo](/definitions#repo)
+- Удаление [Repo](/definitions#repo) если у него нет связанных [Unit](/definitions#repo)
 
 ### Unit
 
@@ -40,7 +50,7 @@
 - Скачивание `Firmware` и скомпилированных пакетов
 - Команды обновления по [MQTT](/definitions#mqtt) - `Firmware`, `Schema` и `Env`
 - Настройки [Unit](/definitions#unit)
-- Выдача [доступов](/mechanics/permission)оступов
+- Выдача [доступов](/mechanics/permission)
 - Удаление [Unit](/definitions#unit)
 
 ### UnitNode
@@ -57,6 +67,12 @@
 # Возможности агентов для видимых сущностей
 
 Агенты имеют ограниченный [доступ](/mechanics/permission) до чужих сущностей, которые они видят с помощью `системы видимости`:
+
+### RepositoryRegistry
+- Изменение своих [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория)
+- Просмотр размера репозитория. Доступно для `Private` и `Public` репозиториев не зависимо от [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория)
+- Создание [Repo](/definitions#repo) на основе [RepositoryRegisty](/definitions#repositoryregistry). Для `Public` доступно всем, для `Private` доступно только если у [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория) статус `Valid`
+- Обновление [Git](/definitions#git) репозитория внутри [Pepeunit](/conception/overview). Для `Public` доступно всем, для `Private` доступно только если у [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория) статус `Valid`
 
 ### Repo
 
