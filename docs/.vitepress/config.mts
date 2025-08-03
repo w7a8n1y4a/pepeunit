@@ -104,7 +104,8 @@ export default withMermaid(defineConfig({
           { text: 'Монетизация', link: '/roadmap/monetisation' },
           { text: 'Система грейдов', link: '/roadmap/instance-grade' },
           { text: 'Федерация', link: '/roadmap/federation' },
-          { text: 'Units', link: '/roadmap/units' },
+          { text: '> 1.0.0 Units', link: '/roadmap/units' },
+          { text: '> 1.0.0 Рефактор фронтенда', link: '/roadmap/frontend-refactor' },
         ]
       },
       {
