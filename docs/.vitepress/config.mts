@@ -96,7 +96,6 @@ export default withMermaid(defineConfig({
       {
         text: 'Дорожная карта',
         items: [
-          { text: 'Реестр Репозиториев', link: '/roadmap/regestry-repo' },
           { text: 'Борды Grafana', link: '/roadmap/boards' },
           { text: 'Библиотеки', link: '/roadmap/libs' },
           { text: 'Динамическое состояние', link: '/roadmap/dynamic-state' },
