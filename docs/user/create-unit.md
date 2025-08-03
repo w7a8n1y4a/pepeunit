@@ -1,10 +1,8 @@
 # Создание Unit в Pepunit
 
-:::warning Что нужно?
-Достаточно настроенного [Repo](/definitions#repo) у которого указана `default` [ветка](/definitions#git-branch).
+:::info Где найти?
+Перейдите в нужный вам [Repo](/definitions#repo) и найдите подсвеченную зелёным кнопку `Create Unit`.
 :::
-
-Перейдите в нужный вам [Repo](/definitions#repo) и найдите подсвеченную зелёным кнопку создания [Unit](/definitions#unit).
 
 ## Имя вашего Unit
 

@@ -9,5 +9,5 @@
 3. `Auto-update = False` и `Commit = <best-commit-pick>` - если установить [коммит](/definitions#git-commit) и нажать `Update` все [Unit](/definitions#unit) у которых настроено автообновление от [Repo](/definitions#repo) получат запрос на обновление, соответствующий текущей [ветке](/definitions#git-branch) и [коммиту](/definitions#git-commit).
 
 :::warning
-Данные способы обновления [Unit](/definitions#unit) будут работать только для [Unit](/definitions#unit) с установленным автоматическим обновлением. Это сделано чтобы владельцы [Repo](/definitions#repo) не могли по своему желанию обновить вашу версию [Unit](/definitions#unit), если вы желаете оставаться на старых версиях.
+Данные способы обновления [Unit](/definitions#unit) будут работать только для [Unit](/definitions#unit) с установленным автоматическим обновлением. Это сделано чтобы можно было разделять [Unit](/definitions#unit) на группы по способам обновлений
 :::
