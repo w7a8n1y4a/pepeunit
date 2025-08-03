@@ -31,6 +31,7 @@
 1. Создайте следующий минимальный набор пустых файлов:
     - `env_example.json`
     - `.gitignore`
+    - `.pepeignore`
     - `LICENSE` - на ваш вкус
     - `readme.md`
     - `schema_example.json`
@@ -45,6 +46,23 @@ tmp
 ```
 
 Не забудьте указать папку с вашей `IDE` это может быть `.idea`, `.nvim` или любая другая. Более подробно о [заполнении .gitignore](/developer/struct-git-repo#как-заполнить-gitignore).
+
+## Заполнение .pepeignore
+
+[.pepeignore](/definitions#pepeignore) позволяет убрать файлы из итогового архива генерируемого [Pepeunit](/conception/overview). Синтаксис аналогичен `.gitignore`.
+
+Например:
+```pepeignore
+.git
+.gitignore
+.pepeignore
+env_example.json
+schema_example.json
+docs
+model
+README.md
+LICENSE
+```
 
 ## Заполнение schema_example.json
 
