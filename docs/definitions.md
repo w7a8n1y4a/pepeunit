@@ -76,8 +76,11 @@
 ## Grafana
 [Grafana](https://grafana.com/) - платформа с открытым исходным кодом, для визуализации данных и их анализа. В рамках [Pepeunit](/conception/overview) поставщиком данных выступает `Prometheus`. Доступ до интерфейса `Grafana` есть только у [Администратора](/mechanics/roles#admin), при входе требуется пароль.
 
+## RepositoryRegistry
+`RepositoryRegistry` - это представление [Pepeunit](/conception/overview) о внешнем [Git](#git) репозитории, например из [Gitlab](#gitlab) или [Github](#github). Данная сущность содержит в себе полный клон репозитория и синхронизирует своё состояние с внешним репозиторием. На основе данной сущности создаются [Repo](#repo).
+
 ## Repo
-`Repo` - это представление [Pepeunit](/conception/overview) о внешнем [Git](#git) репозитории, например из [Gitlab](#gitlab) или [Github](#github). Данная сущность содержит в себе полный клон репозитория и синхронизирует своё состояние с внешним репозиторием, что позволяет [Pepeunit](/conception/overview) быстро создавать микропрограммы для [Unit](#unit).
+`Repo` - это внутренняя сущность [Pepeunit](/conception/overview) соединяющая [RepositoryRegistry](#repositoryregistry) и [Unit](#unit), позволяющая управлять сразу целым пулом [Unit](#unit). Можно настроить обновления сразу для всех связанных [Unit](#unit) и в ручную или автоматически их обновлять. Основная цель существования этой сущности - отвязка [Unit](#unit) по логике от [RepositoryRegistry](#repositoryregistry).
 
 ## Unit
 `Unit` - это представление о физичеcком [IoT](#iot) устройстве в [Pepeunit](/conception/overview), данная сущность создаётся на основе [Repo](#repo) и несёт в себе информацию о конкретном физическом [IoT](#iot) устройстве, а так же о версии микропрограммы доступной в [Repo](#repo).

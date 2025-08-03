@@ -50,6 +50,7 @@ export default withMermaid(defineConfig({
       {
         text: 'Руководство Пользователя',
         items: [
+          { text: 'Создание RepositoryRegistry', link: '/user/create-repository-registry' },
           { text: 'Создание Repo', link: '/user/create-repo' },
           { text: 'Настройка Repo', link: '/user/settings-repo' },
           { text: 'Создание Unit', link: '/user/create-unit' },

@@ -4,7 +4,7 @@
 
 [Postgresql](https://www.postgresql.org/docs/) - открытая, кластерная реляционная база данных с языком запросов `SQL`. [Pepeunit](/conception/overview) использует её для:
 
-1. Хранения информации о всех сущностях - [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode), [DataPipe](/definitions#datapipe)
+1. Хранения информации о всех сущностях - [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode), [DataPipe](/definitions#datapipe)
 1. Хранения [шифрованной](/mechanics/cipher) информации
 1. Хранения информации о [доступах](/mechanics/permission) и [видимости](/mechanics/visibility)
 
@@ -32,6 +32,7 @@
 
 1. Обеспечивает кэширование и хранение промежуточной информации о состоянии [UnitNode](/definitions#unitnode), во время обращения [Unit](/definitions#unit) к [MQTT Broker](/definitions#mqtt-broker) через топики.
 1. Используется также для авторизации [Backend](/definitions#backend) в момент подписки на основной топик `unit.example.com/+/+/+/pepeunit` в [MQTT Broker](/definitions#mqtt-broker). Подписка на `unit.example.com/+/pepeunit` осуществляется стандартными средствами через rest.
+1. `Stream` используется для синхронизации конфигураций [Backend](/definitions#backend) и [DataPipe](/definitions#datapipe) сервисом.
 
 ## Общая схема взаимодействия
 

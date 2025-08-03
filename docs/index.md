@@ -21,12 +21,14 @@ features:
     details: Управление устройствами через MQTT, REST, GQL, Frontend и Telegram Bot
   - title: Pipeline Data Processing
     details: Опциональная обработка данных конвейерами-обогатителями с сохранением в ClickHouse
+  - title: Federation
+    details: Соединяйте экземпляры Pepeunit в единую федеративную сеть для связи между IoT-устройствами
+  - title: Repository Registry
+    details: Открытый реестр репозиториев для создания Unit
   - title: Topic Managment
     details: Система именования тем для отбражения данных и/или быстрого взаимодействия между IoT устройствами
   - title: Access Policies
     details: Настройка уровней доступа User-Unit и Unit-Unit с учетом ролей Пользователей и уровней видимости Repo, Unit и UnitNode
-  - title: Federation
-    details: Соединяйте экземпляры Pepeunit в единую федеративную сеть для связи между IoT-устройствами
 ---
 
 <style>
