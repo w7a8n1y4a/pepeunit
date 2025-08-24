@@ -92,4 +92,45 @@ Dashboard содержит шаблоны, а шаблоны работают с
 
 Возможность импортировать уже существующие данные в систему, формат нужно проверять в оответствии с текущими настройками DataPipe
 
-Эта функция сделает систему гараздо актуальнее, наверняка данные кто-то собирает уже давно
+При появлении не соответствия сразу ошибка
+
+1. Для каждой строки смотрим принадлежность интервалу из ActivePeriod
+2. Фильтруем типами Text и Number, по приводимости к str и int
+3. Фильтруем чёрными и белыми списками
+4. Фильтруем диапазонами
+5. Проверяем max_rate для значений у window_entry и n_last_entry
+6. Проверяем last_unique_check для значений у window_entry и n_last_entry
+7. Проверяем max_size для всех
+8. Из трансформации работает только round_decimal_point и только для чисел
+9. create_datetime монотонно возрастает предыдущий меньше текущего
+10. Проверки в зависимости от типа
+    1. window_entry
+        - state
+        - state_type - известен заранее
+        - create_datetime
+        - expiration_datetime - рассчитывается на основе create_datetime
+        - size - рассчитывается
+
+        1. create_datetime должен быть больше чем текущее время минус ProcessingPolicyConfig.time_window_size, но меньше чем текущее время
+
+    2. n_last_entry
+        - state
+        - state_type - известен заранее
+        - create_datetime
+        - max_count - известен заранее
+        - size - рассчитывается
+
+        1. проверяем что общее число записей, меньше или равно max_count. Можно считать инкремент
+
+    3. agregation_entry
+        - state
+        - aggregation_type - известен заранее
+        - time_window_size - известен заранее
+        - create_datetime
+        - start_window_datetime
+        - end_window_datetime
+
+        1. start_window_datetime < end_window_datetime
+        2. start_window_datetime, end_window_datetime ровные и имеют разницу в time_window_size
+        3. start_window_datetime, end_window_datetime имеют разницу в time_window_size
+        4. create_datetime должен быть равен end_window_datetime
