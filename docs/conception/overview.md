@@ -8,14 +8,9 @@
 
 `Pepeunit` способен на основе внешних [Git](/definitions#git) репозиториев из [Gitlab](/definitions#gitlab) и [Github](/definitions#github), создавать готовые к использованию программы - это могут быть программы на основе [Интерпритируемых](/definitions#interpreterable) или [Компилируемых](/definitions#compilable) языков программирования.
 
-## Управление устройствами IoT
+## Федеративное взаимодействие
 
-`Pepeunit` предоставляет несколько способов взаимодействия с [Unit](/definitions#unit)
-- [MQTT](/definitions#mqtt) - `EMQX`
-- [Frontend](/definitions#frontend) - `React`
-- [REST](/definitions#rest) - `Swagger`
-- [GQL](/definitions#gql) - `Strawberry`
-- [ChatBot](/definitions#chat-bot) - `AioGram`
+`Pepeunit` - федеративная платформа, отдельные [инстансы](/definitions#instance) которой, могут узнавать о других [инстансах](/definitions#instance) и объединятся в большую сеть для взаимодействия. [Unit](/definitions#unit) могут взаимодействовать с другими [Unit](/definitions#unit) даже если они находятся на разных [инстансах](/definitions#instance).
 
 ## Конвейеры обработки данных
 
@@ -25,6 +20,21 @@
 - `Time Window` - сохранение всех записей за установленное временное окно
 - `Aggregation` - сохранение данных аггрегированных при помощи фукнций: `avg, sum, min, max` - за выбранное временное окно
 
+## Интеграция с Grafana
+
+`Pepeunit` - позволяет создавать кастомные [Dashboard](/definitions#dashboard) из [Visualization](/definitions#visualization). В качестве данных служат [UnitNode](/definitions#unitnode) с настроенными [DataPipe](/deployment/dependencies#datapipe)
+
+
+## Управление устройствами IoT
+
+`Pepeunit` предоставляет несколько способов взаимодействия с [Unit](/definitions#unit)
+- [MQTT](/definitions#mqtt) - `EMQX`
+- [Frontend](/definitions#frontend) - `React`
+- [REST](/definitions#rest) - `Swagger`
+- [GQL](/definitions#gql) - `Strawberry`
+- [ChatBot](/definitions#chat-bot) - `AioGram`
+
+
 ## Управление топиками
 
 `Pepeunit` позволяет отслеживать состояние [Unit](/definitions#unit) при помощи системы именования топиков. [UnitNode](/definitions#unitnode) могут образовывать связи `Output` -> `Input` для передачи информации между разными [Unit](/definitions#unit).
@@ -32,7 +42,3 @@
 ## Настройка политик доступа
 
 `Pepeunit` позволяет регулировать уровни [доступа](/mechanics/permission) `Пользователь-Unit` и `Unit-Unit`. Глубина взаимодействия с платформой определяется [ролью Пользователя](/mechanics/roles) и [видимостью](/mechanics/visibility) отдельных сушностей [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode).
-
-## Федеративное взаимодействие
-
-`Pepeunit` - федеративная платформа, отдельные [инстансы](/definitions#instance) которой, могут узнавать о других [инстансах](/definitions#instance) и объединятся в большую сеть для взаимодействия. [Unit](/definitions#unit) могут взаимодействовать с другими [Unit](/definitions#unit) даже если они находятся на разных [инстансах](/definitions#instance).

@@ -73,9 +73,6 @@
 ## Backend Data Pipe
 `Backend Data Pipe` - отдельное от `Backend` приложение размещаемое на сервере, обеспечивающее работу `DataPipe`. [Pepeunit Backend Data Pipe Repository](https://git.pepemoss.com/pepe/pepeunit/pepeunit_data_pipe.git)
 
-## Grafana
-[Grafana](https://grafana.com/) - платформа с открытым исходным кодом, для визуализации данных и их анализа. В рамках [Pepeunit](/conception/overview) поставщиком данных выступает `Prometheus`. Доступ до интерфейса `Grafana` есть только у [Администратора](/mechanics/roles#admin), при входе требуется пароль.
-
 ## RepositoryRegistry
 `RepositoryRegistry` - это представление [Pepeunit](/conception/overview) о внешнем [Git](#git) репозитории, например из [Gitlab](#gitlab) или [Github](#github). Данная сущность содержит в себе полный клон репозитория и синхронизирует своё состояние с внешним репозиторием. На основе данной сущности создаются [Repo](#repo).
 
@@ -93,6 +90,15 @@
 
 ## DataPipe
 `DataPipe` - это модуль [Pepeunit](/conception/overview), состоящий из конфигурации [YML](#yml), отдельного микросервиса на [Golang](#golang) и системы управления. Предназначен для производительного накопления данных из топиков `UnitNode` согласно настройкам из [YML](#yml). Микросервис подписывается на все топики с паттерном `example.com/+/pepeunit` и если работа `DataPipe` активирована в `UnitNode`, проводит процесс описанный в [YML](#yml). [Подробнее о настройке DataPipe](/user/settings-unit-node#datapipe)
+
+## Datasource
+`Datasource` - источник данных [Grafana](/deployment/dependencies#grafana), из которого `Grafana` получает данные для дальнейшей визуализации. [Backend](/definitions#backend) реализует [REST](/definitions#rest) запрос для [InfinityAPI](https://grafana.com/grafana/plugins/yesoreyeram-infinity-datasource/) из коробки для каждой отдельной организации. Который с использованием `headers` и `params` позволяет получать данные накопленные с помощью механизмов [DataPipe](#datapipe).
+
+## Visualization
+`Visualization` — способ отображения данных [Grafana](/deployment/dependencies#grafana). Каждая отдельная визуализация может содержать несколько [Datasource](#datasource) одного или нескольких типов. В каждую визуализацию можно слинковать несколько `UnitNode` с настроенным [DataPipe](#datapipe). При сборке визуализаций, следите, чтобы формат данных был одинаковым.
+
+## Dashboard
+`Dashboard` - набор [Visualization](#visualization) в [Grafana](/deployment/dependencies#grafana), собранных на одной панели для удобного мониторинга и анализа данных.
 
 ## env_example.json
 `env_example.json`- файл, описывающий переменные окружения нужные для корректной работы [Unit](#unit), он создаётся разработчиком [Unit](#unit) и помещается в каждую версию [Repo](#repo). На основе данного файла и ввода Пользователя, [Pepeunit](/conception/overview) может сгенерировать [env.json](#envjson) файл для [Unit](#unit). Более подробная [информация о env_example.json](/developer/struct-env-json#env-example-json).

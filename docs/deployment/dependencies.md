@@ -31,8 +31,12 @@
 [Redis](https://redis.io/) - `NoSQL` кластерная база данных использующая парадигму `key-value`
 
 1. Обеспечивает кэширование и хранение промежуточной информации о состоянии [UnitNode](/definitions#unitnode), во время обращения [Unit](/definitions#unit) к [MQTT Broker](/definitions#mqtt-broker) через топики.
-1. Используется также для авторизации [Backend](/definitions#backend) в момент подписки на основной топик `unit.example.com/+/+/+/pepeunit` в [MQTT Broker](/definitions#mqtt-broker). Подписка на `unit.example.com/+/pepeunit` осуществляется стандартными средствами через rest.
+1. Используется также для авторизации [Backend](/definitions#backend) в момент подписки на основной топик `unit.example.com/+/+/+/pepeunit` в [MQTT Broker](/definitions#mqtt-broker). Подписка на `unit.example.com/+/pepeunit` осуществляется стандартными средствами через [REST](/definitions#rest).
 1. `Stream` используется для синхронизации конфигураций [Backend](/definitions#backend) и [DataPipe](/definitions#datapipe) сервисом.
+
+## Grafana
+
+[Grafana](https://grafana.com/) - платформа с открытым исходным кодом, для визуализации данных и их анализа. Включает в себя следующий набор абстракций: [Datasource](/definitions#datasourcee), [Visualization](/definitions#visualization), [Dashboard](/definitions#dashboard).
 
 ## Общая схема взаимодействия
 
@@ -42,6 +46,7 @@ flowchart LR
   Broker <--> Pepeunit
   Pepeunit <--> Unit
   Pepeunit <--> Postgresql
+  Pepeunit <--> Grafana
   Pepeunit <--> Clickhouse
   Broker <--> Redis
   Pepeunit <--> Redis

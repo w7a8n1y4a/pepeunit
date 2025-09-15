@@ -17,14 +17,16 @@ hero:
 features:
   - title: CI/CD
     details: Автоматическая генерация ПО для IoT-устройств на основе ваших репозиториев gitlab и github
-  - title: IoT Device Management
-    details: Управление устройствами через MQTT, REST, GQL, Frontend и Telegram Bot
-  - title: Pipeline Data Processing
-    details: Опциональная обработка данных конвейерами-обогатителями с сохранением в ClickHouse
   - title: Federation
     details: Соединяйте экземпляры Pepeunit в единую федеративную сеть для связи между IoT-устройствами
+  - title: Pipeline Data Processing
+    details: Опциональная обработка данных конвейерами-обогатителями с сохранением в ClickHouse
+  - title: Integration with Grafana
+    details: Генератор Dashboard с возможностью выбирать несколько UnitNode в визуализацию
   - title: Repository Registry
     details: Открытый реестр репозиториев для создания Unit
+  - title: IoT Device Management
+    details: Управление устройствами через MQTT, REST, GQL, Frontend и Telegram Bot
   - title: Topic Managment
     details: Система именования тем для отбражения данных и/или быстрого взаимодействия между IoT устройствами
   - title: Access Policies

@@ -97,36 +97,38 @@ mv .env.local.example .env.local
 `MQTT_SECURE` | `False` | - | Выбирает `http` или `https` для `MQTT_HOST` [инстансa](/definitions#instance) [Pepeunit](/conception/overview), по умолчанию `https`
 `MQTT_USERNAME` | `YabJTlmvQ4tvweuTl0gn` | `YabJTlmvQ4tvweuTl0gn` | Имя администратора [EMQX MQTT Broker](/definitions#mqtt-broker)
 `MQTT_PASSWORD` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | Пароль администратора [EMQX MQTT Broker](/definitions#mqtt-broker)
-`GF_PASSWORD` | `aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB` | `aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB` | Пароль для [Grafana](/definitions#grafana)
+`GF_USER` | `admin` | `admin` | Логин админа для [Grafana](/deployment/dependencies#grafana)
+`GF_PASSWORD` | `aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB` | `aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB` | Пароль админа для [Grafana](/deployment/dependencies#grafana)
 
 ## Генерация env/.env.service
 
 Выполните команду генерирующую итоговые `.env.service` файлы в дирректории `env/.env.service`:
 ```bash
 $> python make_env.py
-2025-06-22 18:22:58,575 - INFO - Run make envs
-2025-06-22 18:22:58,575 - INFO - Run search .env.local or .env.global
-2025-06-22 18:22:58,575 - INFO - The .env.global file was found
-2025-06-22 18:22:58,576 - INFO - Load variables from .env.global
-2025-06-22 18:22:58,576 - INFO - Generate .env.emqx
-2025-06-22 18:22:58,576 - INFO - Save env/.env.emqx
-2025-06-22 18:22:58,576 - INFO - Generate .env.postgres
-2025-06-22 18:22:58,576 - INFO - Save env/.env.postgres
-2025-06-22 18:22:58,576 - INFO - Generate .env.frontend
-2025-06-22 18:22:58,576 - INFO - Save env/.env.frontend
-2025-06-22 18:22:58,577 - INFO - Generate .env.backend
-2025-06-22 18:22:58,577 - INFO - Existing .env.backend found, loading sensitive keys
-2025-06-22 18:22:58,577 - INFO - Load variables from env/.env.backend
-2025-06-22 18:22:58,577 - INFO - Save env/.env.backend
-2025-06-22 18:22:58,577 - INFO - Generate .env.grafana
-2025-06-22 18:22:58,577 - INFO - Save env/.env.grafana
-2025-06-22 18:22:58,577 - INFO - Generate .env.clickhouse
-2025-06-22 18:22:58,577 - INFO - Save env/.env.clickhouse
-2025-06-22 18:22:58,577 - INFO - Generate .env.backend_data_pipe
-2025-06-22 18:22:58,578 - INFO - Existing .env.backend found, loading sensitive keys
-2025-06-22 18:22:58,578 - INFO - Load variables from env/.env.backend
-2025-06-22 18:22:58,578 - INFO - Save env/.env.backend_data_pipe
-2025-06-22 18:22:58,578 - INFO - Environment file generation is complete
+2025-09-16 00:51:44,693 - INFO - Run make envs
+2025-09-16 00:51:44,693 - INFO - Run search .env.local or .env.global
+2025-09-16 00:51:44,693 - INFO - The .env.global file was found
+2025-09-16 00:51:44,693 - INFO - Load variables from .env.global
+2025-09-16 00:51:44,694 - INFO - Generate .env.emqx
+2025-09-16 00:51:44,694 - INFO - Save env/.env.emqx
+2025-09-16 00:51:44,694 - INFO - Generate .env.postgres
+2025-09-16 00:51:44,694 - INFO - Save env/.env.postgres
+2025-09-16 00:51:44,694 - INFO - Generate .env.frontend
+2025-09-16 00:51:44,694 - INFO - Save env/.env.frontend
+2025-09-16 00:51:44,694 - INFO - Generate .env.backend
+2025-09-16 00:51:44,694 - INFO - Existing .env.backend found, loading sensitive keys
+2025-09-16 00:51:44,695 - INFO - Load variables from env/.env.backend
+2025-09-16 00:51:44,695 - INFO - Save env/.env.backend
+2025-09-16 00:51:44,695 - INFO - Generate .env.grafana
+2025-09-16 00:51:44,695 - INFO - Save env/.env.grafana
+2025-09-16 00:51:44,695 - INFO - Generate .env.clickhouse
+2025-09-16 00:51:44,695 - INFO - Save env/.env.clickhouse
+2025-09-16 00:51:44,696 - INFO - Generate .env.backend_data_pipe
+2025-09-16 00:51:44,696 - INFO - Existing .env.backend found, loading sensitive keys
+2025-09-16 00:51:44,696 - INFO - Load variables from env/.env.backend
+2025-09-16 00:51:44,696 - INFO - Save env/.env.backend_data_pipe
+2025-09-16 00:51:44,696 - INFO - Generate grafana.ini
+2025-09-16 00:51:44,696 - INFO - Environment file generation is complete
 ```
 
 :::danger
@@ -170,42 +172,61 @@ docker compose up
 :::info
 Пример корреткного запуска [Backend](/definitions#backend) на основе конфига `.env.global`. Для `.env.local` будут отличаться только `ip` адреса и установка `pooling` для `Telegram Bot`:
 ```bash
-INFO - 2025-03-14 01:11:48,419 - HTTP Request: GET https://dcemqx.pepemoss.com/api-docs/swagger.json "HTTP/1.1 200 OK"
-INFO - 2025-03-14 01:11:49,541 - EMQX Broker https://dcemqx.pepemoss.com - Ready to work
-INFO - 2025-03-14 01:11:49,594 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/login "HTTP/1.1 200 OK"
-INFO - 2025-03-14 01:11:49,594 - Del file auth hook MQTT Broker
-INFO - 2025-03-14 01:11:49,677 - HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/file "HTTP/1.1 204 No Content"
-INFO - 2025-03-14 01:11:49,678 - Del http auth hook MQTT Broker
-INFO - 2025-03-14 01:11:49,749 - HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/http "HTTP/1.1 204 No Content"
-INFO - 2025-03-14 01:11:49,750 - Del redis auth hook MQTT Broker
-INFO - 2025-03-14 01:11:49,838 - HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/redis "HTTP/1.1 204 No Content"
-INFO - 2025-03-14 01:11:49,838 - Set ACL file auth hook MQTT Broker
-INFO - 2025-03-14 01:11:49,911 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources "HTTP/1.1 204 No Content"
-INFO - 2025-03-14 01:11:49,912 - Set http auth hook MQTT Broker
-INFO - 2025-03-14 01:11:50,144 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources "HTTP/1.1 204 No Content"
-INFO - 2025-03-14 01:11:50,145 - Set redis auth hook MQTT Broker
-INFO - 2025-03-14 01:11:50,342 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources "HTTP/1.1 204 No Content"
-INFO - 2025-03-14 01:11:50,343 - Set cache settings auth hook MQTT Broker
-INFO - 2025-03-14 01:11:50,485 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/authorization/settings "HTTP/1.1 200 OK"
-INFO - 2025-03-14 01:11:50,486 - Disable ssl listener MQTT Broker
-INFO - 2025-03-14 01:11:50,555 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/listeners/ssl:default/stop "HTTP/1.1 200 OK"
-INFO - 2025-03-14 01:11:50,556 - Disable ws listener MQTT Broker
-INFO - 2025-03-14 01:11:50,620 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/listeners/ws:default/stop "HTTP/1.1 200 OK"
-INFO - 2025-03-14 01:11:50,620 - Disable wss listener MQTT Broker
-INFO - 2025-03-14 01:11:50,692 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/listeners/wss:default/stop "HTTP/1.1 200 OK"
-INFO - 2025-03-14 01:11:50,692 - Set settings for tcp listener
-INFO - 2025-03-14 01:11:50,776 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/listeners/tcp:default "HTTP/1.1 200 OK"
-INFO - 2025-03-14 01:11:50,777 - Set global mqtt settings
-INFO - 2025-03-14 01:11:50,813 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/configs/global_zone "HTTP/1.1 200 OK"
-INFO - 2025-03-14 01:11:50,814 - Disable retainer
-INFO - 2025-03-14 01:11:50,876 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/mqtt/retainer "HTTP/1.1 200 OK"
-INFO - 2025-03-14 01:11:50,883 - Get current TG bot webhook info
-INFO - 2025-03-14 01:11:50,883 - Delete webhook before set new webhook
-INFO - 2025-03-14 01:11:51,107 - Set new TG bot webhook url: https://dcunit.pepeunit.com/pepeunit/api/v1/bot
-INFO - 2025-03-14 01:11:51,177 - Success set TG bot webhook url
-INFO - 2025-03-14 01:11:51,196 - run sync local repo storage
-INFO - 2025-03-14 01:11:51,234 - end sync local repo storage
-INFO - 2025-03-14 01:11:51,235 - 
+$> docker logs -f backend
+Wait Ready PostgreSQL...
+postgres:5432 - accepting connections
+PostgreSQL available.
+Wait check DB 'pepeunit'...
+DB 'pepeunit' Exist.
+Fix collation postgres for swap version containers
+NOTICE:  version has not changed
+ALTER DATABASE
+Collation fixed.
+Run migration...
+INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
+INFO  [alembic.runtime.migration] Will assume transactional DDL.
+Del old lock files
+[2025-09-15 22:09:28 +0000] [42] [INFO] Starting gunicorn 23.0.0
+[2025-09-15 22:09:28 +0000] [42] [INFO] Listening at: http://0.0.0.0:5000 (42)
+[2025-09-15 22:09:28 +0000] [42] [INFO] Using worker: uvicorn.workers.UvicornWorker
+[2025-09-15 22:09:28 +0000] [43] [INFO] Booting worker with pid: 43
+[2025-09-15 22:09:28 +0000] [44] [INFO] Booting worker with pid: 44
+[2025-09-15 22:09:33 +0000] [44] [INFO] on_connect handler accepted
+[2025-09-15 22:09:33 +0000] [44] [INFO] on_message handler accepted
+[2025-09-15 22:09:33 +0000] [43] [INFO] on_connect handler accepted
+[2025-09-15 22:09:33 +0000] [43] [INFO] on_message handler accepted
+[2025-09-15 22:09:33 +0000] [44] [INFO] Started server process [44]
+[2025-09-15 22:09:33 +0000] [44] [INFO] Waiting for application startup.
+INFO - 2025-09-15 22:09:33,442 - Total migrations to apply: 0
+INFO - 2025-09-15 22:09:33,443 - Check state EMQX Broker https://dcemqx.pepemoss.com
+[2025-09-15 22:09:33 +0000] [43] [INFO] Started server process [43]
+[2025-09-15 22:09:33 +0000] [43] [INFO] Waiting for application startup.
+INFO - 2025-09-15 22:09:33,671 - HTTP Request: GET https://dcemqx.pepemoss.com/api-docs/swagger.json "HTTP/1.1 200 OK"
+INFO - 2025-09-15 22:09:34,803 - EMQX Broker https://dcemqx.pepemoss.com - Ready to work
+INFO - 2025-09-15 22:09:34,850 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/login "HTTP/1.1 200 OK"
+INFO - 2025-09-15 22:09:34,851 - Del file auth hook MQTT Broker
+INFO - 2025-09-15 22:09:34,923 - HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/file "HTTP/1.1 204 No Content"
+INFO - 2025-09-15 22:09:34,923 - Del http auth hook MQTT Broker
+INFO - 2025-09-15 22:09:34,987 - HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/http "HTTP/1.1 204 No Content"
+INFO - 2025-09-15 22:09:34,988 - Del redis auth hook MQTT Broker
+INFO - 2025-09-15 22:09:35,057 - HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/redis "HTTP/1.1 204 No Content"
+INFO - 2025-09-15 22:09:35,058 - Set ACL file auth hook MQTT Broker
+INFO - 2025-09-15 22:09:35,100 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources "HTTP/1.1 204 No Content"
+INFO - 2025-09-15 22:09:35,101 - Set http auth hook MQTT Broker
+INFO - 2025-09-15 22:09:35,315 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources "HTTP/1.1 204 No Content"
+INFO - 2025-09-15 22:09:35,315 - Set redis auth hook MQTT Broker
+INFO - 2025-09-15 22:09:35,492 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources "HTTP/1.1 204 No Content"
+INFO - 2025-09-15 22:09:35,492 - Set cache settings auth hook MQTT Broker
+INFO - 2025-09-15 22:09:35,608 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/authorization/settings "HTTP/1.1 200 OK"
+INFO - 2025-09-15 22:09:35,609 - Set settings for tcp listener
+INFO - 2025-09-15 22:09:35,705 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/listeners/tcp:default "HTTP/1.1 200 OK"
+INFO - 2025-09-15 22:09:35,706 - Set global mqtt settings
+INFO - 2025-09-15 22:09:35,749 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/configs/global_zone "HTTP/1.1 200 OK"
+INFO - 2025-09-15 22:09:35,750 - Disable retainer
+INFO - 2025-09-15 22:09:35,803 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/mqtt/retainer "HTTP/1.1 200 OK"
+INFO - 2025-09-15 22:09:35,810 - Run sync all repository in RepositoryRegistry
+INFO - 2025-09-15 22:09:35,871 - End sync all repository in RepositoryRegistry
+INFO - 2025-09-15 22:09:35,872 - 
             
                            ........:                                   
                           :......::-                                   
@@ -246,7 +267,7 @@ INFO - 2025-03-14 01:11:51,235 -
                       | |                           
                       |_|   
                    
-     v0.3.0 - AGPL v3 License
+     v0.9.0 - AGPL v3 License
      Federated IoT Platform
      Front: https://dcunit.pepeunit.com
      REST:  https://dcunit.pepeunit.com/pepeunit/docs
@@ -254,18 +275,24 @@ INFO - 2025-03-14 01:11:51,235 -
      TG:    https://t.me/PepeUnitDevRobot
      Docs:  https://pepeunit.com
             
-INFO - 2025-03-14 01:11:51,235 - Connect to mqtt server: dcemqx.pepemoss.com:1885
-[2025-03-14 01:11:51 +0000] [35] [INFO] Used broker version is 5
-INFO - 2025-03-14 01:11:51,239 - [CONNECTION MADE]
-INFO - 2025-03-14 01:11:51,257 - Connect to mqtt server: dcemqx.pepemoss.com:1885
-[2025-03-14 01:11:51 +0000] [36] [INFO] Used broker version is 5
-INFO - 2025-03-14 01:11:51,264 - [CONNECTION MADE]
-INFO - 2025-03-14 01:11:53,243 - MQTT subscriptions initialized in this worker
-INFO - 2025-03-14 01:11:53,243 - [SEND SUB] 1 [b'dcunit.pepeunit.com/+/+/+/pepeunit']
-[2025-03-14 01:11:53 +0000] [35] [INFO] Application startup complete.
-INFO - 2025-03-14 01:11:53,249 - [SUBACK] 1 (0,)
-INFO - 2025-03-14 01:11:53,268 - Another worker already subscribed to MQTT topics
-[2025-03-14 01:11:53 +0000] [36] [INFO] Application startup complete.
+INFO - 2025-09-15 22:09:35,872 - Delete webhook before set new webhook
+INFO - 2025-09-15 22:09:35,873 - Connect to mqtt server: dcemqx.pepemoss.com:1885
+[2025-09-15 22:09:35 +0000] [44] [INFO] Used broker version is 5
+INFO - 2025-09-15 22:09:35,878 - [CONNECTION MADE]
+INFO - 2025-09-15 22:09:36,537 - Connect to mqtt server: dcemqx.pepemoss.com:1885
+[2025-09-15 22:09:36 +0000] [43] [INFO] Used broker version is 5
+INFO - 2025-09-15 22:09:36,543 - [CONNECTION MADE]
+INFO - 2025-09-15 22:09:37,882 - MQTT subscriptions initialized in this worker
+INFO - 2025-09-15 22:09:37,882 - [SEND SUB] 1 [b'dcunit.pepeunit.com/+/+/+/pepeunit']
+INFO - 2025-09-15 22:09:37,884 - [SUBACK] 1 (0,)
+[2025-09-15 22:09:37 +0000] [44] [INFO] Application startup complete.
+172.20.1.13:38050 - "POST /pepeunit/api/v1/units/auth HTTP/1.0" 200
+172.20.1.11:35616 - "GET /pepeunit/metrics HTTP/1.1" 200
+INFO - 2025-09-15 22:09:38,548 - Another worker already subscribed to MQTT topics
+[2025-09-15 22:09:38 +0000] [43] [INFO] Application startup complete.
+172.20.1.13:38058 - "POST /pepeunit/api/v1/bot HTTP/1.0" 422
+INFO - 2025-09-15 22:09:38,569 - HTTP Request: POST https://dcunit.pepeunit.com/pepeunit/api/v1/bot "HTTP/1.1 422 Unprocessable Entity"
+INFO - 2025-09-15 22:09:38,640 - Success set TG bot webhook url
 ```
 :::
 
@@ -279,6 +306,7 @@ INFO - 2025-03-14 01:11:53,249 - [SUBACK] 1 (0,)
 Она отображает смог ли [Backend](/definitions#backend) подписаться на топик `dcunit.pepeunit.com/+/+/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/definitions#backend) `не смог` подписаться на основной топик. Обычно это связано со следующими недочётами:
 1. Закрытым портом `1883`
 1. Настройкой портов сервиса `emqx` в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
+1. При использовании кастомного порта для `mqtt`, требуется указать его в двух `.env` файлах: `backend` и `datapipe`
 1. Ошибками в настройках [EMQX MQTT Broker](/definitions#mqtt-broker) и [Backend](/definitions#backend), например `MQTT_REDIS_AUTH_URL` или `REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables#backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies#redis). За первичную авторизацию отвечает именно [Redis](/deployment/dependencies#redis).
 :::
 
@@ -292,11 +320,11 @@ INFO - 2025-03-14 01:11:53,249 - [SUBACK] 1 (0,)
     ```bash
     docker compose up -d
     ```
-1. Запустите создание `backup` командой, скрипт сам выключит контейнеры
+1. Запустите создание `backup` командой, бекап делается без прекращения работы контейнеров
     ```bash
     sudo ./backup.sh backup
     ```
-1. Развернуть версию из `backup`
+1. Развернуть версию из `backup`, при этом изначально инстанс должен быть полностью выключен командой `docker compose down`
     ```bash
     sudo ./backup.sh restore backups/backup_name.tar
     ```

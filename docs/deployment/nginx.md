@@ -2,7 +2,7 @@
 
 ## Nginx Docker Compose
 
-Объединяет [Backend](/definitions#backend), [Frontend](/definitions#frontend) и [Grafana](/definitions#grafana) в единый `80` порт.
+Объединяет [Backend](/definitions#backend), [Frontend](/definitions#frontend) и [Grafana](/deployment/dependencies#grafana) в единый `80` порт.
 
 ```nginx.conf
 events {
@@ -38,6 +38,8 @@ http {
             proxy_set_header Host $host;
             proxy_set_header X-NginX-Proxy true;
             proxy_set_header Connection "";
+
+            client_max_body_size 20M;
         }
 
         location / {
@@ -74,6 +76,8 @@ server {
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto https;
         proxy_set_header X-Forwarded-Host $host;
+
+        client_max_body_size 20M;
     }
 
     ssl_certificate /etc/letsencrypt/live/pepeunit.com-0001/fullchain.pem; # managed by Certbot
@@ -130,6 +134,8 @@ server {
         proxy_set_header Host blog.example.com;
         proxy_set_header X-NginX-Proxy true;
         proxy_set_header Connection "";
+
+        client_max_body_size 20M;
     }
 
     location /grafana/ {

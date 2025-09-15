@@ -52,6 +52,9 @@
 `MQTT_MAX_TOPIC_LEVELS` | `5` | Максимальная вложенность топиков [EMQX MQTT Broker](/definitions#mqtt-broker)
 `MQTT_MAX_LEN_MESSAGE_QUEUE` | `128` | Максимальная длинна очереди сообщений [EMQX MQTT Broker](/definitions#mqtt-broker)
 `MQTT_MAX_TOPIC_ALIAS` | `128` | Максимальное число топиков-ссылок [EMQX MQTT Broker](/definitions#mqtt-broker)
+`GF_ADMIN_USER` | - | Логин админа для [Grafana](/deployment/dependencies#grafana)
+`GF_ADMIN_PASSWORD` | - | Пароль админа для [Grafana](/deployment/dependencies#grafana)
+`GF_LIMIT_UNIT_NODE_PER_ONE_PANEL` | `10` | Максимальное число [UnitNode](/definitions#unitnode) для одной [Visualization](/definitions#visualization)
 `GITHUB_TOKEN_NAME` | - | Название [Github](/definitions#github) токена, с разрешением только для чтения публичных репозиториев. Используется для увеличения лимита загрузки публичных репозиториев с [Github](/definitions#github) с `60` в час до `5000` в час
 `GITHUB_TOKEN_PAT` | - | [Github](/definitions#github) токен, с разрешением только для чтения публичных репозиториев. Используется для увеличения лимита загрузки публичных репозиториев с [Github](/definitions#github) с `60` в час до `5000` в час
 
