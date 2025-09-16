@@ -45,6 +45,7 @@ export default withMermaid(defineConfig({
           { text: 'Docker Compose', link: '/deployment/docker' },
           { text: 'Nginx', link: '/deployment/nginx' },
           { text: 'Переменные окружения', link: '/deployment/env-variables' },
+          { text: 'Grafana Мониторинг', link: '/deployment/monitoring' },
         ]
       },
       {
@@ -55,8 +56,10 @@ export default withMermaid(defineConfig({
           { text: 'Настройка Repo', link: '/user/settings-repo' },
           { text: 'Создание Unit', link: '/user/create-unit' },
           { text: 'Обновление Unit', link: '/user/update-unit' },
-          { text: 'Настройки UnitNode и DataPipe', link: '/user/settings-unit-node' },
+          { text: 'Настройки UnitNode', link: '/user/settings-unit-node' },
           { text: 'Cвязи Output->Input между UnitNode', link: '/user/edge-unit-node' },
+          { text: 'Настройки DataPipe', link: '/user/data-pipe' },
+          { text: 'Управление Dashboard', link: '/user/dashboard' },
         ]
       },
       {
@@ -96,7 +99,6 @@ export default withMermaid(defineConfig({
       {
         text: 'Дорожная карта',
         items: [
-          { text: 'Борды Grafana', link: '/roadmap/boards' },
           { text: 'Библиотеки', link: '/roadmap/libs' },
           { text: 'Динамическое состояние', link: '/roadmap/dynamic-state' },
           { text: 'Анализ нагрузки', link: '/roadmap/load-analyse' },
