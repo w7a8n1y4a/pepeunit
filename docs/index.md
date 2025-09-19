@@ -17,8 +17,6 @@ hero:
 features:
   - title: CI/CD
     details: Автоматическая генерация ПО для IoT-устройств на основе ваших репозиториев gitlab и github
-  - title: Federation
-    details: Соединяйте экземпляры Pepeunit в единую федеративную сеть для связи между IoT-устройствами
   - title: Pipeline Data Processing
     details: Опциональная обработка данных конвейерами-обогатителями с сохранением в ClickHouse
   - title: Integration with Grafana
@@ -31,6 +29,12 @@ features:
     details: Система именования тем для отбражения данных и/или быстрого взаимодействия между IoT устройствами
   - title: Access Policies
     details: Настройка уровней доступа User-Unit и Unit-Unit с учетом ролей Пользователей и уровней видимости Repo, Unit и UnitNode
+  - title: Instance Comparision
+    details: Будет доступно в начиная с одной из версий > 1.0.0
+  - title: Federation
+    details: Будет доступно в версии 2.0.0
+  - title: Monetization
+    details: Будет доступно в версии 2.0.0
 ---
 
 <style>

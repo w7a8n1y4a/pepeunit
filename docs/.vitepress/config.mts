@@ -100,14 +100,12 @@ export default withMermaid(defineConfig({
         text: 'Дорожная карта',
         items: [
           { text: 'Библиотеки', link: '/roadmap/libs' },
-          { text: 'Динамическое состояние', link: '/roadmap/dynamic-state' },
-          { text: 'Анализ нагрузки', link: '/roadmap/load-analyse' },
           { text: 'Алерты', link: '/roadmap/alerts' },
-          { text: 'Монетизация', link: '/roadmap/monetisation' },
-          { text: 'Система грейдов', link: '/roadmap/instance-grade' },
-          { text: 'Федерация', link: '/roadmap/federation' },
           { text: '> 1.0.0 Units', link: '/roadmap/units' },
+          { text: '> 1.0.0 Сравнение инстансов', link: '/roadmap/comparison' },
           { text: '> 1.0.0 Рефактор фронтенда', link: '/roadmap/frontend-refactor' },
+          { text: '> 2.0.0 Монетизация', link: '/roadmap/monetisation' },
+          { text: '> 2.0.0 Федерация', link: '/roadmap/federation' },
         ]
       },
       {
@@ -119,7 +117,6 @@ export default withMermaid(defineConfig({
       {
         text: 'Для общественности',
         items: [
-          { text: 'Статья на Хабр', link: '/society/habr' },
           { text: 'Видео YouTube', link: '/society/video' },
         ]
       },

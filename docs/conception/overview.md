@@ -8,10 +8,6 @@
 
 `Pepeunit` способен на основе внешних [Git](/definitions#git) репозиториев из [Gitlab](/definitions#gitlab) и [Github](/definitions#github), создавать готовые к использованию программы - это могут быть программы на основе [Интерпритируемых](/definitions#interpreterable) или [Компилируемых](/definitions#compilable) языков программирования.
 
-## Федеративное взаимодействие
-
-`Pepeunit` - федеративная платформа, отдельные [инстансы](/definitions#instance) которой, могут узнавать о других [инстансах](/definitions#instance) и объединятся в большую сеть для взаимодействия. [Unit](/definitions#unit) могут взаимодействовать с другими [Unit](/definitions#unit) даже если они находятся на разных [инстансах](/definitions#instance).
-
 ## Конвейеры обработки данных
 
 `Pepeunit` способен производительно накапливать, предварительно отчищенные и трансформированные данные в [Clickhouse](/deployment/dependencies#clickhouse) и [Postgresql](/deployment/dependencies#postgresql). Обработка производится на основании конвейерных конфигураций в [YML](/definitions#yml) формате. Cкорость обработки обеспечивает отдельный микросервис написанный на [Golang](/definitions#golang). Доступно `4` основных типа накопления данных:
@@ -34,7 +30,6 @@
 - [GQL](/definitions#gql) - `Strawberry`
 - [ChatBot](/definitions#chat-bot) - `AioGram`
 
-
 ## Управление топиками
 
 `Pepeunit` позволяет отслеживать состояние [Unit](/definitions#unit) при помощи системы именования топиков. [UnitNode](/definitions#unitnode) могут образовывать связи `Output` -> `Input` для передачи информации между разными [Unit](/definitions#unit).
@@ -42,3 +37,15 @@
 ## Настройка политик доступа
 
 `Pepeunit` позволяет регулировать уровни [доступа](/mechanics/permission) `Пользователь-Unit` и `Unit-Unit`. Глубина взаимодействия с платформой определяется [ролью Пользователя](/mechanics/roles) и [видимостью](/mechanics/visibility) отдельных сушностей [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode).
+
+## Сравнение Инстансов
+
+Будет доступно в начиная с одной из версий > 1.0.0
+
+## Федерация
+
+Будет доступно в версии 2.0.0
+
+## Монетизация
+
+Будет доступно в версии 2.0.0
