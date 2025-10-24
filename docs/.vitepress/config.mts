@@ -33,6 +33,7 @@ export default withMermaid(defineConfig({
     sidebar: [
       {
         text: 'Концепция',
+        collapsed: true,
         items: [
           { text: 'Обзор', link: '/conception/overview' },
           { text: 'Определения', link: '/definitions' }
@@ -40,6 +41,7 @@ export default withMermaid(defineConfig({
       },
       {
         text: 'Развёртывание',
+        collapsed: true,
         items: [
           { text: 'Зависимости', link: '/deployment/dependencies' },
           { text: 'Docker Compose', link: '/deployment/docker' },
@@ -50,6 +52,7 @@ export default withMermaid(defineConfig({
       },
       {
         text: 'Руководство Пользователя',
+        collapsed: true,
         items: [
           { text: 'Создание RepositoryRegistry', link: '/user/create-repository-registry' },
           { text: 'Создание Repo', link: '/user/create-repo' },
@@ -64,6 +67,7 @@ export default withMermaid(defineConfig({
       },
       {
         text: 'Руководство Разработчика Unit',
+        collapsed: true,
         items: [
           { text: 'Алгоритм создания Unit', link: '/developer/alg-create-unit' },
           { text: 'Структура GIT репозитория', link: '/developer/struct-git-repo' },
@@ -80,6 +84,7 @@ export default withMermaid(defineConfig({
       },
       {
         text: 'Механики',
+        collapsed: true,
         items: [
           { text: 'Система Ролей', link: '/mechanics/roles' },
           { text: 'Система Видимости', link: '/mechanics/visibility' },
@@ -90,6 +95,7 @@ export default withMermaid(defineConfig({
       },
       {
         text: 'Тесты',
+        collapsed: true,
         items: [
           { text: 'Модульные', link: '/tests/module-test' },
           { text: 'Интеграционные', link: '/tests/integration-test' },
@@ -98,6 +104,7 @@ export default withMermaid(defineConfig({
       },
       {
         text: 'Дорожная карта',
+        collapsed: true,
         items: [
           { text: 'Библиотеки', link: '/roadmap/libs' },
           { text: 'Алерты', link: '/roadmap/alerts' },
@@ -109,19 +116,15 @@ export default withMermaid(defineConfig({
         ]
       },
       {
-        text: 'Анализ решений',
-        items: [
-          { text: 'Внедрение типизации', link: '/analyse/typing' },
-        ]
-      },
-      {
         text: 'Для общественности',
+        collapsed: true,
         items: [
           { text: 'Видео YouTube', link: '/society/video' },
         ]
       },
       {
         text: 'Вклад',
+        collapsed: true,
         items: [
           { text: 'Соглашения', link: '/contribution/contribution' },
         ]
