@@ -12,6 +12,9 @@
 ## Уровень видимости
 Выберите [Уровень видимости](/mechanics/visibility)
 
+## Максимальное число соединений
+Ограничивает число соединений `Output->Input` у [UnitNode](/definitions#unitnode), введён для того чтобы не перегружать оперативную память у очень маленьких [Unit](/definitions#unit)
+
 ## Настройка Перезаписываемости для Input
 
 Если состояние флага перезаписываемости `False` то [Unit](/definitions#unit) у которых есть [доступ](/mechanics/permission), несмогут записать новое значение через [REST](/definitions#rest) и [GQL](/definitions#gql). Т.е. возможность установить значение будет только у [Пользователей](/mechanics/roles.html#user) с [доступом](/mechanics/permission) и связанных через `Output->Input` топиков.

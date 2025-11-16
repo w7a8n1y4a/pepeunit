@@ -20,7 +20,7 @@
 1. Получение состояний [Unit](/definitions#unit) через специальный топик.
 :::
 
-Брокер `EMQX` на два порядка производительней чем [Backend](/definitions#backend), но благодаря системе кэширования авторизации `EMQX` и кэшированию через `Redis`, [Backend](/definitions#backend) может справится с нагрузкой.
+Брокер `EMQX` на два порядка производительней чем [Backend](/definitions#backend), но благодаря системе кэширования авторизации `EMQX` и кэшированию через `Redis`, [Backend](/definitions#backend) может справиться с нагрузкой.
 
 ## Clickhouse
 
@@ -36,7 +36,7 @@
 
 ## Grafana
 
-[Grafana](https://grafana.com/) - платформа с открытым исходным кодом, для визуализации данных и их анализа. Включает в себя следующий набор абстракций: [Datasource](/definitions#datasourcee), [Visualization](/definitions#visualization), [Dashboard](/definitions#dashboard).
+[Grafana](https://grafana.com/) - платформа с открытым исходным кодом, для визуализации данных и их анализа. Включает в себя следующий набор абстракций: [Datasource](/definitions#datasourcee), [Visualization](/definitions#visualization), [Dashboard](/definitions#dashboard). Интегрирована для визуализации данных из [DataPipe](/definitions#datapipe) и [Мониторинга](/deployment/monitoring)
 
 ## Общая схема взаимодействия
 

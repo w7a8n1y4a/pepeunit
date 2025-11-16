@@ -1,4 +1,4 @@
-## DataPipe
+# DataPipe
 
 :::warning
 [DataPipe](/definitions#datapipe) изначально выключены, чтобы [UnitNode](/definitions#unitnode) не потребляли серверные ресурсы.
@@ -82,8 +82,6 @@
 
 
 ## Примеры DataPipe
-
-- Функционал подразумевает в будущем отображение через `Grafana`, на данном этапе доступны только выгрузки через `csv` по кнопке, а также [REST](/definitions#rest) и [GQL](/definitions#gql) запросы, получения данных порциями.
 
 ### LastValue
 

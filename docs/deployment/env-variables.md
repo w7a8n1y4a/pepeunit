@@ -27,6 +27,9 @@
 `BACKEND_MAX_CIPHER_LENGTH` | `1000000` | Максимальная длинна в символах для шифруемой информации
 `BACKEND_MIN_TOPIC_UPDATE_TIME` | `30` | Частота обновления сообщений в `domain.com/+/pepeunit` топиках [MQTT](/definitions#mqtt)
 `BACKEND_UNIT_LOG_EXPIRATION` | `86400` | Вермя жизни логов, которые присылают [Unit](/definitions#unit) в секундах
+`TELEGRAM_BOT_ENABLE` | `True` | Состояние интеграции с `Telegram Bot`, если установить `False` - весь `Telegram Bot` функционал будет отключён
+`TELEGRAM_BOT_MODE` | `webhook` | Принимает значения: `webhook` или `pooling`. Позволяет указать как [Backend](/definitions#backend) будет обмениваться информацией с `Telegram Bot API`. `pooling` позволяет работать без личного домена и `https`, в средах где есть доступ в интернет. `webhook` более производительный вариант, предназаначен для использования с `https` и личным доменом, ссылка на `webhook` устанавливает автоматически в момент старта приложения
+`TELEGRAM_DEL_OLD_WEBHOOK` | `True` | Удаляется ли `webhook` через `Telegram Bot API`, перед тем как создать новый
 `TELEGRAM_TOKEN` | - | Токен `Telegram Bot API`, можно получить через `Telegram Bot Father`. Секретный, никому не показывайте
 `TELEGRAM_BOT_LINK` | - | Ссылка на `Telegram Bot` которым управляет [Backend](/definitions#backend). Используется для генерации верификационных ссылок для пользователей бота. Передаётся в `openapi.json`
 `TELEGRAM_ITEMS_PER_PAGE` | `7` | Число пагинируемых элементов при отображении за один раз в `Telegram Bot`

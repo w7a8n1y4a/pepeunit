@@ -56,7 +56,7 @@ docker-compose --version
 
 ## Репозиторий Pepeunit Deploy
 
-Хранит в себе все файлы и примеры нужные для запуска инстанса [Pepeunit](/conception/overview) при помощи `docker compose`, чтобы склонировать репозиторий выполните команды:
+Хранит в себе все файлы и примеры, нужные для запуска инстанса [Pepeunit](/conception/overview) при помощи `docker compose`, чтобы склонировать репозиторий выполните команды:
 ```bash
 git clone https://git.pepemoss.com/pepe/pepeunit/pepeunit_deploy.git
 cd pepeunit_deploy
@@ -141,7 +141,7 @@ $> python make_env.py
 
 ## Настройка Nginx
 
-Обычно настройка `Nginx` для `docker compose` не требуется. Если ваш инстанс [Pepeunit](/conception/overview) будет находиться за ещё одним `Nginx`, используйте подробную настройку: [Подробная настройка nginx для https и reverse proxy](/deployment/nginx)
+Обычно настройка `Nginx` для `docker compose` не требуется. Если ваш инстанс [Pepeunit](/conception/overview) будет находиться за ещё одним `Nginx`, используйте: [Подробная настройка nginx для https и reverse proxy](/deployment/nginx)
 
 ## Открытие портов
 
@@ -159,14 +159,14 @@ $> python make_env.py
 
 ## Первый запуск
 
-Настройте доступ для `volumes`:
+Настройте доступ для конфигураций из дирректории `data`:
 ```bash
 sudo chmod 777 -R data
 ```
 
 Выполните команду запуска [Pepeunit](/conception/overview):
 ```bash
-docker compose up
+docker compose up -d
 ```
 
 :::info
@@ -303,7 +303,7 @@ INFO - 2025-09-15 22:09:38,640 - Success set TG bot webhook url
 INFO - 2025-03-14 01:11:53,249 - [SUBACK] 1 (0,)
 ```
 
-Она отображает смог ли [Backend](/definitions#backend) подписаться на топик `dcunit.pepeunit.com/+/+/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/definitions#backend) `не смог` подписаться на основной топик. Обычно это связано со следующими недочётами:
+Она отображает смог ли [Backend](/definitions#backend) подписаться на топик `dcunit.pepeunit.com/+/+/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/definitions#backend) `не смог` подписаться на основной топик. Обычно это одна из ошибок конфигурирования:
 1. Закрытым портом `1883`
 1. Настройкой портов сервиса `emqx` в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
 1. При использовании кастомного порта для `mqtt`, требуется указать его в двух `.env` файлах: `backend` и `datapipe`
@@ -324,7 +324,7 @@ INFO - 2025-03-14 01:11:53,249 - [SUBACK] 1 (0,)
     ```bash
     sudo ./backup.sh backup
     ```
-1. Развернуть версию из `backup`, при этом изначально инстанс должен быть полностью выключен командой `docker compose down`
+1. Развернуть версию из `backup`, инстанс при этом изначально должен быть полностью выключен командой `docker compose down`
     ```bash
     sudo ./backup.sh restore backups/backup_name.tar
     ```

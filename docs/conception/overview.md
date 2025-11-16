@@ -38,6 +38,13 @@
 
 `Pepeunit` позволяет регулировать уровни [доступа](/mechanics/permission) `Пользователь-Unit` и `Unit-Unit`. Глубина взаимодействия с платформой определяется [ролью Пользователя](/mechanics/roles) и [видимостью](/mechanics/visibility) отдельных сушностей [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode).
 
+## Клиентские библиотеки
+
+`Pepeunit` имеет библиотеки облегчающие создание [Unit](/definitions#unit), каждая из библиотек поддерживает полный фунцкилнал, на данный момент доступны:
+- [Micropython](/libraries/micropython)
+- [Python](/libraries/python)
+- [Golang](/libraries/golang)
+
 ## Сравнение Инстансов
 
 Будет доступно в начиная с одной из версий > 1.0.0

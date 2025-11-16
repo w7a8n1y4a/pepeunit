@@ -83,6 +83,15 @@ export default withMermaid(defineConfig({
         ]
       },
       {
+        text: 'Библиотеки Unit',
+        collapsed: true,
+        items: [
+          { text: 'Micropython', link: '/libraries/micropython' },
+          { text: 'Golang', link: '/libraries/golang' },
+          { text: 'Python', link: '/libraries/python' },
+        ]
+      },
+      {
         text: 'Механики',
         collapsed: true,
         items: [
@@ -91,6 +100,7 @@ export default withMermaid(defineConfig({
           { text: 'Система Доступов', link: '/mechanics/permission' },
           { text: 'Система Обновлений', link: '/mechanics/update-system' },
           { text: 'Шифрование', link: '/mechanics/cipher' },
+          { text: 'Генерация Env у Unit', link: '/mechanics/alg-env' },
         ]
       },
       {

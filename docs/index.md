@@ -29,6 +29,8 @@ features:
     details: Система именования тем для отбражения данных и/или быстрого взаимодействия между IoT устройствами
   - title: Access Policies
     details: Настройка уровней доступа User-Unit и Unit-Unit с учетом ролей Пользователей и уровней видимости Repo, Unit и UnitNode
+  - title: Client Library
+    details: Клиентские библиотеки для Micropython, Python и Golang
   - title: Instance Comparision
     details: Будет доступно в начиная с одной из версий > 1.0.0
   - title: Federation

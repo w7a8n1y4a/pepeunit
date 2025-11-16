@@ -1,7 +1,7 @@
 # Dashboards
 
 :::info Где найти?
-На главное странице [инстанса](/definitions#instance), найдите в верхнем левом углу кнопку поиска. Выберите сущность `Dashboard`. В нижней левой части модального окна, вы сможите нажать кнопку `Create Dashboard`
+На главное странице [инстанса](/definitions#instance), найдите в верхнем левом углу кнопку поиска. Выберите сущность `Dashboard`. В нижней левой части модального окна, вы сможете нажать кнопку `Create Dashboard`
 :::
 
 ## Требования к именам Dashboard и Panels
@@ -23,8 +23,8 @@
 так и `Output`
 
 На этапе линковки можно указать два флага:
-1. Only last value ? - Позволят делать выборку для данного [UnitNode](/definitions#unitnode) только по последнему значению, независимо от выбраной политики в [DataPipe](/definitions#datapip)
-1. Value str to json ? - Пытается преобразовать value строку в объект dict, полезно если в value хранятся графики например
+1. `Only last value ?` - Позволят делать выборку для данного [UnitNode](/definitions#unitnode) только по последнему значению, независимо от выбраной политики в [DataPipe](/definitions#datapip)
+1. `Value str to json ?` - Пытается преобразовать `value` строку в объект `dict`, полезно если в value хранятся графики например
 
 :::warning
 Слинковать можно любой [UnitNode](/definitions#unitnode), но отправить в [Grafana](/deployment/dependencies#grafana) получится только тот у которого корректно настроен [DataPipe](/definitions#datapip)
