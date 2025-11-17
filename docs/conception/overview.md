@@ -40,7 +40,7 @@
 
 ## Клиентские библиотеки
 
-`Pepeunit` имеет библиотеки облегчающие создание [Unit](/definitions#unit), каждая из библиотек поддерживает полный фунцкилнал, на данный момент доступны:
+`Pepeunit` имеет библиотеки облегчающие создание [Unit](/definitions#unit), каждая из библиотек поддерживает полный функционал, на данный момент доступны:
 - [Micropython](/libraries/micropython)
 - [Python](/libraries/python)
 - [Golang](/libraries/golang)

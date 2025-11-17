@@ -70,45 +70,19 @@ LICENSE
 [Подробно о заполнении schema_example.json](/developer/struct-schema-json#schema-example-json)
 :::
 
-Копируем в файл [schema_example.json](/definitions#schema-example-json) стандартные топики:
+В заполненом состоянии [schema_example.json](/definitions#schema-example-json) будет выглядеть вот так:
 
 ```json
 {
     "input_base_topic": [
         "update/pepeunit",
+        "env_update/pepeunit",
         "schema_update/pepeunit",
-        "env_update/pepeunit"
+        "log_sync/pepeunit"
     ],
     "output_base_topic": [
-        "state/pepeunit"
-    ]
-}
-```
-
-### Стандартные топики
-В данном пункте нужно определиться какие стандартные функции [Pepeunit](/conception/overview) вы хотите реализовать:
-- Хочется рабочую [систему обновлений](/mechanics/update-system)
-- Хочется обновлять схему и окружение при помощи [стандартных MQTT команд](/developer/default-mqtt-command)
-- Хочется отправлять [состояние](/developer/state-mqtt-send), чтобы его потом читать в меню [Pepeunit](/conception/overview)
-
-Исходя из хотелок - оставляем все топики, которые мы уже добавили на схему, вы можете удалить те, которые вам не хочется реализовывать
-
-### Пользовательские топики
-
-Пользовательские топики - это шаблоны будущих [UnitNode](/definitions#unitnode), вам нужно заполнить их самостоятельно и придумать имена, исходя из требований проекта.
-
-- В `input_topic` добавим `set_fan_state/pepeunit`, [Unit](/definitions#unit) подпишется на него и будет получать управляющие команды
-- В `output_topic` добавим два: `current_fan_speed_percentage/pepeunit`, `current_temp/pepeunit` - в эти топики будем публиковать текущее состояние
-
-Добавляем нужные топики в [schema_example.json](/definitions#schema-example-json):
-```json
-{
-    "input_base_topic": [
-        "update/pepeunit",
-        "schema_update/pepeunit"
-    ],
-    "output_base_topic": [
-        "state/pepeunit"
+        "state/pepeunit",
+        "log/pepeunit"
     ],
     "input_topic": [
         "set_fan_state/pepeunit"
@@ -120,6 +94,25 @@ LICENSE
 }
 ```
 
+### Стандартные топики - `input_base_topic` и `output_base_topic`
+
+При использовании клиентских библиотек: [Micropython](/libraries/micropython), [Golang](/libraries/golang) и [Python](/libraries/python) - можно указывать все топики из `input_base_topic` и `output_base_topic`, они будут корректно работать.
+
+Если вы создаёте облегчённую версию, без библиотек, то вы можете оставить только те топики, которые вам нужны и реализовать работу с ними самостоятельно.
+
+:::info
+Подробнее о возможностях `input_base_topic` - [стандартные MQTT команды](/developer/default-mqtt-command)
+
+Подробнее о возможностях `output_base_topic` - [cтандартные топики состояния](/developer/state-mqtt-send)
+:::
+
+### Пользовательские топики - `input_topic` и `output_topic`
+
+Пользовательские топики - это шаблоны будущих [UnitNode](/definitions#unitnode), вам нужно заполнить их самостоятельно и придумать имена, исходя из требований проекта.
+
+- В `input_topic` добавим `set_fan_state/pepeunit` - [Unit](/definitions#unit) подпишется на него и будет получать управляющие команды
+- В `output_topic` добавим два: `current_fan_speed_percentage/pepeunit`, `current_temp/pepeunit` - в эти топики будем публиковать текущее состояние
+
 :::warning
 В процессе разработки может потребоваться изменение [schema_example.json](/definitions#schema-example-json) - это абсолютно нормально. Добавьте или удалите топики и актуализируйте [Readme](/definitions#readme-file). [Pepeunit](/conception/overview) подстроится и добавит/удалит [UnitNode](/definitions#unitnode).
 :::
@@ -130,33 +123,7 @@ LICENSE
 [Подробно о заполнении env_example.json](/developer/struct-env-json#env-example-json)
 :::
 
-Скопируйте в файл [env_example.json](/definitions#env-example-json) стандартные переменные [Pepeunit](/conception/overview), так как это пример для заполнения [Пользователями](/mechanics/roles.html#user) - все значения должны быть обезличены:
-```json
-{
-    "PEPEUNIT_URL": "unit.example.com",
-    "PEPEUNIT_APP_PREFIX": "/pepeunit",
-    "PEPEUNIT_API_ACTUAL_PREFIX": "/api/v1",
-    "HTTP_TYPE": "https",
-    "MQTT_URL": "emqx.example.com",
-    "MQTT_PORT": 1883,
-    "PEPEUNIT_TOKEN": "jwt_token",
-    "SYNC_ENCRYPT_KEY": "32_bit_encrypt_key",
-    "SECRET_KEY": "32_bit_secret_key",
-    "PING_INTERVAL": 30,
-    "STATE_SEND_INTERVAL": 300
-}
-```
-
-Распишите мотивацию для добавления дополнительных переменных:
-- `WIFI_SSID` - для подключения к `WiFi` точно понадобится название сети
-- `WIFI_PASS` - для подключения к `WiFi` точно будет нужен пароль
-- `PUBLISH_SEND_INTERVAL` - хочу настраивать частоту отравки сообщений в [Pepeunit](/conception/overview)
-- `DUTY_MIN` - хочу иметь возможность ограничить минимальную скорость вентилятора
-- `DUTY_MAX` - хочу иметь возможность ограничить максимальную скорость вентилятора
-- `TEMP_MIN` - хочу настраивать температуру ниже которой скорость будет `DUTY_MIN`
-- `TEMP_MAX` - хочу настраивать температуру выше которой скорость будет `TEMP_MAX`
-
-Теперь добавьте данные переменные в обезличенном виде в [env_example.json](/definitions#env-example-json), получится следующее:
+В заполненом состоянии [env_example.json](/definitions#env-example-json) будет выглядеть вот так:
 
 ```json
 {
@@ -177,9 +144,30 @@ LICENSE
     "SYNC_ENCRYPT_KEY": "32_bit_encrypt_key",
     "SECRET_KEY": "32_bit_secret_key",
     "PING_INTERVAL": 30,
-    "STATE_SEND_INTERVAL": 300
+    "STATE_SEND_INTERVAL": 300,
+    "MIN_LOG_LEVEL": "Debug",
+    "MAX_LOG_LENGTH": 64
 }
 ```
+
+:::warning
+Все переменные в [env_example.json](/definitions#env-example-json) должны быть обезличены
+:::
+
+### Зарезервированные env переменные
+
+При использовании клиентских библиотек: [Micropython](/libraries/micropython), [Golang](/libraries/golang) и [Python](/libraries/python) - нужно указывать полный набор зарезервированных переменных: [Подробно о заполнении env_example.json](/developer/struct-env-json#env-example-json).
+
+### Переменные разработчика
+
+Распишите мотивацию для добавления дополнительных переменных:
+- `WIFI_SSID` - для подключения к `WiFi` точно понадобится название сети
+- `WIFI_PASS` - для подключения к `WiFi` точно будет нужен пароль
+- `PUBLISH_SEND_INTERVAL` - хочу настраивать частоту отравки сообщений в [Pepeunit](/conception/overview)
+- `DUTY_MIN` - хочу иметь возможность ограничить минимальную скорость вентилятора
+- `DUTY_MAX` - хочу иметь возможность ограничить максимальную скорость вентилятора
+- `TEMP_MIN` - хочу настраивать температуру ниже которой скорость будет `DUTY_MIN`
+- `TEMP_MAX` - хочу настраивать температуру выше которой скорость будет `TEMP_MAX`
 
 :::warning
 Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [Readme](/definitions#readme-file). [Pepeunit](/conception/overview) отобразит новые переменные [Пользователям](/mechanics/roles.html#user) для ввода, когда они изменят [таргет версию](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
@@ -220,16 +208,23 @@ LICENSE
 
 ## Наполнение Unit функционалом
 
-Для создания функционала - итеративно прорабатывайте аспекты работы вашего кода, начните c тестирования библиотек получения данных с датчиков и постепенно идите в сторону реализации отправки данных, получения управляющего воздействия и интеграции с [Pepeunit](/conception/overview).
+Когда у вас есть обратная связь от [Pepeunit](/conception/overview), можно идти по следующему алгоритму при создании [Unit](/definitions#unit):
+1. Протестировать что клиентские библиотеки ([Micropython](/libraries/micropython), [Golang](/libraries/golang) и [Python](/libraries/python)) корректно отправляют данные в [Pepeunit](/conception/overview)
+1. Получите данные от ваших датчиков локально, попробуйте вывести их в консоль
+1. Попробуйте отправить свои данные в `output_topic` указанные в [schema_example.json](/definitions#schema-example-json)
+1. Получите команды из `input_topic` и обработайте их так как задумано в концепции вашего [Unit](/definitions#unit)
+1. Внедрите переменные окружения из [env_example.json](/definitions#env-example-json) для удалённой настройки вашего [Unit](/definitions#unit)
 
-Здесь всё индивидуально, разработчики [Pepeunit](/conception/overview) могут лишь облегчить вам работу предоставив примеры для разных языков программирования:
+После этих шагов вы получите рабочее устройство, которое нужно протестировать в различных режимах работы. Не нужно зацыкливаться именно на этом алгоритме, разработывайте так как удобно вам, но старайтесь поддерживать `readme` и следовать стандартным правилам частоты кода у Програмиистов.
 
-- [esp32 Micropython](https://git.pepemoss.com/pepe/pepeunit/units/wifi_pc_fan_4_pin.git)
-- [esp8266 Micropython](https://git.pepemoss.com/pepe/pepeunit/units/wifi_temp_sensor.git)
-- [go](https://git.pepemoss.com/pepe/pepeunit/units/go_hotkeys.git)
+Разработчики [Pepeunit](/conception/overview) могут лишь облегчить вам работу предоставив примеры для разных языков программирования:
+
+- [esp32 Micropython](https://git.pepemoss.com/pepe/pepeunit/units/esp32/wifi_pc_fan_4_pin.git)
+- [esp8266 Micropython](https://git.pepemoss.com/pepe/pepeunit/units/esp8266/temp-sensor-ds18b20.git)
+- [go](https://git.pepemoss.com/pepe/pepeunit/units/go/go_hotkeys.git)
 
 :::info
-Вы можете делать множество [коммитов](/definitions#git-commit) с рабочим и не рабочим функционалом, создавать [ветки](/definitions#git-branch) и делать всё что позволяет [Git](/definitions#git), но настенет момент во времени когда вы увидите, что всё что вы задумали корректно работает. В этот момент нужно перейти в следующему пункту.
+Вы можете делать множество [коммитов](/definitions#git-commit) с рабочим и не рабочим функционалом, создавать [ветки](/definitions#git-branch) и делать всё что позволяет [Git](/definitions#git), но настенет момент - когда вы увидите, что всё что вы задумали корректно работает. В этот момент нужно перейти в следующему пункту.
 :::
 
 ## Актуализация документации

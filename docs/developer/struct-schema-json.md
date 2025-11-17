@@ -16,20 +16,20 @@
 {
     "input_base_topic": [
         "update/pepeunit",
+        "env_update/pepeunit",
         "schema_update/pepeunit",
-        "env_update/pepeunit"
+        "log_sync/pepeunit"
     ],
     "output_base_topic": [
-        "state/pepeunit"
+        "state/pepeunit",
+        "log/pepeunit"
     ],
     "input_topic": [
-        "set_heater_duty/pepeunit"
+        "set_fan_state/pepeunit"
     ],
     "output_topic": [
-        "current_temperature/pepeunit",
-        "current_pressure/pepeunit",
-        "current_heater_duty/pepeunit",
-        "current_humidity/pepeunit"
+        "current_fan_speed_percentage/pepeunit",
+        "current_temp/pepeunit"
     ]
 }
 ```

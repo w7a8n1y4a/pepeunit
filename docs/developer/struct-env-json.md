@@ -4,7 +4,7 @@
 
 :::warning Какое функциональное назначание у [env_example.json](/definitions#env-example-json)?
 Данный файл - это контракт между разработчиком [Unit](/definitions#unit) и [Pepeunit](/conception/overview):
-1. Разработчик гарантирует, что он реализует в функционале [Unit](/definitions#unit) зарезервированные переменные [Pepeunit](/conception/overview), позволяющие взаимодействовать с [Pepeunit](/conception/overview)
+1. Разработчик гарантирует, что он реализует в функционале [Unit](/definitions#unit) все или часть зарезервированных переменных [Pepeunit](/conception/overview), позволяющих взаимодействовать с [Pepeunit](/conception/overview)
 1. [Pepeunit](/conception/overview) гарантирует возможность [Пользователей](/mechanics/roles.html#user) установить переменные указанные разработчиком
 1. [Pepeunit](/conception/overview) гарантирует, что автоматически установит зарезервированные переменные указанные в файле при первом сохранении со стороны [Пользователя](/mechanics/roles.html#user).
 :::
@@ -29,7 +29,9 @@
     "SYNC_ENCRYPT_KEY": "32_bit_encrypt_key",
     "SECRET_KEY": "32_bit_secret_key",
     "PING_INTERVAL": 30,
-    "STATE_SEND_INTERVAL": 300
+    "STATE_SEND_INTERVAL": 300,
+    "MIN_LOG_LEVEL": "Debug",
+    "MAX_LOG_LENGTH": 64
 }
 ```
 
@@ -52,18 +54,20 @@
 `SECRET_KEY` | - | `32 байтовый ключ` в формате `base64`. Уникальный для каждого [Unit](/definitions#unit). Удобно использовать для подписи или генерации `jwt`
 `PING_INTERVAL` | - | Частота [MQTT](/definitions#mqtt) пинга в секундах, `30` секунд для всех
 `STATE_SEND_INTERVAL` | `BACKEND_STATE_SEND_INTERVAL` из [Backend ENV](/deployment/env-variables#backend) | Частота отправки состояния в [стандартный топик состояния](/developer/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit)
+`MIN_LOG_LEVEL` | `Debug` | Минимальный уровень лога, который будет отправляться по [MQTT](/definitions#mqtt) и сохраняться в файл [log.json](/libraries/framework#log-json). Если установить например `Warning`, то `Debug` и `Info` отправляться не будут
+`MAX_LOG_LENGTH` | `64` | Максимальное число строк в файле [log.json](/libraries/framework#log-json), удаляются строки из начала файла, сохрняются в конец.
 `COMMIT_VERSION` | - | `Hash` [коммита](/definitions#git-commit). Отображает текущую [таргет версию](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) [Unit](/definitions#unit). Имеет уникальный функционал, её нельзя изменить вручную в меню изменения [env.json](/definitions#env-json), она будет игнорироваться при сохранении
 
-### Переменные окружения разработчика [Unit](/definitions#unit)
+### Переменные окружения от разработчика [Unit](/definitions#unit)
 
 Разработчик [Unit](/definitions#unit) может создавать любые переменные окружения, которые отличаются по названию от стандартных. При этом значения указанные в переменных, будут отображаться как значения по умолчанию в интерфейсе [Пользователей](/mechanics/roles.html#user).
 
 :::danger
-Так как [Пользователь](/mechanics/roles.html#user) имеет возможность заполнять значение переменных окружения, очень желательно заполнить [Readme](/definitions#readme-file) репозитория, который вы создаёте.
+Так как [Пользователь](/mechanics/roles.html#user) в итоге будет заполнять переменные в ручную, очень желательно заполнить [Readme](/definitions#readme-file) репозитория, который вы создаёте.
 :::
 
-:::info Пользовательский опыт
-При первой попытке [Пользователя](/mechanics/roles.html#user) установить переменные окружения, он изначально видит только переменные которые добавил разработчик [Unit](/definitions#unit) через [env_example.json](/definitions#env-example-json).
+:::danger
+Заполнение [env.json](/definitions#env-json) пользовтелем происходит на основе: [Механизм генерации ENV](/mechanics/alg-env)
 :::
 
 ## env.json
@@ -87,7 +91,7 @@
 
 :::info Какие основные свойства можно выделить у [env.json](/definitions#env-json)?
 1. [env.json](/definitions#env-json) файл секретен, его нельзя передавать кому-либо
-1. [env.json](/definitions#env-json) файл позволяет удобно конфигурировать и обновлять [Unit](/definitions#unit)
+1. [env.json](/definitions#env-json) файл позволяет удобно конфигурировать и обновлять состояние [Unit](/definitions#unit) без полного обновления файлов программы
 1. [env.json](/definitions#env-json) файл позволяет [Unit](/definitions#unit) знать какому [инстансу](/definitions#instance) [Pepeunit](/conception/overview) он принадлежит
 1. [env.json](/definitions#env-json) файл при помощи переменной PEPEUNIT_TOKEN позволяет [Pepeunit](/conception/overview) производить авторизацию для конкретных [Unit](/definitions#unit)
 :::

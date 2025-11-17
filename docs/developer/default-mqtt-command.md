@@ -54,7 +54,7 @@
 
 [Компилируемые](/definitions#compilable):
 
-1. Сверить версию `NEW_COMMIT_VERSION` с текущей версией `COMMIT_VERSION` из [env.json](/definitions#env-json), если совпали обновление прерывается, если не совпали [Unit](/definitions#unit) начинает процесс обновления
+1. Сверить версию `NEW_COMMIT_VERSION` с текущей версией `COMMIT_VERSION` из [env.json](/definitions#env-json), если совпали обновление прерывается, если не совпали - [Unit](/definitions#unit) начинает процесс обновления
 1. Вычислить `uuid` [Unit](/definitions#unit) на основе `jwt` токена `PEPEUNIT_TOKEN` из [env.json](/definitions#env-json)
 1. Скачать архив `tgz`, `tar` или `zip` с [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) при помощи [REST](/definitions#rest). Переменные `HTTP_TYPE` и `PEPEUNIT_URL` доступны внутри [env.json](/definitions#env-json):
     - `HTTP_TYPE://PEPEUNIT_URL/pepeunit/api/v1/units/firmware/tgz/{Unit.uuid}?wbits=9&level=9` 

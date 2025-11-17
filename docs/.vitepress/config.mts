@@ -86,6 +86,7 @@ export default withMermaid(defineConfig({
         text: 'Библиотеки Unit',
         collapsed: true,
         items: [
+          { text: 'Pepeunit Framework', link: '/libraries/framework' },
           { text: 'Micropython', link: '/libraries/micropython' },
           { text: 'Golang', link: '/libraries/golang' },
           { text: 'Python', link: '/libraries/python' },
