@@ -66,6 +66,16 @@ export default withMermaid(defineConfig({
         ]
       },
       {
+        text: 'Библиотеки Unit',
+        collapsed: true,
+        items: [
+          { text: 'Pepeunit Framework', link: '/libraries/framework' },
+          { text: 'Micropython', link: '/libraries/micropython' },
+          { text: 'Golang', link: '/libraries/golang' },
+          { text: 'Python', link: '/libraries/python' },
+        ]
+      },
+      {
         text: 'Руководство Разработчика Unit',
         collapsed: true,
         items: [
@@ -83,16 +93,6 @@ export default withMermaid(defineConfig({
         ]
       },
       {
-        text: 'Библиотеки Unit',
-        collapsed: true,
-        items: [
-          { text: 'Pepeunit Framework', link: '/libraries/framework' },
-          { text: 'Micropython', link: '/libraries/micropython' },
-          { text: 'Golang', link: '/libraries/golang' },
-          { text: 'Python', link: '/libraries/python' },
-        ]
-      },
-      {
         text: 'Механики',
         collapsed: true,
         items: [
@@ -102,15 +102,6 @@ export default withMermaid(defineConfig({
           { text: 'Система Обновлений', link: '/mechanics/update-system' },
           { text: 'Шифрование', link: '/mechanics/cipher' },
           { text: 'Генерация Env у Unit', link: '/mechanics/alg-env' },
-        ]
-      },
-      {
-        text: 'Тесты',
-        collapsed: true,
-        items: [
-          { text: 'Модульные', link: '/tests/module-test' },
-          { text: 'Интеграционные', link: '/tests/integration-test' },
-          { text: 'Нагрузочные', link: '/tests/load-test' },
         ]
       },
       {
@@ -134,10 +125,20 @@ export default withMermaid(defineConfig({
         ]
       },
       {
-        text: 'Вклад',
+        text: 'Разработчику Pepeunit',
         collapsed: true,
         items: [
-          { text: 'Соглашения', link: '/contribution/contribution' },
+          { text: 'Карта репозиториев', link: '/development-pepeunit/maps' },
+          {
+            text: 'Тесты Backend',
+            collapsed: true,
+            items: [
+              { text: 'Модульные', link: '/development-pepeunit/tests/module-test' },
+              { text: 'Интеграционные', link: '/development-pepeunit/tests/integration-test' },
+              { text: 'Нагрузочные', link: '/development-pepeunit/tests/load-test' },
+            ]
+          },
+          { text: 'Соглашения', link: '/development-pepeunit/contribution' },
         ]
       }
     ],

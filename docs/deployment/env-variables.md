@@ -63,9 +63,9 @@
 
 :::info
 Для тестирования [Backend](/definitions#backend) также выделены переменные:
-- [Переменные интеграционного тестирования](/tests/integration-test#запуск)
-- [Переменные нагрузочного тестирования MQTT](/tests/load-test#тестирование-mqtt)
-- [Переменные нагрузочного тестирования REST и GQL](/tests/load-test#тестирование-rest-и-gql)
+- [Переменные интеграционного тестирования](/development-pepeunit/tests/integration-test#запуск)
+- [Переменные нагрузочного тестирования MQTT](/development-pepeunit/tests/load-test#тестирование-mqtt)
+- [Переменные нагрузочного тестирования REST и GQL](/development-pepeunit/tests/load-test#тестирование-rest-и-gql)
 :::
 
 ## Backend Data Pipe
