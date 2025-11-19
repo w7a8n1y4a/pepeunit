@@ -28,8 +28,8 @@ Private Platform Tests | - | `do it yourself` | `do it yourself` | -
 
 ## Unit
 
-Purpose | Lang | hardware | Gitlab | Github | Stack
+Purpose | Lang | Hardware | Gitlab | Github | Stack
 -- | -- | -- | -- | -- | --
 Donut for pick command edged input Unit | `Golang` | `Any` | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/units/go/go_hotkeys) | - | `ebiten-v2`, `pepeunit_go_client`
 WiFi temp sensor ds18b20 | `Micropython` | `esp8266`, `esp32` | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/units/esp8266/temp-sensor-ds18b20) | - | `pepeunit_micropython_client`
-4pin fan regulator by ds18b20 | `Micropython` | `esp32` | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/units/esp32/wifi_pc_fan_4_pin) | - | `pepeunit_micropython_client`
+4pin fan regulator on ds18b20 | `Micropython` | `esp32` | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/units/esp32/wifi_pc_fan_4_pin) | - | `pepeunit_micropython_client`

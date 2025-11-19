@@ -105,26 +105,6 @@ export default withMermaid(defineConfig({
         ]
       },
       {
-        text: 'Дорожная карта',
-        collapsed: true,
-        items: [
-          { text: 'Доработки', link: '/roadmap/revisions' },
-          { text: '> 1.0.0 Units', link: '/roadmap/units' },
-          { text: '> 1.0.0 Уведомления Telegram', link: '/roadmap/alerts' },
-          { text: '> 1.0.0 Сравнение инстансов', link: '/roadmap/comparison' },
-          { text: '> 1.0.0 Рефактор фронтенда', link: '/roadmap/frontend-refactor' },
-          { text: '> 2.0.0 Монетизация', link: '/roadmap/monetisation' },
-          { text: '> 2.0.0 Федерация', link: '/roadmap/federation' },
-        ]
-      },
-      {
-        text: 'Для общественности',
-        collapsed: true,
-        items: [
-          { text: 'Видео YouTube', link: '/society/video' },
-        ]
-      },
-      {
         text: 'Разработчику Pepeunit',
         collapsed: true,
         items: [
@@ -139,6 +119,19 @@ export default withMermaid(defineConfig({
             ]
           },
           { text: 'Соглашения', link: '/development-pepeunit/contribution' },
+        ]
+      },
+      {
+        text: 'Дорожная карта',
+        collapsed: true,
+        items: [
+          { text: 'Доработки', link: '/roadmap/revisions' },
+          { text: '> 1.0.0 Units', link: '/roadmap/units' },
+          { text: '> 1.0.0 Уведомления Telegram', link: '/roadmap/alerts' },
+          { text: '> 1.0.0 Сравнение инстансов', link: '/roadmap/comparison' },
+          { text: '> 1.0.0 Рефактор фронтенда', link: '/roadmap/frontend-refactor' },
+          { text: '> 2.0.0 Монетизация', link: '/roadmap/monetisation' },
+          { text: '> 2.0.0 Федерация', link: '/roadmap/federation' },
         ]
       }
     ],
