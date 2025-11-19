@@ -1,19 +1,22 @@
-# Pepeunit - Federated IoT Platform
+# Pepeunit Documentation - Federated IoT Platform
 
 <div align="center">
     <img align="center" src="https://pepeunit.com/pepeunit-og.jpg"  width="640" height="320">
 </div>
 
-[Pepeunit](https://pepeunit.com/) - платформа с открытым исходным кодом, основанная на принципах [Fediverse](https://pepeunit.com/definitions.html#fediverse) и [IoT](https://pepeunit.com/definitions.html#iot), предназначенная для организации устройств в единую, управляемую информационную систему.
+## [Карта проекта](https://pepeunit.com/development-pepeunit/maps.html)
 
-## Основные репозитории
-1. [Deploy](https://git.pepemoss.com/pepe/pepeunit/pepeunit_deploy.git) - Развёртывание через `Docker Compose`
-1. [Pepeunit SPA](https://git.pepemoss.com/pepe/pepeunit/pepeunit.git) - Статический Лэндинг с Документацией
-1. [Frontend](https://git.pepemoss.com/pepe/pepeunit/pepeunit_frontend.git) - Фронтенд для инстансов
-1. [Backend](https://git.pepemoss.com/pepe/pepeunit/pepeunit_backend.git) - Бэкенд для инстансов
+## Управление проектом
+```bash
+make help
+```
 
-## Репозитории Unit
-
-1. [WiFi Temp sensor](https://git.pepemoss.com/pepe/pepeunit/units/wifi_temp_sensor.git) - Сенсор температуры `esp8266`
-1. [Wifi 4pin PWM вентилятор](https://git.pepemoss.com/pepe/pepeunit/units/wifi_pc_fan_4_pin.git) - Регулятор температуры на `esp32`
-1. [Go Hotkeys](https://git.pepemoss.com/pepe/pepeunit/units/go_hotkeys.git) - Отправка значений в [UnitNode](https://pepeunit.com/definitions.html#unitnode) через `Desktop` приложение
+## Основные этапы развёртывания
+0. Установите пакеты
+    ```bash
+    make install
+    ```
+1. Запустите приложение в режиме разработчика:
+    ```bash
+    make run-dev
+    ```
