@@ -1,4 +1,4 @@
-# Pepeunit Documentation - Federated IoT Platform
+# Pepeunit Documentation
 
 <div align="center">
     <img align="center" src="https://pepeunit.com/pepeunit-og.jpg"  width="640" height="320">
