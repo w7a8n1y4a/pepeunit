@@ -11,11 +11,11 @@ Frontend | `TS` | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/pepeunit_front
 
 ## Библиотеки
 
-Purpose | Lang | Gitlab | Github | Stack
--- | -- | -- | -- | --
-Client Micropython | `Micropython` | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client) | [Github](https://github.com/w7a8n1y4a/pepeunit_micropython_client) | `mrequests`, `shutil`, `tarfile`, `umqtt.simple`
-Client Python | `Python` | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_python_client) | [Github](https://github.com/w7a8n1y4a/pepeunit_python_client) | `Paho-mqtt`, `httpx`
-Client Golang | `Golang` | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_go_client) | [Github](https://github.com/w7a8n1y4a/pepeunit_go_client) | `Paho-mqtt`
+Purpose | Lang | Registry | Gitlab | Github | Stack
+-- | -- | -- | -- | -- | --
+Client Micropython | `Micropython` | [Releases](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/releases) | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client) | [Github](https://github.com/w7a8n1y4a/pepeunit_micropython_client) | `mrequests`, `shutil`, `tarfile`, `umqtt.simple`
+Client Python | `Python` | [PyPi](https://pypi.org/project/pepeunit-client/) | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_python_client) | [Github](https://github.com/w7a8n1y4a/pepeunit_python_client) | `Paho-mqtt`, `httpx`
+Client Golang | `Golang` | [go.dev](https://pkg.go.dev/github.com/w7a8n1y4a/pepeunit_go_client) | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_go_client) | [Github](https://github.com/w7a8n1y4a/pepeunit_go_client) | `Paho-mqtt`
 
 ## Инфраструктурные Unit
 
