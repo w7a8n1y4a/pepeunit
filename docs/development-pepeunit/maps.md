@@ -13,7 +13,7 @@ Frontend | `TS` | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/pepeunit_front
 
 Purpose | Lang | Gitlab | Github | Stack
 -- | -- | -- | -- | --
-Client Micropython | `Micropython` | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client) | [Github](https://github.com/w7a8n1y4a/pepeunit_micropython_client) | `mrequests`, `shutil`, `tarfile`, `umqtt`
+Client Micropython | `Micropython` | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client) | [Github](https://github.com/w7a8n1y4a/pepeunit_micropython_client) | `mrequests`, `shutil`, `tarfile`, `umqtt.simple`
 Client Python | `Python` | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_python_client) | [Github](https://github.com/w7a8n1y4a/pepeunit_python_client) | `Paho-mqtt`, `httpx`
 Client Golang | `Golang` | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_go_client) | [Github](https://github.com/w7a8n1y4a/pepeunit_go_client) | `Paho-mqtt`
 
@@ -24,7 +24,7 @@ Purpose | Lang | Gitlab | Github | Stack
 Integration Tests | `json`, `md` | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/units/universal_test_unit) | - | -
 Load Tests | `json` | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/units/universal_load_unit) | - | -
 Public Platform Tests | - | [Gitlab](https://git.pepemoss.com/pepe/pepeunit/units/gitlab_unit_pub_test) | [Github](https://github.com/w7a8n1y4a/github_unit_pub_test) | -
-Private Platform Tests | - | `self make` | `self make` | -
+Private Platform Tests | - | `do it yourself` | `do it yourself` | -
 
 ## Unit
 
