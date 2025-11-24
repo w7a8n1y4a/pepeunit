@@ -33,7 +33,7 @@
 ```json
 {
     "COMMAND": "Update",
-    "NEW_COMMIT_VERSION": "ad1ddee1e559153f6ea4ae33790f5980e32d61cf",
+    "PU_COMMIT_VERSION": "ad1ddee1e559153f6ea4ae33790f5980e32d61cf",
     "COMPILED_FIRMWARE_LINK": "https://git.pepemoss.com/api/v4/projects/281/packages/generic/release/0.0.2/picker-linux-amd64"
 }
 ```
@@ -43,7 +43,7 @@
 ```json
 {
     "COMMAND": "Update",
-    "NEW_COMMIT_VERSION": "ad1ddee1e559153f6ea4ae33790f5980e32d61cf"
+    "PU_COMMIT_VERSION": "ad1ddee1e559153f6ea4ae33790f5980e32d61cf"
 }
 ```
 
@@ -54,28 +54,28 @@
 
 [Компилируемые](/definitions#compilable):
 
-1. Сверить версию `NEW_COMMIT_VERSION` с текущей версией `COMMIT_VERSION` из [env.json](/definitions#env-json), если совпали обновление прерывается, если не совпали - [Unit](/definitions#unit) начинает процесс обновления
-1. Вычислить `uuid` [Unit](/definitions#unit) на основе `jwt` токена `PEPEUNIT_TOKEN` из [env.json](/definitions#env-json)
-1. Скачать архив `tgz`, `tar` или `zip` с [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) при помощи [REST](/definitions#rest). Переменные `HTTP_TYPE` и `PEPEUNIT_URL` доступны внутри [env.json](/definitions#env-json):
-    - `HTTP_TYPE://PEPEUNIT_URL/pepeunit/api/v1/units/firmware/tgz/{Unit.uuid}?wbits=9&level=9` 
+1. Сверить версию `PU_COMMIT_VERSION` с текущей версией `PU_COMMIT_VERSION` из [env.json](/definitions#env-json), если совпали обновление прерывается, если не совпали - [Unit](/definitions#unit) начинает процесс обновления
+1. Вычислить `uuid` [Unit](/definitions#unit) на основе `jwt` токена `PU_AUTH_TOKEN` из [env.json](/definitions#env-json)
+1. Скачать архив `tgz`, `tar` или `zip` с [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) при помощи [REST](/definitions#rest). Переменные `PU_HTTP_TYPE` и `PU_DOMAIN` доступны внутри [env.json](/definitions#env-json):
+    - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/firmware/tgz/{Unit.uuid}?wbits=9&level=9` 
         - Доступные `wbits` - `(от -15 до -8) (от 9 до 16) (от 25 до 32)`
         - Доступные `level` - `(от -1 до 10)`
-    - `HTTP_TYPE://PEPEUNIT_URL/pepeunit/api/v1/units/firmware/tar/{Unit.uuid}`
-    - `HTTP_TYPE://PEPEUNIT_URL/pepeunit/api/v1/units/firmware/zip/{Unit.uuid}`
+    - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/firmware/tar/{Unit.uuid}`
+    - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/firmware/zip/{Unit.uuid}`
 1. Распаковать из архива файлы [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json)
 1. Скачать новую скомпилированную часть по ссылке из `COMPILED_FIRMWARE_LINK` - [подробнее о предварительной компиляции](/developer/release-assets)
 1. Запустить новую скомпилированную часть c прекращением работы старой
 
 [Интерпритируемые](/definitions#interpreterable):
 
-1. Сверить версию `NEW_COMMIT_VERSION` с текущей версией `COMMIT_VERSION` из [env.json](/definitions#env-json), если совпали обновление прерывается, если не совпали [Unit](/definitions#unit) начинает процесс обновления
-1. Вычислить `uuid` [Unit](/definitions#unit) на основе `jwt` токена `PEPEUNIT_TOKEN` из [env.json](/definitions#env-json)
-1. Скачать архив `tgz`, `tar` или `zip` с обновлением при помощи [REST](/definitions#rest). Переменные `HTTP_TYPE` и `PEPEUNIT_URL` доступны внутри [env.json](/definitions#env-json):
-    - `HTTP_TYPE://PEPEUNIT_URL/pepeunit/api/v1/units/firmware/tgz/{Unit.uuid}?wbits=9&level=9` 
+1. Сверить версию `PU_COMMIT_VERSION` с текущей версией `COMMIT_VERSION` из [env.json](/definitions#env-json), если совпали обновление прерывается, если не совпали [Unit](/definitions#unit) начинает процесс обновления
+1. Вычислить `uuid` [Unit](/definitions#unit) на основе `jwt` токена `PU_AUTH_TOKEN` из [env.json](/definitions#env-json)
+1. Скачать архив `tgz`, `tar` или `zip` с обновлением при помощи [REST](/definitions#rest). Переменные `PU_HTTP_TYPE` и `PU_DOMAIN` доступны внутри [env.json](/definitions#env-json):
+    - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/firmware/tgz/{Unit.uuid}?wbits=9&level=9` 
         - Доступные `wbits` - `(от -15 до -8) (от 9 до 16) (от 25 до 32)`
         - Доступные `level` - `(от -1 до 10)`
-    - `HTTP_TYPE://PEPEUNIT_URL/pepeunit/api/v1/units/firmware/tar/{Unit.uuid}`
-    - `HTTP_TYPE://PEPEUNIT_URL/pepeunit/api/v1/units/firmware/zip/{Unit.uuid}`
+    - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/firmware/tar/{Unit.uuid}`
+    - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/firmware/zip/{Unit.uuid}`
 1. Распаковать из архива все файлы в отдельную дирректорию или область памяти
 1. Заменить текущую версию программы на файлы из новой дирректории или области памяти
 1. Перезапустить [Unit](/definitions#unit)
@@ -99,8 +99,8 @@
 
 ### Алгоритм действий Unit
 
-1. Скачать новую версию файла [schema.json](/definitions#schema-json) через [REST](/definitions#rest). Переменные `HTTP_TYPE` и `PEPEUNIT_URL` доступны внутри [env.json](/definitions#env-json):
-    - `HTTP_TYPE://PEPEUNIT_URL/pepeunit/api/v1/units/get_current_schema/{Unit.uuid}`
+1. Скачать новую версию файла [schema.json](/definitions#schema-json) через [REST](/definitions#rest). Переменные `PU_HTTP_TYPE` и `PU_DOMAIN` доступны внутри [env.json](/definitions#env-json):
+    - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/get_current_schema/{Unit.uuid}`
 1. Установить новое состояние для [schema.json](/definitions#schema-json) у [Unit](/definitions#unit)
 
 ## ENV_UPDATE - env_update/pepeunit
@@ -122,8 +122,8 @@
 
 ### Алгоритм действий Unit
 
-1. Скачать новую версию файла [env.json](/definitions#env-json) через [REST](/definitions#rest). Переменные `HTTP_TYPE` и `PEPEUNIT_URL` доступны внутри существующего [env.json](/definitions#env-json):
-    - `HTTP_TYPE://PEPEUNIT_URL/pepeunit/api/v1/units/env/{Unit.uuid}`
+1. Скачать новую версию файла [env.json](/definitions#env-json) через [REST](/definitions#rest). Переменные `PU_HTTP_TYPE` и `PU_DOMAIN` доступны внутри существующего [env.json](/definitions#env-json):
+    - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/env/{Unit.uuid}`
 1. Установить новое состояние для [env.json](/definitions#env-json) у [Unit](/definitions#unit)
 
 ## LOG_SYNC - log_sync/pepeunit

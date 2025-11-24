@@ -89,14 +89,15 @@ mv .env.local.example .env.local
 `CLICKHOUSE_USER` | `pepeunit-admin` | `pepeunit-admin` | Имя пользователя, от имени которого будет создана база данных
 `CLICKHOUSE_PASSWORD` | `f6prBUMbhvNnlLZ0f0HN` | `f6prBUMbhvNnlLZ0f0HN` | Пароль пользователя, от имени которого будет создана база данных
 `CLICKHOUSE_DB` | `default` | `default` | Название базы данных
-`BACKEND_DOMAIN` | `192.168.0.22` | `unit.pepeunit.com` | Доменное имя от [инстанса](/definitions#instance) [Pepeunit](/conception/overview)
-`BACKEND_SECURE` | `False` | - | Выбирает `http` или `https` для `BACKEND_DOMAIN` [инстанса](/definitions#instance) [Pepeunit](/conception/overview), по умолчанию `https`
-`TELEGRAM_TOKEN `| `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | Токен `Telegram Bot` можно получить у [Bot Father](https://t.me/BotFather)
-`TELEGRAM_BOT_LINK` | `https://t.me/PepeUnitRobot` | `https://t.me/PepeUnitRobot` | Ccылка на бота, которого вы создаёте в [Bot Father](https://t.me/BotFather)
-`MQTT_HOST` | `192.168.0.22` | `emqx.pepeunit.com` | Доменное имя от [инстансa](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker)
-`MQTT_SECURE` | `False` | - | Выбирает `http` или `https` для `MQTT_HOST` [инстансa](/definitions#instance) [Pepeunit](/conception/overview), по умолчанию `https`
-`MQTT_USERNAME` | `YabJTlmvQ4tvweuTl0gn` | `YabJTlmvQ4tvweuTl0gn` | Имя администратора [EMQX MQTT Broker](/definitions#mqtt-broker)
-`MQTT_PASSWORD` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | Пароль администратора [EMQX MQTT Broker](/definitions#mqtt-broker)
+`PU_DOMAIN` | `192.168.0.22` | `unit.pepeunit.com` | Доменное имя от [инстанса](/definitions#instance) [Pepeunit](/conception/overview)
+`PU_SECURE` | `False` | - | Выбирает `http` или `https` для `BACKEND_DOMAIN` [инстанса](/definitions#instance) [Pepeunit](/conception/overview), по умолчанию `https`
+`PU_TELEGRAM_TOKEN `| `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | Токен `Telegram Bot` можно получить у [Bot Father](https://t.me/BotFather)
+`PU_TELEGRAM_BOT_LINK` | `https://t.me/PepeUnitRobot` | `https://t.me/PepeUnitRobot` | Ccылка на бота, которого вы создаёте в [Bot Father](https://t.me/BotFather)
+`PU_MQTT_HOST` | `192.168.0.22` | `emqx.pepeunit.com` | Доменное имя от [инстансa](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker). Для локального использования, убедитесь, что адрес будет доступен из контейнеров, `127.0.0.1` скорее всего работать не будет
+`PU_MQTT_SECURE` | `False` | - | Выбирает `http` или `https` для `MQTT_HOST` [инстансa](/definitions#instance) [Pepeunit](/conception/overview), по умолчанию `https`
+`PU_MQTT_PORT` | `1883` | `1883` | `MQTT` порт для [EMQX MQTT Broker](/definitions#mqtt-broker)
+`PU_MQTT_USERNAME` | `YabJTlmvQ4tvweuTl0gn` | `YabJTlmvQ4tvweuTl0gn` | Имя администратора [EMQX MQTT Broker](/definitions#mqtt-broker)
+`PU_MQTT_PASSWORD` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | Пароль администратора [EMQX MQTT Broker](/definitions#mqtt-broker)
 `GF_USER` | `admin` | `admin` | Логин админа для [Grafana](/deployment/dependencies#grafana)
 `GF_PASSWORD` | `aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB` | `aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB` | Пароль админа для [Grafana](/deployment/dependencies#grafana)
 
@@ -151,7 +152,7 @@ $> python make_env.py
 1. `1883` - для работы по протоколу [MQTT](/definitions#mqtt)
 
 :::warning
-если ваш `1883` порт занят другими приложениями, изменить его на другой и внесите изменения в [ENV переменные Backend](/deployment/env-variables#backend) - `MQTT_PORT`, а также в `docker-compose.yml` в секцию `emqx.ports` - значение `- "1883:1883"` вам нужно будет заменить например на: `- "1885:1883"`
+если ваш `1883` порт занят другими приложениями, изменить его на другой и внесите изменения в [ENV переменные Backend](/deployment/env-variables#backend) - `PU_MQTT_PORT`, а также в `docker-compose.yml` в секцию `emqx.ports` - значение `- "1883:1883"` вам нужно будет заменить например на: `- "1885:1883"`
 :::
 :::danger
 Если у вас публичный [инстанс](/definitions#instance) [Pepeunit](/conception/overview) с доменом - вам потребуется прокинуть данные порты наружу
@@ -307,7 +308,7 @@ INFO - 2025-03-14 01:11:53,249 - [SUBACK] 1 (0,)
 1. Закрытым портом `1883`
 1. Настройкой портов сервиса `emqx` в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
 1. При использовании кастомного порта для `mqtt`, требуется указать его в двух `.env` файлах: `backend` и `datapipe`
-1. Ошибками в настройках [EMQX MQTT Broker](/definitions#mqtt-broker) и [Backend](/definitions#backend), например `MQTT_REDIS_AUTH_URL` или `REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables#backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies#redis). За первичную авторизацию отвечает именно [Redis](/deployment/dependencies#redis).
+1. Ошибками в настройках [EMQX MQTT Broker](/definitions#mqtt-broker) и [Backend](/definitions#backend), например `PU_MQTT_REDIS_AUTH_URL` или `PU_REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables#backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies#redis). За первичную авторизацию отвечает именно [Redis](/deployment/dependencies#redis).
 :::
 
 ## Создание Администратора

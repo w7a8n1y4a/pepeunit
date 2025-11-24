@@ -5,7 +5,7 @@
 :::
 
 :::warning
-Размер передаваемого [Unit](/definitions#unit) сообщения с префиксом `/pepeunit` на конце - ограничен количеством символов указанных в переменной окружения `MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables#backend). По умолчанию это значение составляет `50000` символов.
+Размер передаваемого [Unit](/definitions#unit) сообщения с префиксом `/pepeunit` на конце - ограничен количеством символов указанных в переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables#backend). По умолчанию это значение составляет `50000` символов.
 :::
 
 

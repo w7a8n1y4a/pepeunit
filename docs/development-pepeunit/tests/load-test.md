@@ -14,14 +14,14 @@ python -m tests.load.load_test_mqtt
 Позволяет создать синтетическую нагрузку в виде [Unit](/definitions#unit), отправляющих [MQTT](/definitions#mqtt) сообщения. Дополнительные [ENV переменные Backend](/deployment/env-variables#backend) позволяют настроить нагрузку по следующим параметрам:
 Переменная Backend | Что делает ?
 -- | --
-`TEST_LOAD_MQTT_DURATION` | Время выполнения теста в секундах
-`TEST_LOAD_MQTT_UNIT_COUNT` | Число [Unit](/definitions#unit) которые будут выполнять запросы
-`TEST_LOAD_MQTT_RPS` | Нагрузка которую будет создавать каждый [Unit](/definitions#unit)
-`TEST_LOAD_MQTT_VALUE_TYPE` | Тип отправляемых переменных `Text` или `Number`
-`TEST_LOAD_MQTT_DUPLICATE_COUNT` | Число повторяюшихся сообщений подряд
-`TEST_LOAD_MQTT_MESSAGE_SIZE` | Размер [MQTT](/definitions#mqtt) сообщений в символах
-`TEST_LOAD_MQTT_POLICY_TYPE` | Тип политики для обработки всех сообщений в тесте: `LastValue`, `NRecords`, `TimeWindow`, `Aggregation`
-`TEST_LOAD_MQTT_WORKERS` | Число процессов `multiprocessing` создающих нагрузку
+`PU_TEST_LOAD_MQTT_DURATION` | Время выполнения теста в секундах
+`PU_TEST_LOAD_MQTT_UNIT_COUNT` | Число [Unit](/definitions#unit) которые будут выполнять запросы
+`PU_TEST_LOAD_MQTT_RPS` | Нагрузка которую будет создавать каждый [Unit](/definitions#unit)
+`PU_TEST_LOAD_MQTT_VALUE_TYPE` | Тип отправляемых переменных `Text` или `Number`
+`PU_TEST_LOAD_MQTT_DUPLICATE_COUNT` | Число повторяюшихся сообщений подряд
+`PU_TEST_LOAD_MQTT_MESSAGE_SIZE` | Размер [MQTT](/definitions#mqtt) сообщений в символах
+`PU_TEST_LOAD_MQTT_POLICY_TYPE` | Тип политики для обработки всех сообщений в тесте: `LastValue`, `NRecords`, `TimeWindow`, `Aggregation`
+`PU_TEST_LOAD_MQTT_WORKERS` | Число процессов `multiprocessing` создающих нагрузку
 
 :::danger
 [Backend](/definitions#backend) использует всегда только `1` воркер `Gunicorn` для обработки [MQTT](/definitions#mqtt) сообщений. Он способен обработать `~4000 rps` сообщений из системных топиков `domain.com/+/+/+/pepeunit`. Для топиков [DataPipe](/definitions#datapipe) c паттерном `domain.com/+/pepeunit` количество сообщений может составлять `~25000 rps`.

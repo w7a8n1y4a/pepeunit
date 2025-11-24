@@ -11,27 +11,29 @@
 
 ### Структура
 ```json
-{
-    "WIFI_SSID": "My_Perfect_Wifi_SSID",
-    "WIFI_PASS": "Strong_Password",
-    "PUBLISH_SEND_INTERVAL": 10,
-    "DUTY_MIN": 8192,
-    "DUTY_MAX": 65535,
+{   
+    "WIFI_SSID": "ssid",
+    "WIFI_PASS": "password",
+    "PWM_FAN_PIN": 0,
+    "DS18B20_PIN_NUM": 4,
+    "REGULATOR_OPERATING_RANGE": 1000,
+    "PUBLISH_SEND_INTERVAL": 1,
     "TEMP_MIN": 30,
     "TEMP_MAX": 60,
-    "PEPEUNIT_URL": "unit.example.com",
-    "PEPEUNIT_APP_PREFIX": "/pepeunit",
-    "PEPEUNIT_API_ACTUAL_PREFIX": "/api/v1",
-    "HTTP_TYPE": "https",
-    "MQTT_URL": "emqx.example.com",
-    "MQTT_PORT": 1883,
-    "PEPEUNIT_TOKEN": "jwt_token",
-    "SYNC_ENCRYPT_KEY": "32_bit_encrypt_key",
-    "SECRET_KEY": "32_bit_secret_key",
-    "PING_INTERVAL": 30,
-    "STATE_SEND_INTERVAL": 300,
-    "MIN_LOG_LEVEL": "Debug",
-    "MAX_LOG_LENGTH": 64
+    "DUTY_MIN": 8192,
+    "DUTY_MAX": 65535,
+    "PU_DOMAIN": "unit.example.com",
+    "PU_HTTP_TYPE": "https",
+    "PU_APP_PREFIX": "/pepeunit",
+    "PU_API_ACTUAL_PREFIX": "/api/v1",
+    "PU_MQTT_HOST": "emqx.example.com",
+    "PU_MQTT_PORT": 1883,
+    "PU_MQTT_PING_INTERVAL": 30,
+    "PU_AUTH_TOKEN": "jwt_token",
+    "PU_SECRET_KEY": "32_bit_secret_key",
+    "PU_STATE_SEND_INTERVAL": 300,
+    "PU_MIN_LOG_LEVEL": "Debug",
+    "PU_MAX_LOG_LENGTH": 64
 }
 ```
 
@@ -43,20 +45,19 @@
 
 Переменная | Значение | Зачем нужна?
 -- | -- | --
-`PEPEUNIT_URL` | `BACKEND_DOMAIN` из [Backend ENV](/deployment/env-variables#backend) | Доменное имя или `ip` адрес [инстанса](/definitions#instance) [Pepeunit](/conception/overview)
-`PEPEUNIT_APP_PREFIX` | `BACKEND_APP_PREFIX` из [Backend ENV](/deployment/env-variables#backend) | Префикс [Backend](/definitions#backend)
-`PEPEUNIT_API_ACTUAL_PREFIX` | `BACKEND_API_V1_PREFIX` из [Backend ENV](/deployment/env-variables#backend) | Префикс актауальной версии [API](/definitions#api) для [Backend](/definitions#backend). Полностью соответствует последней версии [API](/definitions#api)
-`HTTP_TYPE` | `BACKEND_SECURE` из [Backend ENV](/deployment/env-variables#backend) | Тип соединения `https/http` с доменным именем или `ip` адресом [Backend](/definitions#backend) в формате `https/http`
-`MQTT_URL` | `MQTT_HOST` из [Backend ENV](/deployment/env-variables#backend) | Доменное имя или `ip` - адрес [инстанса](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker)
-`MQTT_PORT` | `MQTT_PORT` из [Backend ENV](/deployment/env-variables#backend) | Порт для взаимодействия с [EMQX MQTT Broker](/definitions#mqtt-broker), по умолчанию `1883`
-`PEPEUNIT_TOKEN` | - | Вечный `jwt` токен доступа [Unit](/definitions#unit) к [инстансу](/definitions#instance) [Pepeunit](/conception/overview). Данный токен позволяет пройти авторизацию на подписку и публикацию у топиков [EMQX MQTT Broker](/definitions#mqtt-broker)
-`SYNC_ENCRYPT_KEY` | - | `32 байтовый ключ` в формате `base64`. Уникальный для каждого [Unit](/definitions#unit). Удобно использовать при шифровании чего-либо
-`SECRET_KEY` | - | `32 байтовый ключ` в формате `base64`. Уникальный для каждого [Unit](/definitions#unit). Удобно использовать для подписи или генерации `jwt`
-`PING_INTERVAL` | - | Частота [MQTT](/definitions#mqtt) пинга в секундах, `30` секунд для всех
-`STATE_SEND_INTERVAL` | `BACKEND_STATE_SEND_INTERVAL` из [Backend ENV](/deployment/env-variables#backend) | Частота отправки состояния в [стандартный топик состояния](/developer/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit)
-`MIN_LOG_LEVEL` | `Debug` | Минимальный уровень лога, который будет отправляться по [MQTT](/definitions#mqtt) и сохраняться в файл [log.json](/libraries/framework#log-json). Если установить например `Warning`, то `Debug` и `Info` отправляться не будут
-`MAX_LOG_LENGTH` | `64` | Максимальное число строк в файле [log.json](/libraries/framework#log-json), удаляются строки из начала файла, сохрняются в конец.
-`COMMIT_VERSION` | - | `Hash` [коммита](/definitions#git-commit). Отображает текущую [таргет версию](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) [Unit](/definitions#unit). Имеет уникальный функционал, её нельзя изменить вручную в меню изменения [env.json](/definitions#env-json), она будет игнорироваться при сохранении
+`PU_DOMAIN` | `PU_DOMAIN` из [Backend ENV](/deployment/env-variables#backend) | Доменное имя или `ip` адрес [инстанса](/definitions#instance) [Pepeunit](/conception/overview)
+`PU_HTTP_TYPE` | `PU_SECURE` из [Backend ENV](/deployment/env-variables#backend) | Тип соединения `https/http` с доменным именем или `ip` адресом [Backend](/definitions#backend) в формате `https/http`
+`PU_APP_PREFIX` | `PU_APP_PREFIX` из [Backend ENV](/deployment/env-variables#backend) | Префикс [Backend](/definitions#backend)
+`PU_API_ACTUAL_PREFIX` | `PU_API_V1_PREFIX` из [Backend ENV](/deployment/env-variables#backend) | Префикс актауальной версии [API](/definitions#api) для [Backend](/definitions#backend). Полностью соответствует последней версии [API](/definitions#api)
+`PU_MQTT_HOST` | `PU_MQTT_HOST` из [Backend ENV](/deployment/env-variables#backend) | Доменное имя или `ip` - адрес [инстанса](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker)
+`PU_MQTT_PORT` | `PU_MQTT_PORT` из [Backend ENV](/deployment/env-variables#backend) | Порт для взаимодействия с [EMQX MQTT Broker](/definitions#mqtt-broker), по умолчанию `1883`
+`PU_MQTT_PING_INTERVAL` | - | Частота [MQTT](/definitions#mqtt) пинга в секундах, `30` секунд для всех
+`PU_AUTH_TOKEN` | - | Вечный `jwt` токен доступа [Unit](/definitions#unit) к [инстансу](/definitions#instance) [Pepeunit](/conception/overview). Данный токен позволяет пройти авторизацию на подписку и публикацию у топиков [EMQX MQTT Broker](/definitions#mqtt-broker), устанавливается [Backend](/definitions#backend) автоматически.
+`PU_SECRET_KEY` | - | `32 байтовый ключ` в формате `base64`. Уникальный для каждого [Unit](/definitions#unit). Удобно использовать для подписи или генерации `jwt`. Устанавливается [Backend](/definitions#backend) автоматически
+`PU_STATE_SEND_INTERVAL` | `PU_STATE_SEND_INTERVAL` из [Backend ENV](/deployment/env-variables#backend) | Частота отправки состояния в [стандартный топик состояния](/developer/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit)
+`PU_MIN_LOG_LEVEL` | `Debug` | Минимальный уровень лога, который будет отправляться по [MQTT](/definitions#mqtt) и сохраняться в файл [log.json](/libraries/framework#log-json). Если установить например `Warning`, то `Debug` и `Info` отправляться не будут
+`PU_MAX_LOG_LENGTH` | `64` | Максимальное число строк в файле [log.json](/libraries/framework#log-json), удаляются строки из начала файла, сохрняются в конец.
+`PU_COMMIT_VERSION` | - | `Hash` [коммита](/definitions#git-commit). Отображает текущую [таргет версию](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) [Unit](/definitions#unit). Имеет уникальный функционал, её нельзя изменить вручную в меню изменения [env.json](/definitions#env-json), она будет игнорироваться при сохранении
 
 ### Переменные окружения от разработчика [Unit](/definitions#unit)
 
@@ -78,7 +79,7 @@
 Данный файл - это четырёхсторонний контракт между [Unit](/definitions#unit), [Pepeunit](/conception/overview), [Пользователем](/mechanics/roles.html#user) и [Администратором](/mechanics/roles#admin) [инстанса](/definitions#instance) [Pepeunit](/conception/overview):
 1. [Unit](/definitions#unit) гарантирует всем сторонам, что будет использовать для соответствующих значений из [env_example.json](/definitions#env-example-json) значения из [env.json](/definitions#env-json)
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что при первой установке переменных окружения в [env.json](/definitions#env-json), сгенерирует зарезервированные переменные
-1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что [Unit](/definitions#unit) сможет пройти авторизацию для топиков и соединений в [EMQX MQTT Broker](/definitions#mqtt-broker), авторизацию [Backend](/definitions#backend) с использованием `PEPEUNIT_TOKEN`
+1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что [Unit](/definitions#unit) сможет пройти авторизацию для топиков и соединений в [EMQX MQTT Broker](/definitions#mqtt-broker), авторизацию [Backend](/definitions#backend) с использованием `PU_AUTH_TOKEN`
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, возможность изменения [env.json](/definitions#env-json)
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что [env.json](/definitions#env-json) будет храниться в [шифрованном виде](/mechanics/cipher#шифрование)
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что доступ до [env.json](/definitions#env-json) будет предоставлен только создателю [Unit](/definitions#unit)
@@ -93,5 +94,5 @@
 1. [env.json](/definitions#env-json) файл секретен, его нельзя передавать кому-либо
 1. [env.json](/definitions#env-json) файл позволяет удобно конфигурировать и обновлять состояние [Unit](/definitions#unit) без полного обновления файлов программы
 1. [env.json](/definitions#env-json) файл позволяет [Unit](/definitions#unit) знать какому [инстансу](/definitions#instance) [Pepeunit](/conception/overview) он принадлежит
-1. [env.json](/definitions#env-json) файл при помощи переменной PEPEUNIT_TOKEN позволяет [Pepeunit](/conception/overview) производить авторизацию для конкретных [Unit](/definitions#unit)
+1. [env.json](/definitions#env-json) файл при помощи переменной `PU_AUTH_TOKEN` позволяет [Pepeunit](/conception/overview) производить авторизацию для конкретных [Unit](/definitions#unit)
 :::

@@ -126,27 +126,29 @@ LICENSE
 В заполненом состоянии [env_example.json](/definitions#env-example-json) будет выглядеть вот так:
 
 ```json
-{
-    "WIFI_SSID": "My_Perfect_Wifi_SSID",
-    "WIFI_PASS": "Strong_Password",
-    "PUBLISH_SEND_INTERVAL": 10,
-    "DUTY_MIN": 8192,
-    "DUTY_MAX": 65535,
+{   
+    "WIFI_SSID": "ssid",
+    "WIFI_PASS": "password",
+    "PWM_FAN_PIN": 0,
+    "DS18B20_PIN_NUM": 4,
+    "REGULATOR_OPERATING_RANGE": 1000,
+    "PUBLISH_SEND_INTERVAL": 1,
     "TEMP_MIN": 30,
     "TEMP_MAX": 60,
-    "PEPEUNIT_URL": "unit.example.com",
-    "PEPEUNIT_APP_PREFIX": "/pepeunit",
-    "PEPEUNIT_API_ACTUAL_PREFIX": "/api/v1",
-    "HTTP_TYPE": "https",
-    "MQTT_URL": "emqx.example.com",
-    "MQTT_PORT": 1883,
-    "PEPEUNIT_TOKEN": "jwt_token",
-    "SYNC_ENCRYPT_KEY": "32_bit_encrypt_key",
-    "SECRET_KEY": "32_bit_secret_key",
-    "PING_INTERVAL": 30,
-    "STATE_SEND_INTERVAL": 300,
-    "MIN_LOG_LEVEL": "Debug",
-    "MAX_LOG_LENGTH": 64
+    "DUTY_MIN": 8192,
+    "DUTY_MAX": 65535,
+    "PU_DOMAIN": "unit.example.com",
+    "PU_HTTP_TYPE": "https",
+    "PU_APP_PREFIX": "/pepeunit",
+    "PU_API_ACTUAL_PREFIX": "/api/v1",
+    "PU_MQTT_HOST": "emqx.example.com",
+    "PU_MQTT_PORT": 1883,
+    "PU_MQTT_PING_INTERVAL": 30,
+    "PU_AUTH_TOKEN": "jwt_token",
+    "PU_SECRET_KEY": "32_bit_secret_key",
+    "PU_STATE_SEND_INTERVAL": 300,
+    "PU_MIN_LOG_LEVEL": "Debug",
+    "PU_MAX_LOG_LENGTH": 64
 }
 ```
 
@@ -163,11 +165,14 @@ LICENSE
 Распишите мотивацию для добавления дополнительных переменных:
 - `WIFI_SSID` - для подключения к `WiFi` точно понадобится название сети
 - `WIFI_PASS` - для подключения к `WiFi` точно будет нужен пароль
+- `PWM_FAN_PIN` - нужно иметь возможность менять номер `Pin` отвечающего за управляющее воздействие на Вентилятор
+- `DS18B20_PIN_NUM` - нужно иметь возможность менять номер `Pin` отвечающего за получение данных от датчика `ds18b20`
+- `REGULATOR_OPERATING_RANGE` - хочу настроивать частоту работы регулятора
 - `PUBLISH_SEND_INTERVAL` - хочу настраивать частоту отравки сообщений в [Pepeunit](/conception/overview)
 - `DUTY_MIN` - хочу иметь возможность ограничить минимальную скорость вентилятора
 - `DUTY_MAX` - хочу иметь возможность ограничить максимальную скорость вентилятора
 - `TEMP_MIN` - хочу настраивать температуру ниже которой скорость будет `DUTY_MIN`
-- `TEMP_MAX` - хочу настраивать температуру выше которой скорость будет `TEMP_MAX`
+- `TEMP_MAX` - хочу настраивать температуру выше которой скорость будет `DUTY_MAX`
 
 :::warning
 Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [Readme](/definitions#readme-file). [Pepeunit](/conception/overview) отобразит новые переменные [Пользователям](/mechanics/roles.html#user) для ввода, когда они изменят [таргет версию](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)

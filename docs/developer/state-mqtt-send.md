@@ -13,7 +13,7 @@
 ## state/pepeunit - output_base_topic
 
 :::info Когда [Unit](/definitions#unit) отправляет данные в этот топик?
-1. Каждые `STATE_SEND_INTERVAL` секунд указанные в [env.json](/definitions#env-json).
+1. Каждые `PU_STATE_SEND_INTERVAL` секунд указанные в [env.json](/definitions#env-json).
 :::
 
 Данные отправляемые [Unit](/definitions#unit), преобразуются на стороне [Pepeunit](/conception/overview) в отображение состояния в меню [Unit](/definitions#unit). Также данное состояние можно получить через [REST](/definitions#rest) и [GQL](/definitions#gql).
@@ -28,7 +28,7 @@
     "mem_alloc": 25648.0,
     "freq": 80000000.0,
     "statvfs": [4096, 4096, 763, 716, 716, 0, 0, 0, 0, 255],
-    "commit_version": "7f1b6564c4885432a17e5892e3c98f3a2ad33658"
+    "pu_commit_version": "7f1b6564c4885432a17e5892e3c98f3a2ad33658"
 }
 ```
 
@@ -53,18 +53,18 @@
         f_namemax,  # maximum filename length
     ]
     ```
-- `commit_version` - ключ `COMMIT_VERSION` из [env.json](/definitions#env-json) файла [Unit](/definitions#unit). Данный ключ используется в [системе обновлений](/mechanics/update-system) [Pepeunit](/conception/overview), для отслеживания текущей версии [Unit](/definitions#unit).
+- `pu_commit_version` - ключ `PU_COMMIT_VERSION` из [env.json](/definitions#env-json) файла [Unit](/definitions#unit). Данный ключ используется в [системе обновлений](/mechanics/update-system) [Pepeunit](/conception/overview), для отслеживания текущей версии [Unit](/definitions#unit).
 
 :::danger
-Для корректной работы статусов обновлений у [Unit](/definitions#unit), требуется отправлять `commit_version`
+Для корректной работы статусов обновлений у [Unit](/definitions#unit), требуется отправлять `pu_commit_version`
 :::
 
 :::warning
-Размер передаваемого [Unit](/definitions#unit) состояния ограничен количеством символов указанных в переменной окружения `MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables#backend). По умолчанию это значение составляет `50000` символов.
+Размер передаваемого [Unit](/definitions#unit) состояния ограничен количеством символов указанных в переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables#backend). По умолчанию это значение составляет `50000` символов.
 :::
 
 :::info
-[Pepeunit](/conception/overview) не обязывает отправлять все ключи указанные в примере, можно отправить например только два ключа `millis` и `commit_version`
+[Pepeunit](/conception/overview) не обязывает отправлять все ключи указанные в примере, можно отправить например только два ключа `millis` и `pu_commit_version`
 :::
 
 ### Алгоритм отправки
@@ -147,9 +147,9 @@
     2. Если отправлено множество логов и данный ключ отсутствует, [Pepeunit](/conception/overview) берёт текущее время для самого первого элемента листа и добавляет по 1 секунде для каждого последующего элемента c целью сохранить порядок логов полученный от [Unit](/definitions#unit).
 
 :::warning
-Размер передаваемого [Unit](/definitions#unit) лога ограничен количеством символов указанных в переменной окружения `MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables#backend). По умолчанию это значение составляет `50000` символов.
+Размер передаваемого [Unit](/definitions#unit) лога ограничен количеством символов указанных в переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables#backend). По умолчанию это значение составляет `50000` символов.
 
-По умолчанию время жизни логов ограничено `86400` секундами. За это отвечает переменная `BACKEND_UNIT_LOG_EXPIRATION` из [Backend ENV](/deployment/env-variables#backend).
+По умолчанию время жизни логов ограничено `86400` секундами. За это отвечает переменная `PU_UNIT_LOG_EXPIRATION` из [Backend ENV](/deployment/env-variables#backend).
 :::
 
 ### Алгоритм отправки
