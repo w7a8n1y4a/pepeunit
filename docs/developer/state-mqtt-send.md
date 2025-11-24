@@ -53,7 +53,7 @@
         f_namemax,  # maximum filename length
     ]
     ```
-- `pu_commit_version` - ключ `PU_COMMIT_VERSION` из [env.json](/definitions#env-json) файла [Unit](/definitions#unit). Данный ключ используется в [системе обновлений](/mechanics/update-system) [Pepeunit](/conception/overview), для отслеживания текущей версии [Unit](/definitions#unit).
+- `pu_commit_version` - ключ `PU_COMMIT_VERSION` из [env.json](/definitions#env-json) файла [Unit](/definitions#unit). Данный ключ используется в [системе обновлений](/development-pepeunit/mechanics/update-system) [Pepeunit](/conception/overview), для отслеживания текущей версии [Unit](/definitions#unit).
 
 :::danger
 Для корректной работы статусов обновлений у [Unit](/definitions#unit), требуется отправлять `pu_commit_version`
@@ -76,7 +76,7 @@
 ## log/pepeunit - output_base_topic
 
 :::info Когда [Unit](/definitions#unit) отправляет данные в этот топик?
-1. Если [Unit](/definitions#unit) сам считает нужным отправить лог или набор логов для отображения [Пользователю](/mechanics/roles.html#user)
+1. Если [Unit](/definitions#unit) сам считает нужным отправить лог или набор логов для отображения [Пользователю](/development-pepeunit/mechanics/roles.html#user)
 2. В случае получения команды в топике `log_sync/pepeunit`, [подробнее](/developer/default-mqtt-command#формат-сообщения-в-топик-log-sync-pepeunit)
 :::
 
@@ -142,7 +142,7 @@
 Разберём каждый ключ и логику обработки на стороне [Pepeunit](/conception/overview):
 - `level` - указывает уровень логирования и может принимать следующие значения: `Debug, Info, Warning, Error, Critical`
 - `text` - содержание лога в текстовом формате, желательно укладывать в `256` символов для корректного отображения в [Frontend](/definitions#frontend)
-- `create_datetime` - необязательный ключ, указывающий временную метку для [Pepeunit](/conception/overview). Именно данная метка отображается [Пользователю](/mechanics/roles.html#user), в случае отсутствия [Pepeunit](/conception/overview) действует по следующим алгоритмам:
+- `create_datetime` - необязательный ключ, указывающий временную метку для [Pepeunit](/conception/overview). Именно данная метка отображается [Пользователю](/development-pepeunit/mechanics/roles.html#user), в случае отсутствия [Pepeunit](/conception/overview) действует по следующим алгоритмам:
     1. Если сообщение содержит один лог и данный ключ отсутствует, берётся время когда [Pepeunit](/conception/overview) получил сообщение.
     2. Если отправлено множество логов и данный ключ отсутствует, [Pepeunit](/conception/overview) берёт текущее время для самого первого элемента листа и добавляет по 1 секунде для каждого последующего элемента c целью сохранить порядок логов полученный от [Unit](/definitions#unit).
 

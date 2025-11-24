@@ -5,15 +5,15 @@
 [Postgresql](https://www.postgresql.org/docs/) - открытая, кластерная реляционная база данных с языком запросов `SQL`. [Pepeunit](/conception/overview) использует её для:
 
 1. Хранения информации о всех сущностях - [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode), [DataPipe](/definitions#datapipe)
-1. Хранения [шифрованной](/mechanics/cipher) информации
-1. Хранения информации о [доступах](/mechanics/permission) и [видимости](/mechanics/visibility)
+1. Хранения [шифрованной](/development-pepeunit/mechanics/cipher) информации
+1. Хранения информации о [доступах](/development-pepeunit/mechanics/permission) и [видимости](/development-pepeunit/mechanics/visibility)
 
 ## EMQX MQTT Broker
 
 [EMQX MQTT Broker](https://docs.emqx.com/en/emqx/latest/) - это серверное приложение, которое координирует сообщения между издателями и подпищиками [MQTT](/definitions#mqtt-broker) протокола. Брокер обеспечивает взаимодействие через `1883` и `8883` порты между [Unit](/definitions#unit) и [Backend](/definitions#backend). Его можно назвать рельсой данных, на которую завязано основное взаимодействие.
 
 ::: tip Ключевые моменты взаимодействия [MQTT Broker](/definitions#mqtt-broker), [Backend](/definitions#backend) и [Unit](/definitions#unit)
-[Backend](/definitions#backend) выполняет [Административные](/mechanics/roles#admin) функции, а именно:
+[Backend](/definitions#backend) выполняет [Административные](/development-pepeunit/mechanics/roles#admin) функции, а именно:
 1. Авторизация всех [Unit](/definitions#unit) для доступа к определённым топикам
 1. Агрегация данных из определённых топиков, согласно политике имён топиков
 1. Управление [Unit](/definitions#unit), при помощи системы команд, позволяющей публиковать в топики задания на обновление [schema.json](/definitions#schema-json), [env.json](/definitions#env-json) или программы целиком.

@@ -110,7 +110,7 @@
 `env.json`- секретный файл, содержащий переменные окружения нужные дла корректной работы [Unit](#unit).
 Именно данный файл отличает ваш [Unit](#unit) от других [Unit](#unit) отстыкованных от одного и того же [Repo](#repo).
 Он создаётся владельцем [Unit](#unit) совместно с [Pepeunit](/conception/overview) и хранится в 
-[шифрованном](/mechanics/cipher) виде внутри сущности [Unit](#unit). Более подробная [информация о env.json](/developer/struct-env-json#env-json).
+[шифрованном](/development-pepeunit/mechanics/cipher) виде внутри сущности [Unit](#unit). Более подробная [информация о env.json](/developer/struct-env-json#env-json).
 
 ## schema_example.json
 `schema_example.json` - файл схемы, описывающий [MQTT](#mqtt) топики нужные [Unit](#unit). Данный файл создаётся разработчиком [Unit](#unit) и помещается в каждую версию [Repo](#repo). Благодаря данному файлу [Pepeunit](/conception/overview) создаёт [UnitNode](#unitnode) сущности, отвечающие за взаимодействие с [Unit](#unit) и регламентирующие политики доступа до топиков [Unit](#unit). Более подробная [информация о schema_example.json](/developer/struct-schema-json#schema-example-json).

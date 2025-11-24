@@ -93,22 +93,22 @@ export default withMermaid(defineConfig({
         ]
       },
       {
-        text: 'Механики',
-        collapsed: true,
-        items: [
-          { text: 'Система Ролей', link: '/mechanics/roles' },
-          { text: 'Система Видимости', link: '/mechanics/visibility' },
-          { text: 'Система Доступов', link: '/mechanics/permission' },
-          { text: 'Система Обновлений', link: '/mechanics/update-system' },
-          { text: 'Шифрование', link: '/mechanics/cipher' },
-          { text: 'Генерация Env у Unit', link: '/mechanics/alg-env' },
-        ]
-      },
-      {
         text: 'Разработчику Pepeunit',
         collapsed: true,
         items: [
           { text: 'Карта репозиториев', link: '/development-pepeunit/maps' },
+          {
+            text: 'Механики',
+            collapsed: true,
+            items: [
+              { text: 'Система Ролей', link: '/development-pepeunit/mechanics/roles' },
+              { text: 'Система Видимости', link: '/development-pepeunit/mechanics/visibility' },
+              { text: 'Система Доступов', link: '/development-pepeunit/mechanics/permission' },
+              { text: 'Система Обновлений', link: '/development-pepeunit/mechanics/update-system' },
+              { text: 'Шифрование', link: '/development-pepeunit/mechanics/cipher' },
+              { text: 'Генерация Env у Unit', link: '/development-pepeunit/mechanics/alg-env' },
+            ]
+          },
           {
             text: 'Тесты Backend',
             collapsed: true,
@@ -118,7 +118,7 @@ export default withMermaid(defineConfig({
               { text: 'Нагрузочные', link: '/development-pepeunit/tests/load-test' },
             ]
           },
-          { text: 'Соглашения', link: '/development-pepeunit/contribution' },
+          { text: 'Вклад', link: '/development-pepeunit/contribution' },
         ]
       },
       {

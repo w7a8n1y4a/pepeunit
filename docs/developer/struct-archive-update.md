@@ -4,18 +4,18 @@
 
 ## Компилируемые
 
-1. Вычисляется [таргет версия](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
-1. Добавляются [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) на основе [таргет версии](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
-1. В файл [env.json](/definitions#env-json) записывается [таргет версия](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) - ключ = `COMMIT_VERSION`
+1. Вычисляется [таргет версия](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
+1. Добавляются [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) на основе [таргет версии](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
+1. В файл [env.json](/definitions#env-json) записывается [таргет версия](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) - ключ = `COMMIT_VERSION`
 1. Создаётся файл Архива - `tgz`, `tar` или `zip`
 
 ## Интерпритируемые
 
-1. Вычисляется [таргет версия](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
+1. Вычисляется [таргет версия](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
 1. Создаётся временное представление файлов находящихся в этом [коммите](/definitions#git-commit)
 1. Удаляются файлы не участвующие в работе [Unit](/definitions#unit) на основе [.pepeignore](/definitions#pepeignore)
-1. Добавляются [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) на основе [таргет версии](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
-1. В файл [env.json](/definitions#env-json) записывается [таргет версия](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) - ключ = `COMMIT_VERSION`
+1. Добавляются [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) на основе [таргет версии](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
+1. В файл [env.json](/definitions#env-json) записывается [таргет версия](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) - ключ = `COMMIT_VERSION`
 1. Создаётся файл Архива - `tgz`, `tar` или `zip`
 
 

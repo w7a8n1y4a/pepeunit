@@ -8,14 +8,17 @@
 
 Переменная | По умолчанию | Зачем нужна?
 -- | -- | --
-`TELEGRAM_BOT_ENABLE` | `True` | Состояние интеграции с `Telegram Bot`, если установить `False` - весь `Telegram Bot` функционал будет отключён
+`PU_FF_TELEGRAM_BOT_ENABLE` | `True` | Функциональный флаг, отвечает за то включен ли `Telegram Bot`
+`PU_FF_GRAFANA_INTEGRATION_ENABLE` | `True` | Функциональный флаг, отвечает за то включена ли интеграция с `Grafana`
+`PU_FF_DATAPIPE_ENABLE` | `True` | Функциональный флаг, отвечает за то включены ли возможности [DataPipe](/definitions#datapipe), когда флаг выключен нужно так же выключить [Backend Data Pipe](/definitions#backend-data-pipe), т.к. он перестанет получать обновления конфигураций и тд.
+`PU_FF_PROMETHEUS_ENABLE` | `True` | Функциональный флаг, отвечает за то включен ли мониторинг запросов через `Prometheus` или нет
 `PU_DEBUG` | `False` | При включении расширяет вывод логов для [FastApi](https://fastapi.tiangolo.com/) и [SqlAlchemy](https://docs.sqlalchemy.org/en/20/)
 `PU_APP_PREFIX` | `/pepeunit` | Стандартный префикс, позволяющий дистанцировать навигацию от домена, обычно не требует изменений. Нужен для сложных встраиваемых систем
 `PU_API_V1_PREFIX` | `/api/v1` | Префикс версии [REST API](/definitions#rest), нужен для возможности поддержки старых версий [REST API](/definitions#rest), а также для систем требующих поддержки нескольких версий одновременно
 `PU_WORKER_COUNT` | `2` | Число воркеров Gunicorn, позволяет увеличить нагрузку, которую способен выдержать [Backend](/definitions#backend)
 `PU_DOMAIN` | - | Доменное имя или `ip`. Влияет на ссылки которые генерирует [Backend](/definitions#backend). Позволяет [Unit](/definitions#unit) связываться с [Backend](/definitions#backend). Устанавливается в [Unit ENV](/developer/struct-env-json) - как `PU_DOMAIN`
 `PU_SECURE` | `True` | Если `True`, то [Backend](/definitions#backend) будет генерировать ссылки с `https` для `PU_DOMAIN`. Устанавливается в [Unit ENV](/developer/struct-env-json) - в поле `PU_HTTP_TYPE`, но уже в формате `https/http`
-`PU_AUTH_TOKEN_EXPIRATION` | `2678400` | Время жизни токенов авторизации [Пользователей](/mechanics/roles.html#user) в секундах
+`PU_AUTH_TOKEN_EXPIRATION` | `2678400` | Время жизни токенов авторизации [Пользователей](/development-pepeunit/mechanics/roles.html#user) в секундах
 `PU_SAVE_REPO_PATH` | `repo_cache` | Путь по которому [Backend](/definitions#backend) хранит внешние [Git](/definitions#git) репозитории. Устанавливается относительно корневой дирректории [Backend](/definitions#backend)
 `PU_SQLALCHEMY_DATABASE_URL` | - | Ссылка для подключения к [Postgresql](/deployment/dependencies#postgresql)
 `PU_CLICKHOUSE_DATABASE_URL` | - | Ссылка для подключения к [Clickhouse](/deployment/dependencies#clickhouse)

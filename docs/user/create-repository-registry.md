@@ -35,7 +35,7 @@
 :::
 
 :::info
-Креды хранится в [шифрованном](/mechanics/cipher) виде.
+Креды хранится в [шифрованном](/development-pepeunit/mechanics/cipher) виде.
 :::
 
 :::info

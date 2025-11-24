@@ -175,7 +175,7 @@ LICENSE
 - `TEMP_MAX` - хочу настраивать температуру выше которой скорость будет `DUTY_MAX`
 
 :::warning
-Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [Readme](/definitions#readme-file). [Pepeunit](/conception/overview) отобразит новые переменные [Пользователям](/mechanics/roles.html#user) для ввода, когда они изменят [таргет версию](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
+Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [Readme](/definitions#readme-file). [Pepeunit](/conception/overview) отобразит новые переменные [Пользователям](/development-pepeunit/mechanics/roles.html#user) для ввода, когда они изменят [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
 :::
 
 ## Первичное заполнение Readme
@@ -201,14 +201,14 @@ LICENSE
 Для продолжения разработки вам нужно будет отправлять и получать управляющее воздействие на [Unit](/definitions#unit). Очень удобно для этого использовать [инстанс](/definitions#instance) [Pepeunit](/conception/overview), которому вы доверяете. Нужно выполнить два шага на этом [инстасе](/definitions#instance):
 1. Создайте [Repo](/definitions#repo) на основе вашего [Git](/definitions#git) репозитория из [Gitlab](/definitions#gitlab) и [Github](/definitions#github)
 1. Создайте [Unit](/definitions#unit):
-    - Обязательно [сделайте его обновляемым в ручную](/user/create-unit.html#блок-автообновлении), чтобы чётко контролировать [таргет версию](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
+    - Обязательно [сделайте его обновляемым в ручную](/user/create-unit.html#блок-автообновлении), чтобы чётко контролировать [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
     - Заполните [переменные окружения](/user/create-unit.html)
     - Скачайте [архив](/developer/struct-archive-update) с [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json)
 
 Полученные файлы [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) нужно будет поместить в каталог вашего локального [Git](/definitions#git) репозитория. Данные файлы будут содержать данные для подключения к [инстансу](/definitions#instance), а также топики для публикации. По сути теперь вы готовы разрабатывать программный код вашего [Unit](/definitions#unit).
 
 :::info
-В процессе разработки вы сможете заходить в тестовый [Unit](/definitions#unit) и видеть какие данные он отправляет в `Output` [UnitNode](/definitions#unitnode), создавать для него управляющее воздействие через `Input` [UnitNode](/definitions#unitnode), а также же отлаживать [систему обновлений](/mechanics/update-system).
+В процессе разработки вы сможете заходить в тестовый [Unit](/definitions#unit) и видеть какие данные он отправляет в `Output` [UnitNode](/definitions#unitnode), создавать для него управляющее воздействие через `Input` [UnitNode](/definitions#unitnode), а также же отлаживать [систему обновлений](/development-pepeunit/mechanics/update-system).
 :::
 
 ## Наполнение Unit функционалом
@@ -234,7 +234,7 @@ LICENSE
 
 ## Актуализация документации
 
-Актуализируйте и дозаполните все пункты документации, согласно [руководству](/developer/struct-readme). [Пользователи](/mechanics/roles.html#user) скажут вам `Большое Спасибо`.
+Актуализируйте и дозаполните все пункты документации, согласно [руководству](/developer/struct-readme). [Пользователи](/development-pepeunit/mechanics/roles.html#user) скажут вам `Большое Спасибо`.
 
 ## Присвоение Тега
 
@@ -255,7 +255,7 @@ LICENSE
 :::
 
 :::danger
-[Тег](/definitions#git-tag) будет сигнализировать [Пользователям](/mechanics/roles.html#user), что всё готово к эксплуатации и протестировано разработчиком.
+[Тег](/definitions#git-tag) будет сигнализировать [Пользователям](/development-pepeunit/mechanics/roles.html#user), что всё готово к эксплуатации и протестировано разработчиком.
 
-[Пользователи](/mechanics/roles.html#user) будут ожидать, что выбрав последний [Тег](/definitions#git-tag) - получат самую рабочую, самую актуальную версию [Unit](/definitions#unit).
+[Пользователи](/development-pepeunit/mechanics/roles.html#user) будут ожидать, что выбрав последний [Тег](/definitions#git-tag) - получат самую рабочую, самую актуальную версию [Unit](/definitions#unit).
 :::

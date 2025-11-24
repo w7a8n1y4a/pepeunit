@@ -41,20 +41,20 @@ def aes_gcm_decode(data: str, key: str = settings.pu_encrypt_key) -> str:
 
 ::: tip Какие данные шифрует [Pepeunit](/conception/overview)?
 Все конфиденциальные данные, а именно:
-1. Динамическая соль, использующаяся для хэширования пароля [Пользователя](/mechanics/roles.html#user)
+1. Динамическая соль, использующаяся для хэширования пароля [Пользователя](/development-pepeunit/mechanics/roles.html#user)
 1. Авторизационные данные, отвестветвенные за доступ до `Private` [RepositoryRegisty](/definitions#repositoryregistry)
 1. Файлы окружений - [env.json](/definitions#env-json) от [Unit](/definitions#unit)
 1. [Хранилище внутреннего состояния](/developer/state-storage-unit) [Unit](/definitions#unit)
 :::
 
 :::warning Ограничение размера шифруемых объектов
-Все шифруемые объекты имеют стандартное ограничение в `1000000` символов. [Администратор](/mechanics/roles#admin) [инстанса](/definitions#instance) может изменить этот объём установив переменную окружения `PU_MAX_CIPHER_LENGTH` в файле [Backend ENV](/deployment/env-variables#backend).
+Все шифруемые объекты имеют стандартное ограничение в `1000000` символов. [Администратор](/development-pepeunit/mechanics/roles#admin) [инстанса](/definitions#instance) может изменить этот объём установив переменную окружения `PU_MAX_CIPHER_LENGTH` в файле [Backend ENV](/deployment/env-variables#backend).
 :::
 
 :::danger
-[Администратор](/mechanics/roles#admin) имеющий доступ к [Backend ENV](/deployment/env-variables#backend) [инстанса](/definitions#instance) [Pepeunit](/conception/overview), имеет возможность расшифровать данные хранящиеся в шифрованном виде на его [инстансе](/definitions#instance).
+[Администратор](/development-pepeunit/mechanics/roles#admin) имеющий доступ к [Backend ENV](/deployment/env-variables#backend) [инстанса](/definitions#instance) [Pepeunit](/conception/overview), имеет возможность расшифровать данные хранящиеся в шифрованном виде на его [инстансе](/definitions#instance).
 
-Поэтому пользуйтесь только [инстансами](/definitions#instance) [Pepeunit](/conception/overview) [Администраторам](/mechanics/roles#admin) которых вы доверяете.
+Поэтому пользуйтесь только [инстансами](/definitions#instance) [Pepeunit](/conception/overview) [Администраторам](/development-pepeunit/mechanics/roles#admin) которых вы доверяете.
 
 Шифрованная информация не передаётся между [инстансами](/definitions#instance) и хранится на [инстансе](/definitions#instance) создания сущности, остальные [инстансы](/definitions#instance) получают ограниченное представление о первичной сущности.
 :::

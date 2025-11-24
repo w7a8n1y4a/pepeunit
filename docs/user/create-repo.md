@@ -34,7 +34,7 @@
 :::
 
 ## Уровень видимости
-Выберите [Уровень видимости](/mechanics/visibility)
+Выберите [Уровень видимости](/development-pepeunit/mechanics/visibility)
 
 :::info
 Можно изменить в будущем

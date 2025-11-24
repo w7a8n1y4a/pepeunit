@@ -9,7 +9,7 @@
 
 ## Description
 
-Когда другие [Пользователи](/mechanics/roles.html#user) [Pepeunit](/conception/overview) переходят по ссылке на репозиторий, они первым делом захотят прочитать описание будущего [Unit](/definitions#unit). Опишите в данном пункте функциональные возможности устройства, желательно просто привести возможности по пунктам, чтобы читать было проще.
+Когда другие [Пользователи](/development-pepeunit/mechanics/roles.html#user) [Pepeunit](/conception/overview) переходят по ссылке на репозиторий, они первым делом захотят прочитать описание будущего [Unit](/definitions#unit). Опишите в данном пункте функциональные возможности устройства, желательно просто привести возможности по пунктам, чтобы читать было проще.
 
 :::info Пример легко читаемого функционального описания
 
@@ -25,7 +25,7 @@
 
 ## Software platform
 
-Укажите программную платформу на основе которой работает данное устройстве, здесь [Пользователи](/mechanics/roles.html#user) будут ожидать увидеть язык программирования или фреймворк на основе которого был создан [Unit](/definitions#unit), желательно указывать версию.
+Укажите программную платформу на основе которой работает данное устройстве, здесь [Пользователи](/development-pepeunit/mechanics/roles.html#user) будут ожидать увидеть язык программирования или фреймворк на основе которого был создан [Unit](/definitions#unit), желательно указывать версию.
 
 :::info Примеры
 - `Python v3.11`
@@ -39,15 +39,15 @@
 
 ## Firmware format
 
-Чтобы [Пользователи](/mechanics/roles.html#user) могли быстро понять [Компилируемый](/definitions#compilable) ваш [Unit](/definitions#unit) или [Интерпритируемый](/definitions#interpreterable) добавьте в данном пункте один из двух возможных вариантов:
+Чтобы [Пользователи](/development-pepeunit/mechanics/roles.html#user) могли быстро понять [Компилируемый](/definitions#compilable) ваш [Unit](/definitions#unit) или [Интерпритируемый](/definitions#interpreterable) добавьте в данном пункте один из двух возможных вариантов:
 - Интерпритируемый
 - Компилируемый
 
-Данный параметр при создании [Repo](/definitions#repo) в [Pepeunit](/conception/overview) влияет на [первую установку](/user/create-unit#получение-фаилов-развертывания) и [способ доставки программных обновлений](/mechanics/update-system)
+Данный параметр при создании [Repo](/definitions#repo) в [Pepeunit](/conception/overview) влияет на [первую установку](/user/create-unit#получение-фаилов-развертывания) и [способ доставки программных обновлений](/development-pepeunit/mechanics/update-system)
 
 ## Hardware platform
 
-Здесь указывается тип физических устройств на которые [Пользователи](/mechanics/roles.html#user) могут ориентироваться при создании физического [Unit](/definitions#unit)
+Здесь указывается тип физических устройств на которые [Пользователи](/development-pepeunit/mechanics/roles.html#user) могут ориентироваться при создании физического [Unit](/definitions#unit)
 
 :::info Примеры
 - `esp32` (требуется >= 1МБ `flash` памяти)
@@ -57,7 +57,7 @@
 
 ## Required physical components
 
-Опишите какие физические компаненты потребуются, чтобы воспроизвести [Unit](/definitions#unit). Данный пункт облегчает [Пользователям](/mechanics/roles.html#user) поиск номенклатуры материалов для закупок.
+Опишите какие физические компаненты потребуются, чтобы воспроизвести [Unit](/definitions#unit). Данный пункт облегчает [Пользователям](/development-pepeunit/mechanics/roles.html#user) поиск номенклатуры материалов для закупок.
 
 :::info Пример
 - Микроконтроллер `esp32`
@@ -69,8 +69,8 @@
 
 ## Operating Scheme
 
-[Пользователи](/mechanics/roles.html#user) ожидают увидеть в данном пункте схемы работы [Unit](/definitions#unit), это могут быть электрические схемы, схема работы топиков или схема подключения нескольких [Unit](/definitions#unit) к [Pepeunit](/conception/overview).
-Видя схему [Пользователю](/mechanics/roles.html#user) легче понять как работает ваш [Unit](/definitions#unit) и воспроизвести его.
+[Пользователи](/development-pepeunit/mechanics/roles.html#user) ожидают увидеть в данном пункте схемы работы [Unit](/definitions#unit), это могут быть электрические схемы, схема работы топиков или схема подключения нескольких [Unit](/definitions#unit) к [Pepeunit](/conception/overview).
+Видя схему [Пользователю](/development-pepeunit/mechanics/roles.html#user) легче понять как работает ваш [Unit](/definitions#unit) и воспроизвести его.
 
 :::warning
 Ввиду того что картинки достаточно большие по размеру, а объём пространства репозитория будет нарастать с каждым новым изменением. Гораздо проще воспользоваться внешними хостингами картинок, которые позволяют получить статическую ссылку на изображение.
@@ -87,7 +87,7 @@
 
 ## 3D Models
 
-Укажите здесь ссылки на `3D` модели элементов [Unit](/definitions#unit) в различных форматах, чтобы [Пользователи](/mechanics/roles.html#user) могли распечатать их на `3D` принтерах. Отдавайте приоритет формату `stl`, т.к. он может быть использован в любой программе трассировки `3D` печати.
+Укажите здесь ссылки на `3D` модели элементов [Unit](/definitions#unit) в различных форматах, чтобы [Пользователи](/development-pepeunit/mechanics/roles.html#user) могли распечатать их на `3D` принтерах. Отдавайте приоритет формату `stl`, т.к. он может быть использован в любой программе трассировки `3D` печати.
 
 :::info Пример
 - `stl` - [Корпус](https://pepeunit.com)
@@ -105,7 +105,7 @@
 
 ## env_example.json
 
-Отобразите [env_example.json](/definitions#env-example-json). Это нужно для опытных [Пользователей](/mechanics/roles.html#user) - по переменным окружения можно оценить возможности настройки [Unit](/definitions#unit). [Подробное описание структуры env_example.json](/developer/struct-schema-json#schema-example-json).
+Отобразите [env_example.json](/definitions#env-example-json). Это нужно для опытных [Пользователей](/development-pepeunit/mechanics/roles.html#user) - по переменным окружения можно оценить возможности настройки [Unit](/definitions#unit). [Подробное описание структуры env_example.json](/developer/struct-schema-json#schema-example-json).
 
 :::info Пример
 ```json
@@ -148,7 +148,7 @@
 
 ## schema_example.json
 
-Отобразите [schema_example.json](/definitions#schema-example-json) . Это нужно для опытных [Пользователей](/mechanics/roles.html#user) - по данной схеме можно очень быстро оценить, что может [Unit](/definitions#unit). [Подробное описание структуры schema_example.json](/developer/struct-env-json#env-example-json).
+Отобразите [schema_example.json](/definitions#schema-example-json) . Это нужно для опытных [Пользователей](/development-pepeunit/mechanics/roles.html#user) - по данной схеме можно очень быстро оценить, что может [Unit](/definitions#unit). [Подробное описание структуры schema_example.json](/developer/struct-env-json#env-example-json).
 
 :::info Пример
 ```json
@@ -183,7 +183,7 @@
 
 ## Work algorithm
 
-Расскижите о логике работы вашего [Unit](/definitions#unit), возможно другие [Пользователи](/mechanics/roles.html#user) захотят внести вклад и им будет гораздо проще, если они будут знать подробности о том как работают различные режимы вашего [Unit](/definitions#unit).
+Расскижите о логике работы вашего [Unit](/definitions#unit), возможно другие [Пользователи](/development-pepeunit/mechanics/roles.html#user) захотят внести вклад и им будет гораздо проще, если они будут знать подробности о том как работают различные режимы вашего [Unit](/definitions#unit).
 
 :::info Пример
 Алгоритм работы с момента нажатия кнопки включения:

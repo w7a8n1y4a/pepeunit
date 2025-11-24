@@ -16,7 +16,7 @@
 :::
 
 ## Уровень видимости
-Выберите [Уровень видимости](/mechanics/visibility)
+Выберите [Уровень видимости](/development-pepeunit/mechanics/visibility)
 
 :::info
 Можно изменить в будущем
@@ -51,7 +51,7 @@
 После нажатия кнопки `Update`, переменные которые вы добавили сохранятся.
 
 :::warning
-Кнопка `reset` - позволяет сбросить переменные до состояния предусмотренного разработчиком. Это состояние результат работы [алгоритма генерации env](/mechanics/alg-env)
+Кнопка `reset` - позволяет сбросить переменные до состояния предусмотренного разработчиком. Это состояние результат работы [алгоритма генерации env](/development-pepeunit/mechanics/alg-env)
 :::
 
 ## Получение файлов развёртывания
@@ -61,7 +61,7 @@
 ### Компилируемый Repo
 
 Вам потребуется скачать два компанента вашего будущего [Unit](/definitions#unit): 
-1. Cкомпилированную часть из вкладки `Compiled Firmware Platforms`, содержащей ссылки на [платформы](/developer/release-assets) текущей [таргет версии](/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) [Unit](/definitions#unit).
+1. Cкомпилированную часть из вкладки `Compiled Firmware Platforms`, содержащей ссылки на [платформы](/developer/release-assets) текущей [таргет версии](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) [Unit](/definitions#unit).
 1. [Архив](/developer/struct-archive-update) из вкладки `Firmware with env.json and schema.json`.
 
 Вам нужно будет расположить файлы из [архива](/developer/struct-archive-update) в одной дирректории с выбранной вами [платформой](/developer/release-assets), чтобы они увидели друг друга

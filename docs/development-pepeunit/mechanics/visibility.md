@@ -6,15 +6,15 @@
 
 ### Public
 
-- предоставляет [доступ](/mechanics/permission) всем
+- предоставляет [доступ](/development-pepeunit/mechanics/permission) всем
 
 ### Internal
 
-- предоставляет [доступ](/mechanics/permission) до сущности только авторизованным [Пользователям](/mechanics/roles.html#user) [инстанса](/definitions#instance) или всем [Unit](/definitions#unit) находящихся в [инстансе](/definitions#instance)
+- предоставляет [доступ](/development-pepeunit/mechanics/permission) до сущности только авторизованным [Пользователям](/development-pepeunit/mechanics/roles.html#user) [инстанса](/definitions#instance) или всем [Unit](/definitions#unit) находящихся в [инстансе](/definitions#instance)
 
 ### Private
 
-- предоставляет [доступ](/mechanics/permission) до сущности только создателю и агентам которых укажет создатель. Работает в пределах [инстанса](/definitions#instance)
+- предоставляет [доступ](/development-pepeunit/mechanics/permission) до сущности только создателю и агентам которых укажет создатель. Работает в пределах [инстанса](/definitions#instance)
 
 :::danger
 Сущность [RepositoryRegisty](/definitions#repositoryregistry) уникальная и имеет только два типа `Public` и `Private`. Предоставление доступа к `Private` сущности отличается, и завязано на ввод пользователями [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория). Создатель не может сам предоставить доступ, это связано с бизнес логикой работы этой сущности
@@ -39,7 +39,7 @@
 - Создание [Unit](/definitions#unit) на основе [Repo](/definitions#repo)
 - Обновление всех связанных [Unit](/definitions#unit)
 - Настройки [Repo](/definitions#repo)
-- Выдача [доступов](/mechanics/permission)
+- Выдача [доступов](/development-pepeunit/mechanics/permission)
 - Удаление [Repo](/definitions#repo) если у него нет связанных [Unit](/definitions#repo)
 
 ### Unit
@@ -50,7 +50,7 @@
 - Скачивание `Firmware` и скомпилированных пакетов
 - Команды обновления по [MQTT](/definitions#mqtt) - `Firmware`, `Schema` и `Env`
 - Настройки [Unit](/definitions#unit)
-- Выдача [доступов](/mechanics/permission)
+- Выдача [доступов](/development-pepeunit/mechanics/permission)
 - Удаление [Unit](/definitions#unit)
 
 ### UnitNode
@@ -59,14 +59,14 @@
 - Установка значений с отправкой в `Input` через [MQTT](/definitions#mqtt)
 - Создание связей для `Input`
 - Настройки [UnitNode](/definitions#unitnode)
-- Выдача [доступов](/mechanics/permission)
+- Выдача [доступов](/development-pepeunit/mechanics/permission)
 - Все аспекты управления [DataPipe](/definitions#datapipe)
 
 ---
 
 # Возможности агентов для видимых сущностей
 
-Агенты имеют ограниченный [доступ](/mechanics/permission) до чужих сущностей, которые они видят с помощью `системы видимости`:
+Агенты имеют ограниченный [доступ](/development-pepeunit/mechanics/permission) до чужих сущностей, которые они видят с помощью `системы видимости`:
 
 ### RepositoryRegistry
 - Изменение своих [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория)
