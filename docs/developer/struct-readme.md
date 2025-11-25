@@ -1,216 +1,151 @@
-# Readme и его основные элементы
+# readme.md и pepeunit.toml
+
+## readme.md
+
+:::info
+[readme.md](/definitions#readme-md) - документация [Unit](/definitions#unit), самый важный элемент вашего репозитория, от полноты информации в нём будет зависеть лёгкость эксплуатации [Unit](/definitions#unit) другими людьми.
+:::
+
+Заполнение [readme.md](/definitions#readme-md) в ручную крапотливая работа, при этом даже задав единый стандарт для формирования структуры, поддерживать её единообразие силами разработчиков [Unit](/definitions#unit) будет не просто.
+
+:::tip
+Для решения задачи поддержания единообразия в документациях [Unit](/definitions#unit) - у каждого инстанса [Pepeunit](/conception/overview) есть генератор [readme.md](/definitions#readme-md) на основе [pepeunit.toml](/definitions#pepeunit-toml). Генератор позволяет преобразовать машиночитаемый [pepeunit.toml](/definitions#pepeunit-toml) в человекочитаемый [readme.md](/definitions#readme-md).
+:::
+
+:::info
+Чтобы найти генератор - кликните по своему никнейму в правом верхнем углу. И нажмите на кнопку `Generate README.md`, вам будет предложено выбрать [pepeunit.toml](/definitions#pepeunit-toml) файл. После утверждения файла, скачивание [readme.md](/definitions#readme-md) произойдёт автоматически.
+:::
+
+## pepeunit.toml
+
+:::info
+[pepeunit.toml](/definitions#pepeunit-toml) будет использован в будущем для упрощения поиска по [RepositoryRegisty](/definitions#repositoryregistry) между инстансами [Pepeunit](/conception/overview).
+:::
+
+Ближайший аналог в мире разработки - `pyproject.toml`.
+
+Пример [pepeunit.toml](/definitions#pepeunit-toml):
+```toml
+[general]
+name = "Fan Regulator ds18b20"
+description = "Регулирует обороты вентилятора в зависимости от температуры. Публикует текущую температуру и скважность. Позволяет включить вентилятор на `N` секунд по команде"
+language = "Micropython"
+hardware = ["esp32", "ds18b20", "4pin fan", "резистор 4.7кОм", "wires"]
+firmware = [
+  {name = "Поменять на 1.0.0 esp32 GENERIC", link = "https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/package_files/43/download"}
+]
+stack = ["pepeunit_micropython_client"]
+version = "0.0.0"
+license = "AGPL v3 License"
+authors = [
+    {name = "Ivan Serebrennikov", email = "admin@silberworks.com"}
+]
+
+[images]
+schema = "https://i.ibb.co/QQJ6h70/schema-fan-4pin-unit.png"
+
+[files]
+"Документация `4Pin` вентилятора" = "https://www.delta-fan.com/products/ffb1212eh.html"
+
+[physical_io]
+"client.settings.PWM_FAN_PIN" = "Управление скважностью для работы Вентилятора"
+"client.settings.DS18B20_PIN_NUM" = "Цифровое значение температуры от датчика `ds18b20`"
+
+[env_description]
+WIFI_SSID = "Имя сети WiFi"
+WIFI_PASS = "Пароль от сети WiFi"
+PWM_FAN_PIN = "Номер `Pin` отвечающий за управляющее воздействие на Вентилятор"
+DS18B20_PIN_NUM = "Номер `Pin` отвечающий за получение данных от датчика `ds18b20`"
+REGULATOR_OPERATING_RANGE = "Частота работы регулятора в миллисекундах"
+PUBLISH_SEND_INTERVAL = "Частота публикации данных в `current_fan_speed_percentage/pepeunit` и `current_temp/pepeunit` в секундах"
+DUTY_MIN = "Минимальная скважность `PWM 16bit`, которую можно установить"
+DUTY_MAX = "Максимальная скважность `PWM 16bit`, которую можно установить" 
+TEMP_MIN = "Температура в градусах цельсия, ниже которой скважность будет `DUTY_MIN`"
+TEMP_MAX = "Температура в градусах цельсия, выше которой скважность будет соответствовать `DUTY_MAX`"
+
+[topic_assignment]
+"set_fan_state/pepeunit" = "Принимает в качестве значения `json` - `{\"sleep\": 15, \"duty\": 65535}`, где `sleep` сообщаяет в течении скольки секунд вентилятор будут включен со скважностью `duty`"
+"current_fan_speed_percentage/pepeunit" = "Текущее значение скважности в текстовом формате - `8192`"
+"current_temp/pepeunit" = "Текущая температура в текстовом формате - `27.5`"
+
+[work_algorithm]
+steps = [
+  "Подключение к `WiFi`",
+  "Инициализация клиета `pepeunit_micropython_client`",
+  "Инициализация датчика `ds18b20` и `PWM`",
+  "Запуск основного цикла",
+  "Каждые `PUBLISH_SEND_INTERVAL` секунд публикуются сообщения в `current_fan_speed_percentage/pepeunit` и `current_temp/pepeunit`",
+  "Каждые `REGULATOR_OPERATING_RANGE` миллисекунд регулятор линейно преобразует температуру в скважность, по алгоритму из функции `main.py` `def convert_temp_to_duty`. Вычисленное значение устанавливается для Вентилятора как целевое",
+  "При получении команды из `set_fan_state/pepeunit`, скважность `duty` устанавливается как целевая для Вентилятора и устройство засыпает на `sleep` секунд"
+]
+
+[installation]
+steps = [
+  "Установите образ `Micropython` указанный в `firmware` на `esp32`, как это сделано в [руководстве](https://micropython.org/download/ESP32_GENERIC/)",
+  "Создайте `Unit` в `Pepeunit`",
+  "Установите переменные окружения в `Pepeunit`",
+  "Скачайте архив c программой из `Pepeunit`",
+  "Распакуйте архив в дирректорию",
+  "Загрузите файлы из дирреткории на физическое устройство, например командой: `ampy -p /dev/ttyUSB0 -b 115200 put ./ .`",
+  "Запустить устройство нажатием кнопки `reset`"
+]
+```
 
 :::warning
-`Readme` - самый важный элемент вашего репозитория и будущих [Unit](/definitions#unit), от того как вы его заполните будет зависеть лёгкость эксплуатации [Unit](/definitions#unit) другими людьми. Старайтесь заполнить каждый из пунктов содержищихся в данном разделе.
+Файлы `.toml` имеют ряд синтаксических правил заполнения:
+
+1. Единый формат элементов списка `[]`:
+    Допустимо | Не допустимо
+    -- | --
+    `["esp32", "ds18b20", "4pin fan", "резистор 4.7кОм", "wires"]` | `["test", {name = "Ivan Serebrennikov"}]`
+2. Ключи в которых есть особые символы, требуют обёртки `""`:
+    Требует | Не требует
+    -- | --
+    `"current_temp/pepeunit" = "Текущая температура в текстовом формате - 27.5"` | `WIFI_SSID = "Имя сети WiFi"`
 :::
 
-Пример стандартного заполнения `readme` для различных [Unit](/definitions#unit):
-1. [Wifi 4pin PWM вентилятор](https://git.pepemoss.com/pepe/pepeunit/units/wifi_pc_fan_4_pin)
+## Структура pepeunit.toml
 
-## Description
-
-Когда другие [Пользователи](/development-pepeunit/mechanics/roles.html#user) [Pepeunit](/conception/overview) переходят по ссылке на репозиторий, они первым делом захотят прочитать описание будущего [Unit](/definitions#unit). Опишите в данном пункте функциональные возможности устройства, желательно просто привести возможности по пунктам, чтобы читать было проще.
-
-:::info Пример легко читаемого функционального описания
-
-- Регулирует обороты вентилятора в зависимости от температуры, чем больше температура тем больше обороты.
-- Публикует текущую температуру и скважность.
-- Позволяет включить вентилятор на `N` секунд по команде.
-:::
-
-:::info Пример тяжело читаемого описания:
-
-Аппаратно-программный комплекс предназначен для управления вентиляционным узлом с учетом термодинамических параметров окружающей среды. Система реализует интеллектуальную адаптацию вращательных характеристик вентилятора: повышение температуры приводит к пропорциональному увеличению частоты вращения устройства, обеспечивая эффективное охлаждение. Одновременно предусмотрена возможность публикации телеметрических данных, включая текущие значения температурного показателя и коэффициента скважности, что осуществляется посредством стандартизированных протоколов передачи данных. Кроме того, комплекс поддерживает функционал кратковременной активации вентилятора, позволяя включать его на заданный интервал времени `N` секунд по внешним управляющим командам. Такое решение обеспечивает высокоадаптивное управление тепловыми процессами и возможность интеграции в сложные инфраструктурные системы.
-:::
-
-## Software platform
-
-Укажите программную платформу на основе которой работает данное устройстве, здесь [Пользователи](/development-pepeunit/mechanics/roles.html#user) будут ожидать увидеть язык программирования или фреймворк на основе которого был создан [Unit](/definitions#unit), желательно указывать версию.
-
-:::info Примеры
-- `Python v3.11`
-- `Micropython v1.24.1`
-- `GO v1.23.4`
-- `Vue v3.5.13`
-- `React v19.0`
-- `C++ v23`
-- ...
-:::
-
-## Firmware format
-
-Чтобы [Пользователи](/development-pepeunit/mechanics/roles.html#user) могли быстро понять [Компилируемый](/definitions#compilable) ваш [Unit](/definitions#unit) или [Интерпритируемый](/definitions#interpreterable) добавьте в данном пункте один из двух возможных вариантов:
-- Интерпритируемый
-- Компилируемый
-
-Данный параметр при создании [Repo](/definitions#repo) в [Pepeunit](/conception/overview) влияет на [первую установку](/user/create-unit#получение-фаилов-развертывания) и [способ доставки программных обновлений](/development-pepeunit/mechanics/update-system)
-
-## Hardware platform
-
-Здесь указывается тип физических устройств на которые [Пользователи](/development-pepeunit/mechanics/roles.html#user) могут ориентироваться при создании физического [Unit](/definitions#unit)
-
-:::info Примеры
-- `esp32` (требуется >= 1МБ `flash` памяти)
-- `PC` - `Linux`, `Mac`, `Win`
-- `Rpi 3B+`
-:::
-
-## Required physical components
-
-Опишите какие физические компаненты потребуются, чтобы воспроизвести [Unit](/definitions#unit). Данный пункт облегчает [Пользователям](/development-pepeunit/mechanics/roles.html#user) поиск номенклатуры материалов для закупок.
-
-:::info Пример
-- Микроконтроллер `esp32`
-- `PWM` `4pin` вентилятор, например `FFB1212EH`
-- Датчик температуры `DS18B20`
-- `1х` резистор `4.7кОм`
-- Провода
-:::
-
-## Operating Scheme
-
-[Пользователи](/development-pepeunit/mechanics/roles.html#user) ожидают увидеть в данном пункте схемы работы [Unit](/definitions#unit), это могут быть электрические схемы, схема работы топиков или схема подключения нескольких [Unit](/definitions#unit) к [Pepeunit](/conception/overview).
-Видя схему [Пользователю](/development-pepeunit/mechanics/roles.html#user) легче понять как работает ваш [Unit](/definitions#unit) и воспроизвести его.
+Раздел | Предназначение | [readme.md](/definitions#readme-md) формат
+-- | -- | --
+`general` | Содержит самую базовую информацию о [Unit](/definitions#unit) | Формируется таблица в шапке [readme.md](/definitions#readme-md)
+`images` | Предназначен для отображения визуальной информации, здесь могут быть схемы работы [Unit](/definitions#unit), фото готового [Unit](/definitions#unit) или любая другая визуальная информация | Каждая пара ключ-значение будет выделена в отдельный элемент c уровнем `##`
+`files` | Позволяет указывать файлы, например `3D` модели или дополнительные материалы | Каждая пара ключ-значение будет отдельным элементом нумерованного списка
+`physical_io` | Нужен для микроконтрллеров, даёт чёткое понимание, какой `IO Pin` для чего предназначен | Каждая пара ключ-значение станет элементом не нумерованного списка
+`env_description` | Описывает каждую [env переменную](/developer/struct-env-json) добавленную разработчиком [Unit](/definitions#unit) | Каждая пара ключ-значение будет отдельным элементом нумерованного списка
+`topic_assignment` | Описывает каждый [UnitNode топик](/developer/struct-schema-json) добавленный разработчиком [Unit](/definitions#unit) | Каждая пара ключ-значение станет элементом не нумерованного списка
+`work_algorithm` | Описывает последовательность работы [Unit](/definitions#unit) | Каждая пара ключ-значение будет отдельным элементом нумерованного списка
+`installation` | Описывает последовательность шагов для корректного запуска [Unit](/definitions#unit) | Каждая пара ключ-значение будет отдельным элементом нумерованного списка
 
 :::warning
-Ввиду того что картинки достаточно большие по размеру, а объём пространства репозитория будет нарастать с каждым новым изменением. Гораздо проще воспользоваться внешними хостингами картинок, которые позволяют получить статическую ссылку на изображение.
+Нюансы генерации `pepeunit.toml -> readme.md`:
+1. Если раздел или элемент раздела не указан, то он не будет добавлен в [readme.md](/definitions#readme-md)
+2. Т.к. текст парсится напрямую, можно указывать в тексте `md` символы форматирования, например: `**, ``, __` и тд.
+3. Сложные элементы форматирования на подобии: блоков кода, нумерованных списков и таблиц - не доступны. Они ломают генерацию из-за ошибок парсинга
+4. Если вам требуются расширенные возможности `md`, то сгенерируйте первичную версию на основе [pepeunit.toml](/definitions#pepeunit-toml). И добавьте в конец дополнительный блок `## Additional information`. Таким образом конечный пользователь получит все преимущества ожидаемой схемы [readme.md](/definitions#readme-md) и ваше особое доплнение.
 :::
 
-:::info Пример вставки картинки в md
-```md
-![img](https://i.ibb.co/QQJ6h70/schema-fan-4pin-unit.png)
-```
-Эта же картинка но уже с рендером
+## Заполнение pepeunit.toml general
 
-![img](https://i.ibb.co/QQJ6h70/schema-fan-4pin-unit.png)
+Ключ | Пример значения | Комментарий
+-- | -- | --
+`name` | `"Fan Regulator ds18b20"` | Короткое название [Unit](/definitions#unit) - должно содержать только самую важную информацию
+`description` | `"Регулирует обороты вентилятора в зависимости от температуры. Публикует текущую температуру и скважность. Позволяет включить вентилятор на `N` секунд по команде"` | `1-5` предложений, отражающих основной функционал [Unit](/definitions#unit)
+`language` | `"Micropython"` | Язык программирования на котором написан [Unit](/definitions#unit)
+`hardware` | `["esp32", "ds18b20", "4pin fan", "резистор 4.7кОм", "wires"]` | Используемые физические компаненты
+`firmware` | `[{name = "ESP32...0.0.bin", link = "https://git.pepe.../download"}]` | Набор данных о бинарных файлах устанавливаемых напрямую на физические компаненты: конкретные интерпритаторы, бинарники и тд
+`stack` | `["pepeunit_micropython_client"]` | Набор библиотек используемых в программе [Unit](/definitions#unit)
+`version` | `"0.0.0"` | Текущая версия [Unit](/definitions#unit)
+`license` | `"AGPL v3 License"` | Лицензия на основе которой, предоставляетcя репозиторий [Unit](/definitions#unit)
+`authors` | `[{name = "Ivan Serebrennikov", email = "admin@silberworks.com"}]` | Список авторов [Unit](/definitions#unit)
+
+:::warning
+Нюансы:
+1. `hardware`, `firmware` и `stack` - могут быть заполнены как текстовыми ключами в примере для `hardware`, так и ссылками как в примере для `firmware`. Но формат всех элементов списка должен быть единым, или все элементы текстовые, или все элменты ссылки
 :::
 
-## 3D Models
+## Заполнение блоков после general
 
-Укажите здесь ссылки на `3D` модели элементов [Unit](/definitions#unit) в различных форматах, чтобы [Пользователи](/development-pepeunit/mechanics/roles.html#user) могли распечатать их на `3D` принтерах. Отдавайте приоритет формату `stl`, т.к. он может быть использован в любой программе трассировки `3D` печати.
-
-:::info Пример
-- `stl` - [Корпус](https://pepeunit.com)
-- `m3d` - [Корпус](https://pepeunit.com)
-:::
-
-## Physical IO
-
-Данный пункт актуален только для [Unit](/definitions#unit) на основе микроконтроллеров, так как здесь нужно описать какие физические `IO` пины используются.
-
-:::info Пример
-- `machine.Pin(0)` настроен на отдачу `PWM` сигнала c частотой `10000Гц` и разрешением `16бит`
-- `machine.Pin(4)` настроен на получение цифрового значения температуры от датчика `DS18B20`
-:::
-
-## env_example.json
-
-Отобразите [env_example.json](/definitions#env-example-json). Это нужно для опытных [Пользователей](/development-pepeunit/mechanics/roles.html#user) - по переменным окружения можно оценить возможности настройки [Unit](/definitions#unit). [Подробное описание структуры env_example.json](/developer/struct-schema-json#schema-example-json).
-
-:::info Пример
-```json
-{
-    "WIFI_SSID": "My_Perfect_Wifi_SSID",
-    "WIFI_PASS": "Strong_Password",
-    "PUBLISH_SEND_INTERVAL": 10,
-    "DUTY_MIN": 8192,
-    "DUTY_MAX": 65535,
-    "TEMP_MIN": 30,
-    "TEMP_MAX": 60,
-    "PEPEUNIT_URL": "unit.example.com",
-    "PEPEUNIT_APP_PREFIX": "/pepeunit",
-    "PEPEUNIT_API_ACTUAL_PREFIX": "/api/v1",
-    "HTTP_TYPE": "https",
-    "MQTT_URL": "emqx.example.com",
-    "MQTT_PORT": 1883,
-    "PEPEUNIT_TOKEN": "jwt_token",
-    "SYNC_ENCRYPT_KEY": "32_bit_encrypt_key",
-    "SECRET_KEY": "32_bit_secret_key",
-    "PING_INTERVAL": 30,
-    "STATE_SEND_INTERVAL": 300
-}
-```
-:::
-
-### Env variable assignment
-
-Опишите какие переменные, отличные от стандартных, вы добавили в [env_example.json](/definitions#env-example-json). Чем подробнее тем лучше.
-
-:::info Пример
-1. `WIFI_SSID` - имя сети `WiFi` в которой будет работать устройство
-1. `WIFI_PASS` - пароль от сети `WiFI` в которой будет работать устройство
-1. `PUBLISH_SEND_INTERVAL` - частота публикации данных в `current_fan_speed_percentage/pepeunit` и `current_temp/pepeunit` указывать нужно в секундах
-1. `DUTY_MIN` - минимальная скважность `PWM 16bit`, которую можно установить 
-1. `DUTY_MAX` - максимальная скважность `PWM 16bit`, которую можно установить 
-1. `TEMP_MIN` - температура в градусах цельсия, ниже которой скважность будет `DUTY_MIN`
-1. `TEMP_MAX` - температура в градусах цельсия, выше которой скважность будет соответствовать `DUTY_MAX`
-:::
-
-## schema_example.json
-
-Отобразите [schema_example.json](/definitions#schema-example-json) . Это нужно для опытных [Пользователей](/development-pepeunit/mechanics/roles.html#user) - по данной схеме можно очень быстро оценить, что может [Unit](/definitions#unit). [Подробное описание структуры schema_example.json](/developer/struct-env-json#env-example-json).
-
-:::info Пример
-```json
-{
-    "input_base_topic": [
-        "update/pepeunit",
-        "schema_update/pepeunit"
-    ],
-    "output_base_topic": [
-        "state/pepeunit"
-    ],
-    "input_topic": [
-        "set_fan_state/pepeunit"
-    ],
-    "output_topic": [
-        "current_fan_speed_percentage/pepeunit",
-        "current_temp/pepeunit"
-    ]
-}
-```
-:::
-
-### Assignment of Device Topics
-
-Опишите какие форматы данных отдают ваши `Output` и какие форматы принимают `Input`. Постарайтесь добавить примеры.
-
-:::info Пример
-- `input` `set_fan_state/pepeunit` - принимает в качестве значения `json` - `{"sleep": 15, "duty": 65535}`, где `sleep` сообщаяет в течении скольки секунд вентилятор будет включен со скважностью `duty`
-- `output` `current_fan_speed_percentage/pepeunit` - текущее значение скважности в текстовом формате - `8192`
-- `output` `current_temp/pepeunit` - текущая температура в текстовом формате - `27.5`
-:::
-
-## Work algorithm
-
-Расскижите о логике работы вашего [Unit](/definitions#unit), возможно другие [Пользователи](/development-pepeunit/mechanics/roles.html#user) захотят внести вклад и им будет гораздо проще, если они будут знать подробности о том как работают различные режимы вашего [Unit](/definitions#unit).
-
-:::info Пример
-Алгоритм работы с момента нажатия кнопки включения:
-1. Подключение к `WiFI`
-1. Инициализация датчика `DS18B20`
-1. Подключение к `MQTT Брокеру`
-1. Каждые `PUBLISH_SEND_INTERVAL` секунд публикуются сообщения в `current_fan_speed_percentage/pepeunit` и `current_temp/pepeunit`
-1. Каждую секунду температура линейно преобразуется в скважность выхода, по следующему алгоритму:
-    ```python
-        def convert_temp_to_duty(x) -> int:
-        temp_min = settings.TEMP_MIN
-        temp_max = settings.TEMP_MAX
-        duty_min = settings.DUTY_MIN
-        duty_max = settings.DUTY_MAX
-        
-        if x < temp_min:
-            return 8192
-        
-        if x > temp_max:
-            return 65532
-        
-        y = ((x - temp_min) * (duty_max - duty_min)) / (temp_max - temp_min) + duty_min
-        return int(round(y))
-    ```
-
-Алгоритм работы в момент получения сообщения из `set_fan_state/pepeunit`
-1. Устройство получает сообщение формата `{"sleep": 15, "duty": 65535}`
-1. Устанавливается скважность равная `duty`
-1. Устойство засыпает на `sleep` секунд
+:::info
+Заполнение всех остальных блоков, происходит на основе общего примера [pepeunit.toml](/definitions#pepeunit-toml)
 :::

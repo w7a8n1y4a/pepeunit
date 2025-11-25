@@ -34,8 +34,8 @@
 ## Git Branch
 `Branch или Ветка` - это набор [коммитов](/#git-commit), расположенных в хронологическом порядке в системе контроля версии [Git](#git).
 
-## Readme File
-`Readme` - файл документации внутри репозитория [Git](#git), по усмотрению создателя репозитория содержит базовую инфорацию о переменных окружения, развёртыванию [Unit](#unit), нюансах работы, настройки [Unit](#unit) или любую другую информацию, которую автор счёл нужной. [Инструкция](/developer/struct-readme) для авторов по заполнению `Readme`.
+## readme.md
+`readme.md` или `README.md` - файл документации внутри репозитория [Git](#git), по усмотрению создателя репозитория содержит базовую инфорацию о репозитории, нюансах работы, настройки или любую другую информацию, которую автор счёл нужной. В [Pepeunit](/conception/overview) для заполнения `readme.md` использует генератор на основе [pepeunit.toml](#pepeunit-toml). [Подробная инструкция](/developer/struct-readme#readme-md).
 
 ## Gitlab
 `Gitlab` - это веб-инструмент жизненного цикла [Git](#git) репозиториев от компании `GitLab Inc`. В данной документации под `Gitlab` подразумевается не только [gitlab.com](https://about.gitlab.com/), но и любой другой [Узел](#instance) `Gitlab CE` или `Gitlab EE`
@@ -120,3 +120,6 @@
 
 ## .pepeignore
 `.pepeignore` - файл [Git](#git) репозиториев [Unit](#unit) аналогичный по синтаксису [.gitignore](https://git-scm.com/docs/gitignore), но позволяющий удалить все указанные в нём файлы и дирректории из репозитория в момент генерации [архива с программой](/developer/struct-archive-update) для [Интерпритируемых](#interpreterable) [Unit](#unit). Более подробная [информация о .pepeignore](/developer/struct-archive-update#pepeignore).
+
+## pepeunit.toml
+`pepeunit.toml` - стандартизированый информационный блок [Unit](#unit), включающий в себя исчерпывающую информацию о [Unit](#unit). Помещается в корень [Git](#git) репозитория и выполняет функцию машиночитаемого описания [Unit](#unit) для [Pepeunit](/conception/overview). Ближайший аналог в мире разработки - `pyproject.toml`. [Подробнее о заполнении pepeunit.toml](/developer/struct-readme#pepeunit-toml)

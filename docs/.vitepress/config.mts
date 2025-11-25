@@ -81,7 +81,7 @@ export default withMermaid(defineConfig({
         items: [
           { text: 'Алгоритм создания Unit', link: '/developer/alg-create-unit' },
           { text: 'Структура GIT репозитория', link: '/developer/struct-git-repo' },
-          { text: 'Документация Readme', link: '/developer/struct-readme' },
+          { text: 'Документация readme.md и pepeunit.toml', link: '/developer/struct-readme' },
           { text: 'Структура schema.json и schema_example.json', link: '/developer/struct-schema-json' },
           { text: 'Структура env.json и env_example.json', link: '/developer/struct-env-json' },
           { text: 'Структура архивов c обновлениями', link: '/developer/struct-archive-update' },

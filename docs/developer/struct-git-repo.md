@@ -19,7 +19,7 @@
 ```
 
 Рассмотрим каждый файл:
-- [readme.md](/definitions#readme-file) - описание проекта, содержащее основную информацию о его назначении, установке и использовании, [требования к структуре](/developer/struct-readme)
+- [readme.md](/definitions#readme-md) - описание проекта, содержащее основную информацию о его назначении, установке и использовании, [требования к структуре](/developer/struct-readme)
 - [env_example.json](/definitions#env-example-json) - отвечает за требующиеся для [Unit](/definitions#unit) переменные окруженияю, [требования к структуре](/developer/struct-env-json)
 - [schema_example.json](/definitions#schema-example-json) - отвечает за схему взаимодействия [Unit](/definitions#unit) с [Pepeunit](/conception/overview), а также за `Input` и `Output` которые будут у [Unit](/definitions#unit), [требования к структуре](/developer/struct-schema-json)
 - `LICENSE` - лицензия на усмотрение автора. Все репозитории [Pepeunit](/conception/overview) имеют лицензию `AGPL v3`

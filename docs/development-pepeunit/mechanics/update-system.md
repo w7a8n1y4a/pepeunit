@@ -7,7 +7,7 @@
 - [Как генерируются архивы с обновлениями Unit?](/developer/struct-archive-update)
 - [Какие есть MQTT команды обновлений Unit?](/developer/default-mqtt-command)
 - [Как Pepeunit узнаёт о текущей версии Unit?](/developer/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit)
-- [Как Unit получают ссылку на скомпилированные версии?](/developer/release-assets.html)
+- [Как Unit получают ссылку на скомпилированные версии?](/developer/release-assets)
 
 ## Процесс обновления всех Unit связанных с Repo
 

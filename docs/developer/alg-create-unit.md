@@ -114,7 +114,7 @@ LICENSE
 - В `output_topic` добавим два: `current_fan_speed_percentage/pepeunit`, `current_temp/pepeunit` - в эти топики будем публиковать текущее состояние
 
 :::warning
-В процессе разработки может потребоваться изменение [schema_example.json](/definitions#schema-example-json) - это абсолютно нормально. Добавьте или удалите топики и актуализируйте [Readme](/definitions#readme-file). [Pepeunit](/conception/overview) подстроится и добавит/удалит [UnitNode](/definitions#unitnode).
+В процессе разработки может потребоваться изменение [schema_example.json](/definitions#schema-example-json) - это абсолютно нормально. Добавьте или удалите топики и актуализируйте [Readme](/definitions#readme-md). [Pepeunit](/conception/overview) подстроится и добавит/удалит [UnitNode](/definitions#unitnode).
 :::
 
 ## Заполнение env_example.json
@@ -175,12 +175,12 @@ LICENSE
 - `TEMP_MAX` - хочу настраивать температуру выше которой скорость будет `DUTY_MAX`
 
 :::warning
-Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [Readme](/definitions#readme-file). [Pepeunit](/conception/overview) отобразит новые переменные [Пользователям](/development-pepeunit/mechanics/roles.html#user) для ввода, когда они изменят [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
+Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [Readme](/definitions#readme-md). [Pepeunit](/conception/overview) отобразит новые переменные [Пользователям](/development-pepeunit/mechanics/roles.html#user) для ввода, когда они изменят [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
 :::
 
 ## Первичное заполнение Readme
 
-Используя [документацию по общей структуре Readme](/definitions#readme-file) заполните пункты:
+Используя [документацию по общей структуре Readme](/definitions#readme-md) заполните пункты:
 - `Description`
 - `Firmware format`
 - `Hardware platform`
@@ -202,7 +202,7 @@ LICENSE
 1. Создайте [Repo](/definitions#repo) на основе вашего [Git](/definitions#git) репозитория из [Gitlab](/definitions#gitlab) и [Github](/definitions#github)
 1. Создайте [Unit](/definitions#unit):
     - Обязательно [сделайте его обновляемым в ручную](/user/create-unit.html#блок-автообновлении), чтобы чётко контролировать [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
-    - Заполните [переменные окружения](/user/create-unit.html)
+    - Заполните [переменные окружения](/user/create-unit)
     - Скачайте [архив](/developer/struct-archive-update) с [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json)
 
 Полученные файлы [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) нужно будет поместить в каталог вашего локального [Git](/definitions#git) репозитория. Данные файлы будут содержать данные для подключения к [инстансу](/definitions#instance), а также топики для публикации. По сути теперь вы готовы разрабатывать программный код вашего [Unit](/definitions#unit).
@@ -238,7 +238,7 @@ LICENSE
 
 ## Присвоение Тега
 
-[Readme](/definitions#readme-file) заполнен, функционал готов, всё работает корректно. Самое время присвоить [Тег](/definitions#git-tag) для вашего последнего [коммита](/definitions#git-commit):
+[Readme](/definitions#readme-md) заполнен, функционал готов, всё работает корректно. Самое время присвоить [Тег](/definitions#git-tag) для вашего последнего [коммита](/definitions#git-commit):
 
 1. Перейдите в консоль дирректории вашего проекта
 1. Выполните команду `git tag 1.0.0`

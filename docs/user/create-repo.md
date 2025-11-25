@@ -41,7 +41,7 @@
 :::
 
 ## Компилируемость
-Обычно значение данного флага можно подсмотреть в [Readme](/definitions#readme-file) [Git](/definitions#git) репозитория.
+Обычно значение данного флага можно подсмотреть в [Readme](/definitions#readme-md) [Git](/definitions#git) репозитория.
 
 Установите флаг `True` - для [Компилируемых](/definitions#compilable) репозиториев и `False` для [Интерпритируемых](/definitions#interpreterable).
 
