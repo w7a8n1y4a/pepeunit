@@ -22,9 +22,6 @@
 [pepeunit.toml](/definitions#pepeunit-toml) будет использован в будущем для упрощения поиска по [RepositoryRegisty](/definitions#repositoryregistry) между инстансами [Pepeunit](/conception/overview).
 :::
 
-Ближайший аналог в мире разработки - `pyproject.toml`.
-
-Пример [pepeunit.toml](/definitions#pepeunit-toml):
 ```toml
 [general]
 name = "Fan Regulator ds18b20"
