@@ -3,7 +3,7 @@
 - [Что означают флаги обновлений у Repo?](/user/settings-repo#флаги-массовых-обновлении)
 - [Как получить файлы для создания Unit?](/user/create-unit#получение-фаилов-развертывания)
 - [Как обновлять Unit?](/user/update-unit)
-- [Как Unit узнаёт о своей текущей версии используя env.json?](/developer/struct-env-json#зарезервированные-переменные-pepeunit)
+- [Как Unit узнаёт о своей текущей версии используя env.json?](/developer/struct-env-json#стандартные-переменные-pepeunit)
 - [Как генерируются архивы с обновлениями Unit?](/developer/struct-archive-update)
 - [Какие есть MQTT команды обновлений Unit?](/developer/default-mqtt-command)
 - [Как Pepeunit узнаёт о текущей версии Unit?](/developer/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit)

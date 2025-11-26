@@ -1,79 +1,89 @@
 # Алгоритм создания Unit
 
-Пройдя последовательно данный алгоритм, вы создадите свой первый [Unit](/definitions#unit)
+:::tip
+1. [Проработка идеи Unit](/developer/alg-create-unit#проработка-идеи-unit)
+1. [Создание репозитория Git](/developer/alg-create-unit#создание-репозитория-git)
+1. [Создание базовой файловой структуры](/developer/alg-create-unit#создание-базовои-фаиловои-структуры)
+1. [Первый коммит](/developer/alg-create-unit#первыи-коммит)
+1. [Создание тестового Unit в Pepeunit](/developer/alg-create-unit#создание-тестового-unit-в-pepeunit)
+1. [Наполнение Unit программным функционалом](/developer/alg-create-unit#наполнение-unit-программным-функционалом)
+1. [Создание pepeunit.toml и readme.md](/developer/alg-create-unit#создание-pepeunit-toml-и-readme-md)
+1. [Присвоение Тега](/developer/alg-create-unit#присвоение-тега)
+:::
 
-## Проработка идеи
+:::info
+Данное руководство составлено на основе готового к работе [Fan Regulator ds18b20](https://git.pepemoss.com/pepe/pepeunit/units/esp32/fan-regulator-ds18b20.git)
+:::
+
+## Проработка идеи Unit
 
 Перед началом разработки [Unit](/definitions#unit) ответьте себе на следующие вопросы:
-1. Какую основную задачу будет решать мой [Unit](/definitions#unit) ?
-1. Какие физические элементы будут у моего [Unit](/definitions#unit) ?
+1. Какую основную задачу будет решать [Unit](/definitions#unit) ?
+1. Какие физические элементы будут у [Unit](/definitions#unit) ?
 1. Какие данные [Unit](/definitions#unit) будет публиковать ?
 1. Какое управляющее воздействие будет допускать [Unit](/definitions#unit) ?
-1. [Компилируемый](/definitions#compilable) или [Интерпритируемый](/definitions#interpreterable) будет мой [Unit](/definitions#unit) ?
+1. На каком языке будет написан [Unit](/definitions#unit) ?
 
 :::info Например
 1. `Unit` будет регулировать температуру при помощи вентилятора
-1. Понадобятся: `esp32`, `4pin` вентилятор, температурный датчик `DS18B20`
+1. Понадобятся: `esp32`, `4pin` вентилятор, температурный датчик `ds18b20`
 1. Будет публиковаться: скважность `PWM` сигнала управления вентилятором и температура на датчике
 1. Будет команда: включение на `N` секунд с заданной скоростью вращения
-1. Интерпритируемый
+1. `Micropython`
 :::
 
-## Создание удалённого репозитория
+## Создание репозитория Git
 
 Перейдите в удобный вам [инстанс](/definitions#instance) [Gitlab](/definitions#gitlab) или [Github](/definitions#github):
 1. Создайте пустой репозиторий
 1. Склонируйте его на свою `ЭВМ`
 
-## Создание файловой структуры
+## Создание базовой файловой структуры
 
-1. Откройте склонированный репозиторий любым удобным для вас редактором кода
-1. Создайте следующий минимальный набор пустых файлов:
-    - `env_example.json`
-    - `.gitignore`
-    - `.pepeignore`
-    - `LICENSE` - на ваш вкус
-    - `readme.md`
-    - `schema_example.json`
+:::tip
+Создайте в корне [Git](/definitions#git) репозитория следующие пустые файлы:
+:::
 
-## Заполнение .gitignore
+Файл | Назначение
+-- | --
+`.gitignore` | [Тык .gitignore](/developer/struct-git-repo#как-заполнить-gitignore)
+`.pepeignore` | [Тык .pepeignore](/definitions#pepeignore)
+`schema_example.json` | [Тык schema_example.json](/definitions#schema-example-json)
+`env_example.json` | [Тык env_example.json](/definitions#env-example-json)
+`LICENSE` | Лицензия. У `Pepeunit` например `AGPL v3 License`
 
-Впишите следующий набор дирректорий и файлов:
-```gitignore
+### .gitignore
+
+```text
 env.json
 schema.json
 tmp
+.idea
+.nvim
 ```
 
-Не забудьте указать папку с вашей `IDE` это может быть `.idea`, `.nvim` или любая другая. Более подробно о [заполнении .gitignore](/developer/struct-git-repo#как-заполнить-gitignore).
+:::warning
+Не забудьте указать папку с вашей `IDE`, это может быть: `.idea`, `.nvim` или любая другая
+:::
 
-## Заполнение .pepeignore
+### .pepeignore
 
-[.pepeignore](/definitions#pepeignore) позволяет убрать файлы из итогового архива генерируемого [Pepeunit](/conception/overview). Синтаксис аналогичен `.gitignore`.
 
-Например:
-```pepeignore
+```text
 .git
 .gitignore
 .pepeignore
+LICENSE
 env_example.json
 schema_example.json
-docs
-model
-README.md
-LICENSE
+pepeunit.toml
+readme.md
 ```
 
-## Заполнение schema_example.json
-
-:::info
-[Подробно о заполнении schema_example.json](/developer/struct-schema-json#schema-example-json)
-:::
-
-В заполненом состоянии [schema_example.json](/definitions#schema-example-json) будет выглядеть вот так:
+### schema_example.json
 
 ```json
-{
+{   
     "input_base_topic": [
         "update/pepeunit",
         "env_update/pepeunit",
@@ -94,37 +104,19 @@ LICENSE
 }
 ```
 
-### Стандартные топики - `input_base_topic` и `output_base_topic`
+Для соответствия проработанной идее [Unit](/definitions#unit) - к стандартным топикам `input_base_topic` и `output_base_topic` потребуются добавить ещё два типа топиков: `input_topic` и `output_topic`
 
-При использовании клиентских библиотек: [Micropython](/libraries/micropython), [Golang](/libraries/golang) и [Python](/libraries/python) - можно указывать все топики из `input_base_topic` и `output_base_topic`, они будут корректно работать.
-
-Если вы создаёте облегчённую версию, без библиотек, то вы можете оставить только те топики, которые вам нужны и реализовать работу с ними самостоятельно.
-
-:::info
-Подробнее о возможностях `input_base_topic` - [стандартные MQTT команды](/developer/default-mqtt-command)
-
-Подробнее о возможностях `output_base_topic` - [cтандартные топики состояния](/developer/state-mqtt-send)
-:::
-
-### Пользовательские топики - `input_topic` и `output_topic`
-
-Пользовательские топики - это шаблоны будущих [UnitNode](/definitions#unitnode), вам нужно заполнить их самостоятельно и придумать имена, исходя из требований проекта.
-
-- В `input_topic` добавим `set_fan_state/pepeunit` - [Unit](/definitions#unit) подпишется на него и будет получать управляющие команды
-- В `output_topic` добавим два: `current_fan_speed_percentage/pepeunit`, `current_temp/pepeunit` - в эти топики будем публиковать текущее состояние
-
-:::warning
-В процессе разработки может потребоваться изменение [schema_example.json](/definitions#schema-example-json) - это абсолютно нормально. Добавьте или удалите топики и актуализируйте [Readme](/definitions#readme-md). [Pepeunit](/conception/overview) подстроится и добавит/удалит [UnitNode](/definitions#unitnode).
-:::
-
-## Заполнение env_example.json
+Тип топика | Топик разработчика | Назначение
+-- | -- | --
+`input_topic` | `set_fan_state/pepeunit` | [Unit](/definitions#unit) подпишется на него и будет получать управляющие команды
+`output_topic` | `current_fan_speed_percentage/pepeunit` | Будет использоваться для публикации скважности `PWM`
+`output_topic` | `current_temp/pepeunit` | Будет использоваться для публикации данных с датчика температуры `ds18b20`
 
 :::info
-[Подробно о заполнении env_example.json](/developer/struct-env-json#env-example-json)
+[Подробнее о назначении каждого типа топиков](/developer/struct-schema-json#структура)
 :::
 
-В заполненом состоянии [env_example.json](/definitions#env-example-json) будет выглядеть вот так:
-
+### env_example.json
 ```json
 {   
     "WIFI_SSID": "ssid",
@@ -152,43 +144,32 @@ LICENSE
 }
 ```
 
-:::warning
+:::danger
 Все переменные в [env_example.json](/definitions#env-example-json) должны быть обезличены
 :::
 
-### Зарезервированные env переменные
-
-При использовании клиентских библиотек: [Micropython](/libraries/micropython), [Golang](/libraries/golang) и [Python](/libraries/python) - нужно указывать полный набор зарезервированных переменных: [Подробно о заполнении env_example.json](/developer/struct-env-json#env-example-json).
-
-### Переменные разработчика
-
-Распишите мотивацию для добавления дополнительных переменных:
-- `WIFI_SSID` - для подключения к `WiFi` точно понадобится название сети
-- `WIFI_PASS` - для подключения к `WiFi` точно будет нужен пароль
-- `PWM_FAN_PIN` - нужно иметь возможность менять номер `Pin` отвечающего за управляющее воздействие на Вентилятор
-- `DS18B20_PIN_NUM` - нужно иметь возможность менять номер `Pin` отвечающего за получение данных от датчика `ds18b20`
-- `REGULATOR_OPERATING_RANGE` - хочу настроивать частоту работы регулятора
-- `PUBLISH_SEND_INTERVAL` - хочу настраивать частоту отравки сообщений в [Pepeunit](/conception/overview)
-- `DUTY_MIN` - хочу иметь возможность ограничить минимальную скорость вентилятора
-- `DUTY_MAX` - хочу иметь возможность ограничить максимальную скорость вентилятора
-- `TEMP_MIN` - хочу настраивать температуру ниже которой скорость будет `DUTY_MIN`
-- `TEMP_MAX` - хочу настраивать температуру выше которой скорость будет `DUTY_MAX`
+Нужно придумать назначение переменных Разработчика:
+Название переменной | Назначение
+-- | --
+`WIFI_SSID` | Название `WiFi` сети для подключения
+`WIFI_PASS` | Пароль от `WiFi` сети для подключения
+`PWM_FAN_PIN` | Позволит менять номер контакта подключения вентилятора
+`DS18B20_PIN_NUM` | Позволит менять номер контакта отвечающего за получение данных от датчика `ds18b20`
+`REGULATOR_OPERATING_RANGE` | Позволит изменять частоту работы регулятора
+`PUBLISH_SEND_INTERVAL` | Позволит настраивать скорость публикации в топик `current_fan_speed_percentage/pepeunit` и `current_temp/pepeunit`
+`DUTY_MIN` | Позволит устанавливать минимальную скорость вентилятора
+`DUTY_MAX` | Позволит устанавливать максимальную скорость вентилятора
+`TEMP_MIN` | Позволит настраивать температуру начиная с которой скорость будет `DUTY_MIN`
+`TEMP_MAX` | Позволит настраивать температуру начиная с которой скорость будет `DUTY_MAX`
 
 :::warning
-Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [Readme](/definitions#readme-md). [Pepeunit](/conception/overview) отобразит новые переменные [Пользователям](/development-pepeunit/mechanics/roles.html#user) для ввода, когда они изменят [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
+Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [pepeunit.toml](/definitions#pepeunit-toml) и [readme.md](/definitions#readme-md).
+
+[Pepeunit](/conception/overview) отобразит новые переменные [Пользователям](/development-pepeunit/mechanics/roles#user) для ввода, когда они изменят [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit).
 :::
 
-## Первичное заполнение Readme
 
-Используя [документацию по общей структуре Readme](/definitions#readme-md) заполните пункты:
-- `Description`
-- `Firmware format`
-- `Hardware platform`
-- `Required physical components`
-- `env_example.json`
-- `schema_example.json`
-
-## Первый коммит и git push
+## Первый коммит
 
 Вы заполнили минимально нужные файлы, пора их закомитить:
 1. Переходим в консоль дирректории вашего проекта
@@ -198,47 +179,63 @@ LICENSE
 
 ## Создание тестового Unit в Pepeunit
 
-Для продолжения разработки вам нужно будет отправлять и получать управляющее воздействие на [Unit](/definitions#unit). Очень удобно для этого использовать [инстанс](/definitions#instance) [Pepeunit](/conception/overview), которому вы доверяете. Нужно выполнить два шага на этом [инстасе](/definitions#instance):
-1. Создайте [Repo](/definitions#repo) на основе вашего [Git](/definitions#git) репозитория из [Gitlab](/definitions#gitlab) и [Github](/definitions#github)
-1. Создайте [Unit](/definitions#unit):
-    - Обязательно [сделайте его обновляемым в ручную](/user/create-unit.html#блок-автообновлении), чтобы чётко контролировать [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
-    - Заполните [переменные окружения](/user/create-unit)
-    - Скачайте [архив](/developer/struct-archive-update) с [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json)
+Чтобы продолжить разработку [Unit](/definitions#unit) - нужно взаимодействовать с [Pepeunit](/conception/overview) через [MQTT](/definitions#mqtt), а также получить [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json). Выбирите подходящий инстанс [Pepeunit](/conception/overview), которому вы доверяете. Выполните следующие шаги:
+1. [Создайте RepositoryRegistry](/user/create-repository-registry#создание-repositoryregistry)
+1. [Создайте Repo](/user/create-repo)
+1. [Создайте Unit](/user/create-unit)
+1. Настройте [Unit](/definitions#unit) для [обновлений в ручную](/user/create-unit#блок-автообновлении), чтобы чётко контролировать [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
+1. [Заполните env у Unit](/user/create-unit#настроика-окружения)
+1. Скачайте [Архив](/developer/struct-archive-update) с [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json)
 
-Полученные файлы [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) нужно будет поместить в каталог вашего локального [Git](/definitions#git) репозитория. Данные файлы будут содержать данные для подключения к [инстансу](/definitions#instance), а также топики для публикации. По сути теперь вы готовы разрабатывать программный код вашего [Unit](/definitions#unit).
+Полученные файлы [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) нужно будет поместить в каталог вашего локального [Git](/definitions#git) репозитория.
+
+Данные файлы будут содержать данные для подключения к [инстансу](/definitions#instance), а также топики для публикации. По сути теперь вы готовы разрабатывать программный код вашего [Unit](/definitions#unit).
 
 :::info
-В процессе разработки вы сможете заходить в тестовый [Unit](/definitions#unit) и видеть какие данные он отправляет в `Output` [UnitNode](/definitions#unitnode), создавать для него управляющее воздействие через `Input` [UnitNode](/definitions#unitnode), а также же отлаживать [систему обновлений](/development-pepeunit/mechanics/update-system).
+В процессе разработки вы сможете заходить в тестовый [Unit](/definitions#unit) и видеть:
+
+- какие данные [Unit](/definitions#unit) отправляет в `Output` [UnitNode](/definitions#unitnode) через систему [DataPipe](/definitions#datapipe)
+- создавать для [Unit](/definitions#unit) управляющее воздействие через `Input` [UnitNode](/definitions#unitnode)
 :::
 
-## Наполнение Unit функционалом
+## Наполнение Unit программным функционалом
 
-Когда у вас есть обратная связь от [Pepeunit](/conception/overview), можно идти по следующему алгоритму при создании [Unit](/definitions#unit):
-1. Протестировать что клиентские библиотеки ([Micropython](/libraries/micropython), [Golang](/libraries/golang) и [Python](/libraries/python)) корректно отправляют данные в [Pepeunit](/conception/overview)
-1. Получите данные от ваших датчиков локально, попробуйте вывести их в консоль
+:::warning
+Не существует универсального алгоритма разработки Программного обеспечения, разрабатывайте так как удобно именно вам. Но старайтесь следовать стандартным правилам частоты кода у Програмиистов.
+:::
+
+Когда у [Unit](/definitions#unit) в локальном репозитории есть обратная связь с [Pepeunit](/conception/overview), попробуйте следовать следующему алгоритму:
+1. Протестировать что клиентские библиотеки ([Micropython](/libraries/micropython), [Golang](/libraries/golang) и [Python](/libraries/python)) корректно [отправляют данные](/developer/default-mqtt-command) и получают [стандартные команды](/developer/default-mqtt-command)
+1. Получите данные от ваших физических датчиков, попробуйте вывести значения напрямую в консоль - без сетевых заморочек, чтобы понять что данные действительно поступают
 1. Попробуйте отправить свои данные в `output_topic` указанные в [schema_example.json](/definitions#schema-example-json)
 1. Получите команды из `input_topic` и обработайте их так как задумано в концепции вашего [Unit](/definitions#unit)
 1. Внедрите переменные окружения из [env_example.json](/definitions#env-example-json) для удалённой настройки вашего [Unit](/definitions#unit)
 
-После этих шагов вы получите рабочее устройство, которое нужно протестировать в различных режимах работы. Не нужно зацыкливаться именно на этом алгоритме, разработывайте так как удобно вам, но старайтесь поддерживать `readme` и следовать стандартным правилам частоты кода у Програмиистов.
+После этих шагов вы получите рабочее устройство, которое нужно протестировать в различных режимах работы.
 
-Разработчики [Pepeunit](/conception/overview) могут лишь облегчить вам работу предоставив примеры для разных языков программирования:
-
-- [esp32 Micropython](https://git.pepemoss.com/pepe/pepeunit/units/esp32/wifi_pc_fan_4_pin.git)
-- [esp8266 Micropython](https://git.pepemoss.com/pepe/pepeunit/units/esp8266/temp-sensor-ds18b20.git)
-- [go](https://git.pepemoss.com/pepe/pepeunit/units/go/go_hotkeys.git)
-
-:::info
-Вы можете делать множество [коммитов](/definitions#git-commit) с рабочим и не рабочим функционалом, создавать [ветки](/definitions#git-branch) и делать всё что позволяет [Git](/definitions#git), но настенет момент - когда вы увидите, что всё что вы задумали корректно работает. В этот момент нужно перейти в следующему пункту.
+:::warning
+Вы можете делать множество [коммитов](/definitions#git-commit) с рабочим и не рабочим функционалом, создавать [ветки](/definitions#git-branch) и делать всё что позволяет [Git](/definitions#git), но настенет момент - когда вы увидите, что всё что вы задумали корректно работает. В этот момент нужно двигаться дальше.
 :::
 
-## Актуализация документации
+## Создание pepeunit.toml и readme.md
 
-Актуализируйте и дозаполните все пункты документации, согласно [руководству](/developer/struct-readme). [Пользователи](/development-pepeunit/mechanics/roles.html#user) скажут вам `Большое Спасибо`.
+:::info
+[Pepeunit](/conception/overview) расчитывает на машиночитаемое описание [Unit](/definitions#unit) в файле [pepeunit.toml](/definitions#pepeunit-toml).
+:::
+
+Чтобы добавить описание для [Unit](/definitions#unit), нужно:
+
+1. Создать в корне репозитория [Unit](/definitions#unit) файл [pepeunit.toml](/definitions#pepeunit-toml) и заполнить его по аналогии с [примером заполнения pepeunit.toml](/developer/struct-readme#pepeunit-toml)
+1. Сгенерировать [readme.md](/definitions#readme-md) на основе [pepeunit.toml](/definitions#pepeunit-toml) можно согласно [инструкции](/developer/struct-readme.html#генерация-readme-md). Писать [readme.md](/definitions#readme-md) в ручную не трубется
+
+
+:::danger
+У всех [Unit](/definitions#unit) должна быть документация, чтобы Пользователи могли ими пользоваться.
+:::
 
 ## Присвоение Тега
 
-[Readme](/definitions#readme-md) заполнен, функционал готов, всё работает корректно. Самое время присвоить [Тег](/definitions#git-tag) для вашего последнего [коммита](/definitions#git-commit):
+[readme.md](/definitions#readme-md) и [pepeunit.toml](/definitions#pepeunit-toml)  заполнены, функционал готов, всё работает корректно. Время присвоить [Тег](/definitions#git-tag) для последнего [коммита](/definitions#git-commit) в репозитории:
 
 1. Перейдите в консоль дирректории вашего проекта
 1. Выполните команду `git tag 1.0.0`
@@ -249,13 +246,11 @@ LICENSE
 :::
 
 :::info
-[Pepeunit](/conception/overview) использует везде: `major.minor.fix`:
-- `< 1.0.0` являются `beta` версиями
-- `>= 1.0.0` стабильны
+[Pepeunit](/conception/overview) например использует везде: `major.minor.fix`:
 :::
 
 :::danger
-[Тег](/definitions#git-tag) будет сигнализировать [Пользователям](/development-pepeunit/mechanics/roles.html#user), что всё готово к эксплуатации и протестировано разработчиком.
+[Тег](/definitions#git-tag) будет сигнализировать [Пользователям](/development-pepeunit/mechanics/roles#user), что всё готово к эксплуатации и протестировано разработчиком.
 
-[Пользователи](/development-pepeunit/mechanics/roles.html#user) будут ожидать, что выбрав последний [Тег](/definitions#git-tag) - получат самую рабочую, самую актуальную версию [Unit](/definitions#unit).
+[Пользователи](/development-pepeunit/mechanics/roles#user) будут ожидать, что выбрав последний [Тег](/definitions#git-tag) - получат самую рабочую, самую актуальную версию [Unit](/definitions#unit).
 :::

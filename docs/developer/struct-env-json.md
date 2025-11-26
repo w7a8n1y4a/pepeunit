@@ -4,9 +4,9 @@
 
 :::warning Какое функциональное назначание у [env_example.json](/definitions#env-example-json)?
 Данный файл - это контракт между разработчиком [Unit](/definitions#unit) и [Pepeunit](/conception/overview):
-1. Разработчик гарантирует, что он реализует в функционале [Unit](/definitions#unit) все или часть зарезервированных переменных [Pepeunit](/conception/overview), позволяющих взаимодействовать с [Pepeunit](/conception/overview)
+1. Разработчик гарантирует, что он реализует в функционале [Unit](/definitions#unit) все или часть стандартных переменных [Pepeunit](/conception/overview), позволяющих взаимодействовать с [Pepeunit](/conception/overview)
 1. [Pepeunit](/conception/overview) гарантирует возможность [Пользователей](/development-pepeunit/mechanics/roles.html#user) установить переменные указанные разработчиком
-1. [Pepeunit](/conception/overview) гарантирует, что автоматически установит зарезервированные переменные указанные в файле при первом сохранении со стороны [Пользователя](/development-pepeunit/mechanics/roles.html#user).
+1. [Pepeunit](/conception/overview) гарантирует, что автоматически установит стандартные переменные указанные в файле при первом сохранении `env` со стороны [Пользователя](/development-pepeunit/mechanics/roles.html#user).
 :::
 
 ### Структура
@@ -37,11 +37,11 @@
 }
 ```
 
-Переменные можно разделить на две категории - `зарезервированные` и `переменные разработчика`
+Переменные можно разделить на две категории - `стандартные` и `переменные разработчика`
 
-### Зарезервированные переменные Pepeunit
+### Стандартные переменные Pepeunit
 
-[Pepeunit](/conception/overview) резервирует под нужды связи и стандартные процедуры следующий набор переменных окружения [Unit](/definitions#unit):
+[Pepeunit](/conception/overview) резервирует следующий набор переменных окружения [Unit](/definitions#unit):
 
 Переменная | Значение | Зачем нужна?
 -- | -- | --
@@ -59,16 +59,16 @@
 `PU_MAX_LOG_LENGTH` | `64` | Максимальное число строк в файле [log.json](/libraries/framework#log-json), удаляются строки из начала файла, сохрняются в конец.
 `PU_COMMIT_VERSION` | - | `Hash` [коммита](/definitions#git-commit). Отображает текущую [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) [Unit](/definitions#unit). Имеет уникальный функционал, её нельзя изменить вручную в меню изменения [env.json](/definitions#env-json), она будет игнорироваться при сохранении
 
-### Переменные окружения от разработчика [Unit](/definitions#unit)
+### Переменные окружения Разработчика [Unit](/definitions#unit)
 
 Разработчик [Unit](/definitions#unit) может создавать любые переменные окружения, которые отличаются по названию от стандартных. При этом значения указанные в переменных, будут отображаться как значения по умолчанию в интерфейсе [Пользователей](/development-pepeunit/mechanics/roles.html#user).
 
 :::danger
-Так как [Пользователь](/development-pepeunit/mechanics/roles.html#user) в итоге будет заполнять переменные в ручную, очень желательно заполнить [Readme](/definitions#readme-md) репозитория, который вы создаёте.
+Так как [Пользователь](/development-pepeunit/mechanics/roles.html#user) в итоге будет заполнять переменные в ручную, всегда нужно заполнить [pepeunit.toml](/definitions#pepeunit-toml) и [readme.md](/definitions#readme-md), чтобы Пользователь мог понять за что отвечает каждая переменная
 :::
 
 :::danger
-Заполнение [env.json](/definitions#env-json) пользовтелем происходит на основе: [Механизм генерации ENV](/development-pepeunit/mechanics/alg-env)
+Заполнение [env.json](/definitions#env-json) пользовтелем происходит на основе: [Механизма генерации ENV](/development-pepeunit/mechanics/alg-env)
 :::
 
 ## env.json
@@ -78,7 +78,7 @@
 :::warning Какое функциональное назначание у [env.json](/definitions#env-json)?
 Данный файл - это четырёхсторонний контракт между [Unit](/definitions#unit), [Pepeunit](/conception/overview), [Пользователем](/development-pepeunit/mechanics/roles.html#user) и [Администратором](/development-pepeunit/mechanics/roles#admin) [инстанса](/definitions#instance) [Pepeunit](/conception/overview):
 1. [Unit](/definitions#unit) гарантирует всем сторонам, что будет использовать для соответствующих значений из [env_example.json](/definitions#env-example-json) значения из [env.json](/definitions#env-json)
-1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что при первой установке переменных окружения в [env.json](/definitions#env-json), сгенерирует зарезервированные переменные
+1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что при первой установке переменных окружения в [env.json](/definitions#env-json), сгенерирует стандартные переменные
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что [Unit](/definitions#unit) сможет пройти авторизацию для топиков и соединений в [EMQX MQTT Broker](/definitions#mqtt-broker), авторизацию [Backend](/definitions#backend) с использованием `PU_AUTH_TOKEN`
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, возможность изменения [env.json](/definitions#env-json)
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что [env.json](/definitions#env-json) будет храниться в [шифрованном виде](/development-pepeunit/mechanics/cipher#шифрование)

@@ -10,10 +10,10 @@
 1. [Pepeunit](/conception/overview) гарантирует, что будет поддерживать актуальный набор [UnitNode](/definitions#unitnode) в соответствии с `input_topic` и `output_topic` указанных разработчиком в [schema_example.json](/definitions#schema-example-json) , для каждой версии [Unit](/definitions#unit).
 :::
 
-### Структура
+## Структура
 
 ```json
-{
+{   
     "input_base_topic": [
         "update/pepeunit",
         "env_update/pepeunit",
@@ -34,14 +34,23 @@
 }
 ```
 
-Всего в [schema_example.json](/definitions#schema-example-json) есть 4 типа топиков:
-- `input_base_topic` - топики стандартных [MQTT](/definitions#mqtt) команд, которые [Unit](/definitions#unit) может выполнить
-- `output_base_topic` - топики стандартной публикации данных, в которые [Unit](/definitions#unit) может публиковать данные
-- `input_topic` - топики `Input` [UnitNode](/definitions#unitnode) = набор [UnitNode](/definitions#unitnode) на которые [Unit](/definitions#unit) будет подписан
-- `output_topic` - `Output` [UnitNode](/definitions#unitnode) = набор [UnitNode](/definitions#unitnode) в которые [Unit](/definitions#unit) будет публиковать данные
+Всего в [schema_example.json](/definitions#schema-example-json) есть `4` типа топиков:
 
-:::info Пользовательский опыт
-При создании [Unit](/definitions#unit) или изменении его версии, [Pepeunit](/conception/overview) автоматически создаёт и удаляет недостающие `Input` и `Output` [UnitNode](/definitions#unitnode) в соответствии с [schema_example.json](/definitions#schema-example-json) .
+Топик | Описание | Подробности
+-- | -- | -- 
+`input_base_topic` | Топики стандартных [MQTT](/definitions#mqtt) команд, которые [Unit](/definitions#unit) может выполнить | [Стандартные MQTT команды](/developer/default-mqtt-command)
+`output_base_topic` | Топики стандартной публикации данных, в которые [Unit](/definitions#unit) может публиковать данные | [Стандартные MQTT топики состояния](/developer/default-mqtt-command)
+`input_topic` | `Input` топики Разработчика [Unit](/definitions#unit). [Pepeunit](/conception/overview) использует их как шаблон для создания `Input` [UnitNode](/definitions#unitnode) | -
+`output_topic` | `Output` топики Разработчика [Unit](/definitions#unit). [Pepeunit](/conception/overview) использует их как шаблон для создания `Output` [UnitNode](/definitions#unitnode) | -
+
+:::info
+При использовании клиентских библиотек: [Micropython](/libraries/micropython), [Golang](/libraries/golang) и [Python](/libraries/python) - можно указывать все топики из `input_base_topic` и `output_base_topic`, они будут корректно работать.
+
+Если вы сами реализуете взаимодействие с [Pepeunit](/conception/overview) без библиотек, то можно оставить только те топики, которые нужны для реализации [Unit](/definitions#unit).
+:::
+
+:::warning
+При создании [Unit](/definitions#unit) или изменении его версии, [Pepeunit](/conception/overview) автоматически создаёт и удаляет недостающие `Input` и `Output` [UnitNode](/definitions#unitnode) в соответствии с [schema_example.json](/definitions#schema-example-json).
 :::
 
 ## schema.json
@@ -61,29 +70,38 @@
 {
     "input_base_topic": {
         "update/pepeunit": [
-            "example.com/input_base_topic/5e1a4151-515e-4926-8b8a-5e821713e25e/update/pepeunit"
-        ],
-        "schema_update/pepeunit": [
-            "example.com/input_base_topic/5e1a4151-515e-4926-8b8a-5e821713e25e/schema_update/pepeunit"
+            "example.com/input_base_topic/9d0c2f4d-108e-488a-85e5-6040ef3d842a/update/pepeunit"
         ],
         "env_update/pepeunit": [
-            "example.com/input_base_topic/5e1a4151-515e-4926-8b8a-5e821713e25e/env_update/pepeunit"
+            "example.com/input_base_topic/9d0c2f4d-108e-488a-85e5-6040ef3d842a/env_update/pepeunit"
+        ],
+        "schema_update/pepeunit": [
+            "example.com/input_base_topic/9d0c2f4d-108e-488a-85e5-6040ef3d842a/schema_update/pepeunit"
+        ],
+        "log_sync/pepeunit": [
+            "example.com/input_base_topic/9d0c2f4d-108e-488a-85e5-6040ef3d842a/log_sync/pepeunit"
         ]
     },
     "output_base_topic": {
         "state/pepeunit": [
-            "example.com/output_base_topic/5e1a4151-515e-4926-8b8a-5e821713e25e/state/pepeunit"
+            "example.com/output_base_topic/9d0c2f4d-108e-488a-85e5-6040ef3d842a/state/pepeunit"
+        ],
+        "log/pepeunit": [
+            "example.com/output_base_topic/9d0c2f4d-108e-488a-85e5-6040ef3d842a/log/pepeunit"
         ]
     },
     "input_topic": {
-        "input/pepeunit": [
-            "example.com/dc2d6f5e-90b3-4cdb-91a4-5ae12db1887f/pepeunit",
-            "example.com/f06bcaa8-bb00-45ea-aba8-0fc0eba41e08"
+        "set_fan_state/pepeunit": [
+            "example.com/2d98b4ba-c935-4379-8e1a-520e76018c17/pepeunit"
+            "example.com/c0b107a7-9ae0-44ed-bc76-db5ff2af8887"
         ]
     },
     "output_topic": {
-        "output/pepeunit": [
-            "example.com/4114a3f8-65c1-4d42-8d1d-481785d0dcca/pepeunit"
+        "current_fan_speed_percentage/pepeunit": [
+            "example.com/d76b4234-3997-4a4a-a113-6d1c21d6b84a/pepeunit"
+        ],
+        "current_temp/pepeunit": [
+            "example.com/7279d28d-53b6-4866-99da-0b81bc1cc025/pepeunit"
         ]
     }
 }
