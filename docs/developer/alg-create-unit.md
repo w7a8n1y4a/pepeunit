@@ -250,7 +250,7 @@ readme.md
 :::
 
 :::danger
-[Тег](/definitions#git-tag) будет сигнализировать [Пользователям](/development-pepeunit/mechanics/roles#user), что всё готово к эксплуатации и протестировано разработчиком.
+[Тег](/definitions#git-tag) будет сигнализировать [Пользователям](/development-pepeunit/mechanics/roles#user), что всё готово к эксплуатации и протестировано разработчиком [Unit](/definitions#unit).
 
 [Пользователи](/development-pepeunit/mechanics/roles#user) будут ожидать, что выбрав последний [Тег](/definitions#git-tag) - получат самую рабочую, самую актуальную версию [Unit](/definitions#unit).
 :::
