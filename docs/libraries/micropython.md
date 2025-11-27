@@ -1,22 +1,115 @@
 # Micropython
 
+[Ccылки на репозитории](/development-pepeunit/maps.html#библиотеки)
+
 :::info
 Интерпритируемый и при этом имеет полную функциональность [Pepeunit Framework](/libraries/framework)
 :::
 
-## Ссылки
+## Пример
 
-Все подробности в `readme.md` репозитория
+```python
+import time
+import gc
+from pepeunit_micropython_client.client import PepeunitClient
+from pepeunit_micropython_client.enums import SearchTopicType, SearchScope
+    
+last_output_send_time = 0
 
-- [Релизы с Micropython образми](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/releases)
-- [Github (зеркало) для issues](https://github.com/w7a8n1y4a/pepeunit_micropython_client.git)
-- [Gitlab для разработки](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client.git)
+def output_handler(client: PepeunitClient):
+    global last_output_send_time
+    current_time = client.time_manager.get_epoch_ms()
+    
+    if (current_time - last_output_send_time) / 1000 >= client.settings.DELAY_PUB_MSG:
+        message = str(time.ticks_ms())
+        print('free mem:', gc.mem_free())
+        
+        client.logger.debug(f"Send to output/pepeunit: {message}", file_only=True)
+        
+        client.publish_to_topics("output/pepeunit", message)
+        
+        last_output_send_time = current_time
 
-## Версии
 
-### esp8266 и esp32
+def input_handler(client: PepeunitClient, msg):
+    try:
+        topic_parts = msg.topic.split("/")
+        if len(topic_parts) == 3:
+            topic_name = client.schema.find_topic_by_unit_node(
+                msg.topic, SearchTopicType.FULL_NAME, SearchScope.INPUT
+            )
 
-0. [ESP8266_GENERIC-v1.26.1-PEPEUNIT-v0.10.0.bin](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/package_files/43/download)
+            if topic_name == "input/pepeunit":
+                value = msg.payload
+                try:
+                    value = int(value)
+                    client.logger.debug(f"Get from input/pepeunit: {value}", file_only=True)
+
+                except ValueError:
+                    client.logger.error(f"Value is not a number: {value}")
+
+    except Exception as e:
+        client.logger.error(f"Input handler error: {e}")
+
+
+def test_set_get_storage(client: PepeunitClient):
+
+    try:
+        client.rest_client.set_state_storage('This line is saved in Pepeunit Instance')
+        client.logger.info(f"Success set state")
+        
+        state = client.rest_client.get_state_storage()
+        client.logger.info(f"Success get state: {state}")
+    except Exception as e:
+        client.logger.error(f"Test set get storage failed: {e}")
+
+
+def test_get_units(client: PepeunitClient):
+    try:
+        output_topic_urls = client.schema.output_topic.get('output/pepeunit', [])
+        if output_topic_urls:
+            unit_nodes_response = client.rest_client.get_input_by_output(output_topic_urls[0])
+            client.logger.info("Found {} unit nodes".format(unit_nodes_response.get('count', 0)))
+            
+            unit_node_uuids = [item.get('uuid')for item in unit_nodes_response.get('unit_nodes', [])]
+            
+            if unit_node_uuids:
+                units_response = client.rest_client.get_units_by_nodes(unit_node_uuids)
+                client.logger.info("Found {} units".format(units_response.get('count', 0)))
+                
+                for unit in units_response.get('units', []):
+                    name = unit.get('name')
+                    uuid = unit.get('uuid')
+                    client.logger.info("Unit: {} (UUID: {})".format(name, uuid))
+    except Exception as e:
+        client.logger.error("Test get units failed: {}".format(e))
+
+
+def main():
+    client = PepeunitClient(
+        env_file_path='/env.json',
+        schema_file_path='/schema.json',
+        log_file_path='/log.json',
+        sta=sta
+    )
+
+    test_set_get_storage(client)
+    test_get_units(client)
+    
+    client.set_mqtt_input_handler(input_handler)
+    client.mqtt_client.connect()
+    client.subscribe_all_schema_topics()
+    client.set_output_handler(output_handler)
+    client.run_main_cycle()
+
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Exception as e:
+        print('Error:', str(e))
+
+```
 
 ## Важные нюансы
 

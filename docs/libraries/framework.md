@@ -1,9 +1,11 @@
 # Pepeunit Framework
 
-:::info
-Каждая из библиотек является [Framework`ом](/definitions#framework) для работы с [Pepeunit](/conception/overview)
+[Ccылки на репозитории библиотек](/development-pepeunit/maps.html#библиотеки)
 
-Цель [Framework](/definitions#framework) - облегчить разработку новых [Unit](/definitions#unit), обеспечив работу базового функционала для интеграции с [Pepeunit](/conception/overview) и предоставить инструменты управления программой
+:::info
+Каждая из библиотек является клиентским [Framework`ом](/definitions#framework) для работы с [Pepeunit](/conception/overview)
+
+Цель [Framework](/definitions#framework) - облегчить разработку новых [Unit](/definitions#unit), обеспечив работу базового функционала для интеграции с [Pepeunit](/conception/overview), а также предоставить инструменты управления циклом выполнения
 :::
 
 ## Набор возможностей
@@ -17,6 +19,8 @@
     - загрузка [schema.json](/definitions#schema-json)
     - установка состояния [storage](/developer/state-storage-unit)
     - получение состояния [storage](/developer/state-storage-unit)
+    - получение списка [Unit](/definitions#unit) при помощи списка [UnitNode](/definitions#unitnode).uuid
+    - получение `Input` [UnitNode](/definitions#unitnode) при помощи `Output` [UnitNode](/definitions#unitnode)
 1. Приём и корректная обработка [cтандартных MQTT команды Pepeunit](/developer/default-mqtt-command)
 1. Отправки и генерации [состояния Unit](/developer/state-mqtt-send)
 1. Функционал для работы с [schema.json](/definitions#schema-json):
@@ -44,7 +48,7 @@
 ## log.json
 
 :::info
-Чёрный ящик [Unit](/definitions#unit) - позволяет хранить последние N логов не зависимо от состояния сети. 
+'Чёрный ящик' [Unit](/definitions#unit) - позволяет хранить последние `N` логов не зависимо от состояния сети. 
 :::
 
 Логи хранятся в нём в формате `ndjson`, где каждая новая строка отделённая `\n` - это новый словарь:

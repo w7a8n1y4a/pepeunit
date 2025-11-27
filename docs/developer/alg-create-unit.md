@@ -34,7 +34,7 @@
 
 ## Создание репозитория Git
 
-Перейдите в удобный вам [инстанс](/definitions#instance) [Gitlab](/definitions#gitlab) или [Github](/definitions#github):
+Выберите [инстанс](/definitions#instance) [Gitlab](/definitions#gitlab) или [Github](/definitions#github):
 1. Создайте пустой репозиторий
 1. Склонируйте его на свою `ЭВМ`
 
@@ -148,7 +148,7 @@ readme.md
 Все переменные в [env_example.json](/definitions#env-example-json) должны быть обезличены
 :::
 
-Нужно придумать назначение переменных Разработчика:
+Нужно прордумать за что будут отвечать переменные Разработчика:
 Название переменной | Назначение
 -- | --
 `WIFI_SSID` | Название `WiFi` сети для подключения
@@ -171,7 +171,7 @@ readme.md
 
 ## Первый коммит
 
-Вы заполнили минимально нужные файлы, пора их закомитить:
+После заполнения минимально нужных файлов, пора их закомитить:
 1. Переходим в консоль дирректории вашего проекта
 1. `git add .` - добавляем все файлы в кандидаты на [коммит](/definitions#git-commit)
 1. `git commit -m "feat(init): initial files"` - [коммитим](/definitions#git-commit) изменения
@@ -187,12 +187,10 @@ readme.md
 1. [Заполните env у Unit](/user/create-unit#настроика-окружения)
 1. Скачайте [Архив](/developer/struct-archive-update) с [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json)
 
-Полученные файлы [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) нужно будет поместить в каталог вашего локального [Git](/definitions#git) репозитория.
-
-Данные файлы будут содержать данные для подключения к [инстансу](/definitions#instance), а также топики для публикации. По сути теперь вы готовы разрабатывать программный код вашего [Unit](/definitions#unit).
+Полученные файлы [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) нужно будет поместить в каталог вашего локального [Git](/definitions#git) репозитория. Данные файлы будут содержать данные для подключения к [Pepeunit](/conception/overview), а также топики для публикации.
 
 :::info
-В процессе разработки вы сможете заходить в тестовый [Unit](/definitions#unit) и видеть:
+В процессе разработки можно заходить в тестовый [Unit](/definitions#unit) и видеть:
 
 - какие данные [Unit](/definitions#unit) отправляет в `Output` [UnitNode](/definitions#unitnode) через систему [DataPipe](/definitions#datapipe)
 - создавать для [Unit](/definitions#unit) управляющее воздействие через `Input` [UnitNode](/definitions#unitnode)
@@ -211,10 +209,10 @@ readme.md
 1. Получите команды из `input_topic` и обработайте их так как задумано в концепции вашего [Unit](/definitions#unit)
 1. Внедрите переменные окружения из [env_example.json](/definitions#env-example-json) для удалённой настройки вашего [Unit](/definitions#unit)
 
-После этих шагов вы получите рабочее устройство, которое нужно протестировать в различных режимах работы.
+После этих шагов вы получите рабочий [Unit](/definitions#unit), которой нужно протестировать в различных режимах работы.
 
 :::warning
-Вы можете делать множество [коммитов](/definitions#git-commit) с рабочим и не рабочим функционалом, создавать [ветки](/definitions#git-branch) и делать всё что позволяет [Git](/definitions#git), но настенет момент - когда вы увидите, что всё что вы задумали корректно работает. В этот момент нужно двигаться дальше.
+В процессе разработки можно делать множество [коммитов](/definitions#git-commit) с рабочим и не рабочим функционалом, создавать [ветки](/definitions#git-branch) и делать всё что позволяет [Git](/definitions#git), но настенет момент - когда вы поймёте что всё работает корректно. В этот момент нужно двигаться дальше.
 :::
 
 ## Создание pepeunit.toml и readme.md
@@ -226,8 +224,8 @@ readme.md
 Чтобы добавить описание для [Unit](/definitions#unit), нужно:
 
 1. Создать в корне репозитория [Unit](/definitions#unit) файл [pepeunit.toml](/definitions#pepeunit-toml) и заполнить его по аналогии с [примером заполнения pepeunit.toml](/developer/struct-readme#pepeunit-toml)
-1. Сгенерировать [readme.md](/definitions#readme-md) на основе [pepeunit.toml](/definitions#pepeunit-toml) можно согласно [инструкции](/developer/struct-readme.html#генерация-readme-md). Писать [readme.md](/definitions#readme-md) в ручную не трубется
-
+1. Сгенерировать [readme.md](/definitions#readme-md) на основе [pepeunit.toml](/definitions#pepeunit-toml) можно согласно [инструкции](/developer/struct-readme.html#генерация-readme-md).
+1. Поместить сгенерированный [readme.md](/definitions#readme-md) в корень репозитория. Писать [readme.md](/definitions#readme-md) в ручную не требуется
 
 :::danger
 У всех [Unit](/definitions#unit) должна быть документация, чтобы Пользователи могли ими пользоваться.
