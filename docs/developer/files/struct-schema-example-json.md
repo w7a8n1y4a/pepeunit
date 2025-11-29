@@ -36,13 +36,13 @@
 
 Топик | Описание | Подробности
 -- | -- | -- 
-`input_base_topic` | Топики стандартных [MQTT](/definitions#mqtt) команд, которые [Unit](/definitions#unit) может выполнить | [Стандартные MQTT команды](/developer/default-mqtt-command)
-`output_base_topic` | Топики стандартной публикации данных, в которые [Unit](/definitions#unit) может публиковать данные | [Стандартные MQTT топики состояния](/developer/default-mqtt-command)
+`input_base_topic` | Топики стандартных [MQTT](/definitions#mqtt) команд, которые [Unit](/definitions#unit) может выполнить | [Стандартные MQTT команды](/developer/mqtt/default-mqtt-command)
+`output_base_topic` | Топики стандартной публикации данных, в которые [Unit](/definitions#unit) может публиковать данные | [Стандартные MQTT топики состояния](/developer/mqtt/default-mqtt-command)
 `input_topic` | `Input` топики Разработчика [Unit](/definitions#unit). [Pepeunit](/conception/overview) использует их как шаблон для создания `Input` [UnitNode](/definitions#unitnode) | [Топики разработчика](/developer/files/struct-schema-json#топики-разработчика)
 `output_topic` | `Output` топики Разработчика [Unit](/definitions#unit). [Pepeunit](/conception/overview) использует их как шаблон для создания `Output` [UnitNode](/definitions#unitnode) | [Топики разработчика](/developer/files/struct-schema-json#топики-разработчика)
 
 :::info
-При использовании клиентских библиотек: [Micropython](/libraries/micropython), [Golang](/libraries/golang) и [Python](/libraries/python) - можно указывать все топики из `input_base_topic` и `output_base_topic`, они будут корректно работать.
+При использовании клиентских библиотек: [Micropython](/developer/libraries/micropython), [Golang](/developer/libraries/golang) и [Python](/developer/libraries/python) - можно указывать все топики из `input_base_topic` и `output_base_topic`, они будут корректно работать.
 
 Если вы сами реализуете взаимодействие с [Pepeunit](/conception/overview) без библиотек, то можно оставить только те топики, которые нужны для реализации [Unit](/definitions#unit).
 :::

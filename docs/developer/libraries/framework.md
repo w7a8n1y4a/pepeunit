@@ -21,8 +21,8 @@
     - получение состояния [storage](/developer/state-storage-unit)
     - получение списка [Unit](/definitions#unit) при помощи списка [UnitNode](/definitions#unitnode).uuid
     - получение `Input` [UnitNode](/definitions#unitnode) при помощи `Output` [UnitNode](/definitions#unitnode)
-1. Приём и корректная обработка [cтандартных MQTT команды Pepeunit](/developer/default-mqtt-command)
-1. Отправки и генерации [состояния Unit](/developer/state-mqtt-send)
+1. Приём и корректная обработка [cтандартных MQTT команды Pepeunit](/developer/mqtt/default-mqtt-command)
+1. Отправки и генерации [состояния Unit](/developer/mqtt/state-mqtt-send)
 1. Функционал для работы с [schema.json](/definitions#schema-json):
     - Динамическое обновление
     - Поиск по всем `4` типам топиков
@@ -69,4 +69,4 @@
 
 Ёмкость данного буфера зависит от переменной окружения `PU_MAX_LOG_LENGTH`, все новые записи попадают в конец файла, а все старые записи, если их порядковый номер от конца больше `PU_MAX_LOG_LENGTH` удаляются.
 
-Доступ к даному файлу возможен либо физически через порты устройств или через команду [log_sync](/developer/default-mqtt-command.html#log-sync-log-sync-pepeunit)
+Доступ к даному файлу возможен либо физически через порты устройств или через команду [log_sync](/developer/mqtt/default-mqtt-command.html#log-sync-log-sync-pepeunit)

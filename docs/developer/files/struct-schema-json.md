@@ -4,7 +4,7 @@
 Данный файл - это контракт между конкретным экземпляром [Unit](/definitions#unit) и [Pepeunit](/conception/overview):
 1. [Unit](/definitions#unit) гарантирует, что он подпишется на все стандартные топики указанные в `input_base_topic` и все [UnitNode](/definitions#unitnode) указанные в `input_topic`
 1. [Unit](/definitions#unit) гарантирует, что он будет публиковать данные в стандартные топики из `output_base_topic` и в [UnitNode](/definitions#unitnode) указанные в `output_topic`
-1. [Pepeunit](/conception/overview) гарантирует, что будет [отправлять корректные форматы данных](/developer/default-mqtt-command) в `input_base_topic` и то что подпишется на все топики в `output_base_topic`
+1. [Pepeunit](/conception/overview) гарантирует, что будет [отправлять корректные форматы данных](/developer/mqtt/default-mqtt-command) в `input_base_topic` и то что подпишется на все топики в `output_base_topic`
 1. [Pepeunit](/conception/overview) гарантирует, что будет производить авторизацию для публикации и подписки на все без исключения топики адресованные на [инстанс](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker) используемый [Backend](/definitions#backend)
 1. [Pepeunit](/conception/overview) гарантирует, что будет подписан на все топики соответствующие паттерну `unit.example.com/+/+/+/pepeunit`
 1. [Pepeunit](/conception/overview) гарантирует, что подпишется на все топики с паттерном `unit.example.com/+/pepeunit` у которых включен механизм [DataPipe](/definitions#datapipe)
@@ -70,7 +70,7 @@
 ```
 :::
 
-Предназначены для корректной работы механизма [стандартных MQTT команд](/developer/default-mqtt-command) и [стандартных MQTT топиков состояния](/developer/default-mqtt-command)
+Предназначены для корректной работы механизма [стандартных MQTT команд](/developer/mqtt/default-mqtt-command) и [стандартных MQTT топиков состояния](/developer/mqtt/default-mqtt-command)
 
 ## Топики Разработчика
 

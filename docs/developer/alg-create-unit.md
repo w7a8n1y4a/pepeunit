@@ -201,7 +201,7 @@ readme.md
 :::
 
 Когда у [Unit](/definitions#unit) в локальном репозитории есть обратная связь с [Pepeunit](/conception/overview), попробуйте следовать следующему алгоритму:
-1. Протестировать что клиентские библиотеки ([Micropython](/libraries/micropython), [Golang](/libraries/golang) и [Python](/libraries/python)) корректно [отправляют данные](/developer/default-mqtt-command) и получают [стандартные команды](/developer/default-mqtt-command)
+1. Протестировать что клиентские библиотеки ([Micropython](/developer/libraries/micropython), [Golang](/developer/libraries/golang) и [Python](/developer/libraries/python)) корректно [отправляют данные](/developer/mqtt/default-mqtt-command) и получают [стандартные команды](/developer/mqtt/default-mqtt-command)
 1. Получите данные от ваших физических датчиков, попробуйте вывести значения напрямую в консоль - без сетевых заморочек, чтобы понять что данные действительно поступают
 1. Попробуйте отправить свои данные в `output_topic` указанные в [schema_example.json](/definitions#schema-example-json)
 1. Получите команды из `input_topic` и обработайте их так как задумано в концепции вашего [Unit](/definitions#unit)

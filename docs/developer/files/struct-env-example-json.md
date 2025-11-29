@@ -52,9 +52,9 @@
 `PU_MQTT_PING_INTERVAL` | 30 | Частота [MQTT](/definitions#mqtt) пинга в секундах, `30` секунд для всех
 `PU_AUTH_TOKEN` | `jwt` токен | Вечный токен доступа [Unit](/definitions#unit) к [инстансу](/definitions#instance) [Pepeunit](/conception/overview). Данный токен позволяет пройти авторизацию на подписку и публикацию у топиков [EMQX MQTT Broker](/definitions#mqtt-broker), устанавливается [Backend](/definitions#backend) автоматически.
 `PU_SECRET_KEY` | `32 байтовый ключ` в формате `base64` | Уникальный для каждого [Unit](/definitions#unit). Удобно использовать для подписи или генерации `jwt`. Устанавливается [Backend](/definitions#backend) автоматически
-`PU_STATE_SEND_INTERVAL` | `PU_STATE_SEND_INTERVAL` из [Backend ENV](/deployment/env-variables#backend) | Частота отправки состояния в [стандартный топик состояния](/developer/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit)
-`PU_MIN_LOG_LEVEL` | `Debug` | Минимальный уровень лога, который будет отправляться по [MQTT](/definitions#mqtt) и сохраняться в файл [log.json](/libraries/framework#log-json). Если установить например `Warning`, то `Debug` и `Info` отправляться не будут
-`PU_MAX_LOG_LENGTH` | `64` | Максимальное число строк в файле [log.json](/libraries/framework#log-json), удаляются строки из начала файла, сохрняются в конец.
+`PU_STATE_SEND_INTERVAL` | `PU_STATE_SEND_INTERVAL` из [Backend ENV](/deployment/env-variables#backend) | Частота отправки состояния в [стандартный топик состояния](/developer/mqtt/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit)
+`PU_MIN_LOG_LEVEL` | `Debug` | Минимальный уровень лога, который будет отправляться по [MQTT](/definitions#mqtt) и сохраняться в файл [log.json](/developer/libraries/framework#log-json). Если установить например `Warning`, то `Debug` и `Info` отправляться не будут
+`PU_MAX_LOG_LENGTH` | `64` | Максимальное число строк в файле [log.json](/developer/libraries/framework#log-json), удаляются строки из начала файла, сохрняются в конец.
 `PU_COMMIT_VERSION` | `Hash` [коммита](/definitions#git-commit) | Отображает текущую [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) [Unit](/definitions#unit). Имеет уникальный функционал, её нельзя изменить вручную в меню изменения [env.json](/definitions#env-json), она будет игнорироваться при сохранении
 
 ### Переменные окружения Разработчика [Unit](/definitions#unit)

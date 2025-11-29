@@ -1,4 +1,4 @@
-# Отправка состояния Unit через MQTT
+# Стандартные MQTT топики состояния
 
 :::warning
 Поддерживаемые топики состояний должны быть отражены в [schema_example.json](/definitions#schema-example-json)  в разделе `output_base_topic`.
@@ -77,7 +77,7 @@
 
 :::info Когда [Unit](/definitions#unit) отправляет данные в этот топик?
 1. Если [Unit](/definitions#unit) сам считает нужным отправить лог или набор логов для отображения [Пользователю](/development-pepeunit/mechanics/roles.html#user)
-2. В случае получения команды в топике `log_sync/pepeunit`, [подробнее](/developer/default-mqtt-command#формат-сообщения-в-топик-log-sync-pepeunit)
+2. В случае получения команды в топике `log_sync/pepeunit`, [подробнее](/developer/mqtt/default-mqtt-command#формат-сообщения-в-топик-log-sync-pepeunit)
 :::
 
 Данные отправляемые [Unit](/definitions#unit), преобразуются на стороне [Pepeunit](/conception/overview) в меню логов [Unit](/definitions#unit). Также данные логи можно получить через [REST](/definitions#rest) и [GQL](/definitions#gql).

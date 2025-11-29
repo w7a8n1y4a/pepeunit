@@ -66,17 +66,7 @@ export default withMermaid(defineConfig({
         ]
       },
       {
-        text: 'Библиотеки Unit',
-        collapsed: true,
-        items: [
-          { text: 'Pepeunit Framework', link: '/libraries/framework' },
-          { text: 'Micropython', link: '/libraries/micropython' },
-          { text: 'Golang', link: '/libraries/golang' },
-          { text: 'Python', link: '/libraries/python' },
-        ]
-      },
-      {
-        text: 'Руководство Разработчика Unit',
+        text: 'Разработчику Unit',
         collapsed: true,
         items: [
           { text: 'Алгоритм создания Unit', link: '/developer/alg-create-unit' },
@@ -96,9 +86,25 @@ export default withMermaid(defineConfig({
               { text: 'Архив обновлений', link: '/developer/files/struct-archive-update' },
             ]
           },
-          { text: 'Стандартные MQTT команды Pepeunit', link: '/developer/default-mqtt-command' },
-          { text: 'Отправка состояния Unit через MQTT', link: '/developer/state-mqtt-send' },
-          { text: 'Структура сообщений в MQTT топиках', link: '/developer/struct-topic-messages' },
+          {
+            text: 'Библиотеки Unit',
+            collapsed: true,
+            items: [
+              { text: 'Pepeunit Framework', link: '/developer/libraries/framework' },
+              { text: 'Micropython', link: '/developer/libraries/micropython' },
+              { text: 'Golang', link: '/developer/libraries/golang' },
+              { text: 'Python', link: '/developer/libraries/python' },
+            ]
+          },
+          {
+            text: 'MQTT Взаимодействие',
+            collapsed: true,
+            items: [
+              { text: 'Стандартные MQTT команды Pepeunit', link: '/developer/mqtt/default-mqtt-command' },
+              { text: 'Стандартные MQTT топики состояния', link: '/developer/mqtt/state-mqtt-send' },
+              { text: 'Структура сообщений в MQTT топиках', link: '/developer/mqtt/struct-topic-messages' },
+            ]
+          },
           { text: 'Хранилище состояний Unit', link: '/developer/state-storage-unit' },
           { text: 'Компиляция для разных платформ', link: '/developer/release-assets' },
         ]

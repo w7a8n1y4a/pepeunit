@@ -145,7 +145,7 @@
 
 ### Алгоритм действий Unit
 
-1. Подготовить логи в нужном формате - [подробнее в разделе с топиком `log/pepeunit`](/developer/state-mqtt-send#log-pepeunit-output-base-topic)
+1. Подготовить логи в нужном формате - [подробнее в разделе с топиком `log/pepeunit`](/developer/mqtt/state-mqtt-send#log-pepeunit-output-base-topic)
 1. Отправить подготовленные логи в топик `log/pepeunit` из раздела `output_base_topic`
 
 :::info
