@@ -136,6 +136,7 @@ readme.md
     "PU_MQTT_PING_INTERVAL": 30,
     "PU_AUTH_TOKEN": "jwt_token",
     "PU_SECRET_KEY": "32_bit_secret_key",
+    "PU_ENCRYPT_KEY": "32_bit_encrypt_key",
     "PU_STATE_SEND_INTERVAL": 300,
     "PU_MIN_LOG_LEVEL": "Debug",
     "PU_MAX_LOG_LENGTH": 64

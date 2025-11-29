@@ -39,6 +39,7 @@ import (
 // - Run the main application cycle
 // - Storage api
 // - Units Nodes api
+// - Cipher api
 
 // Global variable to track last message send time
 var lastOutputSendTime time.Time
@@ -125,6 +126,27 @@ func testGetUnits(client *pepeunit.PepeunitClient) {
 	}
 }
 
+func testCipher(client *pepeunit.PepeunitClient) {
+	key := client.GetSettings().PU_ENCRYPT_KEY
+	if key == "" {
+		client.GetLogger().Warning("PU_ENCRYPT_KEY is empty, skip cipher test")
+		return
+	}
+	text := "pepeunit cipher test"
+	enc, err := client.AESGCMEncode(text, key)
+	if err != nil {
+		client.GetLogger().Error(fmt.Sprintf("Cipher encode error: %v", err))
+		return
+	}
+	client.GetLogger().Info(fmt.Sprintf("Cipher data %s", enc))
+	dec, err := client.AESGCMDecode(enc, key)
+	if err != nil {
+		client.GetLogger().Error(fmt.Sprintf("Cipher decode error: %v", err))
+		return
+	}
+	client.GetLogger().Info(fmt.Sprintf("Decoded data: %s", dec))
+}
+
 func handleInputMessages(client *pepeunit.PepeunitClient, msg pepeunit.MQTTMessage) {
 	topicParts := strings.Split(msg.Topic, "/")
 
@@ -200,6 +222,9 @@ func main() {
 
 	// Test get edged units by output topic
 	testGetUnits(client)
+
+	// Test AES-GCM cipher
+	testCipher(client)
 
 	// Set up message handlers
 	client.SetMQTTInputHandler(func(msg pepeunit.MQTTMessage) {

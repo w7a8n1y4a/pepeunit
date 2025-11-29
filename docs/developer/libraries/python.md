@@ -24,10 +24,11 @@ It shows how to:
 - Run the main application cycle
 - Storage api
 - Units Nodes api
+- Cipher api
 """
 
 import time
-from pepeunit_client import PepeunitClient, RestartMode
+from pepeunit_client import PepeunitClient, RestartMode, AesGcmCipher
 from pepeunit_client.enums import SearchTopicType, SearchScope
 
 # Global variable to track last message send time
@@ -113,6 +114,19 @@ def test_get_units(client: PepeunitClient):
     except Exception as e:
         client.logger.warning(f"REST query example failed: {e}")
 
+
+def test_cipher(client: PepeunitClient):
+    try:
+        aes_cipher = AesGcmCipher()
+        text = "pepeunit cipher test"
+        enc = aes_cipher.aes_gcm_encode(text, client.settings.PU_ENCRYPT_KEY)
+        client.logger.info(f"Cipher data {enc}")
+        dec = aes_cipher.aes_gcm_decode(enc, client.settings.PU_ENCRYPT_KEY)
+        client.logger.info(f"Decoded data: {dec}")
+    except Exception as e:
+        client.logger.error("Cipher test error: {}".format(e))
+
+
 def main():
     # Initialize the PepeUnit client
     client = PepeunitClient(
@@ -130,6 +144,9 @@ def main():
 
     # Test get edged units by output topic
     test_get_units(client)
+    
+    # Test AES-GCM cipher
+    test_cipher(client)
     
     # Set up message handlers
     client.set_mqtt_input_handler(handle_input_messages)

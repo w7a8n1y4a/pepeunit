@@ -29,6 +29,7 @@
     "PU_MQTT_PING_INTERVAL": 30,
     "PU_AUTH_TOKEN": "jwt_token",
     "PU_SECRET_KEY": "32_bit_secret_key",
+    "PU_ENCRYPT_KEY": "32_bit_encrypt_key",
     "PU_STATE_SEND_INTERVAL": 300,
     "PU_MIN_LOG_LEVEL": "Debug",
     "PU_MAX_LOG_LENGTH": 64
@@ -52,6 +53,7 @@
 `PU_MQTT_PING_INTERVAL` | 30 | Частота [MQTT](/definitions#mqtt) пинга в секундах, `30` секунд для всех
 `PU_AUTH_TOKEN` | `jwt` токен | Вечный токен доступа [Unit](/definitions#unit) к [инстансу](/definitions#instance) [Pepeunit](/conception/overview). Данный токен позволяет пройти авторизацию на подписку и публикацию у топиков [EMQX MQTT Broker](/definitions#mqtt-broker), устанавливается [Backend](/definitions#backend) автоматически.
 `PU_SECRET_KEY` | `32 байтовый ключ` в формате `base64` | Уникальный для каждого [Unit](/definitions#unit). Удобно использовать для подписи или генерации `jwt`. Устанавливается [Backend](/definitions#backend) автоматически
+`PU_ENCRYPT_KEY` | `32 байтовый ключ` в формате `base64` | Уникальный для каждого [Unit](/definitions#unit). Удобно использовать для шифрования методом `aes-gcm-256`. Устанавливается [Backend](/definitions#backend) автоматически
 `PU_STATE_SEND_INTERVAL` | `PU_STATE_SEND_INTERVAL` из [Backend ENV](/deployment/env-variables#backend) | Частота отправки состояния в [стандартный топик состояния](/developer/mqtt/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit)
 `PU_MIN_LOG_LEVEL` | `Debug` | Минимальный уровень лога, который будет отправляться по [MQTT](/definitions#mqtt) и сохраняться в файл [log.json](/developer/libraries/framework#log-json). Если установить например `Warning`, то `Debug` и `Info` отправляться не будут
 `PU_MAX_LOG_LENGTH` | `64` | Максимальное число строк в файле [log.json](/developer/libraries/framework#log-json), удаляются строки из начала файла, сохрняются в конец.
