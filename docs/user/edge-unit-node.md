@@ -1,7 +1,7 @@
 # Связи Output->Input между UnitNode
 
 :::info
-[Подробнее о механизме Output Input](/developer/struct-schema-json.html#топики-разработчика)
+[Подробнее о механизме Output Input](/developer/files/struct-schema-json.html#топики-разработчика)
 :::
 
 ## Создание связи

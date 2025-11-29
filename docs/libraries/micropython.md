@@ -9,6 +9,23 @@
 ## Пример
 
 ```python
+"""
+Basic PepeUnit Client Example
+
+To use this example, simply create a Pepeunit Unit based on the repository https://git.pepemoss.com/pepe/pepeunit/units/universal_test_unit on any instance.
+
+The resulting schema.json and env.json files should be added to the example directory.
+
+This example demonstrates basic usage of the PepeUnit client with both MQTT and REST functionality.
+It shows how to:
+- Initialize the client with configuration files
+- Set up message handlers
+- Subscribe to topics
+- Run the main application cycle
+- Storage api
+- Units Nodes api
+"""
+
 import time
 import gc
 from pepeunit_micropython_client.client import PepeunitClient

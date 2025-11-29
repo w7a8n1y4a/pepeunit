@@ -80,11 +80,22 @@ export default withMermaid(defineConfig({
         collapsed: true,
         items: [
           { text: 'Алгоритм создания Unit', link: '/developer/alg-create-unit' },
-          { text: 'Структура GIT репозитория', link: '/developer/struct-git-repo' },
-          { text: 'Документация readme.md и pepeunit.toml', link: '/developer/struct-readme' },
-          { text: 'Структура schema.json и schema_example.json', link: '/developer/struct-schema-json' },
-          { text: 'Структура env.json и env_example.json', link: '/developer/struct-env-json' },
-          { text: 'Структура архивов c обновлениями', link: '/developer/struct-archive-update' },
+          {
+            text: 'Файлы',
+            collapsed: true,
+            items: [
+              { text: 'Структура GIT репозитория', link: '/developer/files/struct-git-repo' },
+              { text: 'schema_example.json', link: '/developer/files/struct-schema-example-json' },
+              { text: 'schema.json', link: '/developer/files/struct-schema-json' },
+              { text: 'env_example.json', link: '/developer/files/struct-env-example-json' },
+              { text: 'env.json', link: '/developer/files/struct-env-json' },
+              { text: 'pepeunit.toml', link: '/developer/files/struct-pepeunit-toml' },
+              { text: 'readme.md', link: '/developer/files/struct-readme' },
+              { text: '.gitignore', link: '/developer/files/struct-gitignore' },
+              { text: '.pepeignore', link: '/developer/files/struct-pepeignore' },
+              { text: 'Архив обновлений', link: '/developer/files/struct-archive-update' },
+            ]
+          },
           { text: 'Стандартные MQTT команды Pepeunit', link: '/developer/default-mqtt-command' },
           { text: 'Отправка состояния Unit через MQTT', link: '/developer/state-mqtt-send' },
           { text: 'Структура сообщений в MQTT топиках', link: '/developer/struct-topic-messages' },

@@ -1,19 +1,4 @@
-# readme.md и pepeunit.toml
-
-## readme.md
-
-[readme.md](/definitions#readme-md) - документация [Unit](/definitions#unit), самый важный элемент любого репозитория, от полноты информации в этом файле будет зависеть лёгкость эксплуатации [Unit](/definitions#unit) другими людьми.
-
-:::tip
-Для решения задачи поддержания единообразия в документациях [Unit](/definitions#unit) - у каждого инстанса [Pepeunit](/conception/overview) есть генератор [readme.md](/definitions#readme-md) на основе [pepeunit.toml](/definitions#pepeunit-toml). Генератор позволяет преобразовать машиночитаемый [pepeunit.toml](/definitions#pepeunit-toml) в человекочитаемый [readme.md](/definitions#readme-md).
-:::
-
-## Генерация readme.md
-:::info
-Чтобы найти генератор - кликните по своему никнейму в правом верхнем углу. И нажмите на кнопку `Generate README.md`, вам будет предложено выбрать [pepeunit.toml](/definitions#pepeunit-toml) файл. После утверждения файла, скачивание [readme.md](/definitions#readme-md) произойдёт автоматически.
-:::
-
-## pepeunit.toml
+# pepeunit.toml
 
 :::info
 [pepeunit.toml](/definitions#pepeunit-toml) будет использован в будущем для упрощения поиска по [RepositoryRegisty](/definitions#repositoryregistry) между инстансами [Pepeunit](/conception/overview).
@@ -106,8 +91,8 @@ steps = [
 `images` | Предназначен для отображения визуальной информации, здесь могут быть схемы работы [Unit](/definitions#unit), фото готового [Unit](/definitions#unit) или любая другая визуальная информация | Каждая пара ключ-значение будет выделена в отдельный элемент c уровнем `##`
 `files` | Позволяет указывать файлы, например `3D` модели или дополнительные материалы | Каждая пара ключ-значение будет отдельным элементом нумерованного списка
 `physical_io` | Нужен для микроконтрллеров, даёт чёткое понимание, какой `IO Pin` для чего предназначен | Каждая пара ключ-значение станет элементом не нумерованного списка
-`env_description` | Описывает каждую [env переменную](/developer/struct-env-json) добавленную разработчиком [Unit](/definitions#unit) | Каждая пара ключ-значение будет отдельным элементом нумерованного списка
-`topic_assignment` | Описывает каждый [UnitNode топик](/developer/struct-schema-json) добавленный разработчиком [Unit](/definitions#unit) | Каждая пара ключ-значение станет элементом не нумерованного списка
+`env_description` | Описывает каждую [env переменную](/developer/files/struct-env-example-json) добавленную разработчиком [Unit](/definitions#unit) | Каждая пара ключ-значение будет отдельным элементом нумерованного списка
+`topic_assignment` | Описывает каждый [UnitNode топик](/developer/files/struct-schema-example-json) добавленный разработчиком [Unit](/definitions#unit) | Каждая пара ключ-значение станет элементом не нумерованного списка
 `work_algorithm` | Описывает последовательность работы [Unit](/definitions#unit) | Каждая пара ключ-значение будет отдельным элементом нумерованного списка
 `installation` | Описывает последовательность шагов для корректного запуска [Unit](/definitions#unit) | Каждая пара ключ-значение будет отдельным элементом нумерованного списка
 

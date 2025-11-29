@@ -17,25 +17,3 @@
 1. Добавляются [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) на основе [таргет версии](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
 1. В файл [env.json](/definitions#env-json) записывается [таргет версия](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) - ключ = `COMMIT_VERSION`
 1. Создаётся файл Архива - `tgz`, `tar` или `zip`
-
-
-## .pepeignore
-
-:::info Для чего нужно удаление?
-Объём `flash` памяти у микроконтоллеров обычно до `30кБ`. Следовательно большие файлы, например: `LICENSE AGPL v3` - `33.71 кБ` - абсолютно точно не поместятся в `flash` память. Т.к. В [Pepeunit](/conception/overview) есть функционал автоматических обновлений, нужна система чистки файлов текущей версии перед отправкой [Unit](/definitions#unit).
-:::
-
-[.pepeignore](/definitions#pepeignore) выделяет паттерны файлов и папок аналогично [.gitignore](https://git-scm.com/docs/gitignore). [Pepeunit](/conception/overview) получает пути всех файлов подходящих под паттерн и удаляет их.
-
-Чистка происходит в момент генерации архива обновления для [Unit](/definitions#unit), Пример заполнения:
-```.pepeignore
-.git
-.gitignore
-.pepeignore
-env_example.json
-schema_example.json
-docs
-model
-README.md
-LICENSE
-```

@@ -44,13 +44,11 @@
 Создайте в корне [Git](/definitions#git) репозитория следующие пустые файлы:
 :::
 
-Файл | Назначение
--- | --
-`.gitignore` | [Тык .gitignore](/developer/struct-git-repo#как-заполнить-gitignore)
-`.pepeignore` | [Тык .pepeignore](/definitions#pepeignore)
-`schema_example.json` | [Тык schema_example.json](/definitions#schema-example-json)
-`env_example.json` | [Тык env_example.json](/definitions#env-example-json)
-`LICENSE` | Лицензия. У `Pepeunit` например `AGPL v3 License`
+- [.gitignore](/definitions#gitignore)
+- [.pepeignore](/definitions#pepeignore)
+- [schema_example.json](/definitions#schema-example-json)
+- [env_example.json](/definitions#env-example-json)
+- `LICENSE` - Лицензия. У `Pepeunit` например `AGPL v3 License`
 
 ### .gitignore
 
@@ -113,7 +111,7 @@ readme.md
 `output_topic` | `current_temp/pepeunit` | Будет использоваться для публикации данных с датчика температуры `ds18b20`
 
 :::info
-[Подробнее о назначении каждого типа топиков](/developer/struct-schema-json#структура)
+[Подробнее о назначении каждого типа топиков](/developer/files/struct-schema-example-json#структура)
 :::
 
 ### env_example.json
@@ -185,7 +183,7 @@ readme.md
 1. [Создайте Unit](/user/create-unit)
 1. Настройте [Unit](/definitions#unit) для [обновлений в ручную](/user/create-unit#блок-автообновлении), чтобы чётко контролировать [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
 1. [Заполните env у Unit](/user/create-unit#настроика-окружения)
-1. Скачайте [Архив](/developer/struct-archive-update) с [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json)
+1. Скачайте [Архив](/developer/files/struct-archive-update) с [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json)
 
 Полученные файлы [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) нужно будет поместить в каталог вашего локального [Git](/definitions#git) репозитория. Данные файлы будут содержать данные для подключения к [Pepeunit](/conception/overview), а также топики для публикации.
 
@@ -223,8 +221,8 @@ readme.md
 
 Чтобы добавить описание для [Unit](/definitions#unit), нужно:
 
-1. Создать в корне репозитория [Unit](/definitions#unit) файл [pepeunit.toml](/definitions#pepeunit-toml) и заполнить его по аналогии с [примером заполнения pepeunit.toml](/developer/struct-readme#pepeunit-toml)
-1. Сгенерировать [readme.md](/definitions#readme-md) на основе [pepeunit.toml](/definitions#pepeunit-toml) можно согласно [инструкции](/developer/struct-readme.html#генерация-readme-md).
+1. Создать в корне репозитория [Unit](/definitions#unit) файл [pepeunit.toml](/definitions#pepeunit-toml)
+1. Сгенерировать [readme.md](/definitions#readme-md) на основе [pepeunit.toml](/definitions#pepeunit-toml)
 1. Поместить сгенерированный [readme.md](/definitions#readme-md) в корень репозитория. Писать [readme.md](/definitions#readme-md) в ручную не требуется
 
 :::danger
