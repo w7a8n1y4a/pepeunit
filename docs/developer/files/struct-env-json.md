@@ -1,7 +1,5 @@
 # env.json
 
-Файлы окружения, такие как [env.json](/definitions#env-json) или [Backend ENV](/deployment/env-variables#backend), представляют собой механизм индивидуализации общего кода под конкретное устройство или экземпляр приложения.
-
 :::warning Какое функциональное назначание у [env.json](/definitions#env-json)?
 Данный файл - это четырёхсторонний контракт между [Unit](/definitions#unit), [Pepeunit](/conception/overview), [Пользователем](/development-pepeunit/mechanics/roles.html#user) и [Администратором](/development-pepeunit/mechanics/roles#admin) [инстанса](/definitions#instance) [Pepeunit](/conception/overview):
 1. [Unit](/definitions#unit) гарантирует всем сторонам, что будет использовать для соответствующих значений из [env_example.json](/definitions#env-example-json) значения из [env.json](/definitions#env-json)
@@ -12,6 +10,8 @@
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что доступ до [env.json](/definitions#env-json) будет предоставлен только создателю [Unit](/definitions#unit)
 1. [Aдминистратор](/development-pepeunit/mechanics/roles#admin) гарантирует всем сторонам, что [env.json](/definitions#env-json) ни в каком виде не будет передан тем кто не явялется стороной данного контракта.
 :::
+
+Файлы окружения, такие как [env.json](/definitions#env-json) или [Backend ENV](/deployment/env-variables#backend), представляют собой механизм индивидуализации общего кода под конкретное устройство или экземпляр приложения.
 
 ::: danger
 Используйте только доверенные [инстансы](/definitions#instance) [Pepeunit](/conception/overview). Следите, чтобы [Администратор](/development-pepeunit/mechanics/roles#admin) [инстанса](/definitions#instance) [Pepeunit](/conception/overview) выполнял свои контрактные обязательства, связанные с [env.json](/definitions#env-json).

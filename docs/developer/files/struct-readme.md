@@ -1,6 +1,4 @@
-# readme.md и pepeunit.toml
-
-## readme.md
+# readme.md
 
 [readme.md](/definitions#readme-md) - документация [Unit](/definitions#unit), самый важный элемент любого репозитория, от полноты информации в этом файле будет зависеть лёгкость эксплуатации [Unit](/definitions#unit) другими людьми.
 

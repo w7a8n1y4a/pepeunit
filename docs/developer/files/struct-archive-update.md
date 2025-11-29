@@ -1,6 +1,8 @@
 # Структура архивов c обновлениями
 
+:::info
 [Pepeunit](/conception/overview) умеет генеририровать готовые архивы с обновлениями для [Unit](/definitions#unit), при этом алгоритм генерации разный для [Компилируемых](/definitions#compilable) и [Интерпритируемых](/definitions#interpreterable) [Repo](/definitions#repo) ,
+:::
 
 ## Компилируемые
 

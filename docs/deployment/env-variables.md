@@ -17,8 +17,8 @@
 `PU_APP_PREFIX` | `/pepeunit` | Стандартный префикс, позволяющий дистанцировать навигацию от домена, обычно не требует изменений. Нужен для сложных встраиваемых систем
 `PU_API_V1_PREFIX` | `/api/v1` | Префикс версии [REST API](/definitions#rest), нужен для возможности поддержки старых версий [REST API](/definitions#rest), а также для систем требующих поддержки нескольких версий одновременно
 `PU_WORKER_COUNT` | `2` | Число воркеров Gunicorn, позволяет увеличить нагрузку, которую способен выдержать [Backend](/definitions#backend)
-`PU_DOMAIN` | - | Доменное имя или `ip`. Влияет на ссылки которые генерирует [Backend](/definitions#backend). Позволяет [Unit](/definitions#unit) связываться с [Backend](/definitions#backend). Устанавливается в [Unit ENV](/developer/files/struct-env-schema-json) - как `PU_DOMAIN`
-`PU_SECURE` | `True` | Если `True`, то [Backend](/definitions#backend) будет генерировать ссылки с `https` для `PU_DOMAIN`. Устанавливается в [Unit ENV](/developer/files/struct-env-schema-json) - в поле `PU_HTTP_TYPE`, но уже в формате `https/http`
+`PU_DOMAIN` | - | Доменное имя или `ip`. Влияет на ссылки которые генерирует [Backend](/definitions#backend). Позволяет [Unit](/definitions#unit) связываться с [Backend](/definitions#backend). Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) - как `PU_DOMAIN`
+`PU_SECURE` | `True` | Если `True`, то [Backend](/definitions#backend) будет генерировать ссылки с `https` для `PU_DOMAIN`. Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) - в поле `PU_HTTP_TYPE`, но уже в формате `https/http`
 `PU_AUTH_TOKEN_EXPIRATION` | `2678400` | Время жизни токенов авторизации [Пользователей](/development-pepeunit/mechanics/roles.html#user) в секундах
 `PU_SAVE_REPO_PATH` | `repo_cache` | Путь по которому [Backend](/definitions#backend) хранит внешние [Git](/definitions#git) репозитории. Устанавливается относительно корневой дирректории [Backend](/definitions#backend)
 `PU_SQLALCHEMY_DATABASE_URL` | - | Ссылка для подключения к [Postgresql](/deployment/dependencies#postgresql)
@@ -27,7 +27,7 @@
 `PU_ENCRYPT_KEY` | - | `32 байтовый ключ` в формате `base64`. Отвечает за шифрование всех данных. В случае изменения все шифрованные записи - становится невозможно расшифровать
 `PU_STATIC_SALT` | - | `32 байтовый ключ` в формате `base64`. Отвечает за генерацию `hash` для паролей пользователей. В случае изменения все учётные записи созданные до момента изменения - потеряют возможность авторизоваться
 `PU_MIN_INTERVAL_SYNC_REPOSITORY` | `10` | Время в секундах, которое должно пройти перед следующим запросом обновления репозитория из внешнего ресурса
-`PU_STATE_SEND_INTERVAL` | `60` | Частота в секундах с которой [Unit'ы](/definitions#unit) должны отправлять своё состояние. Устанавливается в [Unit ENV](/developer/files/struct-env-schema-json) - в поле `STATE_SEND_INTERVAL`
+`PU_STATE_SEND_INTERVAL` | `60` | Частота в секундах с которой [Unit'ы](/definitions#unit) должны отправлять своё состояние. Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) - в поле `STATE_SEND_INTERVAL`
 `PU_MAX_EXTERNAL_REPO_SIZE` | `50` | Значение в `МБ`, ограничивающее размер внешних [Git](/definitions#git) репозиториев для скачивания
 `PU_MAX_CIPHER_LENGTH` | `1000000` | Максимальная длинна в символах для шифруемой информации
 `PU_MIN_TOPIC_UPDATE_TIME` | `30` | Частота обновления сообщений в `domain.com/+/pepeunit` топиках [MQTT](/definitions#mqtt)
@@ -42,9 +42,9 @@
 `PU_TELEGRAM_GIT_HASH_LENGTH` | `8` | Предельная длинна `hash` [Git Commit](/definitions#git-commit) при отображении в `Telegram Bot`
 `PU_PROMETHEUS_MULTIPROC_DIR` | `./prometheus_metrics` | Дирректория, которую `Prometheus` использует для хранения статистик с нескольких `worker` - `uvicorn`. При старте приложения содержимое дирректории отчищается
 `PU_REDIS_URL` | `redis://redis:6379/0` | Ссылка для доступа к [Redis](/deployment/dependencies#redis), которую использует [Backend](/definitions#backend) для соединения c [Redis](/deployment/dependencies#redis). Инстанс [Redis](/deployment/dependencies#redis) должен быть единым с `MQTT_REDIS_AUTH_URL`
-`PU_MQTT_HOST` | - | Доменное имя или `ip`. Позволяет [Backend](/definitions#backend) управлять и подписываться на топики [EMQX MQTT Broker](/definitions#mqtt-broker). Позволяет Unit связываться с [EMQX MQTT Broker](/definitions#mqtt-broker). Устанавливается в [Unit ENV](/developer/files/struct-env-schema-json) - в поле `PU_MQTT_HOST`
+`PU_MQTT_HOST` | - | Доменное имя или `ip`. Позволяет [Backend](/definitions#backend) управлять и подписываться на топики [EMQX MQTT Broker](/definitions#mqtt-broker). Позволяет Unit связываться с [EMQX MQTT Broker](/definitions#mqtt-broker). Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) - в поле `PU_MQTT_HOST`
 `PU_MQTT_SECURE` | `True` | Если `True`, то [Backend](/definitions#backend) будет использовать `https` для настройки [EMQX MQTT Broker](/definitions#mqtt-broker)
-`PU_MQTT_PORT` | `1883` | Порт по которому [Unit](/definitions#unit) и [Backend](/definitions#backend) связываются c [EMQX MQTT Broker](/definitions#mqtt-broker). Устанавливается в [Unit ENV](/developer/files/struct-env-schema-json) - в поле `PU_MQTT_PORT`
+`PU_MQTT_PORT` | `1883` | Порт по которому [Unit](/definitions#unit) и [Backend](/definitions#backend) связываются c [EMQX MQTT Broker](/definitions#mqtt-broker). Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) - в поле `PU_MQTT_PORT`
 `PU_MQTT_API_PORT` | `18083` | Порт [API](/definitions#api) [EMQX MQTT Broker](/definitions#mqtt-broker), по которому [Backend](/definitions#backend) производит настройку [EMQX MQTT Broker](/definitions#mqtt-broker)
 `PU_MQTT_KEEPALIVE` | `60` | Максимальный период в секундах между отправками `ping` от [Backend](/definitions#backend) до [EMQX MQTT Broker](/definitions#mqtt-broker)
 `PU_MQTT_USERNAME` | - | Имя пользователя [EMQX MQTT Broker](/definitions#mqtt-broker). [Backend](/definitions#backend) использует его для первичной настройки брокера
