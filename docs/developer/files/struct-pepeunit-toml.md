@@ -115,7 +115,7 @@ steps = [
 `firmware` | `[{name = "ESP32...0.0.bin", link = "https://git.pepe.../download"}]` | Набор данных о бинарных файлах устанавливаемых напрямую на физические компаненты: конкретные интерпритаторы, бинарники и тд
 `stack` | `["pepeunit_micropython_client"]` | Набор библиотек используемых в программе [Unit](/definitions#unit)
 `version` | `"0.0.0"` | Текущая версия [Unit](/definitions#unit)
-`license` | `"AGPL v3 License"` | Лицензия на основе которой, предоставляетcя репозиторий [Unit](/definitions#unit)
+`license` | `"AGPL v3 License"` | Подробнее о лицензиях [LICENSE](/definitions#license)
 `authors` | `[{name = "Ivan Serebrennikov", email = "admin@silberworks.com"}]` | Список авторов [Unit](/definitions#unit)
 
 :::warning

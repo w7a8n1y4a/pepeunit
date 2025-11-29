@@ -126,3 +126,6 @@
 
 ## .pepeignore
 `.pepeignore` - аналогичный по синтаксису [.gitignore](#gitignore) файл [Git](#git) репозиториев у [Unit](#unit), но позволяющий удалить все указанные в нём файлы и дирректории из репозитория в момент генерации [архива с программой](/developer/files/struct-archive-update) для [Интерпритируемых](#interpreterable) [Unit](#unit). [Подробнее](/developer/files/struct-pepeignore).
+
+## LICENSE
+`LICENSE` - файл лицензии, устанавливается в корень репозитория [Git](#git), регламентирует юридический аспект использования репозитория. Все репозитории [Pepeunit](/conception/overview) имеют лицензию `AGPL v3`, но каждый автор выбирает лицензию для своего кода сам, например на [spdx.org](https://spdx.org/licenses/).

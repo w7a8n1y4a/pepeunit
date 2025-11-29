@@ -48,7 +48,7 @@
 - [.pepeignore](/definitions#pepeignore)
 - [schema_example.json](/definitions#schema-example-json)
 - [env_example.json](/definitions#env-example-json)
-- `LICENSE` - Лицензия. У `Pepeunit` например `AGPL v3 License`
+- [LICENSE](/definitions#license)
 
 ### .gitignore
 
@@ -146,7 +146,7 @@ readme.md
 Все переменные в [env_example.json](/definitions#env-example-json) должны быть обезличены
 :::
 
-Нужно прордумать за что будут отвечать переменные Разработчика:
+Нужно продумать за что будут отвечать переменные Разработчика:
 Название переменной | Назначение
 -- | --
 `WIFI_SSID` | Название `WiFi` сети для подключения
@@ -233,7 +233,7 @@ readme.md
 
 [readme.md](/definitions#readme-md) и [pepeunit.toml](/definitions#pepeunit-toml)  заполнены, функционал готов, всё работает корректно. Время присвоить [Тег](/definitions#git-tag) для последнего [коммита](/definitions#git-commit) в репозитории:
 
-1. Перейдите в консоль дирректории вашего проекта
+1. Перейдите в консоль в дирректории вашего проекта
 1. Выполните команду `git tag 1.0.0`
 1. Выполните команду отправки во внешний репозиторий `git push --tags`
 
