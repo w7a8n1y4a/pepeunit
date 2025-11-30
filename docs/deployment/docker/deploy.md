@@ -1,60 +1,5 @@
-# Docker Compose установка Pepeunit
-
-:::info
-Данное руководство для `debian 12`, но подойдёт почти для всех `unix` систем.
-:::
-
-:::warning
-Если сомневаетесь, спросите для вашей платформы у доступной вам `LLM`, следующий промт:
-
-```text
-Напиши гайд как установить docker и docker compose на машину <Название дистрибутива>
-```
-:::
-
-## Установка Docker
-
-Данный набор команд позволит установить `Docker` в систему для пользователя `root`:
-```bash
-sudo su
-curl -fsSL https://get.docker.com -o get-docker.sh
-sh ./get-docker.sh
-```
-
-Проверьте установку `Docker`:
-
-```bash
-docker --version
-docker run hello-world
-```
-
-Если права для использования команды `docker` нужно предоставить другому пользователю - можно воспользоваться командой:
-```bash
-sudo su
-sudo usermod -aG docker <user-name>
-```
-
-Установите `docker` в автозапуск:
-
-```bash
-sudo systemctl start docker
-sudo systemctl enable docker
-```
-
-## Установка Docker Compose
-
-Выполните команды:
-```bash
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
-```
-
-Проверьте установку `Docker Compose`:
-```bash
-docker-compose --version
-```
-
-## Репозиторий Pepeunit Deploy
+# Развёртывание
+## Pepeunit Deploy
 
 Хранит в себе все файлы и примеры, нужные для запуска инстанса [Pepeunit](/conception/overview) при помощи `docker compose`, чтобы склонировать репозиторий выполните команды:
 ```bash
@@ -62,11 +7,11 @@ git clone https://git.pepemoss.com/pepe/pepeunit/pepeunit_deploy.git
 cd pepeunit_deploy
 ```
 
-## Заполняем первичный .env файл
+## Заполнение первичного .env файла
 
 На выбор есть два варианта установки:
-1. Для локального использования на основе `.env.local.example`
-1. Для глобального использования на основе `.env.global.example`
+1. Для локального использования - `.env.local.example`
+1. Для глобального использования - `.env.global.example`
 
 Отличие состоит в том, что локальный рассчитан на эксплуатацию в локальной сети, а глобальный позволяет обращаться к инстансу [Pepeunit](/conception/overview) по доменному имени через `https`.
 
@@ -133,7 +78,7 @@ $> python make_env.py
 ```
 
 :::danger
-Команда `python3 make_env.py` каждый раз перегенерирует конфиги. При перегенерации существующие секретные `32 битные ключи` не измененяются. Используйте команды [создания backup](/deployment/docker#работа-с-бэкапами), для сохранения старой конфигурации.
+Команда `python3 make_env.py` каждый раз перегенерирует конфиги. При перегенерации существующие секретные `32 битные ключи` не измененяются. Используйте команды [создания backup](/deployment/docker/backup-update#работа-с-бэкапами), для сохранения старой конфигурации.
 :::
 
 :::danger
@@ -314,72 +259,3 @@ INFO - 2025-03-14 01:11:53,249 - [SUBACK] 1 (0,)
 ## Создание Администратора
 
 Первый созданный пользователь на [инстансе](/definitions#instance) [Pepeunit](/conception/overview) автоматически становится [Администратором](/development-pepeunit/mechanics/roles#admin). Для этого достаточно пройти стандартную форму регистрации.
-
-## Работа с бэкапами
-
-0. Запустите `Pepeunit` командой, это требуется для получения корректной версии
-    ```bash
-    docker compose up -d
-    ```
-1. Запустите создание `backup` командой, бекап делается без прекращения работы контейнеров
-    ```bash
-    sudo ./backup.sh backup
-    ```
-1. Развернуть версию из `backup`, инстанс при этом изначально должен быть полностью выключен командой `docker compose down`
-    ```bash
-    sudo ./backup.sh restore backups/backup_name.tar
-    ```
-
-## Обновление
-
-0. Создайте `backup`
-    ```bash
-    sudo ./backup.sh backup
-    ```
-1. Выполните обновление репозитория
-    ```bash
-    git pull
-    ```
-1. Выполните обновление `env` переменных. Существующие секретные `32 битные ключи` изменены не будут. Остальные переменные будут сгенерированны, как при первой генерации, если вы выполняли ручной ввод данных в `env/.env.<service-name>` файлы, то ваши изменения будут **УДАЛЕНЫ**, поэтому обязательно делайте `backup` перед запуском команды. Если у вас очень тонкая настройка, изменяйте настройки в ручную, напрямую в `env/.env.<service-name>`.
-    ```bash
-    python make_env.py
-    ```
-1. Выполните запуск `Pepeunit`
-    ```bash
-    docker compose up -d
-    ```
-
-## Полезные команды для дебага
-
-- Остановить `docker compose`
-    ```bash
-    docker compose down
-    ```
-- Запустить `docker compose` в фоновом режиме
-    ```bash
-    docker compose up -d
-    ```
-- Посмотреть логи конкретного контейнера
-    ```bash
-    docker logs postgres
-    ```
-- Зайти во внутрь контейнера, чтобы посмотреть состояние файлов и тд:
-    ```bash
-    docker exec -it frontend /bin/sh
-    docker exec -it backend /bin/bash
-    docker exec -it datapipe /bin/sh
-    docker exec -it emqx /bin/bash
-    docker exec -it postgres /bin/bash
-    docker exec -it redis /bin/bash
-    docker exec -it nginx /bin/bash
-    docker exec -it clickhouse /bin/bash
-    ```
-- Зайти в консоль базы данных, `POSTGRES_USER` и `POSTGRES_DB` можно найти в `env/.env.postgres`
-    ```bash
-    docker exec -it postgres psql -U <POSTGRES_USER> -d <POSTGRES_DB>
-    psql -U <POSTGRES_USER> -d <POSTGRES_DB>
-    ```
-- Отправить запрос в clickhouse через curl:
-    ```bash
-    curl "http://admin:mypassword@127.0.0.1:8123/?query=SHOW+TABLES"
-    ```
