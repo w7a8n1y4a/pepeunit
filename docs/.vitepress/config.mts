@@ -43,11 +43,30 @@ export default withMermaid(defineConfig({
         text: 'Развёртывание',
         collapsed: true,
         items: [
-          { text: 'Зависимости', link: '/deployment/dependencies' },
+          {
+            text: 'Зависимости',
+            collapsed: true,
+            items: [
+              { text: 'Схема взаимодействия сервисов', link: '/deployment/dependencies/schema.md' },
+              { text: 'Postgresql', link: '/deployment/dependencies/postgresql.md' },
+              { text: 'Clickhouse', link: '/deployment/dependencies/clickhouse.md' },
+              { text: 'Redis', link: '/deployment/dependencies/redis.md' },
+              { text: 'EMQX', link: '/deployment/dependencies/emqx.md' },
+              { text: 'Backend', link: '/deployment/dependencies/backend.md' },
+              { text: 'DataPipe', link: '/deployment/dependencies/datapipe.md' },
+              { text: 'Frontend', link: '/deployment/dependencies/frontend.md' },
+              { text: 'Grafana', link: '/deployment/dependencies/grafana.md' },
+              { text: 'Nginx', link: '/deployment/dependencies/nginx.md' },
+              { text: 'Prometheus', link: '/deployment/dependencies/prometheus.md' },
+              { text: 'Logporter', link: '/deployment/dependencies/logporter.md' },
+              { text: 'Loki', link: '/deployment/dependencies/loki.md' },
+              { text: 'Promtail', link: '/deployment/dependencies/promtail.md' },
+            ]
+          },
           { text: 'Docker Compose', link: '/deployment/docker' },
-          { text: 'Nginx', link: '/deployment/nginx' },
+          { text: 'Конфиги Nginx', link: '/deployment/nginx' },
           { text: 'Переменные окружения', link: '/deployment/env-variables' },
-          { text: 'Grafana Мониторинг', link: '/deployment/monitoring' },
+          { text: 'Мониторинг состояния', link: '/deployment/monitoring' },
         ]
       },
       {

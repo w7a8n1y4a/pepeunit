@@ -21,8 +21,8 @@
 `PU_SECURE` | `True` | Если `True`, то [Backend](/definitions#backend) будет генерировать ссылки с `https` для `PU_DOMAIN`. Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) - в поле `PU_HTTP_TYPE`, но уже в формате `https/http`
 `PU_AUTH_TOKEN_EXPIRATION` | `2678400` | Время жизни токенов авторизации [Пользователей](/development-pepeunit/mechanics/roles.html#user) в секундах
 `PU_SAVE_REPO_PATH` | `repo_cache` | Путь по которому [Backend](/definitions#backend) хранит внешние [Git](/definitions#git) репозитории. Устанавливается относительно корневой дирректории [Backend](/definitions#backend)
-`PU_SQLALCHEMY_DATABASE_URL` | - | Ссылка для подключения к [Postgresql](/deployment/dependencies#postgresql)
-`PU_CLICKHOUSE_DATABASE_URL` | - | Ссылка для подключения к [Clickhouse](/deployment/dependencies#clickhouse)
+`PU_SQLALCHEMY_DATABASE_URL` | - | Ссылка для подключения к [Postgresql](/deployment/dependencies/postgresql)
+`PU_CLICKHOUSE_DATABASE_URL` | - | Ссылка для подключения к [Clickhouse](/deployment/dependencies/clickhouse)
 `PU_SECRET_KEY` | - | `32 байтовый ключ` в формате `base64`. Отвечает за подпись токенов авторизации. В случае изменения все `jwt` токены созданные до изменения - становятся не действительными
 `PU_ENCRYPT_KEY` | - | `32 байтовый ключ` в формате `base64`. Отвечает за шифрование всех данных. В случае изменения все шифрованные записи - становится невозможно расшифровать
 `PU_STATIC_SALT` | - | `32 байтовый ключ` в формате `base64`. Отвечает за генерацию `hash` для паролей пользователей. В случае изменения все учётные записи созданные до момента изменения - потеряют возможность авторизоваться
@@ -41,7 +41,7 @@
 `PU_TELEGRAM_HEADER_ENTITY_LENGTH` | `15` | Предельная длинна наименований сущностей при отображении в `Telegram Bot`
 `PU_TELEGRAM_GIT_HASH_LENGTH` | `8` | Предельная длинна `hash` [Git Commit](/definitions#git-commit) при отображении в `Telegram Bot`
 `PU_PROMETHEUS_MULTIPROC_DIR` | `./prometheus_metrics` | Дирректория, которую `Prometheus` использует для хранения статистик с нескольких `worker` - `uvicorn`. При старте приложения содержимое дирректории отчищается
-`PU_REDIS_URL` | `redis://redis:6379/0` | Ссылка для доступа к [Redis](/deployment/dependencies#redis), которую использует [Backend](/definitions#backend) для соединения c [Redis](/deployment/dependencies#redis). Инстанс [Redis](/deployment/dependencies#redis) должен быть единым с `MQTT_REDIS_AUTH_URL`
+`PU_REDIS_URL` | `redis://redis:6379/0` | Ссылка для доступа к [Redis](/deployment/dependencies/redis), которую использует [Backend](/definitions#backend) для соединения c [Redis](/deployment/dependencies/redis). Инстанс [Redis](/deployment/dependencies/redis) должен быть единым с `MQTT_REDIS_AUTH_URL`
 `PU_MQTT_HOST` | - | Доменное имя или `ip`. Позволяет [Backend](/definitions#backend) управлять и подписываться на топики [EMQX MQTT Broker](/definitions#mqtt-broker). Позволяет Unit связываться с [EMQX MQTT Broker](/definitions#mqtt-broker). Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) - в поле `PU_MQTT_HOST`
 `PU_MQTT_SECURE` | `True` | Если `True`, то [Backend](/definitions#backend) будет использовать `https` для настройки [EMQX MQTT Broker](/definitions#mqtt-broker)
 `PU_MQTT_PORT` | `1883` | Порт по которому [Unit](/definitions#unit) и [Backend](/definitions#backend) связываются c [EMQX MQTT Broker](/definitions#mqtt-broker). Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) - в поле `PU_MQTT_PORT`
@@ -49,7 +49,7 @@
 `PU_MQTT_KEEPALIVE` | `60` | Максимальный период в секундах между отправками `ping` от [Backend](/definitions#backend) до [EMQX MQTT Broker](/definitions#mqtt-broker)
 `PU_MQTT_USERNAME` | - | Имя пользователя [EMQX MQTT Broker](/definitions#mqtt-broker). [Backend](/definitions#backend) использует его для первичной настройки брокера
 `PU_MQTT_PASSWORD` | - | Пароль пользователя [EMQX MQTT Broker](/definitions#mqtt-broker). [Backend](/definitions#backend) использует его для первичной настройки брокера
-`PU_MQTT_REDIS_AUTH_URL` | `redis://redis:6379/0` | Ссылка для доступа к [Redis](/deployment/dependencies#redis), которую использует [EMQX MQTT Broker](/definitions#mqtt-broker) для соединения c [Redis](/deployment/dependencies#redis). Инстанс [Redis](/deployment/dependencies#redis) должен быть единым с `REDIS_URL`
+`PU_MQTT_REDIS_AUTH_URL` | `redis://redis:6379/0` | Ссылка для доступа к [Redis](/deployment/dependencies/redis), которую использует [EMQX MQTT Broker](/definitions#mqtt-broker) для соединения c [Redis](/deployment/dependencies/redis). Инстанс [Redis](/deployment/dependencies/redis) должен быть единым с `REDIS_URL`
 `PU_MQTT_MAX_CLIENTS` | `10000` | Максимальное число клиентов [EMQX MQTT Broker](/definitions#mqtt-broker)
 `PU_MQTT_MAX_CLIENT_CONNECTION_RATE` | `20/s` | Максимальная скорость подписки клиентов [EMQX MQTT Broker](/definitions#mqtt-broker)
 `PU_MQTT_MAX_CLIENT_ID_LEN` | `512` | Максимальная длинная `id` клиентов [EMQX MQTT Broker](/definitions#mqtt-broker)
@@ -62,8 +62,8 @@
 `PU_MQTT_MAX_TOPIC_ALIAS` | `128` | Максимальное число топиков-ссылок [EMQX MQTT Broker](/definitions#mqtt-broker)
 `PU_GITHUB_TOKEN_NAME` | - | Название [Github](/definitions#github) токена, с разрешением только для чтения публичных репозиториев. Используется для увеличения лимита загрузки публичных репозиториев с [Github](/definitions#github) с `60` в час до `5000` в час
 `PU_GITHUB_TOKEN_PAT` | - | [Github](/definitions#github) токен, с разрешением только для чтения публичных репозиториев. Используется для увеличения лимита загрузки публичных репозиториев с [Github](/definitions#github) с `60` в час до `5000` в час
-`PU_GRAFANA_ADMIN_USER` | - | Логин админа для [Grafana](/deployment/dependencies#grafana)
-`PU_GRAFANA_ADMIN_PASSWORD` | - | Пароль админа для [Grafana](/deployment/dependencies#grafana)
+`PU_GRAFANA_ADMIN_USER` | - | Логин админа для [Grafana](/deployment/dependencies/grafana)
+`PU_GRAFANA_ADMIN_PASSWORD` | - | Пароль админа для [Grafana](/deployment/dependencies/grafana)
 `PU_GRAFANA_LIMIT_UNIT_NODE_PER_ONE_PANEL` | `10` | Максимальное число [UnitNode](/definitions#unitnode) для одной [Visualization](/definitions#visualization)
 
 :::info
@@ -83,16 +83,16 @@
 -- | -- | -- 
 `PU_DP_DOMAIN` | - | Доменное имя или `ip` - позволяет корректно подписаться на топики.
 `PU_DP_SECRET_KEY` | - | `32 байтовый ключ` в формате `base64`. Отвечает за подпись токенов авторизации. В случае изменения все `jwt` токены созданные до изменения - становятся не действительными
-`PU_DP_SQLALCHEMY_DATABASE_URL` | - | Ссылка для подключения к [Postgresql](/deployment/dependencies#postgresql)
-`PU_DP_CLICKHOUSE_DATABASE_URL` | - | Ссылка для подключения к [Clickhouse](/deployment/dependencies#clickhouse)
-`PU_DP_REDIS_URL` | `redis://redis:6379/0` | Ссылка для доступа к [Redis](/deployment/dependencies#redis) - используется для обмена конфигурациями [UnitNode](/definitions#unitnode) между [Backend](/definitions#backend) и [Backend Data Pipe](/definitions#backend-data-pipe)
+`PU_DP_SQLALCHEMY_DATABASE_URL` | - | Ссылка для подключения к [Postgresql](/deployment/dependencies/postgresql)
+`PU_DP_CLICKHOUSE_DATABASE_URL` | - | Ссылка для подключения к [Clickhouse](/deployment/dependencies/clickhouse)
+`PU_DP_REDIS_URL` | `redis://redis:6379/0` | Ссылка для доступа к [Redis](/deployment/dependencies/redis) - используется для обмена конфигурациями [UnitNode](/definitions#unitnode) между [Backend](/definitions#backend) и [Backend Data Pipe](/definitions#backend-data-pipe)
 `PU_DP_MQTT_HOST` | - | Доменное имя или `ip`. Позволяет корректно подключиться к [EMQX MQTT Broker](/definitions#mqtt-broker).
 `PU_DP_MQTT_PORT` | `1883` | Порт позволяющий корректно подключиться к [EMQX MQTT Broker](/definitions#mqtt-broker).
 `PU_DP_MQTT_KEEPALIVE` | `60` | Максимальный период в секундах между отправками `ping` от [Backend Data Pipe](/definitions#backend-data-pipe) до [EMQX MQTT Broker](/definitions#mqtt-broker)
 `PU_DP_CONFIG_SYNC_INTERVAL` | `60` | Период времени в секундах между повторными запросами конфигурации [YML](/definitions#yml)
 `PU_DP_NRECORDS_CLEANUP_INTERVAL` | `60` | Период времени в секундах между запусками задачи удаления накопившихся всверх предела записей `N Records`
-`PU_DP_BUFFER_FLUSH_INTERVAL` | `5` | Период времени в секундах, по истечении которого, не зависимо от числа пришедших записей, данные будут сохранены в [Clickhouse](/deployment/dependencies#clickhouse) или [Postgresql](/deployment/dependencies#postgresql)
-`PU_DP_BUFFER_MAX_SIZE` | `1000` | Предельная длинна очереди, при превышении которой запись в [Clickhouse](/deployment/dependencies#clickhouse) или [Postgresql](/deployment/dependencies#postgresql) выполняется не дожидаясь интервала `PU_DP_BUFFER_FLUSH_INTERVAL`
+`PU_DP_BUFFER_FLUSH_INTERVAL` | `5` | Период времени в секундах, по истечении которого, не зависимо от числа пришедших записей, данные будут сохранены в [Clickhouse](/deployment/dependencies/clickhouse) или [Postgresql](/deployment/dependencies/postgresql)
+`PU_DP_BUFFER_MAX_SIZE` | `1000` | Предельная длинна очереди, при превышении которой запись в [Clickhouse](/deployment/dependencies/clickhouse) или [Postgresql](/deployment/dependencies/postgresql) выполняется не дожидаясь интервала `PU_DP_BUFFER_FLUSH_INTERVAL`
 
 ## Frontend
 

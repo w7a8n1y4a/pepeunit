@@ -2,7 +2,7 @@
 
 ## Nginx Docker Compose
 
-Объединяет [Backend](/definitions#backend), [Frontend](/definitions#frontend) и [Grafana](/deployment/dependencies#grafana) в единый `80` порт.
+Объединяет [Backend](/definitions#backend), [Frontend](/definitions#frontend) и [Grafana](/deployment/dependencies/grafana) в единый `80` порт.
 
 ```nginx.conf
 events {

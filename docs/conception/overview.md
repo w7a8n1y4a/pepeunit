@@ -10,7 +10,7 @@
 
 ## Конвейеры обработки данных
 
-`Pepeunit` способен производительно накапливать, предварительно отчищенные и трансформированные данные в [Clickhouse](/deployment/dependencies#clickhouse) и [Postgresql](/deployment/dependencies#postgresql). Обработка производится на основании конвейерных конфигураций в [YML](/definitions#yml) формате. Cкорость обработки обеспечивает отдельный микросервис написанный на [Golang](/definitions#golang). Доступно `4` основных типа накопления данных:
+`Pepeunit` способен производительно накапливать, предварительно отчищенные и трансформированные данные в [Clickhouse](/deployment/dependencies/clickhouse) и [Postgresql](/deployment/dependencies/postgresql). Обработка производится на основании конвейерных конфигураций в [YML](/definitions#yml) формате. Cкорость обработки обеспечивает отдельный микросервис написанный на [Golang](/definitions#golang). Доступно `4` основных типа накопления данных:
 - `Last Value` - сохранение последнего значения
 - `N Records` - сохранение `N` последних записей
 - `Time Window` - сохранение всех записей за установленное временное окно
@@ -18,7 +18,7 @@
 
 ## Интеграция с Grafana
 
-`Pepeunit` - позволяет создавать кастомные [Dashboard](/definitions#dashboard) из [Visualization](/definitions#visualization). В качестве данных служат [UnitNode](/definitions#unitnode) с настроенными [DataPipe](/deployment/dependencies#datapipe)
+`Pepeunit` - позволяет создавать кастомные [Dashboard](/definitions#dashboard) из [Visualization](/definitions#visualization). В качестве данных служат [UnitNode](/definitions#unitnode) с настроенными [DataPipe](/definitions#datapipe)
 
 
 ## Управление устройствами IoT

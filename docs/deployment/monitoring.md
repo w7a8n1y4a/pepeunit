@@ -3,10 +3,10 @@
 По умолчанию в `docker compose` добавлены:
 1. `promtail` - парсинг логов из `Docker`
 1. `logporter` - парсинг нагрузки на контейнеры из `Docker`
-1. `loki` - агрегатор данных для [Grafana](/deployment/dependencies#grafana), используется для `promtail`
-1. `prometheus` - агрегатор данных для [Grafana](/deployment/dependencies#grafana), используется для [Backend](/definitions#backend), [EMQX MQTT Broker](/definitions#mqtt-broker), `logporter`
+1. `loki` - агрегатор данных для [Grafana](/deployment/dependencies/grafana), используется для `promtail`
+1. `prometheus` - агрегатор данных для [Grafana](/deployment/dependencies/grafana), используется для [Backend](/definitions#backend), [EMQX MQTT Broker](/definitions#mqtt-broker), `logporter`
 
-Эти 4 контейнера вместе с [Grafana](/deployment/dependencies#grafana) позволяют мониторить состояние [инстанса](/definitions#instance) [Pepeunit](/conception/overview)
+Эти 4 контейнера вместе с [Grafana](/deployment/dependencies/grafana) позволяют мониторить состояние [инстанса](/definitions#instance) [Pepeunit](/conception/overview)
 
 ## Grafana Dashboards
 
