@@ -60,7 +60,7 @@
 :::
 
 :::warning
-Размер передаваемого [Unit](/definitions#unit) состояния ограничен количеством символов указанных в переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables#backend). По умолчанию это значение составляет `50000` символов.
+Размер передаваемого [Unit](/definitions#unit) состояния ограничен количеством символов указанных в переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables/backend). По умолчанию это значение составляет `50000` символов.
 :::
 
 :::info
@@ -147,9 +147,9 @@
     2. Если отправлено множество логов и данный ключ отсутствует, [Pepeunit](/conception/overview) берёт текущее время для самого первого элемента листа и добавляет по 1 секунде для каждого последующего элемента c целью сохранить порядок логов полученный от [Unit](/definitions#unit).
 
 :::warning
-Размер передаваемого [Unit](/definitions#unit) лога ограничен количеством символов указанных в переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables#backend). По умолчанию это значение составляет `50000` символов.
+Размер передаваемого [Unit](/definitions#unit) лога ограничен количеством символов указанных в переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables/backend). По умолчанию это значение составляет `50000` символов.
 
-По умолчанию время жизни логов ограничено `86400` секундами. За это отвечает переменная `PU_UNIT_LOG_EXPIRATION` из [Backend ENV](/deployment/env-variables#backend).
+По умолчанию время жизни логов ограничено `86400` секундами. За это отвечает переменная `PU_UNIT_LOG_EXPIRATION` из [Backend ENV](/deployment/env-variables/backend).
 :::
 
 ### Алгоритм отправки

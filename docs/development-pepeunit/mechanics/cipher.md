@@ -48,11 +48,11 @@ def aes_gcm_decode(data: str, key: str = settings.pu_encrypt_key) -> str:
 :::
 
 :::warning Ограничение размера шифруемых объектов
-Все шифруемые объекты имеют стандартное ограничение в `1000000` символов. [Администратор](/development-pepeunit/mechanics/roles#admin) [инстанса](/definitions#instance) может изменить этот объём установив переменную окружения `PU_MAX_CIPHER_LENGTH` в файле [Backend ENV](/deployment/env-variables#backend).
+Все шифруемые объекты имеют стандартное ограничение в `1000000` символов. [Администратор](/development-pepeunit/mechanics/roles#admin) [инстанса](/definitions#instance) может изменить этот объём установив переменную окружения `PU_MAX_CIPHER_LENGTH` в файле [Backend ENV](/deployment/env-variables/backend).
 :::
 
 :::danger
-[Администратор](/development-pepeunit/mechanics/roles#admin) имеющий доступ к [Backend ENV](/deployment/env-variables#backend) [инстанса](/definitions#instance) [Pepeunit](/conception/overview), имеет возможность расшифровать данные хранящиеся в шифрованном виде на его [инстансе](/definitions#instance).
+[Администратор](/development-pepeunit/mechanics/roles#admin) имеющий доступ к [Backend ENV](/deployment/env-variables/backend) [инстанса](/definitions#instance) [Pepeunit](/conception/overview), имеет возможность расшифровать данные хранящиеся в шифрованном виде на его [инстансе](/definitions#instance).
 
 Поэтому пользуйтесь только [инстансами](/definitions#instance) [Pepeunit](/conception/overview) [Администраторам](/development-pepeunit/mechanics/roles#admin) которых вы доверяете.
 

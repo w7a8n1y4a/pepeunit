@@ -10,7 +10,7 @@
 
 ## Запуск
 
-0. Настроить дополнительные [ENV переменные Backend](/deployment/env-variables#backend):
+0. Настроить дополнительные [ENV переменные Backend](/deployment/env-variables/backend):
 
     Переменная Backend | Что делает ?
     -- | --

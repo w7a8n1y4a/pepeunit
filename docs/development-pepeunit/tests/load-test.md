@@ -11,7 +11,7 @@
 python -m tests.load.load_test_mqtt
 ```
 
-Позволяет создать синтетическую нагрузку в виде [Unit](/definitions#unit), отправляющих [MQTT](/definitions#mqtt) сообщения. Дополнительные [ENV переменные Backend](/deployment/env-variables#backend) позволяют настроить нагрузку по следующим параметрам:
+Позволяет создать синтетическую нагрузку в виде [Unit](/definitions#unit), отправляющих [MQTT](/definitions#mqtt) сообщения. Дополнительные [ENV переменные Backend](/deployment/env-variables/backend) позволяют настроить нагрузку по следующим параметрам:
 Переменная Backend | Что делает ?
 -- | --
 `PU_TEST_LOAD_MQTT_DURATION` | Время выполнения теста в секундах
@@ -34,7 +34,7 @@ python -m tests.load.load_test_mqtt
 locust -f tests/load/locustfile.py
 ```
 
-Позволяет создать синтетическую нагрузку в виде [GQL](/definitions#gql) и [REST](/definitions#rest) запросов, на наиболее нагруженные участки. Дополнительные [ENV переменные Backend](/deployment/env-variables#backend) позволяют настроить нагрузку по следующим параметрам:
+Позволяет создать синтетическую нагрузку в виде [GQL](/definitions#gql) и [REST](/definitions#rest) запросов, на наиболее нагруженные участки. Дополнительные [ENV переменные Backend](/deployment/env-variables/backend) позволяют настроить нагрузку по следующим параметрам:
 
 Переменная Backend | Что делает ?
 -- | --

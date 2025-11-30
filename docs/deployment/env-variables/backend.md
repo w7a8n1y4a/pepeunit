@@ -1,6 +1,4 @@
-# Переменные окружения
-
-## Backend
+# Backend
 
 :::warning
 Пример заполнения переменных есть в [Backend](/definitions#backend), файл `.env_example`. Обычно нужно заполнить только основные переменные т.к. есть [файл генерации .env файлов для сервисов](/deployment/docker)
@@ -72,36 +70,3 @@
 - [Переменные нагрузочного тестирования MQTT](/development-pepeunit/tests/load-test#тестирование-mqtt)
 - [Переменные нагрузочного тестирования REST и GQL](/development-pepeunit/tests/load-test#тестирование-rest-и-gql)
 :::
-
-## Backend Data Pipe
-
-:::warning
-Пример заполнения переменных есть в [Backend Data Pipe](/definitions#backend-data-pipe), файл `.env_example`. Обычно нужно заполнить только основные переменные т.к. есть [файл генерации .env файлов для сервисов](/deployment/docker)
-:::
-
-Переменная | По умолчанию | Зачем нужна?
--- | -- | -- 
-`PU_DP_DOMAIN` | - | Доменное имя или `ip` - позволяет корректно подписаться на топики.
-`PU_DP_SECRET_KEY` | - | `32 байтовый ключ` в формате `base64`. Отвечает за подпись токенов авторизации. В случае изменения все `jwt` токены созданные до изменения - становятся не действительными
-`PU_DP_SQLALCHEMY_DATABASE_URL` | - | Ссылка для подключения к [Postgresql](/deployment/dependencies/postgresql)
-`PU_DP_CLICKHOUSE_DATABASE_URL` | - | Ссылка для подключения к [Clickhouse](/deployment/dependencies/clickhouse)
-`PU_DP_REDIS_URL` | `redis://redis:6379/0` | Ссылка для доступа к [Redis](/deployment/dependencies/redis) - используется для обмена конфигурациями [UnitNode](/definitions#unitnode) между [Backend](/definitions#backend) и [Backend Data Pipe](/definitions#backend-data-pipe)
-`PU_DP_MQTT_HOST` | - | Доменное имя или `ip`. Позволяет корректно подключиться к [EMQX MQTT Broker](/definitions#mqtt-broker).
-`PU_DP_MQTT_PORT` | `1883` | Порт позволяющий корректно подключиться к [EMQX MQTT Broker](/definitions#mqtt-broker).
-`PU_DP_MQTT_KEEPALIVE` | `60` | Максимальный период в секундах между отправками `ping` от [Backend Data Pipe](/definitions#backend-data-pipe) до [EMQX MQTT Broker](/definitions#mqtt-broker)
-`PU_DP_CONFIG_SYNC_INTERVAL` | `60` | Период времени в секундах между повторными запросами конфигурации [YML](/definitions#yml)
-`PU_DP_NRECORDS_CLEANUP_INTERVAL` | `60` | Период времени в секундах между запусками задачи удаления накопившихся всверх предела записей `N Records`
-`PU_DP_BUFFER_FLUSH_INTERVAL` | `5` | Период времени в секундах, по истечении которого, не зависимо от числа пришедших записей, данные будут сохранены в [Clickhouse](/deployment/dependencies/clickhouse) или [Postgresql](/deployment/dependencies/postgresql)
-`PU_DP_BUFFER_MAX_SIZE` | `1000` | Предельная длинна очереди, при превышении которой запись в [Clickhouse](/deployment/dependencies/clickhouse) или [Postgresql](/deployment/dependencies/postgresql) выполняется не дожидаясь интервала `PU_DP_BUFFER_FLUSH_INTERVAL`
-
-## Frontend
-
-:::warning
-У [Frontend](/definitions#frontend) нет значений по умолчанию.
-:::
-
-Переменная | Пример | Зачем нужна?
--- | -- | --
-`VITE_INSTANCE_NAME` | `example.com` | Используется для генерации ссылок между разными `Node` основного графа
-`VITE_SELF_URI` | `https://example.com/` | Используется для тегов `og:url` и `og:image` в `index.html`
-`VITE_BACKEND_URI` | `https://example.com/pepeunit/graphql` | Используется для отправки [GQL](/definitions#gql) запросов к [Backend](/definitions#backend)

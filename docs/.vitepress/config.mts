@@ -33,7 +33,7 @@ export default withMermaid(defineConfig({
     sidebar: [
       {
         text: 'Концепция',
-        collapsed: true,
+        collapsed: false,
         items: [
           { text: 'Обзор', link: '/conception/overview' },
           { text: 'Определения', link: '/definitions' }
@@ -41,13 +41,13 @@ export default withMermaid(defineConfig({
       },
       {
         text: 'Развёртывание',
-        collapsed: true,
+        collapsed: false,
         items: [
+          { text: 'Схема взаимодействия сервисов', link: '/deployment/schema.md' },
           {
             text: 'Зависимости',
             collapsed: true,
             items: [
-              { text: 'Схема взаимодействия сервисов', link: '/deployment/dependencies/schema.md' },
               { text: 'Postgresql', link: '/deployment/dependencies/postgresql.md' },
               { text: 'Clickhouse', link: '/deployment/dependencies/clickhouse.md' },
               { text: 'Redis', link: '/deployment/dependencies/redis.md' },
@@ -65,13 +65,25 @@ export default withMermaid(defineConfig({
           },
           { text: 'Docker Compose', link: '/deployment/docker' },
           { text: 'Конфиги Nginx', link: '/deployment/nginx' },
-          { text: 'Переменные окружения', link: '/deployment/env-variables' },
-          { text: 'Мониторинг состояния', link: '/deployment/monitoring' },
+          {
+            text: 'Переменные окружения',
+            collapsed: true,
+            items: [
+              { text: 'Backend', link: '/deployment/env-variables/backend.md' },
+              { text: 'DataPipe', link: '/deployment/env-variables/data-pipe.md' },
+              { text: 'Frontend', link: '/deployment/env-variables/frontend.md' },
+              { text: 'Postgresql', link: '/deployment/env-variables/postgresql.md' },
+              { text: 'Clickhouse', link: '/deployment/env-variables/clickhouse.md' },
+              { text: 'EMQX', link: '/deployment/env-variables/emqx.md' },
+              { text: 'Grafana', link: '/deployment/env-variables/grafana.md' },
+            ]
+          },
+          { text: 'Мониторинг', link: '/deployment/monitoring' },
         ]
       },
       {
         text: 'Руководство Пользователя',
-        collapsed: true,
+        collapsed: false,
         items: [
           { text: 'Создание RepositoryRegistry', link: '/user/create-repository-registry' },
           { text: 'Создание Repo', link: '/user/create-repo' },
@@ -86,7 +98,7 @@ export default withMermaid(defineConfig({
       },
       {
         text: 'Разработчику Unit',
-        collapsed: true,
+        collapsed: false,
         items: [
           { text: 'Алгоритм создания Unit', link: '/developer/alg-create-unit' },
           {

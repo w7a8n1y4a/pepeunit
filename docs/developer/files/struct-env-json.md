@@ -11,7 +11,7 @@
 1. [Aдминистратор](/development-pepeunit/mechanics/roles#admin) гарантирует всем сторонам, что [env.json](/definitions#env-json) ни в каком виде не будет передан тем кто не явялется стороной данного контракта.
 :::
 
-Файлы окружения, такие как [env.json](/definitions#env-json) или [Backend ENV](/deployment/env-variables#backend), представляют собой механизм индивидуализации общего кода под конкретное устройство или экземпляр приложения.
+Файлы окружения, такие как [env.json](/definitions#env-json) или [Backend ENV](/deployment/env-variables/backend), представляют собой механизм индивидуализации общего кода под конкретное устройство или экземпляр приложения.
 
 ::: danger
 Используйте только доверенные [инстансы](/definitions#instance) [Pepeunit](/conception/overview). Следите, чтобы [Администратор](/development-pepeunit/mechanics/roles#admin) [инстанса](/definitions#instance) [Pepeunit](/conception/overview) выполнял свои контрактные обязательства, связанные с [env.json](/definitions#env-json).

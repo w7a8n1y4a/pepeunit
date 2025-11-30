@@ -4,7 +4,7 @@
 
 У [Pepeunit](/conception/overview) строгие требования к размеру репозиториев - это связано с хранением репозиториев на стороне инстансов [Pepeunit](/conception/overview).
 
-Cтандартное ограничение `50МБ`, но [Администраторы](/development-pepeunit/mechanics/roles#admin) [инстансов](/definitions#instance) могут увеличить данный лимит установив значение `PU_MAX_EXTERNAL_REPO_SIZE` в [Backend ENV](/deployment/env-variables#backend).
+Cтандартное ограничение `50МБ`, но [Администраторы](/development-pepeunit/mechanics/roles#admin) [инстансов](/definitions#instance) могут увеличить данный лимит установив значение `PU_MAX_EXTERNAL_REPO_SIZE` в [Backend ENV](/deployment/env-variables/backend).
 
 Для выполнения такого строгого требования не рекомендуется хранить в репозиториях картинки и бинарные файлы.
 
