@@ -24,7 +24,7 @@
 ## Управление устройствами IoT
 
 `Pepeunit` предоставляет несколько способов взаимодействия с [Unit](/definitions#unit)
-- [MQTT](/definitions#mqtt) - [EMQX](deployment/dependencies/emqx)
+- [MQTT](/definitions#mqtt) - [EMQX](/deployment/dependencies/emqx)
 - [Frontend](/deployment/dependencies/frontend) - `React`
 - [REST](/definitions#rest) - `Swagger`
 - [GQL](/definitions#gql) - `Strawberry`

@@ -251,7 +251,7 @@ INFO - 2025-03-14 01:11:53,249 - [SUBACK] 1 (0,)
 
 Она отображает смог ли [Backend](/deployment/dependencies/backend) подписаться на топик `dcunit.pepeunit.com/+/+/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/deployment/dependencies/backend) `не смог` подписаться на основной топик. Обычно это одна из ошибок конфигурирования:
 1. Закрытым портом `1883`
-1. Настройкой портов сервиса [EMQX](deployment/dependencies/emqx) в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
+1. Настройкой портов сервиса [EMQX](/deployment/dependencies/emqx) в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
 1. При использовании кастомного порта для `mqtt`, требуется указать его в двух `.env` файлах: `backend` и `datapipe`
 1. Ошибками в настройках [EMQX](/deployment/dependencies/emqx) и [Backend](/deployment/dependencies/backend), например `PU_MQTT_REDIS_AUTH_URL` или `PU_REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables/backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies/redis). За первичную авторизацию отвечает именно [Redis](/deployment/dependencies/redis).
 :::
