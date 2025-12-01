@@ -47,34 +47,25 @@
 `SQL (Structured Query Language)` — декларативный язык программирования для создания, изменения и управления базами данных.
 
 ## API
-`Application Programming Interface` - контракт, проедоставляемый программами и описывающий взаимодействие c ними. Например [Backend](#backend) `Pepeunit` предоставляет - [REST](#rest), [GQL](#gql), [MQTT](#mqtt)
+`Application Programming Interface` - контракт, проедоставляемый программами и описывающий взаимодействие c ними. Например [Backend](/deployment/dependencies/backend) `Pepeunit` предоставляет - [REST](#rest), [GQL](#gql), [MQTT](#mqtt)
 
 ## REST
-`REST API` - контракт описывающий взаимодействие программы с клиентами через `HTTP` запросы. Pepeunit [Backend](#backend) использует пакет [Pydantic](https://docs.pydantic.dev/latest/) и интерфейс [Swagger OpenAPI](https://swagger.io/docs/) для предоставления `REST API`.
+`REST API` - контракт описывающий взаимодействие программы с клиентами через `HTTP` запросы. Pepeunit [Backend](/deployment/dependencies/backend) использует пакет [Pydantic](https://docs.pydantic.dev/latest/) и интерфейс [Swagger OpenAPI](https://swagger.io/docs/) для предоставления `REST API`.
 
 ## GQL
-`GraphQL API` - язык запросов и серверная среда с открытым исходным кодом, использующая `HTTP` запросы для обмена информацией с клиентами. Pepeunit [Backend](#backend) использует пакет [strawberry-graphql](https://strawberry.rocks/docs) для предоставления `GraphQL API`.
+`GraphQL API` - язык запросов и серверная среда с открытым исходным кодом, использующая `HTTP` запросы для обмена информацией с клиентами. Pepeunit [Backend](/deployment/dependencies/backend) использует пакет [strawberry-graphql](https://strawberry.rocks/docs) для предоставления `GraphQL API`.
 
 ## MQTT
-`MQTT API` - упрощённый сетевой протокол, работающий поверх `TCP/IP`, ориентированный на обмен сообщениями между устройствами по принципу издатель-подпищик. Pepeunit [Backend](#backend) использует пакет [fastapi-mqtt](https://sabuhish.github.io/fastapi-mqtt/) как клиент, для взаимодействия c [MQTT Broker - EMQX](https://www.emqx.io/docs/en/latest/).
-
-## MQTT Broker
-`MQTT Broker` - серверное приложение, которое координирует сообщения между издателями и подпищиками [MQTT](#mqtt) протокола. В [Pepeunit](/conception/overview) главными подпищиками и издателеми можно считать [Unit](#unit), а главным руководителем взаимодействия - [Backend](#backend). [Pepeunit](/conception/overview) использует [MQTT](#mqtt) брокера - [EMQX](https://www.emqx.io/docs/en/latest/).
+`MQTT API` - упрощённый сетевой протокол, работающий поверх `TCP/IP`, ориентированный на обмен сообщениями между устройствами по принципу издатель-подпищик. Pepeunit [Backend](/deployment/dependencies/backend) использует пакет [fastapi-mqtt](https://sabuhish.github.io/fastapi-mqtt/) как клиент, для взаимодействия c [EMQX](deployment/dependencies/emqx).
 
 ## ACL List
-`ACL List` - файл, определяющий правила авторизации для [MQTT Broker](#mqtt-broker)
+`ACL List` - файл, определяющий правила авторизации для [EMQX](/deployment/dependencies/emqx)
 
 ## Telegram
-[Telegram](https://telegram.org/) - мессенджер, имеющий [Telegram Bot API](https://core.telegram.org/bots/api), позволяющий взаимодействовать с [Backend](#backend) через диалог в чате. [Pepeunit](/conception/overview) использует пакет [AioGram](https://github.com/aiogram/aiogram) как клиент для работы с ботом. Имеет вспомогательную функцию верификации [Пользователей](/development-pepeunit/mechanics/roles.html#user)
+[Telegram](https://telegram.org/) - популярный мессенджер, имеющий функционал [Telegram Bot](#telegram-bot)
 
-## Chat Bot
-`Chat Bot` - приложение, позволяющее взаимодействовать с [Backend](#backend) через диалог в чате. Pepeunit [Backend](#backend) использует пакет [AioGram](https://github.com/aiogram/aiogram) как клиент, для взаимодействия с [Telegram Bot API](https://core.telegram.org/bots/api).
-
-## Frontend
-`Frontend` - веб приложение, доступное для скачивания открытым способом и предназаначенное для обеспечения взаимодействия [Пользователей](/development-pepeunit/mechanics/roles.html#user) c [Backend](#backend) приложением. [Pepeunit Frontend Repository](https://git.pepemoss.com/pepe/pepeunit/pepeunit_frontend)
-
-## Backend
-`Backend` - приложение размещаемое на сервере, обеспечивающее обработку, хранение и анализ информации, а так же предоставляющее разные [API](#api) для взаимодействия. [Pepeunit Backend Repository](https://git.pepemoss.com/pepe/pepeunit/pepeunit_backend.git)
+## Telegram Bot
+[Telegram Bot API](https://core.telegram.org/bots/api) - открытый [API](#api) для взаимодействия с внешними по отношению к [Telegram](#telegram) сервисами, например: [Pepeunit](/conception/overview). Для интегарции с `Telegram Bot API` [Pepeunit](/conception/overview) использует пакет [AioGram](https://github.com/aiogram/aiogram) как клиент. `Telegram Bot API` позволяет [Backend](/deployment/dependencies/backend) верифицировать [Пользователей](/development-pepeunit/mechanics/roles.html#user). Управление ботами происходит через [Bot Father](https://t.me/BotFather).
 
 ## RepositoryRegistry
 `RepositoryRegistry` - представление [Pepeunit](/conception/overview) о внешнем [Git](#git) репозитории, например из [Gitlab](#gitlab) или [Github](#github). Данная сущность содержит в себе полный клон репозитория и синхронизирует своё состояние с внешним репозиторием. На основе данной сущности создаются [Repo](#repo).
@@ -91,14 +82,11 @@
 ## YML
 `YML` или `YAML` - человеко-читаемый формат данных, используемый для сериализации и конфигурации. Данный формат широко применяется в автоматизации и конвейерах, для описания этапов и их парамтеров. [Pepeunit](/conception/overview) использует его для конвейеров данных.
 
-## DataPipe
-`DataPipe` - модуль [Pepeunit](/conception/overview), состоящий из конфигурации [YML](#yml), отдельного микросервиса на [Golang](#golang) и системы управления. Предназначен для производительного накопления данных из топиков `UnitNode` согласно настройкам из [YML](#yml). У [Pepeunit](/conception/overview) есть глубокая интеграция с [Grafana](/deployment/dependencies/grafana) для визуализации данных из `DataPipe`. Микросервис подписывается на все топики с паттерном `example.com/+/pepeunit` и если работа `DataPipe` активирована в `UnitNode`, проводит процесс описанный в [YML](#yml). [Подробнее о настройке DataPipe](/user/data-pipe#datapipe)
-
 ## Datasource
-`Datasource` - источник данных [Grafana](/deployment/dependencies/grafana), из которого [Grafana](/deployment/dependencies/grafana) получает данные для дальнейшей визуализации. [Backend](/definitions#backend) реализует [REST](/definitions#rest) запрос для [InfinityAPI](https://grafana.com/grafana/plugins/yesoreyeram-infinity-datasource/) из коробки для каждой отдельной организации. Который с использованием `headers` и `params` позволяет получать данные накопленные с помощью механизмов [DataPipe](#datapipe).
+`Datasource` - источник данных [Grafana](/deployment/dependencies/grafana), из которого [Grafana](/deployment/dependencies/grafana) получает данные для дальнейшей визуализации. [Backend](/deployment/dependencies/backend) реализует [REST](/definitions#rest) запрос для [InfinityAPI](https://grafana.com/grafana/plugins/yesoreyeram-infinity-datasource/) из коробки для каждой отдельной организации. Который с использованием `headers` и `params` позволяет получать данные накопленные с помощью механизмов [DataPipe](/deployment/dependencies/datapipe).
 
 ## Visualization
-`Visualization`, панели —  способ отображения данных [Grafana](/deployment/dependencies/grafana). Каждая отдельная визуализация может содержать несколько [Datasource](#datasource) одного или нескольких типов. В каждую визуализацию можно слинковать несколько `UnitNode` с настроенным [DataPipe](#datapipe). При сборке визуализаций, следите, чтобы формат данных был одинаковым.
+`Visualization`, панели —  способ отображения данных [Grafana](/deployment/dependencies/grafana). Каждая отдельная визуализация может содержать несколько [Datasource](#datasource) одного или нескольких типов. В каждую визуализацию можно слинковать несколько `UnitNode` с настроенным [DataPipe](/deployment/dependencies/datapipe). При сборке визуализаций, следите, чтобы формат данных был одинаковым.
 
 ## Dashboard
 `Dashboard` - набор [Visualization](#visualization) в [Grafana](/deployment/dependencies/grafana), собранных на одной панели для удобного мониторинга и анализа данных.

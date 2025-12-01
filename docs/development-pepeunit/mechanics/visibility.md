@@ -60,7 +60,7 @@
 - Создание связей для `Input`
 - Настройки [UnitNode](/definitions#unitnode)
 - Выдача [доступов](/development-pepeunit/mechanics/permission)
-- Все аспекты управления [DataPipe](/definitions#datapipe)
+- Все аспекты управления [DataPipe](/deployment/dependencies/datapipe)
 
 ---
 

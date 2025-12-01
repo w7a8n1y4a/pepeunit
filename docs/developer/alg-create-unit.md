@@ -191,7 +191,7 @@ readme.md
 :::info
 В процессе разработки можно заходить в тестовый [Unit](/definitions#unit) и видеть:
 
-- какие данные [Unit](/definitions#unit) отправляет в `Output` [UnitNode](/definitions#unitnode) через систему [DataPipe](/definitions#datapipe)
+- какие данные [Unit](/definitions#unit) отправляет в `Output` [UnitNode](/definitions#unitnode) через систему [DataPipe](/deployment/dependencies/datapipe)
 - создавать для [Unit](/definitions#unit) управляющее воздействие через `Input` [UnitNode](/definitions#unitnode)
 :::
 

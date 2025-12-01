@@ -10,8 +10,8 @@
 
 ## Grafana Dashboards
 
-1. `Backend Load Metrics` - позволяет оценить нагрузку в запросах на самую важную часть системы: [Backend](/definitions#backend)
-1. `EMQX Load Metrics` - показывает нагрузку на [EMQX MQTT Broker](/definitions#mqtt-broker) - основного менеджера данных в системе
+1. `Backend Load Metrics` - позволяет оценить нагрузку в запросах на самую важную часть системы: [Backend](/deployment/dependencies/backend)
+1. `EMQX Load Metrics` - показывает нагрузку на [EMQX](/deployment/dependencies/emqx) - основного менеджера данных в системе
 1. `Docker Resource Metrics` - показывает какой объём ресурсов потребляет система в целом и для каждого контейенера в отдельности
 1. `Docker Logs` - просмотр логов любых контейнеров
 

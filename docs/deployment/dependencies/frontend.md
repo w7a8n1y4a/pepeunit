@@ -1,8 +1,15 @@
 # Frontend
 
-Имеет два определения:
+## Frontend в широком смысле
 
-1. `Frontend` в широком смысле - набор сервисов, обеспечивающих взимодествие [Пользователей](/development-pepeunit/mechanics/roles.html#user) с [Backend](/deployment/dependencies/backend), состоит из `Frontend` сервиса и [Grafana](/deployment/dependencies/grafana) инстанса встроенного в [Pepeunit](/conception/overview)
-1. `Frontend` сервис - веб приложение, доступное для скачивания открытым способом и предназаначенное для обеспечения взаимодействия [Пользователей](/development-pepeunit/mechanics/roles.html#user) c [Backend](#backend) приложением. Взаимодействует с [Backend](#backend) при помощи:
-    - [REST](/definitions#rest)
-    - [GQL](/definitions#gql)
+Набор из `2` сервисов: `Frontend` и [Grafana](/deployment/dependencies/grafana) - вместе обеспечивающих взаимодествие [Пользователей](/development-pepeunit/mechanics/roles.html#user) с [Backend](/deployment/dependencies/backend)
+
+## Frontend сервис 
+
+Веб приложение, доступное для скачивания открытым способом и предназаначенное для обеспечения взаимодействия [Пользователей](/development-pepeunit/mechanics/roles.html#user) c [Backend](/deployment/dependencies/backend) приложением средствами визуального интерфейса. Взаимодействует с [Backend](/deployment/dependencies/backend) при помощи:
+- [REST](/definitions#rest)
+- [GQL](/definitions#gql)
+
+:::info
+[Подробнее о переменных окружения](/deployment/env-variables/frontend)
+:::

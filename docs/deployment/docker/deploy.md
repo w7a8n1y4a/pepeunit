@@ -36,13 +36,13 @@ mv .env.local.example .env.local
 `CLICKHOUSE_DB` | `default` | `default` | Название базы данных
 `PU_DOMAIN` | `192.168.0.22` | `unit.pepeunit.com` | Доменное имя от [инстанса](/definitions#instance) [Pepeunit](/conception/overview)
 `PU_SECURE` | `False` | - | Выбирает `http` или `https` для `BACKEND_DOMAIN` [инстанса](/definitions#instance) [Pepeunit](/conception/overview), по умолчанию `https`
-`PU_TELEGRAM_TOKEN `| `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | Токен `Telegram Bot` можно получить у [Bot Father](https://t.me/BotFather)
-`PU_TELEGRAM_BOT_LINK` | `https://t.me/PepeUnitRobot` | `https://t.me/PepeUnitRobot` | Ccылка на бота, которого вы создаёте в [Bot Father](https://t.me/BotFather)
-`PU_MQTT_HOST` | `192.168.0.22` | `emqx.pepeunit.com` | Доменное имя от [инстансa](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker). Для локального использования, убедитесь, что адрес будет доступен из контейнеров, `127.0.0.1` скорее всего работать не будет
+`PU_TELEGRAM_TOKEN `| `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | Токен [Telegram Bot](/definitions#telegram-bot) можно получить у [Bot Father](https://t.me/BotFather)
+`PU_TELEGRAM_BOT_LINK` | `https://t.me/PepeUnitRobot` | `https://t.me/PepeUnitRobot` | Ccылка на [Telegram Bot](/definitions#telegram-bot), которого вы создаёте в [Bot Father](https://t.me/BotFather)
+`PU_MQTT_HOST` | `192.168.0.22` | `emqx.pepeunit.com` | Доменное имя от [инстансa](/definitions#instance) [EMQX](/deployment/dependencies/emqx). Для локального использования, убедитесь, что адрес будет доступен из контейнеров, `127.0.0.1` скорее всего работать не будет
 `PU_MQTT_SECURE` | `False` | - | Выбирает `http` или `https` для `MQTT_HOST` [инстансa](/definitions#instance) [Pepeunit](/conception/overview), по умолчанию `https`
-`PU_MQTT_PORT` | `1883` | `1883` | `MQTT` порт для [EMQX MQTT Broker](/definitions#mqtt-broker)
-`PU_MQTT_USERNAME` | `YabJTlmvQ4tvweuTl0gn` | `YabJTlmvQ4tvweuTl0gn` | Имя администратора [EMQX MQTT Broker](/definitions#mqtt-broker)
-`PU_MQTT_PASSWORD` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | Пароль администратора [EMQX MQTT Broker](/definitions#mqtt-broker)
+`PU_MQTT_PORT` | `1883` | `1883` | `MQTT` порт для [EMQX](/deployment/dependencies/emqx)
+`PU_MQTT_USERNAME` | `YabJTlmvQ4tvweuTl0gn` | `YabJTlmvQ4tvweuTl0gn` | Имя администратора [EMQX](/deployment/dependencies/emqx)
+`PU_MQTT_PASSWORD` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | Пароль администратора [EMQX](/deployment/dependencies/emqx)
 `GF_USER` | `admin` | `admin` | Логин админа для [Grafana](/deployment/dependencies/grafana)
 `GF_PASSWORD` | `aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB` | `aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB` | Пароль админа для [Grafana](/deployment/dependencies/grafana)
 
@@ -87,7 +87,7 @@ $> python make_env.py
 
 ## Настройка Nginx
 
-Обычно настройка `Nginx` для `docker compose` не требуется. Если ваш инстанс [Pepeunit](/conception/overview) будет находиться за ещё одним `Nginx`, используйте: [Подробная настройка nginx для https и reverse proxy](/deployment/nginx)
+Обычно настройка [Nginx](/deployment/dependencies/nginx) для `docker compose` не требуется, но если ваш инстанс [Pepeunit](/conception/overview) будет находиться за ещё одним [Nginx](/deployment/dependencies/nginx), используйте: [Подробная настройка nginx для https и reverse proxy](/deployment/nginx)
 
 ## Открытие портов
 
@@ -116,7 +116,7 @@ docker compose up -d
 ```
 
 :::info
-Пример корреткного запуска [Backend](/definitions#backend) на основе конфига `.env.global`. Для `.env.local` будут отличаться только `ip` адреса и установка `pooling` для `Telegram Bot`:
+Пример корреткного запуска [Backend](/deployment/dependencies/backend) на основе конфига `.env.global`. Для `.env.local` будут отличаться только `ip` адреса и установка `pooling` для [Telegram Bot](/definitions#telegram-bot):
 ```bash
 $> docker logs -f backend
 Wait Ready PostgreSQL...
@@ -249,11 +249,11 @@ INFO - 2025-09-15 22:09:38,640 - Success set TG bot webhook url
 INFO - 2025-03-14 01:11:53,249 - [SUBACK] 1 (0,)
 ```
 
-Она отображает смог ли [Backend](/definitions#backend) подписаться на топик `dcunit.pepeunit.com/+/+/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/definitions#backend) `не смог` подписаться на основной топик. Обычно это одна из ошибок конфигурирования:
+Она отображает смог ли [Backend](/deployment/dependencies/backend) подписаться на топик `dcunit.pepeunit.com/+/+/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/deployment/dependencies/backend) `не смог` подписаться на основной топик. Обычно это одна из ошибок конфигурирования:
 1. Закрытым портом `1883`
-1. Настройкой портов сервиса `emqx` в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
+1. Настройкой портов сервиса [EMQX](deployment/dependencies/emqx) в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
 1. При использовании кастомного порта для `mqtt`, требуется указать его в двух `.env` файлах: `backend` и `datapipe`
-1. Ошибками в настройках [EMQX MQTT Broker](/definitions#mqtt-broker) и [Backend](/definitions#backend), например `PU_MQTT_REDIS_AUTH_URL` или `PU_REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables/backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies/redis). За первичную авторизацию отвечает именно [Redis](/deployment/dependencies/redis).
+1. Ошибками в настройках [EMQX](/deployment/dependencies/emqx) и [Backend](/deployment/dependencies/backend), например `PU_MQTT_REDIS_AUTH_URL` или `PU_REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables/backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies/redis). За первичную авторизацию отвечает именно [Redis](/deployment/dependencies/redis).
 :::
 
 ## Создание Администратора

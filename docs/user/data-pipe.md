@@ -1,14 +1,14 @@
 # DataPipe
 
 :::warning
-[DataPipe](/definitions#datapipe) изначально выключены, чтобы [UnitNode](/definitions#unitnode) не потребляли серверные ресурсы.
+[DataPipe](/deployment/dependencies/datapipe) изначально выключены, чтобы [UnitNode](/definitions#unitnode) не потребляли серверные ресурсы.
 :::
 
 :::info Как найти DataPipe?
 1. Найдите интересующий вас [Unit](/definitions#unit) визуально или через вкладку поиска. 
 1. Нажмите `ПКМ` по [Unit](/definitions#unit) если [UnitNode](/definitions#unitnode) ещё не отобразились
 1. Выберите `ЛКМ` `Input` или `Output` [UnitNode](/definitions#unitnode)
-1. Кликните жёлткую кнопку [DataPipe](/definitions#datapipe)
+1. Кликните жёлткую кнопку [DataPipe](/deployment/dependencies/datapipe)
 :::
 
 Кнопки:
@@ -196,7 +196,7 @@ processing_policy:
 
 ## Import CSV Data
 
-Данная кнопка позволяет загрузить правильно отформатированный `CSV` файл в [DataPipe](/definitions#datapipe). При этом все данные пройдут проверки, указанные в `YML` конфигурации. Важным условие является отсортированность по `create_datetime` и `end_window_datetime` в asc - первая запись старше чем последняя.
+Данная кнопка позволяет загрузить правильно отформатированный `CSV` файл в [DataPipe](/deployment/dependencies/datapipe). При этом все данные пройдут проверки, указанные в `YML` конфигурации. Важным условие является отсортированность по `create_datetime` и `end_window_datetime` в asc - первая запись старше чем последняя.
 
 Далее примеры файлов для разных `policy_type`, с минимальным набором полей для импорта:
 

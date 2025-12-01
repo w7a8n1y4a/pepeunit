@@ -24,7 +24,7 @@ features:
   - title: Repository Registry
     details: Открытый реестр репозиториев для создания Unit
   - title: IoT Device Management
-    details: Управление устройствами через MQTT, REST, GQL, Frontend и Telegram Bot
+    details: Управление устройствами через MQTT, REST, GQL, Frontend и Telegram
   - title: Topic Managment
     details: Система именования тем для отбражения данных и/или быстрого взаимодействия между IoT устройствами
   - title: Access Policies

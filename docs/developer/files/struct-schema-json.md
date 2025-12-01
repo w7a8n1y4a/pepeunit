@@ -5,9 +5,9 @@
 1. [Unit](/definitions#unit) гарантирует, что он подпишется на все стандартные топики указанные в `input_base_topic` и все [UnitNode](/definitions#unitnode) указанные в `input_topic`
 1. [Unit](/definitions#unit) гарантирует, что он будет публиковать данные в стандартные топики из `output_base_topic` и в [UnitNode](/definitions#unitnode) указанные в `output_topic`
 1. [Pepeunit](/conception/overview) гарантирует, что будет [отправлять корректные форматы данных](/developer/mqtt/default-mqtt-command) в `input_base_topic` и то что подпишется на все топики в `output_base_topic`
-1. [Pepeunit](/conception/overview) гарантирует, что будет производить авторизацию для публикации и подписки на все без исключения топики адресованные на [инстанс](/definitions#instance) [EMQX MQTT Broker](/definitions#mqtt-broker) используемый [Backend](/definitions#backend)
+1. [Pepeunit](/conception/overview) гарантирует, что будет производить авторизацию для публикации и подписки на все без исключения топики адресованные на [инстанс](/definitions#instance) [EMQX](/deployment/dependencies/emqx) используемый [Backend](/deployment/dependencies/backend)
 1. [Pepeunit](/conception/overview) гарантирует, что будет подписан на все топики соответствующие паттерну `unit.example.com/+/+/+/pepeunit`
-1. [Pepeunit](/conception/overview) гарантирует, что подпишется на все топики с паттерном `unit.example.com/+/pepeunit` у которых включен механизм [DataPipe](/definitions#datapipe)
+1. [Pepeunit](/conception/overview) гарантирует, что подпишется на все топики с паттерном `unit.example.com/+/pepeunit` у которых включен механизм [DataPipe](/deployment/dependencies/datapipe)
 :::
 
 ## Структура
@@ -61,9 +61,9 @@
 
 :::info
 1. Всегда состоят из `5` основных элементов
-1. Каждому наименованию топика в [schema_example.json](/definitions#schema-example-json) соответствует только один топик из [EMQX MQTT Broker](/definitions#mqtt-broker):
+1. Каждому наименованию топика в [schema_example.json](/definitions#schema-example-json) соответствует только один топик из [EMQX](/deployment/dependencies/emqx):
 
-Структура топиков в [EMQX MQTT Broker](/definitions#mqtt-broker):
+Структура топиков в [EMQX](/deployment/dependencies/emqx):
 
 ```txt
 Доменное имя инстанса / тип топика / Unit.uuid / назначение / pepeunit
@@ -76,9 +76,9 @@
 
 :::info
 - Могут состоять из `2` или `3` элементов (c и без постфикса `/pepeunit` на конце)
-- Для топиков без постфикса `/pepeunit` (состоящих из `2` элементов) нельзя настроить [DataPipe](/definitions#datapipe)
+- Для топиков без постфикса `/pepeunit` (состоящих из `2` элементов) нельзя настроить [DataPipe](/deployment/dependencies/datapipe)
 
-Структура топиков в [EMQX MQTT Broker](/definitions#mqtt-broker):
+Структура топиков в [EMQX](/deployment/dependencies/emqx):
 ```txt
 Доменное имя инстанса / UnitNode.uuid
 Доменное имя инстанса / UnitNode.uuid / pepeunit
@@ -88,13 +88,13 @@
 :::
 
 Подробнее о `output_topic`:
-- Предназначен чтобы [Unit](/definitions#unit) мог отправлять данные в [EMQX MQTT Broker](/definitions#mqtt-broker)
-- Каждому `output_topic` из [schema_example.json](/definitions#schema-example-json) соответствует только один топик из [EMQX MQTT Broker](/definitions#mqtt-broker)
+- Предназначен чтобы [Unit](/definitions#unit) мог отправлять данные в [EMQX](/deployment/dependencies/emqx)
+- Каждому `output_topic` из [schema_example.json](/definitions#schema-example-json) соответствует только один топик из [EMQX](/deployment/dependencies/emqx)
 - [Unit](/definitions#unit) имеет эксклюзивное право на публикацию в данные топики, ни один другой [Unit](/definitions#unit) опубликовать данные в них не сможет
 
 Подробнее о `input_topic`:
 - Предназначен чтобы [Unit](/definitions#unit) мог принимать сообщения сразу от нескольких [Unit](/definitions#unit)
-- Каждому `input_topic` из [schema_example.json](/definitions#schema-example-json) может соответствовать несколько топиков из [EMQX MQTT Broker](/definitions#mqtt-broker)
+- Каждому `input_topic` из [schema_example.json](/definitions#schema-example-json) может соответствовать несколько топиков из [EMQX](/deployment/dependencies/emqx)
 - Система связей `Output->Input` позволяет [Unit](/definitions#unit) подписываться не только на свой `Input` [UnitNode](/definitions#unitnode), а также получить значения из `Output` [UnitNode](/definitions#unitnode) других [Unit](/definitions#unit) внутри одного `input_topic`
 
 Схематический пример создания связи между двумя [Unit](/definitions#unit)

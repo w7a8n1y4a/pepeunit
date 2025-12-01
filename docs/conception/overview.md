@@ -18,17 +18,17 @@
 
 ## Интеграция с Grafana
 
-`Pepeunit` - позволяет создавать кастомные [Dashboard](/definitions#dashboard) из [Visualization](/definitions#visualization). В качестве данных служат [UnitNode](/definitions#unitnode) с настроенными [DataPipe](/definitions#datapipe)
+`Pepeunit` - позволяет создавать кастомные [Dashboard](/definitions#dashboard) из [Visualization](/definitions#visualization). В качестве данных служат [UnitNode](/definitions#unitnode) с настроенными [DataPipe](/deployment/dependencies/datapipe)
 
 
 ## Управление устройствами IoT
 
 `Pepeunit` предоставляет несколько способов взаимодействия с [Unit](/definitions#unit)
-- [MQTT](/definitions#mqtt) - `EMQX`
-- [Frontend](/definitions#frontend) - `React`
+- [MQTT](/definitions#mqtt) - [EMQX](deployment/dependencies/emqx)
+- [Frontend](/deployment/dependencies/frontend) - `React`
 - [REST](/definitions#rest) - `Swagger`
 - [GQL](/definitions#gql) - `Strawberry`
-- [ChatBot](/definitions#chat-bot) - `AioGram`
+- [Telegram Bot](/definitions#telegram-bot) - `AioGram`
 
 ## Управление топиками
 

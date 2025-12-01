@@ -13,4 +13,4 @@
 :::
 
 ## DataPipe
-Для простых сообщений текстом и числами, можно организовать обработку через [DataPipe](/definitions#datapipe). [Подробнее о настройке DataPipe](/user/data-pipe#datapipe)
+Для простых сообщений текстом и числами, можно организовать обработку через [DataPipe](/deployment/dependencies/datapipe). [Подробнее о настройке DataPipe](/user/data-pipe#datapipe)
