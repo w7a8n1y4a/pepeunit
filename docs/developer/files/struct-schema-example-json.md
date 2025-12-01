@@ -37,7 +37,7 @@
 Топик | Описание | Подробности
 -- | -- | -- 
 `input_base_topic` | Топики стандартных [MQTT](/definitions#mqtt) команд, которые [Unit](/definitions#unit) может выполнить | [Стандартные MQTT команды](/developer/mqtt/default-mqtt-command)
-`output_base_topic` | Топики стандартной публикации данных, в которые [Unit](/definitions#unit) может публиковать данные | [Стандартные MQTT топики состояния](/developer/mqtt/default-mqtt-command)
+`output_base_topic` | Топики стандартной публикации данных, в которые [Unit](/definitions#unit) может публиковать данные | [Стандартные MQTT топики состояния](/developer/mqtt/state-mqtt-send)
 `input_topic` | `Input` топики Разработчика [Unit](/definitions#unit). [Pepeunit](/conception/overview) использует их как шаблон для создания `Input` [UnitNode](/definitions#unitnode) | [Топики разработчика](/developer/files/struct-schema-json#топики-разработчика)
 `output_topic` | `Output` топики Разработчика [Unit](/definitions#unit). [Pepeunit](/conception/overview) использует их как шаблон для создания `Output` [UnitNode](/definitions#unitnode) | [Топики разработчика](/developer/files/struct-schema-json#топики-разработчика)
 
