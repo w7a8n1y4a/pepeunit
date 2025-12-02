@@ -86,31 +86,31 @@
 `Dashboard` - набор [Visualization](#visualization) в [Grafana](/deployment/dependencies/grafana), собранных на одной панели для удобного мониторинга и анализа данных.
 
 ## schema_example.json
-`schema_example.json` - файл схемы, описывающий [MQTT](#mqtt) топики нужные [Unit](#unit). Данный файл создаётся разработчиком [Unit](#unit) и помещается в каждую версию [Repo](#repo). Благодаря данному файлу [Pepeunit](/conception/overview) создаёт [UnitNode](#unitnode) сущности, отвечающие за взаимодействие с [Unit](#unit) и регламентирующие политики доступа до топиков [Unit](#unit). [Подробнее](/developer/files/struct-schema-example-json#schema-example-json).
+`schema_example.json` - файл схемы, описывающий [MQTT](#mqtt) топики нужные [Unit](#unit). Данный файл создаётся разработчиком [Unit](#unit) и помещается в каждую версию [Repo](#repo). Благодаря данному файлу [Pepeunit](/conception/overview) создаёт [UnitNode](#unitnode) сущности, отвечающие за взаимодействие с [Unit](#unit) и регламентирующие политики доступа до топиков [Unit](#unit). [Подробнее](/developer/files/struct-schema-example-json#schema-example-json)
 
 ## schema.json
-`schema.json` - готовый файл схемы для [Unit](#unit) генерируемый [Pepeunit](/conception/overview), содержит в себе ссылки на [UnitNode](#unitnode) и базовые топики для взаимодействия с [Pepeunit](/conception/overview). [Подробнее](/developer/files/struct-schema-json#schema-json).
+`schema.json` - готовый файл схемы для [Unit](#unit) генерируемый [Pepeunit](/conception/overview), содержит в себе ссылки на [UnitNode](#unitnode) и базовые топики для взаимодействия с [Pepeunit](/conception/overview). [Подробнее](/developer/files/struct-schema-json#schema-json)
 
 ## env_example.json
-`env_example.json`- файл, описывающий переменные окружения нужные для корректной работы [Unit](#unit), он создаётся разработчиком [Unit](#unit) и помещается в каждую версию [Repo](#repo). На основе данного файла и ввода Пользователя, [Pepeunit](/conception/overview) может сгенерировать [env.json](#envjson) файл для [Unit](#unit). [Подробнее](/developer/files/struct-env-example-json#env-example-json).
+`env_example.json`- файл, описывающий переменные окружения нужные для корректной работы [Unit](#unit), он создаётся разработчиком [Unit](#unit) и помещается в каждую версию [Repo](#repo). На основе данного файла и ввода Пользователя, [Pepeunit](/conception/overview) может сгенерировать [env.json](#envjson) файл для [Unit](#unit). [Подробнее](/developer/files/struct-env-example-json#env-example-json)
 
 ## env.json
 `env.json`- секретный файл, содержащий переменные окружения нужные дла корректной работы [Unit](#unit).
 Именно данный файл отличает ваш [Unit](#unit) от других [Unit](#unit) отстыкованных от одного и того же [Repo](#repo).
 Он создаётся владельцем [Unit](#unit) совместно с [Pepeunit](/conception/overview) и хранится в 
-[шифрованном](/development-pepeunit/mechanics/cipher) виде внутри сущности [Unit](#unit). [Подробнее](/developer/files/struct-env-json#env-json).
+[шифрованном](/development-pepeunit/mechanics/cipher) виде внутри сущности [Unit](#unit). [Подробнее](/developer/files/struct-env-json#env-json)
 
 ## pepeunit.toml
-`pepeunit.toml` - стандартизированый информационный блок [Unit](#unit), включающий в себя исчерпывающую информацию о [Unit](#unit). Помещается в корень [Git](#git) репозитория и выполняет функцию машиночитаемого описания [Unit](#unit) для [Pepeunit](/conception/overview). Ближайший аналог в мире разработки - `pyproject.toml`. [Подробнее](/developer/files/struct-pepeunit-toml#pepeunit-toml).
+`pepeunit.toml` - стандартизированый информационный блок [Unit](#unit), включающий в себя исчерпывающую информацию о [Unit](#unit). Помещается в корень [Git](#git) репозитория и выполняет функцию машиночитаемого описания [Unit](#unit) для [Pepeunit](/conception/overview). Ближайший аналог в мире разработки - [pyproject.toml](https://packaging.python.org/en/latest/guides/writing-pyproject-toml/). [Подробнее](/developer/files/struct-pepeunit-toml#pepeunit-toml)
 
 ## readme.md
-`readme.md` или `README.md` - файл документации внутри репозитория [Git](#git), по усмотрению создателя репозитория содержит базовую инфорацию о репозитории, нюансах работы, настройки или любую другую информацию, которую автор счёл нужной. В [Pepeunit](/conception/overview) для заполнения `readme.md` использует генератор на основе [pepeunit.toml](#pepeunit-toml). [Подробнее](/developer/files/struct-readme#readme-md).
+`readme.md` или `README.md` - файл документации внутри репозитория [Git](#git), по усмотрению создателя репозитория содержит базовую инфорацию о репозитории, нюансах работы, настройки или любую другую информацию, которую автор счёл нужной. В [Pepeunit](/conception/overview) для заполнения `readme.md` использует генератор на основе [pepeunit.toml](#pepeunit-toml). [Подробнее](/developer/files/struct-readme#readme-md)
 
 ## .gitignore
-[.gitignore](https://git-scm.com/docs/gitignore) - указывает файлы и дирректории, которые [Git](#git) должен игнорировать, поддерживает паттерны для облегчения чистки файлов. [Подробнее](/developer/files/struct-gitignore).
+[.gitignore](https://git-scm.com/docs/gitignore) - указывает файлы и дирректории, которые [Git](#git) должен игнорировать, поддерживает паттерны для облегчения чистки файлов. [Подробнее](/developer/files/struct-gitignore)
 
 ## .pepeignore
-`.pepeignore` - аналогичный по синтаксису [.gitignore](#gitignore) файл [Git](#git) репозиториев у [Unit](#unit), но позволяющий удалить все указанные в нём файлы и дирректории из репозитория в момент генерации [архива с программой](/developer/files/struct-archive-update) для [Интерпритируемых](#interpreterable) [Unit](#unit). [Подробнее](/developer/files/struct-pepeignore).
+`.pepeignore` - аналогичный по синтаксису [.gitignore](#gitignore) файл [Git](#git) репозиториев у [Unit](#unit), но позволяющий удалить все указанные в нём файлы и дирректории из репозитория в момент генерации [архива с программой](/developer/files/struct-archive-update) для [Интерпритируемых](#interpreterable) [Unit](#unit). [Подробнее](/developer/files/struct-pepeignore)
 
 ## LICENSE
 `LICENSE` - файл лицензии, устанавливается в корень репозитория [Git](#git), регламентирует юридический аспект использования репозитория. Все репозитории [Pepeunit](/conception/overview) имеют лицензию `AGPL v3`, но каждый автор выбирает лицензию для своего кода сам, например на [spdx.org](https://spdx.org/licenses/).
