@@ -34,13 +34,13 @@ mv .env.local.example .env.local
 `CLICKHOUSE_USER` | `pepeunit-admin` | `pepeunit-admin` | Имя пользователя, от имени которого будет создана база данных
 `CLICKHOUSE_PASSWORD` | `f6prBUMbhvNnlLZ0f0HN` | `f6prBUMbhvNnlLZ0f0HN` | Пароль пользователя, от имени которого будет создана база данных
 `CLICKHOUSE_DB` | `default` | `default` | Название базы данных
-`PU_DOMAIN` | `192.168.0.22` | `unit.pepeunit.com` | Доменное имя от [инстанса](/definitions#instance) [Pepeunit](/conception/overview)
-`PU_SECURE` | `False` | - | Выбирает `http` или `https` для `BACKEND_DOMAIN` [инстанса](/definitions#instance) [Pepeunit](/conception/overview), по умолчанию `https`
+`PU_DOMAIN` | `192.168.0.22` | `unit.pepeunit.com` | Доменное имя от инстанса [Pepeunit](/conception/overview)
+`PU_SECURE` | `False` | - | Выбирает `http` или `https` для `BACKEND_DOMAIN` инстанса [Pepeunit](/conception/overview), по умолчанию `https`
 `PU_TELEGRAM_TOKEN `| `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | Токен [Telegram Bot](/definitions#telegram-bot) можно получить у [Bot Father](https://t.me/BotFather)
 `PU_TELEGRAM_BOT_LINK` | `https://t.me/PepeUnitRobot` | `https://t.me/PepeUnitRobot` | Ccылка на [Telegram Bot](/definitions#telegram-bot), которого вы создаёте в [Bot Father](https://t.me/BotFather)
-`PU_MQTT_HOST` | `192.168.0.22` | `emqx.pepeunit.com` | Доменное имя от [инстансa](/definitions#instance) [EMQX](/deployment/dependencies/emqx). Для локального использования, убедитесь, что адрес будет доступен из контейнеров, `127.0.0.1` скорее всего работать не будет
-`PU_MQTT_SECURE` | `False` | - | Выбирает `http` или `https` для `MQTT_HOST` [инстансa](/definitions#instance) [Pepeunit](/conception/overview), по умолчанию `https`
-`PU_MQTT_PORT` | `1883` | `1883` | `MQTT` порт для [EMQX](/deployment/dependencies/emqx)
+`PU_MQTT_HOST` | `192.168.0.22` | `emqx.pepeunit.com` | Доменное имя от инстансa [EMQX](/deployment/dependencies/emqx). Для локального использования, убедитесь, что адрес будет доступен из контейнеров, `127.0.0.1` скорее всего работать не будет
+`PU_MQTT_SECURE` | `False` | - | Выбирает `http` или `https` для `MQTT_HOST` инстансa [Pepeunit](/conception/overview), по умолчанию `https`
+`PU_MQTT_PORT` | `1883` | `1883` | [MQTT](/definitions#mqtt) порт для [EMQX](/deployment/dependencies/emqx)
 `PU_MQTT_USERNAME` | `YabJTlmvQ4tvweuTl0gn` | `YabJTlmvQ4tvweuTl0gn` | Имя администратора [EMQX](/deployment/dependencies/emqx)
 `PU_MQTT_PASSWORD` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | Пароль администратора [EMQX](/deployment/dependencies/emqx)
 `GF_USER` | `admin` | `admin` | Логин админа для [Grafana](/deployment/dependencies/grafana)
@@ -100,7 +100,7 @@ $> python make_env.py
 если ваш `1883` порт занят другими приложениями, изменить его на другой и внесите изменения в [ENV переменные Backend](/deployment/env-variables/backend) - `PU_MQTT_PORT`, а также в `docker-compose.yml` в секцию `emqx.ports` - значение `- "1883:1883"` вам нужно будет заменить например на: `- "1885:1883"`
 :::
 :::danger
-Если у вас публичный [инстанс](/definitions#instance) [Pepeunit](/conception/overview) с доменом - вам потребуется прокинуть данные порты наружу
+Если у вас публичный инстанс [Pepeunit](/conception/overview) с доменом - вам потребуется прокинуть данные порты наружу
 :::
 
 ## Первый запуск
@@ -252,10 +252,10 @@ INFO - 2025-03-14 01:11:53,249 - [SUBACK] 1 (0,)
 Она отображает смог ли [Backend](/deployment/dependencies/backend) подписаться на топик `dcunit.pepeunit.com/+/+/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/deployment/dependencies/backend) `не смог` подписаться на основной топик. Обычно это одна из ошибок конфигурирования:
 1. Закрытым портом `1883`
 1. Настройкой портов сервиса [EMQX](/deployment/dependencies/emqx) в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
-1. При использовании кастомного порта для `mqtt`, требуется указать его в двух `.env` файлах: `backend` и `datapipe`
+1. При использовании кастомного порта для [MQTT](/definitions#mqtt), требуется указать его в двух `.env` файлах: `backend` и `datapipe`
 1. Ошибками в настройках [EMQX](/deployment/dependencies/emqx) и [Backend](/deployment/dependencies/backend), например `PU_MQTT_REDIS_AUTH_URL` или `PU_REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables/backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies/redis). За первичную авторизацию отвечает именно [Redis](/deployment/dependencies/redis).
 :::
 
 ## Создание Администратора
 
-Первый созданный пользователь на [инстансе](/definitions#instance) [Pepeunit](/conception/overview) автоматически становится [Администратором](/development-pepeunit/mechanics/roles#admin). Для этого достаточно пройти стандартную форму регистрации.
+Первый созданный пользователь на инстансе [Pepeunit](/conception/overview) автоматически становится [Администратором](/development-pepeunit/mechanics/roles#admin). Для этого достаточно пройти стандартную форму регистрации.

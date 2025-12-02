@@ -10,7 +10,7 @@
 :::
 
 :::danger
-Размер данного хранилища ограничен размером [шифруемых объектов](/development-pepeunit/mechanics/cipher#шифрование) на [инстансе](/definitions#instance) [Pepeunit](/conception/overview).
+Размер данного хранилища ограничен размером [шифруемых объектов](/development-pepeunit/mechanics/cipher#шифрование) на инстансе [Pepeunit](/conception/overview).
 :::
 
 ## Отправка данных в хранилище

@@ -3,7 +3,7 @@
 [Ccылки на репозитории](/development-pepeunit/maps.html#библиотеки)
 
 :::info
-Интерпритируемый и при этом имеет полную функциональность [Pepeunit Framework](/developer/libraries/framework)
+[Интерпритируемый](/definitions#interpreterable) и при этом имеет полную функциональность [Pepeunit Framework](/developer/libraries/framework)
 :::
 
 ## Пример
@@ -147,8 +147,8 @@ if __name__ == '__main__':
 1. Библиотека протестирована для `esp32` и `esp8266`
 1. На `esp8266` из `38кБ` остаются свободными `19-21кБ` опретивной памяти, после полной инициализации библиотеки, как в примере
 1. Ввиду отсутствия поддержки `https` на `esp8266` поддерживается только `http` при работе через [REST](/definitions#rest)
-1. Сама по себе библиотека уже встроена в образ `Micropython` при помощи `freeze`, благодаря этому удалось сильно освободить оперативную память. Такое решение было принято ввиду очень малого объёма оперативной памяти при установке даже через `.mpy` файлы.
-1. В кастомный `Micropython` помимо текущей библиотеки также встроены:
+1. Сама по себе библиотека уже встроена в образ [Micropython](/definitions#micropython) при помощи `freeze`, благодаря этому удалось сильно освободить оперативную память. Такое решение было принято ввиду очень малого объёма оперативной памяти при установке даже через `.mpy` файлы.
+1. В кастомный [Micropython](/definitions#micropython) помимо текущей библиотеки также встроены:
     - [mrequests](https://github.com/SpotlightKid/mrequests.git)
     - [shutil](https://github.com/micropython/micropython-lib/blob/master/python-stdlib/shutil/shutil.py)
     - [tarfile](https://github.com/micropython/micropython-lib/blob/master/python-stdlib/tarfile/tarfile/__init__.py)

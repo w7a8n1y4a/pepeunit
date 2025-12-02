@@ -10,11 +10,11 @@
 
 ### Internal
 
-- предоставляет [доступ](/development-pepeunit/mechanics/permission) до сущности только авторизованным [Пользователям](/development-pepeunit/mechanics/roles.html#user) [инстанса](/definitions#instance) или всем [Unit](/definitions#unit) находящихся в [инстансе](/definitions#instance)
+- предоставляет [доступ](/development-pepeunit/mechanics/permission) до сущности только авторизованным [Пользователям](/development-pepeunit/mechanics/roles.html#user) инстанса или всем [Unit](/definitions#unit) находящихся в инстансе
 
 ### Private
 
-- предоставляет [доступ](/development-pepeunit/mechanics/permission) до сущности только создателю и агентам которых укажет создатель. Работает в пределах [инстанса](/definitions#instance)
+- предоставляет [доступ](/development-pepeunit/mechanics/permission) до сущности только создателю и агентам которых укажет создатель. Работает в пределах инстанса
 
 :::danger
 Сущность [RepositoryRegisty](/definitions#repositoryregistry) уникальная и имеет только два типа `Public` и `Private`. Предоставление доступа к `Private` сущности отличается, и завязано на ввод пользователями [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория). Создатель не может сам предоставить доступ, это связано с бизнес логикой работы этой сущности

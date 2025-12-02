@@ -11,7 +11,7 @@
 [Fediverse](https://en.wikipedia.org/wiki/Fediverse) - способ организации взаимодействия сервер - сервер, обеспечивающий децентрализованную схему распространения и обработки информации.
 
 ## IoT
-`Ineternet of Things` - обширная сеть устройств-предметов, подключенных к Интернету и способных взаимодействовать друг c другом.
+`Ineternet of Things` - сеть физических объектов, встроенных с датчиками, программным обеспечением и другими технологиями, которые позволяют этим устройствам подключаться и обмениваться данными с другими устройствами и системами.
 
 ## Framework
 Готовая программная структура или каркас для разработки программ, который задаёт архитектуру приложения, управляет потоком выполнения и жизненным циклом, предоставляет набор компонентов и инструментов, а также позволяет внедрять свою логику через определённые расширяемые точки. В отличие от библиотеки, фреймворк диктует правила организации кода и вызывает пользовательский код по своему усмотрению.
@@ -35,13 +35,10 @@
 `Branch или Ветка` - набор [коммитов](/#git-commit), расположенных в хронологическом порядке в системе контроля версии [Git](#git).
 
 ## Gitlab
-`Gitlab` - веб-инструмент жизненного цикла [Git](#git) репозиториев от компании `GitLab Inc`. В данной документации под `Gitlab` подразумевается не только [gitlab.com](https://about.gitlab.com/), но и любой другой [Узел](#instance) `Gitlab CE` или `Gitlab EE`
+`Gitlab` - веб-инструмент жизненного цикла [Git](#git) репозиториев от компании `GitLab Inc`. В данной документации под `Gitlab` подразумевается не только [gitlab.com](https://about.gitlab.com/), но и любой другой инстанс `Gitlab CE` или `Gitlab EE`
 
 ## Github
 [Github](https://github.com/) - хостинг [Git](#git) репозиториев от компании `Github Inc`.
-
-## Instance
-`Instance или Узел` - полностью работоспособное, настроенное и запущенное веб приложение - способное отвечать на запросы клиентов.
 
 ## SQL
 `SQL (Structured Query Language)` — декларативный язык программирования для создания, изменения и управления базами данных.
@@ -57,9 +54,6 @@
 
 ## MQTT
 `MQTT API` - упрощённый сетевой протокол, работающий поверх `TCP/IP`, ориентированный на обмен сообщениями между устройствами по принципу издатель-подпищик. Pepeunit [Backend](/deployment/dependencies/backend) использует пакет [fastapi-mqtt](https://sabuhish.github.io/fastapi-mqtt/) как клиент, для взаимодействия c [EMQX](deployment/dependencies/emqx).
-
-## ACL List
-`ACL List` - файл, определяющий правила авторизации для [EMQX](/deployment/dependencies/emqx)
 
 ## Telegram
 [Telegram](https://telegram.org/) - популярный мессенджер, имеющий функционал [Telegram Bot](#telegram-bot)
@@ -86,7 +80,7 @@
 `Datasource` - источник данных [Grafana](/deployment/dependencies/grafana), из которого [Grafana](/deployment/dependencies/grafana) получает данные для дальнейшей визуализации. [Backend](/deployment/dependencies/backend) реализует [REST](/definitions#rest) запрос для [InfinityAPI](https://grafana.com/grafana/plugins/yesoreyeram-infinity-datasource/) из коробки для каждой отдельной организации. Который с использованием `headers` и `params` позволяет получать данные накопленные с помощью механизмов [DataPipe](/deployment/dependencies/datapipe).
 
 ## Visualization
-`Visualization`, панели —  способ отображения данных [Grafana](/deployment/dependencies/grafana). Каждая отдельная визуализация может содержать несколько [Datasource](#datasource) одного или нескольких типов. В каждую визуализацию можно слинковать несколько `UnitNode` с настроенным [DataPipe](/deployment/dependencies/datapipe). При сборке визуализаций, следите, чтобы формат данных был одинаковым.
+`Visualization`, панели —  способ отображения данных [Grafana](/deployment/dependencies/grafana). Каждая отдельная визуализация может содержать несколько [Datasource](#datasource) одного или нескольких типов. В каждую визуализацию можно слинковать несколько [UnitNode](#unitnode) с настроенным [DataPipe](/deployment/dependencies/datapipe). При сборке визуализаций, следите, чтобы формат данных был одинаковым.
 
 ## Dashboard
 `Dashboard` - набор [Visualization](#visualization) в [Grafana](/deployment/dependencies/grafana), собранных на одной панели для удобного мониторинга и анализа данных.

@@ -2,7 +2,7 @@
 
 ## DataPipe как cервис Backend
 
-Высокопроизводительный обработчик данных написанный на `golang` - отвечает за получение информации из топиков с паттерном `example.com/+/pepeunit` и фильтрацию получаемых из них данных для сохранения в [Clickhouse](/deployment/dependencies/clickhouse) и [Postgresql](/deployment/dependencies/postgresql).
+Высокопроизводительный обработчик данных написанный на [Golang](/definitions#golang) - отвечает за получение информации из топиков с паттерном `example.com/+/pepeunit` и фильтрацию получаемых из них данных для сохранения в [Clickhouse](/deployment/dependencies/clickhouse) и [Postgresql](/deployment/dependencies/postgresql).
 
 :::info
 [Подробнее о переменных окружения](/deployment/env-variables/data-pipe)

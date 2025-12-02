@@ -6,7 +6,7 @@
 - [loki](/deployment/dependencies/loki)
 - [promtail](/deployment/dependencies/promtail)
 
-Эти `4` контейнера вместе с [Grafana](/deployment/dependencies/grafana) позволяют создать набор `Grafana Dashboards` о состоянии [инстанса](/definitions#instance) [Pepeunit](/conception/overview)
+Эти `4` контейнера вместе с [Grafana](/deployment/dependencies/grafana) позволяют создать набор `Grafana Dashboards` о состоянии инстанса [Pepeunit](/conception/overview)
 
 ## Grafana Dashboards
 

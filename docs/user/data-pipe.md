@@ -45,12 +45,12 @@
 
 Название параметра | Возможные значения | Обязательный? | Комментарий
 -- | -- | -- | --
-`type_input_value` | `Text` или `Number` | Да | Тип обрабатываемых данных. `Number` это `float64` из [go](/definitions#golang)
+`type_input_value` | `Text` или `Number` | Да | Тип обрабатываемых данных. `Number` это `float64` из [Golang](/definitions#golang)
 `type_value_filtering` | `WhiteList` и `BlackList` | Нет | Тип фильтрации значений 
 `filtering_values` | Список только числовых или только текстовых значений | Обязателен в случае если есть `type_value_filtering` | Проверка завязана на тип из `type_input_value`
 `type_value_threshold` | `Min`, `Max` или `Range` | Нет | Тип фильтрации диапазонов числовых значений
-`threshold_min` | `float64` из [go](/definitions#golang) | Обязателен если есть `type_value_threshold` с типами: `Min` и `Range` | Работает только с `type_input_value` = `Number`
-`threshold_max` | `float64` из [go](/definitions#golang) | Обязателен если есть `type_value_threshold` с типами: `Max` и `Range` | Работает только с `type_input_value` = `Number`
+`threshold_min` | `float64` из [Golang](/definitions#golang) | Обязателен если есть `type_value_threshold` с типами: `Min` и `Range` | Работает только с `type_input_value` = `Number`
+`threshold_max` | `float64` из [Golang](/definitions#golang) | Обязателен если есть `type_value_threshold` с типами: `Max` и `Range` | Работает только с `type_input_value` = `Number`
 `max_rate` | `0 <= max_rate <= 86400` только целые | Да | Определят через сколько секунд будет обработано следующее сообщение. `0` без ограничения
 `last_unique_check` | `true`, `false` | Да | Если `true` пропустит только если новое значение отличается от предыдущего, по умолчанию `false`
 `max_size` | `0 <= max_size <= MQTT_MAX_PAYLOAD_SIZE * 1024` | Да | Максимальный размер сообщения, если рамер привысит, сообщение будет пропущено
@@ -62,7 +62,7 @@
 Для `type_input_value` = `Number`:
 Название параметра | Возможные значения | Обязательный? | Комментарий
 -- | -- | -- | --
-`multiplication_ratio` | `float64` из [go](/definitions#golang) | Нет | На это число можно умножить заданное значение - линейное преобразование
+`multiplication_ratio` | `float64` из [Golang](/definitions#golang) | Нет | На это число можно умножить заданное значение - линейное преобразование
 `round_decimal_point` | `0 <= round_decimal_point <= 7` | Нет | Сколько чисел после запятой останется ?
 
 Для `type_input_value` = `Text`:
@@ -196,7 +196,7 @@ processing_policy:
 
 ## Import CSV Data
 
-Данная кнопка позволяет загрузить правильно отформатированный `CSV` файл в [DataPipe](/deployment/dependencies/datapipe). При этом все данные пройдут проверки, указанные в `YML` конфигурации. Важным условие является отсортированность по `create_datetime` и `end_window_datetime` в asc - первая запись старше чем последняя.
+Данная кнопка позволяет загрузить правильно отформатированный `CSV` файл в [DataPipe](/deployment/dependencies/datapipe). При этом все данные пройдут проверки, указанные в [YML](/definitions#yml) конфигурации. Важным условие является отсортированность по `create_datetime` и `end_window_datetime` в asc - первая запись старше чем последняя.
 
 Далее примеры файлов для разных `policy_type`, с минимальным набором полей для импорта:
 
