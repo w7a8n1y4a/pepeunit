@@ -10,6 +10,10 @@
 
 `Pepeunit` способен на основе внешних [Git](/definitions#git) репозиториев из [Gitlab](/definitions#gitlab) и [Github](/definitions#github), создавать готовые к использованию программы - это могут быть программы на основе [Интерпритируемых](/definitions#interpreterable) или [Компилируемых](/definitions#compilable) языков программирования.
 
+:::info
+[Cистема обновлений](/development-pepeunit/mechanics/update-system)
+:::
+
 ## Конвейеры обработки данных
 
 `Pepeunit` способен производительно накапливать, предварительно отчищенные и трансформированные данные в [Clickhouse](/deployment/dependencies/clickhouse) и [Postgresql](/deployment/dependencies/postgresql).
@@ -20,10 +24,17 @@
 - `Time Window` - сохранение всех записей за установленное временное окно
 - `Aggregation` - сохранение данных аггрегированных при помощи фукнций: `avg, sum, min, max` - за выбранное временное окно
 
+:::info
+[Настройка DataPipe](/user/data-pipe)
+:::
+
 ## Интеграция с Grafana
 
 `Pepeunit` - позволяет создавать кастомные [Dashboard](/definitions#dashboard) из [Visualization](/definitions#visualization). В качестве данных служат [UnitNode](/definitions#unitnode) с настроенными [DataPipe](/deployment/dependencies/datapipe)
 
+:::info
+[Управлении Dashboard](/user/dashboard)
+:::
 
 ## Управление устройствами IoT
 
@@ -38,25 +49,40 @@
 
 `Pepeunit` позволяет отслеживать состояние [Unit](/definitions#unit) при помощи системы именования топиков. [UnitNode](/definitions#unitnode) могут образовывать связи `Output` -> `Input` для передачи информации между разными [Unit](/definitions#unit).
 
+:::info
+[Связи Output->Input](/user/edge-unit-node)
+
+[Стандартные MQTT команды](/developer/mqtt/default-mqtt-command)
+
+[Стандартные MQTT топики состояния](/developer/mqtt/state-mqtt-send)
+
+[Структура сообщений в MQTT топиках](/developer/mqtt/struct-topic-messages)
+:::
+
+
 ## Настройка политик доступа
 
 `Pepeunit` позволяет регулировать уровни [доступа](/development-pepeunit/mechanics/permission) `Пользователь-Unit` и `Unit-Unit`. Глубина взаимодействия с платформой определяется [ролью Пользователя](/development-pepeunit/mechanics/roles) и [видимостью](/development-pepeunit/mechanics/visibility) отдельных сушностей [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode).
 
+:::info
+[Управление доступами](/development-pepeunit/mechanics/permission)
+:::
+
 ## Клиентские библиотеки
 
-`Pepeunit` имеет библиотеки облегчающие создание [Unit](/definitions#unit), каждая из библиотек поддерживает полный функционал, на данный момент доступны:
+`Pepeunit` имеет библиотеки облегчающие создание [Unit](/definitions#unit), каждая из библиотек поддерживает полный функционал [Pepeunit Framework](/developer/libraries/framework), на данный момент доступны:
 - [Micropython](/developer/libraries/micropython)
 - [Python](/developer/libraries/python)
 - [Golang](/developer/libraries/golang)
 
 ## Сравнение Инстансов
 
-Будет доступно начиная с одной из версий > 1.0.0
+[Будет доступно начиная с одной из версий > 1.0.0](/roadmap/comparison)
 
 ## Федерация
 
-Будет доступно в версии 2.0.0
+[Будет доступно в версии 2.0.0](/roadmap/federation)
 
 ## Монетизация
 
-Будет доступно в версии 2.0.0
+[Будет доступно в версии 2.0.0](/roadmap/monetisation)
