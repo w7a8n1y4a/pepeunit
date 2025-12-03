@@ -19,4 +19,4 @@
 1. Найдите зелёную кнопку `Related Output` и нажмите её - появится спсок [Unit](/definitions#unit) `Output` которых передают данные в текущий `Input`
 1. Нажмите на нужный вам [Unit](/definitions#unit) - откроется набор `Output`
 1. Выберите `Output` и нажмите `delete`
-1. [Pepeunit](/conception/overview) автоматически отправит команду [SCHEMA_UPDATE - schema_update/pepeunit](/developer/mqtt/default-mqtt-command#schema-update-schema-update-pepeunit) обязующую [Unit](/definitions#unit) обновить схему взаимодействия на своей стороне
+1. [Pepeunit](/conception/overview) автоматически отправит команду [SCHEMA_UPDATE](/developer/mqtt/default-mqtt-command#schema-update-schema-update-pepeunit) обязующую [Unit](/definitions#unit) обновить схему взаимодействия на своей стороне

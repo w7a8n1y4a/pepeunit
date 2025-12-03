@@ -37,7 +37,3 @@
 :::info
 Креды хранится в [шифрованном](/development-pepeunit/mechanics/cipher) виде.
 :::
-
-:::info
-Можно изменить в будущем
-:::
