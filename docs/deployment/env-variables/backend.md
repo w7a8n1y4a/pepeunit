@@ -53,7 +53,7 @@
 `PU_MQTT_MAX_CLIENT_ID_LEN` | `512` | Максимальная длинная `id` клиентов [EMQX](/deployment/dependencies/emqx)
 `PU_MQTT_CLIENT_MAX_MESSAGES_RATE` | `30/s` | Максимальная частота отправки сообщений одним клиентом [EMQX](/deployment/dependencies/emqx)
 `PU_MQTT_CLIENT_MAX_BYTES_RATE` | `1MB/s` | Максимальная скорость соединения с клиентом [EMQX](/deployment/dependencies/emqx)
-`PU_MQTT_MAX_PAYLOAD_SIZE` | `256` | Максимальный размер в кБ, для данных передаваемых через топики [EMQX](/deployment/dependencies/emqx)
+`PU_MQTT_MAX_PAYLOAD_SIZE` | `256` | Максимальный размер в килобайтах, для данных передаваемых через топики [EMQX](/deployment/dependencies/emqx)
 `PU_MQTT_MAX_QOS` | `2` | Максимальное качество обслуживания доступное в [EMQX](/deployment/dependencies/emqx)
 `PU_MQTT_MAX_TOPIC_LEVELS` | `5` | Максимальная вложенность топиков [EMQX](/deployment/dependencies/emqx)
 `PU_MQTT_MAX_LEN_MESSAGE_QUEUE` | `128` | Максимальная длинна очереди сообщений [EMQX](/deployment/dependencies/emqx)
