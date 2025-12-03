@@ -4,25 +4,19 @@
 От `уровня видимости` сущности зависит кто может получить о ней информацию и/или провзаимодействовать с ней
 :::
 
-### Public
-
-- предоставляет [доступ](/development-pepeunit/mechanics/permission) всем
-
-### Internal
-
-- предоставляет [доступ](/development-pepeunit/mechanics/permission) до сущности только авторизованным [Пользователям](/development-pepeunit/mechanics/roles.html#user) инстанса или всем [Unit](/definitions#unit) находящихся в инстансе
-
-### Private
-
-- предоставляет [доступ](/development-pepeunit/mechanics/permission) до сущности только создателю и агентам которых укажет создатель. Работает в пределах инстанса
+Уровень видимости | Состояние
+-- | --
+`Public` | Предоставляет [доступ](/development-pepeunit/mechanics/permission) всем
+`Internal` | Предоставляет [доступ](/development-pepeunit/mechanics/permission) до сущности только авторизованным [Пользователям](/development-pepeunit/mechanics/roles.html#user) инстанса или всем [Unit](/definitions#unit) находящимся в инстансе
+`Private` | Предоставляет [доступ](/development-pepeunit/mechanics/permission) до сущности только создателю и агентам которых укажет создатель. Работает в пределах инстанса
 
 :::danger
-Сущность [RepositoryRegisty](/definitions#repositoryregistry) уникальная и имеет только два типа `Public` и `Private`. Предоставление доступа к `Private` сущности отличается, и завязано на ввод пользователями [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория). Создатель не может сам предоставить доступ, это связано с бизнес логикой работы этой сущности
+Сущность [RepositoryRegisty](/definitions#repositoryregistry) уникальная и имеет только два типа `Public` и `Private`. Предоставление доступа к `Private` сущности отличается, и завязано на ввод пользователями [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория).
+
+Создатель не может сам предоставить доступ, это связано с `бизнес логикой` работы этой сущности
 :::
 
----
-
-# Возможности создателя сущностей
+## Возможности создателя сущностей
 
 Создатель имеет `абсолютно полный доступ` по управлению своими cущностями.
 
@@ -62,9 +56,7 @@
 - Выдача [доступов](/development-pepeunit/mechanics/permission)
 - Все аспекты управления [DataPipe](/deployment/dependencies/datapipe)
 
----
-
-# Возможности агентов для видимых сущностей
+## Возможности агентов для видимых сущностей
 
 Агенты имеют ограниченный [доступ](/development-pepeunit/mechanics/permission) до чужих сущностей, которые они видят с помощью `системы видимости`:
 

@@ -3,6 +3,14 @@
 [Pepeunit](/conception/overview) использует шифрование `AES256` с `12 байтовым` инициирующим вектором и `32 байтовым` ключом - схема шифрования `GCM`
 
 ```python
+import os
+import base64
+
+from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+
+from app import settings
+
+
 def aes_gcm_encode(data: str, key: str = settings.pu_encrypt_key) -> str:
     """
     data: any python str
@@ -48,7 +56,7 @@ def aes_gcm_decode(data: str, key: str = settings.pu_encrypt_key) -> str:
 :::
 
 :::warning Ограничение размера шифруемых объектов
-Все шифруемые объекты имеют стандартное ограничение в `1000000` символов. [Администратор](/development-pepeunit/mechanics/roles#admin) инстанса может изменить этот объём установив переменную окружения `PU_MAX_CIPHER_LENGTH` в файле [Backend ENV](/deployment/env-variables/backend).
+Все шифруемые объекты имеют стандартное ограничение в `1 000 000` символов. [Администратор](/development-pepeunit/mechanics/roles#admin) инстанса может изменить этот объём установив переменную окружения `PU_MAX_CIPHER_LENGTH` в файле [Backend ENV](/deployment/env-variables/backend).
 :::
 
 :::danger

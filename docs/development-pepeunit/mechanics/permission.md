@@ -5,7 +5,7 @@
 :::
 
 :::warning
-Cиситема доступов работает только для сущностей у которых [уровень видимости](/development-pepeunit/mechanics/visibility) - `Private`.
+Cистема доступов работает только для сущностей у которых [уровень видимости](/development-pepeunit/mechanics/visibility) - `Private`.
 :::
 
 :::danger
