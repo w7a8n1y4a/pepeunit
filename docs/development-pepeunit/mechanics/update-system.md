@@ -1,8 +1,8 @@
 # Система обновлений
 
-- [Что означают флаги обновлений у Repo?](/user/settings-repo#флаги-массовых-обновлении)
-- [Как получить файлы для создания Unit?](/user/create-unit#получение-фаилов-развертывания)
-- [Как обновлять Unit?](/user/update-unit)
+- [Что означают флаги обновлений у Repo?](/user/git-repository/settings-repo#флаги-массовых-обновлении)
+- [Как получить файлы для создания Unit?](/user/unit/create-physic-unit#получение-фаилов-развертывания)
+- [Как обновлять Unit?](/user/unit/update-unit)
 - [Как Unit узнаёт о своей текущей версии используя env.json?](/developer/files/struct-env-example-json#стандартные-переменные-pepeunit)
 - [Как генерируются архивы с обновлениями Unit?](/developer/files/struct-archive-update)
 - [Какие есть MQTT команды обновлений Unit?](/developer/mqtt/default-mqtt-command)

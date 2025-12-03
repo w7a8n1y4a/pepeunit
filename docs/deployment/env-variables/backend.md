@@ -8,7 +8,7 @@
 -- | -- | --
 `PU_FF_TELEGRAM_BOT_ENABLE` | `True` | Функциональный флаг, отвечает за то включен ли [Telegram Bot](/definitions#telegram-bot)
 `PU_FF_GRAFANA_INTEGRATION_ENABLE` | `True` | Функциональный флаг, отвечает за то включена ли интеграция с `Grafana`
-`PU_FF_DATAPIPE_DEFAULT_LAST_VALUE_ENABLE` | `True` | Функциональный флаг, отвечает за то будет ли устанавливаться по умолчанию [DataPipe](/deployment/dependencies/datapipe) с типом [LastValue](/user/data-pipe#lastvalue) для [UnitNode](/definitions#unitnode)
+`PU_FF_DATAPIPE_DEFAULT_LAST_VALUE_ENABLE` | `True` | Функциональный флаг, отвечает за то будет ли устанавливаться по умолчанию [DataPipe](/deployment/dependencies/datapipe) с типом [LastValue](/user/datapipe/example#lastvalue) для [UnitNode](/definitions#unitnode)
 `PU_FF_DATAPIPE_ENABLE` | `True` | Функциональный флаг, отвечает за то включены ли возможности [DataPipe](/deployment/dependencies/datapipe), когда флаг выключен нужно так же выключить [DataPipe](/deployment/dependencies/datapipe) сервис, т.к. он перестанет получать обновления конфигураций и тд
 `PU_FF_PROMETHEUS_ENABLE` | `True` | Функциональный флаг, отвечает за то включен ли мониторинг запросов через [Prometheus](/deployment/dependencies/prometheus) или нет
 `PU_DEBUG` | `False` | При включении расширяет вывод логов для [FastApi](https://fastapi.tiangolo.com/) и [SqlAlchemy](https://docs.sqlalchemy.org/en/20/)

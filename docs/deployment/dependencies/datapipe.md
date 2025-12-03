@@ -16,5 +16,9 @@
 У [Pepeunit](/conception/overview) есть глубокая интеграция с [Grafana](/deployment/dependencies/grafana) для визуализации данных из `DataPipe`.
 
 :::info
-[Подробнее о настройке DataPipe](/user/data-pipe#datapipe)
+[Настройка DataPipe](/user/datapipe/datapipe)
+
+[Примеры DataPipe](/user/datapipe/example)
+
+[Импорт данных в DataPipe](/user/datapipe/import)
 :::

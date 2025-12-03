@@ -22,7 +22,7 @@
 ::: tip Возможности обычного `Пользователя`
 - Имеет доступ к созданию [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo), [Unit](/definitions#unit) и [UnitNode](/definitions#unitnode)
 - Имеет возможность видеть все записи [RepositoryRegisty](/definitions#repositoryregistry) включая приватные
-- Не имеет возможности создать [Repo](/definitions#repo) на основе приватного [RepositoryRegisty](/definitions#repositoryregistry), если не укажет [Креды доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория)
+- Не имеет возможности создать [Repo](/definitions#repo) на основе приватного [RepositoryRegisty](/definitions#repositoryregistry), если не укажет [Креды доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория)
 - Имеет доступ к сущностям чей [уровень видимости](/development-pepeunit/mechanics/visibility) `Public`, `Internal` или `Private` с предоставленым [доступом](/development-pepeunit/mechanics/permission)
 :::
 

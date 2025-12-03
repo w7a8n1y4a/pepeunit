@@ -46,7 +46,7 @@
 Установите флаг `True` - для [Компилируемых](/definitions#compilable) репозиториев и `False` для [Интерпритируемых](/definitions#interpreterable).
 
 :::warning
-От значения данного флага будет зависеть [первичное получение файлов](/user/create-unit#получение-фаилов-развертывания) для [Unit](/definitions#unit)
+От значения данного флага будет зависеть [первичное получение файлов](/user/unit/create-physic-unit#получение-фаилов-развертывания) для [Unit](/definitions#unit)
 :::
 
 :::info

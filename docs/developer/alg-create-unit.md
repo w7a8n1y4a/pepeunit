@@ -179,11 +179,11 @@ readme.md
 ## Создание тестового Unit в Pepeunit
 
 Чтобы продолжить разработку [Unit](/definitions#unit) - нужно взаимодействовать с [Pepeunit](/conception/overview) через [MQTT](/definitions#mqtt), а также получить [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json). Выбирите подходящий инстанс [Pepeunit](/conception/overview), которому вы доверяете. Выполните следующие шаги:
-1. [Создайте RepositoryRegistry](/user/create-repository-registry#создание-repositoryregistry)
-1. [Создайте Repo](/user/create-repo)
-1. [Создайте Unit](/user/create-unit)
-1. Настройте [Unit](/definitions#unit) для [обновлений в ручную](/user/create-unit#блок-автообновлении), чтобы чётко контролировать [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
-1. [Заполните env у Unit](/user/create-unit#настроика-окружения)
+1. [Создайте RepositoryRegistry](/user/git-repository/create-repository-registry#создание-repositoryregistry)
+1. [Создайте Repo](/user/git-repository/create-repo)
+1. [Создайте Unit](/user/unit/create-unit-pepeunit)
+1. Настройте [Unit](/definitions#unit) для [обновлений в ручную](/user/unit/create-unit-pepeunit#блок-автообновлении), чтобы чётко контролировать [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
+1. [Заполните env у Unit](/user/unit/create-physic-unit#настроика-окружения)
 1. Скачайте [Архив](/developer/files/struct-archive-update) с [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json)
 
 Полученные файлы [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) нужно будет поместить в каталог вашего локального [Git](/definitions#git) репозитория. Данные файлы будут содержать данные для подключения к [Pepeunit](/conception/overview), а также топики для публикации.

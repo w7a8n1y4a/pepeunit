@@ -94,15 +94,43 @@ export default withMermaid(defineConfig({
         text: 'Руководство Пользователя',
         collapsed: false,
         items: [
-          { text: 'Создание RepositoryRegistry', link: '/user/create-repository-registry' },
-          { text: 'Создание Repo', link: '/user/create-repo' },
-          { text: 'Настройка Repo', link: '/user/settings-repo' },
-          { text: 'Создание Unit', link: '/user/create-unit' },
-          { text: 'Обновление Unit', link: '/user/update-unit' },
-          { text: 'Настройки UnitNode', link: '/user/settings-unit-node' },
-          { text: 'Cвязи Output->Input между UnitNode', link: '/user/edge-unit-node' },
-          { text: 'Настройки DataPipe', link: '/user/data-pipe' },
-          { text: 'Управление Dashboard', link: '/user/dashboard' },
+          {
+            text: 'Управление Git Repository',
+            collapsed: true,
+            items: [
+              { text: 'Создание RepositoryRegistry', link: '/user/git-repository/create-repository-registry' },
+              { text: 'Создание Repo', link: '/user/git-repository/create-repo' },
+              { text: 'Настройка Repo', link: '/user/git-repository/settings-repo' },
+            ]
+          },
+          {
+            text: 'Unit',
+            collapsed: true,
+            items: [
+              { text: 'Создание Unit в Pepeunit', link: '/user/unit/create-unit-pepeunit' },
+              { text: 'Создание Unit физически', link: '/user/unit/create-physic-unit' },
+              { text: 'Обновление Unit', link: '/user/unit/update-unit' },
+              { text: 'Настройка UnitNode', link: '/user/unit/settings-unit-node' },
+              { text: 'Cвязи Output->Input между UnitNode', link: '/user/unit/edge-unit-node' },
+            ]
+          },
+          {
+            text: 'DataPipe',
+            collapsed: true,
+            items: [
+              { text: 'Настройка DataPipe', link: '/user/datapipe/datapipe' },
+              { text: 'Примеры DataPipe', link: '/user/datapipe/example' },
+              { text: 'Импорт данных в DataPipe', link: '/user/datapipe/import' },
+            ]
+          },
+          {
+            text: 'Grafana',
+            collapsed: true,
+            items: [
+              { text: 'Создание Dashboard', link: '/user/grafana/create' },
+              { text: 'Синхронизация с Grafana', link: '/user/grafana/sync' },
+            ]
+          },
         ]
       },
       {

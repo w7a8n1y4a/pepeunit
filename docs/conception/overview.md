@@ -25,7 +25,7 @@
 - `Aggregation` - сохранение данных аггрегированных при помощи фукнций: `avg, sum, min, max` - за выбранное временное окно
 
 :::info
-[Настройка DataPipe](/user/data-pipe)
+[DataPipe](/deployment/dependencies/datapipe)
 :::
 
 ## Интеграция с Grafana
@@ -33,7 +33,7 @@
 `Pepeunit` - позволяет создавать кастомные [Dashboard](/definitions#dashboard) из [Visualization](/definitions#visualization). В качестве данных служат [UnitNode](/definitions#unitnode) с настроенными [DataPipe](/deployment/dependencies/datapipe)
 
 :::info
-[Управлении Dashboard](/user/dashboard)
+[Создание Dashboard](/user/grafana/create)
 :::
 
 ## Управление устройствами IoT
@@ -50,7 +50,7 @@
 `Pepeunit` позволяет отслеживать состояние [Unit](/definitions#unit) при помощи системы именования топиков. [UnitNode](/definitions#unitnode) могут образовывать связи `Output` -> `Input` для передачи информации между разными [Unit](/definitions#unit).
 
 :::info
-[Связи Output->Input](/user/edge-unit-node)
+[Связи Output->Input](/user/unit/edge-unit-node)
 
 [Стандартные MQTT команды](/developer/mqtt/default-mqtt-command)
 

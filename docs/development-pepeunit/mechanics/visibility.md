@@ -17,7 +17,7 @@
 - предоставляет [доступ](/development-pepeunit/mechanics/permission) до сущности только создателю и агентам которых укажет создатель. Работает в пределах инстанса
 
 :::danger
-Сущность [RepositoryRegisty](/definitions#repositoryregistry) уникальная и имеет только два типа `Public` и `Private`. Предоставление доступа к `Private` сущности отличается, и завязано на ввод пользователями [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория). Создатель не может сам предоставить доступ, это связано с бизнес логикой работы этой сущности
+Сущность [RepositoryRegisty](/definitions#repositoryregistry) уникальная и имеет только два типа `Public` и `Private`. Предоставление доступа к `Private` сущности отличается, и завязано на ввод пользователями [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория). Создатель не может сам предоставить доступ, это связано с бизнес логикой работы этой сущности
 :::
 
 ---
@@ -27,7 +27,7 @@
 Создатель имеет `абсолютно полный доступ` по управлению своими cущностями.
 
 ### RepositoryRegistry
-- Изменение своих [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория)
+- Изменение своих [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория)
 - Просмотр размера репозитория
 - Создание [Repo](/definitions#repo) на основе [RepositoryRegisty](/definitions#repositoryregistry)
 - Обновление [Git](/definitions#git) репозитория внутри [Pepeunit](/conception/overview)
@@ -69,10 +69,10 @@
 Агенты имеют ограниченный [доступ](/development-pepeunit/mechanics/permission) до чужих сущностей, которые они видят с помощью `системы видимости`:
 
 ### RepositoryRegistry
-- Изменение своих [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория)
-- Просмотр размера репозитория. Доступно для `Private` и `Public` репозиториев не зависимо от [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория)
-- Создание [Repo](/definitions#repo) на основе [RepositoryRegisty](/definitions#repositoryregistry). Для `Public` доступно всем, для `Private` доступно только если у [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория) статус `Valid`
-- Обновление [Git](/definitions#git) репозитория внутри [Pepeunit](/conception/overview). Для `Public` доступно всем, для `Private` доступно только если у [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория) статус `Valid`
+- Изменение своих [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория)
+- Просмотр размера репозитория. Доступно для `Private` и `Public` репозиториев не зависимо от [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория)
+- Создание [Repo](/definitions#repo) на основе [RepositoryRegisty](/definitions#repositoryregistry). Для `Public` доступно всем, для `Private` доступно только если у [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория) статус `Valid`
+- Обновление [Git](/definitions#git) репозитория внутри [Pepeunit](/conception/overview). Для `Public` доступно всем, для `Private` доступно только если у [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория) статус `Valid`
 
 ### Repo
 

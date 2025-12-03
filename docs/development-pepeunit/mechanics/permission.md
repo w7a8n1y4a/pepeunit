@@ -9,7 +9,7 @@ Cиситема доступов работает только для сущно
 :::
 
 :::danger
-Доступ до `Private` [RepositoryRegisty](/definitions#repositoryregistry), осуществляется на основе [Кредов доступа](/user/create-repository-registry#доступ-до-закрытого-репозитория) и игнорирует систему ниже.
+Доступ до `Private` [RepositoryRegisty](/definitions#repositoryregistry), осуществляется на основе [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория) и игнорирует систему ниже.
 :::
 
 ## Создание доступа
