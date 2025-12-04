@@ -50,7 +50,7 @@ def aes_gcm_decode(data: str, key: str = settings.pu_encrypt_key) -> str:
 ::: tip Какие данные шифрует [Pepeunit](/conception/overview)?
 Все конфиденциальные данные, а именно:
 1. Динамическая соль, использующаяся для хэширования пароля [Пользователя](/development-pepeunit/mechanics/roles.html#user)
-1. Авторизационные данные, отвестветвенные за доступ до `Private` [RepositoryRegisty](/definitions#repositoryregistry)
+1. Авторизационные данные, отвестветвенные за доступ к `Private` [RepositoryRegisty](/definitions#repositoryregistry)
 1. Файлы окружений - [env.json](/definitions#env-json) от [Unit](/definitions#unit)
 1. [Хранилище внутреннего состояния](/developer/state-storage-unit) [Unit](/definitions#unit)
 :::

@@ -14,8 +14,7 @@
 ### Ручной
 
 1. Обновление локального [RepositoryRegisty](/definitions#repositoryregistry) через кнопку `Update Local Repository`
-1. Создатель [Repo](/definitions#repo) нажимает кнопку `Update local Repo` в меню [Repo](/definitions#repo) 
-1. [Pepeunit](/conception/overview) принудительно заменяет локальный репозиторий новым
+1. [Pepeunit](/conception/overview) принудительно заменяет локальный репозиторий новым. Максимальная частота обновлений, регламентируется переменной `PU_MIN_INTERVAL_SYNC_REPOSITORY`
 
 Обновление связанных [Unit](/definitions#unit)
 1. Создатель [Repo](/definitions#repo) нажимает кнопку `Update related Unit` в меню [Repo](/definitions#repo) 
@@ -23,12 +22,12 @@
 
 ### Автоматический или по запросу Администратора
 
-1. Каждый час или по запросу [Администратора](/development-pepeunit/mechanics/roles#admin) [Pepeunit](/conception/overview) запускает задачу обновления всех [Unit](/definitions#repo) в соответствии с текущим состоянием физических [RepositoryRegisty](/definitions#repositoryregistry)
+1. Каждый час или при нажатии [Администратором](/development-pepeunit/mechanics/roles#admin) кнопки `Update all Repo and Unit` в `Domain` сущности [Frontend](/deployment/dependencies/frontend) - запускается задача обновления всех [Unit](/definitions#repo) в соответствии с текущим состоянием физических [RepositoryRegisty](/definitions#repositoryregistry)
 1. [Pepeunit](/conception/overview) получает выборку [Repo](/definitions#repo) у которых выставлено автоматическое обновление
-1. [Pepeunit](/conception/overview) выполняет вызов [MQTT](/definitions#mqtt) команды [UPDATE - update/pepeunit](/developer/mqtt/default-mqtt-command#update-update-pepeunit) - для каждого [Unit](/definitions#unit) у которого указано автоматическое обновление и родительский [Repo](/definitions#repo) которого присутствует в выборке
+1. [Pepeunit](/conception/overview) выполняет вызов [MQTT](/definitions#mqtt) команды [UPDATE - update/pepeunit](/developer/mqtt/default-mqtt-command#update-update-pepeunit) - для каждого [Unit](/definitions#unit) у которого указано автоматическое обновление
 
 :::warning
-[RepositoryRegisty](/definitions#repositoryregistry) физически обновляются каждый час. [Администратор](/development-pepeunit/mechanics/roles#admin) не имеет возможности запустить принудительное обновление в силовом режиме. Обновение [Unit](/definitions#repo) и [RepositoryRegisty](/definitions#repositoryregistry) имеет рассинхронизацию в пол часа, для улучшения производительности.
+Обновение [Unit](/definitions#repo) и [RepositoryRegisty](/definitions#repositoryregistry) имеет рассинхронизацию в пол часа, для улучшения производительности.
 :::
 
 ## Алгоритм вычисления текущей версии Unit
