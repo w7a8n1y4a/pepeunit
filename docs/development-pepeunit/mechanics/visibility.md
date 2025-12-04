@@ -11,7 +11,7 @@
 `Private` | Предоставляет [доступ](/development-pepeunit/mechanics/permission) до сущности только создателю и агентам которых укажет создатель. Работает в пределах инстанса
 
 :::danger
-Сущность [RepositoryRegisty](/definitions#repositoryregistry) уникальная и имеет только два типа `Public` и `Private`. Предоставление доступа к `Private` сущности отличается, и завязано на ввод пользователями [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория).
+Сущность [RepositoryRegisty](/definitions#repositoryregistry) уникальная и имеет только два типа `Public` и `Private`. Предоставление доступа к `Private` сущности отличается, и завязано на ввод [Пользователями](/development-pepeunit/mechanics/roles.html#user) [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория).
 
 Создатель не может сам предоставить доступ, это связано с `бизнес логикой` работы этой сущности
 :::

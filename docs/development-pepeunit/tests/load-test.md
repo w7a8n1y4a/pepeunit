@@ -39,8 +39,8 @@ locust -f tests/load/locustfile.py
 Переменная Backend | Что делает ?
 -- | --
 `LOCUST_HEADLESS` | `CLI` формат работы `locust`
-`LOCUST_USERS` | Число пользователей, которые будут создавать нагрузку
-`LOCUST_SPAWN_RATE` | Нарастание числа пользователей, от `0` до `400`, c шагом `10`, т.е. нарастание нагрузки займёт `~= 40 секунд`
+`LOCUST_USERS` | Число [Пользователей](/development-pepeunit/mechanics/roles.html#user), которые будут создавать нагрузку
+`LOCUST_SPAWN_RATE` | Нарастание числа [Пользователей](/development-pepeunit/mechanics/roles.html#user), от `0` до `400`, c шагом `10`, т.е. нарастание нагрузки займёт `~= 40 секунд`
 `LOCUST_RUN_TIME` | Время выполнения теста в секундах
 
 :::info

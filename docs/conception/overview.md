@@ -62,7 +62,7 @@
 
 ## Настройка политик доступа
 
-`Pepeunit` позволяет регулировать уровни [доступа](/development-pepeunit/mechanics/permission) `Пользователь-Unit` и `Unit-Unit`. Глубина взаимодействия с платформой определяется [ролью Пользователя](/development-pepeunit/mechanics/roles) и [видимостью](/development-pepeunit/mechanics/visibility) отдельных сушностей [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode).
+`Pepeunit` позволяет регулировать уровни [доступа](/development-pepeunit/mechanics/permission) [Пользователей](/development-pepeunit/mechanics/roles.html#user) и `Unit-Unit`. Глубина взаимодействия с платформой определяется ролью [Пользователя](/development-pepeunit/mechanics/roles) и [видимостью](/development-pepeunit/mechanics/visibility) отдельных сушностей [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode).
 
 :::info
 [Управление доступами](/development-pepeunit/mechanics/permission)

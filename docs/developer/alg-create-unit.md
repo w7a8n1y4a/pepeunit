@@ -227,7 +227,7 @@ readme.md
 1. Поместить сгенерированный [readme.md](/definitions#readme-md) в корень репозитория. Писать [readme.md](/definitions#readme-md) в ручную не требуется
 
 :::danger
-У всех [Unit](/definitions#unit) должна быть документация, чтобы Пользователи могли ими пользоваться.
+У всех [Unit](/definitions#unit) должна быть документация, чтобы [Пользователи](/development-pepeunit/mechanics/roles.html#user) могли ими пользоваться.
 :::
 
 ## Присвоение Тега

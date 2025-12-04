@@ -64,9 +64,9 @@
 Разработчик [Unit](/definitions#unit) может создавать любые переменные окружения, которые отличаются по названию от стандартных. При этом значения указанные в переменных, будут отображаться как значения по умолчанию в интерфейсе [Пользователей](/development-pepeunit/mechanics/roles.html#user).
 
 :::danger
-Так как [Пользователь](/development-pepeunit/mechanics/roles.html#user) в итоге будет заполнять переменные в ручную, всегда нужно заполнить [pepeunit.toml](/definitions#pepeunit-toml) и [readme.md](/definitions#readme-md), чтобы Пользователь мог понять за что отвечает каждая переменная
+Так как [Пользователь](/development-pepeunit/mechanics/roles.html#user) в итоге будет заполнять переменные в ручную, всегда нужно заполнить [pepeunit.toml](/definitions#pepeunit-toml) и [readme.md](/definitions#readme-md), чтобы [Пользователь](/development-pepeunit/mechanics/roles.html#user) мог понять за что отвечает каждая переменная
 :::
 
 :::danger
-Заполнение [env.json](/definitions#env-json) пользовтелем происходит на основе: [Механизма генерации ENV](/development-pepeunit/mechanics/alg-env)
+Заполнение [env.json](/definitions#env-json) [Пользователем](/development-pepeunit/mechanics/roles.html#user) происходит на основе: [Механизма генерации ENV](/development-pepeunit/mechanics/alg-env)
 :::

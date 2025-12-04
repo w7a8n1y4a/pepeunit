@@ -31,7 +31,7 @@
 `Администратор` - владелец, выполняющий функции модератора, имеет полномочия полного управления инстансом [Pepeunit](/conception/overview).
 
 :::tip Возможности `Администратора`
-- Блокирование Пользователей, при нарушении условий использования инстанса
+- Блокирование `Пользователей`, при нарушении условий использования инстанса
 - Видимость всех сущностей [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo), [Unit](/definitions#unit) и [UnitNode](/definitions#unitnode), возможности взаимодействия сводятся к аналогичным при предоставлении [видимости](/development-pepeunit/mechanics/visibility)
 - Не может получить информацию о [зашифрованных](/development-pepeunit/mechanics/cipher) данных напрямую через [Pepeunit](/conception/overview), но имеет техническую возможность дешифровать любую [шифрованную](/development-pepeunit/mechanics/cipher) информацию инстанса
 :::
