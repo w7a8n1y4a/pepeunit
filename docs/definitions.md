@@ -25,13 +25,13 @@
 `Dashboard` - набор [Visualization](#visualization) в [Grafana](/deployment/dependencies/grafana), собранных на одной панели для удобного мониторинга и анализа данных.
 
 ## schema_example.json
-`schema_example.json` - файл схемы, описывающий [MQTT](#mqtt) топики нужные [Unit](#unit). Данный файл создаётся разработчиком [Unit](#unit) и помещается в каждую версию [Repo](#repo). Благодаря данному файлу [Pepeunit](/conception/overview) создаёт [UnitNode](#unitnode) сущности, отвечающие за взаимодействие с [Unit](#unit) и регламентирующие политики доступа до топиков [Unit](#unit). [Подробнее](/developer/files/struct-schema-example-json#schema-example-json)
+`schema_example.json` - файл схемы, описывающий [MQTT](#mqtt) топики нужные [Unit](#unit). Данный файл создаётся [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) и помещается в каждую версию [Repo](#repo). Благодаря данному файлу [Pepeunit](/conception/overview) создаёт [UnitNode](#unitnode) сущности, отвечающие за взаимодействие с [Unit](#unit) и регламентирующие политики доступа до топиков [Unit](#unit). [Подробнее](/developer/files/struct-schema-example-json#schema-example-json)
 
 ## schema.json
 `schema.json` - готовый файл схемы для [Unit](#unit) генерируемый [Pepeunit](/conception/overview), содержит в себе ссылки на [UnitNode](#unitnode) и базовые топики для взаимодействия с [Pepeunit](/conception/overview). [Подробнее](/developer/files/struct-schema-json#schema-json)
 
 ## env_example.json
-`env_example.json`- файл, описывающий переменные окружения нужные для корректной работы [Unit](#unit), он создаётся разработчиком [Unit](#unit) и помещается в каждую версию [Repo](#repo). На основе данного файла и ввода [Пользователя](/development-pepeunit/mechanics/roles.html#user), [Pepeunit](/conception/overview) может сгенерировать [env.json](#envjson) файл для [Unit](#unit). [Подробнее](/developer/files/struct-env-example-json#env-example-json)
+`env_example.json`- файл, описывающий переменные окружения нужные для корректной работы [Unit](#unit), он создаётся [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) и помещается в каждую версию [Repo](#repo). На основе данного файла и ввода [Пользователя](/development-pepeunit/mechanics/roles.html#user), [Pepeunit](/conception/overview) может сгенерировать [env.json](#envjson) файл для [Unit](#unit). [Подробнее](/developer/files/struct-env-example-json#env-example-json)
 
 ## env.json
 `env.json`- секретный файл, содержащий переменные окружения, нужные для корректной работы [Unit](#unit).

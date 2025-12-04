@@ -53,9 +53,9 @@
 }
 ```
 
-Топики можно разделить на две категории, стандартные и топики Разработчика [Unit](/definitions#unit):
+Топики можно разделить на две категории, стандартные и топики [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer):
 - `input_base_topic` и `output_base_topic` - стандартные
-- `input_topic` и `output_topic` - топики Разработчика
+- `input_topic` и `output_topic` - топики [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer)
 
 ## Стандарнтые топики
 

@@ -147,7 +147,7 @@ readme.md
 Все переменные в [env_example.json](/definitions#env-example-json) должны быть обезличены
 :::
 
-Нужно продумать за что будут отвечать переменные Разработчика:
+Нужно продумать за что будут отвечать переменные [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer):
 Название переменной | Назначение
 -- | --
 `WIFI_SSID` | Название `WiFi` сети для подключения
@@ -247,7 +247,7 @@ readme.md
 :::
 
 :::danger
-[Тег](/definitions#git-tag) будет сигнализировать [Пользователям](/development-pepeunit/mechanics/roles#user), что всё готово к эксплуатации и протестировано разработчиком [Unit](/definitions#unit).
+[Тег](/definitions#git-tag) будет сигнализировать [Пользователям](/development-pepeunit/mechanics/roles#user), что всё готово к эксплуатации и протестировано [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer).
 
 [Пользователи](/development-pepeunit/mechanics/roles#user) будут ожидать, что выбрав последний [Тег](/definitions#git-tag) - получат самую рабочую, самую актуальную версию [Unit](/definitions#unit).
 :::

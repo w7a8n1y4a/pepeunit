@@ -15,7 +15,7 @@
 1 | `Ручные` | Ручной ввод [Пользователя](/development-pepeunit/mechanics/roles.html#user) в систему с [Frontend](/deployment/dependencies/frontend) или через `set_env` через [REST](/definitions#rest) и [GQL](/definitions#gql)
 2 | `Записанные в бд` | [env.json](/definitions#env-json) в базе данных [Pepeunit](/conception/overview)
 3 | `Cгенерированные` | [Стандартные переменные](/developer/files/struct-env-example-json#стандартные-переменные-pepeunit) сгенерированные [Backend](/deployment/dependencies/backend)
-4 | `Целевые` | Переменные указанные разработчиком [Unit](/definitions#unit) в [env_example.json](/definitions#env-example-json)
+4 | `Целевые` | Переменные указанные [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) в [env_example.json](/definitions#env-example-json)
 
 В конце работы, отсекаются все ключи которых нет в `Целевых`
 
@@ -35,7 +35,7 @@
 1. Все ключи которых нет в `Целевых` удаляются
 
 :::info
-В результате получится [env.json](/definitions#env-json), в котором поверх переменных разработчика, записаны переменные сгенерированные [Pepeunit](/conception/overview). Такой [env.json](/definitions#env-json) уже пригоден для использования в [Unit](/definitions#unit)
+В результате получится [env.json](/definitions#env-json), в котором поверх переменных [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer), записаны переменные сгенерированные [Pepeunit](/conception/overview). Такой [env.json](/definitions#env-json) уже пригоден для использования в [Unit](/definitions#unit)
 :::
 
 ### Unit изменяет свою версию автоматически с иземенением состава ключей
@@ -48,7 +48,7 @@
 1. Все ключи которых нет в `Целевых` удаляются
 
 :::info
-В результате получится [env.json](/definitions#env-json), у которого добавятся переменные из новой версии [env_example.json](/definitions#env-example-json) созданной Разработчиком [Unit](/definitions#unit)
+В результате получится [env.json](/definitions#env-json), у которого добавятся переменные из новой версии [env_example.json](/definitions#env-example-json) созданной [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer)
 :::
 
 ### Пользователь вносит изменения в уже существующий env

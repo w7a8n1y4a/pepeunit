@@ -9,7 +9,7 @@
 :::
 
 :::warning
-Соответственно если разработчик [Компилируемого](/definitions#compilable) [Unit](/definitions#unit) хочет добавить поддержку автоматического обновления в [Pepeunit](/conception/overview), ему придётся скомпилировать и загрузить в [Gitlab](/definitions#gitlab) или [Github](/definitions#github) версии своей программы для каждой платформы. При этом название для одной и той же платформы в разных релизах должно быть одинаковым.
+Соответственно если [Разработчик](/development-pepeunit/mechanics/roles#unit-developer) [Компилируемого](/definitions#compilable) [Unit](/definitions#unit) хочет добавить поддержку автоматического обновления в [Pepeunit](/conception/overview), ему придётся скомпилировать и загрузить в [Gitlab](/definitions#gitlab) или [Github](/definitions#github) версии своей программы для каждой платформы. При этом название для одной и той же платформы в разных релизах должно быть одинаковым.
 :::
 
 ## Пример хорошего наименования assets между релизами

@@ -6,13 +6,12 @@
 Роль `Пользователя` влияет на его возможности при использовании инстанса [Pepeunit](/conception/overview), а также на взаимодействие с [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode)
 :::
 
-### Bot
+### Unit Developer
 
-Внешний агент - обычный `Пользователь` интернета или любая программа, не прошедшая стадию авторизации.
+`Разработчик Unit` - создатель [Git](/definitions#git) репоизиториев [Gitlab](/definitions#gitlab) или [Github](/definitions#github). Используемых для [RepositoryRegisty](/definitions#repositoryregistry), апосредовано взаимодействует с [Pepeunit](/conception/overview) при помощи своего кода, который эксплуатируется `Пользователями` в качестве [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo) и [Unit](/definitions#unit)
 
-::: tip Возможности внешнего агента
-- Может видеть все публичные записи из [RepositoryRegisty](/definitions#repositoryregistry)
-- Может взаимодействовать только с сущностями у которых [уровень видимости](/development-pepeunit/mechanics/visibility) соответствует `Public`
+:::tip Возможности `Разработчика Unit`
+- Имеет возможность вносить изменения в [Git](/definitions#git) репоизитории [Gitlab](/definitions#gitlab) или [Github](/definitions#github)
 :::
 
 ### User
@@ -34,4 +33,13 @@
 - Блокирование `Пользователей`, при нарушении условий использования инстанса
 - Видимость всех сущностей [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo), [Unit](/definitions#unit) и [UnitNode](/definitions#unitnode), возможности взаимодействия сводятся к аналогичным при предоставлении [видимости](/development-pepeunit/mechanics/visibility)
 - Не может получить информацию о [зашифрованных](/development-pepeunit/mechanics/cipher) данных напрямую через [Pepeunit](/conception/overview), но имеет техническую возможность дешифровать любую [шифрованную](/development-pepeunit/mechanics/cipher) информацию инстанса
+:::
+
+### Bot
+
+Внешний агент - обычный `Пользователь` интернета или любая программа, не прошедшая стадию авторизации.
+
+::: tip Возможности внешнего агента
+- Может видеть все публичные записи из [RepositoryRegisty](/definitions#repositoryregistry)
+- Может взаимодействовать только с сущностями у которых [уровень видимости](/development-pepeunit/mechanics/visibility) соответствует `Public`
 :::

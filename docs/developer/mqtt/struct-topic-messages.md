@@ -5,7 +5,7 @@
 :::
 
 :::danger
-Разработчики [Unit](/definitions#unit) всегда могут применить дополнительное шифрование поверх текстовых данных, которое сочтут нужным. Например алгоритм `aes-gcm-256` на основе `PU_ENCRYPT_KEY` встроен в [клиентские библиотеки](/developer/libraries/framework).
+[Разработчики Unit](/development-pepeunit/mechanics/roles#unit-developer) всегда могут применить дополнительное шифрование поверх текстовых данных, которое сочтут нужным. Например алгоритм `aes-gcm-256` на основе `PU_ENCRYPT_KEY` встроен в [клиентские библиотеки](/developer/libraries/framework).
 :::
 
 :::warning
