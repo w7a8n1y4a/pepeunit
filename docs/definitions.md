@@ -1,7 +1,7 @@
 # Определения
 
 ## RepositoryRegistry
-`RepositoryRegistry` - представление [Pepeunit](/conception/overview) о внешнем [Git](#git) репозитории, например из [Gitlab](#gitlab) или [Github](#github). Данная сущность содержит в себе полный клон репозитория и синхронизирует своё состояние с внешним репозиторием. На основе данной сущности создаются [Repo](#repo).
+`RepositoryRegistry` - представление [Pepeunit](/conception/overview) о внешнем [Git](#git) репозитории, например из [GitLab](#gitlab) или [GitHub](#github). Данная сущность содержит в себе полный клон репозитория и синхронизирует своё состояние с внешним репозиторием. На основе данной сущности создаются [Repo](#repo).
 
 ## Repo
 `Repo` - внутренняя сущность [Pepeunit](/conception/overview) соединяющая [RepositoryRegistry](#repositoryregistry) и [Unit](#unit), позволяющая управлять сразу целым пулом [Unit](#unit). Можно настроить обновления сразу для всех связанных [Unit](#unit) и в ручную или автоматически их обновлять. Основная цель существования этой сущности - отвязка [Unit](#unit) по логике от [RepositoryRegistry](#repositoryregistry).

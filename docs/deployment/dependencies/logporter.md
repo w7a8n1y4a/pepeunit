@@ -3,5 +3,5 @@
 `Logporter` - простой и легковесный инструмент для сбора базовых метрик с `Docker`-контейнеров, который получает данные о нагрузке и других параметрах через логи контейнеров. Он служит альтернативой `cAdvisor`, обеспечивая мониторинг `Docker` с поддержкой метрик, извлекаемых из логов.
 
 :::info
-`Logporter` в [Pepeunit](/conception/overview) используется для собора логи всех контейенеров, доступных через `/var/run/docker.sock:ro`, и отправки собранных данных в [Prometheus](/deployment/dependencies/prometheus).
+`Logporter` в [Pepeunit](/conception/overview) используется для собора логов всех контейенеров, доступных через `/var/run/docker.sock:ro`, и отправки собранных данных в [Prometheus](/deployment/dependencies/prometheus).
 :::

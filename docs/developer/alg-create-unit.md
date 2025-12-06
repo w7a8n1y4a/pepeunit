@@ -34,7 +34,7 @@
 
 ## Создание репозитория Git
 
-Выберите инстанс [Gitlab](/definitions#gitlab) или [Github](/definitions#github):
+Выберите инстанс [GitLab](/definitions#gitlab) или [GitHub](/definitions#github):
 1. Создайте пустой репозиторий
 1. Склонируйте его на свою `ЭВМ`
 
@@ -174,7 +174,7 @@ readme.md
 1. Переходим в консоль дирректории вашего проекта
 1. `git add .` - добавляем все файлы в кандидаты на [коммит](/definitions#git-commit)
 1. `git commit -m "feat(init): initial files"` - [коммитим](/definitions#git-commit) изменения
-1. `git push` - отправляем изменения в ваш удалённый хостинг [Gitlab](/definitions#gitlab) или [Github](/definitions#github)
+1. `git push` - отправляем изменения в ваш удалённый хостинг [GitLab](/definitions#gitlab) или [GitHub](/definitions#github)
 
 ## Создание тестового Unit в Pepeunit
 

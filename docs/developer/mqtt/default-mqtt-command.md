@@ -133,7 +133,7 @@
 1. Если команда была вызвана через [REST](/definitions#rest) или [GQL](/definitions#gql)
 :::
 
-Данная команда отправляет [Unit](/definitions#unit) запрос на синхронизацию всех логов, которые есть в распоряжении [Unit](/definitions#unit) локально. При этом [Pepeunit](/conception/overview) принудительно удаляет все логи из [Clickhouse](/deployment/dependencies/clickhouse). [Unit](/definitions#unit) в ответ должен собрать все существующие логи и отправить их через [MQTT](/definitions#mqtt) в [Pepeunit](/conception/overview).
+Данная команда отправляет [Unit](/definitions#unit) запрос на синхронизацию всех логов, которые есть в распоряжении [Unit](/definitions#unit) локально. При этом [Pepeunit](/conception/overview) принудительно удаляет все логи из [ClickHouse](/deployment/dependencies/clickhouse). [Unit](/definitions#unit) в ответ должен собрать все существующие логи и отправить их через [MQTT](/definitions#mqtt) в [Pepeunit](/conception/overview).
 
 ### Формат сообщения в топик `log_sync/pepeunit`
 

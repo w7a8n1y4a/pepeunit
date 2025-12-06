@@ -1,7 +1,7 @@
 # Развёртывание
 ## Pepeunit Deploy
 
-`Pepeunit Deploy` хранит в себе все файлы и примеры, нужные для запуска инстанса [Pepeunit](/conception/overview) при помощи `docker compose`. Для клонирования репозиторий выполните команды:
+`Pepeunit Deploy` репозиторий - хранит в себе все файлы и примеры, нужные для запуска инстанса [Pepeunit](/conception/overview) при помощи `docker compose`. Чтобы склонировать выполните команды:
 ```bash
 git clone https://git.pepemoss.com/pepe/pepeunit/pepeunit_deploy.git
 cd pepeunit_deploy

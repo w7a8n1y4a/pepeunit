@@ -1,15 +1,15 @@
 # Компиляция для различных платформ
 
-Из-за особенностей [Компилируемых](/definitions#compilable) программ их способ доставки [Пользователям](/development-pepeunit/mechanics/roles.html#user) отличается от [Интерпритируемых](/definitions#interpreterable). Чтобы конечному [Пользователю](/development-pepeunit/mechanics/roles.html#user) не приходилось постоянно компилировать исходный код, для получения бинарного файла, в хостингах [Git](/definitions#git) репозиториев [Gitlab](/definitions#gitlab) и [Github](/definitions#github) предусмотренна система релизов.
+Из-за особенностей [Компилируемых](/definitions#compilable) программ их способ доставки [Пользователям](/development-pepeunit/mechanics/roles.html#user) отличается от [Интерпритируемых](/definitions#interpreterable). Чтобы конечному [Пользователю](/development-pepeunit/mechanics/roles.html#user) не приходилось постоянно компилировать исходный код, для получения бинарного файла, в хостингах [Git](/definitions#git) репозиториев [GitLab](/definitions#gitlab) и [GitHub](/definitions#github) предусмотренна система релизов.
 
-В каждый релиз можно добавить бинарные файлы, с определённым названием - такие пары обычно называют `assets`. [Gitlab](/definitions#gitlab) и [Github](/definitions#github) позволяют через свои [API](/definitions#api) получать соответствие названия `assets` и ссылки на бинарный файл.
+В каждый релиз можно добавить бинарные файлы, с определённым названием - такие пары обычно называют `assets`. [GitLab](/definitions#gitlab) и [GitHub](/definitions#github) позволяют через свои [API](/definitions#api) получать соответствие названия `assets` и ссылки на бинарный файл.
 
 :::info
 На основе данной механики [Pepeunit](/conception/overview) имеет возможность обновлять [Компилируемые](/definitions#compilable) репозитории в автоматическом режимие. Единственное условие, названия `assets` должны быть сквозными между различными релизами.
 :::
 
 :::warning
-Соответственно если [Разработчик](/development-pepeunit/mechanics/roles#unit-developer) [Компилируемого](/definitions#compilable) [Unit](/definitions#unit) хочет добавить поддержку автоматического обновления в [Pepeunit](/conception/overview), ему придётся скомпилировать и загрузить в [Gitlab](/definitions#gitlab) или [Github](/definitions#github) версии своей программы для каждой платформы. При этом название для одной и той же платформы в разных релизах должно быть одинаковым.
+Соответственно если [Разработчик](/development-pepeunit/mechanics/roles#unit-developer) [Компилируемого](/definitions#compilable) [Unit](/definitions#unit) хочет добавить поддержку автоматического обновления в [Pepeunit](/conception/overview), ему придётся скомпилировать и загрузить в [GitLab](/definitions#gitlab) или [GitHub](/definitions#github) версии своей программы для каждой платформы. При этом название для одной и той же платформы в разных релизах должно быть одинаковым.
 :::
 
 ## Пример хорошего наименования assets между релизами

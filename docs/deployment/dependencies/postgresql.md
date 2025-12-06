@@ -1,6 +1,6 @@
-# Postgresql
+# PostgreSQL
 
-[Postgresql](https://www.postgresql.org/docs/) - открытая кластерная реляционная база данных с языком запросов [SQL](/definitions#sql). [Подробнее о переменных окружения](/deployment/env-variables/postgresql)
+[PostgreSQL](https://www.postgresql.org/docs/) - открытая кластерная реляционная база данных с языком запросов [SQL](/definitions#sql). [Подробнее о переменных окружения](/deployment/env-variables/postgresql)
 
 :::info
 [Backend](/deployment/dependencies/backend) хранит в ней следующую информацию:

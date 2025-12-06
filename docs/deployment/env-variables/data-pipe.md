@@ -16,5 +16,5 @@
 `PU_DP_MQTT_KEEPALIVE` | `60` | Максимальный период в секундах между отправками `ping` от [DataPipe](/deployment/dependencies/datapipe) до [EMQX](/deployment/dependencies/emqx)
 `PU_DP_CONFIG_SYNC_INTERVAL` | `60` | Период времени в секундах между повторными запросами конфигурации [YML](/definitions#yml)
 `PU_DP_NRECORDS_CLEANUP_INTERVAL` | `60` | Период времени в секундах между запусками задачи удаления накопившихся всверх предела записей `N Records`
-`PU_DP_BUFFER_FLUSH_INTERVAL` | `5` | Период времени в секундах, по истечении которого, не зависимо от числа пришедших записей, данные будут сохранены в [Clickhouse](/deployment/dependencies/clickhouse) или [PostgreSQL](/deployment/dependencies/postgresql)
-`PU_DP_BUFFER_MAX_SIZE` | `1000` | Предельная длинна очереди, при превышении которой запись в [ClickHouse](/deployment/dependencies/clickhouse) или [Postgresql](/deployment/dependencies/postgresql) выполняется не дожидаясь интервала `PU_DP_BUFFER_FLUSH_INTERVAL`
+`PU_DP_BUFFER_FLUSH_INTERVAL` | `5` | Период времени в секундах, по истечении которого, не зависимо от числа пришедших записей, данные будут сохранены в [ClickHouse](/deployment/dependencies/clickhouse) или [PostgreSQL](/deployment/dependencies/postgresql)
+`PU_DP_BUFFER_MAX_SIZE` | `1000` | Предельная длинна очереди, при превышении которой запись в [ClickHouse](/deployment/dependencies/clickhouse) или [PostgreSQL](/deployment/dependencies/postgresql) выполняется не дожидаясь интервала `PU_DP_BUFFER_FLUSH_INTERVAL`

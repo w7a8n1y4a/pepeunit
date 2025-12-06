@@ -2,7 +2,7 @@
 
 ## Работа с бэкапами
 
-1. Запустите `Pepeunit`, чтобы получить корректную версию
+1. Запустите `Pepeunit`, чтобы скрипт `backup` имел доступ до баз данных и версии `backend`
     ```bash
     docker compose up -d
     ```
@@ -10,7 +10,7 @@
     ```bash
     sudo ./backup.sh backup
     ```
-1. Развернуть версию из `backup`, инстанс при этом изначально должен быть полностью выключен командой `docker compose down`
+1. Развернуте версию из `backup`, инстанс при этом изначально должен быть полностью выключен командой `docker compose down`
     ```bash
     sudo ./backup.sh restore backups/backup_name.tar
     ```
