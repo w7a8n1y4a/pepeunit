@@ -1,14 +1,14 @@
 # Pepeunit
 
 :::info
-`Pepeunit` - платформа с открытым исходным кодом, основанная на принципах [Fediverse](/definitions#fediverse) и [IoT](/definitions#iot), предназначенная для организации устройств в единую, управляемую информационную систему.
+`Pepeunit` - платформа с открытым исходным кодом, основанная на принципах [Fediverse](/definitions#fediverse) и [IoT](/definitions#iot), предназначенная для организации устройств в единую и управляемую информационную систему.
 :::
 
 ![img](/schemas/work_schema.svg)
 
 ## CI/CD для Unit
 
-`Pepeunit` способен на основе внешних [Git](/definitions#git) репозиториев из [Gitlab](/definitions#gitlab) и [Github](/definitions#github), создавать готовые к использованию программы - это могут быть программы на основе [Интерпритируемых](/definitions#interpreterable) или [Компилируемых](/definitions#compilable) языков программирования.
+`Pepeunit` способен на основе внешних [Git](/definitions#git) репозиториев из [GitLab](/definitions#gitlab) и [GitHub](/definitions#github), создавать готовые к использованию программы - это могут быть программы на основе [интерпритируемых](/definitions#interpreterable) или [компилируемых](/definitions#compilable) языков программирования.
 
 :::info
 [Cистема обновлений](/development-pepeunit/mechanics/update-system)
@@ -16,13 +16,13 @@
 
 ## Конвейеры обработки данных
 
-`Pepeunit` способен производительно накапливать, предварительно отчищенные и трансформированные данные в [Clickhouse](/deployment/dependencies/clickhouse) и [Postgresql](/deployment/dependencies/postgresql).
+`Pepeunit` способен производительно накапливать предварительно отчищенные и трансформированные данные в [ClickHouse](/deployment/dependencies/clickhouse) и [PostgreSQL](/deployment/dependencies/postgresql).
 
-Обработка производится на основании конвейерных конфигураций в [YML](/definitions#yml) формате. Cкорость обработки обеспечивает отдельный микросервис написанный на [Golang](/definitions#golang). Доступно `4` основных типа накопления данных:
+Обработка производится на основании конвейерных конфигураций в [YML](/definitions#yml) формате. Cкорость обработки обеспечивает микросервис, написанный на [Golang](/definitions#golang). Доступно `4` основных типа накопления данных:
 - `Last Value` - сохранение последнего значения
 - `N Records` - сохранение `N` последних записей
 - `Time Window` - сохранение всех записей за установленное временное окно
-- `Aggregation` - сохранение данных аггрегированных при помощи фукнций: `avg, sum, min, max` - за выбранное временное окно
+- `Aggregation` - сохранение данных за выбранное временное окно, агрегированных при помощи фукнций: `avg, sum, min, max`
 
 :::info
 [DataPipe](/deployment/dependencies/datapipe)
@@ -70,14 +70,14 @@
 
 ## Клиентские библиотеки
 
-`Pepeunit` имеет библиотеки облегчающие создание [Unit](/definitions#unit), каждая из библиотек поддерживает полный функционал [Pepeunit Framework](/developer/libraries/framework), на данный момент доступны:
+`Pepeunit` имеет библиотеки, облегчающие создание [Unit](/definitions#unit), каждая из которых поддерживает полный функционал [Pepeunit Framework](/developer/libraries/framework). На данный момент доступны:
 - [Micropython](/developer/libraries/micropython)
 - [Python](/developer/libraries/python)
 - [Golang](/developer/libraries/golang)
 
 ## Сравнение Инстансов
 
-[Будет доступно начиная с одной из версий > 1.0.0](/roadmap/comparison)
+[Будет доступно, начиная с одной из версий > 1.0.0](/roadmap/comparison)
 
 ## Федерация
 

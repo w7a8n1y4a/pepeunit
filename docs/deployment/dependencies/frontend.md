@@ -2,7 +2,7 @@
 
 ## Frontend в широком смысле
 
-Набор из `2` сервисов: `Frontend` и [Grafana](/deployment/dependencies/grafana) - вместе обеспечивающих взаимодествие [Пользователей](/development-pepeunit/mechanics/roles.html#user) с [Backend](/deployment/dependencies/backend)
+Набор из `2` сервисов: `Frontend` и [Grafana](/deployment/dependencies/grafana). Указанные сервисы вместе обеспечивают взаимодействие [Пользователей](/development-pepeunit/mechanics/roles.html#user) с [Backend](/deployment/dependencies/backend).
 
 ## Frontend сервис 
 

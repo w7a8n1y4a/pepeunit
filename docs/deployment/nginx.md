@@ -80,10 +80,10 @@ server {
         client_max_body_size 20M;
     }
 
-    ssl_certificate /etc/letsencrypt/live/pepeunit.com-0001/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/pepeunit.com-0001/privkey.pem; # managed by Certbot
-    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/pepeunit.com-0001/fullchain.pem; 
+    ssl_certificate_key /etc/letsencrypt/live/pepeunit.com-0001/privkey.pem; 
+    include /etc/letsencrypt/options-ssl-nginx.conf; 
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; 
 }
 
 server {
@@ -153,10 +153,10 @@ server {
         proxy_pass http://192.168.0.22:5292;
     }
 
-    ssl_certificate /etc/letsencrypt/live/pepeunit.com-0001/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/pepeunit.com-0001/privkey.pem; # managed by Certbot
-    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/pepeunit.com-0001/fullchain.pem; 
+    ssl_certificate_key /etc/letsencrypt/live/pepeunit.com-0001/privkey.pem; 
+    include /etc/letsencrypt/options-ssl-nginx.conf; 
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; 
 }
 server {
     listen 80;

@@ -1,7 +1,7 @@
 # Развёртывание
 ## Pepeunit Deploy
 
-Хранит в себе все файлы и примеры, нужные для запуска инстанса [Pepeunit](/conception/overview) при помощи `docker compose`, чтобы склонировать репозиторий выполните команды:
+Deploy хранит в себе все файлы и примеры, нужные для запуска инстанса [Pepeunit](/conception/overview) при помощи `docker compose`. Для клонирования репозиторий выполните команды:
 ```bash
 git clone https://git.pepemoss.com/pepe/pepeunit/pepeunit_deploy.git
 cd pepeunit_deploy
@@ -11,15 +11,15 @@ cd pepeunit_deploy
 
 На выбор есть два варианта установки:
 1. Для локального использования - `.env.local.example`
-1. Для глобального использования - `.env.global.example`
+2. Для глобального использования - `.env.global.example`
 
-Отличие состоит в том, что локальный рассчитан на эксплуатацию в локальной сети, а глобальный позволяет обращаться к инстансу [Pepeunit](/conception/overview) по доменному имени через `https`.
+Отличие состоит в том, что локальный вариант рассчитан на эксплуатацию в локальной сети, а глобальный позволяет обращаться к инстансу [Pepeunit](/conception/overview) по доменному имени через `https`.
 
 Выберите один из файлов и уберите у него приставку `.example`
 - `.env.local.example` -> `.env.local`
 - `.env.global.example` -> `.env.global`
 
-Например командой:
+Например, командой:
 ```bash
 mv .env.local.example .env.local
 ```
@@ -36,7 +36,7 @@ mv .env.local.example .env.local
 `CLICKHOUSE_DB` | `default` | `default` | Название базы данных
 `PU_DOMAIN` | `192.168.0.22` | `unit.pepeunit.com` | Доменное имя от инстанса [Pepeunit](/conception/overview)
 `PU_SECURE` | `False` | - | Выбирает `http` или `https` для `BACKEND_DOMAIN` инстанса [Pepeunit](/conception/overview), по умолчанию `https`
-`PU_TELEGRAM_TOKEN `| `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | Токен [Telegram Bot](/definitions#telegram-bot) можно получить у [Bot Father](https://t.me/BotFather)
+`PU_TELEGRAM_TOKEN `| `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | Токен [Telegram Bot](/definitions#telegram-bot), можно получить у [Bot Father](https://t.me/BotFather)
 `PU_TELEGRAM_BOT_LINK` | `https://t.me/PepeUnitRobot` | `https://t.me/PepeUnitRobot` | Ccылка на [Telegram Bot](/definitions#telegram-bot), которого вы создаёте в [Bot Father](https://t.me/BotFather)
 `PU_MQTT_HOST` | `192.168.0.22` | `emqx.pepeunit.com` | Доменное имя от инстансa [EMQX](/deployment/dependencies/emqx). Для локального использования, убедитесь, что адрес будет доступен из контейнеров, `127.0.0.1` скорее всего работать не будет
 `PU_MQTT_SECURE` | `False` | - | Выбирает `http` или `https` для `MQTT_HOST` инстансa [Pepeunit](/conception/overview), по умолчанию `https`
@@ -78,7 +78,7 @@ $> python make_env.py
 ```
 
 :::danger
-Команда `python3 make_env.py` каждый раз перегенерирует конфиги. При перегенерации существующие секретные `32 битные ключи` не измененяются. Используйте команды [создания backup](/deployment/docker/backup-update#работа-с-бэкапами), для сохранения старой конфигурации.
+Команда `python3 make_env.py` каждый раз перегенерирует конфиги. При перегенерации существующие секретные `32-битные ключи` не измененяются. Используйте команды [создания backup](/deployment/docker/backup-update#работа-с-бэкапами), для сохранения старой конфигурации.
 :::
 
 :::danger
@@ -87,20 +87,20 @@ $> python make_env.py
 
 ## Настройка Nginx
 
-Обычно настройка [Nginx](/deployment/dependencies/nginx) для `docker compose` не требуется, но если ваш инстанс [Pepeunit](/conception/overview) будет находиться за ещё одним [Nginx](/deployment/dependencies/nginx), используйте: [Подробная настройка nginx для https и reverse proxy](/deployment/nginx)
+Обычно настройка [Nginx](/deployment/dependencies/nginx) для `docker compose` не требуется, но если ваш инстанс [Pepeunit](/conception/overview) будет находиться за ещё одним [Nginx](/deployment/dependencies/nginx), выполните [подробную настройку Nginx для https и reverse proxy](/deployment/nginx)
 
 ## Открытие портов
 
-Для корректной работы [Pepeunit](/conception/overview), нужно открыть следующие порты:
+Для корректной работы [Pepeunit](/conception/overview) нужно открыть следующие порты:
 1. `80` - для работы по `http`
 1. `443` - для работы по `https`
 1. `1883` - для работы по протоколу [MQTT](/definitions#mqtt)
 
 :::warning
-если ваш `1883` порт занят другими приложениями, изменить его на другой и внесите изменения в [ENV переменные Backend](/deployment/env-variables/backend) - `PU_MQTT_PORT`, а также в `docker-compose.yml` в секцию `emqx.ports` - значение `- "1883:1883"` вам нужно будет заменить например на: `- "1885:1883"`
+Если ваш порт `1883` занят другими приложениями, измените его на другой и внесите изменения в [ENV переменные Backend](/deployment/env-variables/backend) - `PU_MQTT_PORT`, а также в `docker-compose.yml` в секцию `emqx.ports`, значение `- "1883:1883"` вам нужно будет заменить, например, на `- "1885:1883"`.
 :::
 :::danger
-Если у вас публичный инстанс [Pepeunit](/conception/overview) с доменом - вам потребуется прокинуть данные порты наружу
+Если у вас публичный инстанс [Pepeunit](/conception/overview) с доменом - вам потребуется открыть указанные порты.
 :::
 
 ## Первый запуск
@@ -255,11 +255,11 @@ Del old lock files
 {"time": "2025-12-06 11:51:33,223", "level": "INFO", "logger": "gmqtt.client", "message": "[SUBACK] 1 (0,)", "funcName": "_handle_suback_packet"}
 ```
 
-Она отображает смог ли [Backend](/deployment/dependencies/backend) подписаться на топик `dcunit.pepeunit.com/+/+/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/deployment/dependencies/backend) `не смог` подписаться на основной топик. Обычно это одна из ошибок конфигурирования:
+Она отображает, смог ли [Backend](/deployment/dependencies/backend) подписаться на топик `dcunit.pepeunit.com/+/+/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/deployment/dependencies/backend) `не смог` подписаться на основной топик. Обычно, это одна из ошибок конфигурирования:
 1. Закрыт порт `1883` в роутере, хостинге и ли системе
-1. Настройкой портов сервиса [EMQX](/deployment/dependencies/emqx) в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
-1. При использовании кастомного порта для [MQTT](/definitions#mqtt), требуется указать его в двух `.env` файлах: `backend` и `datapipe`
-1. Ошибками в настройках [EMQX](/deployment/dependencies/emqx) и [Backend](/deployment/dependencies/backend), например `PU_MQTT_REDIS_AUTH_URL` или `PU_REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables/backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies/redis). За первичную авторизацию отвечает именно [Redis](/deployment/dependencies/redis).
+2. Настройкой портов сервиса [EMQX](/deployment/dependencies/emqx) в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
+3. При использовании кастомного порта для [MQTT](/definitions#mqtt), требуется указать его в двух `.env` файлах: `backend` и `datapipe`
+4. Ошибками в настройках [EMQX](/deployment/dependencies/emqx) и [Backend](/deployment/dependencies/backend), например `PU_MQTT_REDIS_AUTH_URL` или `PU_REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables/backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies/redis). За первичную авторизацию отвечает именно [Redis](/deployment/dependencies/redis).
 :::
 
 ## Создание Администратора

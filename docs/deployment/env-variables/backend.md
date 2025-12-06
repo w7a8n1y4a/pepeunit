@@ -20,8 +20,8 @@
 `PU_SECURE` | `True` | Если `True`, то [Backend](/deployment/dependencies/backend) будет генерировать ссылки с `https` для `PU_DOMAIN`. Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) - в поле `PU_HTTP_TYPE`, но уже в формате `https/http`
 `PU_AUTH_TOKEN_EXPIRATION` | `2678400` | Время жизни токенов авторизации [Пользователей](/development-pepeunit/mechanics/roles.html#user) в секундах
 `PU_SAVE_REPO_PATH` | `repo_cache` | Путь по которому [Backend](/deployment/dependencies/backend) хранит внешние [Git](/definitions#git) репозитории. Устанавливается относительно корневой дирректории [Backend](/deployment/dependencies/backend)
-`PU_SQLALCHEMY_DATABASE_URL` | - | Ссылка для подключения к [Postgresql](/deployment/dependencies/postgresql)
-`PU_CLICKHOUSE_DATABASE_URL` | - | Ссылка для подключения к [Clickhouse](/deployment/dependencies/clickhouse)
+`PU_SQLALCHEMY_DATABASE_URL` | - | Ссылка для подключения к [PostgreSQL](/deployment/dependencies/postgresql)
+`PU_CLICKHOUSE_DATABASE_URL` | - | Ссылка для подключения к [ClickHouse](/deployment/dependencies/clickhouse)
 `PU_SECRET_KEY` | - | `32 байтовый ключ` в формате `base64`. Отвечает за подпись токенов авторизации. В случае изменения все `jwt` токены созданные до изменения - становятся не действительными
 `PU_ENCRYPT_KEY` | - | `32 байтовый ключ` в формате `base64`. Отвечает за шифрование всех данных. В случае изменения все шифрованные записи - становится невозможно расшифровать
 `PU_STATIC_SALT` | - | `32 байтовый ключ` в формате `base64`. Отвечает за генерацию `hash` для паролей [Пользователей](/development-pepeunit/mechanics/roles.html#user). В случае изменения все учётные записи созданные до момента изменения - потеряют возможность авторизоваться
@@ -59,8 +59,8 @@
 `PU_MQTT_MAX_TOPIC_LEVELS` | `5` | Максимальная вложенность топиков [EMQX](/deployment/dependencies/emqx)
 `PU_MQTT_MAX_LEN_MESSAGE_QUEUE` | `128` | Максимальная длинна очереди сообщений [EMQX](/deployment/dependencies/emqx)
 `PU_MQTT_MAX_TOPIC_ALIAS` | `128` | Максимальное число топиков-ссылок [EMQX](/deployment/dependencies/emqx)
-`PU_GITHUB_TOKEN_NAME` | - | Название [Github](/definitions#github) токена, с разрешением только для чтения публичных репозиториев. Используется для увеличения лимита загрузки публичных репозиториев с [Github](/definitions#github) с `60` в час до `5000` в час
-`PU_GITHUB_TOKEN_PAT` | - | [Github](/definitions#github) токен, с разрешением только для чтения публичных репозиториев. Используется для увеличения лимита загрузки публичных репозиториев с [Github](/definitions#github) с `60` в час до `5000` в час
+`PU_GITHUB_TOKEN_NAME` | - | Название [GitHub](/definitions#github) токена, с разрешением только для чтения публичных репозиториев. Используется для увеличения лимита загрузки публичных репозиториев с [GitHub](/definitions#github) с `60` в час до `5000` в час
+`PU_GITHUB_TOKEN_PAT` | - | [GitHub](/definitions#github) токен, с разрешением только для чтения публичных репозиториев. Используется для увеличения лимита загрузки публичных репозиториев с [GitHub](/definitions#github) с `60` в час до `5000` в час
 `PU_GRAFANA_ADMIN_USER` | - | Логин админа для [Grafana](/deployment/dependencies/grafana)
 `PU_GRAFANA_ADMIN_PASSWORD` | - | Пароль админа для [Grafana](/deployment/dependencies/grafana)
 `PU_GRAFANA_LIMIT_UNIT_NODE_PER_ONE_PANEL` | `10` | Максимальное число [UnitNode](/definitions#unitnode) для одной [Visualization](/definitions#visualization)

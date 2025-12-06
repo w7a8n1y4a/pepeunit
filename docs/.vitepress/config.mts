@@ -48,8 +48,8 @@ export default withMermaid(defineConfig({
             text: 'Зависимости',
             collapsed: true,
             items: [
-              { text: 'Postgresql', link: '/deployment/dependencies/postgresql' },
-              { text: 'Clickhouse', link: '/deployment/dependencies/clickhouse' },
+              { text: 'PostgreSQL', link: '/deployment/dependencies/postgresql' },
+              { text: 'ClickHouse', link: '/deployment/dependencies/clickhouse' },
               { text: 'Redis', link: '/deployment/dependencies/redis' },
               { text: 'EMQX', link: '/deployment/dependencies/emqx' },
               { text: 'Backend', link: '/deployment/dependencies/backend' },
@@ -81,8 +81,8 @@ export default withMermaid(defineConfig({
               { text: 'Backend', link: '/deployment/env-variables/backend' },
               { text: 'DataPipe', link: '/deployment/env-variables/data-pipe' },
               { text: 'Frontend', link: '/deployment/env-variables/frontend' },
-              { text: 'Postgresql', link: '/deployment/env-variables/postgresql' },
-              { text: 'Clickhouse', link: '/deployment/env-variables/clickhouse' },
+              { text: 'PostgreSQL', link: '/deployment/env-variables/postgresql' },
+              { text: 'ClickHouse', link: '/deployment/env-variables/clickhouse' },
               { text: 'EMQX', link: '/deployment/env-variables/emqx' },
               { text: 'Grafana', link: '/deployment/env-variables/grafana' },
             ]
@@ -91,7 +91,7 @@ export default withMermaid(defineConfig({
         ]
       },
       {
-        text: 'Руководство Пользователя',
+        text: 'Руководство пользователя',
         collapsed: false,
         items: [
           {
@@ -108,10 +108,10 @@ export default withMermaid(defineConfig({
             collapsed: true,
             items: [
               { text: 'Создание Unit в Pepeunit', link: '/user/unit/create-unit-pepeunit' },
-              { text: 'Создание Unit физически', link: '/user/unit/create-physic-unit' },
+              { text: 'Создание физического Unit', link: '/user/unit/create-physic-unit' },
               { text: 'Обновление Unit', link: '/user/unit/update-unit' },
               { text: 'Настройка UnitNode', link: '/user/unit/settings-unit-node' },
-              { text: 'Cвязи Output->Input между UnitNode', link: '/user/unit/edge-unit-node' },
+              { text: 'Настройка IO-связи между UnitNode', link: '/user/unit/edge-unit-node' },
             ]
           },
           {
@@ -191,7 +191,7 @@ export default withMermaid(defineConfig({
               { text: 'Система Доступов', link: '/development-pepeunit/mechanics/permission' },
               { text: 'Система Обновлений', link: '/development-pepeunit/mechanics/update-system' },
               { text: 'Шифрование', link: '/development-pepeunit/mechanics/cipher' },
-              { text: 'Генерация Env у Unit', link: '/development-pepeunit/mechanics/alg-env' },
+              { text: 'Генерация env.json у Unit', link: '/development-pepeunit/mechanics/alg-env' },
             ]
           },
           {
