@@ -10,7 +10,11 @@
     ```bash
     sudo ./backup.sh backup
     ```
-1. Развернуте версию из `backup`, инстанс при этом изначально должен быть полностью выключен командой `docker compose down`
+1. Выключите инстанс
+    ```bash
+    docker compose down
+    ```
+1. Развернуте версию из `backup`
     ```bash
     sudo ./backup.sh restore backups/backup_name.tar
     ```

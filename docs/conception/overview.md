@@ -1,6 +1,6 @@
 # Pepeunit
 
-:::info
+:::info 
 `Pepeunit` - платформа с открытым исходным кодом, основанная на принципах [Fediverse](/definitions#fediverse) и [IoT](/definitions#iot), предназначенная для организации устройств в единую и управляемую информационную систему.
 :::
 
@@ -16,13 +16,13 @@
 
 ## Конвейеры обработки данных
 
-`Pepeunit` способен производительно накапливать предварительно отчищенные и трансформированные данные в [ClickHouse](/deployment/dependencies/clickhouse) и [PostgreSQL](/deployment/dependencies/postgresql).
+`Pepeunit` способен производительно накапливать предварительно очищенные и трансформированные данные в [ClickHouse](/deployment/dependencies/clickhouse) и [PostgreSQL](/deployment/dependencies/postgresql).
 
 Обработка производится на основании конвейерных конфигураций в [YML](/definitions#yml) формате. Cкорость обработки обеспечивает микросервис, написанный на [Golang](/definitions#golang). Доступно `4` основных типа накопления данных:
 - `Last Value` - сохранение последнего значения
 - `N Records` - сохранение `N` последних записей
 - `Time Window` - сохранение всех записей за установленное временное окно
-- `Aggregation` - сохранение данных за выбранное временное окно, агрегированных при помощи фукнций: `avg, sum, min, max`
+- `Aggregation` - сохранение за выбранное временное окно данных, агрегированных при помощи фукнций `avg, sum, min, max`
 
 :::info
 [DataPipe](/deployment/dependencies/datapipe)
@@ -47,10 +47,10 @@
 
 ## Управление топиками
 
-`Pepeunit` позволяет отслеживать состояние [Unit](/definitions#unit) при помощи системы именования топиков. [UnitNode](/definitions#unitnode) могут образовывать связи `Output` -> `Input` для передачи информации между разными [Unit](/definitions#unit).
+`Pepeunit` позволяет отслеживать состояние [Unit](/definitions#unit) при помощи системы именования топиков. [UnitNode](/definitions#unitnode) могут образовывать связи `Output→ Input` для передачи информации между разными [Unit](/definitions#unit).
 
 :::info
-[Связи Output->Input](/user/unit/edge-unit-node)
+[Связи Output→Input](/user/unit/edge-unit-node)
 
 [Стандартные MQTT команды](/developer/mqtt/default-mqtt-command)
 

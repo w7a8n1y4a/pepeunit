@@ -13,7 +13,6 @@ sh ./get-docker.sh
 ```
 
 Проверьте установку `Docker`:
-
 ```bash
 docker --version
 docker run hello-world
@@ -26,7 +25,6 @@ sudo usermod -aG docker <user-name>
 ```
 
 Установите `docker` в автозапуск:
-
 ```bash
 sudo systemctl start docker
 sudo systemctl enable docker

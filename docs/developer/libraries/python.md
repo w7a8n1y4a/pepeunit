@@ -3,7 +3,7 @@
 [Ccылки на репозитории](/development-pepeunit/maps.html#библиотеки)
 
 :::info
-[Интерпритируемый](/definitions#interpreterable) и при этом имеет полную функциональность [Pepeunit Framework](/developer/libraries/framework)
+[Интерпритируемый](/definitions#interpreterable) и имеет полную функциональность [Pepeunit Framework](/developer/libraries/framework)
 :::
 
 ## Пример

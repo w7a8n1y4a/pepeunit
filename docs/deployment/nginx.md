@@ -169,5 +169,5 @@ server {
 ```
 
 :::warning
-Подразумевается что контейнер `nginx` отключен в `docker-compose.yml` - `ip` взяты напрямую, порты взяты из `Docker Compose`.
+Подразумевается, что контейнер `nginx` отключен в `docker-compose.yml`, `ip` взяты напрямую, порты взяты из `Docker Compose`.
 :::

@@ -102,7 +102,7 @@ readme.md
 }
 ```
 
-Для соответствия проработанной идее [Unit](/definitions#unit) - к стандартным топикам `input_base_topic` и `output_base_topic` потребуются добавить ещё два типа топиков: `input_topic` и `output_topic`
+Для соответствия проработанной идее [Unit](/definitions#unit), к стандартным топикам `input_base_topic` и `output_base_topic` потребуются добавить ещё два типа топиков: `input_topic` и `output_topic`
 
 Тип топика | Топик разработчика | Назначение
 -- | -- | --
@@ -147,19 +147,19 @@ readme.md
 Все переменные в [env_example.json](/definitions#env-example-json) должны быть обезличены
 :::
 
-Нужно продумать за что будут отвечать переменные [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer):
+Нужно продумать, за что будут отвечать переменные [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer):
 Название переменной | Назначение
 -- | --
 `WIFI_SSID` | Название `WiFi` сети для подключения
 `WIFI_PASS` | Пароль от `WiFi` сети для подключения
 `PWM_FAN_PIN` | Позволит менять номер контакта подключения вентилятора
-`DS18B20_PIN_NUM` | Позволит менять номер контакта отвечающего за получение данных от датчика `ds18b20`
+`DS18B20_PIN_NUM` | Позволит менять номер контакта, отвечающего за получение данных от датчика `ds18b20`
 `REGULATOR_OPERATING_RANGE` | Позволит изменять частоту работы регулятора
 `PUBLISH_SEND_INTERVAL` | Позволит настраивать скорость публикации в топик `current_fan_speed_percentage/pepeunit` и `current_temp/pepeunit`
 `DUTY_MIN` | Позволит устанавливать минимальную скорость вентилятора
 `DUTY_MAX` | Позволит устанавливать максимальную скорость вентилятора
-`TEMP_MIN` | Позволит настраивать температуру начиная с которой скорость будет `DUTY_MIN`
-`TEMP_MAX` | Позволит настраивать температуру начиная с которой скорость будет `DUTY_MAX`
+`TEMP_MIN` | Позволит настраивать температуру, начиная с которой скорость будет `DUTY_MIN`
+`TEMP_MAX` | Позволит настраивать температуру, начиная с которой скорость будет `DUTY_MAX`
 
 :::warning
 Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [pepeunit.toml](/definitions#pepeunit-toml) и [readme.md](/definitions#readme-md).
@@ -170,7 +170,7 @@ readme.md
 
 ## Первый коммит
 
-После заполнения минимально нужных файлов, пора их закомитить:
+После заполнения минимально нужных файлов, пора их закоммитить:
 1. Переходим в консоль дирректории вашего проекта
 1. `git add .` - добавляем все файлы в кандидаты на [коммит](/definitions#git-commit)
 1. `git commit -m "feat(init): initial files"` - [коммитим](/definitions#git-commit) изменения
@@ -178,7 +178,7 @@ readme.md
 
 ## Создание тестового Unit в Pepeunit
 
-Чтобы продолжить разработку [Unit](/definitions#unit) - нужно взаимодействовать с [Pepeunit](/conception/overview) через [MQTT](/definitions#mqtt), а также получить [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json). Выбирите подходящий инстанс [Pepeunit](/conception/overview), которому вы доверяете. Выполните следующие шаги:
+Чтобы продолжить разработку [Unit](/definitions#unit), нужно взаимодействовать с [Pepeunit](/conception/overview) через [MQTT](/definitions#mqtt), а также получить [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json). Выбирите подходящий инстанс [Pepeunit](/conception/overview), которому вы доверяете. Выполните следующие шаги:
 1. [Создайте RepositoryRegistry](/user/git-repository/create-repository-registry#создание-repositoryregistry)
 1. [Создайте Repo](/user/git-repository/create-repo)
 1. [Создайте Unit](/user/unit/create-unit-pepeunit)
@@ -190,7 +190,6 @@ readme.md
 
 :::info
 В процессе разработки можно заходить в тестовый [Unit](/definitions#unit) и видеть:
-
 - какие данные [Unit](/definitions#unit) отправляет в `Output` [UnitNode](/definitions#unitnode) через систему [DataPipe](/deployment/dependencies/datapipe)
 - создавать для [Unit](/definitions#unit) управляющее воздействие через `Input` [UnitNode](/definitions#unitnode)
 :::
@@ -198,20 +197,20 @@ readme.md
 ## Наполнение Unit программным функционалом
 
 :::warning
-Не существует универсального алгоритма разработки Программного обеспечения, разрабатывайте так как удобно именно вам. Но старайтесь следовать стандартным правилам частоты кода у Програмиистов.
+Не существует универсального алгоритма разработки Программного обеспечения. Разрабатывайте так, как удобно именно вам. Однако рекомендуем стараться следовать стандартным правилам частоты кода.
 :::
 
 Когда у [Unit](/definitions#unit) в локальном репозитории есть обратная связь с [Pepeunit](/conception/overview), попробуйте следовать следующему алгоритму:
-1. Протестировать что клиентские библиотеки ([Micropython](/developer/libraries/micropython), [Golang](/developer/libraries/golang) и [Python](/developer/libraries/python)) корректно [отправляют данные](/developer/mqtt/default-mqtt-command) и получают [стандартные команды](/developer/mqtt/default-mqtt-command)
-1. Получите данные от ваших физических датчиков, попробуйте вывести значения напрямую в консоль - без сетевых заморочек, чтобы понять что данные действительно поступают
-1. Попробуйте отправить свои данные в `output_topic` указанные в [schema_example.json](/definitions#schema-example-json)
-1. Получите команды из `input_topic` и обработайте их так как задумано в концепции вашего [Unit](/definitions#unit)
+1. Протестировать, что клиентские библиотеки ([Micropython](/developer/libraries/micropython), [Golang](/developer/libraries/golang) и [Python](/developer/libraries/python)) корректно [отправляют данные](/developer/mqtt/default-mqtt-command) и получают [стандартные команды](/developer/mqtt/default-mqtt-command)
+1. Получите данные от ваших физических датчиков, попробуйте вывести значения напрямую в консоль, без сетевых усложнений, чтобы понять что данные действительно поступают
+1. Попробуйте отправить свои данные в `output_topic`, указанные в [schema_example.json](/definitions#schema-example-json)
+1. Получите команды из `input_topic` и обработайте их так, как задумано в концепции вашего [Unit](/definitions#unit)
 1. Внедрите переменные окружения из [env_example.json](/definitions#env-example-json) для удалённой настройки вашего [Unit](/definitions#unit)
 
 После этих шагов вы получите рабочий [Unit](/definitions#unit), которой нужно протестировать в различных режимах работы.
 
 :::warning
-В процессе разработки можно делать множество [коммитов](/definitions#git-commit) с рабочим и не рабочим функционалом, создавать [ветки](/definitions#git-branch) и делать всё что позволяет [Git](/definitions#git), но настенет момент - когда вы поймёте что всё работает корректно. В этот момент нужно двигаться дальше.
+В процессе разработки можно делать множество [коммитов](/definitions#git-commit) с рабочим и не рабочим функционалом, создавать [ветки](/definitions#git-branch) и делать всё, что позволяет [Git](/definitions#git). Однако настенет момент, когда вы поймёте, что всё работает корректно, и доработки больше не требуются. В этот случае можно двигаться дальше.
 :::
 
 ## Создание pepeunit.toml и readme.md
@@ -232,7 +231,7 @@ readme.md
 
 ## Присвоение Тега
 
-[readme.md](/definitions#readme-md) и [pepeunit.toml](/definitions#pepeunit-toml)  заполнены, функционал готов, всё работает корректно. Время присвоить [Тег](/definitions#git-tag) для последнего [коммита](/definitions#git-commit) в репозитории:
+[readme.md](/definitions#readme-md) и [pepeunit.toml](/definitions#pepeunit-toml) заполнены, функционал готов, всё работает корректно. Время присвоить [Тег](/definitions#git-tag) для последнего [коммита](/definitions#git-commit) в репозитории:
 
 1. Перейдите в консоль в дирректории вашего проекта
 1. Выполните команду `git tag 1.0.0`
@@ -249,5 +248,5 @@ readme.md
 :::danger
 [Тег](/definitions#git-tag) будет сигнализировать [Пользователям](/development-pepeunit/mechanics/roles#user), что всё готово к эксплуатации и протестировано [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer).
 
-[Пользователи](/development-pepeunit/mechanics/roles#user) будут ожидать, что выбрав последний [Тег](/definitions#git-tag) - получат самую рабочую, самую актуальную версию [Unit](/definitions#unit).
+[Пользователи](/development-pepeunit/mechanics/roles#user) будут ожидать, что выбрав последний [Тег](/definitions#git-tag), получат самую рабочую, самую актуальную версию [Unit](/definitions#unit).
 :::

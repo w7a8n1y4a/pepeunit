@@ -16,8 +16,8 @@ cd pepeunit_deploy
 Отличие состоит в том, что локальный вариант рассчитан на эксплуатацию в локальной сети, а глобальный позволяет обращаться к инстансу [Pepeunit](/conception/overview) по доменному имени через `https`.
 
 Выберите один из файлов и уберите у него приставку `.example`
-- `.env.local.example` -> `.env.local`
-- `.env.global.example` -> `.env.global`
+- `.env.local.example` → `.env.local`
+- `.env.global.example` → `.env.global`
 
 Например, командой:
 ```bash
@@ -38,17 +38,17 @@ mv .env.local.example .env.local
 `PU_SECURE` | `False` | - | Выбирает `http` или `https` для `BACKEND_DOMAIN` инстанса [Pepeunit](/conception/overview), по умолчанию `https`
 `PU_TELEGRAM_TOKEN `| `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | Токен [Telegram Bot](/definitions#telegram-bot), можно получить у [Bot Father](https://t.me/BotFather)
 `PU_TELEGRAM_BOT_LINK` | `https://t.me/PepeUnitRobot` | `https://t.me/PepeUnitRobot` | Ccылка на [Telegram Bot](/definitions#telegram-bot), которого вы создаёте в [Bot Father](https://t.me/BotFather)
-`PU_MQTT_HOST` | `192.168.0.22` | `emqx.pepeunit.com` | Доменное имя от инстансa [EMQX](/deployment/dependencies/emqx). Для локального использования, убедитесь, что адрес будет доступен из контейнеров, `127.0.0.1` скорее всего работать не будет
+`PU_MQTT_HOST` | `192.168.0.22` | `emqx.pepeunit.com` | Доменное имя от инстансa [EMQX](/deployment/dependencies/emqx). Для локального использования убедитесь, что адрес будет доступен из контейнеров, `127.0.0.1`, скорее всего, работать не будет
 `PU_MQTT_SECURE` | `False` | - | Выбирает `http` или `https` для `MQTT_HOST` инстансa [Pepeunit](/conception/overview), по умолчанию `https`
 `PU_MQTT_PORT` | `1883` | `1883` | [MQTT](/definitions#mqtt) порт для [EMQX](/deployment/dependencies/emqx)
 `PU_MQTT_USERNAME` | `YabJTlmvQ4tvweuTl0gn` | `YabJTlmvQ4tvweuTl0gn` | Имя администратора [EMQX](/deployment/dependencies/emqx)
 `PU_MQTT_PASSWORD` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | Пароль администратора [EMQX](/deployment/dependencies/emqx)
-`GF_USER` | `admin` | `admin` | Логин админа для [Grafana](/deployment/dependencies/grafana)
-`GF_PASSWORD` | `aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB` | `aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB` | Пароль админа для [Grafana](/deployment/dependencies/grafana)
+`GF_USER` | `admin` | `admin` | Логин администратора для [Grafana](/deployment/dependencies/grafana)
+`GF_PASSWORD` | `aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB` | `aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB` | Пароль администратора для [Grafana](/deployment/dependencies/grafana)
 
 ## Генерация env/.env.service
 
-Выполните команду генерирующую итоговые `.env.service` файлы в дирректории `env/.env.service`:
+Выполните команду, генерирующую итоговые `.env.service` файлы в дирректории `env/.env.service`:
 ```bash
 $> python make_env.py
 2025-09-16 00:51:44,693 - INFO - Run make envs
@@ -116,7 +116,7 @@ docker compose up -d
 ```
 
 :::info
-Пример корреткного запуска [Backend](/deployment/dependencies/backend) на основе конфига `.env.global`. Для `.env.local` будут отличаться только `ip` адреса и установка `pooling` для [Telegram Bot](/definitions#telegram-bot):
+Пример корреткного запуска [Backend](/deployment/dependencies/backend) на основе конфига `.env.global`. Для `.env.local` будут отличаться только `ip`-адреса и установка `pooling` для [Telegram Bot](/definitions#telegram-bot):
 ```bash
 $> docker logs -f backend
 Wait Ready PostgreSQL...
@@ -256,10 +256,10 @@ Del old lock files
 ```
 
 Она отображает, смог ли [Backend](/deployment/dependencies/backend) подписаться на топик `dcunit.pepeunit.com/+/+/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/deployment/dependencies/backend) `не смог` подписаться на основной топик. Обычно, это одна из ошибок конфигурирования:
-1. Закрыт порт `1883` в роутере, хостинге и ли системе
-1. Настройкой портов сервиса [EMQX](/deployment/dependencies/emqx) в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
+1. Закрыт порт `1883` в роутере, хостинге или системе
+1. Во время настройки портов сервиса [EMQX](/deployment/dependencies/emqx) в `docker-compose.yml` был указан другой порт, который не был открыт
 1. При использовании кастомного порта для [MQTT](/definitions#mqtt), требуется указать его в двух `.env` файлах: `backend` и `datapipe`
-1. Ошибками в настройках [EMQX](/deployment/dependencies/emqx) и [Backend](/deployment/dependencies/backend), например `PU_MQTT_REDIS_AUTH_URL` или `PU_REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables/backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies/redis). За первичную авторизацию отвечает именно [Redis](/deployment/dependencies/redis).
+1. Ошибками в настройках [EMQX](/deployment/dependencies/emqx) и [Backend](/deployment/dependencies/backend), например `PU_MQTT_REDIS_AUTH_URL` или `PU_REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables/backend). Данные переменные должны содержать в себе данные строго от одного и того же инстанса [Redis](/deployment/dependencies/redis), поскольку за первичную авторизацию отвечает именно [Redis](/deployment/dependencies/redis).
 :::
 
 ## Создание Администратора

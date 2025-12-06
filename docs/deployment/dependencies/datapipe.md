@@ -2,7 +2,7 @@
 
 ## DataPipe как cервис Backend
 
-`DataPipe сервис` - высокопроизводительный обработчик данных, написанный на [Golang](/definitions#golang). Отвечает за получение данных из топиков с паттерном `example.com/+/pepeunit`, с последующей их фильтрацией для сохранения в [ClickHouse](/deployment/dependencies/clickhouse) и [PostgreSQL](/deployment/dependencies/postgresql).
+`DataPipe-сервис` - высокопроизводительный обработчик данных, написанный на [Golang](/definitions#golang). Отвечает за получение данных из топиков с паттерном `example.com/+/pepeunit`, с последующей их фильтрацией для сохранения в [ClickHouse](/deployment/dependencies/clickhouse) и [PostgreSQL](/deployment/dependencies/postgresql).
 
 :::info
 [Подробнее о переменных окружения](/deployment/env-variables/data-pipe)

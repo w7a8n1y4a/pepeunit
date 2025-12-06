@@ -1,9 +1,9 @@
 # Стандартные MQTT команды Pepeunit
 
 :::warning
-Команды которые поддерживает [Unit](/definitions#unit) должны быть отражены в [schema_example.json](/definitions#schema-example-json) в разделе `input_base_topic`.
+Команды, которые поддерживает [Unit](/definitions#unit), должны быть отражены в [schema_example.json](/definitions#schema-example-json) в разделе `input_base_topic`.
 
-[Unit](/definitions#unit) должен быть подписан на эти топики, при получении сообщения [Unit](/definitions#unit) должны следовать единому паттерну поведения описанному в данном разделе.
+[Unit](/definitions#unit) должен быть подписан на эти топики, при получении сообщения [Unit](/definitions#unit) должны следовать единому паттерну поведения, описанному в данном разделе.
 :::
 
 Всего в [Pepeunit](/conception/overview) есть четыре команды - топика:
@@ -21,7 +21,7 @@
 1. Если команда была вызвана через [REST](/definitions#rest) или [GQL](/definitions#gql)
 :::
 
-Данная команда отправляет [Unit](/definitions#unit) запрос на обновление, [Unit](/definitions#unit) в ответ должен выполнить опредлённый алгоритм действий, приводящий к изменению текущей версии программного кода, на новый.
+Данная команда отправляет [Unit](/definitions#unit) запрос на обновление, [Unit](/definitions#unit) в ответ должен выполнить опредлённый алгоритм действий, приводящий к изменению текущей версии программного кода на новый.
 
 ### Формат сообщения в топик `update/pepeunit`
 :::danger
@@ -54,7 +54,7 @@
 
 [Компилируемые](/definitions#compilable):
 
-1. Сверить версию `PU_COMMIT_VERSION` с текущей версией `PU_COMMIT_VERSION` из [env.json](/definitions#env-json), если совпали обновление прерывается, если не совпали - [Unit](/definitions#unit) начинает процесс обновления
+1. Сверить версию `PU_COMMIT_VERSION` с текущей версией `PU_COMMIT_VERSION` из [env.json](/definitions#env-json), если совпали - обновление прерывается, если не совпали - [Unit](/definitions#unit) начинает процесс обновления
 1. Вычислить `uuid` [Unit](/definitions#unit) на основе `jwt` токена `PU_AUTH_TOKEN` из [env.json](/definitions#env-json)
 1. Скачать архив `tgz`, `tar` или `zip` с [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) при помощи [REST](/definitions#rest). Переменные `PU_HTTP_TYPE` и `PU_DOMAIN` доступны внутри [env.json](/definitions#env-json):
     - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/firmware/tgz/{Unit.uuid}?wbits=9&level=9` 
@@ -68,7 +68,7 @@
 
 [Интерпритируемые](/definitions#interpreterable):
 
-1. Сверить версию `PU_COMMIT_VERSION` с текущей версией `COMMIT_VERSION` из [env.json](/definitions#env-json), если совпали обновление прерывается, если не совпали [Unit](/definitions#unit) начинает процесс обновления
+1. Сверить версию `PU_COMMIT_VERSION` с текущей версией `COMMIT_VERSION` из [env.json](/definitions#env-json), если совпали - обновление прерывается, если не совпали - [Unit](/definitions#unit) начинает процесс обновления
 1. Вычислить `uuid` [Unit](/definitions#unit) на основе `jwt` токена `PU_AUTH_TOKEN` из [env.json](/definitions#env-json)
 1. Скачать архив `tgz`, `tar` или `zip` с обновлением при помощи [REST](/definitions#rest). Переменные `PU_HTTP_TYPE` и `PU_DOMAIN` доступны внутри [env.json](/definitions#env-json):
     - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/firmware/tgz/{Unit.uuid}?wbits=9&level=9` 
