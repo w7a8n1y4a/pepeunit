@@ -129,128 +129,134 @@ NOTICE:  version has not changed
 ALTER DATABASE
 Collation fixed.
 Run migration...
-INFO  [alembic.runtime.migration] Context impl PostgresqlImpl.
-INFO  [alembic.runtime.migration] Will assume transactional DDL.
+{"asctime": "2025-12-06 11:51:13,514", "levelname": "INFO", "name": "alembic.runtime.migration", "message": "Context impl PostgresqlImpl."}
+{"asctime": "2025-12-06 11:51:13,514", "levelname": "INFO", "name": "alembic.runtime.migration", "message": "Will assume transactional DDL."}
 Del old lock files
-[2025-09-15 22:09:28 +0000] [42] [INFO] Starting gunicorn 23.0.0
-[2025-09-15 22:09:28 +0000] [42] [INFO] Listening at: http://0.0.0.0:5000 (42)
-[2025-09-15 22:09:28 +0000] [42] [INFO] Using worker: uvicorn.workers.UvicornWorker
-[2025-09-15 22:09:28 +0000] [43] [INFO] Booting worker with pid: 43
-[2025-09-15 22:09:28 +0000] [44] [INFO] Booting worker with pid: 44
-[2025-09-15 22:09:33 +0000] [44] [INFO] on_connect handler accepted
-[2025-09-15 22:09:33 +0000] [44] [INFO] on_message handler accepted
-[2025-09-15 22:09:33 +0000] [43] [INFO] on_connect handler accepted
-[2025-09-15 22:09:33 +0000] [43] [INFO] on_message handler accepted
-[2025-09-15 22:09:33 +0000] [44] [INFO] Started server process [44]
-[2025-09-15 22:09:33 +0000] [44] [INFO] Waiting for application startup.
-INFO - 2025-09-15 22:09:33,442 - Total migrations to apply: 0
-INFO - 2025-09-15 22:09:33,443 - Check state EMQX Broker https://dcemqx.pepemoss.com
-[2025-09-15 22:09:33 +0000] [43] [INFO] Started server process [43]
-[2025-09-15 22:09:33 +0000] [43] [INFO] Waiting for application startup.
-INFO - 2025-09-15 22:09:33,671 - HTTP Request: GET https://dcemqx.pepemoss.com/api-docs/swagger.json "HTTP/1.1 200 OK"
-INFO - 2025-09-15 22:09:34,803 - EMQX Broker https://dcemqx.pepemoss.com - Ready to work
-INFO - 2025-09-15 22:09:34,850 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/login "HTTP/1.1 200 OK"
-INFO - 2025-09-15 22:09:34,851 - Del file auth hook MQTT Broker
-INFO - 2025-09-15 22:09:34,923 - HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/file "HTTP/1.1 204 No Content"
-INFO - 2025-09-15 22:09:34,923 - Del http auth hook MQTT Broker
-INFO - 2025-09-15 22:09:34,987 - HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/http "HTTP/1.1 204 No Content"
-INFO - 2025-09-15 22:09:34,988 - Del redis auth hook MQTT Broker
-INFO - 2025-09-15 22:09:35,057 - HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/redis "HTTP/1.1 204 No Content"
-INFO - 2025-09-15 22:09:35,058 - Set ACL file auth hook MQTT Broker
-INFO - 2025-09-15 22:09:35,100 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources "HTTP/1.1 204 No Content"
-INFO - 2025-09-15 22:09:35,101 - Set http auth hook MQTT Broker
-INFO - 2025-09-15 22:09:35,315 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources "HTTP/1.1 204 No Content"
-INFO - 2025-09-15 22:09:35,315 - Set redis auth hook MQTT Broker
-INFO - 2025-09-15 22:09:35,492 - HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources "HTTP/1.1 204 No Content"
-INFO - 2025-09-15 22:09:35,492 - Set cache settings auth hook MQTT Broker
-INFO - 2025-09-15 22:09:35,608 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/authorization/settings "HTTP/1.1 200 OK"
-INFO - 2025-09-15 22:09:35,609 - Set settings for tcp listener
-INFO - 2025-09-15 22:09:35,705 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/listeners/tcp:default "HTTP/1.1 200 OK"
-INFO - 2025-09-15 22:09:35,706 - Set global mqtt settings
-INFO - 2025-09-15 22:09:35,749 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/configs/global_zone "HTTP/1.1 200 OK"
-INFO - 2025-09-15 22:09:35,750 - Disable retainer
-INFO - 2025-09-15 22:09:35,803 - HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/mqtt/retainer "HTTP/1.1 200 OK"
-INFO - 2025-09-15 22:09:35,810 - Run sync all repository in RepositoryRegistry
-INFO - 2025-09-15 22:09:35,871 - End sync all repository in RepositoryRegistry
-INFO - 2025-09-15 22:09:35,872 - 
-            
-                           ........:                                   
-                          :......::-                                   
-                           .....::.:                                   
-                           .....::.-                                   
-                      :.........::.-****                               
-                    :........::::--==++###%                            
-                  :::-++*++=======++*#@@%%-::                          
-                ....:-=---==++******###%%*-...:                        
-              :....:--===++=*=+**%@@%@%%%%*+:..:                       
-            :....::=====+====+==*##%@%%%#*##+=...:                     
-          -...........:-===++*=++**#%*:....::---...:                   
-         :......-..:*##%%*+++===+#*-.:-..+#%%%#*+:...:                 
-       :......=..++*##%%%%#**++--=..-.--*##%%*%@#+=....-               
-      :..:-:.+-+=+#%%***+#@#*=---..+:=**+%@%%*%@@*+=-...:              
-     =--===-.%%=#*#%-.=:+@@%**==-::%%#==#@@#%@@+@%**+=:::              
-     =-=====.+@%%+@@%:.-#@@##***+-:%@%*%@%@%%=%@@#++::-::              
-     =--====-.#@@*@+@@*@@@#***#**#-:%@*%%+@=@*@@#*==-..::              
-     ==+*=+++=::#@@@@@@@########*#%==+%@@@@@@@#**++++*+::-             
-     *@*+++++++++****#####%##%###%#%%%%#########*##+==*#--             
-     -*@%**==+=+*#=+**###%%%%####%%##%%%%%%%#%%%#####@@%=+             
-  :::-=--+%%@*##*.-.*#####%%%########%%%%%%%###%%@@%*++=+****          
-  ....:---------==***#%%%%%*%#%%#%%%%%%%%%#*++=====+**#######%         
-  ....:-:::-=====-----------------------===+++***+++*#%@@%###%         
-  :--=:=++++====---::::---------===========++*##%@@@@@@@@@@@@@         
-     =--+*++++***+=+*****###########%%%%%%%%%#%%%#@@@@@@@@             
-       +==++++**+...:*=+=*=+==*++##++=+++#%-:-*%#%@@@@@@               
-          %#*****#####*##*-+-=*==#--+#**%*%%%%@@@@@@@                  
-            *##%@@@@@@@%%%%%%%%%%%%%%@@@@@@@@@@@@@@                    
-            *###%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@                    
-                %%@@@@@@@@@@@@@@@@@@@@@@@@@@@@       
-             _____                            _ _   
-            |  __ \                          (_) |  
-            | |__) |__ _ __   ___ _   _ _ __  _| |_ 
-            |  ___/ _ \ '_ \ / _ \ | | | '_ \| | __|
-            | |  |  __/ |_) |  __/ |_| | | | | | |_ 
-            |_|   \___| .__/ \___|\__,_|_| |_|_|\__|
-                      | |                           
-                      |_|   
-                   
-     v0.9.0 - AGPL v3 License
-     Federated IoT Platform
-     Front: https://dcunit.pepeunit.com
-     REST:  https://dcunit.pepeunit.com/pepeunit/docs
-     GQL:   https://dcunit.pepeunit.com/pepeunit/graphql
-     TG:    https://t.me/PepeUnitDevRobot
-     Docs:  https://pepeunit.com
-            
-INFO - 2025-09-15 22:09:35,872 - Delete webhook before set new webhook
-INFO - 2025-09-15 22:09:35,873 - Connect to mqtt server: dcemqx.pepemoss.com:1885
-[2025-09-15 22:09:35 +0000] [44] [INFO] Used broker version is 5
-INFO - 2025-09-15 22:09:35,878 - [CONNECTION MADE]
-INFO - 2025-09-15 22:09:36,537 - Connect to mqtt server: dcemqx.pepemoss.com:1885
-[2025-09-15 22:09:36 +0000] [43] [INFO] Used broker version is 5
-INFO - 2025-09-15 22:09:36,543 - [CONNECTION MADE]
-INFO - 2025-09-15 22:09:37,882 - MQTT subscriptions initialized in this worker
-INFO - 2025-09-15 22:09:37,882 - [SEND SUB] 1 [b'dcunit.pepeunit.com/+/+/+/pepeunit']
-INFO - 2025-09-15 22:09:37,884 - [SUBACK] 1 (0,)
-[2025-09-15 22:09:37 +0000] [44] [INFO] Application startup complete.
-172.20.1.13:38050 - "POST /pepeunit/api/v1/units/auth HTTP/1.0" 200
-172.20.1.11:35616 - "GET /pepeunit/metrics HTTP/1.1" 200
-INFO - 2025-09-15 22:09:38,548 - Another worker already subscribed to MQTT topics
-[2025-09-15 22:09:38 +0000] [43] [INFO] Application startup complete.
-172.20.1.13:38058 - "POST /pepeunit/api/v1/bot HTTP/1.0" 422
-INFO - 2025-09-15 22:09:38,569 - HTTP Request: POST https://dcunit.pepeunit.com/pepeunit/api/v1/bot "HTTP/1.1 422 Unprocessable Entity"
-INFO - 2025-09-15 22:09:38,640 - Success set TG bot webhook url
+{"time": "2025-12-06 11:51:16,012", "level": "INFO", "logger": "gunicorn.error", "message": "Starting gunicorn 23.0.0", "funcName": "info"}
+{"time": "2025-12-06 11:51:16,013", "level": "INFO", "logger": "gunicorn.error", "message": "Listening at: http://0.0.0.0:5000 (28)", "funcName": "info"}
+{"time": "2025-12-06 11:51:16,014", "level": "INFO", "logger": "gunicorn.error", "message": "Using worker: uvicorn.workers.UvicornWorker", "funcName": "info"}
+{"time": "2025-12-06 11:51:16,017", "level": "INFO", "logger": "gunicorn.error", "message": "Booting worker with pid: 29", "funcName": "info"}
+{"time": "2025-12-06 11:51:16,088", "level": "INFO", "logger": "gunicorn.error", "message": "Booting worker with pid: 30", "funcName": "info"}
+{"time": "2025-12-06 11:51:22,533", "level": "INFO", "logger": "uvicorn.error", "message": "on_connect handler accepted", "funcName": "on_connect"}
+{"time": "2025-12-06 11:51:22,533", "level": "INFO", "logger": "uvicorn.error", "message": "on_message handler accepted", "funcName": "on_message"}
+{"time": "2025-12-06 11:51:22,534", "level": "INFO", "logger": "uvicorn.error", "message": "on_connect handler accepted", "funcName": "on_connect"}
+{"time": "2025-12-06 11:51:22,534", "level": "INFO", "logger": "uvicorn.error", "message": "on_message handler accepted", "funcName": "on_message"}
+{"time": "2025-12-06 11:51:22,827", "level": "INFO", "logger": "uvicorn.error", "message": "Started server process [29]", "funcName": "_serve", "color_message": "Started server process [\u001b[36m%d\u001b[0m]"}
+{"time": "2025-12-06 11:51:22,827", "level": "INFO", "logger": "uvicorn.error", "message": "Waiting for application startup.", "funcName": "startup"}
+{"time": "2025-12-06 11:51:22,844", "level": "INFO", "logger": "uvicorn.error", "message": "Started server process [30]", "funcName": "_serve", "color_message": "Started server process [\u001b[36m%d\u001b[0m]"}
+{"time": "2025-12-06 11:51:22,844", "level": "INFO", "logger": "uvicorn.error", "message": "Waiting for application startup.", "funcName": "startup"}
+{"time": "2025-12-06 11:51:22,856", "level": "INFO", "logger": "root", "message": "Total migrations to apply: 0", "funcName": "apply_migration"}
+{"time": "2025-12-06 11:51:22,856", "level": "INFO", "logger": "root", "message": "Check state EMQX Broker https://dcemqx.pepemoss.com", "funcName": "__init__"}
+{"time": "2025-12-06 11:51:23,650", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET https://dcemqx.pepemoss.com/api-docs/swagger.json \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:25,405", "level": "INFO", "logger": "root", "message": "EMQX Broker https://dcemqx.pepemoss.com - Ready to work", "funcName": "__init__"}
+{"time": "2025-12-06 11:51:25,802", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/login \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:25,803", "level": "INFO", "logger": "root", "message": "Del file auth hook MQTT Broker", "funcName": "delete_auth_hooks"}
+{"time": "2025-12-06 11:51:26,266", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/file \"HTTP/1.1 204 No Content\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:26,268", "level": "INFO", "logger": "root", "message": "Del http auth hook MQTT Broker", "funcName": "delete_auth_hooks"}
+{"time": "2025-12-06 11:51:26,679", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/http \"HTTP/1.1 204 No Content\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:26,681", "level": "INFO", "logger": "root", "message": "Del redis auth hook MQTT Broker", "funcName": "delete_auth_hooks"}
+{"time": "2025-12-06 11:51:27,092", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/redis \"HTTP/1.1 204 No Content\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:27,095", "level": "INFO", "logger": "root", "message": "Set ACL file auth hook MQTT Broker", "funcName": "set_file_auth_hook"}
+{"time": "2025-12-06 11:51:27,487", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources \"HTTP/1.1 204 No Content\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:27,490", "level": "INFO", "logger": "root", "message": "Set http auth hook MQTT Broker", "funcName": "set_http_auth_hook"}
+{"time": "2025-12-06 11:51:28,282", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources \"HTTP/1.1 204 No Content\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:28,284", "level": "INFO", "logger": "root", "message": "Set redis auth hook MQTT Broker", "funcName": "set_redis_auth_hook"}
+{"time": "2025-12-06 11:51:28,801", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources \"HTTP/1.1 204 No Content\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:28,803", "level": "INFO", "logger": "root", "message": "Set cache settings auth hook MQTT Broker", "funcName": "set_auth_cache_ttl"}
+{"time": "2025-12-06 11:51:29,286", "level": "INFO", "logger": "httpx", "message": "HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/authorization/settings \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:29,288", "level": "INFO", "logger": "root", "message": "Set settings for tcp listener", "funcName": "set_tcp_listener_settings"}
+{"time": "2025-12-06 11:51:29,710", "level": "INFO", "logger": "httpx", "message": "HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/listeners/tcp:default \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:29,712", "level": "INFO", "logger": "root", "message": "Set global mqtt settings", "funcName": "set_global_mqtt_settings"}
+{"time": "2025-12-06 11:51:30,112", "level": "INFO", "logger": "httpx", "message": "HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/configs/global_zone \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:30,114", "level": "INFO", "logger": "root", "message": "Disable retainer", "funcName": "set_global_mqtt_settings"}
+{"time": "2025-12-06 11:51:30,257", "level": "INFO", "logger": "httpx", "message": "HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/mqtt/retainer \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:30,264", "level": "INFO", "logger": "root", "message": "Run sync all repository in RepositoryRegistry", "funcName": "sync_local_repository_storage"}
+{"time": "2025-12-06 11:51:30,331", "level": "INFO", "logger": "root", "message": "End sync all repository in RepositoryRegistry", "funcName": "sync_local_repository_storage"}
+
+
+                             ........:
+                            :......::-
+                             .....::.:
+                             .....::.-
+                        :.........::.-****
+                      :........::::--==++###%
+                    :::-++*++=======++*#@@%%-::
+                  ....:-=---==++******###%%*-...:
+                :....:--===++=*=+**%@@%@%%%%*+:..:
+              :....::=====+====+==*##%@%%%#*##+=...:
+            -...........:-===++*=++**#%*:....::---...:
+           :......-..:*##%%*+++===+#*-.:-..+#%%%#*+:...:
+         :......=..++*##%%%%#**++--=..-.--*##%%*%@#+=....-
+        :..:-:.+-+=+#%%***+#@#*=---..+:=**+%@%%*%@@*+=-...:
+       =--===-.%%=#*#%-.=:+@@%**==-::%%#==#@@#%@@+@%**+=:::
+       =-=====.+@%%+@@%:.-#@@##***+-:%@%*%@%@%%=%@@#++::-::
+       =--====-.#@@*@+@@*@@@#***#**#-:%@*%%+@=@*@@#*==-..::
+       ==+*=+++=::#@@@@@@@########*#%==+%@@@@@@@#**++++*+::-
+       *@*+++++++++****#####%##%###%#%%%%#########*##+==*#--
+       -*@%**==+=+*#=+**###%%%%####%%##%%%%%%%#%%%#####@@%=+
+    :::-=--+%%@*##*.-.*#####%%%########%%%%%%%###%%@@%*++=+****
+    ....:---------==***#%%%%%*%#%%#%%%%%%%%%#*++=====+**#######%
+    ....:-:::-=====-----------------------===+++***+++*#%@@%###%
+    :--=:=++++====---::::---------===========++*##%@@@@@@@@@@@@@
+       =--+*++++***+=+*****###########%%%%%%%%%#%%%#@@@@@@@@
+         +==++++**+...:*=+=*=+==*++##++=+++#%-:-*%#%@@@@@@
+            %#*****#####*##*-+-=*==#--+#**%*%%%%@@@@@@@
+              *##%@@@@@@@%%%%%%%%%%%%%%@@@@@@@@@@@@@@
+              *###%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+                  %%@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+               _____                            _ _
+              |  __ \                          (_) |
+              | |__) |__ _ __   ___ _   _ _ __  _| |_
+              |  ___/ _ \ '_ \ / _ \ | | | '_ \| | __|
+              | |  |  __/ |_) |  __/ |_| | | | | | |_
+              |_|   \___| .__/ \___|\__,_|_| |_|_|\__|
+                        | |
+                        |_|
+
+       v0.10.0 - AGPL v3 License
+       Federated IoT Platform
+       Front: https://dcunit.pepeunit.com
+       REST:  https://dcunit.pepeunit.com/pepeunit/docs
+       GQL:   https://dcunit.pepeunit.com/pepeunit/graphql
+       TG:    https://t.me/PepeUnitDevRobot
+       Docs:  https://pepeunit.com
+
+{"time": "2025-12-06 11:51:30,333", "level": "INFO", "logger": "root", "message": "Delete webhook before set new webhook", "funcName": "run_webhook_bot"}
+{"time": "2025-12-06 11:51:30,333", "level": "INFO", "logger": "root", "message": "Connect to mqtt server: dcemqx.pepemoss.com:1885", "funcName": "run_mqtt_client"}
+{"time": "2025-12-06 11:51:30,334", "level": "INFO", "logger": "uvicorn.error", "message": "Used broker version is 5", "funcName": "connection"}
+{"time": "2025-12-06 11:51:30,335", "level": "INFO", "logger": "uvicorn.error", "message": "Application startup complete.", "funcName": "startup"}
+{"time": "2025-12-06 11:51:30,343", "level": "INFO", "logger": "root", "message": "NoAccessError('403: 1: No Access: Token is invalid')", "funcName": "get_mqtt_auth"}
+{"time": "2025-12-06 11:51:30,349", "level": "INFO", "logger": "uvicorn.access", "message": "GET /pepeunit/metrics 200", "funcName": "send", "client_ip": "172.20.1.12", "http_method": "GET", "http_path": "/pepeunit/metrics", "http_version": "1.1", "http_status_code": 200}
+{"time": "2025-12-06 11:51:30,445", "level": "INFO", "logger": "gmqtt.mqtt.protocol", "message": "[CONNECTION MADE]", "funcName": "connection_made"}
+{"time": "2025-12-06 11:51:30,724", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET https://dcunit.pepeunit.com/grafana/api/dashboards/uid/all-docker-logs/permissions \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:30,850", "level": "INFO", "logger": "root", "message": "Connect to mqtt server: dcemqx.pepemoss.com:1885", "funcName": "run_mqtt_client"}
+{"time": "2025-12-06 11:51:30,850", "level": "INFO", "logger": "uvicorn.error", "message": "Used broker version is 5", "funcName": "connection"}
+{"time": "2025-12-06 11:51:30,855", "level": "INFO", "logger": "uvicorn.error", "message": "Application startup complete.", "funcName": "startup"}
+{"time": "2025-12-06 11:51:30,978", "level": "INFO", "logger": "gmqtt.mqtt.protocol", "message": "[CONNECTION MADE]", "funcName": "connection_made"}
+{"time": "2025-12-06 11:51:31,193", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://dcunit.pepeunit.com/grafana/api/dashboards/uid/all-docker-logs/permissions \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:31,631", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET https://dcunit.pepeunit.com/grafana/api/dashboards/uid/backend-aggregated-logs/permissions \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:32,072", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://dcunit.pepeunit.com/grafana/api/dashboards/uid/backend-aggregated-logs/permissions \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:32,553", "level": "INFO", "logger": "root", "message": "MQTT subscriptions initialized in this worker", "funcName": "connect"}
+{"time": "2025-12-06 11:51:32,554", "level": "INFO", "logger": "gmqtt.mqtt.package", "message": "[SEND SUB] 1 [b'dcunit.pepeunit.com/+/+/+/pepeunit']", "funcName": "build_package"}
+{"time": "2025-12-06 11:51:33,087", "level": "INFO", "logger": "root", "message": "Another worker already subscribed to MQTT topics", "funcName": "connect"}
+{"time": "2025-12-06 11:51:33,108", "level": "INFO", "logger": "uvicorn.access", "message": "POST /pepeunit/api/v1/bot 422", "funcName": "send", "client_ip": "172.20.1.10", "http_method": "POST", "http_path": "/pepeunit/api/v1/bot", "http_version": "1.0", "http_status_code": 422}
+{"time": "2025-12-06 11:51:33,113", "level": "INFO", "logger": "uvicorn.access", "message": "POST /pepeunit/api/v1/units/auth 200", "funcName": "send", "client_ip": "172.20.1.10", "http_method": "POST", "http_path": "/pepeunit/api/v1/units/auth", "http_version": "1.0", "http_status_code": 200}
+{"time": "2025-12-06 11:51:33,172", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://dcunit.pepeunit.com/pepeunit/api/v1/bot \"HTTP/1.1 422 Unprocessable Content\"", "funcName": "_send_single_request"}
+{"time": "2025-12-06 11:51:33,179", "level": "INFO", "logger": "uvicorn.access", "message": "GET /pepeunit/metrics 200", "funcName": "send", "client_ip": "172.20.1.12", "http_method": "GET", "http_path": "/pepeunit/metrics", "http_version": "1.1", "http_status_code": 200}
+{"time": "2025-12-06 11:51:33,223", "level": "INFO", "logger": "gmqtt.client", "message": "[SUBACK] 1 (0,)", "funcName": "_handle_suback_packet"}
+{"time": "2025-12-06 11:51:33,249", "level": "INFO", "logger": "root", "message": "Success set TG bot webhook url", "funcName": "run_webhook_bot"}
 ```
 :::
 
 :::warning
 Стоит обратить особое внимание на строчку:
 
-```bash
-INFO - 2025-03-14 01:11:53,249 - [SUBACK] 1 (0,)
+```json
+{"time": "2025-12-06 11:51:33,223", "level": "INFO", "logger": "gmqtt.client", "message": "[SUBACK] 1 (0,)", "funcName": "_handle_suback_packet"}
 ```
 
 Она отображает смог ли [Backend](/deployment/dependencies/backend) подписаться на топик `dcunit.pepeunit.com/+/+/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/deployment/dependencies/backend) `не смог` подписаться на основной топик. Обычно это одна из ошибок конфигурирования:
-1. Закрытым портом `1883`
+1. Закрыт порт `1883` в роутере, хостинге и ли системе
 1. Настройкой портов сервиса [EMQX](/deployment/dependencies/emqx) в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
 1. При использовании кастомного порта для [MQTT](/definitions#mqtt), требуется указать его в двух `.env` файлах: `backend` и `datapipe`
 1. Ошибками в настройках [EMQX](/deployment/dependencies/emqx) и [Backend](/deployment/dependencies/backend), например `PU_MQTT_REDIS_AUTH_URL` или `PU_REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables/backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies/redis). За первичную авторизацию отвечает именно [Redis](/deployment/dependencies/redis).

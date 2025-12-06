@@ -10,10 +10,15 @@
 
 ## Grafana Dashboards
 
-1. `Backend Load Metrics` - позволяет оценить нагрузку в запросах на самую важную часть системы: [Backend](/deployment/dependencies/backend)
-1. `EMQX Load Metrics` - показывает нагрузку на [EMQX](/deployment/dependencies/emqx) - основного менеджера данных в системе
-1. `Docker Resource Metrics` - показывает какой объём ресурсов потребляет система в целом и для каждого контейенера в отдельности
-1. `Docker Logs` - просмотр логов любых контейнеров
+Данные `Dashboards` доступны по умолчанию в `Main Org`. Обычные [Пользователи](/development-pepeunit/mechanics/roles.html#user) имеют доступ `View`. `Admin` доступ есть только при входе с `GF_SECURITY_ADMIN_USER` и `GF_SECURITY_ADMIN_PASSWORD`                       
+
+Название | Требуемый доступ | Описание
+-- | -- | --
+`Docker Logs` | `Admin` | Просмотр логов любых контейнеров
+`Backend Aggregated Logs` | `Admin` | Просмотр логов [Backend](/deployment/dependencies/backend) с группировкой по сообщениям и возможностью выбора уровней логов
+`Backend Load Metrics` | `View` | Позволяет оценить нагрузку в запросах на самую важную часть системы: [Backend](/deployment/dependencies/backend)
+`EMQX Load Metrics` | `View` | Показывает нагрузку на [EMQX](/deployment/dependencies/emqx) - основного менеджера данных в системе
+`Docker Resource Metrics` | `View` | Показывает какой объём ресурсов потребляет система в целом и для каждого контейенера в отдельности
 
 :::warning
 Функционал мониторинга можно выключить используя следующие шаги:
