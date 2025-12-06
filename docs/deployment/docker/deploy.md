@@ -213,7 +213,7 @@ Del old lock files
                         | |
                         |_|
 
-       v0.10.0 - AGPL v3 License
+       v1.0.0 - AGPL v3 License
        Federated IoT Platform
        Front: https://dcunit.pepeunit.com
        REST:  https://dcunit.pepeunit.com/pepeunit/docs
