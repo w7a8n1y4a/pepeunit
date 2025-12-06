@@ -111,7 +111,7 @@ export default withMermaid(defineConfig({
               { text: 'Создание физического Unit', link: '/user/unit/create-physic-unit' },
               { text: 'Обновление Unit', link: '/user/unit/update-unit' },
               { text: 'Настройка UnitNode', link: '/user/unit/settings-unit-node' },
-              { text: 'Настройка IO-связи между UnitNode', link: '/user/unit/edge-unit-node' },
+              { text: 'Настройка Output→Input связи между UnitNode', link: '/user/unit/edge-unit-node' },
             ]
           },
           {

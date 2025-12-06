@@ -1,7 +1,7 @@
 # Развёртывание
 ## Pepeunit Deploy
 
-Deploy хранит в себе все файлы и примеры, нужные для запуска инстанса [Pepeunit](/conception/overview) при помощи `docker compose`. Для клонирования репозиторий выполните команды:
+`Pepeunit Deploy` хранит в себе все файлы и примеры, нужные для запуска инстанса [Pepeunit](/conception/overview) при помощи `docker compose`. Для клонирования репозиторий выполните команды:
 ```bash
 git clone https://git.pepemoss.com/pepe/pepeunit/pepeunit_deploy.git
 cd pepeunit_deploy
@@ -11,7 +11,7 @@ cd pepeunit_deploy
 
 На выбор есть два варианта установки:
 1. Для локального использования - `.env.local.example`
-2. Для глобального использования - `.env.global.example`
+1. Для глобального использования - `.env.global.example`
 
 Отличие состоит в том, что локальный вариант рассчитан на эксплуатацию в локальной сети, а глобальный позволяет обращаться к инстансу [Pepeunit](/conception/overview) по доменному имени через `https`.
 
@@ -87,7 +87,7 @@ $> python make_env.py
 
 ## Настройка Nginx
 
-Обычно настройка [Nginx](/deployment/dependencies/nginx) для `docker compose` не требуется, но если ваш инстанс [Pepeunit](/conception/overview) будет находиться за ещё одним [Nginx](/deployment/dependencies/nginx), выполните [подробную настройку Nginx для https и reverse proxy](/deployment/nginx)
+Обычно, настройка [Nginx](/deployment/dependencies/nginx) для `docker compose` не требуется, но если ваш инстанс [Pepeunit](/conception/overview) будет находиться за ещё одним [Nginx](/deployment/dependencies/nginx), изучите [примеры конфигов Nginx для https и reverse proxy](/deployment/nginx)
 
 ## Открытие портов
 
@@ -257,9 +257,9 @@ Del old lock files
 
 Она отображает, смог ли [Backend](/deployment/dependencies/backend) подписаться на топик `dcunit.pepeunit.com/+/+/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/deployment/dependencies/backend) `не смог` подписаться на основной топик. Обычно, это одна из ошибок конфигурирования:
 1. Закрыт порт `1883` в роутере, хостинге и ли системе
-2. Настройкой портов сервиса [EMQX](/deployment/dependencies/emqx) в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
-3. При использовании кастомного порта для [MQTT](/definitions#mqtt), требуется указать его в двух `.env` файлах: `backend` и `datapipe`
-4. Ошибками в настройках [EMQX](/deployment/dependencies/emqx) и [Backend](/deployment/dependencies/backend), например `PU_MQTT_REDIS_AUTH_URL` или `PU_REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables/backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies/redis). За первичную авторизацию отвечает именно [Redis](/deployment/dependencies/redis).
+1. Настройкой портов сервиса [EMQX](/deployment/dependencies/emqx) в `docker-compose.yml`, вы могли указать другой порт, и не открыли его
+1. При использовании кастомного порта для [MQTT](/definitions#mqtt), требуется указать его в двух `.env` файлах: `backend` и `datapipe`
+1. Ошибками в настройках [EMQX](/deployment/dependencies/emqx) и [Backend](/deployment/dependencies/backend), например `PU_MQTT_REDIS_AUTH_URL` или `PU_REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables/backend). Данные переменные должны смотреть строго на один и тот же инстанас [Redis](/deployment/dependencies/redis). За первичную авторизацию отвечает именно [Redis](/deployment/dependencies/redis).
 :::
 
 ## Создание Администратора

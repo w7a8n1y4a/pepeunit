@@ -12,7 +12,7 @@
     ```bash
     docker logs postgres
     ```
-- Зайти "внутрь" контейнера, чтобы посмотреть состояние файлов и тд:
+- Подключиться к контейнеру:
     ```bash
     docker exec -it frontend /bin/sh
     docker exec -it backend /bin/bash

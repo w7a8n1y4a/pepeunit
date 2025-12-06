@@ -8,7 +8,7 @@
 
 ## CI/CD для Unit
 
-`Pepeunit` способен на основе внешних [Git](/definitions#git) репозиториев из [GitLab](/definitions#gitlab) и [GitHub](/definitions#github), создавать готовые к использованию программы - это могут быть программы на основе [интерпритируемых](/definitions#interpreterable) или [компилируемых](/definitions#compilable) языков программирования.
+`Pepeunit` способен на основе внешних [Git](/definitions#git) репозиториев из [GitLab](/definitions#gitlab) и [GitHub](/definitions#github), создавать готовые к использованию программы - это могут быть программы на основе [Интерпретируемых](/definitions#interpreterable) или [Компилируемых](/definitions#compilable) языков программирования.
 
 :::info
 [Cистема обновлений](/development-pepeunit/mechanics/update-system)

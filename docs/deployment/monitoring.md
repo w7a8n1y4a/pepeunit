@@ -23,8 +23,8 @@
 :::warning
 Функционал мониторинга можно выключить используя следующие шаги:
 1. Закоментировать указанные `4` сервиса в `docker compose`
-2. Установить переменную окружения [EMQX_PROMETHEUS__METRICS__ENABLED](/deployment/env-variables/emqx) как `false`
-3. Установить переменную окружения [PU_FF_PROMETHEUS_ENABLE](/deployment/env-variables/backend) как `False`
-4. Удалив из репозитория развёртывания `json Dashboards` в дирректории `data/grafana/dashboards` все файлы с расширением `.json`
-5. Перезапустить [Pepeunit](/conception/overview) при помощи [команд docker compose](/deployment/docker/commands)
+1. Установить переменную окружения [EMQX_PROMETHEUS__METRICS__ENABLED](/deployment/env-variables/emqx) как `false`
+1. Установить переменную окружения [PU_FF_PROMETHEUS_ENABLE](/deployment/env-variables/backend) как `False`
+1. Удалив из репозитория развёртывания `json Dashboards` в дирректории `data/grafana/dashboards` все файлы с расширением `.json`
+1. Перезапустить [Pepeunit](/conception/overview) при помощи [команд docker compose](/deployment/docker/commands)
 :::
