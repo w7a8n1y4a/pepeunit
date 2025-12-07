@@ -76,4 +76,4 @@
 `policy_type` | `LastValue`, `NRecords`, `TimeWindow`, `Aggregation` | Да | Одна из `4` политик обработки
 `n_records_count` | Число хранимых записей `0 < n_records_count =< 1024` | Обязателен только для `policy_type` = `NRecords` | Определяет, сколько записей будет храниться
 `time_window_size` | Одно из значений: `[60, 300, 600, 900, 1200, 1800, 3600, 7200, 10800, 14400, 21600, 28800, 43200, 86400]` | Обязателен для `policy_type` = `TimeWindow` или `Aggregation` | Размер окна в секундах, оно должно нацело делить `86400`
-`aggregation_functions` | `Avg`, `Min`, `Max`, `Sum` | Обязателен для `policy_type` = `Aggregation` | Фунация, на основе которой будет расчитано итоговое значение, на основе `time_window_size`
+`aggregation_functions` | `Avg`, `Min`, `Max`, `Sum` | Обязателен для `policy_type` = `Aggregation` | Функция, на основе которой будет расчитано итоговое значение, на основе `time_window_size`

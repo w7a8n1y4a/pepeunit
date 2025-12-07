@@ -17,7 +17,7 @@
 
 Создание состоит из трёх этапов:
 1. Cоздание [Dashboard](/definitions#dashboard), для этого достаточно ввести имя 
-1. Создание N [панелей](/definitions#visualization) для [Dashboard](/definitions#dashboard), тут достаточно вести имя и тип из списка. Типы соответствуют стандартным [Visualization](/definitions#visualization) в [Grafana](/deployment/dependencies/grafana) и одному дополнительному `Horly Heatmap`. Вы можете изменить тип в самом дашборде уже в интерфейса [Grafana](/deployment/dependencies/grafana), т.к. у вас будут права `modifier` в своей организации.
+1. Создание `N` [панелей](/definitions#visualization) для [Dashboard](/definitions#dashboard), тут достаточно вести имя и тип из списка. Типы соответствуют стандартным [Visualization](/definitions#visualization) в [Grafana](/deployment/dependencies/grafana) и одному дополнительному `Horly Heatmap`. Вы можете изменить тип в самом дашборде уже в интерфейса [Grafana](/deployment/dependencies/grafana), т.к. у вас будут права `modifier` в своей организации.
 1. Линковка [UnitNode](/definitions#unitnode) в [панель](/definitions#visualization). Нужно кликнуть на кнопку `UnitNodes` для конкретной панели, далее интерфейс выбора аналогичен связям `Output->Input`, за исключением того, что можно выбирать как `Input`
 так и `Output`
 
