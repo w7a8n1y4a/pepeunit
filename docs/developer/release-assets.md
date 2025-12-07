@@ -1,6 +1,6 @@
 # Компиляция для различных платформ
 
-Из-за особенностей [Компилируемых](/definitions#compilable) программ, их способ доставки [Пользователям](/development-pepeunit/mechanics/roles.html#user) отличается от [Интерпритируемых](/definitions#interpreterable). Чтобы конечному [Пользователю](/development-pepeunit/mechanics/roles.html#user) не приходилось постоянно компилировать исходный код, для получения бинарного файла в хостингах [Git](/definitions#git) репозиториев [GitLab](/definitions#gitlab) и [GitHub](/definitions#github) предусмотренна система релизов.
+Из-за особенностей [Компилируемых](/definitions#compilable) программ, их способ доставки [Пользователям](/development-pepeunit/mechanics/roles.html#user) отличается от [Интерпретируемых](/definitions#interpreterable). Чтобы конечному [Пользователю](/development-pepeunit/mechanics/roles.html#user) не приходилось постоянно компилировать исходный код, для получения бинарного файла в хостингах [Git](/definitions#git) репозиториев [GitLab](/definitions#gitlab) и [GitHub](/definitions#github) предусмотренна система релизов.
 
 В каждый релиз можно добавить бинарные файлы с определённым названием, такие пары обычно называют `assets`. [GitLab](/definitions#gitlab) и [GitHub](/definitions#github) позволяют через свои [API](/definitions#api) получать соответствие названия `assets` и ссылки на бинарный файл.
 

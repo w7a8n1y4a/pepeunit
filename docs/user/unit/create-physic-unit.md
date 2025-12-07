@@ -34,7 +34,7 @@
 
 Вам нужно будет расположить файлы из [архива](/developer/files/struct-archive-update) в одной директории с выбранной вами [платформой](/developer/release-assets), чтобы они увидели друг друга
 
-### Интерпритируемый Repo
+### Интерпретируемый Repo
 
 Достаточно скачать [архив](/developer/files/struct-archive-update) из вкладки `Firmware with env.json and schema.json`, в нём будут находиться все нужные вам файлы. После распаковки [архива](/developer/files/struct-archive-update) вы будете готовы перейти на следующую стадию.
 

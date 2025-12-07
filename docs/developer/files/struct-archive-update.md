@@ -1,7 +1,7 @@
 # Структура архивов c обновлениями
 
 :::info
-[Pepeunit](/conception/overview) умеет генеририровать готовые архивы с обновлениями для [Unit](/definitions#unit), при этом алгоритм генерации разный для [Компилируемых](/definitions#compilable) и [Интерпритируемых](/definitions#interpreterable) [Repo](/definitions#repo) ,
+[Pepeunit](/conception/overview) умеет генеририровать готовые архивы с обновлениями для [Unit](/definitions#unit), при этом алгоритм генерации разный для [Компилируемых](/definitions#compilable) и [Интерпретируемых](/definitions#interpreterable) [Repo](/definitions#repo) ,
 :::
 
 ## Компилируемые
@@ -11,7 +11,7 @@
 1. В файл [env.json](/definitions#env-json) записывается [таргет версия](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) - `PU_COMMIT_VERSION`
 1. Создаётся файл Архива: `tgz`, `tar` или `zip`
 
-## Интерпритируемые
+## Интерпретируемые
 
 1. Вычисляется [таргет версия](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
 1. Создаётся временное представление файлов находящихся в этом [коммите](/definitions#git-commit)
