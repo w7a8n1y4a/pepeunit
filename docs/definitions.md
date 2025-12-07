@@ -10,13 +10,13 @@
 `Unit` - представление о физическом [IoT](#iot) устройстве в [Pepeunit](/conception/overview), данная сущность создаётся на основе [Repo](#repo) и несёт в себе информацию о конкретном физическом [IoT](#iot) устройстве, а также о версии микропрограммы, доступной в [Repo](#repo).
 
 ## UnitNode
-`UnitNode` - представление о [MQTT](#mqtt)-топике для [Pepeunit](/conception/overview), данная сущность описывает точку взаимодействия с [Unit](#unit). `UnitNode` может быть двух типов: `Input` и `Output`. Между `UnitNode` разных [Unit](#unit) могут быть связи: от одного `Output` к многим `Input`.
+`UnitNode` - представление о [MQTT](#mqtt) топике для [Pepeunit](/conception/overview), данная сущность описывает точку взаимодействия с [Unit](#unit). `UnitNode` может быть двух типов: `Input` и `Output`. Между `UnitNode` разных [Unit](#unit) могут быть связи: от одного `Output` к многим `Input`.
 
 ## YML
 `YML` или `YAML` - человекочитаемый формат данных, используемый для сериализации и конфигурации. Данный формат широко применяется в автоматизации и конвейерах для описания этапов и их параметров. [Pepeunit](/conception/overview) использует его для конвейеров данных.
 
 ## Datasource
-`Datasource` - источник данных [Grafana](/deployment/dependencies/grafana), из которого [Grafana](/deployment/dependencies/grafana) получает данные для дальнейшей визуализации. [Backend](/deployment/dependencies/backend) реализует [REST](/definitions#rest)-запрос для [InfinityAPI](https://grafana.com/grafana/plugins/yesoreyeram-infinity-datasource/) из коробки для каждой отдельной организации. Такой запрос с использованием `headers` и `params` позволяет получать данные, накопленные с помощью механизмов [DataPipe](/deployment/dependencies/datapipe).
+`Datasource` - источник данных [Grafana](/deployment/dependencies/grafana), из которого [Grafana](/deployment/dependencies/grafana) получает данные для дальнейшей визуализации. [Backend](/deployment/dependencies/backend) реализует [REST](/definitions#rest) запрос для [InfinityAPI](https://grafana.com/grafana/plugins/yesoreyeram-infinity-datasource/) из коробки для каждой отдельной организации. Такой запрос с использованием `headers` и `params` позволяет получать данные, накопленные с помощью механизмов [DataPipe](/deployment/dependencies/datapipe).
 
 ## Visualization
 `Visualization`, панели - способ отображения данных [Grafana](/deployment/dependencies/grafana). Каждая отдельная визуализация может содержать несколько [Datasource](#datasource) одного или нескольких типов. В каждую визуализацию можно связать несколько [UnitNode](#unitnode) с настроенным [DataPipe](/deployment/dependencies/datapipe). При сборке визуализаций следите, чтобы формат данных был одинаковым.
@@ -62,7 +62,7 @@
 [Go](https://go.dev/), `Golang` - компилируемый язык программирования со статической типизацией, хорошо подходящий для высокой нагрузки.
 
 ## Fediverse
-[Fediverse](https://en.wikipedia.org/wiki/Fediverse) - способ организации взаимодействия сервер-сервер, обеспечивающий децентрализованную схему распространения и обработки информации.
+[Fediverse](https://en.wikipedia.org/wiki/Fediverse) - способ организации взаимодействия `сервер-сервер`, обеспечивающий децентрализованную схему распространения и обработки информации.
 
 ## IoT
 `Internet of Things` - сеть физических объектов, встроенных с датчиками, программным обеспечением и другими технологиями, которые позволяют этим устройствам подключаться и обмениваться данными с другими устройствами и системами.

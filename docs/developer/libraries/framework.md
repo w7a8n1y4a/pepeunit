@@ -3,7 +3,7 @@
 [Ccылки на репозитории библиотек](/development-pepeunit/maps.html#библиотеки)
 
 :::info
-Каждая из библиотек является клиентским [Framework'ом](/definitions#framework) для работы с [Pepeunit](/conception/overview)
+Каждая из библиотек является клиентским [Framework](/definitions#framework) для работы с [Pepeunit](/conception/overview)
 
 Цель [Framework](/definitions#framework) - облегчить разработку новых [Unit](/definitions#unit), обеспечив работу базового функционала для интеграции с [Pepeunit](/conception/overview), а также предоставить инструменты управления циклом выполнения
 :::

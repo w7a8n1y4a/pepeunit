@@ -14,19 +14,21 @@
 
 ## Пример хорошего наименования assets между релизами
 - `Release 1.0.0` - `linux-amd64` `macos`
-- `Release 1.0.1` - `linux-amd64` `macos`
-- `Release 1.1.0` - `linux-amd64` `macos`
-- `Release 1.2.0` - `linux-amd64`
+- `Release 1.0.1` - `linux-amd64` `esp8266-generic` `macos`
+- `Release 1.1.0` - `linux-amd64` `esp8266-generic` `macos`
+- `Release 1.2.0` - `linux-amd64` `esp8266-generic`
+- `Release 1.3.0` - `linux-amd64` `esp8266-generic` `macos`
 
-Рассмотрим логику [Pepeunit](/conception/overview) в этом сценарии для каждой из платформ `linux-amd64` и `macos`:
+Рассмотрим логику [Pepeunit](/conception/overview) в этом сценарии для каждой из платформ `linux-amd64`, `esp8266-generic` и `macos`:
 - для `linux-amd64` - [Unit](/definitions#unit) будет штатно обновлять все версии
-- для `macos` - [Unit](/definitions#unit) будет шататно обновляться до версии `1.1.0`, далее автоматическое обновление будет прервано
+- для `esp8266-generic` - [Unit](/definitions#unit) можно будет создать начиная с версии `1.0.1`, далее обновления будут идти штатно
+- для `macos` - [Unit](/definitions#unit) будет шататно обновляться до версии `1.1.0`, далее автоматическое обновление будет прервано, но возобновится начиная с версии `1.3.0`
 
 ## Пример плохого наименования assets между релизами
 - `Release 1.0.0` - `linux-amd64-1.0.0` `macos-one`
-- `Release 1.0.1` - `linux-amd64-1.0.1` `macos-two`
-- `Release 1.1.0` - `linux-amd64-1.1.0` `macos-three`
-- `Release 1.2.0` - `linux-amd64-1.2.0`
+- `Release 1.0.1` - `linux-amd64-1.0.1` `esp8266-and-esp8266-generic` `macos-two`
+- `Release 1.1.0` - `linux-amd64-1.1.0` `esp8266-generic` `macos-three`
+- `Release 1.2.0` - `linux-amd64-1.2.0` `esp8266-and-esp8266-generic`
 
 В данном случае [Pepeunit](/conception/overview) не сможет автоматически обновлять [Unit](/definitions#unit). Корректно будет работать только ручное обновление, платформу для каждой версии придётся скачивать вручную.
 
