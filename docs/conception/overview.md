@@ -47,10 +47,10 @@
 
 ## Управление топиками
 
-`Pepeunit` позволяет отслеживать состояние [Unit](/definitions#unit) при помощи системы именования топиков. [UnitNode](/definitions#unitnode) могут образовывать связи `Output→ Input` для передачи информации между разными [Unit](/definitions#unit).
+`Pepeunit` позволяет отслеживать состояние [Unit](/definitions#unit) при помощи системы именования топиков. [UnitNode](/definitions#unitnode) могут образовывать связи `Output-> Input` для передачи информации между разными [Unit](/definitions#unit).
 
 :::info
-[Связи Output→Input](/user/unit/edge-unit-node)
+[Связи Output->Input](/user/unit/edge-unit-node)
 
 [Стандартные MQTT команды](/developer/mqtt/default-mqtt-command)
 

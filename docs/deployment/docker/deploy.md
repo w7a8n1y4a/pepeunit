@@ -16,8 +16,8 @@ cd pepeunit_deploy
 Отличие состоит в том, что локальный вариант рассчитан на эксплуатацию в локальной сети, а глобальный позволяет обращаться к инстансу [Pepeunit](/conception/overview) по доменному имени через `https`.
 
 Выберите один из файлов и уберите у него приставку `.example`
-- `.env.local.example` → `.env.local`
-- `.env.global.example` → `.env.global`
+- `.env.local.example` -> `.env.local`
+- `.env.global.example` -> `.env.global`
 
 Например, командой:
 ```bash

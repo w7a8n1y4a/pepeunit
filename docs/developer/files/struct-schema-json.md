@@ -95,18 +95,18 @@
 Подробнее об `input_topic`:
 - Предназначен, чтобы [Unit](/definitions#unit) мог принимать сообщения сразу от нескольких [Unit](/definitions#unit)
 - Каждому `input_topic` из [schema_example.json](/definitions#schema-example-json) может соответствовать несколько топиков из [EMQX](/deployment/dependencies/emqx)
-- Система связей `Output→Input` позволяет [Unit](/definitions#unit) подписываться не только на свой `Input` [UnitNode](/definitions#unitnode), а также получить значения из `Output` [UnitNode](/definitions#unitnode) других [Unit](/definitions#unit) внутри одного `input_topic`
+- Система связей `Output->Input` позволяет [Unit](/definitions#unit) подписываться не только на свой `Input` [UnitNode](/definitions#unitnode), а также получить значения из `Output` [UnitNode](/definitions#unitnode) других [Unit](/definitions#unit) внутри одного `input_topic`
 
 Схематический пример создания связи между двумя [Unit](/definitions#unit)
 ![img](/schemas/edge_schema.svg)
 
-:::warning Почему существуют только связи `Output→Input`?
+:::warning Почему существуют только связи `Output->Input`?
 В парадигме протокола [MQTT](/definitions#mqtt) в топик информацию публикует издатель, а получить информацию из топика могут подпищики. Если перенести эту логику на [Pepeunit](/conception/overview), можно сделать следующие выводы:
 
 - `Output` - топик, в который [Unit](/definitions#unit) может отправить данные ([Unit](/definitions#unit) издатель для этого топика)
 - `Input` - набор топиков, из которых [Unit](/definitions#unit) может получить данные ([Unit](/definitions#unit) подпищик для этих топиков)
 
-Таким образом, когда создаётся связь `Output→Input`, мы говорим [Unit](/definitions#unit), у которого есть `Input`, дополнительно подписаться этим `Input` на `Output` другого [Unit](/definitions#unit). Т.е. [Unit](/definitions#unit) может получать в `Input` информацию от нескольких `Output` других [Unit](/definitions#unit).
+Таким образом, когда создаётся связь `Output->Input`, мы говорим [Unit](/definitions#unit), у которого есть `Input`, дополнительно подписаться этим `Input` на `Output` другого [Unit](/definitions#unit). Т.е. [Unit](/definitions#unit) может получать в `Input` информацию от нескольких `Output` других [Unit](/definitions#unit).
 
-Если бы существовала возможность создавать связи `Input→Output`, то это означало бы, что `Input` одного [Unit](/definitions#unit) инициирует или влияет на `Output` другого [Unit](/definitions#unit).
+Если бы существовала возможность создавать связи `Input->Output`, то это означало бы, что `Input` одного [Unit](/definitions#unit) инициирует или влияет на `Output` другого [Unit](/definitions#unit).
 :::
