@@ -36,7 +36,7 @@
 }
 ```
 
-Переменные можно разделить на две категории - `стандартные` и `переменные разработчика`
+Переменные можно разделить на две категории: `стандартные переменные` и `переменные окружения разработчика`
 
 ### Стандартные переменные Pepeunit
 
@@ -61,10 +61,10 @@
 
 ### Переменные окружения Разработчика [Unit](/definitions#unit)
 
-[Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) может создавать любые переменные окружения, которые отличаются по названию от стандартных. При этом значения указанные в переменных, будут отображаться как значения по умолчанию в интерфейсе [Пользователей](/development-pepeunit/mechanics/roles.html#user).
+[Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) может создавать любые переменные окружения, которые отличаются по названию от стандартных. При этом значения, указанные в переменных, будут отображаться как значения по умолчанию в интерфейсе [Пользователей](/development-pepeunit/mechanics/roles.html#user).
 
 :::danger
-Так как [Пользователь](/development-pepeunit/mechanics/roles.html#user) в итоге будет заполнять переменные в ручную, всегда нужно заполнить [pepeunit.toml](/definitions#pepeunit-toml) и [readme.md](/definitions#readme-md), чтобы [Пользователь](/development-pepeunit/mechanics/roles.html#user) мог понять за что отвечает каждая переменная
+Так как [Пользователь](/development-pepeunit/mechanics/roles.html#user) в итоге будет заполнять переменные вручную, всегда нужно заполнить [pepeunit.toml](/definitions#pepeunit-toml) и [readme.md](/definitions#readme-md), чтобы [Пользователь](/development-pepeunit/mechanics/roles.html#user) мог понять, за что отвечает каждая переменная
 :::
 
 :::danger

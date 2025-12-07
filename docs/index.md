@@ -16,7 +16,7 @@ hero:
 
 features:
   - title: CI/CD
-    details: Автоматическая генерация ПО для IoT-устройств на основе ваших репозиториев gitlab и github
+    details: Автоматическая генерация ПО для IoT-устройств на основе ваших репозиториев GitLab и GitHub
   - title: Pipeline Data Processing
     details: Опциональная обработка данных конвейерами-обогатителями с сохранением в ClickHouse
   - title: Integration with Grafana

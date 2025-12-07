@@ -12,4 +12,4 @@
 -- | -- | --
 `EMQX_DASHBOARD__DEFAULT_USERNAME` | `admin` | Имя пользователя для сервисного аккаунта
 `EMQX_DASHBOARD__DEFAULT_PASSWORD` | `password` | Пароль пользователя для сервисного аккаунта
-`EMQX_PROMETHEUS__METRICS__ENABLED` | `true` | Включены ли метрики нагрузки ?
+`EMQX_PROMETHEUS__METRICS__ENABLED` | `true` | Признак включения метрик нагрузки

@@ -2,12 +2,12 @@
 
 :::warning Какое функциональное назначание у [schema.json](/definitions#schema-json)?
 Данный файл - это контракт между конкретным экземпляром [Unit](/definitions#unit) и [Pepeunit](/conception/overview):
-1. [Unit](/definitions#unit) гарантирует, что он подпишется на все стандартные топики указанные в `input_base_topic` и все [UnitNode](/definitions#unitnode) указанные в `input_topic`
-1. [Unit](/definitions#unit) гарантирует, что он будет публиковать данные в стандартные топики из `output_base_topic` и в [UnitNode](/definitions#unitnode) указанные в `output_topic`
-1. [Pepeunit](/conception/overview) гарантирует, что будет [отправлять корректные форматы данных](/developer/mqtt/default-mqtt-command) в `input_base_topic` и то что подпишется на все топики в `output_base_topic`
-1. [Pepeunit](/conception/overview) гарантирует, что будет производить авторизацию для публикации и подписки на все без исключения топики адресованные на инстанс [EMQX](/deployment/dependencies/emqx) используемый [Backend](/deployment/dependencies/backend)
-1. [Pepeunit](/conception/overview) гарантирует, что будет подписан на все топики соответствующие паттерну `unit.example.com/+/+/+/pepeunit`
-1. [Pepeunit](/conception/overview) гарантирует, что подпишется на все топики с паттерном `unit.example.com/+/pepeunit` у которых включен механизм [DataPipe](/deployment/dependencies/datapipe)
+1. [Unit](/definitions#unit) гарантирует, что он подпишется на все стандартные топики, указанные в `input_base_topic`, и все [UnitNode](/definitions#unitnode), указанные в `input_topic`
+1. [Unit](/definitions#unit) гарантирует, что он будет публиковать данные в стандартные топики из `output_base_topic`, и во все [UnitNode](/definitions#unitnode), указанные в `output_topic`
+1. [Pepeunit](/conception/overview) гарантирует, что будет [отправлять корректные форматы данных](/developer/mqtt/default-mqtt-command) в `input_base_topic`, и что подпишется на все топики в `output_base_topic`
+1. [Pepeunit](/conception/overview) гарантирует, что будет производить авторизацию для публикации и подписки на все без исключения топики, адресованные на инстанс [EMQX](/deployment/dependencies/emqx), используемый [Backend](/deployment/dependencies/backend)
+1. [Pepeunit](/conception/overview) гарантирует, что будет подписан на все топики, соответствующие паттерну `unit.example.com/+/+/+/pepeunit`
+1. [Pepeunit](/conception/overview) гарантирует, что подпишется на все топики с паттерном `unit.example.com/+/pepeunit`, у которых включен механизм [DataPipe](/deployment/dependencies/datapipe)
 :::
 
 ## Структура
@@ -53,8 +53,8 @@
 }
 ```
 
-Топики можно разделить на две категории, стандартные и топики [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer):
-- `input_base_topic` и `output_base_topic` - стандартные
+Топики можно разделить на две категории: стандартные и топики [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer):
+- `input_base_topic` и `output_base_topic` - стандартные топики
 - `input_topic` и `output_topic` - топики [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer)
 
 ## Стандарнтые топики
@@ -75,8 +75,8 @@
 ## Топики Разработчика
 
 :::info
-- Могут состоять из `2` или `3` элементов (c и без постфикса `/pepeunit` на конце)
-- Для топиков без постфикса `/pepeunit` (состоящих из `2` элементов) нельзя настроить [DataPipe](/deployment/dependencies/datapipe)
+1. Могут состоять из `2` или `3` элементов (c и без постфикса `/pepeunit` на конце)
+1. Для топиков без постфикса `/pepeunit` (состоящих из `2` элементов) нельзя настроить [DataPipe](/deployment/dependencies/datapipe)
 
 Структура топиков в [EMQX](/deployment/dependencies/emqx):
 ```txt
@@ -87,13 +87,13 @@
 Каждый топик с такой структурой соответствует одному [UnitNode](/definitions#unitnode)
 :::
 
-Подробнее о `output_topic`:
-- Предназначен чтобы [Unit](/definitions#unit) мог отправлять данные в [EMQX](/deployment/dependencies/emqx)
+Подробнее об `output_topic`:
+- Предназначен, чтобы [Unit](/definitions#unit) мог отправлять данные в [EMQX](/deployment/dependencies/emqx)
 - Каждому `output_topic` из [schema_example.json](/definitions#schema-example-json) соответствует только один топик из [EMQX](/deployment/dependencies/emqx)
 - [Unit](/definitions#unit) имеет эксклюзивное право на публикацию в данные топики, ни один другой [Unit](/definitions#unit) опубликовать данные в них не сможет
 
-Подробнее о `input_topic`:
-- Предназначен чтобы [Unit](/definitions#unit) мог принимать сообщения сразу от нескольких [Unit](/definitions#unit)
+Подробнее об `input_topic`:
+- Предназначен, чтобы [Unit](/definitions#unit) мог принимать сообщения сразу от нескольких [Unit](/definitions#unit)
 - Каждому `input_topic` из [schema_example.json](/definitions#schema-example-json) может соответствовать несколько топиков из [EMQX](/deployment/dependencies/emqx)
 - Система связей `Output->Input` позволяет [Unit](/definitions#unit) подписываться не только на свой `Input` [UnitNode](/definitions#unitnode), а также получить значения из `Output` [UnitNode](/definitions#unitnode) других [Unit](/definitions#unit) внутри одного `input_topic`
 
@@ -101,12 +101,12 @@
 ![img](/schemas/edge_schema.svg)
 
 :::warning Почему существуют только связи `Output->Input`?
-В парадигме протокола [MQTT](/definitions#mqtt) в топик информацию публикует издатель, а получить информацию из топика могут подпищики. Если перенести эту логику на [Pepeunit](/conception/overview) можно сделать следующий вывод:
+В парадигме протокола [MQTT](/definitions#mqtt) в топик информацию публикует издатель, а получить информацию из топика могут подпищики. Если перенести эту логику на [Pepeunit](/conception/overview), можно сделать следующие выводы:
 
-- `Output` - топик в который [Unit](/definitions#unit) может отправить данные ([Unit](/definitions#unit) издатель для этого топика)
-- `Input` - набор топиков из которых [Unit](/definitions#unit) может получить данные ([Unit](/definitions#unit) подпищик для этих топиков)
+- `Output` - топик, в который [Unit](/definitions#unit) может отправить данные ([Unit](/definitions#unit) издатель для этого топика)
+- `Input` - набор топиков, из которых [Unit](/definitions#unit) может получить данные ([Unit](/definitions#unit) подпищик для этих топиков)
 
-Таким образом когда создаётся связь `Output->Input`, мы говорим [Unit](/definitions#unit) у которого есть `Input` дополнительно подписаться этим `Input` на `Output` другого [Unit](/definitions#unit). Т.е. [Unit](/definitions#unit) может получать в `Input` информацию от нескольких `Output` других [Unit](/definitions#unit).
+Таким образом, когда создаётся связь `Output->Input`, мы говорим [Unit](/definitions#unit), у которого есть `Input`, дополнительно подписаться этим `Input` на `Output` другого [Unit](/definitions#unit). Т.е. [Unit](/definitions#unit) может получать в `Input` информацию от нескольких `Output` других [Unit](/definitions#unit).
 
-Если бы существовала возможность создавать связи `Input->Output` - то это означало бы, что `Input` одного [Unit](/definitions#unit) инициирует или влияет на `Output` другого [Unit](/definitions#unit).
+Если бы существовала возможность создавать связи `Input->Output`, то это означало бы, что `Input` одного [Unit](/definitions#unit) инициирует или влияет на `Output` другого [Unit](/definitions#unit).
 :::

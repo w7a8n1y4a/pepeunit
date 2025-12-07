@@ -19,7 +19,7 @@
 :::
 
 ## Тип GIT Платформы
-1. Выберите [Gitlab](/definitions#gitlab) или [Github](/definitions#github)
+1. Выберите [GitLab](/definitions#gitlab) или [GitHub](/definitions#github)
 
 :::danger
 Устанавливается один раз в момент создания

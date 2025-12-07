@@ -28,13 +28,13 @@
 
 ### Компилируемый Repo
 
-Вам потребуется скачать два компанента вашего будущего [Unit](/definitions#unit): 
+Вам потребуется скачать два компонента вашего будущего [Unit](/definitions#unit): 
 1. Cкомпилированную часть из вкладки `Compiled Firmware Platforms`, содержащей ссылки на [платформы](/developer/release-assets) текущей [таргет версии](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) [Unit](/definitions#unit).
 1. [Архив](/developer/files/struct-archive-update) из вкладки `Firmware with env.json and schema.json`.
 
-Вам нужно будет расположить файлы из [архива](/developer/files/struct-archive-update) в одной дирректории с выбранной вами [платформой](/developer/release-assets), чтобы они увидели друг друга
+Вам нужно будет расположить файлы из [архива](/developer/files/struct-archive-update) в одной директории с выбранной вами [платформой](/developer/release-assets), чтобы они увидели друг друга
 
-### Интерпритируемый Repo
+### Интерпретируемый Repo
 
 Достаточно скачать [архив](/developer/files/struct-archive-update) из вкладки `Firmware with env.json and schema.json`, в нём будут находиться все нужные вам файлы. После распаковки [архива](/developer/files/struct-archive-update) вы будете готовы перейти на следующую стадию.
 

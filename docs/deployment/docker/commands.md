@@ -12,7 +12,7 @@
     ```bash
     docker logs postgres
     ```
-- Зайти во внутрь контейнера, чтобы посмотреть состояние файлов и тд:
+- Подключение к оболочкам контейнеров `docker`:
     ```bash
     docker exec -it frontend /bin/sh
     docker exec -it backend /bin/bash
@@ -28,7 +28,7 @@
     docker exec -it postgres psql -U <POSTGRES_USER> -d <POSTGRES_DB>
     psql -U <POSTGRES_USER> -d <POSTGRES_DB>
     ```
-- Отправить запрос в clickhouse через curl:
+- Отправить запрос в `ClickHouse` через `curl`:
     ```bash
     curl "http://admin:mypassword@127.0.0.1:8123/?query=SHOW+TABLES"
     ```

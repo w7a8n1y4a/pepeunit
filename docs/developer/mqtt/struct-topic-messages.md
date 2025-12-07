@@ -9,8 +9,8 @@
 :::
 
 :::warning
-Размер передаваемого [Unit](/definitions#unit) сообщения через [EMQX](/deployment/dependencies/emqx) - ограничен переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables/backend).
+Размер передаваемого [Unit](/definitions#unit) сообщения через [EMQX](/deployment/dependencies/emqx) ограничен переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables/backend).
 :::
 
 ## DataPipe
-Для простых сообщений текстом и числами, можно организовать обработку через [DataPipe](/deployment/dependencies/datapipe).
+Для простых сообщений с текстом и числами можно организовать обработку через [DataPipe](/deployment/dependencies/datapipe).

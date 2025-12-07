@@ -1,11 +1,11 @@
 # schema_example.json
 
-:::warning Какое функциональное назначание у [schema_example.json](/definitions#schema-example-json) ?
+:::warning Какое функциональное назначание у [schema_example.json](/definitions#schema-example-json)?
 Данный файл - это контракт между [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) и [Pepeunit](/conception/overview):
 1. [Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) гарантирует, что он реализует в функционале [Unit](/definitions#unit), работу указанных в [schema_example.json](/definitions#schema-example-json) стандартных топиков [Pepeunit](/conception/overview): `input_base_topic` и `output_base_topic`
 1. [Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) гарантирует работу `input_topic` и `output_topic` в соответствии описанием, которое он составил в [Readme](/definitions#readme-md)
 1. [Pepeunit](/conception/overview) гарантирует корректное взаимодействие со стандартными топиками `input_base_topic` и `output_base_topic`
-1. [Pepeunit](/conception/overview) гарантирует, что будет поддерживать актуальный набор [UnitNode](/definitions#unitnode) в соответствии с `input_topic` и `output_topic` указанных разработчиком в [schema_example.json](/definitions#schema-example-json) , для каждой версии [Unit](/definitions#unit).
+1. [Pepeunit](/conception/overview) гарантирует, что будет поддерживать актуальный набор [UnitNode](/definitions#unitnode) в соответствии с `input_topic` и `output_topic`, указанных разработчиком в [schema_example.json](/definitions#schema-example-json), для каждой версии [Unit](/definitions#unit).
 :::
 
 ## Структура
@@ -42,7 +42,7 @@
 `output_topic` | `Output` топики [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer). [Pepeunit](/conception/overview) использует их как шаблон для создания `Output` [UnitNode](/definitions#unitnode) | [Топики разработчика](/developer/files/struct-schema-json#топики-разработчика)
 
 :::info
-При использовании клиентских библиотек: [Micropython](/developer/libraries/micropython), [Golang](/developer/libraries/golang) и [Python](/developer/libraries/python) - можно указывать все топики из `input_base_topic` и `output_base_topic`, они будут корректно работать.
+При использовании клиентских библиотек [Micropython](/developer/libraries/micropython), [Golang](/developer/libraries/golang) и [Python](/developer/libraries/python), можно указывать все топики из `input_base_topic` и `output_base_topic`, они будут корректно работать.
 
 Если вы сами реализуете взаимодействие с [Pepeunit](/conception/overview) без библиотек, то можно оставить только те топики, которые нужны для реализации [Unit](/definitions#unit).
 :::

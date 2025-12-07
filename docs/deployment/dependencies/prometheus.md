@@ -9,5 +9,5 @@
 - [EMQX](/deployment/dependencies/emqx)
 - [Logporter](/deployment/dependencies/logporter)
 
-Конечная цель его наличия в [Pepeunit](/conception/overview) - предоставление данных для [Grafana](/deployment/dependencies/grafana)
+Конечная цель его использования в [Pepeunit](/conception/overview) - предоставление данных для [Grafana](/deployment/dependencies/grafana).
 :::

@@ -3,7 +3,7 @@
 [Ccылки на репозитории библиотек](/development-pepeunit/maps.html#библиотеки)
 
 :::info
-Каждая из библиотек является клиентским [Framework`ом](/definitions#framework) для работы с [Pepeunit](/conception/overview)
+Каждая из библиотек является клиентским [Framework](/definitions#framework) для работы с [Pepeunit](/conception/overview)
 
 Цель [Framework](/definitions#framework) - облегчить разработку новых [Unit](/definitions#unit), обеспечив работу базового функционала для интеграции с [Pepeunit](/conception/overview), а также предоставить инструменты управления циклом выполнения
 :::
@@ -49,10 +49,10 @@
 ## log.json
 
 :::info
-'Чёрный ящик' [Unit](/definitions#unit) - позволяет хранить последние `N` логов не зависимо от состояния сети. 
+'Чёрный ящик' [Unit](/definitions#unit) - позволяет хранить последние `N` логов, независимо от состояния сети. 
 :::
 
-Логи хранятся в нём в формате `ndjson`, где каждая новая строка отделённая `\n` - это новый словарь:
+Логи хранятся в формате `ndjson`, где каждая новая строка, отделённая `\n`, это новый словарь:
 
 ```ndjson
 {"create_datetime":"2025-11-12T19:43:53Z","level":"Info","text":"MQTT connected successfully"}
@@ -68,6 +68,6 @@
 {"create_datetime":"2025-11-12T23:25:42Z","level":"Info","text":"Success subscribed to 4 topics"}
 ```
 
-Ёмкость данного буфера зависит от переменной окружения `PU_MAX_LOG_LENGTH`, все новые записи попадают в конец файла, а все старые записи, если их порядковый номер от конца больше `PU_MAX_LOG_LENGTH` удаляются.
+Ёмкость данного буфера зависит от переменной окружения `PU_MAX_LOG_LENGTH`, все новые записи попадают в конец файла, а все старые записи, если их порядковый номер от конца больше `PU_MAX_LOG_LENGTH`, удаляются.
 
-Доступ к даному файлу возможен либо физически через порты устройств или через команду [log_sync](/developer/mqtt/default-mqtt-command.html#log-sync-log-sync-pepeunit)
+Доступ к даному файлу возможен физически через порты устройств или через команду [log_sync](/developer/mqtt/default-mqtt-command.html#log-sync-log-sync-pepeunit)

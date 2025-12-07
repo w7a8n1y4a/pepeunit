@@ -1,6 +1,6 @@
 # EMQX
 
-[EMQX MQTT Broker](https://docs.emqx.com/en/emqx/latest/) - серверное приложение, которое координирует сообщения между издателями и подпищиками [MQTT](/definitions#mqtt) протокола. Брокер обеспечивает взаимодействие через `1883` порт между [Unit](/definitions#unit) и [Backend](/deployment/dependencies/backend). Его можно назвать рельсой данных, на которую завязано основное взаимодействие. [Подробнее о переменных окружения](/deployment/env-variables/emqx)
+[EMQX MQTT Broker](https://docs.emqx.com/en/emqx/latest/) - серверное приложение, которое координирует сообщения между издателями и подписчиками [MQTT](/definitions#mqtt) протокола. Брокер обеспечивает взаимодействие через порт `1883` между [Unit](/definitions#unit) и [Backend](/deployment/dependencies/backend). Его можно назвать `рельсой данных`, на которую завязано основное взаимодействие. [Подробнее о переменных окружения](/deployment/env-variables/emqx)
 
 Используется [Unit](/definitions#unit), [Backend](/deployment/dependencies/backend) и [DataPipe](/deployment/dependencies/datapipe) для организации взаимодействия:
 

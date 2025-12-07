@@ -1,7 +1,7 @@
 # Стандартные MQTT топики состояния
 
 :::warning
-Поддерживаемые топики состояний должны быть отражены в [schema_example.json](/definitions#schema-example-json)  в разделе `output_base_topic`.
+Поддерживаемые топики состояний должны быть отражены в [schema_example.json](/definitions#schema-example-json) в разделе `output_base_topic`.
 
 [Unit](/definitions#unit) должен отправлять форматированные данные в топики, которые указаны. [Pepeunit](/conception/overview) обязуется обработать их по единому паттерну, описанному в данном разделе.
 :::
@@ -80,7 +80,7 @@
 2. В случае получения команды в топике `log_sync/pepeunit`, [подробнее](/developer/mqtt/default-mqtt-command#формат-сообщения-в-топик-log-sync-pepeunit)
 :::
 
-Данные отправляемые [Unit](/definitions#unit), преобразуются на стороне [Pepeunit](/conception/overview) в меню логов [Unit](/definitions#unit). Также данные логи можно получить через [REST](/definitions#rest) и [GQL](/definitions#gql).
+Данные, отправляемые [Unit](/definitions#unit), преобразуются на стороне [Pepeunit](/conception/overview) в меню логов [Unit](/definitions#unit). Также данные логи можно получить через [REST](/definitions#rest) и [GQL](/definitions#gql).
 
 ### Формат сообщений в топик `log/pepeunit`
 
@@ -147,9 +147,9 @@
     2. Если отправлено множество логов и данный ключ отсутствует, [Pepeunit](/conception/overview) берёт текущее время для самого первого элемента листа и добавляет по 1 секунде для каждого последующего элемента c целью сохранить порядок логов полученный от [Unit](/definitions#unit).
 
 :::warning
-Размер передаваемого [Unit](/definitions#unit) сообщения через [EMQX](/deployment/dependencies/emqx) - ограничен переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables/backend).
+Размер передаваемого [Unit](/definitions#unit) сообщения через [EMQX](/deployment/dependencies/emqx) ограничен переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables/backend).
 
-По умолчанию время жизни логов ограничено `86400` секундами ~ `1 день`. За это отвечает переменная `PU_UNIT_LOG_EXPIRATION` из [Backend ENV](/deployment/env-variables/backend).
+По умолчанию, время жизни логов ограничено `86400` секундами ~ `1 день`. За это отвечает переменная `PU_UNIT_LOG_EXPIRATION` из [Backend ENV](/deployment/env-variables/backend).
 :::
 
 ### Алгоритм отправки

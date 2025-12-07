@@ -1,6 +1,6 @@
 # Redis
 
-[Redis](https://redis.io/) - `NoSQL` кластерная база данных использующая парадигму `key-value`
+[Redis](https://redis.io/) - кластерная база данных формата `NoSQL`, использующая парадигму `key-value`.
 
 :::info
 Используется [Backend](/deployment/dependencies/backend), [DataPipe](/deployment/dependencies/datapipe) и [EMQX](/deployment/dependencies/emqx) для следующих задач:

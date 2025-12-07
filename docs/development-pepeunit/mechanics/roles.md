@@ -8,10 +8,10 @@
 
 ### Unit Developer
 
-`Разработчик Unit` - создатель [Git](/definitions#git) репоизиториев [Gitlab](/definitions#gitlab) или [Github](/definitions#github). Используемых для [RepositoryRegisty](/definitions#repositoryregistry), апосредовано взаимодействует с [Pepeunit](/conception/overview) при помощи своего кода, который эксплуатируется `Пользователями` в качестве [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo) и [Unit](/definitions#unit)
+`Разработчик Unit` - создатель [Git](/definitions#git) репоизиториев [GitLab](/definitions#gitlab) или [GitHub](/definitions#github). Используемых для [RepositoryRegisty](/definitions#repositoryregistry), апосредовано взаимодействует с [Pepeunit](/conception/overview) при помощи своего кода, который эксплуатируется `Пользователями` в качестве [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo) и [Unit](/definitions#unit)
 
 :::tip Возможности `Разработчика Unit`
-- Имеет возможность вносить изменения в [Git](/definitions#git) репоизитории [Gitlab](/definitions#gitlab) или [Github](/definitions#github)
+- Имеет возможность вносить изменения в [Git](/definitions#git) репоизитории [GitLab](/definitions#gitlab) или [GitHub](/definitions#github)
 :::
 
 ### User
