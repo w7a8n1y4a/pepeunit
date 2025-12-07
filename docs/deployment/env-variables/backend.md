@@ -19,7 +19,7 @@
 `PU_DOMAIN` | - | Доменное имя или `ip`. Влияет на ссылки, которые генерирует [Backend](/deployment/dependencies/backend). Позволяет [Unit](/definitions#unit) связываться с [Backend](/deployment/dependencies/backend). Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) - как `PU_DOMAIN`
 `PU_SECURE` | `True` | Если `True`, то [Backend](/deployment/dependencies/backend) будет генерировать ссылки с `https` для `PU_DOMAIN`. Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) - в поле `PU_HTTP_TYPE`, но уже в формате `https/http`
 `PU_AUTH_TOKEN_EXPIRATION` | `2678400` | Время жизни токенов авторизации [Пользователей](/development-pepeunit/mechanics/roles.html#user), в секундах
-`PU_SAVE_REPO_PATH` | `repo_cache` | Путь, по которому [Backend](/deployment/dependencies/backend) хранит внешние [Git](/definitions#git) репозитории. Устанавливается относительно корневой дирректории [Backend](/deployment/dependencies/backend)
+`PU_SAVE_REPO_PATH` | `repo_cache` | Путь, по которому [Backend](/deployment/dependencies/backend) хранит внешние [Git](/definitions#git) репозитории. Устанавливается относительно корневой директории [Backend](/deployment/dependencies/backend)
 `PU_SQLALCHEMY_DATABASE_URL` | - | Ссылка для подключения к [PostgreSQL](/deployment/dependencies/postgresql)
 `PU_CLICKHOUSE_DATABASE_URL` | - | Ссылка для подключения к [ClickHouse](/deployment/dependencies/clickhouse)
 `PU_SECRET_KEY` | - | `32 байтовый ключ` в формате `base64`. Отвечает за подпись токенов авторизации. В случае изменения, все `jwt` токены, созданные до изменения, становятся недействительными
@@ -39,7 +39,7 @@
 `PU_TELEGRAM_ITEMS_PER_PAGE` | `7` | Число пагинируемых элементов при отображении за один раз в [Telegram Bot](/definitions#telegram-bot)
 `PU_TELEGRAM_HEADER_ENTITY_LENGTH` | `15` | Предельная длинна наименований сущностей при отображении в [Telegram Bot](/definitions#telegram-bot)
 `PU_TELEGRAM_GIT_HASH_LENGTH` | `8` | Предельная длинна `hash` [Git Commit](/definitions#git-commit) при отображении в [Telegram Bot](/definitions#telegram-bot)
-`PU_PROMETHEUS_MULTIPROC_DIR` | `./prometheus_metrics` | Директория, которую [Prometheus](/deployment/dependencies/prometheus) использует для хранения статистик с нескольких `worker` - `uvicorn`. При старте приложения содержимое дирректории отчищается
+`PU_PROMETHEUS_MULTIPROC_DIR` | `./prometheus_metrics` | Директория, которую [Prometheus](/deployment/dependencies/prometheus) использует для хранения статистик с нескольких `worker` - `uvicorn`. При старте приложения содержимое директории отчищается
 `PU_REDIS_URL` | `redis://redis:6379/0` | Ссылка для доступа к [Redis](/deployment/dependencies/redis), которую использует [Backend](/deployment/dependencies/backend) для соединения c [Redis](/deployment/dependencies/redis). Инстанс [Redis](/deployment/dependencies/redis) должен быть единым с `MQTT_REDIS_AUTH_URL`
 `PU_MQTT_HOST` | - | Доменное имя или `ip`. Позволяет [Backend](/deployment/dependencies/backend) управлять и подписываться на топики [EMQX](/deployment/dependencies/emqx). Позволяет Unit связываться с [EMQX](/deployment/dependencies/emqx). Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) - в поле `PU_MQTT_HOST`
 `PU_MQTT_SECURE` | `True` | Если `True`, то [Backend](/deployment/dependencies/backend) будет использовать `https` для настройки [EMQX](/deployment/dependencies/emqx)

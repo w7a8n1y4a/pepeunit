@@ -2,6 +2,7 @@
 
 ## Работа с бэкапами
 
+### Создание бэкапа
 1. Запустите `Pepeunit`, чтобы скрипт `backup` имел доступ до баз данных и версии `backend`
     ```bash
     docker compose up -d
@@ -10,13 +11,19 @@
     ```bash
     sudo ./backup.sh backup
     ```
+
+### Восстановление из бэкапа
 1. Выключите инстанс
     ```bash
     docker compose down
     ```
-1. Развернуте версию из `backup`
+1. Разверните версию из `backup`
     ```bash
     sudo ./backup.sh restore backups/backup_name.tar
+    ```
+1. Запустите `Pepeunit`
+    ```bash
+    docker compose up -d
     ```
 
 ## Обновление

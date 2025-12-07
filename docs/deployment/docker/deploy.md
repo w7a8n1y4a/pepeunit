@@ -48,7 +48,7 @@ mv .env.local.example .env.local
 
 ## Генерация env/.env.service
 
-Выполните команду, генерирующую итоговые `.env.service` файлы в дирректории `env/.env.service`:
+Выполните команду, генерирующую итоговые `.env.service` файлы в директории `env/.env.service`:
 ```bash
 $> python make_env.py
 2025-09-16 00:51:44,693 - INFO - Run make envs
@@ -82,7 +82,15 @@ $> python make_env.py
 :::
 
 :::danger
-Вам может потребоваться внести изменения в конфигурацию отдельных сервисов для тонкой настройки. [Подробнее о переменных окружения Backend, Backend Data Pipe и Frontend](/deployment/env-variables/backend)
+Вам может потребоваться внести изменения в конфигурацию отдельных сервисов для тонкой настройки:
+
+- [Переменные Backend](/deployment/env-variables/backend)
+- [Переменные DataPipe](/deployment/env-variables/data-pipe)
+- [Переменные Frontend](/deployment/env-variables/frontend)
+- [Переменные PostgreSQL](/deployment/env-variables/postgresql)
+- [Переменные ClickHouse](/deployment/env-variables/clickhouse)
+- [Переменные EMQX](/deployment/env-variables/emqx)
+- [Переменные Grafana](/deployment/env-variables/grafana)
 :::
 
 ## Настройка Nginx
@@ -97,15 +105,19 @@ $> python make_env.py
 1. `1883` - для работы по протоколу [MQTT](/definitions#mqtt)
 
 :::warning
-Если ваш порт `1883` занят другими приложениями, измените его на другой и внесите изменения в [ENV переменные Backend](/deployment/env-variables/backend) - `PU_MQTT_PORT`, а также в `docker-compose.yml` в секцию `emqx.ports`, значение `- "1883:1883"` вам нужно будет заменить, например, на `- "1885:1883"`.
+Если ваш порт `1883` занят другими приложениями, измените его на другой и внесите изменения: 
+- `PU_MQTT_PORT` - [ENV переменные Backend](/deployment/env-variables/backend)
+- `PU_DP_MQTT_PORT` - [ENV переменные DataPipe](/deployment/env-variables/data-pipe)
+- `docker-compose.yml` в секцию `emqx.ports`, значение `- "1883:1883"` вам нужно будет заменить, например, на `- "1885:1883"`.
 :::
+
 :::danger
 Если у вас публичный инстанс [Pepeunit](/conception/overview) с доменом - вам потребуется открыть указанные порты.
 :::
 
 ## Первый запуск
 
-Настройте доступ для конфигураций из дирректории `data`:
+Настройте доступ для конфигураций из директории `data`:
 ```bash
 sudo chmod 777 -R data
 ```
