@@ -7,7 +7,7 @@
 :::
 
 :::tip
-Основаня платформа для разработки - [GitLab](/definitions#gitlab), чтобы зарегистрироваться свяжитесь с [@w7a8n1y4a](https://t.me/w7a8n1y4a), при этом все `core` репозитории имеют зеркало на [GitHub](/definitions#github), чтобы пользователям было проще оставлять `issues`.
+Основаня платформа для разработки - [GitLab](/definitions#gitlab), чтобы зарегистрироваться свяжитесь с [@w7a8n1y4a](https://t.me/w7a8n1y4a), при этом все `core` репозитории имеют зеркало на [GitHub](/definitions#github), чтобы [Пользователям](/development-pepeunit/mechanics/roles.html#user) было проще оставлять `issues`.
 
 В каждом репозитории разработки вы найдёте `Makefile` и [readme.md](/definitions#readme-md) с важными нюансами по работe кода
 :::

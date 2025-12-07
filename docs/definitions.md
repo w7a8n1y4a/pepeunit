@@ -50,7 +50,7 @@
 [.gitignore](https://git-scm.com/docs/gitignore) - файл, содержащий перечисление файлов и директорий, которые [Git](#git) должен игнорировать. Поддерживает паттерны для облегчения чистки файлов. [Подробнее](/developer/files/struct-gitignore)
 
 ## .pepeignore
-`.pepeignore` - аналогичный по синтаксису [.gitignore](#gitignore) файл [Git](#git) репозиториев у [Unit](#unit), но позволяющий удалить все указанные в нём файлы и директории из репозитория в момент генерации [архива с программой](/developer/files/struct-archive-update) для [интерпретируемых](#interpreterable) [Unit](#unit). [Подробнее](/developer/files/struct-pepeignore)
+`.pepeignore` - аналогичный по синтаксису [.gitignore](#gitignore) файл [Git](#git) репозиториев у [Unit](#unit), но позволяющий удалить все указанные в нём файлы и директории из репозитория в момент генерации [архива с программой](/developer/files/struct-archive-update) для [Интерпритируемых](#interpreterable) [Unit](#unit). [Подробнее](/developer/files/struct-pepeignore)
 
 ## LICENSE
 `LICENSE` - файл лицензии, устанавливается в корень репозитория [Git](#git), регламентирует юридический аспект использования репозитория. Репозитории [Pepeunit](/conception/overview) публикуются под лицензией `AGPL v3`; авторы собственных репозиториев выбирают лицензию самостоятельно (см. [spdx.org](https://spdx.org/licenses/)).
