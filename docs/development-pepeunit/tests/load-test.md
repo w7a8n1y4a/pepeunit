@@ -1,7 +1,7 @@
 # Нагрузочные тесты - Backend
 
 :::info
-Нагрузочные тесты - это часть репозитория [Backend](/deployment/dependencies/backend), единственная задача, которой проверка выдерживает ли [Backend](/deployment/dependencies/backend) заданное число запросов в секунду. 
+Нагрузочные тесты - это часть репозитория [Backend](/deployment/dependencies/backend), единственная задача которой является проверка, выдерживает ли [Backend](/deployment/dependencies/backend) заданное число запросов в секунду. 
 :::
 
 ## Тестирование MQTT
@@ -15,13 +15,13 @@ python -m tests.load.load_test_mqtt
 Переменная Backend | Что делает ?
 -- | --
 `PU_TEST_LOAD_MQTT_DURATION` | Время выполнения теста в секундах
-`PU_TEST_LOAD_MQTT_UNIT_COUNT` | Число [Unit](/definitions#unit) которые будут выполнять запросы
-`PU_TEST_LOAD_MQTT_RPS` | Нагрузка которую будет создавать каждый [Unit](/definitions#unit)
+`PU_TEST_LOAD_MQTT_UNIT_COUNT` | Число [Unit](/definitions#unit), которые будут выполнять запросы
+`PU_TEST_LOAD_MQTT_RPS` | Нагрузка, которую будет создавать каждый [Unit](/definitions#unit)
 `PU_TEST_LOAD_MQTT_VALUE_TYPE` | Тип отправляемых переменных `Text` или `Number`
 `PU_TEST_LOAD_MQTT_DUPLICATE_COUNT` | Число повторяюшихся сообщений подряд
 `PU_TEST_LOAD_MQTT_MESSAGE_SIZE` | Размер [MQTT](/definitions#mqtt) сообщений в символах
 `PU_TEST_LOAD_MQTT_POLICY_TYPE` | Тип политики для обработки всех сообщений в тесте: `LastValue`, `NRecords`, `TimeWindow`, `Aggregation`
-`PU_TEST_LOAD_MQTT_WORKERS` | Число процессов `multiprocessing` создающих нагрузку
+`PU_TEST_LOAD_MQTT_WORKERS` | Число процессов `multiprocessing`, создающих нагрузку
 
 :::danger
 [Backend](/deployment/dependencies/backend) использует всегда только `1` воркер `Gunicorn` для обработки [MQTT](/definitions#mqtt) сообщений. Он способен обработать `~4000 rps` сообщений из системных топиков `domain.com/+/+/+/pepeunit`. Для топиков [DataPipe](/deployment/dependencies/datapipe) c паттерном `domain.com/+/pepeunit` количество сообщений может составлять `~25000 rps`.
