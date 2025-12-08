@@ -18,7 +18,7 @@ python -m tests.load.load_test_mqtt
 `PU_TEST_LOAD_MQTT_UNIT_COUNT` | Число [Unit](/definitions#unit), которые будут выполнять запросы
 `PU_TEST_LOAD_MQTT_RPS` | Нагрузка, которую будет создавать каждый [Unit](/definitions#unit)
 `PU_TEST_LOAD_MQTT_VALUE_TYPE` | Тип отправляемых переменных `Text` или `Number`
-`PU_TEST_LOAD_MQTT_DUPLICATE_COUNT` | Число повторяюшихся сообщений подряд
+`PU_TEST_LOAD_MQTT_DUPLICATE_COUNT` | Число повторяющихся сообщений подряд
 `PU_TEST_LOAD_MQTT_MESSAGE_SIZE` | Размер [MQTT](/definitions#mqtt) сообщений в символах
 `PU_TEST_LOAD_MQTT_POLICY_TYPE` | Тип политики для обработки всех сообщений в тесте: `LastValue`, `NRecords`, `TimeWindow`, `Aggregation`
 `PU_TEST_LOAD_MQTT_WORKERS` | Число процессов `multiprocessing`, создающих нагрузку
@@ -56,7 +56,7 @@ locust -f tests/load/locustfile.py
 :::
 
 :::danger
-[REST](/definitions#rest) и [GQL](/definitions#gql) запросы обрабатываются многопоточно, увеличение числа вокеров, почти линейно увеличивает число обрабатываемых запросов в еденицу времени. `4` воркера `Gunicorn` выдерживают `~400rps` без перезагрузок. Процентили в миллисекундах:
+[REST](/definitions#rest) и [GQL](/definitions#gql) запросы обрабатываются многопоточно, увеличение числа вокеров, почти линейно увеличивает число обрабатываемых запросов в единицу времени. `4` воркера `Gunicorn` выдерживают `~400rps` без перезагрузок. Процентили в миллисекундах:
 ```bash
 Type     Name                             50%    66%    75%    80%    90%    95%    98%    99%  99.9% 99.99%   100% # reqs
 --------|---------------------------|--------|------|------|------|------|------|------|------|------|------|------|------

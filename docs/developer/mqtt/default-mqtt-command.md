@@ -87,7 +87,7 @@
 1. Если команда была вызвана через [REST](/definitions#rest) или [GQL](/definitions#gql)
 :::
 
-Данная команда отправляет [Unit](/definitions#unit) запрос на обновление [schema.json](/definitions#schema-json), [Unit](/definitions#unit) в ответ должен выполнить опредлённый алгоритм действий, приводящий к изменению текущей версии [schema.json](/definitions#schema-json), на новую.
+Данная команда отправляет [Unit](/definitions#unit) запрос на обновление [schema.json](/definitions#schema-json), [Unit](/definitions#unit) в ответ должен выполнить определённый алгоритм действий, приводящий к изменению текущей версии [schema.json](/definitions#schema-json), на новую.
 
 ### Формат сообщения в топик `schema_update/pepeunit`
 

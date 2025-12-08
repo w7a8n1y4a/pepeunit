@@ -18,7 +18,7 @@
 
 Обновление связанных [Unit](/definitions#unit)
 1. Создатель [Repo](/definitions#repo) нажимает кнопку `Update related Unit` в меню [Repo](/definitions#repo) 
-1. [Pepeunit](/conception/overview) выполняет вызывов [MQTT](/definitions#mqtt) команды [UPDATE - update/pepeunit](/developer/mqtt/default-mqtt-command#update-update-pepeunit) для каждого [Unit](/definitions#unit), у которого указано автоматическое обновление
+1. [Pepeunit](/conception/overview) выполняет вызов [MQTT](/definitions#mqtt) команды [UPDATE - update/pepeunit](/developer/mqtt/default-mqtt-command#update-update-pepeunit) для каждого [Unit](/definitions#unit), у которого указано автоматическое обновление
 
 ### Автоматический или по запросу Администратора
 
@@ -27,7 +27,7 @@
 1. [Pepeunit](/conception/overview) выполняет вызов [MQTT](/definitions#mqtt) команды [UPDATE - update/pepeunit](/developer/mqtt/default-mqtt-command#update-update-pepeunit) - для каждого [Unit](/definitions#unit), у которого указано автоматическое обновление
 
 :::warning
-Для улучшения производительности, обновение [Unit](/definitions#repo) и [RepositoryRegisty](/definitions#repositoryregistry) имеет рассинхронизацию в пол часа.
+Для улучшения производительности, обновление [Unit](/definitions#repo) и [RepositoryRegisty](/definitions#repositoryregistry) имеет рассинхронизацию в пол часа.
 :::
 
 ## Алгоритм вычисления текущей версии Unit

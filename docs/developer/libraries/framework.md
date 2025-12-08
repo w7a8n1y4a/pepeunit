@@ -21,7 +21,7 @@
     - получение состояния [storage](/developer/state-storage-unit)
     - получение списка [Unit](/definitions#unit) при помощи списка [UnitNode](/definitions#unitnode).uuid
     - получение `Input` [UnitNode](/definitions#unitnode) при помощи `Output` [UnitNode](/definitions#unitnode)
-1. Приём и корректная обработка [cтандартных MQTT команды Pepeunit](/developer/mqtt/default-mqtt-command)
+1. Приём и корректная обработка [cтандартных MQTT команд Pepeunit](/developer/mqtt/default-mqtt-command)
 1. Отправки и генерации [состояния Unit](/developer/mqtt/state-mqtt-send)
 1. Функционал для работы с [schema.json](/definitions#schema-json):
     - Динамическое обновление
@@ -30,7 +30,7 @@
 1. Функционал для работы с [env.json](/definitions#env-json):
     - Динамическое обновление
     - Получение [Unit](/definitions#unit).uuid из токена
-    - Получение любой перменной, как атрибута класса
+    - Получение любой переменной, как атрибута класса
 1. Функционал для работы с логами:
     - Поддержка `5` типов логов: `debug`, `info`, `warning`, `error`, `critical`
     - Поддержка отправки логов по [MQTT](/definitions#mqtt)
@@ -70,4 +70,4 @@
 
 Ёмкость данного буфера зависит от переменной окружения `PU_MAX_LOG_LENGTH`, все новые записи попадают в конец файла, а все старые записи, если их порядковый номер от конца больше `PU_MAX_LOG_LENGTH`, удаляются.
 
-Доступ к даному файлу возможен физически через порты устройств или через команду [log_sync](/developer/mqtt/default-mqtt-command.html#log-sync-log-sync-pepeunit)
+Доступ к данному файлу возможен физически через порты устройств или через команду [log_sync](/developer/mqtt/default-mqtt-command.html#log-sync-log-sync-pepeunit)
