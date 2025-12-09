@@ -3,15 +3,15 @@
 ## Роли
 
 ::: tip Какую функцию несут роли `Пользователей` в системе?
-Роль `Пользователя` влияет на его возможности при использовании инстанса [Pepeunit](/conception/overview), а также на взаимодействие с [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode)
+Роль `Пользователя` влияет на его возможности при использовании инстанса [Pepeunit](/conception/overview), а также на взаимодействие с [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo), [Unit](/definitions#unit) и [UnitNode](/definitions#unitnode)
 :::
 
 ### Unit Developer
 
-`Разработчик Unit` - создатель [Git](/definitions#git) репоизиториев [GitLab](/definitions#gitlab) или [GitHub](/definitions#github). Используемых для [RepositoryRegisty](/definitions#repositoryregistry), апосредовано взаимодействует с [Pepeunit](/conception/overview) при помощи своего кода, который эксплуатируется `Пользователями` в качестве [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo) и [Unit](/definitions#unit)
+`Разработчик Unit` - создатель [Git](/definitions#git) репозиториев [GitLab](/definitions#gitlab) или [GitHub](/definitions#github). Используя для своих целей [RepositoryRegisty](/definitions#repositoryregistry), опосредованно взаимодействует с [Pepeunit](/conception/overview) при помощи своего кода, который эксплуатируется `Пользователями` в качестве [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo) и [Unit](/definitions#unit)
 
 :::tip Возможности `Разработчика Unit`
-- Имеет возможность вносить изменения в [Git](/definitions#git) репоизитории [GitLab](/definitions#gitlab) или [GitHub](/definitions#github)
+- Имеет возможность вносить изменения в [Git](/definitions#git) репозитории [GitLab](/definitions#gitlab) или [GitHub](/definitions#github)
 :::
 
 ### User
@@ -20,17 +20,17 @@
 
 ::: tip Возможности обычного `Пользователя`
 - Имеет доступ к созданию [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo), [Unit](/definitions#unit) и [UnitNode](/definitions#unitnode)
-- Имеет возможность видеть все записи [RepositoryRegisty](/definitions#repositoryregistry) включая приватные
+- Имеет возможность видеть все записи [RepositoryRegisty](/definitions#repositoryregistry), включая приватные
 - Не имеет возможности создать [Repo](/definitions#repo) на основе приватного [RepositoryRegisty](/definitions#repositoryregistry), если не укажет [Креды доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория)
-- Имеет доступ к сущностям чей [уровень видимости](/development-pepeunit/mechanics/visibility) `Public`, `Internal` или `Private` с предоставленым [доступом](/development-pepeunit/mechanics/permission)
+- Имеет доступ к сущностям, чей [уровень видимости](/development-pepeunit/mechanics/visibility) `Public`, `Internal` или `Private`, с предоставленным [доступом](/development-pepeunit/mechanics/permission)
 :::
 
 ### Admin
 
-`Администратор` - владелец, выполняющий функции модератора, имеет полномочия полного управления инстансом [Pepeunit](/conception/overview).
+`Администратор` - владелец, выполняющий функции модератора. Имеет полномочия полного управления инстансом [Pepeunit](/conception/overview).
 
 :::tip Возможности `Администратора`
-- Блокирование `Пользователей`, при нарушении условий использования инстанса
+- Блокирование `Пользователей` при нарушении условий использования инстанса
 - Видимость всех сущностей [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo), [Unit](/definitions#unit) и [UnitNode](/definitions#unitnode), возможности взаимодействия сводятся к аналогичным при предоставлении [видимости](/development-pepeunit/mechanics/visibility)
 - Не может получить информацию о [зашифрованных](/development-pepeunit/mechanics/cipher) данных напрямую через [Pepeunit](/conception/overview), но имеет техническую возможность дешифровать любую [шифрованную](/development-pepeunit/mechanics/cipher) информацию инстанса
 :::
@@ -41,5 +41,5 @@
 
 ::: tip Возможности внешнего агента
 - Может видеть все публичные записи из [RepositoryRegisty](/definitions#repositoryregistry)
-- Может взаимодействовать только с сущностями у которых [уровень видимости](/development-pepeunit/mechanics/visibility) соответствует `Public`
+- Может взаимодействовать только с сущностями, у которых [уровень видимости](/development-pepeunit/mechanics/visibility) соответствует `Public`
 :::

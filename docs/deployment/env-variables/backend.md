@@ -30,7 +30,7 @@
 `PU_MAX_EXTERNAL_REPO_SIZE` | `50` | Значение в `МБ`, ограничивающее размер внешних [Git](/definitions#git) репозиториев для скачивания
 `PU_MAX_CIPHER_LENGTH` | `1000000` | Максимальная длинна в символах для шифруемой информации
 `PU_MIN_TOPIC_UPDATE_TIME` | `30` | Частота обновления сообщений в `domain.com/+/pepeunit` топиках [MQTT](/definitions#mqtt)
-`PU_UNIT_LOG_EXPIRATION` | `86400` | Вермя жизни логов, которые присылают [Unit](/definitions#unit), в секундах
+`PU_UNIT_LOG_EXPIRATION` | `86400` | Время жизни логов, которые присылают [Unit](/definitions#unit), в секундах
 `PU_MAX_PAGINATION_SIZE` | `500` | Максимальное количество объектов, которое можно получить за `1` запрос. Применяется в местах, где есть пагинация
 `PU_TELEGRAM_BOT_MODE` | `webhook` | Принимает значения: `webhook` или `pooling`. Позволяет указать, как [Backend](/deployment/dependencies/backend) будет обмениваться информацией с [Telegram Bot](/definitions#telegram-bot). `pooling` позволяет работать без личного домена и `https` в средах, где есть доступ в интернет. `webhook` более производительный вариант, предназаначен для использования с `https` и личным доменом, ссылка на `webhook` устанавливает автоматически в момент старта приложения
 `PU_TELEGRAM_DEL_OLD_WEBHOOK` | `True` | Удаляется ли `webhook` для [Telegram Bot](/definitions#telegram-bot) перед тем, как создать новый
