@@ -57,7 +57,7 @@
 `PU_STATE_SEND_INTERVAL` | `PU_STATE_SEND_INTERVAL` из [Backend ENV](/deployment/env-variables/backend) | Частота отправки состояния в [стандартный топик состояния](/developer/mqtt/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit)
 `PU_MIN_LOG_LEVEL` | `Debug` | Минимальный уровень лога, который будет отправляться по [MQTT](/definitions#mqtt) и сохраняться в файл [log.json](/developer/libraries/framework#log-json). Если установить например `Warning`, то `Debug` и `Info` отправляться не будут
 `PU_MAX_LOG_LENGTH` | `64` | Максимальное число строк в файле [log.json](/developer/libraries/framework#log-json), удаляются строки из начала файла, сохраняются в конец.
-`PU_COMMIT_VERSION` | `Hash` [коммита](/definitions#git-commit) | Отображает текущую [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущейв-версии-unit) [Unit](/definitions#unit). Имеет уникальный функционал, её нельзя изменить вручную в меню изменения [env.json](/definitions#env-json), она будет игнорироваться при сохранении
+`PU_COMMIT_VERSION` | `Hash` [коммита](/definitions#git-commit) | Отображает текущую [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) [Unit](/definitions#unit). Имеет уникальный функционал, её нельзя изменить вручную в меню изменения [env.json](/definitions#env-json), она будет игнорироваться при сохранении
 
 ### Переменные окружения Разработчика [Unit](/definitions#unit)
 
