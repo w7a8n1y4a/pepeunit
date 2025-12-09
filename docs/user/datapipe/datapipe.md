@@ -11,7 +11,7 @@
 -- | --
 `Import YML Config` | Позволяет загрузить конвейер с вашего локального устройства в редактор
 `Export YML Config` | Позволяет скачать конвейер, который на данный момент актуален на сервере
-`Import CSV Data` | Позволяет загрузить данные с вашего локлаьной устройства в [DataPipe](/deployment/dependencies/datapipe)
+`Import CSV Data` | Позволяет загрузить данные с вашего локальной устройства в [DataPipe](/deployment/dependencies/datapipe)
 `Export CSV Data` | Позволяет скачать все накопленные данные в формате `CSV`, если данных нет - выдаст ошибку
 `Set Config` | Позволяет отправить на сервер новый конвейер
 `Del Saved Pipe Data` | Позволяет удалить все данные, которые получились в результате работы конвейера, для данного [UnitNode](/definitions#unitnode)
@@ -51,7 +51,7 @@
 `threshold_max` | `float64` из [Golang](/definitions#golang) | Обязателен, если есть `type_value_threshold` с типами `Max` и `Range` | Работает только с `type_input_value` = `Number`
 `max_rate` | `0 <= max_rate <= 86400` только целые | Да | Определят, через сколько секунд будет обработано следующее сообщение. `0` без ограничения
 `last_unique_check` | `true`, `false` | Да | Если `true`, то пропустит только если новое значение отличается от предыдущего. По умолчанию `false`
-`max_size` | `0 <= max_size <= MQTT_MAX_PAYLOAD_SIZE * 1024` | Да | Максимальный размер сообщения, если рамер привысит - сообщение будет пропущено
+`max_size` | `0 <= max_size <= MQTT_MAX_PAYLOAD_SIZE * 1024` | Да | Максимальный размер сообщения, если размер превысит - сообщение будет пропущено
 
 ## transformations
 
@@ -76,4 +76,4 @@
 `policy_type` | `LastValue`, `NRecords`, `TimeWindow`, `Aggregation` | Да | Одна из `4` политик обработки
 `n_records_count` | Число хранимых записей `0 < n_records_count =< 1024` | Обязателен только для `policy_type` = `NRecords` | Определяет, сколько записей будет храниться
 `time_window_size` | Одно из значений: `[60, 300, 600, 900, 1200, 1800, 3600, 7200, 10800, 14400, 21600, 28800, 43200, 86400]` | Обязателен для `policy_type` = `TimeWindow` или `Aggregation` | Размер окна в секундах, оно должно нацело делить `86400`
-`aggregation_functions` | `Avg`, `Min`, `Max`, `Sum` | Обязателен для `policy_type` = `Aggregation` | Функция, на основе которой будет расчитано итоговое значение, на основе `time_window_size`
+`aggregation_functions` | `Avg`, `Min`, `Max`, `Sum` | Обязателен для `policy_type` = `Aggregation` | Функция, на основе которой будет рассычитано итоговое значение, на основе `time_window_size`

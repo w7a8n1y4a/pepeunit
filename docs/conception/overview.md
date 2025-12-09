@@ -8,7 +8,7 @@
 
 ## CI/CD для Unit
 
-`Pepeunit` способен на основе внешних [Git](/definitions#git) репозиториев из [GitLab](/definitions#gitlab) и [GitHub](/definitions#github), создавать готовые к использованию программы - это могут быть программы на основе [Интерпретируемых](/definitions#interpreterable) или [Компилируемых](/definitions#compilable) языков программирования.
+`Pepeunit` способен на основе внешних [Git](/definitions#git) репозиториев из [GitLab](/definitions#gitlab) и [GitHub](/definitions#github), создавать готовые к использованию программы - это могут быть программы на основе [Интерпретируемых](/definitions#interpretable) или [Компилируемых](/definitions#compilable) языков программирования.
 
 :::info
 [Cистема обновлений](/development-pepeunit/mechanics/update-system)
@@ -62,7 +62,7 @@
 
 ## Настройка политик доступа
 
-`Pepeunit` позволяет регулировать уровни [доступа](/development-pepeunit/mechanics/permission) [Пользователей](/development-pepeunit/mechanics/roles.html#user) и `Unit-Unit`. Глубина взаимодействия с платформой определяется ролью [Пользователя](/development-pepeunit/mechanics/roles) и [видимостью](/development-pepeunit/mechanics/visibility) отдельных сушностей [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode).
+`Pepeunit` позволяет регулировать уровни [доступа](/development-pepeunit/mechanics/permission) [Пользователей](/development-pepeunit/mechanics/roles.html#user) и `Unit-Unit`. Глубина взаимодействия с платформой определяется ролью [Пользователя](/development-pepeunit/mechanics/roles) и [видимостью](/development-pepeunit/mechanics/visibility) отдельных сущностей [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode).
 
 :::info
 [Управление доступами](/development-pepeunit/mechanics/permission)
