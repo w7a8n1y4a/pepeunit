@@ -11,10 +11,10 @@ description = "Регулирует обороты вентилятора в з�
 language = "Micropython"
 hardware = ["esp32", "ds18b20", "4pin fan", "резистор 4.7кОм", "wires"]
 firmware = [
-  {name = "Поменять на 1.0.0 esp32 GENERIC", link = "https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/package_files/43/download"}
+  {name = "ESP32_GENERIC-v1.26.1-PEPEUNIT-v1.0.0.bin", link = "https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/package_files/52/download"}
 ]
 stack = ["pepeunit_micropython_client"]
-version = "0.0.0"
+version = "1.0.0"
 license = "AGPL v3 License"
 authors = [
     {name = "Ivan Serebrennikov", email = "admin@silberworks.com"}
@@ -114,7 +114,7 @@ steps = [
 `hardware` | `["esp32", "ds18b20", "4pin fan", "резистор 4.7кОм", "wires"]` | Используемые физические компоненты
 `firmware` | `[{name = "ESP32...0.0.bin", link = "https://git.pepe.../download"}]` | Набор данных о бинарных файлах, устанавливаемых напрямую на физические компоненты: интерпретаторы, бинарные файлы и т.д.ы
 `stack` | `["pepeunit_micropython_client"]` | Набор библиотек, используемых в программе [Unit](/definitions#unit)
-`version` | `"0.0.0"` | Текущая версия [Unit](/definitions#unit)
+`version` | `"1.0.0"` | Текущая версия [Unit](/definitions#unit)
 `license` | `"AGPL v3 License"` | Подробнее о лицензиях [LICENSE](/definitions#license)
 `authors` | `[{name = "Ivan Serebrennikov", email = "admin@silberworks.com"}]` | Список авторов [Unit](/definitions#unit)
 
