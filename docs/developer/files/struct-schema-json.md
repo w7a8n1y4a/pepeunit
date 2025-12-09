@@ -1,6 +1,6 @@
 # schema.json
 
-:::warning Какое функциональное назначение у [schema.json](/definitions#schema-json)?
+:::warning Какое функциональное назначание у [schema.json](/definitions#schema-json)?
 Данный файл - это контракт между конкретным экземпляром [Unit](/definitions#unit) и [Pepeunit](/conception/overview):
 1. [Unit](/definitions#unit) гарантирует, что он подпишется на все стандартные топики, указанные в `input_base_topic`, и все [UnitNode](/definitions#unitnode), указанные в `input_topic`
 1. [Unit](/definitions#unit) гарантирует, что он будет публиковать данные в стандартные топики из `output_base_topic`, и во все [UnitNode](/definitions#unitnode), указанные в `output_topic`
@@ -101,10 +101,10 @@
 ![img](/schemas/edge_schema.svg)
 
 :::warning Почему существуют только связи `Output->Input`?
-В парадигме протокола [MQTT](/definitions#mqtt) в топик информацию публикует издатель, а получить информацию из топика могут подписчики. Если перенести эту логику на [Pepeunit](/conception/overview), можно сделать следующие выводы:
+В парадигме протокола [MQTT](/definitions#mqtt) в топик информацию публикует издатель, а получить информацию из топика могут подпищики. Если перенести эту логику на [Pepeunit](/conception/overview), можно сделать следующие выводы:
 
 - `Output` - топик, в который [Unit](/definitions#unit) может отправить данные ([Unit](/definitions#unit) издатель для этого топика)
-- `Input` - набор топиков, из которых [Unit](/definitions#unit) может получить данные ([Unit](/definitions#unit) подписчик для этих топиков)
+- `Input` - набор топиков, из которых [Unit](/definitions#unit) может получить данные ([Unit](/definitions#unit) подпищик для этих топиков)
 
 Таким образом, когда создаётся связь `Output->Input`, мы говорим [Unit](/definitions#unit), у которого есть `Input`, дополнительно подписаться этим `Input` на `Output` другого [Unit](/definitions#unit). Т.е. [Unit](/definitions#unit) может получать в `Input` информацию от нескольких `Output` других [Unit](/definitions#unit).
 

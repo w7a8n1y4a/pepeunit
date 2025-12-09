@@ -43,7 +43,7 @@
 ## Компилируемость
 Обычно значение данного флага можно подсмотреть в [Readme](/definitions#readme-md) [Git](/definitions#git) репозитория.
 
-Установите флаг `True` - для [Компилируемых](/definitions#compilable) репозиториев и `False` для [Интерпретируемых](/definitions#interpretable).
+Установите флаг `True` - для [Компилируемых](/definitions#compilable) репозиториев и `False` для [Интерпретируемых](/definitions#interpreterable).
 
 :::warning
 От значения данного флага будет зависеть [первичное получение файлов](/user/unit/create-physic-unit#получение-фаилов-развертывания) для [Unit](/definitions#unit)

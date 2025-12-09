@@ -1,6 +1,6 @@
 # schema_example.json
 
-:::warning Какое функциональное назначение у [schema_example.json](/definitions#schema-example-json)?
+:::warning Какое функциональное назначание у [schema_example.json](/definitions#schema-example-json)?
 Данный файл - это контракт между [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) и [Pepeunit](/conception/overview):
 1. [Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) гарантирует, что он реализует в функционале [Unit](/definitions#unit), работу указанных в [schema_example.json](/definitions#schema-example-json) стандартных топиков [Pepeunit](/conception/overview): `input_base_topic` и `output_base_topic`
 1. [Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) гарантирует работу `input_topic` и `output_topic` в соответствии описанием, которое он составил в [Readme](/definitions#readme-md)

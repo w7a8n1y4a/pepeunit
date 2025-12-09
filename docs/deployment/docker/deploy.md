@@ -78,7 +78,7 @@ $> python make_env.py
 ```
 
 :::danger
-Команда `python3 make_env.py` каждый раз перегенерирует конфиги. При перегенерации существующие секретные `32-битные ключи` не изменяются. Используйте команды [создания backup](/deployment/docker/backup-update#работа-с-бэкапами), для сохранения старой конфигурации.
+Команда `python3 make_env.py` каждый раз перегенерирует конфиги. При перегенерации существующие секретные `32-битные ключи` не измененяются. Используйте команды [создания backup](/deployment/docker/backup-update#работа-с-бэкапами), для сохранения старой конфигурации.
 :::
 
 :::danger
@@ -128,7 +128,7 @@ docker compose up -d
 ```
 
 :::info
-Пример корректного запуска [Backend](/deployment/dependencies/backend) на основе конфига `.env.global`. Для `.env.local` будут отличаться только `ip`-адреса и установка `pooling` для [Telegram Bot](/definitions#telegram-bot):
+Пример корреткного запуска [Backend](/deployment/dependencies/backend) на основе конфига `.env.global`. Для `.env.local` будут отличаться только `ip`-адреса и установка `pooling` для [Telegram Bot](/definitions#telegram-bot):
 ```bash
 $> docker logs -f backend
 Wait Ready PostgreSQL...

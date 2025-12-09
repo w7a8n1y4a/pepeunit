@@ -1,6 +1,6 @@
 # Компиляция для различных платформ
 
-Из-за особенностей [Компилируемых](/definitions#compilable) программ, их способ доставки [Пользователям](/development-pepeunit/mechanics/roles.html#user) отличается от [Интерпретируемых](/definitions#interpretable). Чтобы конечному [Пользователю](/development-pepeunit/mechanics/roles.html#user) не приходилось постоянно компилировать исходный код, для получения бинарного файла в хостингах [Git](/definitions#git) репозиториев [GitLab](/definitions#gitlab) и [GitHub](/definitions#github) предусмотренна система релизов.
+Из-за особенностей [Компилируемых](/definitions#compilable) программ, их способ доставки [Пользователям](/development-pepeunit/mechanics/roles.html#user) отличается от [Интерпретируемых](/definitions#interpreterable). Чтобы конечному [Пользователю](/development-pepeunit/mechanics/roles.html#user) не приходилось постоянно компилировать исходный код, для получения бинарного файла в хостингах [Git](/definitions#git) репозиториев [GitLab](/definitions#gitlab) и [GitHub](/definitions#github) предусмотренна система релизов.
 
 В каждый релиз можно добавить бинарные файлы с определённым названием, такие пары обычно называют `assets`. [GitLab](/definitions#gitlab) и [GitHub](/definitions#github) позволяют через свои [API](/definitions#api) получать соответствие названия `assets` и ссылки на бинарный файл.
 
@@ -22,7 +22,7 @@
 Рассмотрим логику [Pepeunit](/conception/overview) в этом сценарии для каждой из платформ `linux-amd64`, `esp8266-generic` и `macos`:
 - для `linux-amd64` - [Unit](/definitions#unit) будет штатно обновлять все версии
 - для `esp8266-generic` - [Unit](/definitions#unit) можно будет создать начиная с версии `1.0.1`, далее обновления будут идти штатно
-- для `macos` - [Unit](/definitions#unit) будет штатно обновляться до версии `1.1.0`, далее автоматическое обновление будет прервано, но возобновится начиная с версии `1.3.0`
+- для `macos` - [Unit](/definitions#unit) будет шататно обновляться до версии `1.1.0`, далее автоматическое обновление будет прервано, но возобновится начиная с версии `1.3.0`
 
 ## Пример плохого наименования assets между релизами
 - `Release 1.0.0` - `linux-amd64-1.0.0` `macos-one`

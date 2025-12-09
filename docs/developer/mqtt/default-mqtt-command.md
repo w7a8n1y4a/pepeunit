@@ -25,7 +25,7 @@
 
 ### Формат сообщения в топик `update/pepeunit`
 :::danger
-Формат сообщения для [Компилируемых](/definitions#compilable) и [Интерпретируемых](/definitions#interpretable) [Repo](/definitions#repo) отличается:
+Формат сообщения для [Компилируемых](/definitions#compilable) и [Интерпретируемых](/definitions#interpreterable) [Repo](/definitions#repo) отличается:
 :::
 
 [Компилируемые](/definitions#compilable):
@@ -38,7 +38,7 @@
 }
 ```
 
-[Интерпретируемые](/definitions#interpretable):
+[Интерпретируемые](/definitions#interpreterable):
 
 ```json
 {
@@ -49,7 +49,7 @@
 
 ### Алгоритм действий Unit
 :::danger
-Алгоритм [Unit](/definitions#unit) различается для [Компилируемых](/definitions#compilable) и [Интерпретируемых](/definitions#interpretable) [Repo](/definitions#repo)
+Алгоритм [Unit](/definitions#unit) различается для [Компилируемых](/definitions#compilable) и [Интерпретируемых](/definitions#interpreterable) [Repo](/definitions#repo)
 :::
 
 [Компилируемые](/definitions#compilable):
@@ -66,7 +66,7 @@
 1. Скачать новую скомпилированную часть по ссылке из `COMPILED_FIRMWARE_LINK` - [подробнее о предварительной компиляции](/developer/release-assets)
 1. Запустить новую скомпилированную часть c прекращением работы старой
 
-[Интерпретируемые](/definitions#interpretable):
+[Интерпретируемые](/definitions#interpreterable):
 
 1. Сверить версию `PU_COMMIT_VERSION` с текущей версией `COMMIT_VERSION` из [env.json](/definitions#env-json), если совпали - обновление прерывается, если не совпали - [Unit](/definitions#unit) начинает процесс обновления
 1. Вычислить `uuid` [Unit](/definitions#unit) на основе `jwt` токена `PU_AUTH_TOKEN` из [env.json](/definitions#env-json)
@@ -87,7 +87,7 @@
 1. Если команда была вызвана через [REST](/definitions#rest) или [GQL](/definitions#gql)
 :::
 
-Данная команда отправляет [Unit](/definitions#unit) запрос на обновление [schema.json](/definitions#schema-json), [Unit](/definitions#unit) в ответ должен выполнить определённый алгоритм действий, приводящий к изменению текущей версии [schema.json](/definitions#schema-json), на новую.
+Данная команда отправляет [Unit](/definitions#unit) запрос на обновление [schema.json](/definitions#schema-json), [Unit](/definitions#unit) в ответ должен выполнить опредлённый алгоритм действий, приводящий к изменению текущей версии [schema.json](/definitions#schema-json), на новую.
 
 ### Формат сообщения в топик `schema_update/pepeunit`
 

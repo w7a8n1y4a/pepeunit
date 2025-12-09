@@ -1,6 +1,6 @@
 # env.json
 
-:::warning Какое функциональное назначение у [env.json](/definitions#env-json)?
+:::warning Какое функциональное назначание у [env.json](/definitions#env-json)?
 Данный файл - это четырёхсторонний контракт между [Unit](/definitions#unit), [Pepeunit](/conception/overview), [Пользователем](/development-pepeunit/mechanics/roles.html#user) и [Администратором](/development-pepeunit/mechanics/roles#admin) инстанса [Pepeunit](/conception/overview):
 1. [Unit](/definitions#unit) гарантирует всем сторонам, что будет использовать для соответствующих значений из [env_example.json](/definitions#env-example-json) значения из [env.json](/definitions#env-json)
 1. [Pepeunit](/conception/overview) гарантирует всем сторонам, что при первой установке переменных окружения в [env.json](/definitions#env-json) сгенерирует стандартные переменные

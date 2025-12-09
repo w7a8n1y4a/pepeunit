@@ -1,6 +1,6 @@
 # env_example.json
 
-:::warning Какое функциональное назначение у [env_example.json](/definitions#env-example-json)?
+:::warning Какое функциональное назначание у [env_example.json](/definitions#env-example-json)?
 Данный файл - это контракт между [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) и [Pepeunit](/conception/overview):
 1. [Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) гарантирует, что он реализует в функционале [Unit](/definitions#unit) все или часть стандартных переменных [Pepeunit](/conception/overview), позволяющих взаимодействовать с [Pepeunit](/conception/overview)
 1. [Pepeunit](/conception/overview) гарантирует возможность [Пользователей](/development-pepeunit/mechanics/roles.html#user) установить переменные указанные [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer)
@@ -47,7 +47,7 @@
 `PU_DOMAIN` | `PU_DOMAIN` из [Backend ENV](/deployment/env-variables/backend) | Доменное имя или `ip` адрес инстанса [Pepeunit](/conception/overview)
 `PU_HTTP_TYPE` | `PU_SECURE` из [Backend ENV](/deployment/env-variables/backend) | Тип соединения `https/http` с доменным именем или `ip` адресом [Backend](/deployment/dependencies/backend) в формате `https/http`
 `PU_APP_PREFIX` | `PU_APP_PREFIX` из [Backend ENV](/deployment/env-variables/backend) | Префикс [Backend](/deployment/dependencies/backend)
-`PU_API_ACTUAL_PREFIX` | `PU_API_V1_PREFIX` из [Backend ENV](/deployment/env-variables/backend) | Префикс актуальной версии [API](/definitions#api) для [Backend](/deployment/dependencies/backend). Полностью соответствует последней версии [API](/definitions#api)
+`PU_API_ACTUAL_PREFIX` | `PU_API_V1_PREFIX` из [Backend ENV](/deployment/env-variables/backend) | Префикс актауальной версии [API](/definitions#api) для [Backend](/deployment/dependencies/backend). Полностью соответствует последней версии [API](/definitions#api)
 `PU_MQTT_HOST` | `PU_MQTT_HOST` из [Backend ENV](/deployment/env-variables/backend) | Доменное имя или `ip` - адрес инстанса [EMQX](/deployment/dependencies/emqx)
 `PU_MQTT_PORT` | `PU_MQTT_PORT` из [Backend ENV](/deployment/env-variables/backend) | Порт для взаимодействия с [EMQX](/deployment/dependencies/emqx), по умолчанию `1883`
 `PU_MQTT_PING_INTERVAL` | 30 | Частота [MQTT](/definitions#mqtt) пинга в секундах, `30` секунд для всех
@@ -56,7 +56,7 @@
 `PU_ENCRYPT_KEY` | `32 байтовый ключ` в формате `base64` | Уникальный для каждого [Unit](/definitions#unit). Удобно использовать для шифрования методом `aes-gcm-256`. Устанавливается [Backend](/deployment/dependencies/backend) автоматически
 `PU_STATE_SEND_INTERVAL` | `PU_STATE_SEND_INTERVAL` из [Backend ENV](/deployment/env-variables/backend) | Частота отправки состояния в [стандартный топик состояния](/developer/mqtt/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit)
 `PU_MIN_LOG_LEVEL` | `Debug` | Минимальный уровень лога, который будет отправляться по [MQTT](/definitions#mqtt) и сохраняться в файл [log.json](/developer/libraries/framework#log-json). Если установить например `Warning`, то `Debug` и `Info` отправляться не будут
-`PU_MAX_LOG_LENGTH` | `64` | Максимальное число строк в файле [log.json](/developer/libraries/framework#log-json), удаляются строки из начала файла, сохраняются в конец.
+`PU_MAX_LOG_LENGTH` | `64` | Максимальное число строк в файле [log.json](/developer/libraries/framework#log-json), удаляются строки из начала файла, сохрняются в конец.
 `PU_COMMIT_VERSION` | `Hash` [коммита](/definitions#git-commit) | Отображает текущую [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) [Unit](/definitions#unit). Имеет уникальный функционал, её нельзя изменить вручную в меню изменения [env.json](/definitions#env-json), она будет игнорироваться при сохранении
 
 ### Переменные окружения Разработчика [Unit](/definitions#unit)
