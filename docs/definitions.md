@@ -12,9 +12,6 @@
 ## UnitNode
 `UnitNode` - представление о [MQTT](#mqtt) топике для [Pepeunit](/conception/overview), данная сущность описывает точку взаимодействия с [Unit](#unit). `UnitNode` может быть двух типов: `Input` и `Output`. Между `UnitNode` разных [Unit](#unit) могут быть связи: от одного `Output` к многим `Input`.
 
-## YML
-`YML` или `YAML` - человекочитаемый формат данных, используемый для сериализации и конфигурации. Данный формат широко применяется в автоматизации и конвейерах для описания этапов и их параметров. [Pepeunit](/conception/overview) использует его для конвейеров данных.
-
 ## Datasource
 `Datasource` - источник данных [Grafana](/deployment/dependencies/grafana), из которого [Grafana](/deployment/dependencies/grafana) получает данные для дальнейшей визуализации. [Backend](/deployment/dependencies/backend) реализует [REST](/definitions#rest) запрос для [InfinityAPI](https://grafana.com/grafana/plugins/yesoreyeram-infinity-datasource/) из коробки для каждой отдельной организации. Такой запрос с использованием `headers` и `params` позволяет получать данные, накопленные с помощью механизмов [DataPipe](/deployment/dependencies/datapipe).
 
@@ -65,7 +62,7 @@
 [Fediverse](https://en.wikipedia.org/wiki/Fediverse) - способ организации взаимодействия `сервер-сервер`, обеспечивающий децентрализованную схему распространения и обработки информации.
 
 ## IoT
-`Internet of Things` - сеть физических объектов, встроенных с датчиками, программным обеспечением и другими технологиями, которые позволяют этим устройствам подключаться и обмениваться данными с другими устройствами и системами.
+`Internet of Things` - глобальная экосистема взаимосвязанных устройств, где обычные предметы, такие как холодильники, лампочки или автомобили, обретают общие возможности для взаимодействия, благодаря встроенным сенсорам, чипам и интернет-подключению, самостоятельно обмениваясь данными для упрощения жизни человека.
 
 ## Framework
 `Framework` - готовая программная структура или каркас для разработки программ, который задаёт архитектуру приложения, управляет потоком выполнения и жизненным циклом, предоставляет набор компонентов и инструментов, а также позволяет внедрять свою логику через определённые расширяемые точки.
@@ -100,7 +97,7 @@
 `SQL (Structured Query Language)` — декларативный язык программирования для создания, изменения и управления базами данных.
 
 ## API
-`Application Programming Interface` - набор правил взаимодействия, предоставляемый программами и описывающий взаимодействие с ними. Обычно, описывается набором контрактов, или договоров. Например, [Backend](/deployment/dependencies/backend) `Pepeunit` предоставляет: [REST](#rest), [GQL](#gql), [MQTT](#mqtt).
+`Application Programming Interface` - набор правил взаимодействия, предоставляемый программами и описывающий взаимодействие с ними. Обычно, описывается набором контрактов, или договоров. Например, [Backend](/deployment/dependencies/backend) [Pepeunit](/conception/overview) предоставляет: [REST](#rest), [GQL](#gql), [MQTT](#mqtt).
 
 ## REST
 `REST API` - архитектурный стиль, описывающий взаимодействие программы с клиентами через `HTTP` запросы. Pepeunit [Backend](/deployment/dependencies/backend) использует пакет [Pydantic](https://docs.pydantic.dev/latest/) и спецификацию [OpenAPI](https://swagger.io/docs/) для предоставления `REST API`.
@@ -116,3 +113,6 @@
 
 ## Telegram Bot
 [Telegram Bot API](https://core.telegram.org/bots/api) - открытый [API](#api) для взаимодействия с внешними по отношению к [Telegram](#telegram) сервисами, например: [Pepeunit](/conception/overview). Для интеграции с `Telegram Bot API` [Pepeunit](/conception/overview) использует пакет [AioGram](https://github.com/aiogram/aiogram) как клиент. `Telegram Bot API` позволяет [Backend](/deployment/dependencies/backend) верифицировать [Пользователей](/development-pepeunit/mechanics/roles.html#user). Управление ботами происходит через [Bot Father](https://t.me/BotFather).
+
+## YML
+`YML` или `YAML` - человекочитаемый формат данных, используемый для сериализации и конфигурации. Данный формат широко применяется в автоматизации и конвейерах для описания этапов и их параметров. [Pepeunit](/conception/overview) использует его для конвейеров данных.
