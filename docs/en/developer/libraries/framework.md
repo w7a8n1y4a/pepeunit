@@ -1,6 +1,6 @@
 # Pepeunit Framework
 
-[Links to library repositories](/en/development-pepeunit/maps.html#библиотеки)
+[Links to library repositories](/en/development-pepeunit/maps#libraries)
 
 ::::info
 Each library is a client [Framework](/en/definitions#framework) for working with [Pepeunit](/en/conception/overview).
@@ -73,6 +73,6 @@ Logs are stored in `ndjson` format, where each line separated by `\n` is a JSON 
 
 The buffer capacity is controlled by the `PU_MAX_LOG_LENGTH` environment variable; new entries are appended at the end of the file, and old entries are removed from the beginning once their index from the end exceeds `PU_MAX_LOG_LENGTH`.
 
-You can access this file physically (via device ports) or via the [log_sync](/en/developer/mqtt/default-mqtt-command.html#log-sync-log-sync-pepeunit) command.
+You can access this file physically (via device ports) or via the [log_sync](/en/developer/mqtt/default-mqtt-command#log-sync-log-sync-pepeunit) command.
 
 

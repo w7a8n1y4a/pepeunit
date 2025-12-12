@@ -1,7 +1,7 @@
 # Working with permissions
 
 ::::info What does granting permission mean?
-A [User](/en/development-pepeunit/mechanics/roles.html#user) can find your entity via search and perform a number of actions described in the [capabilities of agents for visible entities](/en/development-pepeunit/mechanics/visibility#возможности-агентов-для-видимых-сущностеи).
+A [User](/en/development-pepeunit/mechanics/roles#user) can find your entity via search and perform a number of actions described in the [capabilities of agents for visible entities](/en/development-pepeunit/mechanics/visibility#capabilities-of-agents-for-visible-entities).
 ::::
 
 ::::warning
@@ -9,7 +9,7 @@ The permission system works only for entities whose [visibility level](/en/devel
 ::::
 
 ::::danger
-Access to a `Private` [RepositoryRegisty](/en/definitions#repositoryregistry) is based on [access credentials](/en/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория) and ignores the system described below.
+Access to a `Private` [RepositoryRegisty](/en/definitions#repositoryregistry) is based on [access credentials](/en/user/git-repository/create-repository-registry#access-to-a-private-repository) and ignores the system described below.
 ::::
 
 ## Creating a permission

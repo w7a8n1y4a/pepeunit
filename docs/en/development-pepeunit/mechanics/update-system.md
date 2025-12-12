@@ -1,12 +1,12 @@
 # Update system
 
-- [What do Repo update flags mean?](/en/user/git-repository/settings-repo#флаги-массовых-обновлении)
-- [How to get files for creating a Unit?](/en/user/unit/create-physic-unit#получение-фаилов-развертывания)
+- [What do Repo update flags mean?](/en/user/git-repository/settings-repo)
+- [How to get files for creating a Unit?](/en/user/unit/create-physic-unit#getting-deployment-files)
 - [How to update a Unit?](/en/user/unit/update-unit)
-- [How does a Unit learn its current version using env.json?](/en/developer/files/struct-env-example-json#стандартные-переменные-pepeunit)
+- [How does a Unit learn its current version using env.json?](/en/developer/files/struct-env-example-json#standard-pepeunit-variables)
 - [How are Unit update archives generated?](/en/developer/files/struct-archive-update)
 - [What MQTT commands exist for updating a Unit?](/en/developer/mqtt/default-mqtt-command)
-- [How does Pepeunit know the current version of a Unit?](/en/developer/mqtt/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit)
+- [How does Pepeunit know the current version of a Unit?](/en/developer/mqtt/state-mqtt-send#message-format-for-the-state-pepeunit-topic)
 - [How do Units get links to compiled versions?](/en/developer/release-assets)
 
 ## Process of updating all Units linked to a Repo

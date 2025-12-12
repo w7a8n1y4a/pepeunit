@@ -19,7 +19,7 @@ Limits the number of `Output->Input` connections for a [UnitNode](/en/definition
 
 ## Overwrite setting for Input
 
-If the overwrite flag is set to `False`, then [Units](/en/definitions#unit) that have [access](/en/development-pepeunit/mechanics/permission) will not be able to write a new value via [REST](/en/definitions#rest) or [GQL](/en/definitions#gql). In other words, setting a value will only be possible for [Users](/en/development-pepeunit/mechanics/roles.html#user) with the appropriate [access](/en/development-pepeunit/mechanics/permission) and for topics linked via `Output->Input`.
+If the overwrite flag is set to `False`, then [Units](/en/definitions#unit) that have [access](/en/development-pepeunit/mechanics/permission) will not be able to write a new value via [REST](/en/definitions#rest) or [GQL](/en/definitions#gql). In other words, setting a value will only be possible for [Users](/en/development-pepeunit/mechanics/roles#user) with the appropriate [access](/en/development-pepeunit/mechanics/permission) and for topics linked via `Output->Input`.
 
 ::::info
 This setting is needed to limit the ability of [Units](/en/definitions#unit) to overwrite information in [UnitNodes](/en/definitions#unitnode) that are [accessible](/en/development-pepeunit/mechanics/permission) to them.

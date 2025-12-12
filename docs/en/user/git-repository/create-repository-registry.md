@@ -33,7 +33,7 @@ Set the `Private ?` flag to `True` for a [Git](/en/definitions#git) repository t
 These credentials will be used when executing `git pull` by the [Backend](/en/deployment/dependencies/backend). At the time of requesting data from the external service the `link` will look like: `https://username:pat-token@domain.com/abracadabra/test.git`.
 
 ::::warning
-All [Users](/en/development-pepeunit/mechanics/roles.html#user) of the instance will be able to see the private repository, but only those who have credentials with a `Valid` level will be able to create a [Repo](/en/definitions#repo) from it. You can check your level by opening the [RepositoryRegisty](/en/definitions#repositoryregistry) modal via search and clicking the `Change GIT Credentials` button.
+All [Users](/en/development-pepeunit/mechanics/roles#user) of the instance will be able to see the private repository, but only those who have credentials with a `Valid` level will be able to create a [Repo](/en/definitions#repo) from it. You can check your level by opening the [RepositoryRegisty](/en/definitions#repositoryregistry) modal via search and clicking the `Change GIT Credentials` button.
 ::::
 
 ::::info

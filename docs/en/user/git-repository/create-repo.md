@@ -48,7 +48,7 @@ Usually the meaning of this flag can be found in the repository [Readme](/en/def
 Set the flag to `True` for [Compilable](/en/definitions#compilable) repositories and to `False` for [Interpretable](/en/definitions#interpretable) ones.
 
 ::::warning
-The value of this flag will affect the [initial retrieval of deployment files](/en/user/unit/create-physic-unit#получение-фаилов-развертывания) for the [Unit](/en/definitions#unit)
+The value of this flag will affect the [initial retrieval of deployment files](/en/user/unit/create-physic-unit#getting-deployment-files) for the [Unit](/en/definitions#unit)
 ::::
 
 ::::info

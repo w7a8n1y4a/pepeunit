@@ -47,7 +47,7 @@ It contains links to [UnitNodes](#unitnode) and the base topics used to interact
 ## env_example.json
 `env_example.json` is a file that describes the environment variables required for proper [Unit](#unit) operation.  
 It is created by a [Unit Developer](/en/development-pepeunit/mechanics/roles#unit-developer) and placed into every [Repo](#repo) version.  
-Based on this file and the [User](/en/development-pepeunit/mechanics/roles.html#user) input, [Pepeunit](/en/conception/overview) can generate an [env.json](#envjson) file for a [Unit](#unit).  
+Based on this file and the [User](/en/development-pepeunit/mechanics/roles#user) input, [Pepeunit](/en/conception/overview) can generate an [env.json](#envjson) file for a [Unit](#unit).  
 [Learn more](/en/developer/files/struct-env-example-json#env-example-json)
 
 ## env.json
@@ -154,7 +154,7 @@ The [Pepeunit](/en/conception/overview) [Backend](/en/deployment/dependencies/ba
 ## Telegram Bot
 [Telegram Bot API](https://core.telegram.org/bots/api) is an open [API](#api) for interacting with services external to [Telegram](#telegram), such as [Pepeunit](/en/conception/overview).  
 To integrate with the `Telegram Bot API`, [Pepeunit](/en/conception/overview) uses [AioGram](https://github.com/aiogram/aiogram) as a client.  
-`Telegram Bot API` allows the [Backend](/en/deployment/dependencies/backend) to verify [Users](/en/development-pepeunit/mechanics/roles.html#user).  
+`Telegram Bot API` allows the [Backend](/en/deployment/dependencies/backend) to verify [Users](/en/development-pepeunit/mechanics/roles#user).  
 Bots are managed via [Bot Father](https://t.me/BotFather).
 
 ## YML

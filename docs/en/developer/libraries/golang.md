@@ -1,6 +1,6 @@
 # Golang
 
-[Repository links](/en/development-pepeunit/maps.html#библиотеки)
+[Repository links](/en/development-pepeunit/maps#libraries)
 
 ::::info
 This is a [Compilable](/en/definitions#compilable) client and it implements the full [Pepeunit Framework](/en/developer/libraries/framework) feature set.

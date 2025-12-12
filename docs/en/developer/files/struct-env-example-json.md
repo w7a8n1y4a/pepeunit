@@ -4,8 +4,8 @@
 [env_example.json](/en/definitions#env-example-json) is a contract between the [Unit Developer](/en/development-pepeunit/mechanics/roles#unit-developer) and [Pepeunit](/en/conception/overview):
 
 1. The [Unit Developer](/en/development-pepeunit/mechanics/roles#unit-developer) guarantees that they will implement in the [Unit](/en/definitions#unit) logic all or some of the standard [Pepeunit](/en/conception/overview) variables required for integration with [Pepeunit](/en/conception/overview).
-1. [Pepeunit](/en/conception/overview) guarantees that [Users](/en/development-pepeunit/mechanics/roles.html#user) will be able to set the variables specified by the [Unit Developer](/en/development-pepeunit/mechanics/roles#unit-developer).
-1. [Pepeunit](/en/conception/overview) guarantees that it will automatically populate the standard variables defined in this file when the [User](/en/development-pepeunit/mechanics/roles.html#user) first saves the `env`.
+1. [Pepeunit](/en/conception/overview) guarantees that [Users](/en/development-pepeunit/mechanics/roles#user) will be able to set the variables specified by the [Unit Developer](/en/development-pepeunit/mechanics/roles#unit-developer).
+1. [Pepeunit](/en/conception/overview) guarantees that it will automatically populate the standard variables defined in this file when the [User](/en/development-pepeunit/mechanics/roles#user) first saves the `env`.
 ::::
 
 ## Structure
@@ -56,21 +56,21 @@ Variable | Generated value in `env.json` | Purpose
 `PU_AUTH_TOKEN` | `jwt` token | Permanent access token of the [Unit](/en/definitions#unit) to the [Pepeunit](/en/conception/overview) instance. This token is used to authorize subscriptions and publications in [EMQX](/en/deployment/dependencies/emqx) topics and is set automatically by the [Backend](/en/deployment/dependencies/backend).
 `PU_SECRET_KEY` | `32‑byte key` in `base64` format | Unique for each [Unit](/en/definitions#unit). Convenient for signing or generating JWTs. Set automatically by the [Backend](/en/deployment/dependencies/backend).
 `PU_ENCRYPT_KEY` | `32‑byte key` in `base64` format | Unique for each [Unit](/en/definitions#unit). Convenient for `aes-gcm-256` encryption. Set automatically by the [Backend](/en/deployment/dependencies/backend).
-`PU_STATE_SEND_INTERVAL` | `PU_STATE_SEND_INTERVAL` from [Backend ENV](/en/deployment/env-variables/backend) | Interval for sending state to the [standard state topic](/en/developer/mqtt/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit).
+`PU_STATE_SEND_INTERVAL` | `PU_STATE_SEND_INTERVAL` from [Backend ENV](/en/deployment/env-variables/backend) | Interval for sending state to the [standard state topic](/en/developer/mqtt/state-mqtt-send#message-format-for-the-state-pepeunit-topic).
 `PU_MIN_LOG_LEVEL` | `Debug` | Minimum log level that will be sent over [MQTT](/en/definitions#mqtt) and stored in the [log.json](/en/developer/libraries/framework#log-json) file. For example, if you set it to `Warning`, then `Debug` and `Info` messages will not be sent.
 `PU_MAX_LOG_LENGTH` | `64` | Maximum number of lines in [log.json](/en/developer/libraries/framework#log-json); old lines are removed from the beginning of the file.
-`PU_COMMIT_VERSION` | [Commit](/en/definitions#git-commit) hash | Shows the current [target version](/en/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) of the [Unit](/en/definitions#unit). It has special behavior: it cannot be changed manually in the [env.json](/en/definitions#env-json) editing UI; any attempt to change it will be ignored.
+`PU_COMMIT_VERSION` | [Commit](/en/definitions#git-commit) hash | Shows the current [target version](/en/development-pepeunit/mechanics/update-system#algorithm-for-calculating-the-current-unit-version) of the [Unit](/en/definitions#unit). It has special behavior: it cannot be changed manually in the [env.json](/en/definitions#env-json) editing UI; any attempt to change it will be ignored.
 
 ## Unit Developer environment variables
 
-The [Unit Developer](/en/development-pepeunit/mechanics/roles#unit-developer) can create any environment variables whose names differ from the standard ones. The values defined in these variables will be shown as default values in the [User](/en/development-pepeunit/mechanics/roles.html#user) interface.
+The [Unit Developer](/en/development-pepeunit/mechanics/roles#unit-developer) can create any environment variables whose names differ from the standard ones. The values defined in these variables will be shown as default values in the [User](/en/development-pepeunit/mechanics/roles#user) interface.
 
 ::::danger
-Since in the end it is the [User](/en/development-pepeunit/mechanics/roles.html#user) who will fill in the variables manually, you must always provide [pepeunit.toml](/en/definitions#pepeunit-toml) and [readme.md](/en/definitions#readme-md) so that the [User](/en/development-pepeunit/mechanics/roles.html#user) can understand what each variable controls.
+Since in the end it is the [User](/en/development-pepeunit/mechanics/roles#user) who will fill in the variables manually, you must always provide [pepeunit.toml](/en/definitions#pepeunit-toml) and [readme.md](/en/definitions#readme-md) so that the [User](/en/development-pepeunit/mechanics/roles#user) can understand what each variable controls.
 ::::
 
 ::::danger
-[env.json](/en/definitions#env-json) is filled by the [User](/en/development-pepeunit/mechanics/roles.html#user) based on the [ENV generation mechanism](/en/development-pepeunit/mechanics/alg-env).
+[env.json](/en/definitions#env-json) is filled by the [User](/en/development-pepeunit/mechanics/roles#user) based on the [ENV generation mechanism](/en/development-pepeunit/mechanics/alg-env).
 ::::
 
 

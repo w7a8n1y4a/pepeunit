@@ -3,8 +3,8 @@
 :::warning Какое функциональное назначение у [env_example.json](/definitions#env-example-json)?
 Данный файл - это контракт между [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) и [Pepeunit](/conception/overview):
 1. [Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) гарантирует, что он реализует в функционале [Unit](/definitions#unit) все или часть стандартных переменных [Pepeunit](/conception/overview), позволяющих взаимодействовать с [Pepeunit](/conception/overview)
-1. [Pepeunit](/conception/overview) гарантирует возможность [Пользователей](/development-pepeunit/mechanics/roles.html#user) установить переменные указанные [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer)
-1. [Pepeunit](/conception/overview) гарантирует, что автоматически установит стандартные переменные указанные в файле при первом сохранении `env` со стороны [Пользователя](/development-pepeunit/mechanics/roles.html#user).
+1. [Pepeunit](/conception/overview) гарантирует возможность [Пользователей](/development-pepeunit/mechanics/roles#user) установить переменные указанные [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer)
+1. [Pepeunit](/conception/overview) гарантирует, что автоматически установит стандартные переменные указанные в файле при первом сохранении `env` со стороны [Пользователя](/development-pepeunit/mechanics/roles#user).
 :::
 
 ### Структура
@@ -61,12 +61,12 @@
 
 ### Переменные окружения Разработчика [Unit](/definitions#unit)
 
-[Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) может создавать любые переменные окружения, которые отличаются по названию от стандартных. При этом значения, указанные в переменных, будут отображаться как значения по умолчанию в интерфейсе [Пользователей](/development-pepeunit/mechanics/roles.html#user).
+[Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) может создавать любые переменные окружения, которые отличаются по названию от стандартных. При этом значения, указанные в переменных, будут отображаться как значения по умолчанию в интерфейсе [Пользователей](/development-pepeunit/mechanics/roles#user).
 
 :::danger
-Так как [Пользователь](/development-pepeunit/mechanics/roles.html#user) в итоге будет заполнять переменные вручную, всегда нужно заполнить [pepeunit.toml](/definitions#pepeunit-toml) и [readme.md](/definitions#readme-md), чтобы [Пользователь](/development-pepeunit/mechanics/roles.html#user) мог понять, за что отвечает каждая переменная
+Так как [Пользователь](/development-pepeunit/mechanics/roles#user) в итоге будет заполнять переменные вручную, всегда нужно заполнить [pepeunit.toml](/definitions#pepeunit-toml) и [readme.md](/definitions#readme-md), чтобы [Пользователь](/development-pepeunit/mechanics/roles#user) мог понять, за что отвечает каждая переменная
 :::
 
 :::danger
-Заполнение [env.json](/definitions#env-json) [Пользователем](/development-pepeunit/mechanics/roles.html#user) происходит на основе: [Механизма генерации ENV](/development-pepeunit/mechanics/alg-env)
+Заполнение [env.json](/definitions#env-json) [Пользователем](/development-pepeunit/mechanics/roles#user) происходит на основе: [Механизма генерации ENV](/development-pepeunit/mechanics/alg-env)
 :::

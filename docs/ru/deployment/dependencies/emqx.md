@@ -7,7 +7,7 @@
 Сущность | Операции
 -- | --
 [Unit](/definitions#unit) | Публикуют/подписываются на конкретные [MQTT](/definitions#mqtt) топики с паттернами `example.com/+/pepeunit` и `example.com/+/+/+/pepeunit`
-[Backend](/deployment/dependencies/backend) | Публикует/подписывается на все [MQTT](/definitions#mqtt) топики с паттерном `example.com/+/+/+/pepeunit` и имеет возможность по запросу [Пользователя](/development-pepeunit/mechanics/roles.html#user) отправлять данные в `Input` топики c паттерном  `example.com/+/pepeunit`
+[Backend](/deployment/dependencies/backend) | Публикует/подписывается на все [MQTT](/definitions#mqtt) топики с паттерном `example.com/+/+/+/pepeunit` и имеет возможность по запросу [Пользователя](/development-pepeunit/mechanics/roles#user) отправлять данные в `Input` топики c паттерном  `example.com/+/pepeunit`
 [DataPipe](/deployment/dependencies/datapipe) | Подписан на все топики с паттерном `example.com/+/pepeunit`
 
 :::info

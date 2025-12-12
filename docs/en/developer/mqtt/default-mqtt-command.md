@@ -13,7 +13,7 @@ There are four command topics in [Pepeunit](/en/conception/overview):
 1. `ENV_UPDATE` – `env_update/pepeunit`
 1. `LOG_SYNC` – `log_sync/pepeunit`
 
-## UPDATE – `update/pepeunit`
+## UPDATE - update/pepeunit
 
 ::::info When is this command sent?
 1. When a [Unit](/en/definitions#unit) is updated manually.
@@ -87,7 +87,7 @@ The [Unit](/en/definitions#unit) algorithm differs for [Compilable](/en/definiti
 1. Replace the current program files with the files from the new directory or memory area.
 1. Restart the [Unit](/en/definitions#unit).
 
-## SCHEMA_UPDATE – `schema_update/pepeunit`
+## ENV_UPDATE - env_update/pepeunit
 
 ::::info When is this command sent?
 1. When the command is triggered via the dedicated button in the [Unit](/en/definitions#unit) UI.
@@ -133,7 +133,7 @@ This command tells the [Unit](/en/definitions#unit) to update [env.json](/en/def
     - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/env/{Unit.uuid}`
 1. Replace the current [env.json](/en/definitions#env-json) state in the [Unit](/en/definitions#unit) with the new version.
 
-## LOG_SYNC – `log_sync/pepeunit`
+## LOG_SYNC - log_sync/pepeunit
 
 ::::info When is this command sent?
 1. When the command is triggered via the dedicated button in the [Unit](/en/definitions#unit) UI.

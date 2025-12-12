@@ -18,13 +18,13 @@
 `PU_WORKER_COUNT` | `2` | Число воркеров Gunicorn, позволяет увеличить нагрузку, которую способен выдержать [Backend](/deployment/dependencies/backend)
 `PU_DOMAIN` | - | Доменное имя или `ip`. Влияет на ссылки, которые генерирует [Backend](/deployment/dependencies/backend). Позволяет [Unit](/definitions#unit) связываться с [Backend](/deployment/dependencies/backend). Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) - как `PU_DOMAIN`
 `PU_SECURE` | `True` | Если `True`, то [Backend](/deployment/dependencies/backend) будет генерировать ссылки с `https` для `PU_DOMAIN`. Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) - в поле `PU_HTTP_TYPE`, но уже в формате `https/http`
-`PU_AUTH_TOKEN_EXPIRATION` | `2678400` | Время жизни токенов авторизации [Пользователей](/development-pepeunit/mechanics/roles.html#user), в секундах
+`PU_AUTH_TOKEN_EXPIRATION` | `2678400` | Время жизни токенов авторизации [Пользователей](/development-pepeunit/mechanics/roles#user), в секундах
 `PU_SAVE_REPO_PATH` | `repo_cache` | Путь, по которому [Backend](/deployment/dependencies/backend) хранит внешние [Git](/definitions#git) репозитории. Устанавливается относительно корневой директории [Backend](/deployment/dependencies/backend)
 `PU_SQLALCHEMY_DATABASE_URL` | - | Ссылка для подключения к [PostgreSQL](/deployment/dependencies/postgresql)
 `PU_CLICKHOUSE_DATABASE_URL` | - | Ссылка для подключения к [ClickHouse](/deployment/dependencies/clickhouse)
 `PU_SECRET_KEY` | - | `32 байтовый ключ` в формате `base64`. Отвечает за подпись токенов авторизации. В случае изменения, все `jwt` токены, созданные до изменения, становятся недействительными
 `PU_ENCRYPT_KEY` | - | `32 байтовый ключ` в формате `base64`. Отвечает за шифрование всех данных. В случае изменения, все шифрованные записи становится невозможно расшифровать
-`PU_STATIC_SALT` | - | `32 байтовый ключ` в формате `base64`. Отвечает за генерацию `hash` для паролей [Пользователей](/development-pepeunit/mechanics/roles.html#user). В случае изменения, все учётные записи, созданные до момента изменения, потеряют возможность авторизоваться
+`PU_STATIC_SALT` | - | `32 байтовый ключ` в формате `base64`. Отвечает за генерацию `hash` для паролей [Пользователей](/development-pepeunit/mechanics/roles#user). В случае изменения, все учётные записи, созданные до момента изменения, потеряют возможность авторизоваться
 `PU_MIN_INTERVAL_SYNC_REPOSITORY` | `10` | Время в секундах, которое должно пройти перед следующим запросом обновления репозитория из внешнего ресурса
 `PU_STATE_SEND_INTERVAL` | `60` | Частота в секундах, с которой [Unit'ы](/definitions#unit) должны отправлять своё состояние. Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) в поле `STATE_SEND_INTERVAL`
 `PU_MAX_EXTERNAL_REPO_SIZE` | `50` | Значение в `МБ`, ограничивающее размер внешних [Git](/definitions#git) репозиториев для скачивания
@@ -35,7 +35,7 @@
 `PU_TELEGRAM_BOT_MODE` | `webhook` | Принимает значения: `webhook` или `pooling`. Позволяет указать, как [Backend](/deployment/dependencies/backend) будет обмениваться информацией с [Telegram Bot](/definitions#telegram-bot). `pooling` позволяет работать без личного домена и `https` в средах, где есть доступ в интернет. `webhook` более производительный вариант, предназаначен для использования с `https` и личным доменом, ссылка на `webhook` устанавливает автоматически в момент старта приложения
 `PU_TELEGRAM_DEL_OLD_WEBHOOK` | `True` | Удаляется ли `webhook` для [Telegram Bot](/definitions#telegram-bot) перед тем, как создать новый
 `PU_TELEGRAM_TOKEN` | - | Токен [Telegram Bot](/definitions#telegram-bot). Секретный, никому не показывайте
-`PU_TELEGRAM_BOT_LINK` | - | Ссылка на [Telegram Bot](/definitions#telegram-bot), которым управляет [Backend](/deployment/dependencies/backend). Используется для генерации верификационных ссылок для [Пользователей](/development-pepeunit/mechanics/roles.html#user). Передаётся в `openapi.json`
+`PU_TELEGRAM_BOT_LINK` | - | Ссылка на [Telegram Bot](/definitions#telegram-bot), которым управляет [Backend](/deployment/dependencies/backend). Используется для генерации верификационных ссылок для [Пользователей](/development-pepeunit/mechanics/roles#user). Передаётся в `openapi.json`
 `PU_TELEGRAM_ITEMS_PER_PAGE` | `7` | Число пагинируемых элементов при отображении за один раз в [Telegram Bot](/definitions#telegram-bot)
 `PU_TELEGRAM_HEADER_ENTITY_LENGTH` | `15` | Предельная длинна наименований сущностей при отображении в [Telegram Bot](/definitions#telegram-bot)
 `PU_TELEGRAM_GIT_HASH_LENGTH` | `8` | Предельная длинна `hash` [Git Commit](/definitions#git-commit) при отображении в [Telegram Bot](/definitions#telegram-bot)

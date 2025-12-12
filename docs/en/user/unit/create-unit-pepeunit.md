@@ -27,7 +27,7 @@ Can be changed later
 
 There are two modes:
 
-1. `Auto-update = True` — in this mode the [Unit](/en/definitions#unit) follows the [Repo](/en/definitions#repo) according to the [mass update flags](/en/user/git-repository/settings-repo.md#флаги-массовых-обновлении).
+1. `Auto-update = True` — in this mode the [Unit](/en/definitions#unit) follows the [Repo](/en/definitions#repo) according to the [mass update flags](/en/user/git-repository/settings-repo.md).
 1. `Auto-update = False` — manual update mode for the [Unit](/en/definitions#unit); requires you to specify a [branch](/en/definitions#git-branch) and a [commit](/en/definitions#git-commit).
 
 ## Platform selection for Compilable Repos

@@ -31,7 +31,7 @@
 Авторизационные данные будут применены во время выполнения команды `git pull` силами [Backend](/deployment/dependencies/backend). В момент получения данных от внешнего сервиса `link` будет представлять из себя `https://username:pat-token@domain.com/abracadabra/test.git`.
 
 :::warning
-Все [Пользователи](/development-pepeunit/mechanics/roles.html#user) инcтанса смогут увидеть приватный репозиторий, но создать от него [Repo](/definitions#repo) смогут только те, кто обладают кредами доступа с уровнем `Valid`. Проверить свой уровень можно, перейдя в модальное окно [RepositoryRegisty](/definitions#repositoryregistry) через поиск и нажав кнопку `Change GIT Credentials`.
+Все [Пользователи](/development-pepeunit/mechanics/roles#user) инcтанса смогут увидеть приватный репозиторий, но создать от него [Repo](/definitions#repo) смогут только те, кто обладают кредами доступа с уровнем `Valid`. Проверить свой уровень можно, перейдя в модальное окно [RepositoryRegisty](/definitions#repositoryregistry) через поиск и нажав кнопку `Change GIT Credentials`.
 :::
 
 :::info

@@ -12,7 +12,7 @@
 
 Приоритет | Представление | Описание
 -- | -- | --
-1 | `Ручные` | Ручной ввод [Пользователя](/development-pepeunit/mechanics/roles.html#user) в систему с [Frontend](/deployment/dependencies/frontend) или через `set_env` через [REST](/definitions#rest) и [GQL](/definitions#gql)
+1 | `Ручные` | Ручной ввод [Пользователя](/development-pepeunit/mechanics/roles#user) в систему с [Frontend](/deployment/dependencies/frontend) или через `set_env` через [REST](/definitions#rest) и [GQL](/definitions#gql)
 2 | `Записанные в бд` | [env.json](/definitions#env-json) в базе данных [Pepeunit](/conception/overview)
 3 | `Cгенерированные` | [Стандартные переменные](/developer/files/struct-env-example-json#стандартные-переменные-pepeunit), сгенерированные [Backend](/deployment/dependencies/backend)
 4 | `Целевые` | Переменные указанные [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) в [env_example.json](/definitions#env-example-json)
@@ -20,7 +20,7 @@
 В конце работы, отсекаются все ключи которых нет в `Целевых`
 
 :::info
-Если генерируется [env.json](/definitions#env-json) для отправки [Unit](/definitions#unit) или показа [Пользователю](/development-pepeunit/mechanics/roles.html#user), то будет дополнительно добавлена переменная `PU_COMMIT_VERSION`, в бд она не хранится.
+Если генерируется [env.json](/definitions#env-json) для отправки [Unit](/definitions#unit) или показа [Пользователю](/development-pepeunit/mechanics/roles#user), то будет дополнительно добавлена переменная `PU_COMMIT_VERSION`, в бд она не хранится.
 :::
 
 ## Примеры работы Алгоритма
@@ -57,9 +57,9 @@
 1. `Целевые` - берутся целиком
 1. `Cгенерированные` - заново генерируются [Backend](/deployment/dependencies/backend) в полном объёме и перезаписывают ключи, которые были получены в результате предыдущего шага
 1. `Записанные в бд` - берутся из бд и перезаписывают все значения с совпадающими ключами, которые были получены в результате предыдущего шага
-1. `Ручные` - все полученные от [Пользователя](/development-pepeunit/mechanics/roles.html#user) ключи перезаписывают ключи, которые были получены в результате предыдущего шага
+1. `Ручные` - все полученные от [Пользователя](/development-pepeunit/mechanics/roles#user) ключи перезаписывают ключи, которые были получены в результате предыдущего шага
 1. Все ключи, которых нет в `Целевых`, удаляются
 
 :::info
-В результате получится [env.json](/definitions#env-json), в котором поверх старых [Пользовательских](/development-pepeunit/mechanics/roles.html#user) записаны новые переменные, в которые [Пользователь](/development-pepeunit/mechanics/roles.html#user) внёс изменения
+В результате получится [env.json](/definitions#env-json), в котором поверх старых [Пользовательских](/development-pepeunit/mechanics/roles#user) записаны новые переменные, в которые [Пользователь](/development-pepeunit/mechanics/roles#user) внёс изменения
 :::

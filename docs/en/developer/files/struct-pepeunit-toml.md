@@ -105,7 +105,7 @@ Nuances of `pepeunit.toml -> readme.md` generation:
 1. If a section or an item within a section is not specified, it will not be added to [readme.md](/en/definitions#readme-md).
 1. Since the text is parsed directly, you can use markdown formatting symbols inside the text, such as `**`, `` ` ``, `__`, etc.
 1. Complex formatting constructs—code blocks, nested lists, and tables—are not supported because they can break generation due to parsing errors.
-1. If you need more advanced markdown, generate an initial version from [pepeunit.toml](/en/definitions#pepeunit-toml) and append a `## Additional information` section at the end. This way, the end [User](/en/development-pepeunit/mechanics/roles.html#user) will get all the benefits of the standard [readme.md](/en/definitions#readme-md) layout plus your custom additions.
+1. If you need more advanced markdown, generate an initial version from [pepeunit.toml](/en/definitions#pepeunit-toml) and append a `## Additional information` section at the end. This way, the end [User](/en/development-pepeunit/mechanics/roles#user) will get all the benefits of the standard [readme.md](/en/definitions#readme-md) layout plus your custom additions.
 ::::
 
 ## Filling the `general` section of pepeunit.toml

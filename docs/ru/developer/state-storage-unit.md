@@ -2,7 +2,7 @@
 
 Позволяет [Unit](/definitions#unit) хранить текстовые данные напрямую в [Pepeunit](/conception/overview). Данное хранилище отлично подойдёт для хранения следующих категорий данных:
 1. Последнее состояние [Unit](/definitions#unit)
-1. Кэширование информации ввода [Пользователя](/development-pepeunit/mechanics/roles.html#user)
+1. Кэширование информации ввода [Пользователя](/development-pepeunit/mechanics/roles#user)
 1. Большие по меркам микроконтроллеров данные
 
 :::tip
@@ -10,7 +10,7 @@
 :::
 
 :::danger
-Размер данного хранилища ограничен размером [шифруемых объектов](/development-pepeunit/mechanics/cipher#шифрование) на инстансе [Pepeunit](/conception/overview).
+Размер данного хранилища ограничен размером [шифруемых объектов](/development-pepeunit/mechanics/cipher) на инстансе [Pepeunit](/conception/overview).
 :::
 
 ## Отправка данных в хранилище

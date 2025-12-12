@@ -24,7 +24,7 @@ Variable | Default | Purpose
 `PU_CLICKHOUSE_DATABASE_URL` | - | Connection URL for [ClickHouse](/en/deployment/dependencies/clickhouse)
 `PU_SECRET_KEY` | - | `32‑byte key` in `base64` format. Used to sign auth tokens. If changed, all previously issued `jwt` tokens become invalid
 `PU_ENCRYPT_KEY` | - | `32‑byte key` in `base64` format. Used to encrypt all data. If changed, all previously encrypted records become impossible to decrypt
-`PU_STATIC_SALT` | - | `32‑byte key` in `base64` format. Used to generate password `hash` values for [Users](/en/development-pepeunit/mechanics/roles.html#user). If changed, all accounts created before the change will no longer be able to authenticate
+`PU_STATIC_SALT` | - | `32‑byte key` in `base64` format. Used to generate password `hash` values for [Users](/en/development-pepeunit/mechanics/roles#user). If changed, all accounts created before the change will no longer be able to authenticate
 `PU_MIN_INTERVAL_SYNC_REPOSITORY` | `10` | Minimum time in seconds before the next repository update request to an external source
 `PU_STATE_SEND_INTERVAL` | `60` | Interval in seconds at which [Units](/en/definitions#unit) should send their state. Propagated to [Unit ENV](/en/developer/files/struct-env-example-json) as `STATE_SEND_INTERVAL`
 `PU_MAX_EXTERNAL_REPO_SIZE` | `50` | Limit in MB for the size of external [Git](/en/definitions#git) repositories that can be downloaded
@@ -35,7 +35,7 @@ Variable | Default | Purpose
 `PU_TELEGRAM_BOT_MODE` | `webhook` | Accepts `webhook` or `pooling`. Defines how the [Backend](/en/deployment/dependencies/backend) communicates with the [Telegram Bot](/en/definitions#telegram-bot). `pooling` works without a personal domain and `https` in environments with internet access. `webhook` is more performant and intended for `https` and a personal domain; the webhook URL is set automatically on startup
 `PU_TELEGRAM_DEL_OLD_WEBHOOK` | `True` | Whether to delete the existing `webhook` for the [Telegram Bot](/en/definitions#telegram-bot) before creating a new one
 `PU_TELEGRAM_TOKEN` | - | [Telegram Bot](/en/definitions#telegram-bot) token. Secret – do not share it
-`PU_TELEGRAM_BOT_LINK` | - | Link to the [Telegram Bot](/en/definitions#telegram-bot) managed by the [Backend](/en/deployment/dependencies/backend). Used to generate verification links for [Users](/en/development-pepeunit/mechanics/roles.html#user). Exposed in `openapi.json`
+`PU_TELEGRAM_BOT_LINK` | - | Link to the [Telegram Bot](/en/definitions#telegram-bot) managed by the [Backend](/en/deployment/dependencies/backend). Used to generate verification links for [Users](/en/development-pepeunit/mechanics/roles#user). Exposed in `openapi.json`
 `PU_TELEGRAM_ITEMS_PER_PAGE` | `7` | Number of items per page in the [Telegram Bot](/en/definitions#telegram-bot) UI
 `PU_TELEGRAM_HEADER_ENTITY_LENGTH` | `15` | Maximum length of entity names shown in the [Telegram Bot](/en/definitions#telegram-bot)
 `PU_TELEGRAM_GIT_HASH_LENGTH` | `8` | Maximum length of [Git Commit](/en/definitions#git-commit) `hash` shown in the [Telegram Bot](/en/definitions#telegram-bot)
@@ -68,7 +68,7 @@ Variable | Default | Purpose
 ::::info
 For testing the [Backend](/en/deployment/dependencies/backend) there are also dedicated variables:
 - [Integration testing variables](/en/development-pepeunit/tests/integration-test#run)
-- [MQTT load testing variables](/en/development-pepeunit/tests/load-test#mqtt-load-testing)
-- [REST and GQL load testing variables](/en/development-pepeunit/tests/load-test#rest-and-gql-load-testing)
+- [MQTT load testing variables](/en/development-pepeunit/tests/load-test#mqtt-testing)
+- [REST and GQL load testing variables](/en/development-pepeunit/tests/load-test#rest-and-gql-testing)
 ::::
 

@@ -28,7 +28,7 @@
 `schema.json` - готовый файл схемы для [Unit](#unit), генерируемый [Pepeunit](/conception/overview). Содержит в себе ссылки на [UnitNode](#unitnode) и базовые топики для взаимодействия с [Pepeunit](/conception/overview). [Подробнее](/developer/files/struct-schema-json#schema-json)
 
 ## env_example.json
-`env_example.json`- файл, описывающий переменные окружения, нужные для корректной работы [Unit](#unit). Он создаётся [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) и помещается в каждую версию [Repo](#repo). На основе данного файла и ввода [Пользователя](/development-pepeunit/mechanics/roles.html#user), [Pepeunit](/conception/overview) может сгенерировать [env.json](#envjson) файл для [Unit](#unit). [Подробнее](/developer/files/struct-env-example-json#env-example-json)
+`env_example.json`- файл, описывающий переменные окружения, нужные для корректной работы [Unit](#unit). Он создаётся [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) и помещается в каждую версию [Repo](#repo). На основе данного файла и ввода [Пользователя](/development-pepeunit/mechanics/roles#user), [Pepeunit](/conception/overview) может сгенерировать [env.json](#envjson) файл для [Unit](#unit). [Подробнее](/developer/files/struct-env-example-json#env-example-json)
 
 ## env.json
 `env.json`- секретный файл, содержащий переменные окружения, нужные для корректной работы [Unit](#unit).
@@ -112,7 +112,7 @@
 [Telegram](https://telegram.org/) - популярный мессенджер, имеющий функционал [Telegram Bot](#telegram-bot).
 
 ## Telegram Bot
-[Telegram Bot API](https://core.telegram.org/bots/api) - открытый [API](#api) для взаимодействия с внешними по отношению к [Telegram](#telegram) сервисами, например: [Pepeunit](/conception/overview). Для интеграции с `Telegram Bot API` [Pepeunit](/conception/overview) использует пакет [AioGram](https://github.com/aiogram/aiogram) как клиент. `Telegram Bot API` позволяет [Backend](/deployment/dependencies/backend) верифицировать [Пользователей](/development-pepeunit/mechanics/roles.html#user). Управление ботами происходит через [Bot Father](https://t.me/BotFather).
+[Telegram Bot API](https://core.telegram.org/bots/api) - открытый [API](#api) для взаимодействия с внешними по отношению к [Telegram](#telegram) сервисами, например: [Pepeunit](/conception/overview). Для интеграции с `Telegram Bot API` [Pepeunit](/conception/overview) использует пакет [AioGram](https://github.com/aiogram/aiogram) как клиент. `Telegram Bot API` позволяет [Backend](/deployment/dependencies/backend) верифицировать [Пользователей](/development-pepeunit/mechanics/roles#user). Управление ботами происходит через [Bot Father](https://t.me/BotFather).
 
 ## YML
 `YML` или `YAML` - человекочитаемый формат данных, используемый для сериализации и конфигурации. Данный формат широко применяется в автоматизации и конвейерах для описания этапов и их параметров. [Pepeunit](/conception/overview) использует его для конвейеров данных.

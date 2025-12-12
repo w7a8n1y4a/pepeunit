@@ -1,6 +1,6 @@
 # Compilation for different platforms
 
-Due to the specifics of [Compilable](/en/definitions#compilable) programs, the way they are delivered to [Users](/en/development-pepeunit/mechanics/roles.html#user) differs from [Interpretable](/en/definitions#interpretable) ones. To avoid forcing the end [User](/en/development-pepeunit/mechanics/roles.html#user) to constantly compile the source code to obtain a binary, the [Git](/en/definitions#git) repository hosting platforms [GitLab](/en/definitions#gitlab) and [GitHub](/en/definitions#github) provide a release system.
+Due to the specifics of [Compilable](/en/definitions#compilable) programs, the way they are delivered to [Users](/en/development-pepeunit/mechanics/roles#user) differs from [Interpretable](/en/definitions#interpretable) ones. To avoid forcing the end [User](/en/development-pepeunit/mechanics/roles#user) to constantly compile the source code to obtain a binary, the [Git](/en/definitions#git) repository hosting platforms [GitLab](/en/definitions#gitlab) and [GitHub](/en/definitions#github) provide a release system.
 
 Each release can include binary files with specific names; such pairs are typically called `assets`. [GitLab](/en/definitions#gitlab) and [GitHub](/en/definitions#github) allow you to obtain the mapping between an asset name and the URL to the binary file via their [API](/en/definitions#api).
 

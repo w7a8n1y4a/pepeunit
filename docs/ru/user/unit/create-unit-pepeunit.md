@@ -25,7 +25,7 @@
 ## Блок автообновлений
 
 Доступны два режима:
-1. `Auto-update = True` - в данном режиме [Unit](/definitions#unit) подчиняется [Repo](/definitions#repo) в соответствии с [флагами массовых обновлений](/user/git-repository/settings-repo.md#флаги-массовых-обновлении)
+1. `Auto-update = True` - в данном режиме [Unit](/definitions#unit) подчиняется [Repo](/definitions#repo) в соответствии с [флагами массовых обновлений](/user/git-repository/settings-repo.md)
 1. `Auto-update = False` - ручной режим обновлений [Unit](/definitions#unit), требует ввести [ветку](/definitions#git-branch) и [коммит](/definitions#git-commit).
 
 ## Выбор платформы для компилируемых Repo

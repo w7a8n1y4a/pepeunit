@@ -4,7 +4,7 @@
 
 `Backend в широком смысле` - представляет из себя набор из `6` сервисов: `Backend`, [PostgreSQL](/deployment/dependencies/postgresql), [ClickHouse](/deployment/dependencies/clickhouse), [Redis](/deployment/dependencies/redis), [EMQX](/deployment/dependencies/emqx), [DataPipe](/deployment/dependencies/datapipe). Указанные сервисы вместе обеспечивают реализацию `бизнес-логики` [Pepeunit](/conception/overview), а также взаимодействие всех внешних агентов:
 
-- [Пользователей](/development-pepeunit/mechanics/roles.html#user)
+- [Пользователей](/development-pepeunit/mechanics/roles#user)
 - [Frontend](/deployment/dependencies/frontend)
 - [Unit](/definitions#unit)
 - [GitLab](/definitions#gitlab)

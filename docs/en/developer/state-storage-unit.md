@@ -3,7 +3,7 @@
 Allows a [Unit](/en/definitions#unit) to store textual data directly in [Pepeunit](/en/conception/overview). This storage is well suited for the following categories of data:
 
 1. The last state of the [Unit](/en/definitions#unit)
-1. Cached user input data from [Users](/en/development-pepeunit/mechanics/roles.html#user)
+1. Cached user input data from [Users](/en/development-pepeunit/mechanics/roles#user)
 1. Data that is large by microcontroller standards
 
 ::::tip
@@ -11,7 +11,7 @@ The [Unit](/en/definitions#unit) state storage is long-term memory that the [Uni
 ::::
 
 ::::danger
-The size of this storage is limited by the size of [encrypted objects](/en/development-pepeunit/mechanics/cipher#шифрование) on a [Pepeunit](/en/conception/overview) instance.
+The size of this storage is limited by the size of [encrypted objects](/en/development-pepeunit/mechanics/cipher) on a [Pepeunit](/en/conception/overview) instance.
 ::::
 
 ## Sending data to the storage

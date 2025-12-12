@@ -127,7 +127,7 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: 'Algorithm for creating a Unit', link: '/en/developer/alg-create-unit' },
         {
-          text: 'Файлы',
+          text: 'Files',
           collapsed: true,
           items: [
             { text: 'GIT repository structure', link: '/en/developer/files/struct-git-repo' },

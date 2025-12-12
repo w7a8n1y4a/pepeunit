@@ -49,7 +49,7 @@ def aes_gcm_decode(data: str, key: str = settings.pu_encrypt_key) -> str:
 
 ::::tip What data does [Pepeunit](/en/conception/overview) encrypt?
 All confidential data, namely:
-1. Dynamic salt used for hashing a [User](/en/development-pepeunit/mechanics/roles.html#user) password
+1. Dynamic salt used for hashing a [User](/en/development-pepeunit/mechanics/roles#user) password
 1. Authorization data responsible for access to `Private` [RepositoryRegisty](/en/definitions#repositoryregistry)
 1. Environment files — [env.json](/en/definitions#env-json) of a [Unit](/en/definitions#unit)
 1. [Internal state storage](/en/developer/state-storage-unit) of a [Unit](/en/definitions#unit)

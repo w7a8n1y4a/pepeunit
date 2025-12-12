@@ -39,8 +39,8 @@ Topic type | Description | Details
 -- | -- | --
 `input_base_topic` | Standard [MQTT](/en/definitions#mqtt) command topics the [Unit](/en/definitions#unit) can handle | [Standard MQTT commands](/en/developer/mqtt/default-mqtt-command)
 `output_base_topic` | Standard data publication topics where the [Unit](/en/definitions#unit) can send data | [Standard MQTT state topics](/en/developer/mqtt/state-mqtt-send)
-`input_topic` | `Input` topics of the [Unit Developer](/en/development-pepeunit/mechanics/roles#unit-developer). [Pepeunit](/en/conception/overview) uses them as templates to create `Input` [UnitNodes](/en/definitions#unitnode) | [Developer topics](/en/developer/files/struct-schema-json#топики-разработчика)
-`output_topic` | `Output` topics of the [Unit Developer](/en/development-pepeunit/mechanics/roles#unit-developer). [Pepeunit](/en/conception/overview) uses them as templates to create `Output` [UnitNodes](/en/definitions#unitnode) | [Developer topics](/en/developer/files/struct-schema-json#топики-разработчика)
+`input_topic` | `Input` topics of the [Unit Developer](/en/development-pepeunit/mechanics/roles#unit-developer). [Pepeunit](/en/conception/overview) uses them as templates to create `Input` [UnitNodes](/en/definitions#unitnode) | [Developer topics](/en/developer/files/struct-schema-json#developer-topics)
+`output_topic` | `Output` topics of the [Unit Developer](/en/development-pepeunit/mechanics/roles#unit-developer). [Pepeunit](/en/conception/overview) uses them as templates to create `Output` [UnitNodes](/en/definitions#unitnode) | [Developer topics](/en/developer/files/struct-schema-json#developer-topics)
 
 ::::info
 When using client libraries for [Micropython](/en/developer/libraries/micropython), [Golang](/en/developer/libraries/golang), or [Python](/en/developer/libraries/python), you can include all topics from `input_base_topic` and `output_base_topic`; they will work correctly.

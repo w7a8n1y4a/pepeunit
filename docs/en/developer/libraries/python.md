@@ -1,6 +1,6 @@
 # Python
 
-[Repository links](/en/development-pepeunit/maps.html#библиотеки)
+[Repository links](/en/development-pepeunit/maps#libraries)
 
 ::::info
 This is an [Interpretable](/en/definitions#interpretable) client library with the full [Pepeunit Framework](/en/developer/libraries/framework) feature set.

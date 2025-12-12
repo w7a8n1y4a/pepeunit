@@ -30,7 +30,7 @@ Depending on whether your [Repo](/en/definitions#repo) is [Compilable](/en/defin
 
 You need to download two components of your future [Unit](/en/definitions#unit):
 
-1. The compiled part from the `Compiled Firmware Platforms` tab, which contains links to [platforms](/en/developer/release-assets) for the current [target version](/en/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) of the [Unit](/en/definitions#unit).
+1. The compiled part from the `Compiled Firmware Platforms` tab, which contains links to [platforms](/en/developer/release-assets) for the current [target version](/en/development-pepeunit/mechanics/update-system#algorithm-for-calculating-the-current-unit-version) of the [Unit](/en/definitions#unit).
 1. An [archive](/en/developer/files/struct-archive-update) from the `Firmware with env.json and schema.json` tab.
 
 You must place the files from the [archive](/en/developer/files/struct-archive-update) in the same directory as the [platform](/en/developer/release-assets) you selected so that they can see each other.

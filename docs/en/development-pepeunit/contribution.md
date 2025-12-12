@@ -7,7 +7,7 @@ You can find all `core` repositories on the [Repository map](/en/development-pep
 ::::
 
 ::::tip
-The main development platform is [GitLab](/en/definitions#gitlab). To register, contact [@w7a8n1y4a](https://t.me/w7a8n1y4a). All `core` repositories have mirrors on [GitHub](/en/definitions#github) to make it easier for [Users](/en/development-pepeunit/mechanics/roles.html#user) to create `issues`.
+The main development platform is [GitLab](/en/definitions#gitlab). To register, contact [@w7a8n1y4a](https://t.me/w7a8n1y4a). All `core` repositories have mirrors on [GitHub](/en/definitions#github) to make it easier for [Users](/en/development-pepeunit/mechanics/roles#user) to create `issues`.
 
 Each development repository contains a `Makefile` and a [readme.md](/en/definitions#readme-md) with important notes about how the code works.
 ::::

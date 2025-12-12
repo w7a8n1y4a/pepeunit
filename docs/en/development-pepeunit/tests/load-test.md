@@ -40,8 +40,8 @@ This creates synthetic load in the form of [GQL](/en/definitions#gql) and [REST]
 Backend variable | What it does
 -- | --
 `LOCUST_HEADLESS` | `CLI` mode for running `locust`
-`LOCUST_USERS` | Number of [Users](/en/development-pepeunit/mechanics/roles.html#user) that will generate load
-`LOCUST_SPAWN_RATE` | Ramp-up rate for [Users](/en/development-pepeunit/mechanics/roles.html#user) from `0` to `400` with a step of `10`, i.e. the ramp-up will take `~= 40 seconds`
+`LOCUST_USERS` | Number of [Users](/en/development-pepeunit/mechanics/roles#user) that will generate load
+`LOCUST_SPAWN_RATE` | Ramp-up rate for [Users](/en/development-pepeunit/mechanics/roles#user) from `0` to `400` with a step of `10`, i.e. the ramp-up will take `~= 40 seconds`
 `LOCUST_RUN_TIME` | Test duration in seconds
 
 ::::info

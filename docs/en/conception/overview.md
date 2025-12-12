@@ -67,7 +67,7 @@ The underlying data is provided by [UnitNodes](/en/definitions#unitnode) with co
 
 ## Access policy configuration
 
-`Pepeunit` allows you to configure [access](/en/development-pepeunit/mechanics/permission) levels for [Users](/en/development-pepeunit/mechanics/roles.html#user) and `Unit‑Unit` interactions.  
+`Pepeunit` allows you to configure [access](/en/development-pepeunit/mechanics/permission) levels for [Users](/en/development-pepeunit/mechanics/roles#user) and `Unit‑Unit` interactions.  
 The depth of interaction with the platform is determined by the [User](/en/development-pepeunit/mechanics/roles) role and the [visibility](/en/development-pepeunit/mechanics/visibility) of individual entities: [Repo](/en/definitions#repo), [Unit](/en/definitions#unit), [UnitNode](/en/definitions#unitnode).
 
 ::::info

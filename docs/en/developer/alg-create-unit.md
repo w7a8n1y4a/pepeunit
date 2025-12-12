@@ -1,21 +1,20 @@
 # Algorithm for creating a Unit
 
 ::::tip
-1. [Working out the Unit idea](/en/developer/alg-create-unit#проработка-идеи-unit)
-1. [Creating a Git repository](/en/developer/alg-create-unit#создание-репозитория-git)
-1. [Creating the basic file structure](/en/developer/alg-create-unit#создание-базовои-фаиловои-структуры)
-1. [First commit](/en/developer/alg-create-unit#первыи-коммит)
-1. [Creating a test Unit in Pepeunit](/en/developer/alg-create-unit#создание-тестового-unit-в-pepeunit)
-1. [Filling the Unit with program logic](/en/developer/alg-create-unit#наполнение-unit-программным-функционалом)
-1. [Creating pepeunit.toml and readme.md](/en/developer/alg-create-unit#создание-pepeunit-toml-и-readme-md)
-1. [Assigning a Tag](/en/developer/alg-create-unit#присвоение-тега)
+1. [Working out the Unit idea](/en/developer/alg-create-unit#working-out-the-unit-idea)
+1. [Creating a Git repository](/en/developer/alg-create-unit#creating-a-git-repository)
+1. [Creating the basic file structure](/en/developer/alg-create-unit#creating-the-basic-file-structure)
+1. [First commit](/en/developer/alg-create-unit#first-commit)
+1. [Creating a test Unit in Pepeunit](/en/developer/alg-create-unit#creating-a-test-unit-in-pepeunit)
+1. [Filling the Unit with program logic](/en/developer/alg-create-unit#filling-the-unit-with-program-logic)
+1. [Creating pepeunit.toml and readme.md](/en/developer/alg-create-unit#creating-pepeunit-toml-and-readme-md)
+1. [Assigning a Tag](/en/developer/alg-create-unit#assigning-a-tag)
 ::::
 
 ::::info
 This guide is based on the ready-to-use [Fan Regulator ds18b20](https://git.pepemoss.com/pepe/pepeunit/units/esp32/fan-regulator-ds18b20.git).
 ::::
 
-<a id="проработка-идеи-unit"></a>
 ## Working out the Unit idea
 
 Before you start developing a [Unit](/en/definitions#unit), answer the following questions:
@@ -33,14 +32,12 @@ Before you start developing a [Unit](/en/definitions#unit), answer the following
 1. `Micropython`
 ::::
 
-<a id="создание-репозитория-git"></a>
 ## Creating a Git repository
 
 Choose a [GitLab](/en/definitions#gitlab) or [GitHub](/en/definitions#github) instance:
 1. Create an empty repository.
 1. Clone it to your workstation.
 
-<a id="создание-базовои-фаиловои-структуры"></a>
 ## Creating the basic file structure
 
 ::::tip
@@ -168,10 +165,9 @@ Variable name | Purpose
 ::::warning
 Variables may change during development — this is absolutely normal. Add or remove variables in [env_example.json](/en/definitions#env-example-json) and keep [pepeunit.toml](/en/definitions#pepeunit-toml) and [readme.md](/en/definitions#readme-md) up to date.
 
-[Pepeunit](/en/conception/overview) will show new variables to [Users](/en/development-pepeunit/mechanics/roles#user) for input when they change the [target version](/en/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit).
+[Pepeunit](/en/conception/overview) will show new variables to [Users](/en/development-pepeunit/mechanics/roles#user) for input when they change the [target version](/en/development-pepeunit/mechanics/update-system#algorithm-for-calculating-the-current-unit-version).
 ::::
 
-<a id="первыи-коммит"></a>
 ## First commit
 
 After you have filled in the minimum required files, it is time to commit them:
@@ -180,15 +176,14 @@ After you have filled in the minimum required files, it is time to commit them:
 1. Run `git commit -m "feat(init): initial files"` — [commit](/en/definitions#git-commit) the changes.
 1. Run `git push` — push the changes to your remote [GitLab](/en/definitions#gitlab) or [GitHub](/en/definitions#github) hosting.
 
-<a id="создание-тестового-unit-в-pepeunit"></a>
 ## Creating a test Unit in Pepeunit
 
 To continue developing the [Unit](/en/definitions#unit), you need to interact with [Pepeunit](/en/conception/overview) via [MQTT](/en/definitions#mqtt) and obtain [env.json](/en/definitions#env-json) and [schema.json](/en/definitions#schema-json). Choose a [Pepeunit](/en/conception/overview) instance you trust and perform the following steps:
-1. [Create a RepositoryRegistry](/en/user/git-repository/create-repository-registry#создание-repositoryregistry).
+1. [Create a RepositoryRegistry](/en/user/git-repository/create-repository-registry#creating-a-repositoryregistry).
 1. [Create a Repo](/en/user/git-repository/create-repo).
 1. [Create a Unit](/en/user/unit/create-unit-pepeunit).
-1. Configure the [Unit](/en/definitions#unit) for [manual updates](/en/user/unit/create-unit-pepeunit#блок-автообновлении) to strictly control the [target version](/en/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit).
-1. [Fill in the Unit env](/en/user/unit/create-physic-unit#настроика-окружения).
+1. Configure the [Unit](/en/definitions#unit) for [manual updates](/en/user/unit/create-unit-pepeunit#auto-update-block) to strictly control the [target version](/en/development-pepeunit/mechanics/update-system#algorithm-for-calculating-the-current-unit-version).
+1. [Fill in the Unit env](/en/user/unit/create-physic-unit#configuring-the-environment).
 1. Download the [Archive](/en/developer/files/struct-archive-update) containing [env.json](/en/definitions#env-json) and [schema.json](/en/definitions#schema-json).
 
 The obtained [env.json](/en/definitions#env-json) and [schema.json](/en/definitions#schema-json) files must be placed in the directory of your local [Git](/en/definitions#git) repository. These files will contain the data required to connect to [Pepeunit](/en/conception/overview) as well as the topics for publishing.
@@ -199,7 +194,6 @@ During development, you can open the test [Unit](/en/definitions#unit) and see:
 - how to create control actions for the [Unit](/en/definitions#unit) through the `Input` of the [UnitNode](/en/definitions#unitnode)
 ::::
 
-<a id="наполнение-unit-программным-функционалом"></a>
 ## Filling the Unit with program logic
 
 ::::warning
@@ -232,7 +226,7 @@ To add a description for a [Unit](/en/definitions#unit), you need to:
 1. Place the generated [readme.md](/en/definitions#readme-md) into the repository root. You do not need to write [readme.md](/en/definitions#readme-md) manually.
 
 ::::danger
-Every [Unit](/en/definitions#unit) must have documentation so that [Users](/en/development-pepeunit/mechanics/roles.html#user) can work with it.
+Every [Unit](/en/definitions#unit) must have documentation so that [Users](/en/development-pepeunit/mechanics/roles#user) can work with it.
 ::::
 
 ## Assigning a Tag

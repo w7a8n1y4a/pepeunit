@@ -1,7 +1,7 @@
 # Output->Input links between UnitNodes
 
 ::::info
-[More details about the Output/Input mechanism](/en/developer/files/struct-schema-json.html#топики-разработчика)
+[More details about the Output/Input mechanism](/en/developer/files/struct-schema-json#developer-topics)
 ::::
 
 ## Creating a link

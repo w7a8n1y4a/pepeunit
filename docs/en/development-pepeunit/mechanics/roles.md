@@ -21,7 +21,7 @@ The `User` is a person registered in a [Pepeunit](/en/conception/overview) insta
 ::::tip Capabilities of an ordinary `User`
 - Can create [RepositoryRegisty](/en/definitions#repositoryregistry), [Repo](/en/definitions#repo), [Unit](/en/definitions#unit) and [UnitNode](/en/definitions#unitnode)
 - Can see all [RepositoryRegisty](/en/definitions#repositoryregistry) records, including private ones
-- Cannot create a [Repo](/en/definitions#repo) from a private [RepositoryRegisty](/en/definitions#repositoryregistry) without specifying [access credentials](/en/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория)
+- Cannot create a [Repo](/en/definitions#repo) from a private [RepositoryRegisty](/en/definitions#repositoryregistry) without specifying [access credentials](/en/user/git-repository/create-repository-registry#access-to-a-private-repository)
 - Can access entities whose [visibility level](/en/development-pepeunit/mechanics/visibility) is `Public`, `Internal` or `Private` (if [permission](/en/development-pepeunit/mechanics/permission) is granted)
 ::::
 

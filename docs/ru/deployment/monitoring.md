@@ -10,7 +10,7 @@
 
 ## Grafana Dashboards
 
-Данные `Dashboards` доступны по умолчанию в `Main Org`. Обычные [Пользователи](/development-pepeunit/mechanics/roles.html#user) имеют доступ `View`. `Admin` доступ есть только при входе с `GF_SECURITY_ADMIN_USER` и `GF_SECURITY_ADMIN_PASSWORD`                       
+Данные `Dashboards` доступны по умолчанию в `Main Org`. Обычные [Пользователи](/development-pepeunit/mechanics/roles#user) имеют доступ `View`. `Admin` доступ есть только при входе с `GF_SECURITY_ADMIN_USER` и `GF_SECURITY_ADMIN_PASSWORD`                       
 
 Название | Требуемый доступ | Описание
 -- | -- | --

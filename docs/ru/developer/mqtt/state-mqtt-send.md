@@ -76,7 +76,7 @@
 ## log/pepeunit - output_base_topic
 
 :::info Когда [Unit](/definitions#unit) отправляет данные в этот топик?
-1. Если [Unit](/definitions#unit) сам считает нужным отправить лог или набор логов для отображения [Пользователю](/development-pepeunit/mechanics/roles.html#user)
+1. Если [Unit](/definitions#unit) сам считает нужным отправить лог или набор логов для отображения [Пользователю](/development-pepeunit/mechanics/roles#user)
 2. В случае получения команды в топике `log_sync/pepeunit`, [подробнее](/developer/mqtt/default-mqtt-command#формат-сообщения-в-топик-log-sync-pepeunit)
 :::
 
@@ -142,7 +142,7 @@
 Разберём каждый ключ и логику обработки на стороне [Pepeunit](/conception/overview):
 - `level` - указывает уровень логирования и может принимать следующие значения: `Debug, Info, Warning, Error, Critical`
 - `text` - содержание лога в текстовом формате, желательно укладывать в `256` символов для корректного отображения в [Frontend](/deployment/dependencies/frontend)
-- `create_datetime` - необязательный ключ, указывающий временную метку для [Pepeunit](/conception/overview). Именно данная метка отображается [Пользователю](/development-pepeunit/mechanics/roles.html#user), в случае отсутствия [Pepeunit](/conception/overview) действует по следующим алгоритмам:
+- `create_datetime` - необязательный ключ, указывающий временную метку для [Pepeunit](/conception/overview). Именно данная метка отображается [Пользователю](/development-pepeunit/mechanics/roles#user), в случае отсутствия [Pepeunit](/conception/overview) действует по следующим алгоритмам:
     1. Если сообщение содержит один лог и данный ключ отсутствует, берётся время когда [Pepeunit](/conception/overview) получил сообщение.
     2. Если отправлено множество логов и данный ключ отсутствует, [Pepeunit](/conception/overview) берёт текущее время для самого первого элемента листа и добавляет по 1 секунде для каждого последующего элемента c целью сохранить порядок логов полученный от [Unit](/definitions#unit).
 

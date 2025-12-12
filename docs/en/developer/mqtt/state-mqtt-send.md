@@ -11,7 +11,7 @@ There are two state topics in [Pepeunit](/en/conception/overview):
 1. `state/pepeunit` – `output_base_topic`
 1. `log/pepeunit` – `output_base_topic`
 
-## `state/pepeunit` – `output_base_topic`
+## state/pepeunit - output_base_topic
 
 ::::info When does a [Unit](/en/definitions#unit) send data to this topic?
 1. Every `PU_STATE_SEND_INTERVAL` seconds as specified in [env.json](/en/definitions#env-json).
@@ -77,11 +77,11 @@ The size of a state message sent by a [Unit](/en/definitions#unit) is limited by
 1. Format the data as `json`.
 1. Send the data to the `state/pepeunit` topic from `output_base_topic` as defined in [schema.json](/en/definitions#schema-json).
 
-## `log/pepeunit` – `output_base_topic`
+## log/pepeunit - output_base_topic
 
 ::::info When does a [Unit](/en/definitions#unit) send data to this topic?
-1. Whenever the [Unit](/en/definitions#unit) decides to send a log or batch of logs to display to the [User](/en/development-pepeunit/mechanics/roles.html#user).
-2. When the `log_sync/pepeunit` command is received (see details [here](/en/developer/mqtt/default-mqtt-command#log_sync-log-sync-pepeunit)).
+1. Whenever the [Unit](/en/definitions#unit) decides to send a log or batch of logs to display to the [User](/en/development-pepeunit/mechanics/roles#user).
+2. When the `log_sync/pepeunit` command is received (see details [here](/en/developer/mqtt/default-mqtt-command#log-sync-log-sync-pepeunit)).
 ::::
 
 The logs sent by the [Unit](/en/definitions#unit) are converted into the [Unit](/en/definitions#unit) log view in [Pepeunit](/en/conception/overview). These logs are also accessible via [REST](/en/definitions#rest) and [GQL](/en/definitions#gql).

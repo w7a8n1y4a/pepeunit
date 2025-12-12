@@ -7,7 +7,7 @@ It is used by [Unit](/en/definitions#unit), [Backend](/en/deployment/dependencie
 Entity | Operations
 -- | --
 [Unit](/en/definitions#unit) | Publishes/subscribes to specific [MQTT](/en/definitions#mqtt) topics with patterns `example.com/+/pepeunit` and `example.com/+/+/+/pepeunit`
-[Backend](/en/deployment/dependencies/backend) | Publishes/subscribes to all [MQTT](/en/definitions#mqtt) topics with pattern `example.com/+/+/+/pepeunit` and, on [User](/en/development-pepeunit/mechanics/roles.html#user) request, can send data to `Input` topics with the pattern `example.com/+/pepeunit`
+[Backend](/en/deployment/dependencies/backend) | Publishes/subscribes to all [MQTT](/en/definitions#mqtt) topics with pattern `example.com/+/+/+/pepeunit` and, on [User](/en/development-pepeunit/mechanics/roles#user) request, can send data to `Input` topics with the pattern `example.com/+/pepeunit`
 [DataPipe](/en/deployment/dependencies/datapipe) | Subscribes to all topics with pattern `example.com/+/pepeunit`
 
 ::::info

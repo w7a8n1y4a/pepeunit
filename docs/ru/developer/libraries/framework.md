@@ -1,6 +1,6 @@
 # Pepeunit Framework
 
-[Ccылки на репозитории библиотек](/development-pepeunit/maps.html#библиотеки)
+[Ccылки на репозитории библиотек](/development-pepeunit/maps#библиотеки)
 
 :::info
 Каждая из библиотек является клиентским [Framework](/definitions#framework) для работы с [Pepeunit](/conception/overview)
@@ -70,4 +70,4 @@
 
 Ёмкость данного буфера зависит от переменной окружения `PU_MAX_LOG_LENGTH`, все новые записи попадают в конец файла, а все старые записи, если их порядковый номер от конца больше `PU_MAX_LOG_LENGTH`, удаляются.
 
-Доступ к данному файлу возможен физически через порты устройств или через команду [log_sync](/developer/mqtt/default-mqtt-command.html#log-sync-log-sync-pepeunit)
+Доступ к данному файлу возможен физически через порты устройств или через команду [log_sync](/developer/mqtt/default-mqtt-command#log-sync-log-sync-pepeunit)

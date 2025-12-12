@@ -10,7 +10,7 @@ These `4` containers together with [Grafana](/en/deployment/dependencies/grafana
 
 ## Grafana Dashboards
 
-These dashboards are available by default in `Main Org`. Regular [Users](/en/development-pepeunit/mechanics/roles.html#user) have `View` access. `Admin` access is available only when logging in with `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD`.
+These dashboards are available by default in `Main Org`. Regular [Users](/en/development-pepeunit/mechanics/roles#user) have `View` access. `Admin` access is available only when logging in with `GF_SECURITY_ADMIN_USER` and `GF_SECURITY_ADMIN_PASSWORD`.
 
 Name | Required access | Description
 -- | -- | --
