@@ -32,6 +32,6 @@ To improve performance, updates of [Unit](/en/definitions#repo) and [RepositoryR
 
 ## Algorithm for calculating the current Unit version
 
-![img](/schemas/update_schema.svg)
+![img](/schemas/en_update_schema.svg)
 
 
