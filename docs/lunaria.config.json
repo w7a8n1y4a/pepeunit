@@ -1,0 +1,28 @@
+{
+  "$schema": "./node_modules/@lunariajs/core/config.schema.json",
+  "repository": {
+    "name": "pepe/pepeunit/pepeunit",
+    "rootDir": "docs"
+  },
+  "files": [
+    {
+      "location": "**/config.ts",
+      "pattern": "@lang/@path",
+      "type": "universal"
+    },
+    {
+      "location": "**/*.md",
+      "pattern": "@lang/@path",
+      "type": "universal"
+    }
+  ],
+  "defaultLocale": {
+    "label": "Русский",
+    "lang": "ru"
+  },
+  "locales": [],
+  "outDir": ".vitepress/dist/_translations",
+  "ignoreKeywords": ["lunaria-ignore"]
+}
+
+
