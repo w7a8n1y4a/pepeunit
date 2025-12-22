@@ -31,6 +31,11 @@ export default async (): Promise<UserConfig> => {
         micropython: 'python'
       }
     },
+    themeConfig: {
+      search: {
+        provider: 'local'
+      }
+    },
     locales: {
       root: {
         label: 'Русский',
@@ -41,9 +46,6 @@ export default async (): Promise<UserConfig> => {
         themeConfig: {
           // https://vitepress.dev/reference/default-theme-config
           logo: '/main_icon_small.png',
-          search: {
-            provider: 'local'
-          },
           nav: navRu(),
           sidebar: sidebarRu(),
           socialLinks: [
@@ -87,9 +89,6 @@ export default async (): Promise<UserConfig> => {
         themeConfig: {
           // https://vitepress.dev/reference/default-theme-config
           logo: '/main_icon_small.png',
-          search: {
-            provider: 'local'
-          },
           nav: navEn(),
           sidebar: sidebarEn(),
           socialLinks: [
