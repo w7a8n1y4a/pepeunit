@@ -8,6 +8,8 @@
 
 ## Пример
 
+
+### main.py
 ```python
 """
 Basic PepeUnit Client Example
@@ -29,6 +31,7 @@ It shows how to:
 
 import time
 import gc
+
 from pepeunit_micropython_client.client import PepeunitClient
 from pepeunit_micropython_client.enums import SearchTopicType, SearchScope
 from pepeunit_micropython_client.cipher import AesGcmCipher
@@ -115,14 +118,7 @@ def test_cipher(client: PepeunitClient):
         client.logger.error("Cipher test error: {}".format(e))
 
 
-def main():
-    client = PepeunitClient(
-        env_file_path='/env.json',
-        schema_file_path='/schema.json',
-        log_file_path='/log.json',
-        sta=sta
-    )
-
+def main(client: PepeunitClient):
     test_set_get_storage(client)
     test_get_units(client)
     test_cipher(client)
@@ -136,9 +132,38 @@ def main():
 
 if __name__ == '__main__':
     try:
-        main()
+        main(client)
+    except KeyboardInterrupt:
+        raise
     except Exception as e:
-        print('Error:', str(e))
+        client.logger.critical(f"Error with reset: {str(e)}", file_only=True)
+        client.restart_device()
+
+```
+
+### boot.py
+```python
+import gc
+
+from pepeunit_micropython_client.client import PepeunitClient
+
+print('\nRun init PepeunitClient')
+
+client = PepeunitClient(
+    env_file_path='/env.json',
+    schema_file_path='/schema.json',
+    log_file_path='/log.json',
+    cycle_speed=0.001,
+    ff_wifi_manager_enable=True,
+)
+
+client.wifi_manager.connect_forever()
+
+client.time_manager.sync_epoch_ms_from_ntp()
+
+gc.collect()
+
+client.logger.warning(f'Init Success: free_mem {gc.mem_free()}: alloc_mem {gc.mem_alloc()}', file_only=True)
 
 ```
 
