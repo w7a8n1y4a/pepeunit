@@ -199,6 +199,7 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       collapsed: true,
       items: [
         { text: '> 1.0.0 Units', link: '/en/roadmap/units' },
+        { text: '> 1.0.0 3d Disign system', link: '/en/roadmap/3d' },
         { text: '> 1.0.0 Telegram Alerts', link: '/en/roadmap/alerts' },
         { text: '> 1.0.0 Instance Comparison', link: '/en/roadmap/comparison' },
         { text: '> 1.0.0 Frontend Refactor', link: '/en/roadmap/frontend-refactor' },
