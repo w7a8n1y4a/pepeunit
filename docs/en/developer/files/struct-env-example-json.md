@@ -28,7 +28,8 @@
     "PU_API_ACTUAL_PREFIX": "/api/v1",
     "PU_MQTT_HOST": "emqx.example.com",
     "PU_MQTT_PORT": 1883,
-    "PU_MQTT_PING_INTERVAL": 30,
+    "PU_MQTT_PING_INTERVAL": 20,
+    "PU_MQTT_KEEPALIVE": 60,
     "PU_AUTH_TOKEN": "jwt_token",
     "PU_SECRET_KEY": "32_bit_secret_key",
     "PU_ENCRYPT_KEY": "32_bit_encrypt_key",
@@ -52,7 +53,8 @@ Variable | Generated value in `env.json` | Purpose
 `PU_API_ACTUAL_PREFIX` | `PU_API_V1_PREFIX` from [Backend ENV](/en/deployment/env-variables/backend) | Prefix of the current [API](/en/definitions#api) version of the [Backend](/en/deployment/dependencies/backend). Always points to the latest [API](/en/definitions#api) version.
 `PU_MQTT_HOST` | `PU_MQTT_HOST` from [Backend ENV](/en/deployment/env-variables/backend) | Domain or IP address of the [EMQX](/en/deployment/dependencies/emqx) instance.
 `PU_MQTT_PORT` | `PU_MQTT_PORT` from [Backend ENV](/en/deployment/env-variables/backend) | Port for communication with [EMQX](/en/deployment/dependencies/emqx), `1883` by default.
-`PU_MQTT_PING_INTERVAL` | `30` | [MQTT](/en/definitions#mqtt) ping interval in seconds (`30` seconds for everyone).
+`PU_MQTT_PING_INTERVAL` | `20` | [MQTT](/en/definitions#mqtt) ping interval in seconds (`20` seconds for everyone).
+`PU_MQTT_KEEPALIVE` | `60` | Connection lifetime [MQTT](/definitions#mqtt) in seconds
 `PU_AUTH_TOKEN` | `jwt` token | Permanent access token of the [Unit](/en/definitions#unit) to the [Pepeunit](/en/conception/overview) instance. This token is used to authorize subscriptions and publications in [EMQX](/en/deployment/dependencies/emqx) topics and is set automatically by the [Backend](/en/deployment/dependencies/backend).
 `PU_SECRET_KEY` | `32‑byte key` in `base64` format | Unique for each [Unit](/en/definitions#unit). Convenient for signing or generating JWTs. Set automatically by the [Backend](/en/deployment/dependencies/backend).
 `PU_ENCRYPT_KEY` | `32‑byte key` in `base64` format | Unique for each [Unit](/en/definitions#unit). Convenient for `aes-gcm-256` encryption. Set automatically by the [Backend](/en/deployment/dependencies/backend).

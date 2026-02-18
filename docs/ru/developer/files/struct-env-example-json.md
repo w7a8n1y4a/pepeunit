@@ -26,7 +26,8 @@
     "PU_API_ACTUAL_PREFIX": "/api/v1",
     "PU_MQTT_HOST": "emqx.example.com",
     "PU_MQTT_PORT": 1883,
-    "PU_MQTT_PING_INTERVAL": 30,
+    "PU_MQTT_PING_INTERVAL": 20,
+    "PU_MQTT_KEEPALIVE": 60,
     "PU_AUTH_TOKEN": "jwt_token",
     "PU_SECRET_KEY": "32_bit_secret_key",
     "PU_ENCRYPT_KEY": "32_bit_encrypt_key",
@@ -50,7 +51,8 @@
 `PU_API_ACTUAL_PREFIX` | `PU_API_V1_PREFIX` из [Backend ENV](/deployment/env-variables/backend) | Префикс актуальной версии [API](/definitions#api) для [Backend](/deployment/dependencies/backend). Полностью соответствует последней версии [API](/definitions#api)
 `PU_MQTT_HOST` | `PU_MQTT_HOST` из [Backend ENV](/deployment/env-variables/backend) | Доменное имя или `ip` - адрес инстанса [EMQX](/deployment/dependencies/emqx)
 `PU_MQTT_PORT` | `PU_MQTT_PORT` из [Backend ENV](/deployment/env-variables/backend) | Порт для взаимодействия с [EMQX](/deployment/dependencies/emqx), по умолчанию `1883`
-`PU_MQTT_PING_INTERVAL` | 30 | Частота [MQTT](/definitions#mqtt) пинга в секундах, `30` секунд для всех
+`PU_MQTT_PING_INTERVAL` | `20` | Частота [MQTT](/definitions#mqtt) пинга в секундах, `20` секунд для всех
+`PU_MQTT_KEEPALIVE` | `60` | Время жизни [MQTT](/definitions#mqtt) соединени в секундах
 `PU_AUTH_TOKEN` | `jwt` токен | Вечный токен доступа [Unit](/definitions#unit) к инстансу [Pepeunit](/conception/overview). Данный токен позволяет пройти авторизацию на подписку и публикацию у топиков [EMQX](/deployment/dependencies/emqx), устанавливается [Backend](/deployment/dependencies/backend) автоматически.
 `PU_SECRET_KEY` | `32 байтовый ключ` в формате `base64` | Уникальный для каждого [Unit](/definitions#unit). Удобно использовать для подписи или генерации `jwt`. Устанавливается [Backend](/deployment/dependencies/backend) автоматически
 `PU_ENCRYPT_KEY` | `32 байтовый ключ` в формате `base64` | Уникальный для каждого [Unit](/definitions#unit). Удобно использовать для шифрования методом `aes-gcm-256`. Устанавливается [Backend](/deployment/dependencies/backend) автоматически
