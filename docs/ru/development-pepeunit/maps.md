@@ -30,8 +30,11 @@ Private Platform Tests | - | `do it yourself` | `do it yourself` | -
 
 Purpose | Lang | Hardware | Work and Issue | Stack
 -- | -- | -- | -- | --
-Bublik for pick command edged input Unit | `Golang` | `Any` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/go/hotkey_bublik) | `ebiten-v2`, `pepeunit_go_client`
-WiFi temp sensor ds18b20 | `Micropython` | `esp8266`, `esp32` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp8266/temp-sensor-ds18b20) | `pepeunit_micropython_client`
-4pin fan regulator on ds18b20 | `Micropython` | `esp32` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp32/fan-regulator-ds18b20.git) | `pepeunit_micropython_client`
-Wifi Relay | `Micropython` | `esp8266`, `esp32` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp8266/wifi_relay) | `pepeunit_micropython_client`
-Button and Encoder | `Micropython` | `esp8266`, `esp32` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp8266/button_and_encoder) | `pepeunit_micropython_client`
+Bublik for pick command edged input Unit | `Golang` | `Any-PC` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/go/hotkey_bublik) | `ebiten-v2`, `pepeunit_go_client`
+WiFi temp sensor ds18b20 | `Micropython` | `esp8266`, `esp32`, `esp32c3`, `esp32s3` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp8266/temp-sensor-ds18b20) | `pepeunit_micropython_client`
+4pin fan regulator on ds18b20 | `Micropython` | `esp32`, `esp32c3`, `esp32s3` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp32/fan-regulator-ds18b20.git) | `pepeunit_micropython_client`
+Wifi Relay | `Micropython` | `esp8266`, `esp32`, `esp32c3`, `esp32s3` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp8266/wifi_relay) | `pepeunit_micropython_client`
+Button and Encoder | `Micropython` | `esp8266`, `esp32`, `esp32c3`, `esp32s3` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp8266/button_and_encoder) | `pepeunit_micropython_client`
+BMX280 and mh-z19b climat sensors | `Micropython` | `esp32`, `esp32c3`, `esp32s3` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp32/bmx280_and_mh-z19b) | `pepeunit_micropython_client`
+Control panel on sh1106 | `Micropython` | `esp32`, `esp32c3`, `esp32s3` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp32/control_panel_sh1106) | `pepeunit_micropython_client`
+Base64 video stream | `Python` | `Any-PC` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/python/base64_video_stream) | `opencv`, `numpy`, `pillow`, `tqdm`, `pepeunit_client`
