@@ -10,6 +10,11 @@ export function nav(): DefaultTheme.NavItem[] {
       link: 'https://unit.pepeunit.com'
     },
     {
+      text: 'Support',
+      link: '/en/support',
+      activeMatch: '/'
+    },
+    {
       text: 'Docs',
       link: '/en/conception/overview',
       activeMatch: '/'
@@ -206,7 +211,10 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
         { text: '> 2.0.0 Monetization', link: '/en/roadmap/monetisation' },
         { text: '> 2.0.0 Federation', link: '/en/roadmap/federation' }
       ]
-    }
+    },
+    {
+      text: 'Support the project', link: '/en/support'
+    },
   ]
 }
 

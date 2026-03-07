@@ -6,11 +6,16 @@ export const pepeDescription =
 export function nav(): DefaultTheme.NavItem[] {
   return [
     {
-      text: 'Demo',
+      text: 'Демо',
       link: 'https://unit.pepeunit.com'
     },
     {
-      text: 'Docs',
+      text: 'Поддержать',
+      link: '/support',
+      activeMatch: '/'
+    },
+    {
+      text: 'Документация',
       link: '/conception/overview',
       activeMatch: '/'
     }
@@ -206,7 +211,10 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
         { text: '> 2.0.0 Монетизация', link: '/roadmap/monetisation' },
         { text: '> 2.0.0 Федерация', link: '/roadmap/federation' }
       ]
-    }
+    },
+    {
+      text: 'Поддержать Проект', link: '/support'
+    },
   ]
 }
 

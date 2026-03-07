@@ -7,9 +7,13 @@ hero:
     - theme: brand
       text: Что такое Pepeunit?
       link: /conception/overview
+    - theme: brand
+      text: Поддержать Проект
+      link: /support
     - theme: alt
-      text: Demo Instance
+      text: Демо
       link: https://unit.pepeunit.com/
+    
   image:
     src: /main_icon_big.webp
     alt: Pepeunit

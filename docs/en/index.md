@@ -7,6 +7,9 @@ hero:
     - theme: brand
       text: What is Pepeunit?
       link: /en/conception/overview
+    - theme: brand
+      text: Support the project
+      link: /en/support
     - theme: alt
       text: Demo Instance
       link: https://unit.pepeunit.com/
