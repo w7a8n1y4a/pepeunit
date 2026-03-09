@@ -28,7 +28,12 @@ export default async (): Promise<UserConfig> => {
     ],
     markdown: {
       languageAlias: {
-        micropython: 'python'
+        micropython: 'python',
+        'nginx.conf': 'nginx',
+        conf: 'ini',
+        gitignore: 'ini',
+        '.pepeignore': 'ini',
+        ndjson: 'json'
       }
     },
     themeConfig: {
