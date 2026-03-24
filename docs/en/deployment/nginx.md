@@ -10,12 +10,26 @@ events {
 }
 
 http {
+    # --- Internal network detection (Docker) ---
+    geo $is_internal {
+        default 0;
+        10.0.0.0/8 1;
+        172.16.0.0/12 1;
+        192.168.0.0/16 1;
+        127.0.0.0/8 1;
+    }
+
+    map $is_internal $limit_key {
+        0 $binary_remote_addr;
+        1 "";
+    }
+
     # --- Rate Limiting Zones ---
-    limit_req_zone $binary_remote_addr zone=general:10m rate=10r/s;
-    limit_req_zone $binary_remote_addr zone=api:10m rate=5r/s;
+    limit_req_zone $limit_key zone=general:10m rate=10r/s;
+    limit_req_zone $limit_key zone=api:10m rate=5r/s;
 
     # --- Connection Limiting Zone ---
-    limit_conn_zone $binary_remote_addr zone=conn_per_ip:10m;
+    limit_conn_zone $limit_key zone=conn_per_ip:10m;
 
     # --- Timeouts (Slowloris protection) ---
     client_body_timeout 10s;
