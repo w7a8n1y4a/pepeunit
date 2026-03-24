@@ -10,10 +10,37 @@ events {
 }
 
 http {
+    # --- Rate Limiting Zones ---
+    limit_req_zone $binary_remote_addr zone=general:10m rate=10r/s;
+    limit_req_zone $binary_remote_addr zone=api:10m rate=5r/s;
+
+    # --- Connection Limiting Zone ---
+    limit_conn_zone $binary_remote_addr zone=conn_per_ip:10m;
+
+    # --- Timeouts (Slowloris protection) ---
+    client_body_timeout 10s;
+    client_header_timeout 10s;
+    send_timeout 10s;
+    keepalive_timeout 30s;
+
+    # --- Global defaults ---
+    server_tokens off;
+    client_max_body_size 3m;
+
+    # Return 429 instead of 503 on rate limit hit
+    limit_req_status 429;
+    limit_conn_status 429;
+
     server {
         listen 80;
 
+        # Max concurrent connections per IP
+        limit_conn conn_per_ip 20;
+
         location /pepeunit {
+            # API rate limit: 5 req/s, burst up to 10 without delay
+            limit_req zone=api burst=10 nodelay;
+
             add_header 'Access-Control-Allow-Origin' "$http_origin" always;
             add_header 'Access-Control-Allow-Credentials' 'true' always;
 
@@ -39,14 +66,19 @@ http {
             proxy_set_header X-NginX-Proxy true;
             proxy_set_header Connection "";
 
-            client_max_body_size 20M;
+            client_max_body_size 50M;
         }
 
         location / {
+            # General rate limit: 10 req/s, burst up to 20 without delay
+            limit_req zone=general burst=20 nodelay;
+
             proxy_pass http://frontend:80;
         }
 
         location /grafana/ {
+            limit_req zone=general burst=20 nodelay;
+
             proxy_pass http://grafana:3000;
 
             proxy_set_header Host $host;

@@ -1,119 +1,154 @@
 # Unit Ideas
 
-## Actors
+## Simple Actors
 
-Each Unit must have a set of ff_:
-1. ff_ physical configuration — enabling/disabling sensors and actors
-1. ff_ software features
-1. ff_ power-saving mode type
-1. ff_ connection loss handling type
+### Notifications/Reminders
+1. WS2812B RGB LED, a unique color for each notification
+1. Should work in pair with a Python Unit
 
-### Button + Encoder
+### Motion Sensors
 
-1. ff for encoder presence/absence
-1. Press types:
-    - single with a configured duration
-    - double
-    - triple
-    - long
-1. Debounce handling
-1. Setting messages for each press type via env — a dedicated topic for this — a dedicated topic for the button
-1. Dedicated topic per button press type — one, double, triple, long
-1. Encoder rotation left/right — dedicated topic for encoder right/left
+1. Also known as presence sensors
+1. Research available options
 
-### Microclimate Station with bme280 and mh-z19b — esp8266
-- Same concept as ds18b20, but publishes to separate topics: temperature, humidity, pressure, and CO2
+### 220V Grid Monitoring
 
-### Screen + Encoder
+1. Output to topics: Voltage, Current, Power, Frequency, minimum frequency, maximum frequency
+1. Think about better ways to analyze frequency
 
-1. ff_ for encoder connection
-1. Dedicated topic for receiving a full frame
-1. Dedicated topic for rendering text/partial frame by coordinates (N units can write to a single screen)
-1. Topic for clearing the frame
-1. Encoder sends data the same way as in the Button + Encoder unit; it must interact with the streaming Unit
-1. The concept is that the device is dumb — it only receives images and sends encoder signals if an encoder is present
-1. Joystick support (one or two) should be added in the future
+### Meshtastic Adapter
 
-### Video Streaming
+1. Should convert Meshtastic to MQTT commands
+1. Should convert MQTT to Meshtastic
+1. Should plug into a server Unit via standard topics
 
-1. CLI Unit in Python
-1. Playback control via built-in menu for displays
-1. Ability to skip video
-1. Ability to remotely trigger conversion to text
-1. Ability to pause
-1. Ability to view video info: framerate and duration
+### LED Strips
 
-### Segment Display + Encoder
-
-1. Similar to OLED but with segments; may be better replaced with a larger OLED with esp32
-
-### Notifications / Reminders
-
-1. RGB LED — each notification has its own color
-1. Must work in pair with a Python Unit
-
-### Garage Unit
-
-1. Plain Python
-2. Absorbs all custom garage logic
-3. N button topics, N actor topics, 1 screen output topic and 1 encoder input topic
+1. Control of RGB and regular strips
 
 ### Game Unit
 
-1. Similar to streaming, but designed for two players with data input
-1. Lobby creation based on unique unit UUIDs and their names
-1. The game must have an asset so that only coordinates are sent over streams
+1. Similar to streaming, but designed for two users with input
+1. Lobby creation by unique unit UUIDs and their names
+1. The game should have an asset so that only coordinates are transmitted via streams
 
-### esp32 with Camera
+## Complex Actors
 
-Must be paired with an additional service that can store snapshots, e.g. MinIO, specified simply in settings. Preferably sends data to MinIO directly; publishes a UUID or equivalent to the /pepeunit topic.
+### Diesel Heater
+
+1. Status model
+1. On/Off
+1. Emergency shutdown
+1. Possibly requires Unit duplication so that they know each other's status and duplicate the control
+
+### ESP32 with Camera
+
+Should be combined with an additional service that can store snapshots, e.g. MinIO, specified simply in settings. Preferably sends data to MinIO by itself, sends UUID or equivalent to the /pepeunit topic
 
 1. Operating modes
     - Snapshots on demand
     - Timelapse with and without power saving
-1. Capture parameters
+1. Shooting parameters
     - Resolution
     - Exposure, etc.
 
+### Antenna Positioning
+
+1. Based on stepper motors
+1. Worm gears
+1. Control should work both via Wi-Fi and via some other protocol, possibly better to build them on Meshtastic
+
 ### Scales
 
-Handheld scales using a load cell with a square stainless steel rod frame ~8×8 mm and special slots for convenient measurements.
+Handheld scales on a load cell with a frame in the shape of a square stainless steel rod ~8x8 mm with special slots for convenient measurements
 
 1. Components
     - Load cell
-    - 18650 battery
-    - Screen
+    - 18650
+    - Display
     - Encoder
 1. Output type
     - Newtons
     - Grams
 1. Operating modes
-    - Manual — individual measurements
-    - Dynamic — streaming values at a configured interval
+    - Manual — single measurements
+    - Dynamic — streaming values at a set interval
+
+### Mouse
+
+Very difficult to make, at least a proper casting setup is needed
+
+1. Mouse with modular design
+1. Preferably a steel/titanium case
+1. The mouse module itself in the default frame is potted in epoxy and is moisture/waterproof
+1. The module is inserted into the mouse like a cartridge, ideally the sensor should be made the same way
+1. The mouse is designed for total indestructibility
 
 ## Control
 
-### Hotkey App in Go
-- Tracks hotkeys and sends a configured set of parameters
+### Server Unit for Garage
 
-### Hotkey Sniffer on esp8266
-- Switches between multiple `type-c` devices; 1 keyboard input and 3 or 4 outputs. Intercepts the keyboard character stream and forwards it to one or more devices; also allows switching between devices via hotkeys — a basic KVM switch. Effectively allows managing infrastructure without a PC. Screen for displaying the last pressed keys.
+1. Everything via TG bot
+1. Integration with Meshtastic adapter
+1. On/off by timer
+1. Ability to block activation
+1. Output of basic information to TG messages on schedule
+1. Flexible on/off scenarios
 
-### Pipeline Trigger on esp8266
-- Each sequential press activates a new stage or stages of a task; should have a color LED to indicate the current task's execution status. Linear and cyclic modes.
+### Meshtastic Control Remote
+
+1. Without Wi-Fi or the ability to switch to this mode
+1. Sending pre-defined commands via buttons
+1. Sending commands
+1. Possibly with a display for convenience
+1. Ideally mounted on a phone via MagSafe + built-in battery
+
+### Hotkey Sniffer on ESP8266
+- With switching between multiple Type-C devices, 1 keyboard input and 3 or 4 outputs. Intercepts the character stream from the keyboard and forwards it to the input of a device or a series of devices, also allows switching between devices via hotkeys — a simple KVM switch. Essentially allows controlling infrastructure without a PC. Display for showing the last pressed keys.
+
+### Pipeline Trigger on ESP8266
+- Sequential presses each time activate a new stage or stages of tasks, should have a color LED to indicate the current task's execution. Linear and cyclic modes.
 
 ### Scheduler
-- Server-side unit with a Telegram bot via polling
-- Action scheduling with cancellation support
-- The main action is applied after a configured delay
-- During that delay the action can be cancelled
+- Server unit with a TG bot, via polling
+- Planning actions with the ability to cancel
+- The main action is applied after a set time
+- While the time is running, the action can be cancelled
 
-### WiFi Module for Flipper based on esp32
-- Control of supported functions via MQTT and receiving external data, ability to receive notifications, etc.
-- Connects to WiFi only for sending messages, which significantly saves the Flipper's battery
+### Wi-Fi Module for Flipper Based on ESP32
+- Control of what is possible via MQTT and receiving external data, ability to receive notifications, etc.
+- Connects to Wi-Fi only for sending messages, which will greatly save the Flipper's battery
 
 ## Extensions
 
 ### Unit Bar
 
-1. A power strip / network filter for a large number of Units with a built-in power supply
+1. Power strip for a large number of Units with a power supply
+
+## Garage Automation
+
+- Fully autonomous system built on RPI
+- All external communication via bots on polling
+- Someday we'll give it an IP, but only when super stable internet is available at the cottage
+
+### Main Elements
+
+Number of Units | Purpose | Installation Location
+-- | -- | --
+N | Relay for lights via 220V floodlights | Outdoors
+N | Relay for heaters at workstations | Garage
+N | Relay for other types of heaters / fairy lights / pumps / loads | Everywhere
+3 | Weather stations BME280 + MH-Z19B, outdoors can be without CO2 | House, garage, outdoors
+N | Temperature sensors DS18B20 | Cellar, milling machine, lathe
+N | OLED with encoders — info displays and on/off screens, max 5 FPS | Garage, House, Sauna?
+1 | Diesel heater | Garage
+1 | Server orchestration Unit: TG bot, on/off by timer and for a duration, ability to block activation, parameter output on boards on schedule, flexible scenarios | Server
+N | Portable control remotes on Meshtastic | On the back of a phone
+N | Motion sensors, preferably presence sensors, scenario triggers | Everywhere
+N | 220V grid monitoring to know current and voltage | In garage and house electrical panels
+4 | Antenna positioning | City, 2x Talagi and Garage
+1 | Meshtastic adapter | House at the cottage
+
+### Stages
+
+1. 
