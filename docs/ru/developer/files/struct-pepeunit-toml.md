@@ -7,55 +7,67 @@
 ```toml
 [general]
 name = "Fan Regulator ds18b20"
-description = "Регулирует обороты вентилятора в зависимости от температуры. Публикует текущую температуру и скважность. Позволяет включить вентилятор на `N` секунд по команде"
+description = "Регулирует обороты вентилятора в зависимости от температуры. Публикует текущую температуру и `16bit` скважность. Позволяет включить вентилятор на `N` секунд по команде с любой скважностью"
 language = "Micropython"
-hardware = ["esp32", "ds18b20", "4pin fan", "резистор 4.7кОм", "wires"]
+hardware = ["esp32", "esp32c3", "esp32s3", "ds18b20", "4pin fan", "резистор 4.7кОм", "wires"]
 firmware = [
-  {name = "ESP32_GENERIC-v1.26.1-PEPEUNIT-v1.0.0.bin", link = "https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/package_files/52/download"}
+  {name = "RELEASE-1.1.1", link = "https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/releases/1.1.1"}
 ]
 stack = ["pepeunit_micropython_client"]
-version = "1.0.0"
+version = "1.1.1"
 license = "AGPL v3 License"
 authors = [
     {name = "Ivan Serebrennikov", email = "admin@silberworks.com"}
 ]
 
+[video]
+video = {preview = "https://minio.pepemoss.com/public-data/video/base64_streaming_prev.jpg", link = "https://www.youtube.com/watch?v=r1CpkXD_MJY"}
+
 [images]
-schema = "https://i.ibb.co/QQJ6h70/schema-fan-4pin-unit.png"
+schema = "https://minio.pepemoss.com/public-data/image/schema_fan_4pin_unit.png"
+
+[models]
+models = [
+  {version = "v0", description = "Пример модели", link = "https://minio.pepemoss.com/public-data/model/control_panel_sh1106/v3/stl/capsule_insert.stl"},
+  {version = "v0", description = "Пример модели", link = "https://minio.pepemoss.com/public-data/model/control_panel_sh1106/v3/stl/capsule_panel.stl"}
+]
 
 [files]
-"Документация `4Pin` вентилятора" = "https://www.delta-fan.com/products/ffb1212eh.html"
+"Документация `4Pin PWM` вентилятора Delta" = "https://www.delta-fan.com/products/ffb1212eh.html"
+"Документация `4Pin PWM` вентилятора Noctua" = "https://www.noctua.at/en/products/nf-f12-industrialppc-3000-pwm/specifications"
 
 [physical_io]
-"client.settings.PWM_FAN_PIN" = "Управление скважностью для работы Вентилятора"
-"client.settings.DS18B20_PIN_NUM" = "Цифровое значение температуры от датчика `ds18b20`"
+"client.settings.PIN_FAN" = "Управление скважностью для работы Вентилятора"
+"client.settings.PIN_DS18B20" = "Цифровое значение температуры от датчика `ds18b20`"
 
 [env_description]
-WIFI_SSID = "Имя сети WiFi"
-WIFI_PASS = "Пароль от сети WiFi"
-PWM_FAN_PIN = "Номер `Pin` отвечающий за управляющее воздействие на Вентилятор"
-DS18B20_PIN_NUM = "Номер `Pin` отвечающий за получение данных от датчика `ds18b20`"
+PIN_FAN = "Номер `Pin` отвечающий за управляющее воздействие на Вентилятор"
+PIN_FAN_PWM_FREQUENCY = "Частота `PWM` сигнала в герцах"
+PIN_DS18B20 = "Номер `Pin` отвечающий за получение данных от датчика `ds18b20`"
 REGULATOR_OPERATING_RANGE = "Частота работы регулятора в миллисекундах"
-PUBLISH_SEND_INTERVAL = "Частота публикации данных в `current_fan_speed_percentage/pepeunit` и `current_temp/pepeunit` в секундах"
-DUTY_MIN = "Минимальная скважность `PWM 16bit`, которую можно установить"
-DUTY_MAX = "Максимальная скважность `PWM 16bit`, которую можно установить" 
-TEMP_MIN = "Температура в градусах цельсия, ниже которой скважность будет `DUTY_MIN`"
-TEMP_MAX = "Температура в градусах цельсия, выше которой скважность будет соответствовать `DUTY_MAX`"
+REGULATOR_DUTY_MIN = "Минимальная скважность `PWM 16bit`, которую может установить регулятор"
+REGULATOR_DUTY_MAX = "Максимальная скважность `PWM 16bit`, которую может установить регулятор" 
+REGULATOR_TEMP_MIN = "Температура в градусах цельсия, ниже которой скважность будет `REGULATOR_DUTY_MIN`"
+REGULATOR_TEMP_MAX = "Температура в градусах цельсия, выше которой скважность будет соответствовать `REGULATOR_DUTY_MAX`"
+PUBLISH_SEND_INTERVAL = "Частота публикации данных в `current_fan_speed_percentage/pepeunit` и `current_temp/pepeunit` в миллисекундах"
+PUC_WIFI_SSID = "Имя сети `WiFi`"
+PUC_WIFI_PASS = "Пароль от сети `WiFi`"
+
 
 [topic_assignment]
-"set_fan_state/pepeunit" = "Принимает в качестве значения `json` - `{\"sleep\": 15, \"duty\": 65535}`, где `sleep` сообщаяет в течении скольки секунд вентилятор будут включен со скважностью `duty`"
+"set_fan_state/pepeunit" = "Принимает в качестве значения `json` - `{\"sleep\": 15, \"duty\": 65535}`, где `sleep` сообщаяет в течении скольки секунд вентилятор будут включен с `16 bit` скважностью `duty`"
 "current_fan_speed_percentage/pepeunit" = "Текущее значение скважности в текстовом формате - `8192`"
 "current_temp/pepeunit" = "Текущая температура в текстовом формате - `27.5`"
 
 [work_algorithm]
 steps = [
   "Подключение к `WiFi`",
-  "Инициализация клиета `pepeunit_micropython_client`",
+  "Подключение к `MQTT` Брокеру",
   "Инициализация датчика `ds18b20` и `PWM`",
   "Запуск основного цикла",
-  "Каждые `PUBLISH_SEND_INTERVAL` секунд публикуются сообщения в `current_fan_speed_percentage/pepeunit` и `current_temp/pepeunit`",
+  "Каждые `PUBLISH_SEND_INTERVAL` миллисекунд публикуются сообщения в `current_fan_speed_percentage/pepeunit` и `current_temp/pepeunit`",
   "Каждые `REGULATOR_OPERATING_RANGE` миллисекунд регулятор линейно преобразует температуру в скважность, по алгоритму из функции `main.py` `def convert_temp_to_duty`. Вычисленное значение устанавливается для Вентилятора как целевое",
-  "При получении команды из `set_fan_state/pepeunit`, скважность `duty` устанавливается как целевая для Вентилятора и устройство засыпает на `sleep` секунд"
+  "При получении команды из `set_fan_state/pepeunit`, скважность `duty` устанавливается как целевая для Вентилятора и устройство засыпает на `sleep` секунд, далее начинается цикл обычного регулирования"
 ]
 
 [installation]
@@ -88,11 +100,13 @@ steps = [
 Раздел | Предназначение | [readme.md](/definitions#readme-md) формат
 -- | -- | --
 `general` | Содержит базовую информацию о [Unit](/definitions#unit) | Формируется таблица в шапке [readme.md](/definitions#readme-md)
+`video` | Позволяет отобразить картинку `preview` с ссылкой на видео `link`, сгенерированный результат корректно отображается в [GitLab](/definitions#gitlab) и [GitHub](/definitions#github) | Формирует кликабельное изображение и подписывает тег `## Video`
 `images` | Предназначен для отображения визуальной информации, здесь могут быть схемы работы [Unit](/definitions#unit), фото готового [Unit](/definitions#unit) или любая другая визуальная информация | Каждая пара ключ-значение будет выделена в отдельный элемент c уровнем `##`
+`models` | Отображает таблицу моделей, позволяет указывать версию и описание | Формирует таблицу
 `files` | Позволяет указывать файлы, например, `3D` модели или дополнительные материалы | Каждая пара ключ-значение будет отдельным элементом нумерованного списка
-`physical_io` | Нужен для микроконтрллеров, даёт чёткое понимание, какой `IO Pin` для чего предназначен | Каждая пара ключ-значение станет элементом не нумерованного списка
-`env_description` | Описывает каждую [env переменную](/developer/files/struct-env-example-json), добавленную [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) | Каждая пара ключ-значение будет отдельным элементом нумерованного списка
-`topic_assignment` | Описывает каждый [UnitNode топик](/developer/files/struct-schema-example-json), добавленный [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) | Каждая пара ключ-значение станет элементом не нумерованного списка
+`physical_io` | Нужен для микроконтрллеров, даёт чёткое понимание, какой `IO Pin` для чего предназначен | Формирует таблицу
+`env_description` | Описывает каждую [env переменную](/developer/files/struct-env-example-json), добавленную [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) | Формирует таблицу
+`topic_assignment` | Описывает каждый [UnitNode топик](/developer/files/struct-schema-example-json), добавленный [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) | Формирует таблицу
 `work_algorithm` | Описывает последовательность работы [Unit](/definitions#unit) | Каждая пара ключ-значение будет отдельным элементом нумерованного списка
 `installation` | Описывает последовательность шагов для корректного запуска [Unit](/definitions#unit) | Каждая пара ключ-значение будет отдельным элементом нумерованного списка
 

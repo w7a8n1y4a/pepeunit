@@ -21,7 +21,7 @@ authors = [
 ]
 
 [images]
-schema = "https://i.ibb.co/QQJ6h70/schema-fan-4pin-unit.png"
+schema = "https://minio.pepemoss.com/public-data/image/schema_fan_4pin_unit.png"
 
 [files]
 "4Pin fan documentation" = "https://www.delta-fan.com/products/ffb1212eh.html"
