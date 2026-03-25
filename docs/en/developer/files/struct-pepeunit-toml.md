@@ -24,7 +24,7 @@ authors = [
 video = {preview = "https://minio.pepemoss.com/public-data/video/base64_streaming_prev.jpg", link = "https://www.youtube.com/watch?v=r1CpkXD_MJY"}
 
 [images]
-schema = "https://minio.pepemoss.com/public-data/image/schema_fan_4pin_unit.png"
+schema = "https://minio.pepemoss.com/public-data/schema/schema_fan_4pin_unit.png"
 
 [models]
 models = [
