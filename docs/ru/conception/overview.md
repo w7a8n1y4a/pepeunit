@@ -4,6 +4,8 @@
 `Pepeunit` - платформа с открытым исходным кодом, основанная на принципах [Fediverse](/definitions#fediverse) и [IoT](/definitions#iot), предназначенная для организации устройств в единую и управляемую информационную систему.
 :::
 
+<iframe width="100%" height="415" src="https://www.youtube.com/embed/hEBC7jfkgy0" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 ![img](/schemas/work_schema.svg)
 
 ## CI/CD для Unit
