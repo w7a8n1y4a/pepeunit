@@ -203,13 +203,13 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       text: 'Дорожная карта',
       collapsed: true,
       items: [
-        { text: '> 1.0.0 Units', link: '/roadmap/units' },
-        { text: '> 1.0.0 3d дизайн система', link: '/roadmap/3d' },
-        { text: '> 1.0.0 Уведомления Telegram', link: '/roadmap/alerts' },
         { text: '> 1.0.0 Сравнение инстансов', link: '/roadmap/comparison' },
+        { text: '> 1.0.0 Уведомления Telegram', link: '/roadmap/alerts' },
         { text: '> 1.0.0 Рефактор фронтенда', link: '/roadmap/frontend-refactor' },
         { text: '> 2.0.0 Монетизация', link: '/roadmap/monetisation' },
-        { text: '> 2.0.0 Федерация', link: '/roadmap/federation' }
+        { text: '> 2.0.0 Федерация', link: '/roadmap/federation' },
+        { text: '> 2.0.0 3d дизайн система', link: '/roadmap/3d' },
+        { text: 'Идеи для Units', link: '/roadmap/units' },
       ]
     },
     {
