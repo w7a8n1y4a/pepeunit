@@ -209,7 +209,6 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
         { text: '> 2.0.0 Монетизация', link: '/roadmap/monetisation' },
         { text: '> 2.0.0 Федерация', link: '/roadmap/federation' },
         { text: '> 2.0.0 3d дизайн система', link: '/roadmap/3d' },
-        { text: '> 3.0.0 Game клиент', link: '/roadmap/game' },
         { text: 'Идеи для Units', link: '/roadmap/units' },
       ]
     },
