@@ -1,34 +1,30 @@
 # Federation
 
-## Main problem
-
-The most popular protocol is ActivityPub; it is slow because it is `REST`. There is `matrix`, but if we use it, we will have to forward data from EMQX into `Matrix`.
-
-For now, the main idea is to use EMQX bridge. But how exactly this will work needs to be studied.
-
-:::danger
-Until this problem is solved, the following items basically do not make sense.
-:::
-
 ## Main federation tasks
 
-### What can be implemented without federation protocols
-1. Global search across existing Repo Registry instances.
-1. Trusted instances system. Whether to trust an instance is decided by the owner of the current instance. This can be reduced to a system of allowlists or blocklists, preferably blocklists.
-1. Automatic system for breaking trust between instances.
-1. Ability for a user to fully export their data and create a backup of their account.
+1. For UnitNode, the ability to create a connection between instances to receive data with QoS <= 1.
+1. Synchronization of public Repo Registries into a single registry of available repositories.
+1. Ability for a user to fully download their data and back up their account.
 
-### What requires protocols
-1. For public UnitNode, the ability to create a link between instances to receive data with QoS at least 1.
-1. Automatic ban of external UnitNode that exceed limits.
+## Instance moderation in federation
+1. Automatic ban (incrementing by 1, 7, 30 days) of external UnitNodes that exceed limits between instances.
+1. Automatic system for breaking trust between instances with adding the instance to a blacklist.
+1. Manual disabling of instances by administrators through blacklists, for edge cases.
 
+## Implementation through MessageProcessor
 
-## Consider federation on the Unit side
+DataPipe -> MessageProcessor
 
-1. Shift the task of sending data to other Units onto the device itself, namely into its schema.
-1. Such a policy will free instances from needing to maintain connections via a bridge or similar mechanism.
-1. A Unit will have to publish data into several different EMQX brokers.
-1. EMQX of other instances will have to delegate authorization back to the Unit's home instance.
+gRPC, messages are signed with certificates, load status model from federation.
 
-Questions for this design:
-1. How will a small Unit maintain connections to, for example, 50 other instances over MQTT?
+## Service tasks
+1. The service is subscribed to all messages matching `+/+/pepeunit` and `+/+`.
+1. The service separates external messages from internal ones by `domain.com`.
+1. The service sends messages to external instances over gRPC, where they are received by the same service.
+1. The service receives external messages over gRPC and republishes them to EMQX.
+1. The service sets a set of message parameters, TTL, etc., to avoid loops and duplicates.
+1. The service counts MPS for external domains, split by each domain and each topic.
+1. The service decides when to break trust between instances.
+1. The service decides when to block a Unit.
+1. The service contains the configuration of all connections.
+1. The service contains balance information.

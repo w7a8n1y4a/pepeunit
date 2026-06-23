@@ -33,6 +33,7 @@
 `PU_UNIT_LOG_EXPIRATION` | `86400` | Время жизни логов, которые присылают [Unit](/definitions#unit), в секундах
 `PU_MAX_PAGINATION_SIZE` | `500` | Максимальное количество объектов, которое можно получить за `1` запрос. Применяется в местах, где есть пагинация
 `PU_TELEGRAM_BOT_MODE` | `webhook` | Принимает значения: `webhook` или `pooling`. Позволяет указать, как [Backend](/deployment/dependencies/backend) будет обмениваться информацией с [Telegram Bot](/definitions#telegram-bot). `pooling` позволяет работать без личного домена и `https` в средах, где есть доступ в интернет. `webhook` более производительный вариант, предназаначен для использования с `https` и личным доменом, ссылка на `webhook` устанавливает автоматически в момент старта приложения
+`PU_TELEGRAM_PROXY_URL` | `socks5://user:password@1.1.1.1:1080` | При указании позволяет боту проксировать запросы через заданный сервер. В комбинации с `pooling` позволяет обходить блокировки `Telegram`
 `PU_TELEGRAM_DEL_OLD_WEBHOOK` | `True` | Удаляется ли `webhook` для [Telegram Bot](/definitions#telegram-bot) перед тем, как создать новый
 `PU_TELEGRAM_TOKEN` | - | Токен [Telegram Bot](/definitions#telegram-bot). Секретный, никому не показывайте
 `PU_TELEGRAM_BOT_LINK` | - | Ссылка на [Telegram Bot](/definitions#telegram-bot), которым управляет [Backend](/deployment/dependencies/backend). Используется для генерации верификационных ссылок для [Пользователей](/development-pepeunit/mechanics/roles#user). Передаётся в `openapi.json`

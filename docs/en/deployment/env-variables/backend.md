@@ -33,6 +33,7 @@ Variable | Default | Purpose
 `PU_UNIT_LOG_EXPIRATION` | `86400` | Lifetime in seconds of logs sent by [Unit](/en/definitions#unit)
 `PU_MAX_PAGINATION_SIZE` | `500` | Maximum number of objects that can be returned in a single request where pagination is used
 `PU_TELEGRAM_BOT_MODE` | `webhook` | Accepts `webhook` or `pooling`. Defines how the [Backend](/en/deployment/dependencies/backend) communicates with the [Telegram Bot](/en/definitions#telegram-bot). `pooling` works without a personal domain and `https` in environments with internet access. `webhook` is more performant and intended for `https` and a personal domain; the webhook URL is set automatically on startup
+`PU_TELEGRAM_PROXY_URL` | `socks5://user:password@1.1.1.1:1080` | When specified, allows the bot to proxy requests through the given server. In combination with `pooling`, it helps bypass `Telegram` blocks
 `PU_TELEGRAM_DEL_OLD_WEBHOOK` | `True` | Whether to delete the existing `webhook` for the [Telegram Bot](/en/definitions#telegram-bot) before creating a new one
 `PU_TELEGRAM_TOKEN` | - | [Telegram Bot](/en/definitions#telegram-bot) token. Secret – do not share it
 `PU_TELEGRAM_BOT_LINK` | - | Link to the [Telegram Bot](/en/definitions#telegram-bot) managed by the [Backend](/en/deployment/dependencies/backend). Used to generate verification links for [Users](/en/development-pepeunit/mechanics/roles#user). Exposed in `openapi.json`

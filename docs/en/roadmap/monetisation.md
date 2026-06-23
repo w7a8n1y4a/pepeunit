@@ -1,17 +1,5 @@
 # Monetization for instance owners
 
-## Main problem
-
-Load tracking — there are topics without the `/pepeunit` prefix that also consume EMQX bandwidth. While it is still possible to determine and calculate the data volume in DataPipe for all users' Units, tracking how much bandwidth is occupied is very difficult.
-
-EMQX allows such tracking only in the paid version, which does not fit the project concept.
-
-Apparently we will need to create another Go service.
-
-:::danger
-Until this problem is solved, the following items basically do not make sense.
-:::
-
 ## Key points
 
 1. Enabled/disabled via a flag.
@@ -21,18 +9,26 @@ Until this problem is solved, the following items basically do not make sense.
 1. 100% unit test coverage for money-related code.
 1. 100% integration test coverage for money-related code.
 
+## Monetization data for MessageProcessor
+
+DataPipe -> MessageProcessor
+
+1. The service is subscribed to all messages matching `+/+/pepeunit` and `+/+`.
+1. The service counts all messages.
+1. The service includes DataPipe functionality, but extends it with counters.
+
 ## Monetization mechanism
 
 Required data:
 
 1. For each Unit, an array of the average number of messages is calculated: `[month, week, day, hour]`.
-1. For each Unit, memory dynamics in DataPipe is calculated.
+1. For each Unit, memory dynamics in MessageProcessor is calculated.
 1. Capabilities of the system as a whole: how much persistent storage there is, how much CPU, RAM, etc. is available — also in the `[month, week, day, hour]` format.
 
-Every hour the mechanism calculates the total load from Units and compares it with the system load metrics. Based on this it calculates the status of the instance:
+Every hour, the mechanism calculates the total load from Units and compares it with the system load metrics. Based on this, it calculates the instance status:
 1. Green — available for creating Units.
 1. Yellow — the system is on the verge of throttling, for example less than 10% of resources remain.
-1. Red — the system is throttling, some Units are forcibly disabled. Unit tokens gain the ability to be temporarily blocked; throttling of the system is returned as an error.
+1. Red — the system is throttling, some Units are forcibly disabled. Unit tokens gain the ability to be temporarily blocked; system throttling is returned as an error.
 
 Monetization is built on the instance status; it is enabled only if the instance status is Yellow. All Units are colored according to their statistics:
 1. Green — resource consumption is below the 50th percentile, low resource consumption, works for free — monetization is not required.
@@ -57,7 +53,7 @@ All monetization parameters and statuses must be included in the basic parameter
 
 ## Grafana board
 
-Publicly available monetization board on each instance showing how much each user is spending.
+Publicly available monetization board on each instance, showing how much money came into the instance and how much was spent over a selected period.
 
 ## Average message load values for repo registry
 
