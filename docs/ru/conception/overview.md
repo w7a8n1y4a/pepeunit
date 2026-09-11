@@ -79,7 +79,13 @@
 
 ## Сравнение Инстансов
 
-[Будет доступно, начиная с одной из версий > 1.0.0](/roadmap/comparison)
+`Pepeunit` публикует состояние текущего инстанса и собирает состояния известных соседей. В разделе [Instances](/user/instance/instances) можно сравнить версии, лимиты, контакты и результат [интеграционных тестов](/user/operation-task/integration-tests). [Администратор](/development-pepeunit/mechanics/roles#admin) добавляет новые инстансы по ссылке из [About](/user/instance/add-instance#ссылка-about) и запускает [глобальные команды](/user/operation-task/operation-tasks#типы-задач).
+
+:::info
+[Просмотр Instances](/user/instance/instances)
+
+[Operation Tasks](/user/operation-task/operation-tasks)
+:::
 
 ## Федерация
 

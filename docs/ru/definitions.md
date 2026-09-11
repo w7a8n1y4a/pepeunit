@@ -12,6 +12,12 @@
 ## UnitNode
 `UnitNode` - представление о [MQTT](#mqtt) топике для [Pepeunit](/conception/overview), данная сущность описывает точку взаимодействия с [Unit](#unit). `UnitNode` может быть двух типов: `Input` и `Output`. Между `UnitNode` разных [Unit](#unit) могут быть связи: от одного `Output` к многим `Input`.
 
+## Instance
+`Instance` - представление о развёрнутом инстансе [Pepeunit](/conception/overview). Текущий инстанс публикует своё состояние по ссылке `/pepeunit/api/v1/instances/current`: версию, флаги, лимиты, контакты, публичные метрики и результат последних [интеграционных тестов](/user/operation-task/integration-tests). Внешний `Instance` хранится как запись с этой ссылкой, статусом доверия `Trust` / `Pending` / `Blocking` и последним собранным состоянием соседа. Новые инстансы могут находиться сами при опросе доверенных соседей, но статус доверия им выставляет только [Администратор](/development-pepeunit/mechanics/roles#admin). [Подробнее](/user/instance/instances)
+
+## Operation Task
+`Operation Task` - запись о фоновой задаче, которую [Пользователь](/development-pepeunit/mechanics/roles#user) или [Администратор](/development-pepeunit/mechanics/roles#admin) запустил вручную. К таким задачам относятся интеграционные тесты, сканирование [Instance](#instance), обновление [RepositoryRegistry](#repositoryregistry) и массовое обновление прошивок [Unit](#unit). [Пользователь](/development-pepeunit/mechanics/roles#user) видит только свои задачи и их статусы `Running`, `Success` или `Error`. [Подробнее](/user/operation-task/operation-tasks)
+
 ## Datasource
 `Datasource` - источник данных [Grafana](/deployment/dependencies/grafana), из которого [Grafana](/deployment/dependencies/grafana) получает данные для дальнейшей визуализации. [Backend](/deployment/dependencies/backend) реализует [REST](/definitions#rest) запрос для [InfinityAPI](https://grafana.com/grafana/plugins/yesoreyeram-infinity-datasource/) из коробки для каждой отдельной организации. Такой запрос с использованием `headers` и `params` позволяет получать данные, накопленные с помощью механизмов [DataPipe](/deployment/dependencies/datapipe).
 

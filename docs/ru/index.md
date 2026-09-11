@@ -35,8 +35,8 @@ features:
     details: Настройка уровней доступа User-Unit и Unit-Unit с учетом ролей Пользователей и уровней видимости Repo, Unit и UnitNode
   - title: Client Library
     details: Клиентские библиотеки для Micropython, Python и Golang
-  - title: Instance Comparision
-    details: Будет доступно в начиная с одной из версий > 1.0.0
+  - title: Instance Comparison
+    details: Список известных инстансов, публичное состояние /current и сравнение версий, лимитов и интеграционных тестов
   - title: Federation
     details: Будет доступно в версии 2.0.0
   - title: Monetization

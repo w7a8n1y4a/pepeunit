@@ -123,6 +123,22 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
             { text: 'Создание Dashboard', link: '/user/grafana/create' },
             { text: 'Синхронизация с Grafana', link: '/user/grafana/sync' }
           ]
+        },
+        {
+          text: 'Instances',
+          collapsed: true,
+          items: [
+            { text: 'Просмотр Instances', link: '/user/instance/instances' },
+            { text: 'Добавление Instance', link: '/user/instance/add-instance' }
+          ]
+        },
+        {
+          text: 'Operation Tasks',
+          collapsed: true,
+          items: [
+            { text: 'Просмотр задач', link: '/user/operation-task/operation-tasks' },
+            { text: 'Интеграционные тесты', link: '/user/operation-task/integration-tests' }
+          ]
         }
       ]
     },

@@ -1,5 +1,9 @@
 # Система сравнения инстансов
 
+:::info Реализовано
+Базовый контур сравнения инстансов уже работает во [Frontend](/deployment/dependencies/frontend) и [Backend](/deployment/dependencies/backend). Пользовательские сценарии описаны в разделах [Instances](/user/instance/instances) и [Operation Tasks](/user/operation-task/operation-tasks). Ниже сохранён исходный план, по которому собиралась эта механика
+:::
+
 Нужно дать пользователям место на каждом инстансе, где они могут понять состояние сети Pepeunit
 
 ## Сервис состояния внешних инстансов
