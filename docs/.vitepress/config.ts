@@ -11,6 +11,11 @@ export default async (): Promise<UserConfig> => {
   const { withMermaid } = await import('vitepress-plugin-mermaid')
 
   const config: UserConfig = {
+    vite: {
+      optimizeDeps: {
+        include: ['fastdom', 'fastdom/extensions/fastdom-promised.js']
+      }
+    },
     rewrites: {
       'ru/:rest*': ':rest*'
     },

@@ -5,12 +5,11 @@
     "docs:preview": "vitepress preview docs"
   },
   "devDependencies": {
-    "mermaid": "^10.9.1",
-    "vitepress-plugin-mermaid": "^2.0.16"
+    "mermaid": "^11.17.2",
+    "vitepress": "^1.6.4",
+    "vitepress-plugin-mermaid": "^2.0.17"
   },
   "overrides": {
-    "vitepress": {
-        "vite": "5.3.0-beta.1"
-    }
+    "esbuild": "^0.25.12"
   }
 }

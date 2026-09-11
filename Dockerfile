@@ -1,11 +1,10 @@
-FROM --platform=$BUILDPLATFORM node:18-alpine as builder
+FROM --platform=$BUILDPLATFORM node:22-alpine as builder
 
 WORKDIR /app
 
 COPY package*.json ./
 
-RUN npm install
-RUN npm add -D vitepress
+RUN npm ci
 
 COPY . .
 
