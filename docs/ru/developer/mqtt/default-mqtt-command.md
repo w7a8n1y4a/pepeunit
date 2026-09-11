@@ -6,11 +6,12 @@
 [Unit](/definitions#unit) должен быть подписан на эти топики, при получении сообщения [Unit](/definitions#unit) должны следовать единому паттерну поведения, описанному в данном разделе.
 :::
 
-Всего в [Pepeunit](/conception/overview) есть четыре команды - топика:
+Всего в [Pepeunit](/conception/overview) есть пять команд - топиков:
 1. `UPDATE` - `update/pepeunit`
 1. `SCHEMA_UPDATE` - `schema_update/pepeunit`
 1. `ENV_UPDATE` - `env_update/pepeunit`
 1. `LOG_SYNC` - `log_sync/pepeunit`
+1. `RESET` - `reset/pepeunit`
 
 ## UPDATE - update/pepeunit
 
@@ -151,3 +152,24 @@
 :::info
 Данная команда создана с целью упрощения отладки и контроля за [Unit](/definitions#unit). Т.к. не все ошибки можно получить через [MQTT](/definitions#mqtt) сразу же в момент их возникновения.
 :::
+
+## RESET - reset/pepeunit
+
+:::info Когда вызывается данная команда?
+1. Если команда была вызвана через отдельную кнопку в меню [Unit](/definitions#unit)
+1. Если команда была вызвана через [REST](/definitions#rest) или [GQL](/definitions#gql)
+:::
+
+Данная команда отправляет [Unit](/definitions#unit) запрос на перезапуск. При получении сообщения в этом топике устройство или программа перезапускается.
+
+### Формат сообщения в топик `reset/pepeunit`
+
+```json
+{
+    "COMMAND": "Reset"
+}
+```
+
+### Алгоритм действий Unit
+
+1. Перезапустить устройство или программу

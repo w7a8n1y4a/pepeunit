@@ -86,7 +86,8 @@ readme.md
         "update/pepeunit",
         "env_update/pepeunit",
         "schema_update/pepeunit",
-        "log_sync/pepeunit"
+        "log_sync/pepeunit",
+        "reset/pepeunit"
     ],
     "output_base_topic": [
         "state/pepeunit",

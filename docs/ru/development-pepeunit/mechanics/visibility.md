@@ -43,6 +43,7 @@
 - Установка [env.json](/definitions#env-json)
 - Скачивание `Firmware` и скомпилированных пакетов
 - Команды обновления по [MQTT](/definitions#mqtt): `Firmware`, `Schema` и `Env`
+- Команда перезапуска по [MQTT](/definitions#mqtt): `Reset`
 - Настройки [Unit](/definitions#unit)
 - Выдача [доступов](/development-pepeunit/mechanics/permission)
 - Удаление [Unit](/definitions#unit)
