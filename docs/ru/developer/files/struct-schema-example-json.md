@@ -43,7 +43,7 @@
 `output_topic` | `Output` топики [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer). [Pepeunit](/conception/overview) использует их как шаблон для создания `Output` [UnitNode](/definitions#unitnode) | [Топики разработчика](/developer/files/struct-schema-json#топики-разработчика)
 
 :::info
-При использовании клиентских библиотек [Micropython](/developer/libraries/micropython), [Golang](/developer/libraries/golang) и [Python](/developer/libraries/python), можно указывать все топики из `input_base_topic` и `output_base_topic`, они будут корректно работать.
+При использовании клиентских библиотек [Micropython](/developer/libraries/micropython), [ESP-IDF](/developer/libraries/esp-idf), [Golang](/developer/libraries/golang) и [Python](/developer/libraries/python), можно указывать все топики из `input_base_topic` и `output_base_topic`, они будут корректно работать.
 
 Если вы сами реализуете взаимодействие с [Pepeunit](/conception/overview) без библиотек, то можно оставить только те топики, которые нужны для реализации [Unit](/definitions#unit).
 :::

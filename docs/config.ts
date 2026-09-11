@@ -169,6 +169,7 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
           items: [
             { text: 'Pepeunit Framework', link: '/developer/libraries/framework' },
             { text: 'Micropython', link: '/developer/libraries/micropython' },
+            { text: 'ESP-IDF', link: '/developer/libraries/esp-idf' },
             { text: 'Golang', link: '/developer/libraries/golang' },
             { text: 'Python', link: '/developer/libraries/python' }
           ]

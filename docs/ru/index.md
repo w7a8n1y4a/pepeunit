@@ -34,7 +34,7 @@ features:
   - title: Access Policies
     details: Настройка уровней доступа User-Unit и Unit-Unit с учетом ролей Пользователей и уровней видимости Repo, Unit и UnitNode
   - title: Client Library
-    details: Клиентские библиотеки для Micropython, Python и Golang
+    details: Клиентские библиотеки для Micropython, ESP-IDF, Python и Golang
   - title: Instance Comparison
     details: Список известных инстансов, публичное состояние /current и сравнение версий, лимитов и интеграционных тестов
   - title: Federation

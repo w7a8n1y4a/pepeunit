@@ -74,6 +74,7 @@
 
 `Pepeunit` имеет библиотеки, облегчающие создание [Unit](/definitions#unit), каждая из которых поддерживает полный функционал [Pepeunit Framework](/developer/libraries/framework). На данный момент доступны:
 - [Micropython](/developer/libraries/micropython)
+- [ESP-IDF](/developer/libraries/esp-idf)
 - [Python](/developer/libraries/python)
 - [Golang](/developer/libraries/golang)
 

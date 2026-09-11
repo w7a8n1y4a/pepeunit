@@ -14,6 +14,7 @@ Frontend | `TS` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/pepeunit_front
 Purpose | Lang | Registry | Work | Issue | Stack
 -- | -- | -- | -- | -- | --
 Client Micropython | `Micropython` | [Releases](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/releases) | [GitLab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client) | [GitHub](https://github.com/w7a8n1y4a/pepeunit_micropython_client) | `async_http (Reverb)`, `tarfile`, `mqtt_as (Reverb)`
+Client ESP-IDF | `C` | [Tags](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_esp_idf_client/-/tags) | [GitLab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_esp_idf_client) | [GitHub](https://github.com/w7a8n1y4a/pepeunit_esp_idf_client) | `esp-mqtt`, `esp_http_client`, `mbedtls`, `cJSON`, `nvs_flash`
 Client Python | `Python` | [PyPi](https://pypi.org/project/pepeunit-client/) | [GitLab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_python_client) | [GitHub](https://github.com/w7a8n1y4a/pepeunit_python_client) | `Paho-mqtt`, `httpx`
 Client Golang | `Golang` | [go.dev](https://pkg.go.dev/github.com/w7a8n1y4a/pepeunit_go_client) | [GitLab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_go_client) | [GitHub](https://github.com/w7a8n1y4a/pepeunit_go_client) | `Paho-mqtt`
 
