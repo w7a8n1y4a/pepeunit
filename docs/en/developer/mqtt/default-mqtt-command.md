@@ -6,12 +6,13 @@ Commands supported by a [Unit](/en/definitions#unit) must be listed in [schema_e
 The [Unit](/en/definitions#unit) must subscribe to these topics. When it receives a message, the [Unit](/en/definitions#unit) must follow the unified behavior pattern described in this section.
 ::::
 
-There are four command topics in [Pepeunit](/en/conception/overview):
+There are five command topics in [Pepeunit](/en/conception/overview):
 
 1. `UPDATE` – `update/pepeunit`
 1. `SCHEMA_UPDATE` – `schema_update/pepeunit`
 1. `ENV_UPDATE` – `env_update/pepeunit`
 1. `LOG_SYNC` – `log_sync/pepeunit`
+1. `RESET` – `reset/pepeunit`
 
 ## UPDATE - update/pepeunit
 
@@ -158,5 +159,26 @@ This command tells the [Unit](/en/definitions#unit) to synchronize all logs it c
 ::::info
 This command exists to simplify debugging and monitoring of [Units](/en/definitions#unit). Not every error can be seen in real time via [MQTT](/en/definitions#mqtt) at the moment it occurs.
 ::::
+
+## RESET - reset/pepeunit
+
+::::info When is this command sent?
+1. When the command is triggered via the dedicated button in the [Unit](/en/definitions#unit) UI.
+1. When the command is triggered via [REST](/en/definitions#rest) or [GQL](/en/definitions#gql).
+::::
+
+This command tells the [Unit](/en/definitions#unit) to restart. When a message arrives on this topic, the device or program restarts.
+
+### Message format for the `reset/pepeunit` topic
+
+```json
+{
+    "COMMAND": "Reset"
+}
+```
+
+### Unit behavior algorithm
+
+1. Restart the device or program.
 
 

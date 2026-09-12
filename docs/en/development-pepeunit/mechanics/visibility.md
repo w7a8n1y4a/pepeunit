@@ -43,6 +43,7 @@ The creator has `full control` over managing their entities.
 - Set [env.json](/en/definitions#env-json)
 - Download `Firmware` and compiled packages
 - Send update commands over [MQTT](/en/definitions#mqtt): `Firmware`, `Schema` and `Env`
+- Send a restart command over [MQTT](/en/definitions#mqtt): `Reset`
 - Configure a [Unit](/en/definitions#unit)
 - Grant [permissions](/en/development-pepeunit/mechanics/permission)
 - Delete a [Unit](/en/definitions#unit)

@@ -11,10 +11,10 @@ description = "Regulates fan speed depending on temperature. Publishes current t
 language = "Micropython"
 hardware = ["esp32", "esp32c3", "esp32s3", "ds18b20", "4pin fan", "4.7kOhm resistor", "wires"]
 firmware = [
-  {name = "RELEASE-1.1.1", link = "https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/releases/1.1.1"}
+  {name = "RELEASE-1.3.0", link = "https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/releases/1.3.0"}
 ]
 stack = ["pepeunit_micropython_client"]
-version = "1.1.1"
+version = "1.3.0"
 license = "AGPL v3 License"
 authors = [
     {name = "Ivan Serebrennikov", email = "admin@silberworks.com"}

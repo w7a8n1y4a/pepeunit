@@ -4,7 +4,7 @@ Type | Name | Description
 -- | -- | --
 Adapter | Meshtastic <-> MQTT | Study the protocol. To avoid publishing the entire air, an authorization mechanism based on the existing keys needs to be designed, possibly using AES-256 encryption
 Adapter | LoRa <-> MQTT | Study the protocol. A criterion for skipping unnecessary data needs to be designed
-Adapter | ZigBee <-> MQTT | Study the protocol. The adapter must act as a station
+Adapter | ZigBee <-> MQTT | Study the protocol. The adapter must act as a station. CC2652P — Ebyte E72-2G4M20S1E, RF-Star RF-BM-2652P2, or ESP-IDF + ESP32-C6, which makes a gateway on a single device possible. The main idea is that all traffic is parsed in Python, and zigpy helps turn it into a usable network that can be queried. The full logic lives in a server-side Python layer with a config
 Actuator | LED strips | Control RGB and regular LED strips
 Actuator | LED notifications | WS2812B RGB LED, each notification has its own color
 Sensor | Motion sensors | Need to study what options exist. There are also presence sensors. Event publishing

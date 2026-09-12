@@ -81,12 +81,19 @@ The depth of interaction with the platform is determined by the [User](/en/devel
 `Pepeunit` provides libraries that simplify the creation of [Units](/en/definitions#unit), each supporting the full functionality of the [Pepeunit Framework](/en/developer/libraries/framework).  
 Currently available:
 - [Micropython](/en/developer/libraries/micropython)
+- [ESP-IDF](/en/developer/libraries/esp-idf)
 - [Python](/en/developer/libraries/python)
 - [Golang](/en/developer/libraries/golang)
 
 ## Instance comparison
 
-[Will be available starting from one of the versions > 1.0.0](/en/roadmap/comparison)
+`Pepeunit` publishes the state of the current instance and collects states from known neighbors. In the [Instances](/en/user/instance/instances) section you can compare versions, limits, contacts, and the result of [integration tests](/en/user/operation-task/integration-tests). An [Administrator](/en/development-pepeunit/mechanics/roles#admin) adds new instances via the [About](/en/user/instance/add-instance#about-link) link and starts [global commands](/en/user/operation-task/operation-tasks#task-types).
+
+::::info
+[Viewing Instances](/en/user/instance/instances)
+
+[Operation Tasks](/en/user/operation-task/operation-tasks)
+::::
 
 ## Federation
 

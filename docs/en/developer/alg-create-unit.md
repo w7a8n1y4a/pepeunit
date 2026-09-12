@@ -85,7 +85,8 @@ readme.md
         "update/pepeunit",
         "env_update/pepeunit",
         "schema_update/pepeunit",
-        "log_sync/pepeunit"
+        "log_sync/pepeunit",
+        "reset/pepeunit"
     ],
     "output_base_topic": [
         "state/pepeunit",
@@ -202,7 +203,7 @@ There is no universal algorithm for software development. Develop in the way tha
 ::::
 
 When your [Unit](/en/definitions#unit) in the local repository already has feedback from [Pepeunit](/en/conception/overview), try following this algorithm:
-1. Test that the client libraries ([Micropython](/en/developer/libraries/micropython), [Golang](/en/developer/libraries/golang), and [Python](/en/developer/libraries/python)) correctly [send data](/en/developer/mqtt/default-mqtt-command) and receive [standard commands](/en/developer/mqtt/default-mqtt-command).
+1. Test that the client libraries ([Micropython](/en/developer/libraries/micropython), [ESP-IDF](/en/developer/libraries/esp-idf), [Golang](/en/developer/libraries/golang), and [Python](/en/developer/libraries/python)) correctly [send data](/en/developer/mqtt/default-mqtt-command) and receive [standard commands](/en/developer/mqtt/default-mqtt-command).
 1. Retrieve data from your physical sensors, try printing values directly to the console without network complexity to ensure that the data really arrives.
 1. Try sending your data to the `output_topic` specified in [schema_example.json](/en/definitions#schema-example-json).
 1. Receive commands from `input_topic` and handle them according to your [Unit](/en/definitions#unit) concept.

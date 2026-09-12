@@ -17,7 +17,8 @@ This file is a contract between the [Unit Developer](/en/development-pepeunit/me
         "update/pepeunit",
         "env_update/pepeunit",
         "schema_update/pepeunit",
-        "log_sync/pepeunit"
+        "log_sync/pepeunit",
+        "reset/pepeunit"
     ],
     "output_base_topic": [
         "state/pepeunit",
@@ -43,7 +44,7 @@ Topic type | Description | Details
 `output_topic` | `Output` topics of the [Unit Developer](/en/development-pepeunit/mechanics/roles#unit-developer). [Pepeunit](/en/conception/overview) uses them as templates to create `Output` [UnitNodes](/en/definitions#unitnode) | [Developer topics](/en/developer/files/struct-schema-json#developer-topics)
 
 ::::info
-When using client libraries for [Micropython](/en/developer/libraries/micropython), [Golang](/en/developer/libraries/golang), or [Python](/en/developer/libraries/python), you can include all topics from `input_base_topic` and `output_base_topic`; they will work correctly.
+When using client libraries for [Micropython](/en/developer/libraries/micropython), [ESP-IDF](/en/developer/libraries/esp-idf), [Golang](/en/developer/libraries/golang), or [Python](/en/developer/libraries/python), you can include all topics from `input_base_topic` and `output_base_topic`; they will work correctly.
 
 If you implement interaction with [Pepeunit](/en/conception/overview) without using these libraries, you can leave only the topics you actually need for your [Unit](/en/definitions#unit).
 ::::

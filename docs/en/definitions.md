@@ -19,6 +19,12 @@ This entity is created from a [Repo](#repo) and holds information about a specif
 This entity describes an interaction point with a [Unit](#unit). A `UnitNode` can be of two types: `Input` and `Output`.  
 `UnitNodes` of different [Units](#unit) can be connected via links from one `Output` to many `Input`s.
 
+## Instance
+`Instance` is a representation of a deployed [Pepeunit](/en/conception/overview) instance. The current instance publishes its state at `/pepeunit/api/v1/instances/current`: version, flags, limits, contacts, public metrics, and the result of the latest [integration tests](/en/user/operation-task/integration-tests). An external `Instance` is stored as a record with that URL, a trust status of `Trust` / `Pending` / `Blocking`, and the last collected neighbor state. New instances can be discovered while polling trusted neighbors, but only an [Administrator](/en/development-pepeunit/mechanics/roles#admin) assigns a trust status to them. [Learn more](/en/user/instance/instances)
+
+## Operation Task
+`Operation Task` is a record of a background task that a [User](/en/development-pepeunit/mechanics/roles#user) or an [Administrator](/en/development-pepeunit/mechanics/roles#admin) started manually. Such tasks include integration tests, [Instance](#instance) scanning, [RepositoryRegistry](#repositoryregistry) updates, and mass [Unit](#unit) firmware updates. A [User](/en/development-pepeunit/mechanics/roles#user) sees only their own tasks and their `Running`, `Success`, or `Error` statuses. [Learn more](/en/user/operation-task/operation-tasks)
+
 ## Datasource
 `Datasource` is a data source in [Grafana](/en/deployment/dependencies/grafana) from which Grafana reads data for visualization.  
 The [Backend](/en/deployment/dependencies/backend) exposes a ready-to-use [REST](#rest) endpoint for [InfinityAPI](https://grafana.com/grafana/plugins/yesoreyeram-infinity-datasource/) for each organization.  
@@ -88,6 +94,9 @@ It allows you to remove all listed files and directories from the repository whe
 
 ## Golang
 [Go](https://go.dev/), or `Golang`, is a compiled, statically typed programming language well suited for high-load systems.
+
+## ESP-IDF
+[ESP-IDF](https://docs.espressif.com/projects/esp-idf/) is the official `Espressif` framework for writing `C` and `C++` firmware for `ESP32` family microcontrollers.
 
 ## Fediverse
 [Fediverse](https://en.wikipedia.org/wiki/Fediverse) is a way of organizing `server-to-server` interaction that provides a decentralized model of information distribution and processing.

@@ -123,6 +123,22 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
             { text: 'Create Dashboard', link: '/en/user/grafana/create' },
             { text: 'Synchronization with Grafana', link: '/en/user/grafana/sync' }
           ]
+        },
+        {
+          text: 'Instances',
+          collapsed: true,
+          items: [
+            { text: 'View Instances', link: '/en/user/instance/instances' },
+            { text: 'Add Instance', link: '/en/user/instance/add-instance' }
+          ]
+        },
+        {
+          text: 'Operation Tasks',
+          collapsed: true,
+          items: [
+            { text: 'View tasks', link: '/en/user/operation-task/operation-tasks' },
+            { text: 'Integration tests', link: '/en/user/operation-task/integration-tests' }
+          ]
         }
       ]
     },
@@ -153,6 +169,7 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
           items: [
             { text: 'Pepeunit Framework', link: '/en/developer/libraries/framework' },
             { text: 'Micropython', link: '/en/developer/libraries/micropython' },
+            { text: 'ESP-IDF', link: '/en/developer/libraries/esp-idf' },
             { text: 'Golang', link: '/en/developer/libraries/golang' },
             { text: 'Python', link: '/en/developer/libraries/python' }
           ]

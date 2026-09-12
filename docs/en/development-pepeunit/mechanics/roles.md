@@ -3,7 +3,7 @@
 ## Roles
 
 ::::tip What is the purpose of `User` roles in the system?
-The `User` role affects their capabilities when using a [Pepeunit](/en/conception/overview) instance, as well as how they interact with [RepositoryRegisty](/en/definitions#repositoryregistry), [Repo](/en/definitions#repo), [Unit](/en/definitions#unit) and [UnitNode](/en/definitions#unitnode) entities.
+The `User` role affects their capabilities when using a [Pepeunit](/en/conception/overview) instance, as well as how they interact with [RepositoryRegisty](/en/definitions#repositoryregistry), [Repo](/en/definitions#repo), [Unit](/en/definitions#unit), [UnitNode](/en/definitions#unitnode), [Instance](/en/definitions#instance) and [Operation Task](/en/definitions#operation-task) entities.
 ::::
 
 ### Unit Developer
@@ -23,6 +23,7 @@ The `User` is a person registered in a [Pepeunit](/en/conception/overview) insta
 - Can see all [RepositoryRegisty](/en/definitions#repositoryregistry) records, including private ones
 - Cannot create a [Repo](/en/definitions#repo) from a private [RepositoryRegisty](/en/definitions#repositoryregistry) without specifying [access credentials](/en/user/git-repository/create-repository-registry#access-to-a-private-repository)
 - Can access entities whose [visibility level](/en/development-pepeunit/mechanics/visibility) is `Public`, `Internal` or `Private` (if [permission](/en/development-pepeunit/mechanics/permission) is granted)
+- Can view the list of known [Instances](/en/definitions#instance) and their own [Operation Task](/en/definitions#operation-task) history
 ::::
 
 ### Admin
@@ -33,6 +34,8 @@ The `Administrator` is the owner acting as a moderator, with full control over t
 - Block `Users` who violate the terms of use of the instance
 - View all [RepositoryRegisty](/en/definitions#repositoryregistry), [Repo](/en/definitions#repo), [Unit](/en/definitions#unit) and [UnitNode](/en/definitions#unitnode) entities; their interaction capabilities are equivalent to those they would have if appropriate [visibility](/en/development-pepeunit/mechanics/visibility) were granted
 - Cannot obtain [encrypted](/en/development-pepeunit/mechanics/cipher) data directly through [Pepeunit](/en/conception/overview), but has the technical ability to decrypt any [encrypted](/en/development-pepeunit/mechanics/cipher) information in the instance
+- [Add](/en/user/instance/add-instance) external [Instances](/en/definitions#instance), move them to `Trust` or `Blocking`, and force-poll one instance or all of them at once
+- [Global commands](/en/user/operation-task/operation-tasks#task-types) on the `Domain` node and inspecting their logs in [Operation Tasks](/en/user/operation-task/operation-tasks): integration tests, scanning known instances, updating all [RepositoryRegistry](/en/definitions#repositoryregistry) entries, and mass [Unit](/en/definitions#unit) firmware updates
 ::::
 
 ### Bot
@@ -42,6 +45,7 @@ An external agent — a regular internet `User` or any program that has not gone
 ::::tip Capabilities of an external agent
 - Can view all public records from [RepositoryRegisty](/en/definitions#repositoryregistry)
 - Can interact only with entities whose [visibility level](/en/development-pepeunit/mechanics/visibility) is `Public`
+- Can read the public instance state `GET /pepeunit/api/v1/instances/current` and the lists of known [Instances](/en/definitions#instance)
 ::::
 
 

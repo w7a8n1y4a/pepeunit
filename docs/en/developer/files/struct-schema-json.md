@@ -27,6 +27,9 @@ This file is a contract between a specific [Unit](/en/definitions#unit) instance
         ],
         "log_sync/pepeunit": [
             "example.com/input_base_topic/9d0c2f4d-108e-488a-85e5-6040ef3d842a/log_sync/pepeunit"
+        ],
+        "reset/pepeunit": [
+            "example.com/input_base_topic/9d0c2f4d-108e-488a-85e5-6040ef3d842a/reset/pepeunit"
         ]
     },
     "output_base_topic": {

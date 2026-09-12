@@ -33,9 +33,9 @@ features:
   - title: Access Policies
     details: Access level configuration for User–Unit and Unit–Unit, taking into account user roles and the visibility levels of Repo, Unit and UnitNode
   - title: Client Library
-    details: Client libraries for Micropython, Python and Golang
-  - title: Instance Comparision
-    details: Will be available starting from one of the versions > 1.0.0
+    details: Client libraries for Micropython, ESP-IDF, Python and Golang
+  - title: Instance Comparison
+    details: List of known instances, public /current state, and comparison of versions, limits, and integration tests
   - title: Federation
     details: Will be available in version 2.0.0
   - title: Monetization
