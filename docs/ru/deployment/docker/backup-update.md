@@ -44,3 +44,42 @@
     ```bash
     docker compose up -d
     ```
+1. После корректного запуска бекенда, выполните от имени [Администратора](/development-pepeunit/mechanics/roles#admin) запуск [интеграционных тестов](/user/operation-task/integration-tests). Если будут возникать ошибки, посмотрите [логи связанных контейнеров](/deployment/docker/commands) или напишите `issue`
+
+## Обновление `1.2.1` -> `1.3.0`
+
+:::info
+Сложность этого обновления связана с тем, что `PostgreSQL` изменил структуру каталогов при переходе версий  `17.6 -> 18.6`
+:::
+
+:::danger
+`ClickHouse` `26.8.2` требует инструкции процессора `x86-64-v3` и выше. Если вы хотите запустить инстанс на процессорах без этих инструкций, используйте версию `25.8.32` в `docker-compose.yml`: `clickhouse:25.8.32`.
+:::
+
+В обычном обновлении `backup` нужен для страховки. Здесь `backup` используется напрямую: старые данные из `1.2.1` восстанавливаются поверх `compose` версии `1.3.0`.
+
+1. Создайте `backup`
+    ```bash
+    sudo ./backup.sh backup
+    ```
+1. Полностью остановите инстанс
+    ```bash
+    docker compose down
+    ```
+1. Удалите старые `volume`
+    ```bash
+    docker volume rm pepeunit_deploy_postgres_data pepeunit_deploy_clickhouse_data pepeunit_deploy_emqx_log pepeunit_deploy_emqx_data
+    ```
+1. Выполните обновление репозитория
+    ```bash
+    git pull
+    ```
+1. Скачайте новые образы
+    ```bash
+    docker compose pull
+    ```
+1. Восстановите данные `1.2.1` поверх `compose` версии `1.3.0`. Подставьте имя своего `backup` файла:
+    ```bash
+    sudo ./backup.sh restore backups/2026-09-12_04-05-00_v1.2.1_pepeunit_backup.tar
+    ```
+1. После корректного запуска бекенда, выполните от имени [Администратора](/development-pepeunit/mechanics/roles#admin) запуск [интеграционных тестов](/user/operation-task/integration-tests). Если будут возникать ошибки, посмотрите [логи связанных контейнеров](/deployment/docker/commands) или напишите `issue`
