@@ -220,7 +220,6 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       text: 'Roadmap',
       collapsed: true,
       items: [
-        { text: '> 1.0.0 Instance Comparison', link: '/en/roadmap/comparison' },
         { text: '> 1.0.0 Telegram Alerts', link: '/en/roadmap/alerts' },
         { text: '> 1.0.0 Frontend Refactor', link: '/en/roadmap/frontend-refactor' },
         { text: '> 2.0.0 Monetization', link: '/en/roadmap/monetisation' },
