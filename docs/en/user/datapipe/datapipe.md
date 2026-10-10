@@ -23,7 +23,7 @@ Editor features:
 
 ## Meaning of parameters
 
-There are 4 main stages of the pipeline: `active_period`, `filtres`, `transformations` and `processing_policy`
+The pipeline consists of the stages `active_period`, `filters`, `transformations`, `processing_policy`, and an optional `alerts`
 
 ## active_period
 
@@ -39,7 +39,7 @@ Parameter name | Possible values | Required? | Comment
 `start` | Datetime in format `2023-11-15T12:43:56Z` | Required for types: `DateRange` and `FromDate` | Start time of the `DateRange` period or the start time of the `FromDate` mode
 `end` | Datetime in format `2023-11-15T12:43:56Z` | Required for types: `DateRange` and `ToDate` | End time of the `DateRange` period or the end time of the `ToDate` mode
 
-## filtres
+## filters
 
 Parameter name | Possible values | Required? | Comment
 -- | -- | -- | --
@@ -79,5 +79,24 @@ Parameter name | Possible values | Required? | Comment
 `n_records_count` | Number of stored records `0 < n_records_count =< 1024` | Required only for `policy_type` = `NRecords` | Defines how many records will be stored
 `time_window_size` | One of: `[60, 300, 600, 900, 1200, 1800, 3600, 7200, 10800, 14400, 21600, 28800, 43200, 86400]` | Required for `policy_type` = `TimeWindow` or `Aggregation` | Window size in seconds; it must evenly divide `86400`
 `aggregation_functions` | `Avg`, `Min`, `Max`, `Sum` | Required for `policy_type` = `Aggregation` | Function used to calculate the resulting value based on `time_window_size`
+
+## alerts
+
+Optional stage. [DataPipe](/en/deployment/dependencies/datapipe) checks a value that has already passed `filters` and `transformations`, and writes a [notification](/en/user/notification/notifications#datapipe-alert) to the creator of the [Unit](/en/definitions#unit). The rules are similar to `filters`, but the meaning is reversed: `WhiteList` fires on a value outside the list, `BlackList` on a value inside the list. `Min` fires below `threshold_min`, `Max` above `threshold_max`, and `Range` outside both bounds.
+
+`max_rate` and `last_unique_check` from `filters` decide which values reach this check at all. The first notification is sent after `consecutive_count` violations in a row. While the value remains a violation, the next notification for the same [UnitNode](/en/definitions#unitnode) arrives no more often than once every `max_frequency` seconds. A normal value resets the `consecutive_count` counter.
+
+The stage works when `PU_FF_NOTIFICATION_ENABLE` is on for the [Backend](/en/deployment/dependencies/backend) and [DataPipe](/en/deployment/dependencies/datapipe). Turning off `Data pipe alerts` in [notification settings](/en/user/notification/notifications#settings) keeps the record in the list and the rule in the pipeline. Live page updates and [Telegram](/en/definitions#telegram) for this type stop.
+
+Parameter name | Possible values | Required? | Comment
+-- | -- | -- | --
+`is_enabled` | `true`, `false` | No, `true` by default | `false` turns the check off
+`type_value_filtering` | `WhiteList`, `BlackList` | Either this or `type_value_threshold` is needed | List type
+`filtering_values` | List of numbers or strings | Required if `type_value_filtering` is set | Value type is taken from `filters.type_input_value`
+`type_value_threshold` | `Min`, `Max`, `Range` | Either this or `type_value_filtering` is needed | Only when `filters.type_input_value` = `Number`
+`threshold_min` | Integer | Required for `Min` and `Range` | For `Range`, less than `threshold_max`
+`threshold_max` | Integer | Required for `Max` and `Range` | For `Range`, greater than `threshold_min`
+`consecutive_count` | Integer `1`–`1024`, `1` by default | No | How many violations in a row are needed before the first notification
+`max_frequency` | Integer `10`–`86400`, `10` by default | No | Minimum seconds between two notifications of the same [UnitNode](/en/definitions#unitnode)
 
 

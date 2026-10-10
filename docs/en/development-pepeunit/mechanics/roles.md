@@ -3,7 +3,7 @@
 ## Roles
 
 ::::tip What is the purpose of `User` roles in the system?
-The `User` role affects their capabilities when using a [Pepeunit](/en/conception/overview) instance, as well as how they interact with [RepositoryRegisty](/en/definitions#repositoryregistry), [Repo](/en/definitions#repo), [Unit](/en/definitions#unit), [UnitNode](/en/definitions#unitnode), [Instance](/en/definitions#instance) and [Operation Task](/en/definitions#operation-task) entities.
+The `User` role affects their capabilities when using a [Pepeunit](/en/conception/overview) instance, as well as how they interact with [RepositoryRegisty](/en/definitions#repositoryregistry), [Repo](/en/definitions#repo), [Unit](/en/definitions#unit), [UnitNode](/en/definitions#unitnode), [Instance](/en/definitions#instance) and [Notification](/en/definitions#notification) entities.
 ::::
 
 ### Unit Developer
@@ -23,7 +23,7 @@ The `User` is a person registered in a [Pepeunit](/en/conception/overview) insta
 - Can see all [RepositoryRegisty](/en/definitions#repositoryregistry) records, including private ones
 - Cannot create a [Repo](/en/definitions#repo) from a private [RepositoryRegisty](/en/definitions#repositoryregistry) without specifying [access credentials](/en/user/git-repository/create-repository-registry#access-to-a-private-repository)
 - Can access entities whose [visibility level](/en/development-pepeunit/mechanics/visibility) is `Public`, `Internal` or `Private` (if [permission](/en/development-pepeunit/mechanics/permission) is granted)
-- Can view the list of known [Instances](/en/definitions#instance) and their own [Operation Task](/en/definitions#operation-task) history
+- Can view the list of known [Instances](/en/definitions#instance) and their own [notifications](/en/user/notification/notifications)
 ::::
 
 ### Admin
@@ -35,7 +35,7 @@ The `Administrator` is the owner acting as a moderator, with full control over t
 - View all [RepositoryRegisty](/en/definitions#repositoryregistry), [Repo](/en/definitions#repo), [Unit](/en/definitions#unit) and [UnitNode](/en/definitions#unitnode) entities; their interaction capabilities are equivalent to those they would have if appropriate [visibility](/en/development-pepeunit/mechanics/visibility) were granted
 - Cannot obtain [encrypted](/en/development-pepeunit/mechanics/cipher) data directly through [Pepeunit](/en/conception/overview), but has the technical ability to decrypt any [encrypted](/en/development-pepeunit/mechanics/cipher) information in the instance
 - [Add](/en/user/instance/add-instance) external [Instances](/en/definitions#instance), move them to `Trust` or `Blocking`, and force-poll one instance or all of them at once
-- [Global commands](/en/user/operation-task/operation-tasks#task-types) on the `Domain` node and inspecting their logs in [Operation Tasks](/en/user/operation-task/operation-tasks): integration tests, scanning known instances, updating all [RepositoryRegistry](/en/definitions#repositoryregistry) entries, and mass [Unit](/en/definitions#unit) firmware updates
+- [Global commands](/en/user/notification/notifications#command-results) on the `Domain` node and inspecting their log in [notifications](/en/user/notification/notifications): integration tests, scanning known instances, updating all [RepositoryRegistry](/en/definitions#repositoryregistry) entries, and mass [Unit](/en/definitions#unit) firmware updates
 ::::
 
 ### Bot

@@ -17,6 +17,7 @@ Variable | Default | Purpose
 `PU_DP_CONFIG_SYNC_INTERVAL` | `60` | Interval in seconds between repeated [YML](/en/definitions#yml) configuration requests
 `PU_DP_NRECORDS_CLEANUP_INTERVAL` | `60` | Interval in seconds between cleanup runs that remove excess `N Records` data
 `PU_DP_BUFFER_FLUSH_INTERVAL` | `5` | Interval in seconds after which data will be flushed to [ClickHouse](/en/deployment/dependencies/clickhouse) or [PostgreSQL](/en/deployment/dependencies/postgresql) regardless of the number of accumulated records
-`PU_DP_BUFFER_MAX_SIZE` | `1000` | Maximum queue size; when exceeded, data is written to [ClickHouse](/en/deployment/dependencies/clickhouse) or [PostgreSQL](/en/deployment/dependencies/postgresql) immediately without waiting for `PU_DP_BUFFER_FLUSH_INTERVAL`
+`PU_DP_BUFFER_MAX_SIZE` | `1000` | Maximum queue length; when exceeded, data is written to [ClickHouse](/en/deployment/dependencies/clickhouse) or [PostgreSQL](/en/deployment/dependencies/postgresql) immediately without waiting for `PU_DP_BUFFER_FLUSH_INTERVAL`. The same queue and the same interval are used for [DataPipe](/en/user/datapipe/datapipe#alerts) alerts
+`PU_FF_NOTIFICATION_ENABLE` | `True` | `True` / `False`. Together with the same flag on the [Backend](/en/deployment/env-variables/backend), enables writing pipeline alerts to [notifications](/en/user/notification/notifications). When the flag is off, the `alerts` block in the pipeline does not create records in [PostgreSQL](/en/deployment/dependencies/postgresql)
 
 

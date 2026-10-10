@@ -2,7 +2,7 @@
 
 ## DataPipe as a Backend service
 
-The `DataPipe service` is a high-performance data processing service written in [Golang](/en/definitions#golang). It is responsible for consuming data from topics with the pattern `example.com/+/pepeunit`, filtering it, and then saving it into [ClickHouse](/en/deployment/dependencies/clickhouse) and [PostgreSQL](/en/deployment/dependencies/postgresql).
+The `DataPipe service` is a high-performance data processing service written in [Golang](/en/definitions#golang). It is responsible for consuming data from topics with the pattern `example.com/+/pepeunit`, filtering it, and then saving it into [ClickHouse](/en/deployment/dependencies/clickhouse) and [PostgreSQL](/en/deployment/dependencies/postgresql). When `PU_FF_NOTIFICATION_ENABLE` is on, it writes alerts from the `alerts` block to [notifications](/en/user/notification/notifications).
 
 ::::info
 [More about environment variables](/en/deployment/env-variables/data-pipe)

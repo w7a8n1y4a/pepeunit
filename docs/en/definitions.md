@@ -20,10 +20,10 @@ This entity describes an interaction point with a [Unit](#unit). A `UnitNode` ca
 `UnitNodes` of different [Units](#unit) can be connected via links from one `Output` to many `Input`s.
 
 ## Instance
-`Instance` is a representation of a deployed [Pepeunit](/en/conception/overview) instance. The current instance publishes its state at `/pepeunit/api/v1/instances/current`: version, flags, limits, contacts, public metrics, and the result of the latest [integration tests](/en/user/operation-task/integration-tests). An external `Instance` is stored as a record with that URL, a trust status of `Trust` / `Pending` / `Blocking`, and the last collected neighbor state. New instances can be discovered while polling trusted neighbors, but only an [Administrator](/en/development-pepeunit/mechanics/roles#admin) assigns a trust status to them. [Learn more](/en/user/instance/instances)
+`Instance` is a representation of a deployed [Pepeunit](/en/conception/overview) instance. The current instance publishes its state at `/pepeunit/api/v1/instances/current`: version, flags, limits, contacts, public metrics, and the result of the latest [integration tests](/en/user/notification/integration-tests). An external `Instance` is stored as a record with that URL, a trust status of `Trust` / `Pending` / `Blocking`, and the last collected neighbor state. New instances can be discovered while polling trusted neighbors, but only an [Administrator](/en/development-pepeunit/mechanics/roles#admin) assigns a trust status to them. [Learn more](/en/user/instance/instances)
 
-## Operation Task
-`Operation Task` is a record of a background task that a [User](/en/development-pepeunit/mechanics/roles#user) or an [Administrator](/en/development-pepeunit/mechanics/roles#admin) started manually. Such tasks include integration tests, [Instance](#instance) scanning, [RepositoryRegistry](#repositoryregistry) updates, and mass [Unit](#unit) firmware updates. A [User](/en/development-pepeunit/mechanics/roles#user) sees only their own tasks and their `Running`, `Success`, or `Error` statuses. [Learn more](/en/user/operation-task/operation-tasks)
+## Notification
+`Notification` is an instance event for a specific [User](/en/development-pepeunit/mechanics/roles#user): a daily summary, a [DataPipe](/en/deployment/dependencies/datapipe) alert, or a command result. The list contains only their own records. [Learn more](/en/user/notification/notifications)
 
 ## Datasource
 `Datasource` is a data source in [Grafana](/en/deployment/dependencies/grafana) from which Grafana reads data for visualization.  

@@ -87,12 +87,14 @@ Currently available:
 
 ## Instance comparison
 
-`Pepeunit` publishes the state of the current instance and collects states from known neighbors. In the [Instances](/en/user/instance/instances) section you can compare versions, limits, contacts, and the result of [integration tests](/en/user/operation-task/integration-tests). An [Administrator](/en/development-pepeunit/mechanics/roles#admin) adds new instances via the [About](/en/user/instance/add-instance#about-link) link and starts [global commands](/en/user/operation-task/operation-tasks#task-types).
+`Pepeunit` publishes the state of the current instance and collects states from known neighbors. In the [Instances](/en/user/instance/instances) section you can compare versions, limits, contacts, and the result of [integration tests](/en/user/notification/integration-tests). An [Administrator](/en/development-pepeunit/mechanics/roles#admin) adds new instances via the [About](/en/user/instance/add-instance#about-link) link and starts [global commands](/en/user/notification/notifications#command-results).
+
+[Notifications](/en/user/notification/notifications) collect daily summaries, [DataPipe](/en/user/datapipe/datapipe#alerts) alerts, and the results of these commands. The list opens in the UI; delivery to the [Telegram Bot](/en/definitions#telegram-bot) is configured separately.
 
 ::::info
 [Viewing Instances](/en/user/instance/instances)
 
-[Operation Tasks](/en/user/operation-task/operation-tasks)
+[Notifications](/en/user/notification/notifications)
 ::::
 
 ## Federation

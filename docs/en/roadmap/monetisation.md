@@ -9,28 +9,11 @@
 1. 100% unit test coverage for money-related code.
 1. 100% integration test coverage for money-related code.
 
-## Monetization data for MessageProcessor
-
-DataPipe -> MessageProcessor
-
-1. The service is subscribed to all messages matching `+/+/pepeunit` and `+/+`.
-1. The service counts all messages.
-1. The service includes DataPipe functionality, but extends it with counters.
-
 ## Monetization mechanism
 
-Required data:
+Instance status is in [federation](/en/roadmap/federation). Counters are in [MessageProcessor](/en/roadmap/message-processor).
 
-1. For each Unit, an array of the average number of messages is calculated: `[month, week, day, hour]`.
-1. For each Unit, memory dynamics in MessageProcessor is calculated.
-1. Capabilities of the system as a whole: how much persistent storage there is, how much CPU, RAM, etc. is available — also in the `[month, week, day, hour]` format.
-
-Every hour, the mechanism calculates the total load from Units and compares it with the system load metrics. Based on this, it calculates the instance status:
-1. Green — available for creating Units.
-1. Yellow — the system is on the verge of throttling, for example less than 10% of resources remain.
-1. Red — the system is throttling, some Units are forcibly disabled. Unit tokens gain the ability to be temporarily blocked; system throttling is returned as an error.
-
-Monetization is built on the instance status; it is enabled only if the instance status is Yellow. All Units are colored according to their statistics:
+Monetization is enabled only if the instance status is Yellow. All Units are colored according to their statistics:
 1. Green — resource consumption is below the 50th percentile, low resource consumption, works for free — monetization is not required.
 1. Yellow — resource consumption is above the 50th percentile but below the 80th percentile.
 1. Red — resource consumption is above the 80th percentile.

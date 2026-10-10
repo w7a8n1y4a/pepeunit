@@ -31,6 +31,6 @@ Column | What it shows
 `Version` | [Backend](/en/deployment/dependencies/backend) version of the external instance
 `Units` | Number of public [Units](/en/definitions#unit)
 `Users` | Number of [Users](/en/development-pepeunit/mechanics/roles#user)
-`Tests` | Status of the latest [integration tests](/en/user/operation-task/integration-tests) and the success percentage
+`Tests` | Status of the latest [integration tests](/en/user/notification/integration-tests) and the success percentage
 
 An empty list shows the text `No instances found`.

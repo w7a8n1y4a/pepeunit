@@ -10,6 +10,7 @@ Actuator | LED notifications | WS2812B RGB LED, each notification has its own co
 Sensor | Motion sensors | Need to study what options exist. There are also presence sensors. Event publishing
 Sensor | 220V grid monitoring | Voltage, current, power, frequency, minimum frequency, maximum frequency. Need to configure peaks that will be treated as events
 Sensor | Hall sensor | Measure magnetic field strength
+Sensor | Microphone | Audio stream
 Module | Game Unit | Similar to streaming, but designed for N users with input. Lobby creation by unique Unit UUIDs and their names. The game should have an asset so streams only transmit coordinates
 Module | Diesel heater | Status model, On/Off, emergency shutdown. Unit duplication may be needed so they know which one is in which status. Unit duplication is mandatory
 Module | ESP32 with camera | Must be able to work with an S3 bucket using tokens. Snapshots on request, timelapse with and without power saving. Shooting parameter setup. Rotation support through additional hardware

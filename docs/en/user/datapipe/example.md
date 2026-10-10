@@ -111,4 +111,32 @@ processing_policy:
 ```
 ::::
 
+## Alerts
+
+For example, temperature is already accumulated by the `LastValue` policy, and a notification is needed when, after transformations, the value is outside `18`–`26` three times in a row:
+
+The notification goes to the creator of the [Unit](/en/definitions#unit). While the temperature stays outside the range, the next one arrives no more often than once a minute. A value inside the range resets the counter.
+
+::::tip
+The `alerts` block looks at the value that passed `filters` and `transformations`. The pipeline itself keeps accumulating data.
+```yml
+active_period:
+  type: Permanent
+filters:
+  type_input_value: Number
+  max_rate: 0
+  last_unique_check: false
+  max_size: 50
+processing_policy:
+  policy_type: LastValue
+alerts:
+  is_enabled: true
+  type_value_threshold: Range
+  threshold_min: 18
+  threshold_max: 26
+  consecutive_count: 3
+  max_frequency: 60
+```
+::::
+
 

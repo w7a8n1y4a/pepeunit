@@ -48,7 +48,7 @@ Status | Available buttons
 
 1. `Trust` — start polling the instance and accept data from it
 1. `Block` — stop polling. The current instance does not trust responses from such an instance
-1. `Scan` — force-poll one trusted instance. Creates an [Operation Task](/en/definitions#operation-task) of type `Scan Instance`
+1. `Scan` — force-poll one trusted instance. A record of type `Scan Instance` appears in [notifications](/en/user/notification/notifications)
 1. `Delete` — delete the record
 
 ::::warning
@@ -59,7 +59,7 @@ An [Administrator](/en/development-pepeunit/mechanics/roles#admin) cannot set th
 
 In the `Instances` list, the `Scan All` button starts polling all records with the `Trust` status. The task is stretched over about `10` minutes so it does not hit the network at once. The same command cannot be started again for `10` minutes.
 
-An [Operation Task](/en/definitions#operation-task) of type `Scan All Instances` is created. The result looks like `Scanned N, failed M`.
+A record of type `Scan All Instances` appears in [notifications](/en/user/notification/notifications). The result looks like `Scanned N, failed M`.
 
 ## Automatic polling and retention
 

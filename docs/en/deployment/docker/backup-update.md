@@ -44,7 +44,7 @@
     ```bash
     docker compose up -d
     ```
-1. After the backend starts correctly, run [integration tests](/en/user/operation-task/integration-tests) as an [Administrator](/en/development-pepeunit/mechanics/roles#admin). If errors appear, check the [related container logs](/en/deployment/docker/commands) or open an `issue`
+1. After the backend starts correctly, run [integration tests](/en/user/notification/integration-tests) as an [Administrator](/en/development-pepeunit/mechanics/roles#admin). If errors appear, check the [related container logs](/en/deployment/docker/commands) or open an `issue`
 
 ## Updating `1.2.1` -> `1.3.0`
 
@@ -82,5 +82,5 @@ In a regular update, `backup` is a safety net. Here `backup` is used directly: o
     ```bash
     sudo ./backup.sh restore backups/2026-09-12_04-05-00_v1.2.1_pepeunit_backup.tar
     ```
-1. After the backend starts correctly, run [integration tests](/en/user/operation-task/integration-tests) as an [Administrator](/en/development-pepeunit/mechanics/roles#admin). If errors appear, check the [related container logs](/en/deployment/docker/commands) or open an `issue`
+1. After the backend starts correctly, run [integration tests](/en/user/notification/integration-tests) as an [Administrator](/en/development-pepeunit/mechanics/roles#admin). If errors appear, check the [related container logs](/en/deployment/docker/commands) or open an `issue`
 

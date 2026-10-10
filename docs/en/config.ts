@@ -133,11 +133,11 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
           ]
         },
         {
-          text: 'Operation Tasks',
+          text: 'Notifications',
           collapsed: true,
           items: [
-            { text: 'View tasks', link: '/en/user/operation-task/operation-tasks' },
-            { text: 'Integration tests', link: '/en/user/operation-task/integration-tests' }
+            { text: 'View notifications', link: '/en/user/notification/notifications' },
+            { text: 'Integration tests', link: '/en/user/notification/integration-tests' }
           ]
         }
       ]
@@ -220,10 +220,10 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       text: 'Roadmap',
       collapsed: true,
       items: [
-        { text: '> 1.0.0 Telegram Alerts', link: '/en/roadmap/alerts' },
-        { text: '> 1.0.0 Frontend Refactor', link: '/en/roadmap/frontend-refactor' },
-        { text: '> 2.0.0 Monetization', link: '/en/roadmap/monetisation' },
+        { text: '> 1.0.0 Frontend transformation', link: '/en/roadmap/frontend-refactor' },
+        { text: '> 1.0.0 MessageProcessor', link: '/en/roadmap/message-processor' },
         { text: '> 2.0.0 Federation', link: '/en/roadmap/federation' },
+        { text: '> 2.0.0 Monetization', link: '/en/roadmap/monetisation' },
         { text: '> 2.0.0 3D Design System', link: '/en/roadmap/3d' },
         { text: 'Ideas for Units', link: '/en/roadmap/units' },
       ]

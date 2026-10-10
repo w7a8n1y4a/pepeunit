@@ -28,6 +28,8 @@ features:
     details: Open registry of repositories for creating Units
   - title: IoT Device Management
     details: Device management via MQTT, REST, GQL, frontend and Telegram
+  - title: Notifications
+    details: Instance and Unit summaries, DataPipe alerts, and results of manual commands. A list in the UI, delivery to Telegram and SSE
   - title: Topic Managment
     details: Topic naming system for displaying data and/or fast interaction between IoT devices
   - title: Access Policies
