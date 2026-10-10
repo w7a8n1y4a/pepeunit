@@ -121,7 +121,7 @@
 [Telegram](https://telegram.org/) - популярный мессенджер, имеющий функционал [Telegram Bot](#telegram-bot).
 
 ## Telegram Bot
-[Telegram Bot API](https://core.telegram.org/bots/api) - открытый [API](#api) для взаимодействия с внешними по отношению к [Telegram](#telegram) сервисами, например: [Pepeunit](/conception/overview). Для интеграции с `Telegram Bot API` [Pepeunit](/conception/overview) использует пакет [AioGram](https://github.com/aiogram/aiogram) как клиент. `Telegram Bot API` позволяет [Backend](/deployment/dependencies/backend) верифицировать [Пользователей](/development-pepeunit/mechanics/roles#user). Управление ботами происходит через [Bot Father](https://t.me/BotFather).
+[Telegram Bot API](https://core.telegram.org/bots/api) - открытый [API](#api) для взаимодействия с внешними по отношению к [Telegram](#telegram) сервисами, например: [Pepeunit](/conception/overview). Для интеграции с `Telegram Bot API` [Pepeunit](/conception/overview) использует пакет [AioGram](https://github.com/aiogram/aiogram) как клиент. `Telegram Bot API` позволяет [Backend](/deployment/dependencies/backend) привязать [Telegram](#telegram) к [Пользователю](/development-pepeunit/mechanics/roles#user). Управление ботами происходит через [Bot Father](https://t.me/BotFather).
 
 ## YML
 `YML` или `YAML` - человекочитаемый формат данных, используемый для сериализации и конфигурации. Данный формат широко применяется в автоматизации и конвейерах для описания этапов и их параметров. [Pepeunit](/conception/overview) использует его для конвейеров данных.

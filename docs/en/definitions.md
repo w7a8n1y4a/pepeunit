@@ -163,7 +163,7 @@ The [Pepeunit](/en/conception/overview) [Backend](/en/deployment/dependencies/ba
 ## Telegram Bot
 [Telegram Bot API](https://core.telegram.org/bots/api) is an open [API](#api) for interacting with services external to [Telegram](#telegram), such as [Pepeunit](/en/conception/overview).  
 To integrate with the `Telegram Bot API`, [Pepeunit](/en/conception/overview) uses [AioGram](https://github.com/aiogram/aiogram) as a client.  
-`Telegram Bot API` allows the [Backend](/en/deployment/dependencies/backend) to verify [Users](/en/development-pepeunit/mechanics/roles#user).  
+`Telegram Bot API` allows the [Backend](/en/deployment/dependencies/backend) to link [Telegram](#telegram) to a [User](/en/development-pepeunit/mechanics/roles#user).  
 Bots are managed via [Bot Father](https://t.me/BotFather).
 
 ## YML

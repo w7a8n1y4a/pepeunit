@@ -29,14 +29,14 @@
 -- | -- | --
 `Daily summaries` | включён | Создаёт ежедневные сводки инстанса и [Unit](/definitions#unit)
 `HH:MM UTC` | `16:00` | Время сводок, `00:00`–`23:59` по UTC
-`Data pipe alerts` | включён | Живое обновление страницы и [Telegram](/definitions#telegram) для алертов [DataPipe](/user/datapipe/datapipe#alerts). Запись в списке и правило в конвейере остаются
+`Data pipe alerts` | включён | Живое обновление страницы для алертов [DataPipe](/user/datapipe/datapipe#alerts). В [Telegram](/definitions#telegram) сообщение уходит при включённом `Telegram delivery` и привязанном чате. Запись в списке и правило в конвейере остаются
 `Telegram delivery` | включён | Сообщения в [Telegram Bot](/definitions#telegram-bot). Список и живое обновление страницы остаются. Кнопка есть при включённом `PU_FF_TELEGRAM_BOT_ENABLE`
 
 Итоги ручных команд приходят всегда: интеграционные тесты, опрос [Instance](/definitions#instance), обновление [RepositoryRegistry](/definitions#repositoryregistry) и прошивок [Unit](/definitions#unit).
 
 ## Доставка
 
-Живое обновление открытой страницы и сообщение в [Telegram](/definitions#telegram) уходят верифицированному [Пользователю](/development-pepeunit/mechanics/roles#user). Сводка создаётся только ему и только при включённом `Daily summaries`. Алерт [DataPipe](/deployment/dependencies/datapipe) в список попадает в любом случае, а на страницу и в чат - когда включён `Data pipe alerts`.
+Живое обновление открытой страницы уходит любому [Пользователю](/development-pepeunit/mechanics/roles#user), кроме заблокированного, если для этого типа включена настройка. Сообщение в [Telegram](/definitions#telegram) уходит, когда у пользователя привязан чат и включён `Telegram delivery`. Сводка создаётся при включённом `Daily summaries`. Алерт [DataPipe](/deployment/dependencies/datapipe) в список попадает в любом случае, на страницу — когда включён `Data pipe alerts`, в чат — когда дополнительно включён `Telegram delivery` и чат привязан.
 
 В [Telegram Bot](/definitions#telegram-bot) команда `/alerts` открывает ваши уведомления. Короткий текст уходит в чат, по нажатию видна таблица, а у интеграционных тестов есть кнопка полного лога. Между сообщениями в один чат выдерживается пауза, у всего инстанса есть общий предел скорости. Числа задают [переменные Backend](/deployment/env-variables/backend).
 
@@ -55,5 +55,5 @@
 `UpdateUnitsFirmware` | Операция | Создатель [Repo](/definitions#repo) | Обновление прошивки [Unit](/definitions#unit) этого [Repo](/definitions#repo) с включённым автообновлением
 `UpdateAllUnitsFirmware` | Операция | [Администратор](/development-pepeunit/mechanics/roles#admin) | Обновление прошивки всех [Unit](/definitions#unit), которые разрешили автообновление от [Repo](/definitions#repo) с включённым `Auto-update`
 
-- Периодические создаются раз в сутки, в минуту из `HH:MM UTC`, у верифицированного [Пользователя](/development-pepeunit/mechanics/roles#user) с включённым `Daily summaries`.
+- Периодические создаются раз в сутки, в минуту из `HH:MM UTC`, у [Пользователя](/development-pepeunit/mechanics/roles#user) с включённым `Daily summaries`. Заблокированному пользователю сводка не создаётся.
 - Операция оставляет две записи: `Running` при запуске и `Success` или `Error` после завершения. В таблице статус, время старта, время окончания и короткая строка результата.

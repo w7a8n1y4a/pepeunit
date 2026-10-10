@@ -29,7 +29,7 @@ Toggle | Default | What it does
 -- | -- | --
 `Daily summaries` | on | Creates daily summaries of the instance and [Units](/en/definitions#unit)
 `HH:MM UTC` | `16:00` | Summary time, `00:00`–`23:59` UTC
-`Data pipe alerts` | on | Live page updates and [Telegram](/en/definitions#telegram) for [DataPipe](/en/user/datapipe/datapipe#alerts) alerts. The record in the list and the rule in the pipeline stay
+`Data pipe alerts` | on | Live page updates for [DataPipe](/en/user/datapipe/datapipe#alerts) alerts. A [Telegram](/en/definitions#telegram) message is sent when `Telegram delivery` is on and a chat is linked. The record in the list and the rule in the pipeline stay
 `Telegram delivery` | on | Messages in the [Telegram Bot](/en/definitions#telegram-bot). The list and live page updates stay. The button is present when `PU_FF_TELEGRAM_BOT_ENABLE` is on
 
 <a id="command-results"></a>
@@ -38,7 +38,7 @@ Manual command results always arrive: integration tests, [Instance](/en/definiti
 
 ## Delivery
 
-A live update of the open page and a message in [Telegram](/en/definitions#telegram) go to a verified [User](/en/development-pepeunit/mechanics/roles#user). A summary is created only for them and only when `Daily summaries` is on. A [DataPipe](/en/deployment/dependencies/datapipe) alert always lands in the list, and reaches the page and the chat when `Data pipe alerts` is on.
+A live update of the open page goes to any [User](/en/development-pepeunit/mechanics/roles#user) who is not blocked, when the setting for that type is on. A [Telegram](/en/definitions#telegram) message is sent when the user has a linked chat and `Telegram delivery` is on. A summary is created when `Daily summaries` is on. A [DataPipe](/en/deployment/dependencies/datapipe) alert always lands in the list, reaches the page when `Data pipe alerts` is on, and reaches the chat when `Telegram delivery` is also on and a chat is linked.
 
 In the [Telegram Bot](/en/definitions#telegram-bot), the `/alerts` command opens your notifications. The short text goes to the chat, a press shows the table, and integration tests have a full-log button. There is a pause between messages to one chat, and the whole instance has a shared rate limit. The numbers are set by [Backend variables](/en/deployment/env-variables/backend).
 
@@ -57,5 +57,5 @@ Type | Kind | Who | Description
 `UpdateUnitsFirmware` | Operation | Creator of the [Repo](/en/definitions#repo) | Firmware update of [Units](/en/definitions#unit) of this [Repo](/en/definitions#repo) that have auto-update on
 `UpdateAllUnitsFirmware` | Operation | [Administrator](/en/development-pepeunit/mechanics/roles#admin) | Firmware update of every [Unit](/en/definitions#unit) that allowed auto-update from a [Repo](/en/definitions#repo) with `Auto-update` on
 
-- Periodic ones are created once a day, at the minute from `HH:MM UTC`, for a verified [User](/en/development-pepeunit/mechanics/roles#user) with `Daily summaries` on.
+- Periodic ones are created once a day, at the minute from `HH:MM UTC`, for a [User](/en/development-pepeunit/mechanics/roles#user) with `Daily summaries` on. A blocked user does not get a summary.
 - An operation leaves two records: `Running` at start and `Success` or `Error` after it finishes. The table has the status, start time, end time, and a short result line.
