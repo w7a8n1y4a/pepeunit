@@ -1,5 +1,9 @@
 # Nginx
 
+:::warning
+Поток уведомлений `GET /pepeunit/api/v1/notifications/stream` отвечает как SSE: у ответа нет `Content-Length`, и соединение остаётся открытым. Каждый nginx на пути к бэкенду должен проксировать его без буферизации: `proxy_http_version 1.1`, `proxy_buffering off`, `proxy_cache off`, а `proxy_read_timeout` и `send_timeout` должны быть длинными. Иначе nginx копит ответ, пока не заполнится буфер, и клиент не получает даже заголовки. Заголовок `X-Accel-Buffering: no`, который отдаёт бэкенд, забирает ближайший nginx и дальше не передаёт, поэтому внешний reverse proxy настраивается так же.
+:::
+
 ## Nginx Docker Compose
 
 Объединяет [Backend](/deployment/dependencies/backend), [Frontend](/deployment/dependencies/frontend) и [Grafana](/deployment/dependencies/grafana) в единый `80` порт.
@@ -70,8 +74,12 @@ http {
             }
 
             proxy_pass http://backend:5000;
-            proxy_read_timeout 90;
+            proxy_http_version 1.1;
+            proxy_buffering off;
+            proxy_cache off;
+            proxy_read_timeout 3600s;
             proxy_connect_timeout 90;
+            send_timeout 3600s;
             proxy_redirect off;
             proxy_set_header X-Real-IP $remote_addr;
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -117,11 +125,17 @@ server {
 
     location / {
         proxy_pass http://192.168.0.22:80;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 3600s;
+        send_timeout 3600s;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto https;
         proxy_set_header X-Forwarded-Host $host;
+        proxy_set_header Connection "";
 
         client_max_body_size 20M;
     }
@@ -138,6 +152,12 @@ server {
 
     location /pepeunit {
         proxy_pass http://192.168.0.22:80;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 3600s;
+        send_timeout 3600s;
+        proxy_set_header Connection "";
     }
 }
 ```
@@ -171,8 +191,12 @@ server {
         }
 
         proxy_pass http://192.168.0.22:5291;
-        proxy_read_timeout 90;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 3600s;
         proxy_connect_timeout 90;
+        send_timeout 3600s;
         proxy_redirect off;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -210,6 +234,12 @@ server {
 
     location /pepeunit {
         proxy_pass http://192.168.0.15:5291;
+        proxy_http_version 1.1;
+        proxy_buffering off;
+        proxy_cache off;
+        proxy_read_timeout 3600s;
+        send_timeout 3600s;
+        proxy_set_header Connection "";
     }
 }
 ```
