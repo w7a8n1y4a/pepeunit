@@ -80,12 +80,14 @@
 
 ## Сравнение Инстансов
 
-`Pepeunit` публикует состояние текущего инстанса и собирает состояния известных соседей. В разделе [Instances](/user/instance/instances) можно сравнить версии, лимиты, контакты и результат [интеграционных тестов](/user/operation-task/integration-tests). [Администратор](/development-pepeunit/mechanics/roles#admin) добавляет новые инстансы по ссылке из [About](/user/instance/add-instance#ссылка-about) и запускает [глобальные команды](/user/operation-task/operation-tasks#типы-задач).
+`Pepeunit` публикует состояние текущего инстанса и собирает состояния известных соседей. В разделе [Instances](/user/instance/instances) можно сравнить версии, лимиты, контакты и результат [интеграционных тестов](/user/notification/integration-tests). [Администратор](/development-pepeunit/mechanics/roles#admin) добавляет новые инстансы по ссылке из [About](/user/instance/add-instance#ссылка-about) и запускает [глобальные команды](/user/notification/notifications#итоги-команд).
+
+[Уведомления](/user/notification/notifications) собирают ежедневные сводки, алерты [DataPipe](/user/datapipe/datapipe#alerts) и итоги этих команд. Список открывается в интерфейсе, доставка в [Telegram Bot](/definitions#telegram-bot) настраивается отдельно.
 
 :::info
 [Просмотр Instances](/user/instance/instances)
 
-[Operation Tasks](/user/operation-task/operation-tasks)
+[Уведомления](/user/notification/notifications)
 :::
 
 ## Федерация

@@ -44,7 +44,7 @@
     ```bash
     docker compose up -d
     ```
-1. После корректного запуска бекенда, выполните от имени [Администратора](/development-pepeunit/mechanics/roles#admin) запуск [интеграционных тестов](/user/operation-task/integration-tests). Если будут возникать ошибки, посмотрите [логи связанных контейнеров](/deployment/docker/commands) или напишите `issue`
+1. После корректного запуска бекенда, выполните от имени [Администратора](/development-pepeunit/mechanics/roles#admin) запуск [интеграционных тестов](/user/notification/integration-tests). Если будут возникать ошибки, посмотрите [логи связанных контейнеров](/deployment/docker/commands) или напишите `issue`
 
 ## Обновление `1.2.1` -> `1.3.0`
 
@@ -82,4 +82,4 @@
     ```bash
     sudo ./backup.sh restore backups/2026-09-12_04-05-00_v1.2.1_pepeunit_backup.tar
     ```
-1. После корректного запуска бекенда, выполните от имени [Администратора](/development-pepeunit/mechanics/roles#admin) запуск [интеграционных тестов](/user/operation-task/integration-tests). Если будут возникать ошибки, посмотрите [логи связанных контейнеров](/deployment/docker/commands) или напишите `issue`
+1. После корректного запуска бекенда, выполните от имени [Администратора](/development-pepeunit/mechanics/roles#admin) запуск [интеграционных тестов](/user/notification/integration-tests). Если будут возникать ошибки, посмотрите [логи связанных контейнеров](/deployment/docker/commands) или напишите `issue`

@@ -29,6 +29,8 @@ features:
     details: Открытый реестр репозиториев для создания Unit
   - title: IoT Device Management
     details: Управление устройствами через MQTT, REST, GQL, Frontend и Telegram
+  - title: Notifications
+    details: Сводки инстанса и Unit, алерты DataPipe и итоги ручных команд. Список в интерфейсе, доставка в Telegram и SSE
   - title: Topic Managment
     details: Система именования тем для отбражения данных и/или быстрого взаимодействия между IoT устройствами
   - title: Access Policies

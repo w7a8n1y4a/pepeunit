@@ -31,6 +31,6 @@
 `Version` | Версия [Backend](/deployment/dependencies/backend) внешнего инстанса
 `Units` | Число публичных [Unit](/definitions#unit)
 `Users` | Число [Пользователей](/development-pepeunit/mechanics/roles#user)
-`Tests` | Статус последних [интеграционных тестов](/user/operation-task/integration-tests) и процент успешности
+`Tests` | Статус последних [интеграционных тестов](/user/notification/integration-tests) и процент успешности
 
 Пустой список показывает текст `No instances found`.

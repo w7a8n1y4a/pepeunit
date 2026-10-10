@@ -48,7 +48,7 @@ https://domain.com/pepeunit/api/v1/instances/current
 
 1. `Trust` - начать опрос инстанса и принимать от него данные
 1. `Block` - прекратить опрос. Ответам такого инстанса текущий инстанс не доверяет
-1. `Scan` - принудительно опросить один доверенный инстанс. Создаётся [Operation Task](/definitions#operation-task) типа `Scan Instance`
+1. `Scan` - принудительно опросить один доверенный инстанс. В [уведомлениях](/user/notification/notifications) появляется запись типа `Scan Instance`
 1. `Delete` - удалить запись
 
 :::warning
@@ -59,7 +59,7 @@ https://domain.com/pepeunit/api/v1/instances/current
 
 В списке `Instances` кнопка `Scan All` запускает опрос всех записей со статусом `Trust`. Задача растягивается примерно на `10` минут, чтобы не ударить по сети сразу. Повторный запуск той же команды недоступен в течение `10` минут.
 
-Создаётся [Operation Task](/definitions#operation-task) типа `Scan All Instances`. Результат выглядит как `Scanned N, failed M`.
+В [уведомлениях](/user/notification/notifications) появляется запись типа `Scan All Instances`. Результат выглядит как `Scanned N, failed M`.
 
 ## Автоматический опрос и хранение
 

@@ -23,7 +23,7 @@
 
 ## Значение параметров
 
-Всего есть 4 основных этапа конвейера: `active_period`, `filtres`, `transformations` и `processing_policy`
+Конвейер состоит из этапов `active_period`, `filters`, `transformations`, `processing_policy` и необязательного `alerts`
 
 ## active_period
 
@@ -39,7 +39,7 @@
 `start` | Дата в формате `2023-11-15T12:43:56Z` | Обязателен для типов: `DateRange` и `FromDate` | Время начала периода `DateRange` или время начала работы `FromDate`
 `end` | Дата в формате `2023-11-15T12:43:56Z` | Обязателен для типов: `DateRange` и `ToDate` | Время конца периода `DateRange` или время конца работы `ToDate`
 
-## filtres
+## filters
 
 Название параметра | Возможные значения | Обязательный? | Комментарий
 -- | -- | -- | --
@@ -77,3 +77,22 @@
 `n_records_count` | Число хранимых записей `0 < n_records_count =< 1024` | Обязателен только для `policy_type` = `NRecords` | Определяет, сколько записей будет храниться
 `time_window_size` | Одно из значений: `[60, 300, 600, 900, 1200, 1800, 3600, 7200, 10800, 14400, 21600, 28800, 43200, 86400]` | Обязателен для `policy_type` = `TimeWindow` или `Aggregation` | Размер окна в секундах, оно должно нацело делить `86400`
 `aggregation_functions` | `Avg`, `Min`, `Max`, `Sum` | Обязателен для `policy_type` = `Aggregation` | Функция, на основе которой будет рассычитано итоговое значение, на основе `time_window_size`
+
+## alerts
+
+Необязательный этап. [DataPipe](/deployment/dependencies/datapipe) проверяет значение, которое уже прошло `filters` и `transformations`, и пишет [уведомление](/user/notification/notifications#datapipe-alert) создателю [Unit](/definitions#unit). Правила похожи на `filters`, но смысл обратный: `WhiteList` срабатывает на значение вне списка, `BlackList` на значение внутри списка. `Min` срабатывает ниже `threshold_min`, `Max` выше `threshold_max`, `Range` вне обоих границ.
+
+`max_rate` и `last_unique_check` из `filters` решают, какие значения вообще дойдут до этой проверки. Первое уведомление уходит после `consecutive_count` нарушений подряд. Пока значение остаётся нарушением, следующее уведомление того же [UnitNode](/definitions#unitnode) приходит не чаще чем раз в `max_frequency` секунд. Обычное значение сбрасывает счётчик `consecutive_count`.
+
+Этап работает при включённом `PU_FF_NOTIFICATION_ENABLE` у [Backend](/deployment/dependencies/backend) и [DataPipe](/deployment/dependencies/datapipe). Выключенный `Data pipe alerts` в [настройках уведомлений](/user/notification/notifications#настройки) оставляет запись в списке и правило в конвейере, живое обновление страницы и [Telegram](/definitions#telegram) для этого типа прекращаются.
+
+Название параметра | Возможные значения | Обязательный? | Комментарий
+-- | -- | -- | --
+`is_enabled` | `true`, `false` | Нет, по умолчанию `true` | `false` выключает проверку
+`type_value_filtering` | `WhiteList`, `BlackList` | Нужен он или `type_value_threshold` | Тип списка
+`filtering_values` | Список чисел или строк | Обязателен, если задан `type_value_filtering` | Тип значений берётся из `filters.type_input_value`
+`type_value_threshold` | `Min`, `Max`, `Range` | Нужен он или `type_value_filtering` | Только при `filters.type_input_value` = `Number`
+`threshold_min` | Целое | Обязателен для `Min` и `Range` | Для `Range` меньше `threshold_max`
+`threshold_max` | Целое | Обязателен для `Max` и `Range` | Для `Range` больше `threshold_min`
+`consecutive_count` | Целое `1`–`1024`, по умолчанию `1` | Нет | Сколько нарушений подряд нужно до первого уведомления
+`max_frequency` | Целое `10`–`86400`, по умолчанию `10` | Нет | Минимум секунд между двумя уведомлениями одного [UnitNode](/definitions#unitnode)

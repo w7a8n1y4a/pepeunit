@@ -110,3 +110,31 @@ processing_policy:
   aggregation_functions: Avg
 ```
 :::
+
+## Alerts
+
+Например, температура уже копится политикой `LastValue`, и нужно уведомление, когда после преобразований значение три раза подряд оказывается вне `18`–`26`:
+
+Уведомление уходит создателю [Unit](/definitions#unit). Пока температура остаётся вне диапазона, следующее приходит не чаще раза в минуту. Значение внутри диапазона обнуляет счётчик.
+
+:::tip
+Блок `alerts` смотрит на значение, которое прошло `filters` и `transformations`. Сам конвейер при этом продолжает копить данные.
+```yml
+active_period:
+  type: Permanent
+filters:
+  type_input_value: Number
+  max_rate: 0
+  last_unique_check: false
+  max_size: 50
+processing_policy:
+  policy_type: LastValue
+alerts:
+  is_enabled: true
+  type_value_threshold: Range
+  threshold_min: 18
+  threshold_max: 26
+  consecutive_count: 3
+  max_frequency: 60
+```
+:::
