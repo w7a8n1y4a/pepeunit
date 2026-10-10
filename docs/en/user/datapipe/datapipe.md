@@ -82,21 +82,23 @@ Parameter name | Possible values | Required? | Comment
 
 ## alerts
 
-Optional stage. [DataPipe](/en/deployment/dependencies/datapipe) checks a value that has already passed `filters` and `transformations`, and writes a [notification](/en/user/notification/notifications#datapipe-alert) to the creator of the [Unit](/en/definitions#unit). The rules are similar to `filters`, but the meaning is reversed: `WhiteList` fires on a value outside the list, `BlackList` on a value inside the list. `Min` fires below `threshold_min`, `Max` above `threshold_max`, and `Range` outside both bounds.
+Optional stage. [DataPipe](/en/deployment/dependencies/datapipe) checks a value that has already passed `filters` and `transformations`, and writes a [notification](/en/user/notification/notifications#datapipe-alert) to the creator of the [Unit](/en/definitions#unit). The condition is the same as the `filters` stage: a notification is sent for a value that the same filter would keep.
 
-`max_rate` and `last_unique_check` from `filters` decide which values reach this check at all. The first notification is sent after `consecutive_count` violations in a row. While the value remains a violation, the next notification for the same [UnitNode](/en/definitions#unitnode) arrives no more often than once every `max_frequency` seconds. A normal value resets the `consecutive_count` counter.
+`WhiteList` fires when the value is in `filtering_values`. `BlackList` fires when the value is absent from the list. `Min` fires at or above `threshold_min`, `Max` at or below `threshold_max`, and `Range` when the value is inside both bounds. When both a list and a threshold are set, the value must pass both rules. When neither `type_value_filtering` nor `type_value_threshold` is set, every value creates a notification: `is_enabled` is enough.
+
+`max_rate` and `last_unique_check` from `filters` decide which values reach this check at all. The first notification is sent after `consecutive_count` matches in a row. While the value keeps matching, the next notification for the same [UnitNode](/en/definitions#unitnode) arrives no more often than once every `max_frequency` seconds. A value that does not match the rule resets the `consecutive_count` counter.
 
 The stage works when `PU_FF_NOTIFICATION_ENABLE` is on for the [Backend](/en/deployment/dependencies/backend) and [DataPipe](/en/deployment/dependencies/datapipe). Turning off `Data pipe alerts` in [notification settings](/en/user/notification/notifications#settings) keeps the record in the list and the rule in the pipeline. Live page updates and [Telegram](/en/definitions#telegram) for this type stop.
 
 Parameter name | Possible values | Required? | Comment
 -- | -- | -- | --
 `is_enabled` | `true`, `false` | No, `true` by default | `false` turns the check off
-`type_value_filtering` | `WhiteList`, `BlackList` | Either this or `type_value_threshold` is needed | List type
+`type_value_filtering` | `WhiteList`, `BlackList` | No | List type. Without it and without `type_value_threshold`, any value matches
 `filtering_values` | List of numbers or strings | Required if `type_value_filtering` is set | Value type is taken from `filters.type_input_value`
-`type_value_threshold` | `Min`, `Max`, `Range` | Either this or `type_value_filtering` is needed | Only when `filters.type_input_value` = `Number`
+`type_value_threshold` | `Min`, `Max`, `Range` | No | Only when `filters.type_input_value` = `Number`. Without it and without `type_value_filtering`, any value matches
 `threshold_min` | Integer | Required for `Min` and `Range` | For `Range`, less than `threshold_max`
 `threshold_max` | Integer | Required for `Max` and `Range` | For `Range`, greater than `threshold_min`
-`consecutive_count` | Integer `1`–`1024`, `1` by default | No | How many violations in a row are needed before the first notification
+`consecutive_count` | Integer `1`–`1024`, `1` by default | No | How many matches in a row are needed before the first notification
 `max_frequency` | Integer `10`–`86400`, `10` by default | No | Minimum seconds between two notifications of the same [UnitNode](/en/definitions#unitnode)
 
 

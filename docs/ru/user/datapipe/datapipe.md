@@ -80,19 +80,21 @@
 
 ## alerts
 
-Необязательный этап. [DataPipe](/deployment/dependencies/datapipe) проверяет значение, которое уже прошло `filters` и `transformations`, и пишет [уведомление](/user/notification/notifications#datapipe-alert) создателю [Unit](/definitions#unit). Правила похожи на `filters`, но смысл обратный: `WhiteList` срабатывает на значение вне списка, `BlackList` на значение внутри списка. `Min` срабатывает ниже `threshold_min`, `Max` выше `threshold_max`, `Range` вне обоих границ.
+Необязательный этап. [DataPipe](/deployment/dependencies/datapipe) проверяет значение, которое уже прошло `filters` и `transformations`, и пишет [уведомление](/user/notification/notifications#datapipe-alert) создателю [Unit](/definitions#unit). Условие совпадает с этапом `filters`: уведомление уходит на значение, которое такой же фильтр пропустил бы.
 
-`max_rate` и `last_unique_check` из `filters` решают, какие значения вообще дойдут до этой проверки. Первое уведомление уходит после `consecutive_count` нарушений подряд. Пока значение остаётся нарушением, следующее уведомление того же [UnitNode](/definitions#unitnode) приходит не чаще чем раз в `max_frequency` секунд. Обычное значение сбрасывает счётчик `consecutive_count`.
+`WhiteList` срабатывает, когда значение есть в `filtering_values`. `BlackList` срабатывает, когда значения в списке нет. `Min` срабатывает при значении больше либо равном `threshold_min`, `Max` при значении меньше либо равном `threshold_max`, `Range` когда значение внутри обеих границ. Если заданы и список, и порог, значение должно пройти оба правила. Если не заданы ни `type_value_filtering`, ни `type_value_threshold`, уведомление создаётся на любое значение: достаточно `is_enabled`.
+
+`max_rate` и `last_unique_check` из `filters` решают, какие значения вообще дойдут до этой проверки. Первое уведомление уходит после `consecutive_count` совпадений подряд. Пока значение остаётся совпадением, следующее уведомление того же [UnitNode](/definitions#unitnode) приходит не чаще чем раз в `max_frequency` секунд. Значение, которое не совпало с правилом, сбрасывает счётчик `consecutive_count`.
 
 Этап работает при включённом `PU_FF_NOTIFICATION_ENABLE` у [Backend](/deployment/dependencies/backend) и [DataPipe](/deployment/dependencies/datapipe). Выключенный `Data pipe alerts` в [настройках уведомлений](/user/notification/notifications#настройки) оставляет запись в списке и правило в конвейере, живое обновление страницы и [Telegram](/definitions#telegram) для этого типа прекращаются.
 
 Название параметра | Возможные значения | Обязательный? | Комментарий
 -- | -- | -- | --
 `is_enabled` | `true`, `false` | Нет, по умолчанию `true` | `false` выключает проверку
-`type_value_filtering` | `WhiteList`, `BlackList` | Нужен он или `type_value_threshold` | Тип списка
+`type_value_filtering` | `WhiteList`, `BlackList` | Нет | Тип списка. Без него и без `type_value_threshold` подходит любое значение
 `filtering_values` | Список чисел или строк | Обязателен, если задан `type_value_filtering` | Тип значений берётся из `filters.type_input_value`
-`type_value_threshold` | `Min`, `Max`, `Range` | Нужен он или `type_value_filtering` | Только при `filters.type_input_value` = `Number`
+`type_value_threshold` | `Min`, `Max`, `Range` | Нет | Только при `filters.type_input_value` = `Number`. Без него и без `type_value_filtering` подходит любое значение
 `threshold_min` | Целое | Обязателен для `Min` и `Range` | Для `Range` меньше `threshold_max`
 `threshold_max` | Целое | Обязателен для `Max` и `Range` | Для `Range` больше `threshold_min`
-`consecutive_count` | Целое `1`–`1024`, по умолчанию `1` | Нет | Сколько нарушений подряд нужно до первого уведомления
+`consecutive_count` | Целое `1`–`1024`, по умолчанию `1` | Нет | Сколько совпадений подряд нужно до первого уведомления
 `max_frequency` | Целое `10`–`86400`, по умолчанию `10` | Нет | Минимум секунд между двумя уведомлениями одного [UnitNode](/definitions#unitnode)
