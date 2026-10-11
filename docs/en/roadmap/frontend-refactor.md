@@ -61,3 +61,22 @@ When opening an instance address in the browser or opening the pepeunit app on a
     - binaries will include the top 10 instances by users by default
     - allowlists, blocklists, and manual add
 - Link to the docs
+
+## Honeycomb
+
+The field is one instance. Containment stays visible: a registry is land, a Repo is a patch, a Unit is a cell. An edge appears only while a cell is open, and runs from jack to jack.
+
+| Entity | Where it sits on the field |
+|---|---|
+| Instance | Another field. The switcher moves the camera there |
+| RepositoryRegistry | Land: address, platform, sync |
+| Repo | A patch inside the land |
+| Unit | A cell |
+| UnitNode | A jack inside an opened cell |
+| UnitNodeEdge | A wire between jacks of the opened cell |
+| DataPipe | A mark and the source on the jack |
+| Visibility | The stroke of the cell or the jack |
+| User | The one looking. Their own cells are warmer |
+| Permission | The list "who can open this" on an opened cell, Repo, or jack. The agent is a person or a Unit |
+| Dashboard and panel | A glass layer over the field. A lens sits on a jack and leaves with the layer |
+| Notification | A strip at the edge. A tap moves the camera to the cell |
