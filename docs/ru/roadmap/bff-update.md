@@ -6,6 +6,9 @@
 1. В GET /instances/current диапазон допустимых версий клиента
 1. Во все внешние схемы надо прописать utc 0
 1. Перевод ввода пользователя на unicode
+1. pu_available_topic_symbols - будет сделана статикой внутри бекенда, неизменяемой
+1. pu_available_name_entity_symbols - потеряет смысл
+1. pu_available_password_symbols - на удаление
 
 ## Глобальная авторизация
 
@@ -16,8 +19,6 @@
     - нужно придумать механизм присвоения owner, через ключи и env бекенда
     - часть функционала будет доступна только owner
 1. Из-за глобальности аккаунтов, потребуется улучшить производительность и сделать улучшенное дросселирование/лимитирование по созданию аккаунтов и их апдейту.
-    - апдейт не чаще чем 1 раз в час
-    - нужно установить общий лимит на число пользователей, чтобы инстанс не упал при массовых ddos
 
 ## Картинки и расширение схем данных
 
@@ -47,14 +48,18 @@
         - icon_uuid - линк на картинку инстанса
         - pu_user_max_group - максимальное число групп на 1 аккаунт, по умолчанию 16
         - pu_user_max_count - максимальное число записей user
+        - pu_user_max_update_rate - от 600 с до 7200с, по умолчанию 900 с, отбивает если клиент слишком часто обновляет свои данные
+        - pu_auth_token_expiration - переезажает
         - pu_min_interval_sync_repository - переезжает
         - pu_state_send_interval - переезжает
         - pu_max_external_repo_size - переезжает
-        - pu_max_cipher_length - перезжает
+        - pu_max_cipher_length - перезжает, лимит можно увеличить до 5_000_000, по умолчанию оставить 1_000_000
+        - pu_http_timeout - переезжает
+        - pu_http_connect_timeout - переезжает
         - pu_instance_max_state_size - переезжает
         - pu_instance_retention_days - переезжает
-        - pu_admin_email - переезжает
-        - pu_admin_tg - пеерзжает
+        - pu_admin_email -> pu_owner_email - переезжает
+        - pu_admin_tg -> pu_owner_tg - пеерзжает
         - pu_unit_log_expiration - переезжает
         - pu_max_pagination_size - переезжает
         - pu_notification_telegram_user_interval_seconds - переезжает
@@ -72,6 +77,7 @@
         - они работает внутри emqx
         - они устанавливают в emqx через rest ручки
         - для синхронизации этого раздела, надо будет отдельную задачу создавать в OperationTasks
+        - pu_mqtt_keepalive
         - pu_mqtt_max_clients
         - pu_mqtt_max_client_connection_rate
         - pu_mqtt_max_client_id_len
