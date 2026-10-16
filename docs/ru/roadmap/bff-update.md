@@ -24,10 +24,10 @@
         - pu_user_max_update_rate - от 600 с до 7200с, по умолчанию 900 с, отбивает если клиент слишком часто обновляет свои данные
         - pu_auth_token_expiration - переезажает
         - pu_min_interval_sync_repository - переезжает
-        - pu_state_send_interval - переезжает
+        - pu_state_send_interval - переезжает, будет работать только для новых Unit, старые Unit оставят существующее значение
         - pu_max_external_repo_size - переезжает
         - pu_max_cipher_length - перезжает, лимит можно увеличить до 5_000_000, по умолчанию оставить 1_000_000
-        - pu_http_timeout - переезжает
+        - pu_http_timeout - переезжает, укажем в документации, что tg бот изменит только после перезапуска бекенд контейнера
         - pu_http_connect_timeout - переезжает
         - pu_instance_max_state_size - переезжает
         - pu_instance_retention_days - переезжает
@@ -36,8 +36,8 @@
         - pu_unit_log_expiration - переезжает
         - pu_max_pagination_size - переезжает
         - pu_time_window_sizes - станет статикой внутри бекенда, не имеет смысла для изменения
-        - pu_notification_telegram_user_interval_seconds - переезжает
-        - pu_notification_telegram_instance_rate - переезжает
+        - pu_notification_telegram_user_interval_seconds - переезжает, обновится только после ребута бекенда
+        - pu_notification_telegram_instance_rate - переезжает, обновится только после ребута бекенда
         - pu_notification_telegram_alert_text_limit - переезжает
         - pu_notification_small_text_limit - переезжает
         - pu_notification_data_pipe_alert_batch - переезжает
@@ -52,7 +52,6 @@
         - они работает внутри emqx
         - они устанавливают в emqx через rest ручки
         - для синхронизации этого раздела, надо будет отдельную задачу создавать в OperationTasks
-        - pu_mqtt_keepalive
         - pu_mqtt_max_clients
         - pu_mqtt_max_client_connection_rate
         - pu_mqtt_max_client_id_len
