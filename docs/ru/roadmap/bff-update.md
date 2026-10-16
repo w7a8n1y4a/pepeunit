@@ -9,7 +9,7 @@
 1. pu_available_topic_symbols - будет сделана статикой внутри бекенда, неизменяемой
 1. pu_available_name_entity_symbols - на удаление
 1. pu_available_password_symbols - на удаление
-1. pu_telegram_del_old_webhook - проанализировать, нужна ли она
+1. pu_telegram_del_old_webhook - заменить на алгоритм, саму переменную удалить
 
 ## Добавление instance_settings и мерж сервисов
 
@@ -23,6 +23,8 @@
         - новое pu_user_max_group - максимальное число групп на 1 аккаунт, по умолчанию 16
         - новое pu_user_max_count - максимальное число записей user
         - новое pu_user_max_update_rate - от 600 с до 7200с, по умолчанию 900 с, отбивает если клиент слишком часто обновляет свои данные
+        - новое pu_instance_lat - широта, по умолчанию None
+        - новое pu_instance_lon - долгота, по умолчанию None
         - pu_ff_telegram_bot_enable - переезажает
         - pu_ff_grafana_integration_enable - переезажает
         - pu_ff_prometheus_enable - переезажает
