@@ -9,6 +9,7 @@
 1. pu_available_topic_symbols - будет сделана статикой внутри бекенда, неизменяемой
 1. pu_available_name_entity_symbols - на удаление
 1. pu_available_password_symbols - на удаление
+1. pu_telegram_del_old_webhook - проанализировать, нужна ли она
 
 ## Добавление instance_settings
 
@@ -19,6 +20,15 @@
     - переменные будут динамически подгружаться при вызовах
     - состав полей
         - icon_uuid - линк на картинку инстанса
+        - pu_ff_telegram_bot_enable - переезажает
+        - pu_ff_grafana_integration_enable - переезажает
+        - pu_ff_prometheus_enable - переезажает
+        - pu_ff_federation_enable - переезажает
+        - pu_ff_notification_enable - переезажает
+        - pu_ff_datapipe_enable - переезжает, но потребуется научить datapipe смотреть иногда в постгрес
+        - pu_ff_datapipe_default_last_value_enable - переезжает
+        - pu_log_format - переезажает
+        - pu_min_log_level - переезажает
         - pu_user_max_group - максимальное число групп на 1 аккаунт, по умолчанию 16
         - pu_user_max_count - максимальное число записей user
         - pu_user_max_update_rate - от 600 с до 7200с, по умолчанию 900 с, отбивает если клиент слишком часто обновляет свои данные
@@ -27,7 +37,7 @@
         - pu_state_send_interval - переезжает, будет работать только для новых Unit, старые Unit оставят существующее значение
         - pu_max_external_repo_size - переезжает
         - pu_max_cipher_length - перезжает, лимит можно увеличить до 5_000_000, по умолчанию оставить 1_000_000
-        - pu_http_timeout - переезжает, укажем в документации, что tg бот изменит только после перезапуска бекенд контейнера
+        - pu_http_timeout - переезжает, обновится только после ребута бекенд
         - pu_http_connect_timeout - переезжает
         - pu_instance_max_state_size - переезжает
         - pu_instance_retention_days - переезжает
@@ -52,6 +62,7 @@
         - они работает внутри emqx
         - они устанавливают в emqx через rest ручки
         - для синхронизации этого раздела, надо будет отдельную задачу создавать в OperationTasks
+        - pu_mqtt_keepalive - обновится только после ребута бекенда
         - pu_mqtt_max_clients
         - pu_mqtt_max_client_connection_rate
         - pu_mqtt_max_client_id_len
@@ -62,6 +73,7 @@
         - pu_mqtt_max_topic_levels
         - pu_mqtt_max_len_message_queue
         - pu_mqtt_max_topic_alias
+1. Появляется функционал ребута инстанса
 
 ## Глобальная авторизация
 
