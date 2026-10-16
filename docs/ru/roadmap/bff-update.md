@@ -60,6 +60,8 @@
         - pu_telegram_git_hash_length - переезжает
         - pu_telegram_bot_link - переезжает
         - pu_grafana_limit_unit_node_per_one_panel - переезжает
+        - pu_github_token_name - перезжает
+        - pu_github_token_pat - переезжает
         - почти все не сенсетив данные
     - поля с уникальной логикой - mqtt
         - они работает внутри emqx
