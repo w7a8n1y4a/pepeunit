@@ -220,6 +220,7 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       text: 'Дорожная карта',
       collapsed: true,
       items: [
+        { text: '> 1.0.0 BFF изменения', link: '/roadmap/bff-update' },
         { text: '> 1.0.0 Преобразование фронтенда', link: '/roadmap/frontend-refactor' },
         { text: '> 1.0.0 MessageProcessor', link: '/roadmap/message-processor' },
         { text: '> 2.0.0 Федерация', link: '/roadmap/federation' },
