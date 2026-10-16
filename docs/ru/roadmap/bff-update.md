@@ -52,6 +52,7 @@
         - pu_notification_small_text_limit - переезжает
         - pu_notification_data_pipe_alert_batch - переезжает
         - pu_notification_stream_maxlen - переезжает
+        - pu_telegram_bot_mode - переезжает, обновится только после ребута бекенда
         - pu_telegram_items_per_page - переезжает
         - pu_telegram_header_entity_length - переезжает
         - pu_telegram_git_hash_length - переезжает
@@ -74,6 +75,9 @@
         - pu_mqtt_max_len_message_queue
         - pu_mqtt_max_topic_alias
 1. Появляется функционал ребута инстанса
+    - только owner
+    - через OperationTasks
+    - в момент старта инстанс будет проставлять то что он успешно запустился
 
 ## Глобальная авторизация
 
