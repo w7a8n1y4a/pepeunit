@@ -20,6 +20,9 @@
     - переменные будут динамически подгружаться при вызовах
     - состав полей
         - icon_uuid - линк на картинку инстанса
+        - новое pu_user_max_group - максимальное число групп на 1 аккаунт, по умолчанию 16
+        - новое pu_user_max_count - максимальное число записей user
+        - новое pu_user_max_update_rate - от 600 с до 7200с, по умолчанию 900 с, отбивает если клиент слишком часто обновляет свои данные
         - pu_ff_telegram_bot_enable - переезажает
         - pu_ff_grafana_integration_enable - переезажает
         - pu_ff_prometheus_enable - переезажает
@@ -29,9 +32,6 @@
         - pu_ff_datapipe_default_last_value_enable - переезжает
         - pu_log_format - переезажает
         - pu_min_log_level - переезажает
-        - pu_user_max_group - максимальное число групп на 1 аккаунт, по умолчанию 16
-        - pu_user_max_count - максимальное число записей user
-        - pu_user_max_update_rate - от 600 с до 7200с, по умолчанию 900 с, отбивает если клиент слишком часто обновляет свои данные
         - pu_auth_token_expiration - переезажает
         - pu_min_interval_sync_repository - переезжает
         - pu_state_send_interval - переезжает, будет работать только для новых Unit, старые Unit оставят существующее значение
@@ -52,6 +52,8 @@
         - pu_notification_small_text_limit - переезжает
         - pu_notification_data_pipe_alert_batch - переезжает
         - pu_notification_stream_maxlen - переезжает
+        - pu_telegram_token - переезжает, обновится только после ребута бекенда
+        - pu_telegram_proxy_url - переезжает, обновится только после ребута бекенда
         - pu_telegram_bot_mode - переезжает, обновится только после ребута бекенда
         - pu_telegram_items_per_page - переезжает
         - pu_telegram_header_entity_length - переезжает
@@ -74,10 +76,22 @@
         - pu_mqtt_max_topic_levels
         - pu_mqtt_max_len_message_queue
         - pu_mqtt_max_topic_alias
+    - datapipe переменные на перенос, их datapipe будет брать с постгреса сам
+        - pu_dp_config_sync_interval -> pu_datapipe_config_sync_interval
+        - pu_dp_nrecords_cleanup_interval - pu_datapipe_nrecords_cleanup_interval
+        - pu_dp_buffer_flush_interval - pu_datapipe_nrecords_cleanup_interval
+        - pu_dp_buffer_max_size - pu_datapipe_buffer_max_size
+        - pu_dp_mqtt_keepalive - pu_datapipe_mqtt_keepalive
 1. Появляется функционал ребута инстанса
     - только owner
     - через OperationTasks
     - в момент старта инстанс будет проставлять то что он успешно запустился
+1. Datapipe репозиторий переносится в бекенд
+    - мультистейдж сборка go bin + python
+    - Makefile для локальной разработки будет пребилдить
+    - Это облегчает работу с переменными
+    - Это Убирает лишний сервис в докере
+    - Добавляет управляемости для datapipe
 
 ## Глобальная авторизация
 
