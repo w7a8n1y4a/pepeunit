@@ -32,7 +32,7 @@ const menuSections = <MenuSection>[
     color: Color(0xFFFF3333),
     q: 0,
     r: 0,
-    icon: 'assets/icons/signin.svg',
+    icon: 'assets/icons/account.svg',
   ),
   MenuSection(
     id: 'units',

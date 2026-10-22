@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'account/vault_store.dart';
 import 'app_model.dart';
 import 'app_scope.dart';
+import 'features/account/account_menu_page.dart';
 import 'features/home/home_page.dart';
 import 'features/menu/placeholder_page.dart';
 import 'hive/hex_scene.dart';
@@ -29,8 +30,13 @@ class _PepeunitAppState extends State<PepeunitApp> {
     routes: [
       GoRoute(path: '/', builder: (context, state) => const HomePage()),
       GoRoute(
+        path: '/people',
+        builder: (context, state) => const AccountMenuPage(),
+      ),
+      GoRoute(
         path: '/:section',
-        builder: (context, state) => PlaceholderPage(sectionId: state.pathParameters['section']!),
+        builder: (context, state) =>
+            PlaceholderPage(sectionId: state.pathParameters['section']!),
       ),
     ],
   );
@@ -64,9 +70,15 @@ class _PepeunitAppState extends State<PepeunitApp> {
           filled: true,
           fillColor: hexFill,
           labelStyle: TextStyle(color: Color(0xFFA1A1AA)),
-          border: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFFA1A1AA))),
-          enabledBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFFA1A1AA))),
-          focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Color(0xFFFF9800))),
+          border: OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFFA1A1AA)),
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFFA1A1AA)),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: BorderSide(color: Color(0xFFFF9800)),
+          ),
         ),
       ),
       routerConfig: _router,

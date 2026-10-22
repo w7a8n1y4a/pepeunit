@@ -34,7 +34,10 @@ void main() {
   });
 
   test('instance url drops a trailing path', () {
-    expect(normalizeInstanceUrl('https://devunit.pepeunit.com/pepeunit/docs'), 'https://devunit.pepeunit.com');
+    expect(
+      normalizeInstanceUrl('https://devunit.pepeunit.com/pepeunit/docs'),
+      'https://devunit.pepeunit.com',
+    );
   });
 
   testWidgets('home opens a section and comes back', (tester) async {
@@ -54,8 +57,14 @@ void main() {
     expect(find.bySemanticsLabel('Аккаунт'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('Аккаунт'));
     await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Вход'), findsOneWidget);
+    expect(find.bySemanticsLabel('Регистрация'), findsOneWidget);
     expect(find.bySemanticsLabel('Назад'), findsOneWidget);
-    expect(find.text('Создать аккаунт'), findsNothing);
+    expect(find.bySemanticsLabel('Аккаунт'), findsNothing);
+    expect(find.bySemanticsLabel('Скоро'), findsNothing);
+    await tester.tap(find.bySemanticsLabel('Назад'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Аккаунт'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
