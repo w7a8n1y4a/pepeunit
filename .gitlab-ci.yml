@@ -5,8 +5,6 @@ variables:
 stages:
   - build
   - deploy_dev
-  - deploy_release
-  - tag
 
 build:image:master:
   stage: build
@@ -29,7 +27,7 @@ deploy_dev:image:master:
   tags:
     - shell-runer
   variables:
-    PROJ: pu-spa-dev
+    PROJ: pu-web-dev
   rules:
     - if: $CI_COMMIT_REF_NAME == "master" && $CI_PIPELINE_SOURCE != "merge_request_event"
       when: on_success
@@ -38,41 +36,9 @@ deploy_dev:image:master:
     - docker login -u $CI_REGISTRY_USER_MAIN -p $CI_ACCESS_TOKEN $CI_REGISTRY
   script:
     - docker pull $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
+    - docker stop pu-spa-dev || echo $?
+    - docker rm pu-spa-dev || echo $?
     - docker stop $PROJ || echo $?
     - docker rm $PROJ || echo $?
     - docker run -d --name=$PROJ -p 5400:80 --restart=always $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
     - docker system prune -a -f
-
-deploy_release:image:master:
-  stage: deploy_release
-  tags:
-    - shell-runer
-  variables:
-    PROJ: pu-spa-release
-  rules:
-    - if: $CI_COMMIT_REF_NAME == "master" && $CI_PIPELINE_SOURCE != "merge_request_event"
-      when: manual
-    - when: never
-  before_script:
-    - docker login -u $CI_REGISTRY_USER_MAIN -p $CI_ACCESS_TOKEN $CI_REGISTRY
-  script:
-    - docker pull $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
-    - docker stop $PROJ || echo $?
-    - docker rm $PROJ || echo $?
-    - docker run -d --name=$PROJ -p 5403:80 --restart=always $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
-    - docker system prune -a -f
-
-tag:
-  stage: tag
-  tags:
-    - shell-main-pc
-  rules:
-    - if: $CI_COMMIT_TAG
-      when: on_success
-  before_script:
-    - docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
-    - docker buildx create --name multiarch-builder --use || docker buildx use multiarch-builder
-    - docker buildx inspect --bootstrap
-  script:
-    - docker buildx build --platform linux/amd64,linux/arm64 -t w7a8n1y4a/pepeunit-docs:$CI_COMMIT_TAG --push .
-    - 'curl --request POST "https://git.pepemoss.com/api/v4/projects/${CI_PROJECT_ID}/releases" --header "PRIVATE-TOKEN: $CI_ACCESS_TOKEN" --data "name=Release Tag - $CI_COMMIT_TAG" --data "tag_name=$CI_COMMIT_TAG" --data "description=All builds on [Docker Hub](https://hub.docker.com/r/w7a8n1y4a/pepeunit-docs/tags) - $CI_COMMIT_TAG"'

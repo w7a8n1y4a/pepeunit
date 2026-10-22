@@ -1,0 +1,11 @@
+.git
+docs
+node_modules
+client/.dart_tool
+client/build
+client/.flutter-plugins-dependencies
+client/android
+client/ios
+client/linux
+client/macos
+client/windows

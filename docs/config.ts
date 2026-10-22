@@ -222,6 +222,7 @@ export function sidebarGuide(): DefaultTheme.SidebarItem[] {
       items: [
         { text: '> 1.0.0 BFF изменения', link: '/roadmap/bff-update' },
         { text: '> 1.0.0 Преобразование фронтенда', link: '/roadmap/frontend-refactor' },
+        { text: '> 1.0.0 Каркас клиента', link: '/roadmap/frontend-skeleton' },
         { text: '> 1.0.0 MessageProcessor', link: '/roadmap/message-processor' },
         { text: '> 2.0.0 Федерация', link: '/roadmap/federation' },
         { text: '> 2.0.0 Монетизация', link: '/roadmap/monetisation' },
