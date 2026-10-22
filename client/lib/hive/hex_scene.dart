@@ -165,16 +165,13 @@ class HexPainter extends CustomPainter {
     if ((upperLeft + inward - placed.center).distance > (upperLeft - inward - placed.center).distance) {
       inward = -inward;
     }
-    final origin = upperLeft + dir * (edge.distance / 2) + inward * (placed.radius * 0.08);
-    canvas.save();
-    canvas.translate(origin.dx, origin.dy);
-    canvas.rotate(-pi / 6);
+    final fontSize = max(11.0, placed.radius * 0.18);
     final painter = TextPainter(
       text: TextSpan(
         text: placed.slot.title,
         style: TextStyle(
           color: const Color(0xFFFFFFFF),
-          fontSize: max(11, placed.radius * 0.18),
+          fontSize: fontSize,
           fontFamily: 'OpenGost Type B',
         ),
       ),
@@ -182,6 +179,10 @@ class HexPainter extends CustomPainter {
       maxLines: 1,
       ellipsis: '…',
     )..layout(maxWidth: placed.radius * 0.95);
+    final origin = upperLeft + dir * (edge.distance / 2) + inward * (painter.height / 2 + placed.radius * 0.11);
+    canvas.save();
+    canvas.translate(origin.dx, origin.dy);
+    canvas.rotate(-pi / 6);
     painter.paint(canvas, Offset(-painter.width / 2, -painter.height / 2));
     canvas.restore();
   }

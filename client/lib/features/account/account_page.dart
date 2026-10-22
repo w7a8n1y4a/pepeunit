@@ -82,7 +82,7 @@ class _AccountPageState extends State<AccountPage> {
                   ),
                 ),
                 Text(
-                  en ? 'People' : 'Люди',
+                  en ? 'Account' : 'Аккаунт',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(color: const Color(0xFFFF3333)),
                 ),
                 const SizedBox(height: 8),

@@ -25,8 +25,8 @@ class MenuSection {
 const menuSections = <MenuSection>[
   MenuSection(
     id: 'people',
-    titleRu: 'Люди',
-    titleEn: 'People',
+    titleRu: 'Аккаунт',
+    titleEn: 'Account',
     color: Color(0xFFFF3333),
     q: 0,
     r: 0,
@@ -66,7 +66,7 @@ const menuSections = <MenuSection>[
     color: Color(0xFFFFFF33),
     q: -1,
     r: 0,
-    icon: 'assets/icons/grafana.svg',
+    icon: 'assets/icons/panel.svg',
   ),
   MenuSection(
     id: 'alerts',

@@ -41,7 +41,7 @@ class InstanceRecord {
   }
 }
 
-const defaultInstanceUrl = 'https://localunit.pepeunit.com';
+const defaultInstanceUrl = 'https://devunit.pepeunit.com';
 
 String normalizeInstanceUrl(String raw) {
   final trimmed = raw.trim();

@@ -63,7 +63,7 @@ class Vault {
   factory Vault.fromJson(Map<String, Object?> json) {
     final rawInstances = json['instances'] as List<Object?>? ?? const [];
     final instances = [
-      for (final item in rawInstances) InstanceRecord.fromJson((item as Map).cast<String, Object?>()),
+      for (final item in rawInstances) _migrateInstance(InstanceRecord.fromJson((item as Map).cast<String, Object?>())),
     ];
     return Vault(
       publicKey: json['publicKey'] as String?,
@@ -75,4 +75,14 @@ class Vault {
       instances: instances.isEmpty ? [InstanceRecord(url: defaultInstanceUrl, active: true)] : instances,
     );
   }
+}
+
+InstanceRecord _migrateInstance(InstanceRecord instance) {
+  if (instance.url != 'https://localunit.pepeunit.com') return instance;
+  return InstanceRecord(
+    url: defaultInstanceUrl,
+    token: instance.token,
+    userUuid: instance.userUuid,
+    active: instance.active,
+  );
 }

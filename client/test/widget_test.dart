@@ -23,8 +23,18 @@ void main() {
     expect(restored.language, 'ru');
   });
 
+  test('stored localunit moves to devunit', () {
+    final vault = Vault.fromJson({
+      'instances': [
+        {'url': 'https://localunit.pepeunit.com', 'active': true},
+      ],
+    });
+    expect(vault.instances.single.url, defaultInstanceUrl);
+    expect(vault.instances.single.active, isTrue);
+  });
+
   test('instance url drops a trailing path', () {
-    expect(normalizeInstanceUrl('https://localunit.pepeunit.com/pepeunit/'), 'https://localunit.pepeunit.com');
+    expect(normalizeInstanceUrl('https://devunit.pepeunit.com/pepeunit/docs'), 'https://devunit.pepeunit.com');
   });
 
   testWidgets('home opens a section and comes back', (tester) async {
@@ -33,7 +43,7 @@ void main() {
     await tester.pumpWidget(AppScope(model: model, child: const PepeunitApp()));
     await tester.pumpAndSettle();
 
-    expect(find.bySemanticsLabel('Люди'), findsOneWidget);
+    expect(find.bySemanticsLabel('Аккаунт'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('Устройства'));
     await tester.pumpAndSettle();
 
@@ -41,8 +51,8 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Назад'));
     await tester.pumpAndSettle();
 
-    expect(find.bySemanticsLabel('Люди'), findsOneWidget);
-    await tester.tap(find.bySemanticsLabel('Люди'));
+    expect(find.bySemanticsLabel('Аккаунт'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Аккаунт'));
     await tester.pumpAndSettle();
     expect(find.text('Создать аккаунт'), findsOneWidget);
     expect(tester.takeException(), isNull);
