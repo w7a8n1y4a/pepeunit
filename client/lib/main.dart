@@ -5,7 +5,6 @@ import 'package:go_router/go_router.dart';
 import 'account/vault_store.dart';
 import 'app_model.dart';
 import 'app_scope.dart';
-import 'features/account/account_page.dart';
 import 'features/home/home_page.dart';
 import 'features/menu/placeholder_page.dart';
 import 'hive/hex_scene.dart';
@@ -31,11 +30,7 @@ class _PepeunitAppState extends State<PepeunitApp> {
       GoRoute(path: '/', builder: (context, state) => const HomePage()),
       GoRoute(
         path: '/:section',
-        builder: (context, state) {
-          final id = state.pathParameters['section']!;
-          if (id == 'people') return const AccountPage();
-          return PlaceholderPage(sectionId: id);
-        },
+        builder: (context, state) => PlaceholderPage(sectionId: state.pathParameters['section']!),
       ),
     ],
   );

@@ -54,7 +54,8 @@ void main() {
     expect(find.bySemanticsLabel('Аккаунт'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('Аккаунт'));
     await tester.pumpAndSettle();
-    expect(find.text('Создать аккаунт'), findsOneWidget);
+    expect(find.bySemanticsLabel('Назад'), findsOneWidget);
+    expect(find.text('Создать аккаунт'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 }
