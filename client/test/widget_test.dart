@@ -1,30 +1,50 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
-import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
+import 'package:pepeunit_client/account/vault.dart';
+import 'package:pepeunit_client/account/vault_store.dart';
+import 'package:pepeunit_client/api/backend_version.dart';
+import 'package:pepeunit_client/app_model.dart';
+import 'package:pepeunit_client/app_scope.dart';
+import 'package:pepeunit_client/instances/instance.dart';
 import 'package:pepeunit_client/main.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  test('backend window is 1.5', () {
+    expect(backendCompatible('1.5.0'), isTrue);
+    expect(backendCompatible('1.5.9'), isTrue);
+    expect(backendCompatible('1.4.9'), isFalse);
+    expect(backendCompatible('1.6.0'), isFalse);
+  });
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+  test('fresh vault keeps the local instance', () {
+    final vault = Vault.fresh();
+    final restored = Vault.decode(vault.encode());
+    expect(restored.instances.single.url, defaultInstanceUrl);
+    expect(restored.instances.single.active, isTrue);
+    expect(restored.language, 'ru');
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  test('instance url drops a trailing path', () {
+    expect(normalizeInstanceUrl('https://localunit.pepeunit.com/pepeunit/'), 'https://localunit.pepeunit.com');
+  });
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+  testWidgets('home opens a section and comes back', (tester) async {
+    final model = AppModel(store: MemoryVaultStore());
+    await model.load();
+    await tester.pumpWidget(AppScope(model: model, child: const PepeunitApp()));
+    await tester.pumpAndSettle();
+
+    expect(find.bySemanticsLabel('Люди'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Устройства'));
+    await tester.pumpAndSettle();
+
+    expect(find.bySemanticsLabel('Назад'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Назад'));
+    await tester.pumpAndSettle();
+
+    expect(find.bySemanticsLabel('Люди'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Люди'));
+    await tester.pumpAndSettle();
+    expect(find.text('Создать аккаунт'), findsOneWidget);
+    expect(tester.takeException(), isNull);
   });
 }
