@@ -14,6 +14,7 @@ class HexSlot {
     required this.q,
     required this.r,
     this.icon,
+    this.iconScale = 1,
   });
 
   final String id;
@@ -22,6 +23,7 @@ class HexSlot {
   final int q;
   final int r;
   final String? icon;
+  final double iconScale;
 }
 
 class HexScene extends StatelessWidget {
@@ -58,8 +60,8 @@ class HexScene extends StatelessWidget {
                         : Center(
                             child: SvgPicture.asset(
                               placed.slot.icon!,
-                              width: placed.radius * 0.72,
-                              height: placed.radius * 0.72,
+                              width: placed.radius * 0.72 * placed.slot.iconScale,
+                              height: placed.radius * 0.72 * placed.slot.iconScale,
                             ),
                           ),
                   ),

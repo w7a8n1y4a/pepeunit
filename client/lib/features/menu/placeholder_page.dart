@@ -22,7 +22,7 @@ class PlaceholderPage extends StatelessWidget {
       color: sceneBackground,
       child: HexScene(
         slots: [
-          HexSlot(id: sectionId, title: title, color: section?.color ?? const Color(0xFFA1A1AA), q: 0, r: 0, icon: section?.icon),
+          HexSlot(id: sectionId, title: title, color: section?.color ?? const Color(0xFFA1A1AA), q: 0, r: 0, icon: section?.icon, iconScale: section?.iconScale ?? 1),
           HexSlot(id: 'soon', title: soon, color: const Color(0xFFA1A1AA), q: 1, r: -1),
           HexSlot(id: 'back', title: back, color: const Color(0xFFA1A1AA), q: 0, r: 1, icon: 'assets/icons/back.svg'),
         ],

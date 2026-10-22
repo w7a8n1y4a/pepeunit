@@ -24,6 +24,7 @@ class HomePage extends StatelessWidget {
               q: section.q,
               r: section.r,
               icon: section.icon,
+              iconScale: section.iconScale,
             ),
         ],
         onTap: (id) => context.push('/$id'),

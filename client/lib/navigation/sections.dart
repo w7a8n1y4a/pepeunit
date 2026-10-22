@@ -9,6 +9,7 @@ class MenuSection {
     required this.q,
     required this.r,
     required this.icon,
+    this.iconScale = 1,
   });
 
   final String id;
@@ -18,6 +19,7 @@ class MenuSection {
   final int q;
   final int r;
   final String icon;
+  final double iconScale;
 
   String title(String language) => language == 'en' ? titleEn : titleRu;
 }
@@ -43,12 +45,13 @@ const menuSections = <MenuSection>[
   ),
   MenuSection(
     id: 'peers',
-    titleRu: 'Пиры',
-    titleEn: 'Peers',
+    titleRu: 'Инстансы',
+    titleEn: 'Instances',
     color: Color(0xFFFF9800),
     q: 0,
     r: -1,
     icon: 'assets/icons/instances.svg',
+    iconScale: 0.81,
   ),
   MenuSection(
     id: 'registry',
