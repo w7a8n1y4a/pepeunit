@@ -33,7 +33,10 @@ class PepeunitApi {
     final json = jsonDecode(response.body) as Map<String, Object?>;
     final version = json['version'] as String? ?? '';
     if (!backendCompatible(version)) {
-      throw ApiException(response.statusCode, 'Бекенд $version вне окна >= 1.5.0 < 1.6.0');
+      throw ApiException(
+        response.statusCode,
+        'Бекенд $version вне окна >= 1.5.0 < 1.6.0',
+      );
     }
     return version;
   }
@@ -62,7 +65,10 @@ class PepeunitApi {
     final response = await _client.post(
       _uri('/users/auth'),
       headers: {'content-type': 'application/json'},
-      body: jsonEncode({'challenge': challengeToken, 'signature': signatureBase64}),
+      body: jsonEncode({
+        'challenge': challengeToken,
+        'signature': signatureBase64,
+      }),
     );
     _ensureOk(response);
     final json = jsonDecode(response.body) as Map<String, Object?>;
@@ -83,7 +89,9 @@ class PepeunitApi {
     request.headers['x-auth-token'] = token;
     request.fields['entity_uuid'] = userUuid;
     request.fields['entity_type'] = 'User';
-    request.files.add(http.MultipartFile.fromBytes('file', png, filename: 'icon.png'));
+    request.files.add(
+      http.MultipartFile.fromBytes('file', png, filename: 'icon.png'),
+    );
     final streamed = await _client.send(request);
     final response = await http.Response.fromStream(streamed);
     _ensureOk(response);
@@ -100,7 +108,9 @@ String jwtUuid(String token) {
   if (parts.length < 2) {
     throw const FormatException('Токен без полезной нагрузки');
   }
-  final payload = jsonDecode(utf8.decode(base64Url.decode(base64Url.normalize(parts[1])))) as Map<String, Object?>;
+  final payload = jsonDecode(
+    utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
+  ) as Map<String, Object?>;
   final uuid = payload['uuid'] as String?;
   if (uuid == null || uuid.isEmpty) {
     throw const FormatException('В токене нет uuid');

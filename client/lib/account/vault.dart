@@ -11,7 +11,8 @@ class Vault {
     this.language = 'ru',
     this.timeZone = 'UTC',
     List<InstanceRecord>? instances,
-  }) : instances = instances ?? [InstanceRecord(url: defaultInstanceUrl, active: true)];
+  }) : instances =
+           instances ?? [InstanceRecord(url: defaultInstanceUrl, active: true)];
 
   String? publicKey;
   String? secretKey;
@@ -21,7 +22,23 @@ class Vault {
   String timeZone;
   final List<InstanceRecord> instances;
 
-  bool get hasKey => publicKey != null && secretKey != null && publicKey!.isNotEmpty && secretKey!.isNotEmpty;
+  bool get hasKey =>
+      publicKey != null &&
+      secretKey != null &&
+      publicKey!.isNotEmpty &&
+      secretKey!.isNotEmpty;
+
+  /// Drops the global account: keys, profile fields, and instance sessions.
+  void clearSession() {
+    publicKey = null;
+    secretKey = null;
+    login = '';
+    iconPng = null;
+    for (final instance in instances) {
+      instance.token = null;
+      instance.userUuid = null;
+    }
+  }
 
   InstanceRecord? get active {
     for (final instance in instances) {
@@ -58,12 +75,16 @@ class Vault {
     };
   }
 
-  factory Vault.decode(String raw) => Vault.fromJson(jsonDecode(raw) as Map<String, Object?>);
+  factory Vault.decode(String raw) =>
+      Vault.fromJson(jsonDecode(raw) as Map<String, Object?>);
 
   factory Vault.fromJson(Map<String, Object?> json) {
     final rawInstances = json['instances'] as List<Object?>? ?? const [];
     final instances = [
-      for (final item in rawInstances) _migrateInstance(InstanceRecord.fromJson((item as Map).cast<String, Object?>())),
+      for (final item in rawInstances)
+        _migrateInstance(
+          InstanceRecord.fromJson((item as Map).cast<String, Object?>()),
+        ),
     ];
     return Vault(
       publicKey: json['publicKey'] as String?,
@@ -72,7 +93,9 @@ class Vault {
       iconPng: json['iconPng'] as String?,
       language: json['language'] as String? ?? 'ru',
       timeZone: json['timeZone'] as String? ?? 'UTC',
-      instances: instances.isEmpty ? [InstanceRecord(url: defaultInstanceUrl, active: true)] : instances,
+      instances: instances.isEmpty
+          ? [InstanceRecord(url: defaultInstanceUrl, active: true)]
+          : instances,
     );
   }
 }

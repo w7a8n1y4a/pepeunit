@@ -45,13 +45,12 @@ const menuSections = <MenuSection>[
   ),
   MenuSection(
     id: 'peers',
-    titleRu: 'Инстансы',
-    titleEn: 'Instances',
+    titleRu: 'Сеть',
+    titleEn: 'Network',
     color: Color(0xFFFF9800),
     q: 0,
     r: -1,
     icon: 'assets/icons/instances.svg',
-    iconScale: 0.81,
   ),
   MenuSection(
     id: 'registry',

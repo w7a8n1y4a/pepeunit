@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'account/vault_store.dart';
 import 'app_model.dart';
 import 'app_scope.dart';
+import 'features/account/account_login_page.dart';
 import 'features/account/account_menu_page.dart';
+import 'features/account/account_register_page.dart';
 import 'features/home/home_page.dart';
 import 'features/menu/placeholder_page.dart';
 import 'hive/hex_scene.dart';
@@ -32,6 +34,16 @@ class _PepeunitAppState extends State<PepeunitApp> {
       GoRoute(
         path: '/people',
         builder: (context, state) => const AccountMenuPage(),
+        routes: [
+          GoRoute(
+            path: 'login',
+            builder: (context, state) => const AccountLoginPage(),
+          ),
+          GoRoute(
+            path: 'register',
+            builder: (context, state) => const AccountRegisterPage(),
+          ),
+        ],
       ),
       GoRoute(
         path: '/:section',

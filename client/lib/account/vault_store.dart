@@ -24,7 +24,8 @@ class MemoryVaultStore implements VaultStore {
 /// Secure storage when the platform has it, and a preferences copy so the
 /// same account survives a web session and a desktop session alike.
 class PlatformVaultStore implements VaultStore {
-  PlatformVaultStore({FlutterSecureStorage? secure}) : _secure = secure ?? const FlutterSecureStorage();
+  PlatformVaultStore({FlutterSecureStorage? secure})
+    : _secure = secure ?? const FlutterSecureStorage();
 
   static const _key = 'pepeunit.vault';
 
