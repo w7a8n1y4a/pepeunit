@@ -6,10 +6,16 @@ import 'package:flutter/services.dart';
 
 /// The error message, drawn inside its own cell. The rest of the menu stays put.
 class ErrorCell extends StatefulWidget {
-  const ErrorCell({required this.message, required this.copyLabel, super.key});
+  const ErrorCell({
+    required this.message,
+    required this.copyLabel,
+    required this.color,
+    super.key,
+  });
 
   final String message;
   final String copyLabel;
+  final Color color;
 
   @override
   State<ErrorCell> createState() => _ErrorCellState();
@@ -44,19 +50,20 @@ class _ErrorCellState extends State<ErrorCell> {
         return Padding(
           padding: EdgeInsets.fromLTRB(
             side * 0.16,
-            side * 0.28,
+            side * 0.26,
             side * 0.16,
-            side * 0.08,
+            side * 0.16,
           ),
           child: Column(
             children: [
               Expanded(
                 child: Center(
-                  child: SelectableText(
+                  child: Text(
                     widget.message,
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      color: const Color(0xFFFF3333),
+                      color: widget.color,
+                      decoration: TextDecoration.none,
                       fontFamily: 'OpenGost Type B',
                       fontSize: max(10, side * 0.055),
                       height: 1.2,
@@ -71,8 +78,8 @@ class _ErrorCellState extends State<ErrorCell> {
                   onTap: _copy,
                   behavior: HitTestBehavior.opaque,
                   child: SizedBox(
-                    width: side * 0.16,
-                    height: side * 0.12,
+                    width: side * 0.18,
+                    height: side * 0.16,
                     child: CustomPaint(
                       painter: _CopyMarkPainter(
                         _copied
@@ -91,6 +98,7 @@ class _ErrorCellState extends State<ErrorCell> {
   }
 }
 
+/// Two overlapping sheets, the same copy mark as the previous web client.
 class _CopyMarkPainter extends CustomPainter {
   const _CopyMarkPainter(this.color);
 
@@ -100,16 +108,17 @@ class _CopyMarkPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final paint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = max(1.4, size.shortestSide * 0.07)
+      ..strokeWidth = size.shortestSide * 0.07
+      ..strokeJoin = StrokeJoin.round
       ..color = color;
-    final radius = Radius.circular(size.width * 0.08);
+    final radius = Radius.circular(size.shortestSide * 0.12);
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(
-          size.width * 0.28,
+          size.width * 0.34,
           size.height * 0.08,
-          size.width * 0.56,
-          size.height * 0.56,
+          size.width * 0.54,
+          size.height * 0.62,
         ),
         radius,
       ),
@@ -118,10 +127,10 @@ class _CopyMarkPainter extends CustomPainter {
     canvas.drawRRect(
       RRect.fromRectAndRadius(
         Rect.fromLTWH(
-          size.width * 0.12,
+          size.width * 0.1,
           size.height * 0.28,
-          size.width * 0.56,
-          size.height * 0.56,
+          size.width * 0.54,
+          size.height * 0.62,
         ),
         radius,
       ),

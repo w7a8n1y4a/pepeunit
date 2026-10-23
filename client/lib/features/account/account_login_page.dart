@@ -62,7 +62,8 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
         HexSlot(
           id: 'error',
           title: accountText(language, 'Ошибка', 'Error'),
-          color: const Color(0xFFFF3333),
+          color: color,
+          titleColor: color,
           q: 1,
           r: -1,
           icon: 'assets/icons/error.svg',
@@ -71,6 +72,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
               ? ErrorCell(
                   message: _failure!,
                   copyLabel: accountText(language, 'Скопировать', 'Copy'),
+                  color: color,
                 )
               : null,
         ),

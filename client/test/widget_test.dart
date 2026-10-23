@@ -185,7 +185,7 @@ void main() {
 
     await tester.tap(find.bySemanticsLabel('Ошибка'));
     await tester.pump();
-    expect(find.byType(SelectableText), findsOneWidget);
+    expect(find.byType(SelectableText), findsNothing);
     expect(find.text('Это не приватный ключ ML-DSA-87'), findsOneWidget);
     expect(find.bySemanticsLabel('Загрузка ключа'), findsOneWidget);
     expect(find.bySemanticsLabel('Назад'), findsOneWidget);

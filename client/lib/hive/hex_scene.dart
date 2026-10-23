@@ -16,6 +16,7 @@ class HexSlot {
     required this.r,
     this.icon,
     this.iconScale = 1,
+    this.titleColor = const Color(0xFFFFFFFF),
     this.body,
   });
 
@@ -26,6 +27,7 @@ class HexSlot {
   final int r;
   final String? icon;
   final double iconScale;
+  final Color titleColor;
 
   /// Replaces the icon and stays inside this cell. Used for the error text.
   final Widget? body;
@@ -262,7 +264,7 @@ class HexPainter extends CustomPainter {
       fontSize *= metric.length / span * 0.98;
       glyphs = _glyphs(shown, fontSize, centerAt, metric);
     }
-    _paintGlyphs(canvas, glyphs, fontSize, metric);
+    _paintGlyphs(canvas, glyphs, fontSize, metric, placed.slot.titleColor);
   }
 
   double _along(Offset from, Offset to, Offset point) {
@@ -364,6 +366,7 @@ class HexPainter extends CustomPainter {
     List<_Glyph> glyphs,
     double fontSize,
     PathMetric metric,
+    Color color,
   ) {
     final lineHeight = _box('М', fontSize).height;
     for (final glyph in glyphs) {
@@ -374,6 +377,7 @@ class HexPainter extends CustomPainter {
       _box(
         glyph.char,
         fontSize,
+        color,
       ).paint(canvas, Offset(-glyph.width / 2, -lineHeight / 2));
       canvas.restore();
     }
@@ -389,12 +393,16 @@ class HexPainter extends CustomPainter {
     return Tangent(tangent.position + step, tangent.vector);
   }
 
-  TextPainter _box(String text, double fontSize) {
+  TextPainter _box(
+    String text,
+    double fontSize, [
+    Color color = const Color(0xFFFFFFFF),
+  ]) {
     return TextPainter(
       text: TextSpan(
         text: text,
         style: TextStyle(
-          color: const Color(0xFFFFFFFF),
+          color: color,
           fontSize: fontSize,
           fontFamily: 'OpenGost Type B',
           height: 1,

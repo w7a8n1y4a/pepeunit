@@ -37,7 +37,8 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         HexSlot(
           id: 'error',
           title: accountText(language, 'Ошибка', 'Error'),
-          color: const Color(0xFFFF3333),
+          color: color,
+          titleColor: color,
           q: -1,
           r: 0,
           icon: 'assets/icons/error.svg',
@@ -46,6 +47,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
               ? ErrorCell(
                   message: _failure!,
                   copyLabel: accountText(language, 'Скопировать', 'Copy'),
+                  color: color,
                 )
               : null,
         ),
@@ -66,6 +68,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         q: 0,
         r: -1,
         icon: 'assets/icons/signin.svg',
+        iconScale: 1.2,
       ),
       HexSlot(
         id: 'registration',
