@@ -1,0 +1,121 @@
+import 'dart:typed_data';
+
+import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
+import 'package:go_router/go_router.dart';
+
+import '../../hive/hex_scene.dart';
+import '../../instances/instance.dart';
+import '../../instances/network_view.dart';
+import '../../locale/languages.dart';
+import '../../navigation/sections.dart';
+
+Color get networkColor =>
+    sectionById('peers')?.color ?? const Color(0xFFFF9800);
+
+String netText(String language, String ru, String en) =>
+    phrase(language, {'ru': ru, 'en': en});
+
+/// The current-instance cell, the same shape on the home menu, the network
+/// menu and the instance card.
+HexSlot instanceMark({
+  required String id,
+  required String url,
+  required String language,
+  required int q,
+  required int r,
+  required Color color,
+  required bool current,
+  String? version,
+  Uint8List? image,
+  String icon = 'assets/icons/instances.svg',
+  bool tappable = true,
+  bool enabled = true,
+}) {
+  return HexSlot(
+    id: id,
+    title: instanceHost(url),
+    footerLeft: current ? netText(language, 'Текущий', 'Target') : null,
+    footer: version,
+    color: color,
+    q: q,
+    r: r,
+    icon: image == null ? icon : null,
+    image: image,
+    tappable: tappable,
+    enabled: enabled,
+  );
+}
+
+class ScopeFrame extends StatefulWidget {
+  const ScopeFrame({
+    required this.scope,
+    required this.canZoomIn,
+    required this.path,
+    required this.child,
+    super.key,
+  });
+
+  final int scope;
+  final bool canZoomIn;
+  final String path;
+  final Widget child;
+
+  @override
+  State<ScopeFrame> createState() => _ScopeFrameState();
+}
+
+class _ScopeFrameState extends State<ScopeFrame> {
+  var _pinched = false;
+
+  void _step(int delta) {
+    if (delta > 0 && !widget.canZoomIn) return;
+    final next = (widget.scope + delta).clamp(0, 2);
+    if (next == widget.scope) return;
+    final uri = Uri.parse(widget.path)
+        .replace(queryParameters: {'scope': '$next'});
+    context.replace(uri.toString());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      onPointerSignal: (event) {
+        if (event is! PointerScrollEvent) return;
+        if (event.scrollDelta.dy < 0) {
+          _step(1);
+        } else if (event.scrollDelta.dy > 0) {
+          _step(-1);
+        }
+      },
+      child: GestureDetector(
+        onScaleStart: (_) => _pinched = false,
+        onScaleUpdate: (details) {
+          if (details.pointerCount < 2 || _pinched) return;
+          if (details.scale > 1.08) {
+            _pinched = true;
+            _step(1);
+          } else if (details.scale < 0.92) {
+            _pinched = true;
+            _step(-1);
+          }
+        },
+        child: widget.child,
+      ),
+    );
+  }
+}
+
+(int, int) errorSpot(Iterable<BoardSlot> slots) {
+  const spots = [(0, 2), (-2, 1), (2, -2), (3, -1)];
+  for (final spot in spots) {
+    final taken = slots.any((slot) => slot.q == spot.$1 && slot.r == spot.$2);
+    if (!taken) return spot;
+  }
+  return (3, -3);
+}
+
+int scopeOf(Uri uri) {
+  final raw = int.tryParse(uri.queryParameters['scope'] ?? '') ?? 0;
+  return raw.clamp(0, 2);
+}

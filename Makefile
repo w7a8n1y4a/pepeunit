@@ -1,12 +1,13 @@
 FLUTTER ?= $(shell if command -v flutter >/dev/null 2>&1; then command -v flutter; else echo $(HOME)/.local/share/flutter/bin/flutter; fi)
 CHROME_EXECUTABLE ?= $(shell if [ -x /usr/bin/google-chrome-stable ]; then echo /usr/bin/google-chrome-stable; fi)
 PORT ?= 8080
+INSTANCE_URL ?= $(shell sed -n 's/^INSTANCE_URL=//p' .env 2>/dev/null | head -n 1 | tr -d '\r' | sed -e 's/^"//' -e 's/"$$//' -e "s/^'//" -e "s/'$$//")
 
 .PHONY: help install run-dev run-build run-preview clean
 
 define PREVIEW_PY
 import http.server, os
-root = os.path.join("client", "build", "web")
+root = os.path.join("build", "web")
 class Handler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=root, **kwargs)
@@ -30,21 +31,21 @@ help:
 
 install:
 	@echo "Install client dependencies"
-	cd client && $(FLUTTER) pub get
+	$(FLUTTER) pub get
 
 run-dev:
 	@echo "Run the client in Chrome"
-	cd client && CHROME_EXECUTABLE="$(CHROME_EXECUTABLE)" $(FLUTTER) run -d chrome
+	CHROME_EXECUTABLE="$(CHROME_EXECUTABLE)" $(FLUTTER) run -d chrome $(if $(INSTANCE_URL),--dart-define=INSTANCE_URL="$(INSTANCE_URL)")
 
 run-build:
 	@echo "Build the web client"
-	cd client && $(FLUTTER) build web --release --base-href /
+	$(FLUTTER) build web --release --base-href /
 
 run-preview:
 	@echo "Serve the web build on http://127.0.0.1:$(PORT)"
-	@test -d client/build/web || { echo "Run make run-build first"; exit 1; }
+	@test -d build/web || { echo "Run make run-build first"; exit 1; }
 	PORT=$(PORT) python3 -c "$$PREVIEW_PY"
 
 clean:
 	@echo "Remove the Flutter build"
-	cd client && $(FLUTTER) clean
+	$(FLUTTER) clean

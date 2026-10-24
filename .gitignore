@@ -16,3 +16,19 @@ node_modules
 pnpm-global
 TODOs.md
 *.timestamp-*.mjs
+
+# Flutter
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.dart_tool/
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+/build/
+.widget_preview/
+app.*.symbols
+app.*.map.json
+/android/app/debug
+/android/app/profile
+/android/app/release
+.env

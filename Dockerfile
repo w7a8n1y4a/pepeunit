@@ -27,11 +27,11 @@ RUN flutter config --no-analytics --enable-web \
 
 WORKDIR /app
 
-COPY --chown=flutter:flutter client/pubspec.yaml client/pubspec.lock ./
+COPY --chown=flutter:flutter pubspec.yaml pubspec.lock ./
 
 RUN flutter pub get
 
-COPY --chown=flutter:flutter client/ ./
+COPY --chown=flutter:flutter . ./
 
 RUN flutter build web --release --base-href /
 
@@ -39,5 +39,7 @@ FROM nginx:1.27-alpine
 
 EXPOSE 80
 
-COPY client/nginx.conf /etc/nginx/conf.d/default.conf
+COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/40-instance-url.sh /docker-entrypoint.d/40-instance-url.sh
+RUN chmod +x /docker-entrypoint.d/40-instance-url.sh
 COPY --from=builder /app/build/web /usr/share/nginx/html
