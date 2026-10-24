@@ -149,7 +149,8 @@ void main() {
 
     expect(model.vault.hasKey, isTrue);
     expect(find.bySemanticsLabel('Вход'), findsNothing);
-    expect(find.bySemanticsLabel('Отправить в сеть'), findsOneWidget);
+    expect(find.bySemanticsLabel('Отправить в сеть'), findsNothing);
+    expect(find.bySemanticsLabel('Логин'), findsOneWidget);
     expect(find.bySemanticsLabel('Ключ'), findsOneWidget);
     expect(find.bySemanticsLabel('Выход'), findsOneWidget);
     final secret = base64.decode(model.vault.secretKey!);

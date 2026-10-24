@@ -4,6 +4,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../account/icon_file.dart';
+import '../../account/key_mark.dart';
 import '../../account/secret_key_file.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
@@ -90,28 +92,34 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
   }
 
   List<HexSlot> _signedIn(String language, Color color, String back) {
+    final model = AppScope.of(context);
     final active = _busy ? const Color(0xFFFFFFFF) : color;
+    final png = iconBytes(model.vault.iconPng);
+    final login = model.vault.login;
     return [
       HexSlot(
-        id: 'back',
-        title: back,
-        color: const Color(0xFFA1A1AA),
+        id: 'profile',
+        title: login.isEmpty ? accountText(language, 'Логин', 'Login') : login,
+        color: color,
         q: 0,
-        r: 0,
-        icon: 'assets/icons/back.svg',
+        r: -1,
+        icon: png == null ? 'assets/icons/account.svg' : null,
+        image: png,
+        tappable: false,
       ),
       HexSlot(
         id: 'settings',
         title: accountText(language, 'Настройки', 'Settings'),
         color: color,
         q: 0,
-        r: -1,
+        r: 0,
         icon: 'assets/icons/settings.svg',
         iconScale: 1.4,
       ),
       HexSlot(
         id: 'key',
         title: accountText(language, 'Ключ', 'Key'),
+        footer: keyMarkFromBase64(model.vault.publicKey),
         color: active,
         q: 1,
         r: -1,
@@ -122,19 +130,18 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         id: 'signout',
         title: accountText(language, 'Выход', 'Sign out'),
         color: color,
-        q: 0,
+        q: -1,
         r: 1,
         icon: 'assets/icons/signout.svg',
         iconScale: 1.08,
       ),
       HexSlot(
-        id: 'sync',
-        title: accountText(language, 'Отправить в сеть', 'Send to network'),
-        color: color,
-        q: -1,
+        id: 'back',
+        title: back,
+        color: const Color(0xFFA1A1AA),
+        q: 0,
         r: 1,
-        icon: 'assets/icons/rocket.svg',
-        iconScale: 1.45,
+        icon: 'assets/icons/back.svg',
       ),
     ];
   }
@@ -158,7 +165,8 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
       case 'key':
         await _saveKey(language);
       case 'settings':
-      case 'sync':
+        context.push('/people/settings');
+      case 'profile':
         break;
     }
   }

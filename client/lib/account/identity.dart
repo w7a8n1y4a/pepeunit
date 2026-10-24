@@ -5,14 +5,15 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:crypto/crypto.dart';
-import 'package:pqcrypto/pqcrypto.dart' hide sha256;
+import 'package:pqcrypto/pqcrypto.dart';
 import 'package:pqcrypto/src/algos/dilithium/ntt.dart';
 import 'package:pqcrypto/src/algos/dilithium/packing.dart';
 import 'package:pqcrypto/src/algos/dilithium/params.dart' show n;
 import 'package:pqcrypto/src/algos/dilithium/poly.dart';
 import 'package:pqcrypto/src/algos/dilithium/rounding.dart';
 import 'package:pqcrypto/src/algos/dilithium/symmetric.dart';
+
+import 'key_mark.dart';
 
 (Uint8List, Uint8List) generateMlDsa87KeyPair(int _) {
   return MlDsa.generateKeyPair(DilithiumParams.mlDsa87);
@@ -141,7 +142,7 @@ class Identity {
 
   String get secretKeyBase64 => base64.encode(secretKey);
 
-  String get hashPublicKey => sha256.convert(publicKey).toString();
+  String get hashPublicKey => publicKeyHashHex(publicKey);
 
   Uint8List signChallenge(String challenge) {
     return MlDsa.sign(

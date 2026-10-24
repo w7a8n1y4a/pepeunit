@@ -1,4 +1,5 @@
 import 'dart:math';
+import 'dart:typed_data';
 import 'dart:ui' show PathMetric, Tangent;
 
 import 'package:flutter/material.dart';
@@ -16,8 +17,13 @@ class HexSlot {
     required this.r,
     this.icon,
     this.iconScale = 1,
+    this.image,
     this.titleColor = const Color(0xFFFFFFFF),
+    this.footer,
+    this.footerColor = const Color(0xFFFFFFFF),
     this.body,
+    this.tappable = true,
+    this.enabled = true,
   });
 
   final String id;
@@ -27,10 +33,24 @@ class HexSlot {
   final int r;
   final String? icon;
   final double iconScale;
+
+  /// PNG bytes drawn in the center, in place of [icon].
+  final Uint8List? image;
   final Color titleColor;
+
+  /// A second caption along the lower edges. Short text sits on the lower
+  /// right edge. From 13 characters it is centered across both lower edges.
+  final String? footer;
+  final Color footerColor;
 
   /// Replaces the icon and stays inside this cell. Used for the error text.
   final Widget? body;
+
+  /// False for a caption that does not open anything.
+  final bool tappable;
+
+  /// False for a control that is shown and does nothing yet.
+  final bool enabled;
 }
 
 typedef HexSlotWrap = Widget Function(HexSlot slot, Widget child);
@@ -72,9 +92,24 @@ class HexScene extends StatelessWidget {
   Widget _tile(PlacedHex placed) {
     final icon = placed.slot.icon;
     final body = placed.slot.body;
+    final image = placed.slot.image;
     final Widget child;
     if (body != null) {
       child = ClipPath(clipper: const _CellClip(), child: body);
+    } else if (image != null) {
+      final side = placed.radius * 1.15 * 0.85;
+      child = Center(
+        child: ClipOval(
+          child: Image.memory(
+            image,
+            width: side,
+            height: side,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            filterQuality: FilterQuality.medium,
+          ),
+        ),
+      );
     } else if (icon != null) {
       child = Center(
         child: SvgPicture.asset(
@@ -86,17 +121,28 @@ class HexScene extends StatelessWidget {
     } else {
       child = const SizedBox.expand();
     }
-    Widget tile = body != null
-        ? child
-        : Semantics(
-            button: true,
-            label: placed.slot.title,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => onTap(placed.slot.id),
-              child: child,
-            ),
-          );
+    final slot = placed.slot;
+    Widget tile;
+    if (body != null) {
+      tile = Semantics(
+        container: true,
+        explicitChildNodes: true,
+        label: slot.title,
+        child: child,
+      );
+    } else {
+      tile = Semantics(
+        button: slot.tappable || !slot.enabled,
+        enabled: slot.enabled,
+        label: slot.title,
+        value: slot.footer,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: slot.tappable && slot.enabled ? () => onTap(slot.id) : null,
+          child: child,
+        ),
+      );
+    }
     final wrap = this.wrap;
     if (wrap != null) tile = wrap(placed.slot, tile);
     return tile;
@@ -221,50 +267,121 @@ class HexPainter extends CustomPainter {
 
   void _label(Canvas canvas, PlacedHex placed) {
     final radius = placed.radius;
-    final center = placed.center;
-    final top = center + const Offset(0, -1) * radius;
-    final upperLeft =
-        center + Offset(radius * cos(7 * pi / 6), radius * sin(7 * pi / 6));
-    final upperRight =
-        center + Offset(radius * cos(-pi / 6), radius * sin(-pi / 6));
-    final inset = radius * 0.16;
-    const inwardLeft = Offset(0.5, 0.86602540378);
-    final leftOuter = upperLeft + inwardLeft * inset;
-    final rightOuter = upperRight + const Offset(-0.5, 0.86602540378) * inset;
-    final corner = top + Offset(0, inset * 2 / sqrt(3));
-    final pad = radius * 0.05;
-    final bend = radius * 0.14;
-    final runes = placed.slot.title.runes.toList();
+    _paintText(
+      canvas,
+      placed.slot.title,
+      placed.slot.titleColor,
+      radius,
+      _rim(
+        placed.center,
+        radius,
+        upper: true,
+        both: placed.slot.title.runes.length >= 13,
+      ),
+    );
+    final footer = placed.slot.footer;
+    if (footer == null || footer.isEmpty) return;
+    _paintText(
+      canvas,
+      footer,
+      placed.slot.footerColor,
+      radius,
+      _rim(
+        placed.center,
+        radius,
+        upper: false,
+        both: footer.runes.length >= 13,
+      ),
+    );
+  }
+
+  void _paintText(
+    Canvas canvas,
+    String text,
+    Color color,
+    double radius,
+    ({Path path, double centerAt}) band,
+  ) {
+    final runes = text.runes.toList();
     final shown = runes.length >= 25
         ? '${String.fromCharCodes(runes.take(23))}…'
-        : placed.slot.title;
-    final twoEdges = runes.length >= 13;
-    final Path path;
-    final double centerAt;
-    if (twoEdges) {
-      path = _roof(leftOuter, corner, rightOuter, pad, bend).path;
-      centerAt = path.computeMetrics().single.length / 2;
-    } else {
-      final delta = corner - leftOuter;
-      final length = delta.distance;
-      final direction = delta / length;
-      final start = leftOuter + direction * pad;
-      final end = corner - direction * pad;
-      path = Path()
-        ..moveTo(start.dx, start.dy)
-        ..lineTo(end.dx, end.dy);
-      final edgeMid = (upperLeft + top) / 2 + inwardLeft * inset;
-      centerAt = _along(start, end, edgeMid);
-    }
+        : text;
     var fontSize = max(12.0, radius * 0.19);
-    final metric = path.computeMetrics().single;
-    var glyphs = _glyphs(shown, fontSize, centerAt, metric);
+    final metric = band.path.computeMetrics().single;
+    var glyphs = _glyphs(shown, fontSize, band.centerAt, metric);
     final span = _span(glyphs);
     if (span > metric.length && span > 0) {
       fontSize *= metric.length / span * 0.98;
-      glyphs = _glyphs(shown, fontSize, centerAt, metric);
+      glyphs = _glyphs(shown, fontSize, band.centerAt, metric);
     }
-    _paintGlyphs(canvas, glyphs, fontSize, metric, placed.slot.titleColor);
+    _paintGlyphs(canvas, glyphs, fontSize, metric, color);
+  }
+
+  /// Upper captions start on the left edge. Lower captions start on the
+  /// right edge. Thirteen characters or more run across both edges.
+  ({Path path, double centerAt}) _rim(
+    Offset center,
+    double radius, {
+    required bool upper,
+    required bool both,
+  }) {
+    final inset = radius * 0.16;
+    final pad = radius * 0.05;
+    final bend = radius * 0.14;
+    final Offset peak;
+    final Offset leftVertex;
+    final Offset rightVertex;
+    final Offset inwardLeft;
+    final Offset inwardRight;
+    final Offset peakInset;
+    if (upper) {
+      peak = center + const Offset(0, -1) * radius;
+      leftVertex =
+          center + Offset(radius * cos(7 * pi / 6), radius * sin(7 * pi / 6));
+      rightVertex =
+          center + Offset(radius * cos(-pi / 6), radius * sin(-pi / 6));
+      inwardLeft = const Offset(0.5, 0.86602540378);
+      inwardRight = const Offset(-0.5, 0.86602540378);
+      peakInset = Offset(0, inset * 2 / sqrt(3));
+    } else {
+      peak = center + const Offset(0, 1) * radius;
+      leftVertex =
+          center + Offset(radius * cos(5 * pi / 6), radius * sin(5 * pi / 6));
+      rightVertex = center + Offset(radius * cos(pi / 6), radius * sin(pi / 6));
+      inwardLeft = const Offset(0.5, -0.86602540378);
+      inwardRight = const Offset(-0.5, -0.86602540378);
+      peakInset = Offset(0, -inset * 2 / sqrt(3));
+    }
+    final leftOuter = leftVertex + inwardLeft * inset;
+    final rightOuter = rightVertex + inwardRight * inset;
+    final corner = peak + peakInset;
+    if (both) {
+      final path = _roof(leftOuter, corner, rightOuter, pad, bend).path;
+      return (path: path, centerAt: path.computeMetrics().single.length / 2);
+    }
+    final Offset from;
+    final Offset to;
+    final Offset edgeMid;
+    if (upper) {
+      from = leftOuter;
+      to = corner;
+      edgeMid = (leftVertex + peak) / 2 + inwardLeft * inset;
+    } else {
+      from = corner;
+      to = rightOuter;
+      edgeMid = (peak + rightVertex) / 2 + inwardRight * inset;
+    }
+    final delta = to - from;
+    final length = delta.distance;
+    final direction = delta / length;
+    final start = from + direction * pad;
+    final end = to - direction * pad;
+    return (
+      path: Path()
+        ..moveTo(start.dx, start.dy)
+        ..lineTo(end.dx, end.dy),
+      centerAt: _along(start, end, edgeMid),
+    );
   }
 
   double _along(Offset from, Offset to, Offset point) {

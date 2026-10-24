@@ -1,6 +1,8 @@
 import 'dart:convert';
 
 import '../instances/instance.dart';
+import '../locale/languages.dart';
+import '../locale/time_zones.dart';
 
 class Vault {
   Vault({
@@ -9,7 +11,7 @@ class Vault {
     this.login = '',
     this.iconPng,
     this.language = 'ru',
-    this.timeZone = 'UTC',
+    this.timeZone = '0',
     List<InstanceRecord>? instances,
   }) : instances =
            instances ?? [InstanceRecord(url: defaultInstanceUrl, active: true)];
@@ -91,14 +93,21 @@ class Vault {
       secretKey: json['secretKey'] as String?,
       login: json['login'] as String? ?? '',
       iconPng: json['iconPng'] as String?,
-      language: json['language'] as String? ?? 'ru',
-      timeZone: json['timeZone'] as String? ?? 'UTC',
+      language: _language(json['language'] as String?),
+      timeZone: _timeZone(json['timeZone'] as String?),
       instances: instances.isEmpty
           ? [InstanceRecord(url: defaultInstanceUrl, active: true)]
           : instances,
     );
   }
 }
+
+String _language(String? raw) {
+  if (raw != null && knownLanguage(raw)) return raw;
+  return 'ru';
+}
+
+String _timeZone(String? raw) => zoneMinutes(raw ?? '0').toString();
 
 InstanceRecord _migrateInstance(InstanceRecord instance) {
   if (instance.url != 'https://localunit.pepeunit.com') return instance;

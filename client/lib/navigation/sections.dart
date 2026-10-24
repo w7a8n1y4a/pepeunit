@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../locale/languages.dart';
+
 class MenuSection {
   const MenuSection({
     required this.id,
-    required this.titleRu,
-    required this.titleEn,
+    required this.titles,
     required this.color,
     required this.q,
     required this.r,
@@ -13,22 +14,20 @@ class MenuSection {
   });
 
   final String id;
-  final String titleRu;
-  final String titleEn;
+  final Map<String, String> titles;
   final Color color;
   final int q;
   final int r;
   final String icon;
   final double iconScale;
 
-  String title(String language) => language == 'en' ? titleEn : titleRu;
+  String title(String language) => phrase(language, titles);
 }
 
 const menuSections = <MenuSection>[
   MenuSection(
     id: 'people',
-    titleRu: 'Аккаунт',
-    titleEn: 'Account',
+    titles: {'ru': 'Аккаунт', 'en': 'Account'},
     color: Color(0xFFFF3333),
     q: 0,
     r: 0,
@@ -36,8 +35,7 @@ const menuSections = <MenuSection>[
   ),
   MenuSection(
     id: 'units',
-    titleRu: 'Устройства',
-    titleEn: 'Units',
+    titles: {'ru': 'Устройства', 'en': 'Units'},
     color: Color(0xFFFF0080),
     q: 1,
     r: -1,
@@ -45,8 +43,7 @@ const menuSections = <MenuSection>[
   ),
   MenuSection(
     id: 'peers',
-    titleRu: 'Сеть',
-    titleEn: 'Network',
+    titles: {'ru': 'Сеть', 'en': 'Network'},
     color: Color(0xFFFF9800),
     q: 0,
     r: -1,
@@ -54,8 +51,7 @@ const menuSections = <MenuSection>[
   ),
   MenuSection(
     id: 'registry',
-    titleRu: 'Реестр',
-    titleEn: 'Registry',
+    titles: {'ru': 'Реестр', 'en': 'Registry'},
     color: Color(0xFF7F00FF),
     q: 1,
     r: 0,
@@ -63,8 +59,7 @@ const menuSections = <MenuSection>[
   ),
   MenuSection(
     id: 'dashboards',
-    titleRu: 'Панели',
-    titleEn: 'Dashboards',
+    titles: {'ru': 'Панели', 'en': 'Dashboards'},
     color: Color(0xFFFFFF33),
     q: -1,
     r: 0,
@@ -72,8 +67,7 @@ const menuSections = <MenuSection>[
   ),
   MenuSection(
     id: 'alerts',
-    titleRu: 'Уведомления',
-    titleEn: 'Alerts',
+    titles: {'ru': 'Уведомления', 'en': 'Alerts'},
     color: Color(0xFF2196F3),
     q: -1,
     r: 1,
@@ -81,8 +75,7 @@ const menuSections = <MenuSection>[
   ),
   MenuSection(
     id: 'library',
-    titleRu: 'Библиотека',
-    titleEn: 'Library',
+    titles: {'ru': 'Библиотека', 'en': 'Library'},
     color: Color(0xFF4CAF50),
     q: 0,
     r: 1,

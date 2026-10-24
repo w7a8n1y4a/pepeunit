@@ -8,6 +8,7 @@ import 'app_scope.dart';
 import 'features/account/account_login_page.dart';
 import 'features/account/account_menu_page.dart';
 import 'features/account/account_register_page.dart';
+import 'features/account/account_settings_page.dart';
 import 'features/home/home_page.dart';
 import 'features/menu/placeholder_page.dart';
 import 'hive/hex_scene.dart';
@@ -42,6 +43,10 @@ class _PepeunitAppState extends State<PepeunitApp> {
           GoRoute(
             path: 'register',
             builder: (context, state) => const AccountRegisterPage(),
+          ),
+          GoRoute(
+            path: 'settings',
+            builder: (context, state) => const AccountSettingsPage(),
           ),
         ],
       ),
