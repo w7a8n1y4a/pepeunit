@@ -1,0 +1,40 @@
+---
+description: Hex placement — ring and angle, fill order, menu Back slots
+globs: lib/hive/**,lib/features/**
+alwaysApply: false
+---
+
+# Hex placement
+
+Address a cell by ring and angle. Store the slot as axial `(q, r)` for `HexLayout`. Angles are degrees around the center cell: 0° is right, 90° is up, counter-clockwise. Positive `r` in `HexLayout._axial` is down.
+
+Ring 0 is the center. Ring N is a one-cell-thick perimeter of 6N lattice cells. The nominal step is `360 / (6N)` degrees. Ring 1 and ring 2 land on these angles exactly. From ring 3 the address is the lattice cell of that ring nearest the nominal angle. Do not place a ring on one circle of equal radius.
+
+- Ring 1: 0, 60, 120, 180, 240, 300
+- Ring 2: those, plus 30, 90, 150, 210, 270, 330
+- Ring N: multiples of `360 / (6N)`
+
+Ring 1 `(q, r)`: 0° `(1, 0)`, 60° `(1, -1)`, 120° `(0, -1)`, 180° `(-1, 0)`, 240° `(-1, 1)`, 300° `(0, 1)`.
+
+The center cell is the screen center. A larger cluster stays centered on it.
+
+## Fill order
+
+The center cell is first. Finish ring N before ring N+1. Home slots stay `menuSections`; this order lays out a variable set of cells.
+
+Portrait or square (`width <= height`), each ring:
+
+1. Top, 120° → 60° inclusive
+2. Bottom, 300° → 240° inclusive
+3. Left, (120°, 240°) exclusive, angle increasing
+4. Right, 60° → 300° the short way through 0°, exclusive
+
+Landscape (`width > height`): left, right, top, bottom, with the same arcs and directions.
+
+Top and bottom are filled first on a tall screen, so the cluster gains height before width. Left and right are filled first on a wide screen, so it gains width before height.
+
+## Menu
+
+A menu has at most 7 cells, unless a scope tick says otherwise. An 8th cell is allowed only for an error and takes the next free slot.
+
+Back is `assets/icons/back.svg` with a `hexMuted` border. The home root has none. On an intermediate menu layer, Back is ring 1 at 300°. On the last menu layer, Back is the center. That slot is reserved. Content cells take the next free slot in the fill order.

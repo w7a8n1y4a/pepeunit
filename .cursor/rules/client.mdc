@@ -1,0 +1,29 @@
+---
+description: Pepeunit client map — where facts live and what to leave untouched
+alwaysApply: true
+---
+
+# Pepeunit client
+
+Flutter app at the repo root. UI is custom hex cells (`lib/hive`). Platforms: web, linux, macos, windows, android, ios.
+
+Code is the source of truth. Read these files; do not copy them into answers or comments:
+
+- sections, accent colors, icons, axial coordinates — `menuSections` in `lib/navigation/sections.dart`
+- section visibility — `menuSectionEnabled` in `lib/instances/network_view.dart`
+- routes — `lib/main.dart` (`go_router`, path URL strategy)
+- backend window — `backendCompatible` in `lib/api/backend_version.dart` (currently `1.5.x`)
+- scene colors — `sceneBackground`, `hexFill`, `hexMuted`, `errorColor` in `lib/hive/hex_scene.dart`
+- plan and open questions — `docs/ru/roadmap/frontend-refactor.md`, and only when the task is about the plan
+
+Modules: `account/`, `instances/`, `hive/`, `features/{account,network,home,menu}`, `locale/`, `api/`.
+
+Constraints:
+
+- Screens are pointy-top hex cells. Input changes per platform (mouse / touch); the renderer stays shared.
+- Dark theme only. Icons are SVG in `assets/icons/`, mainly white. UI font is OpenGost.
+- Account storage is `PlatformVaultStore`. API client is hand-written: `PepeunitApi`.
+- Roles and `pu_ff_*` flags from the instance portrait limit actions and menu items.
+- Implement a roadmap item marked «план» only when the task names it. An spacing fix on home does not include the background mosaic, animations, or deep links.
+- A menu level exists to reach an action. Add another level only when the screen is unreadable without it.
+- Reply to the user in Russian. Code, identifiers, and these rules stay in English.

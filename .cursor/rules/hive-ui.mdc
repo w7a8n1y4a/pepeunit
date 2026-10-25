@@ -1,0 +1,26 @@
+---
+description: Hex UI — cell anatomy, scope, and combined screens
+globs: lib/hive/**,lib/features/**
+alwaysApply: false
+---
+
+# Hex UI
+
+Rendering is `HexSlot`, `HexPainter`, and `HexLayout` in `lib/hive/hex_scene.dart`. Take section colors and accents from code.
+
+Menu cell anatomy:
+
+1. Border uses the section accent. The Back cell uses `hexMuted`.
+2. Label sits on the upper-left edge. Text longer than 12 characters runs along both upper edges.
+3. Center is an SVG icon or a PNG avatar.
+4. Lower edges may carry `footer` and `footerLeft`.
+
+Placement, fill order, and menu Back slots are in `hex-layout.mdc`.
+
+The gap between borders scales with the cell. Sizes are standard, reduced, enlarged, or a custom multiplier. A form scrolls vertically when it overflows. Padding follows the aspect ratio and keeps the used area as large as it can.
+
+Screen size changes labels, cells, and icons. Platform changes input only. Outside a menu, Back sits where that screen defines it.
+
+Enable `scope` (wheel / pinch) only when the next step adds cells to the render. Static forms keep zoom off. Network already has `?scope=0|1|2` via `ScopeFrame`, `scopeOf`, and `hexDisk` rings.
+
+On a combined screen, secondary actions go into a submenu. Cell size shows hierarchy. A card does not show every action at once.
