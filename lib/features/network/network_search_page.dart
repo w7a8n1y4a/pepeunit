@@ -38,19 +38,21 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
       for (final url in model.visibleInstances())
         if (url != target?.url) url,
     ];
+    final wide = hexWide(MediaQuery.sizeOf(context));
     final board = searchBoard(
       scope: widget.scope,
       staff: staff,
       scanAll: staff && federation && target != null,
       urls: urls,
       page: _page,
+      wide: wide,
     );
     final slots = [
       for (final slot in board.slots)
         _slot(slot, model, language, color, board),
     ];
     if (_failure != null) {
-      final spot = errorSpot(board.slots);
+      final spot = errorSpot(board.slots, wide: wide);
       slots.add(
         HexSlot(
           id: 'error',
@@ -161,8 +163,7 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
         if (peer != null && peer.trust != 'Trust') {
           leftCaption = trustLabel(language, peer.trust);
         } else if (ping != null) {
-          leftCaption =
-              '${ping.round()} ${netText(language, 'мс', 'ms')}';
+          leftCaption = '${ping.round()} ${netText(language, 'мс', 'ms')}';
         } else {
           leftCaption = null;
         }
@@ -416,10 +417,7 @@ class _TrustToggle extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
           decoration: BoxDecoration(
-            border: Border.all(
-              color: selected ? color : hexMuted,
-              width: 1.2,
-            ),
+            border: Border.all(color: selected ? color : hexMuted, width: 1.2),
             borderRadius: BorderRadius.circular(4),
           ),
           child: Text(

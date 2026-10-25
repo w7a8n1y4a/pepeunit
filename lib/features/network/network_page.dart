@@ -37,19 +37,21 @@ class _NetworkPageState extends State<NetworkPage> {
     final color = networkColor;
     final target = model.target;
     final failure = _failure ?? model.networkFailure;
-    final board = networkBoard(target: target?.url);
+    final wide = hexWide(MediaQuery.sizeOf(context));
+    final board = networkBoard(target: target?.url, wide: wide);
     final slots = [
       for (final slot in board.slots) _slot(slot, model, language, color),
     ];
     if (failure != null) {
+      final spot = errorSpot(board.slots, wide: wide);
       slots.add(
         HexSlot(
           id: 'error',
           title: netText(language, 'Ошибка', 'Error'),
           color: errorColor,
           titleColor: errorColor,
-          q: networkErrorCell.$1,
-          r: networkErrorCell.$2,
+          q: spot.$1,
+          r: spot.$2,
           icon: 'assets/icons/error.svg',
           iconScale: 1.62,
           body: _failureOpen

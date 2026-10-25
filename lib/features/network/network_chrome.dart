@@ -211,22 +211,8 @@ class _ScopeFrameState extends State<ScopeFrame> {
   }
 }
 
-(int, int) errorSpot(Iterable<BoardSlot> slots) {
-  const spots = [
-    (-1, 1),
-    (-1, 0),
-    (1, 0),
-    (0, 1),
-    (0, 2),
-    (-2, 1),
-    (2, -2),
-    (3, -1),
-  ];
-  for (final spot in spots) {
-    final taken = slots.any((slot) => slot.q == spot.$1 && slot.r == spot.$2);
-    if (!taken) return spot;
-  }
-  return (3, -3);
+(int, int) errorSpot(Iterable<BoardSlot> slots, {bool wide = false}) {
+  return nextHex([for (final slot in slots) (slot.q, slot.r)], wide: wide);
 }
 
 int scopeOf(Uri uri) {

@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../account/identity.dart';
 import '../../app_scope.dart';
+import '../../hive/hex_order.dart';
 import '../../hive/hex_scene.dart';
 import '../../navigation/sections.dart';
 import 'account_nav.dart';
@@ -34,13 +35,17 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
   Widget build(BuildContext context) {
     final language = AppScope.of(context).vault.language;
     final color = sectionById('people')?.color ?? const Color(0xFFFF3333);
+    final wide = hexWide(MediaQuery.sizeOf(context));
+    final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
+    final generate = frame.cells.first;
+    final backAt = frame.back!;
     final slots = <HexSlot>[
       HexSlot(
         id: 'generate',
         title: accountText(language, 'Генерация ключа', 'Generate key'),
         color: _busy ? const Color(0xFFFFFFFF) : color,
-        q: 0,
-        r: -1,
+        q: generate.$1,
+        r: generate.$2,
         icon: 'assets/icons/key_gen.svg',
         iconScale: 1.4,
       ),
@@ -48,20 +53,23 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
         id: 'back',
         title: accountText(language, 'Назад', 'Back'),
         color: const Color(0xFFA1A1AA),
-        q: 0,
-        r: 0,
+        q: backAt.$1,
+        r: backAt.$2,
         icon: 'assets/icons/back.svg',
       ),
     ];
     if (_failure != null) {
+      final spot = nextHex([
+        for (final slot in slots) (slot.q, slot.r),
+      ], wide: wide);
       slots.add(
         HexSlot(
           id: 'error',
           title: accountText(language, 'Ошибка', 'Error'),
           color: errorColor,
           titleColor: errorColor,
-          q: 1,
-          r: -1,
+          q: spot.$1,
+          r: spot.$2,
           icon: 'assets/icons/error.svg',
           iconScale: 1.62,
           body: _failureOpen

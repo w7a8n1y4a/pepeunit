@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../account/identity.dart';
 import '../../account/secret_key_file.dart';
 import '../../app_scope.dart';
+import '../../hive/hex_order.dart';
 import '../../hive/hex_scene.dart';
 import '../../navigation/sections.dart';
 import 'account_nav.dart';
@@ -38,13 +39,17 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
     final language = AppScope.of(context).vault.language;
     final color = sectionById('people')?.color ?? const Color(0xFFFF3333);
     final loadColor = _busy || _dragHot ? const Color(0xFFFFFFFF) : color;
+    final wide = hexWide(MediaQuery.sizeOf(context));
+    final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
+    final load = frame.cells.first;
+    final backAt = frame.back!;
     final slots = <HexSlot>[
       HexSlot(
         id: 'load',
         title: accountText(language, 'Загрузка ключа', 'Load key'),
         color: loadColor,
-        q: 0,
-        r: -1,
+        q: load.$1,
+        r: load.$2,
         icon: 'assets/icons/key_load.svg',
         iconScale: 1.2,
       ),
@@ -52,20 +57,23 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
         id: 'back',
         title: accountText(language, 'Назад', 'Back'),
         color: const Color(0xFFA1A1AA),
-        q: 0,
-        r: 0,
+        q: backAt.$1,
+        r: backAt.$2,
         icon: 'assets/icons/back.svg',
       ),
     ];
     if (_failure != null) {
+      final spot = nextHex([
+        for (final slot in slots) (slot.q, slot.r),
+      ], wide: wide);
       slots.add(
         HexSlot(
           id: 'error',
           title: accountText(language, 'Ошибка', 'Error'),
           color: errorColor,
           titleColor: errorColor,
-          q: 1,
-          r: -1,
+          q: spot.$1,
+          r: spot.$2,
           icon: 'assets/icons/error.svg',
           iconScale: 1.62,
           body: _failureOpen

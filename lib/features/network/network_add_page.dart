@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../app_scope.dart';
 import '../../features/account/account_nav.dart';
 import '../../features/account/error_reader.dart';
+import '../../hive/hex_order.dart';
 import '../../hive/hex_scene.dart';
 import 'line_cell.dart';
 import 'network_chrome.dart';
@@ -25,13 +26,17 @@ class _NetworkAddPageState extends State<NetworkAddPage> {
     final model = AppScope.of(context);
     final language = model.vault.language;
     final color = _busy ? const Color(0xFFFFFFFF) : networkColor;
+    final wide = hexWide(MediaQuery.sizeOf(context));
+    final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
+    final url = frame.cells.first;
+    final backAt = frame.back!;
     final slots = <HexSlot>[
       HexSlot(
         id: 'url',
         title: netText(language, 'Ссылка current', 'Current link'),
         color: color,
-        q: 0,
-        r: -1,
+        q: url.$1,
+        r: url.$2,
         body: LineCell(
           hint: '/instances/current',
           color: networkColor,
@@ -42,20 +47,23 @@ class _NetworkAddPageState extends State<NetworkAddPage> {
         id: 'back',
         title: netText(language, 'Назад', 'Back'),
         color: hexMuted,
-        q: 0,
-        r: 0,
+        q: backAt.$1,
+        r: backAt.$2,
         icon: 'assets/icons/back.svg',
       ),
     ];
     if (_failure != null) {
+      final spot = nextHex([
+        for (final slot in slots) (slot.q, slot.r),
+      ], wide: wide);
       slots.add(
         HexSlot(
           id: 'error',
           title: netText(language, 'Ошибка', 'Error'),
           color: errorColor,
           titleColor: errorColor,
-          q: 1,
-          r: -1,
+          q: spot.$1,
+          r: spot.$2,
           icon: 'assets/icons/error.svg',
           iconScale: 1.2,
           body: _open

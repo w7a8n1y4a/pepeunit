@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../account/icon_file.dart';
 import '../../app_scope.dart';
+import '../../hive/hex_order.dart';
 import '../../hive/hex_scene.dart';
 import '../../locale/languages.dart';
 import '../../navigation/sections.dart';
@@ -47,6 +48,10 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     final iconColor = _busy || _dragHot ? const Color(0xFFFFFFFF) : color;
     final muted = const Color(0xFFA1A1AA);
     final failure = _report ?? _failureText(language);
+    final wide = hexWide(MediaQuery.sizeOf(context));
+    final frame = hexFrame(count: 4, back: HexBack.center, wide: wide);
+    final spot = frame.cells;
+    final backAt = frame.back!;
     final slots = <HexSlot>[
       HexSlot(
         id: 'icon',
@@ -55,8 +60,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           'en': 'Upload avatar',
         }),
         color: iconColor,
-        q: 0,
-        r: -1,
+        q: spot[0].$1,
+        r: spot[0].$2,
         icon: png == null ? 'assets/icons/icon_load.svg' : null,
         image: png,
         iconScale: 1.15,
@@ -65,16 +70,16 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         id: 'login',
         title: phrase(language, {'ru': 'Изменить логин', 'en': 'Change login'}),
         color: color,
-        q: 1,
-        r: -1,
+        q: spot[1].$1,
+        r: spot[1].$2,
         body: LoginCell(color: color),
       ),
       HexSlot(
         id: 'back',
         title: phrase(language, {'ru': 'Назад', 'en': 'Back'}),
         color: muted,
-        q: 0,
-        r: 0,
+        q: backAt.$1,
+        r: backAt.$2,
         icon: 'assets/icons/back.svg',
       ),
       HexSlot(
@@ -84,8 +89,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           'en': 'Send to network',
         }),
         color: _busy ? const Color(0xFFFFFFFF) : color,
-        q: 0,
-        r: 1,
+        q: spot[2].$1,
+        r: spot[2].$2,
         icon: 'assets/icons/rocket.svg',
         iconScale: 1.45,
       ),
@@ -93,20 +98,23 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         id: 'parameters',
         title: phrase(language, {'ru': 'Параметры', 'en': 'Parameters'}),
         color: color,
-        q: -1,
-        r: 1,
+        q: spot[3].$1,
+        r: spot[3].$2,
         body: const ParametersCell(),
       ),
     ];
     if (failure != null) {
+      final errorAt = nextHex([
+        for (final slot in slots) (slot.q, slot.r),
+      ], wide: wide);
       slots.add(
         HexSlot(
           id: 'error',
           title: phrase(language, {'ru': 'Ошибка', 'en': 'Error'}),
           color: errorColor,
           titleColor: errorColor,
-          q: -1,
-          r: 0,
+          q: errorAt.$1,
+          r: errorAt.$2,
           icon: 'assets/icons/error.svg',
           iconScale: 1.62,
           body: _failureOpen

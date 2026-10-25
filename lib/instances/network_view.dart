@@ -1,5 +1,17 @@
+import '../hive/hex_order.dart';
 import 'instance.dart';
 import 'portrait.dart';
+
+export '../hive/hex_order.dart'
+    show
+        HexBack,
+        HexFrame,
+        hexBackCell,
+        hexDisk,
+        hexFrame,
+        hexSlots,
+        hexWide,
+        nextHex;
 
 /// Sections that stay available before a target instance is chosen.
 const openSections = {'people', 'peers', 'library'};
@@ -81,10 +93,7 @@ List<String> cardActions({
 }
 
 /// Moderation actions for an external peer when opened by Admin or Owner.
-List<String> peerActions({
-  required String? trust,
-  required bool federation,
-}) {
+List<String> peerActions({required String? trust, required bool federation}) {
   switch (trust) {
     case 'Pending':
       return const ['trust', 'block', 'delete'];
@@ -119,30 +128,7 @@ List<String> operationActions({
   required bool federation,
 }) {
   if (!owner && !staff) return const [];
-  return [
-    'tests',
-    if (federation) 'scan-all',
-    if (owner) 'reboot',
-  ];
-}
-
-const _dirs = <(int, int)>[(1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1)];
-
-/// Center plus [rings] surrounding rings. Ring 1 has 6 cells, then 12, then 18.
-List<(int, int)> hexDisk(int rings) {
-  final cells = <(int, int)>[(0, 0)];
-  for (var radius = 1; radius <= rings; radius++) {
-    var q = _dirs[4].$1 * radius;
-    var r = _dirs[4].$2 * radius;
-    for (final dir in _dirs) {
-      for (var step = 0; step < radius; step++) {
-        cells.add((q, r));
-        q += dir.$1;
-        r += dir.$2;
-      }
-    }
-  }
-  return cells;
+  return ['tests', if (federation) 'scan-all', if (owner) 'reboot'];
 }
 
 class BoardSlot {
@@ -168,18 +154,25 @@ class NetworkBoard {
   final int pages;
 }
 
-/// Bottom-left cell of the network menu, used by the error mark.
-const networkErrorCell = (-1, 1);
-
-/// Search at the top right, settings in the center, back at the bottom
-/// right, and the current instance at the top left.
-NetworkBoard networkBoard({required String? target}) {
+/// Settings, the current instance, then search. Back stays in the center.
+NetworkBoard networkBoard({required String? target, bool wide = false}) {
+  final ids = <String>[
+    'settings',
+    target == null ? 'address' : 'target',
+    'search',
+  ];
+  final frame = hexFrame(count: ids.length, back: HexBack.center, wide: wide);
+  final back = frame.back!;
   return NetworkBoard(
     slots: [
-      const BoardSlot('settings', 0, 0),
-      const BoardSlot('back', 0, 1),
-      BoardSlot(target == null ? 'address' : 'target', 0, -1, url: target),
-      const BoardSlot('search', 1, -1),
+      for (var i = 0; i < ids.length; i++)
+        BoardSlot(
+          ids[i],
+          frame.cells[i].$1,
+          frame.cells[i].$2,
+          url: ids[i] == 'target' ? target : null,
+        ),
+      BoardSlot('back', back.$1, back.$2),
     ],
     canZoomIn: false,
     page: 0,
@@ -187,54 +180,52 @@ NetworkBoard networkBoard({required String? target}) {
   );
 }
 
-/// Peer cards live on the search menu. The search + trust filter shares a
-/// single cell at (0, -1), so peer instances are visible right on the first
-/// ring even when Admin or Owner is signed in.
+/// Search field, then add and scan when they exist, then peer cards.
+/// Back stays in the center. A pager takes the last two free cells.
 NetworkBoard searchBoard({
   required int scope,
   required bool staff,
   required bool scanAll,
   required List<String> urls,
   required int page,
+  bool wide = false,
 }) {
   final rings = scope.clamp(0, 2) + 1;
-  final disk = hexDisk(rings);
-  final reserved = <(int, int), String>{
-    (0, 0): 'back',
-    (0, -1): 'text',
-  };
-  if (staff) reserved[(1, -1)] = 'add';
-  if (scanAll) reserved[(-1, 0)] = 'scan-all';
-  final free = [
-    for (final cell in disk)
-      if (!reserved.containsKey(cell)) cell,
-  ];
-  final overflow = urls.length > free.length;
-  final paging = scope >= 2 && overflow && free.length >= 3;
-  final room = paging ? free.sublist(0, free.length - 2) : free;
-  final pages = paging && room.isNotEmpty
-      ? (urls.length / room.length).ceil()
-      : 1;
+  final chrome = <String>['text', if (staff) 'add', if (scanAll) 'scan-all'];
+  final free = hexDisk(rings, wide: wide).length - 1;
+  final instanceCap = free - chrome.length;
+  final overflow = urls.length > instanceCap;
+  final paging = scope >= 2 && overflow && instanceCap >= 3;
+  final urlRoom = instanceCap - (paging ? 2 : 0);
+  final pages = paging && urlRoom > 0 ? (urls.length / urlRoom).ceil() : 1;
   final safePage = page.clamp(0, pages - 1);
   final slice = paging
-      ? urls.skip(safePage * room.length).take(room.length).toList()
-      : urls.take(room.length).toList();
+      ? urls.skip(safePage * urlRoom).take(urlRoom).toList()
+      : urls.take(urlRoom).toList();
+  final frame = hexFrame(
+    count: chrome.length + slice.length,
+    back: HexBack.center,
+    wide: wide,
+    rings: rings,
+    tail: paging ? 2 : 0,
+  );
+  final back = frame.back!;
   final slots = <BoardSlot>[
-    for (final entry in reserved.entries)
-      if (disk.contains(entry.key))
-        BoardSlot(entry.value, entry.key.$1, entry.key.$2),
+    BoardSlot('back', back.$1, back.$2),
+    for (var i = 0; i < chrome.length; i++)
+      BoardSlot(chrome[i], frame.cells[i].$1, frame.cells[i].$2),
     for (var i = 0; i < slice.length; i++)
-      BoardSlot('instance', room[i].$1, room[i].$2, url: slice[i]),
+      BoardSlot(
+        'instance',
+        frame.cells[chrome.length + i].$1,
+        frame.cells[chrome.length + i].$2,
+        url: slice[i],
+      ),
+    if (frame.tail.length == 2) ...[
+      BoardSlot('prev', frame.tail[0].$1, frame.tail[0].$2),
+      BoardSlot('next', frame.tail[1].$1, frame.tail[1].$2),
+    ],
   ];
-  if (paging) {
-    slots
-      ..add(
-        BoardSlot('prev', free[free.length - 2].$1, free[free.length - 2].$2),
-      )
-      ..add(
-        BoardSlot('next', free[free.length - 1].$1, free[free.length - 1].$2),
-      );
-  }
   return NetworkBoard(
     slots: slots,
     canZoomIn: scope < 2 && overflow,
@@ -243,39 +234,40 @@ NetworkBoard searchBoard({
   );
 }
 
-/// Back in the center, the rest of the disk is one url per cell.
+/// One url per free cell. Back sits in the center. A pager takes the tail.
 NetworkBoard catalogBoard({
   required int scope,
   required List<String> urls,
   required int page,
+  bool wide = false,
 }) {
   final rings = scope.clamp(0, 2) + 1;
-  final disk = hexDisk(rings);
-  final free = disk.skip(1).toList();
-  final overflow = urls.length > free.length;
-  final paging = scope >= 2 && overflow && free.length >= 3;
-  final room = paging ? free.sublist(0, free.length - 2) : free;
-  final pages = paging && room.isNotEmpty
-      ? (urls.length / room.length).ceil()
-      : 1;
+  final free = hexDisk(rings, wide: wide).length - 1;
+  final overflow = urls.length > free;
+  final paging = scope >= 2 && overflow && free >= 3;
+  final room = free - (paging ? 2 : 0);
+  final pages = paging && room > 0 ? (urls.length / room).ceil() : 1;
   final safePage = page.clamp(0, pages - 1);
   final slice = paging
-      ? urls.skip(safePage * room.length).take(room.length).toList()
-      : urls.take(room.length).toList();
+      ? urls.skip(safePage * room).take(room).toList()
+      : urls.take(room).toList();
+  final frame = hexFrame(
+    count: slice.length,
+    back: HexBack.center,
+    wide: wide,
+    rings: rings,
+    tail: paging ? 2 : 0,
+  );
+  final back = frame.back!;
   final slots = <BoardSlot>[
-    const BoardSlot('back', 0, 0),
+    BoardSlot('back', back.$1, back.$2),
     for (var i = 0; i < slice.length; i++)
-      BoardSlot('url', room[i].$1, room[i].$2, url: slice[i]),
+      BoardSlot('url', frame.cells[i].$1, frame.cells[i].$2, url: slice[i]),
+    if (frame.tail.length == 2) ...[
+      BoardSlot('prev', frame.tail[0].$1, frame.tail[0].$2),
+      BoardSlot('next', frame.tail[1].$1, frame.tail[1].$2),
+    ],
   ];
-  if (paging) {
-    slots
-      ..add(
-        BoardSlot('prev', free[free.length - 2].$1, free[free.length - 2].$2),
-      )
-      ..add(
-        BoardSlot('next', free[free.length - 1].$1, free[free.length - 1].$2),
-      );
-  }
   return NetworkBoard(
     slots: slots,
     canZoomIn: scope < 2 && overflow,
@@ -284,47 +276,15 @@ NetworkBoard catalogBoard({
   );
 }
 
-/// Single-ring layout around Back (0, 0). Anchored actions stay at fixed
-/// positions so the instance card has a consistent, balanced geometry.
-List<BoardSlot> cardBoard(List<String> ids) {
-  const anchored = <String, (int, int)>{
-    'identity': (0, -1),
-    'metrics': (1, -1),
-    'target': (1, 0),
-    'clear': (1, 0),
-    'relogin': (0, 1),
-    'telegram': (-1, 1),
-    'settings': (-1, 0),
-    'peer': (-1, 0),
-  };
-  final placed = <BoardSlot>[const BoardSlot('back', 0, 0)];
-  final taken = <(int, int)>{(0, 0)};
-  final rest = <String>[];
-  for (final id in ids) {
-    final spot = anchored[id];
-    if (spot != null && !taken.contains(spot)) {
-      placed.add(BoardSlot(id, spot.$1, spot.$2));
-      taken.add(spot);
-    } else {
-      rest.add(id);
-    }
-  }
-  const ringOrder = <(int, int)>[
-    (0, -1),
-    (1, -1),
-    (1, 0),
-    (0, 1),
-    (-1, 1),
-    (-1, 0),
+/// Actions in list order around Back in the center.
+List<BoardSlot> cardBoard(List<String> ids, {bool wide = false}) {
+  final frame = hexFrame(count: ids.length, back: HexBack.center, wide: wide);
+  final back = frame.back!;
+  return [
+    for (var i = 0; i < ids.length; i++)
+      BoardSlot(ids[i], frame.cells[i].$1, frame.cells[i].$2),
+    BoardSlot('back', back.$1, back.$2),
   ];
-  final spots = [
-    for (final cell in ringOrder)
-      if (!taken.contains(cell)) cell,
-  ];
-  for (var i = 0; i < rest.length && i < spots.length; i++) {
-    placed.add(BoardSlot(rest[i], spots[i].$1, spots[i].$2));
-  }
-  return placed;
 }
 
 Future<List<T>> collectPages<T>({

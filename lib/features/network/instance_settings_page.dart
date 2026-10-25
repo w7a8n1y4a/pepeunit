@@ -18,8 +18,7 @@ import 'network_chrome.dart';
 
 /// Instance administration hub (`/peers/tune`).
 ///
-/// Always stays within a single ring (`hexDisk(1)` — at most 6 cells around
-/// Back) so the screen never bloats when Owner or Admin opens it.
+/// Back stays in the center. The action list stays within the first ring.
 class InstanceTunePage extends StatefulWidget {
   const InstanceTunePage({super.key});
 
@@ -62,22 +61,20 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
     final portrait = target == null ? null : model.portraitOf(target.url);
     final federation = portrait?.federation != false;
 
-    final ids = tuneActions(
-      owner: owner,
-      staff: staff,
-      federation: federation,
-    );
-    final ring = hexDisk(1).skip(1).toList();
+    final ids = tuneActions(owner: owner, staff: staff, federation: federation);
+    final wide = hexWide(MediaQuery.sizeOf(context));
+    final frame = hexFrame(count: ids.length, back: HexBack.center, wide: wide);
+    final back = frame.back!;
     final placed = <BoardSlot>[
-      const BoardSlot('back', 0, 0),
-      for (var i = 0; i < ids.length && i < ring.length; i++)
-        BoardSlot(ids[i], ring[i].$1, ring[i].$2),
+      BoardSlot('back', back.$1, back.$2),
+      for (var i = 0; i < ids.length && i < frame.cells.length; i++)
+        BoardSlot(ids[i], frame.cells[i].$1, frame.cells[i].$2),
     ];
     final slots = <HexSlot>[
       for (final slot in placed) _slot(slot, model, language, color),
     ];
     if (_failure != null) {
-      final spot = errorSpot(placed);
+      final spot = errorSpot(placed, wide: wide);
       slots.add(
         HexSlot(
           id: 'error',
@@ -120,12 +117,7 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
     );
   }
 
-  HexSlot _slot(
-    BoardSlot slot,
-    AppModel model,
-    String language,
-    Color color,
-  ) {
+  HexSlot _slot(BoardSlot slot, AppModel model, String language, Color color) {
     final targetUrl = model.target?.url ?? '';
     final portrait = targetUrl.isEmpty ? null : model.portraitOf(targetUrl);
     final active = _busy ? const Color(0xFFFFFFFF) : color;
@@ -342,21 +334,29 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     final color = networkColor;
     final id = widget.categoryId;
 
+    final wide = hexWide(MediaQuery.sizeOf(context));
     final List<HexSlot> slots;
     if (id == 'ops') {
-      slots = _opsSlots(model, language, color);
+      slots = _opsSlots(model, language, color, wide);
     } else if (settingGroup(id) != null) {
-      slots = _groupSlots(settingGroup(id)!, language, color);
+      slots = _groupSlots(settingGroup(id)!, language, color, wide);
     } else if (settingCategory(id) != null) {
-      slots = _categorySlots(settingCategory(id)!, model, language, color);
+      slots = _categorySlots(
+        settingCategory(id)!,
+        model,
+        language,
+        color,
+        wide,
+      );
     } else {
+      final back = hexBackCell(HexBack.center)!;
       slots = [
         HexSlot(
           id: 'back',
           title: netText(language, 'Назад', 'Back'),
           color: hexMuted,
-          q: 0,
-          r: 0,
+          q: back.$1,
+          r: back.$2,
           icon: 'assets/icons/back.svg',
         ),
       ];
@@ -365,6 +365,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     if (_failure != null) {
       final spot = errorSpot(
         slots.map((slot) => BoardSlot(slot.id, slot.q, slot.r)),
+        wide: wide,
       );
       slots.add(
         HexSlot(
@@ -391,7 +392,12 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     );
   }
 
-  List<HexSlot> _opsSlots(AppModel model, String language, Color color) {
+  List<HexSlot> _opsSlots(
+    AppModel model,
+    String language,
+    Color color,
+    bool wide,
+  ) {
     final target = model.target;
     final owner = target?.ownsInstance ?? false;
     final staff = target?.managesPeers ?? false;
@@ -404,15 +410,21 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
       staff: staff,
       federation: federation,
     );
-    final spots = hexDisk(1).skip(1).toList();
     final items = ['identity', ...ops];
+    final frame = hexFrame(
+      count: items.length,
+      back: HexBack.center,
+      wide: wide,
+    );
+    final spots = frame.cells;
+    final back = frame.back!;
     return [
       HexSlot(
         id: 'back',
         title: netText(language, 'Назад', 'Back'),
         color: hexMuted,
-        q: 0,
-        r: 0,
+        q: back.$1,
+        r: back.$2,
         icon: 'assets/icons/back.svg',
       ),
       for (var i = 0; i < items.length && i < spots.length; i++)
@@ -469,19 +481,26 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     SettingGroup group,
     String language,
     Color color,
+    bool wide,
   ) {
-    final spots = hexDisk(1).skip(1).toList();
     final categories = [
       for (final id in group.categoryIds)
         if (settingCategory(id) != null) settingCategory(id)!,
     ];
+    final frame = hexFrame(
+      count: categories.length,
+      back: HexBack.center,
+      wide: wide,
+    );
+    final spots = frame.cells;
+    final back = frame.back!;
     return [
       HexSlot(
         id: 'back',
         title: netText(language, 'Назад', 'Back'),
         color: hexMuted,
-        q: 0,
-        r: 0,
+        q: back.$1,
+        r: back.$2,
         icon: 'assets/icons/back.svg',
       ),
       for (var i = 0; i < categories.length && i < spots.length; i++)
@@ -502,16 +521,23 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     AppModel model,
     String language,
     Color color,
+    bool wide,
   ) {
     final values = model.targetSettings ?? const <String, Object?>{};
-    final spots = hexDisk(1).skip(1).toList();
+    final frame = hexFrame(
+      count: category.fields.length,
+      back: HexBack.center,
+      wide: wide,
+    );
+    final spots = frame.cells;
+    final back = frame.back!;
     return [
       HexSlot(
         id: 'back',
         title: netText(language, 'Назад', 'Back'),
         color: hexMuted,
-        q: 0,
-        r: 0,
+        q: back.$1,
+        r: back.$2,
         icon: 'assets/icons/back.svg',
       ),
       for (var i = 0; i < category.fields.length && i < spots.length; i++)
@@ -546,9 +572,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
         footer: enabled
             ? netText(language, 'вкл', 'on')
             : netText(language, 'выкл', 'off'),
-        color: _busy
-            ? const Color(0xFFFFFFFF)
-            : (enabled ? color : hexMuted),
+        color: _busy ? const Color(0xFFFFFFFF) : (enabled ? color : hexMuted),
         q: q,
         r: r,
         icon: enabled ? 'assets/icons/check.svg' : 'assets/icons/close.svg',
@@ -817,7 +841,8 @@ class _ValueSettingCellState extends State<ValueSettingCell> {
 
   @override
   Widget build(BuildContext context) {
-    final hint = widget.field.hint ??
+    final hint =
+        widget.field.hint ??
         (widget.field.nullable
             ? netText(widget.language, 'пусто', 'empty')
             : '');

@@ -61,13 +61,14 @@ class _InstancePageState extends State<InstancePage> {
       ];
     }
 
-    final placed = cardBoard(actions);
+    final wide = hexWide(MediaQuery.sizeOf(context));
+    final placed = cardBoard(actions, wide: wide);
     final slots = <HexSlot>[
       for (final slot in placed)
         _slot(slot, model, language, color, url, isTarget, owner, staff),
     ];
     if (_failure != null) {
-      final spot = errorSpot(placed);
+      final spot = errorSpot(placed, wide: wide);
       slots.add(
         HexSlot(
           id: 'error',
@@ -169,7 +170,11 @@ class _InstancePageState extends State<InstancePage> {
             pages: pages,
             copyText: url,
             copyLabel: netText(language, 'Скопировать ссылку', 'Copy link'),
-            prevLabel: netText(language, 'Предыдущая сводка', 'Previous summary'),
+            prevLabel: netText(
+              language,
+              'Предыдущая сводка',
+              'Previous summary',
+            ),
             nextLabel: netText(language, 'Следующая сводка', 'Next summary'),
           ),
         );

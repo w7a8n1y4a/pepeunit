@@ -48,25 +48,81 @@ void main() {
 
   test('three rings grow by six cells and the outer ring pages', () {
     expect(hexDisk(0), [(0, 0)]);
-    expect(hexDisk(1).length, 7);
-    expect(hexDisk(2).length, 19);
+    expect(hexDisk(1), [
+      (0, 0),
+      (0, -1),
+      (1, -1),
+      (0, 1),
+      (-1, 1),
+      (-1, 0),
+      (1, 0),
+    ]);
+    expect(hexDisk(1, wide: true), [
+      (0, 0),
+      (-1, 0),
+      (1, 0),
+      (0, -1),
+      (1, -1),
+      (0, 1),
+      (-1, 1),
+    ]);
+    expect(hexDisk(2).skip(7), [
+      (0, -2),
+      (1, -2),
+      (2, -2),
+      (0, 2),
+      (-1, 2),
+      (-2, 2),
+      (-1, -1),
+      (-2, 0),
+      (-2, 1),
+      (2, -1),
+      (2, 0),
+      (1, 1),
+    ]);
     expect(hexDisk(3).length, 37);
     expect(hexDisk(3).toSet().length, 37);
+    expect(hexDisk(3)[19], (0, -3));
+    expect(hexDisk(3)[32], (3, -2));
+    expect(hexDisk(3)[34], (3, 0));
+    expect(nextHex(const [(0, 0), (0, 1), (0, -1), (1, -1)]), (-1, 1));
+    expect(nextHex(const [(0, 0), (0, 1), (0, -1), (1, -1)], wide: true), (
+      -1,
+      0,
+    ));
+    final loose = cardBoard(const ['custom']);
+    expect(
+      (
+        loose.firstWhere((slot) => slot.id == 'custom').q,
+        loose.firstWhere((slot) => slot.id == 'custom').r,
+      ),
+      (0, -1),
+    );
+    expect(
+      (
+        loose.firstWhere((slot) => slot.id == 'back').q,
+        loose.firstWhere((slot) => slot.id == 'back').r,
+      ),
+      (0, 0),
+    );
 
     final quiet = networkBoard(target: null);
     expect(quiet.slots.map((slot) => slot.id), [
       'settings',
-      'back',
       'address',
       'search',
+      'back',
     ]);
     expect(quiet.slots.any((slot) => slot.id == 'instance'), isFalse);
     expect(quiet.canZoomIn, isFalse);
     expect(quiet.slots.firstWhere((slot) => slot.id == 'settings').q, 0);
-    expect(quiet.slots.firstWhere((slot) => slot.id == 'settings').r, 0);
-    expect(quiet.slots.firstWhere((slot) => slot.id == 'back').r, 1);
+    expect(quiet.slots.firstWhere((slot) => slot.id == 'settings').r, -1);
+    expect(quiet.slots.firstWhere((slot) => slot.id == 'back').q, 0);
+    expect(quiet.slots.firstWhere((slot) => slot.id == 'back').r, 0);
+    expect(quiet.slots.firstWhere((slot) => slot.id == 'address').q, 1);
     expect(quiet.slots.firstWhere((slot) => slot.id == 'address').r, -1);
-    expect(quiet.slots.firstWhere((slot) => slot.id == 'search').q, 1);
+    expect(quiet.slots.firstWhere((slot) => slot.id == 'search').q, 0);
+    expect(quiet.slots.firstWhere((slot) => slot.id == 'search').r, 1);
     final placed = cardBoard(const ['identity', 'metrics', 'relogin']);
     final back = placed.firstWhere((slot) => slot.id == 'back');
     expect((back.q, back.r), (0, 0));
@@ -109,10 +165,7 @@ void main() {
     );
     expect(first.slots.any((slot) => slot.id == 'add'), isTrue);
     expect(first.slots.any((slot) => slot.id == 'scan-all'), isTrue);
-    expect(
-      first.slots.where((slot) => slot.id == 'instance').length,
-      3,
-    );
+    expect(first.slots.where((slot) => slot.id == 'instance').length, 3);
     expect(first.canZoomIn, isTrue);
     final outer = searchBoard(
       scope: 2,
@@ -126,64 +179,74 @@ void main() {
     expect(outer.canZoomIn, isFalse);
   });
 
-  test('role decides which instance actions exist without bloating the card', () {
-    expect(
-      cardActions(
+  test(
+    'role decides which instance actions exist without bloating the card',
+    () {
+      expect(
+        cardActions(
+          isTarget: true,
+          owner: false,
+          staff: false,
+          federation: true,
+          telegram: false,
+          trust: 'Trust',
+        ),
+        ['metrics', 'relogin', 'clear'],
+      );
+      final owner = cardActions(
         isTarget: true,
-        owner: false,
-        staff: false,
-        federation: true,
-        telegram: false,
-        trust: 'Trust',
-      ),
-      ['metrics', 'relogin', 'clear'],
-    );
-    final owner = cardActions(
-      isTarget: true,
-      owner: true,
-      staff: true,
-      federation: true,
-      telegram: true,
-      trust: 'Trust',
-    );
-    expect(owner, ['metrics', 'relogin', 'clear', 'telegram', 'settings']);
-    expect(cardBoard(['identity', ...owner]).length, lessThanOrEqualTo(7));
-    expect(
-      tuneActions(owner: true, staff: true, federation: true),
-      ['icon', 'ops', 'flags', 'core', 'services', 'transport'],
-    );
-    expect(
-      operationActions(owner: true, staff: true, federation: true),
-      ['tests', 'scan-all', 'reboot'],
-    );
-    expect(
-      operationActions(owner: false, staff: true, federation: true),
-      ['tests', 'scan-all'],
-    );
-    expect(
-      cardActions(
-        isTarget: false,
-        owner: false,
+        owner: true,
         staff: true,
         federation: true,
         telegram: true,
-        trust: 'Pending',
-      ),
-      ['metrics', 'relogin', 'target', 'telegram', 'peer'],
-    );
-    expect(
-      peerActions(trust: 'Pending', federation: true),
-      ['trust', 'block', 'delete'],
-    );
-    expect(
-      peerActions(trust: 'Trust', federation: true),
-      ['block', 'scan', 'delete'],
-    );
-    expect(
-      peerActions(trust: 'Trust', federation: false),
-      isNot(contains('scan')),
-    );
-  });
+        trust: 'Trust',
+      );
+      expect(owner, ['metrics', 'relogin', 'clear', 'telegram', 'settings']);
+      expect(cardBoard(['identity', ...owner]).length, lessThanOrEqualTo(7));
+      expect(tuneActions(owner: true, staff: true, federation: true), [
+        'icon',
+        'ops',
+        'flags',
+        'core',
+        'services',
+        'transport',
+      ]);
+      expect(operationActions(owner: true, staff: true, federation: true), [
+        'tests',
+        'scan-all',
+        'reboot',
+      ]);
+      expect(operationActions(owner: false, staff: true, federation: true), [
+        'tests',
+        'scan-all',
+      ]);
+      expect(
+        cardActions(
+          isTarget: false,
+          owner: false,
+          staff: true,
+          federation: true,
+          telegram: true,
+          trust: 'Pending',
+        ),
+        ['metrics', 'relogin', 'target', 'telegram', 'peer'],
+      );
+      expect(peerActions(trust: 'Pending', federation: true), [
+        'trust',
+        'block',
+        'delete',
+      ]);
+      expect(peerActions(trust: 'Trust', federation: true), [
+        'block',
+        'scan',
+        'delete',
+      ]);
+      expect(
+        peerActions(trust: 'Trust', federation: false),
+        isNot(contains('scan')),
+      );
+    },
+  );
 
   test('menu follows the target and its flags', () {
     expect(menuSectionEnabled('library', hasTarget: false), isTrue);
@@ -202,33 +265,39 @@ void main() {
     expect(menuSectionEnabled('alerts', hasTarget: true), isTrue);
   });
 
-  test('settings categories cover the owner fields once and groups stay 1-ring', () {
-    final keys = [
-      for (final category in settingCategories)
-        for (final field in category.fields) field.key,
-    ];
-    expect(keys.toSet().length, keys.length);
-    expect(keys.length, 58);
-    for (final category in settingCategories) {
-      expect(category.fields.length, lessThanOrEqualTo(6));
-    }
-    final groupedCategories = [
-      'flags',
-      for (final group in settingGroups) ...group.categoryIds,
-    ];
-    expect(
-      groupedCategories.toSet(),
-      settingCategories.map((c) => c.id).toSet(),
-    );
-    expect(keys, contains('pu_ff_telegram_bot_enable'));
-    expect(keys, contains('pu_telegram_token'));
-    expect(keys, isNot(contains('icon_uuid')));
-    expect(parseSetting(settingCategory('users')!.fields.first, '0'), isNull);
-    expect(parseSetting(settingCategory('users')!.fields.first, '16'), 16);
-    final emailField = settingCategory('contacts')!.fields.first;
-    expect(parseSetting(emailField, 'not-an-email'), isNull);
-    expect(parseSetting(emailField, 'owner@pepeunit.com'), 'owner@pepeunit.com');
-  });
+  test(
+    'settings categories cover the owner fields once and groups stay 1-ring',
+    () {
+      final keys = [
+        for (final category in settingCategories)
+          for (final field in category.fields) field.key,
+      ];
+      expect(keys.toSet().length, keys.length);
+      expect(keys.length, 58);
+      for (final category in settingCategories) {
+        expect(category.fields.length, lessThanOrEqualTo(6));
+      }
+      final groupedCategories = [
+        'flags',
+        for (final group in settingGroups) ...group.categoryIds,
+      ];
+      expect(
+        groupedCategories.toSet(),
+        settingCategories.map((c) => c.id).toSet(),
+      );
+      expect(keys, contains('pu_ff_telegram_bot_enable'));
+      expect(keys, contains('pu_telegram_token'));
+      expect(keys, isNot(contains('icon_uuid')));
+      expect(parseSetting(settingCategory('users')!.fields.first, '0'), isNull);
+      expect(parseSetting(settingCategory('users')!.fields.first, '16'), 16);
+      final emailField = settingCategory('contacts')!.fields.first;
+      expect(parseSetting(emailField, 'not-an-email'), isNull);
+      expect(
+        parseSetting(emailField, 'owner@pepeunit.com'),
+        'owner@pepeunit.com',
+      );
+    },
+  );
 
   test('peer pages stop at the reported total', () async {
     final seen = <int>[];

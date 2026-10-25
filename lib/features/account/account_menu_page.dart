@@ -8,6 +8,7 @@ import '../../account/icon_file.dart';
 import '../../account/key_mark.dart';
 import '../../account/secret_key_file.dart';
 import '../../app_scope.dart';
+import '../../hive/hex_order.dart';
 import '../../hive/hex_scene.dart';
 import '../../navigation/sections.dart';
 import 'account_nav.dart';
@@ -35,14 +36,17 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         ? _signedIn(language, color, back)
         : _signedOut(language, color, back);
     if (_failure != null) {
+      final spot = nextHex([
+        for (final slot in slots) (slot.q, slot.r),
+      ], wide: hexWide(MediaQuery.sizeOf(context)));
       slots.add(
         HexSlot(
           id: 'error',
           title: accountText(language, 'Ошибка', 'Error'),
           color: errorColor,
           titleColor: errorColor,
-          q: -1,
-          r: 0,
+          q: spot.$1,
+          r: spot.$2,
           icon: 'assets/icons/error.svg',
           iconScale: 1.62,
           body: _failureOpen
@@ -61,13 +65,20 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
   }
 
   List<HexSlot> _signedOut(String language, Color color, String back) {
+    final frame = hexFrame(
+      count: 2,
+      back: HexBack.center,
+      wide: hexWide(MediaQuery.sizeOf(context)),
+    );
+    final spot = frame.cells;
+    final backAt = frame.back!;
     return [
       HexSlot(
         id: 'login',
         title: accountText(language, 'Вход', 'Login'),
         color: color,
-        q: 0,
-        r: -1,
+        q: spot[0].$1,
+        r: spot[0].$2,
         icon: 'assets/icons/signin.svg',
         iconScale: 1.2,
       ),
@@ -75,16 +86,16 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         id: 'registration',
         title: accountText(language, 'Регистрация', 'Registration'),
         color: color,
-        q: 1,
-        r: -1,
+        q: spot[1].$1,
+        r: spot[1].$2,
         icon: 'assets/icons/registration.svg',
       ),
       HexSlot(
         id: 'back',
         title: back,
         color: const Color(0xFFA1A1AA),
-        q: 0,
-        r: 0,
+        q: backAt.$1,
+        r: backAt.$2,
         icon: 'assets/icons/back.svg',
       ),
     ];
@@ -95,13 +106,20 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
     final active = _busy ? const Color(0xFFFFFFFF) : color;
     final png = iconBytes(model.vault.iconPng);
     final login = model.vault.login;
+    final frame = hexFrame(
+      count: 4,
+      back: HexBack.center,
+      wide: hexWide(MediaQuery.sizeOf(context)),
+    );
+    final spot = frame.cells;
+    final backAt = frame.back!;
     return [
       HexSlot(
         id: 'profile',
         title: login.isEmpty ? accountText(language, 'Логин', 'Login') : login,
         color: color,
-        q: 0,
-        r: -1,
+        q: spot[0].$1,
+        r: spot[0].$2,
         icon: png == null ? 'assets/icons/account.svg' : null,
         image: png,
         tappable: false,
@@ -110,8 +128,8 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         id: 'settings',
         title: accountText(language, 'Настройки', 'Settings'),
         color: color,
-        q: 0,
-        r: 0,
+        q: spot[1].$1,
+        r: spot[1].$2,
         icon: 'assets/icons/settings.svg',
         iconScale: 1.4,
       ),
@@ -120,8 +138,8 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         title: accountText(language, 'Скачать ключ', 'Download key'),
         footer: keyMarkFromBase64(model.vault.publicKey),
         color: active,
-        q: 1,
-        r: -1,
+        q: spot[2].$1,
+        r: spot[2].$2,
         icon: 'assets/icons/key.svg',
         iconScale: 1.4,
       ),
@@ -129,8 +147,8 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         id: 'signout',
         title: accountText(language, 'Выход', 'Sign out'),
         color: color,
-        q: -1,
-        r: 1,
+        q: spot[3].$1,
+        r: spot[3].$2,
         icon: 'assets/icons/signout.svg',
         iconScale: 1.08,
       ),
@@ -138,8 +156,8 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         id: 'back',
         title: back,
         color: const Color(0xFFA1A1AA),
-        q: 0,
-        r: 1,
+        q: backAt.$1,
+        r: backAt.$2,
         icon: 'assets/icons/back.svg',
       ),
     ];

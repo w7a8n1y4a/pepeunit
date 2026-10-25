@@ -29,14 +29,18 @@ class _NetworkListsPageState extends State<NetworkListsPage> {
     final color = networkColor;
     final allow = model.vault.allow.length;
     final deny = model.vault.deny.length;
+    final wide = hexWide(MediaQuery.sizeOf(context));
+    final frame = hexFrame(count: 3, back: HexBack.center, wide: wide);
+    final at = frame.cells;
+    final back = frame.back!;
     final slots = <HexSlot>[
       HexSlot(
         id: 'allow',
         title: netText(language, 'Белый список', 'Allow list'),
         footer: allow == 0 ? netText(language, 'все', 'all') : '$allow',
         color: color,
-        q: -1,
-        r: 1,
+        q: at[0].$1,
+        r: at[0].$2,
         icon: 'assets/icons/check.svg',
       ),
       HexSlot(
@@ -44,36 +48,39 @@ class _NetworkListsPageState extends State<NetworkListsPage> {
         title: netText(language, 'Чёрный список', 'Deny list'),
         footer: '$deny',
         color: color,
-        q: 0,
-        r: 1,
+        q: at[1].$1,
+        r: at[1].$2,
         icon: 'assets/icons/ban.svg',
       ),
       HexSlot(
         id: 'pin',
         title: netText(language, 'Добавить адрес', 'Add address'),
         color: color,
-        q: 0,
-        r: -1,
+        q: at[2].$1,
+        r: at[2].$2,
         body: LineCell(hint: 'host', color: color, onSubmit: _pin),
       ),
       HexSlot(
         id: 'back',
         title: netText(language, 'Назад', 'Back'),
         color: hexMuted,
-        q: 0,
-        r: 0,
+        q: back.$1,
+        r: back.$2,
         icon: 'assets/icons/back.svg',
       ),
     ];
     if (_failure != null) {
+      final spot = nextHex([
+        for (final slot in slots) (slot.q, slot.r),
+      ], wide: wide);
       slots.add(
         HexSlot(
           id: 'error',
           title: netText(language, 'Ошибка', 'Error'),
           color: errorColor,
           titleColor: errorColor,
-          q: 1,
-          r: -1,
+          q: spot.$1,
+          r: spot.$2,
           icon: 'assets/icons/error.svg',
           iconScale: 1.2,
           body: _open
@@ -143,17 +150,19 @@ class _NetworkListPageState extends State<NetworkListPage> {
     final model = AppScope.of(context);
     final language = model.vault.language;
     final color = networkColor;
+    final wide = hexWide(MediaQuery.sizeOf(context));
     final board = catalogBoard(
       scope: widget.scope,
       urls: model.catalog(),
       page: _page,
+      wide: wide,
     );
     final slots = <HexSlot>[
       for (final slot in board.slots)
         _slot(slot, model, language, color, board),
     ];
     if (_failure != null) {
-      final spot = errorSpot(board.slots);
+      final spot = errorSpot(board.slots, wide: wide);
       slots.add(
         HexSlot(
           id: 'error',
@@ -198,8 +207,8 @@ class _NetworkListPageState extends State<NetworkListPage> {
           id: 'back',
           title: netText(language, 'Назад', 'Back'),
           color: hexMuted,
-          q: 0,
-          r: 0,
+          q: slot.q,
+          r: slot.r,
           icon: 'assets/icons/back.svg',
         );
       case 'prev':
