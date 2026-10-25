@@ -203,22 +203,30 @@ class _NetworkListPageState extends State<NetworkListPage> {
           icon: 'assets/icons/back.svg',
         );
       case 'prev':
-        return HexSlot(
+        return pageStepSlot(
           id: 'prev',
-          title: netText(language, 'Предыдущие', 'Previous'),
+          left: true,
+          language: language,
           color: color,
           q: slot.q,
           r: slot.r,
+          page: board.page,
+          pages: board.pages,
           enabled: board.page > 0,
+          onTap: () => setState(() => _page = board.page - 1),
         );
       case 'next':
-        return HexSlot(
+        return pageStepSlot(
           id: 'next',
-          title: netText(language, 'Следующие', 'Next'),
+          left: false,
+          language: language,
           color: color,
           q: slot.q,
           r: slot.r,
+          page: board.page,
+          pages: board.pages,
           enabled: board.page + 1 < board.pages,
+          onTap: () => setState(() => _page = board.page + 1),
         );
       default:
         final url = slot.url!;

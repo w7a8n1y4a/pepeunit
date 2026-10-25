@@ -102,21 +102,11 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
       case 'text':
         return HexSlot(
           id: 'text',
-          title: netText(language, 'Строка', 'Text'),
+          title: netText(language, 'Фильтр', 'Filter'),
           color: color,
           q: slot.q,
           r: slot.r,
           body: LineSearch(color: color),
-        );
-      case 'Trust':
-      case 'Pending':
-      case 'Blocking':
-        return HexSlot(
-          id: slot.id,
-          title: slot.id,
-          color: model.query.trust.contains(slot.id) ? color : hexMuted,
-          q: slot.q,
-          r: slot.r,
         );
       case 'add':
         return HexSlot(
@@ -137,34 +127,56 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
           icon: 'assets/icons/reload.svg',
         );
       case 'prev':
-        return HexSlot(
+        return pageStepSlot(
           id: 'prev',
-          title: netText(language, 'Предыдущие', 'Previous'),
+          left: true,
+          language: language,
           color: color,
           q: slot.q,
           r: slot.r,
+          page: board.page,
+          pages: board.pages,
           enabled: board.page > 0,
+          onTap: () => setState(() => _page = board.page - 1),
         );
       case 'next':
-        return HexSlot(
+        return pageStepSlot(
           id: 'next',
-          title: netText(language, 'Следующие', 'Next'),
+          left: false,
+          language: language,
           color: color,
           q: slot.q,
           r: slot.r,
+          page: board.page,
+          pages: board.pages,
           enabled: board.page + 1 < board.pages,
+          onTap: () => setState(() => _page = board.page + 1),
         );
       case 'instance':
         final url = slot.url!;
+        final peer = model.peers[url];
+        final portrait = model.portraitOf(url);
+        final ping = peer?.lastPing;
+        final String? leftCaption;
+        if (peer != null && peer.trust != 'Trust') {
+          leftCaption = trustLabel(language, peer.trust);
+        } else if (ping != null) {
+          leftCaption =
+              '${ping.round()} ${netText(language, 'мс', 'ms')}';
+        } else {
+          leftCaption = null;
+        }
         return instanceMark(
           id: 'open:$url',
           url: url,
           language: language,
           q: slot.q,
           r: slot.r,
-          color: color,
+          color: trustColor(peer?.trust, color),
           current: false,
-          version: model.portraitOf(url)?.version ?? model.peers[url]?.trust,
+          footerLeft: leftCaption,
+          footerLeftColor: trustColor(peer?.trust, const Color(0xFFFFFFFF)),
+          version: portrait?.version ?? peer?.trust,
           image: model.iconOf(url),
         );
       default:
@@ -217,6 +229,8 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
   }
 }
 
+/// Combines host search input and the three trust status toggles inside one
+/// cell so the surrounding ring stays open for peer cards.
 class LineSearch extends StatelessWidget {
   const LineSearch({required this.color, super.key});
 
@@ -229,7 +243,9 @@ class LineSearch extends StatelessWidget {
       color: color,
       value: model.query.text,
       hint: netText(model.vault.language, 'хост', 'host'),
+      activeTrust: model.query.trust,
       onChanged: model.setSearch,
+      onToggleTrust: model.toggleTrust,
     );
   }
 }
@@ -240,6 +256,8 @@ class LineField extends StatefulWidget {
     required this.value,
     required this.hint,
     required this.onChanged,
+    this.activeTrust = const {'Trust', 'Pending', 'Blocking'},
+    this.onToggleTrust,
     super.key,
   });
 
@@ -247,6 +265,8 @@ class LineField extends StatefulWidget {
   final String value;
   final String hint;
   final ValueChanged<String> onChanged;
+  final Set<String> activeTrust;
+  final ValueChanged<String>? onToggleTrust;
 
   @override
   State<LineField> createState() => _LineFieldState();
@@ -280,19 +300,22 @@ class _LineFieldState extends State<LineField> {
     return LayoutBuilder(
       builder: (context, constraints) {
         final side = constraints.maxWidth;
-        final font = side * 0.07;
+        final font = max(10.0, side * 0.068);
+        final chipFont = max(8.5, side * 0.052);
         return Material(
           type: MaterialType.transparency,
           child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: side * 0.16,
-              vertical: side * 0.22,
+            padding: EdgeInsets.fromLTRB(
+              side * 0.14,
+              side * 0.24,
+              side * 0.14,
+              side * 0.16,
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 SizedBox(
-                  height: side * 0.16,
+                  height: side * 0.15,
                   child: TextField(
                     key: const ValueKey('network-search'),
                     controller: _controller,
@@ -321,13 +344,96 @@ class _LineFieldState extends State<LineField> {
                     onChanged: widget.onChanged,
                   ),
                 ),
-                SizedBox(height: side * 0.04),
+                SizedBox(height: side * 0.025),
                 Container(height: max(1, side * 0.008), color: widget.color),
+                if (widget.onToggleTrust != null) ...[
+                  SizedBox(height: side * 0.045),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                    children: [
+                      for (final status in trustStatuses)
+                        _TrustToggle(
+                          status: status,
+                          shortLabel: _shortTrust(status),
+                          selected: widget.activeTrust.contains(status),
+                          color: widget.color,
+                          fontSize: chipFont,
+                          onTap: () => widget.onToggleTrust!(status),
+                        ),
+                    ],
+                  ),
+                ],
               ],
             ),
           ),
         );
       },
+    );
+  }
+
+  String _shortTrust(String status) {
+    switch (status) {
+      case 'Trust':
+        return 'T';
+      case 'Pending':
+        return 'P';
+      case 'Blocking':
+        return 'B';
+      default:
+        return status;
+    }
+  }
+}
+
+class _TrustToggle extends StatelessWidget {
+  const _TrustToggle({
+    required this.status,
+    required this.shortLabel,
+    required this.selected,
+    required this.color,
+    required this.fontSize,
+    required this.onTap,
+  });
+
+  final String status;
+  final String shortLabel;
+  final bool selected;
+  final Color color;
+  final double fontSize;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: status,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+          decoration: BoxDecoration(
+            border: Border.all(
+              color: selected ? color : hexMuted,
+              width: 1.2,
+            ),
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            shortLabel,
+            style: TextStyle(
+              color: selected ? const Color(0xFFFFFFFF) : hexMuted,
+              fontFamily: 'OpenGost Type B',
+              fontSize: fontSize,
+              height: 1.05,
+              decoration: TextDecoration.none,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

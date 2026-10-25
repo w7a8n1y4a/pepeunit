@@ -10,8 +10,8 @@ import 'account/vault.dart';
 import 'account/vault_store.dart';
 import 'api/pepeunit_api.dart';
 import 'instances/hosted_url.dart';
-import 'instances/link.dart';
 import 'instances/instance.dart';
+import 'instances/link.dart';
 import 'instances/network_view.dart';
 import 'instances/portrait.dart';
 import 'instances/session.dart';
@@ -58,10 +58,11 @@ class AppModel extends ChangeNotifier {
 
   InstanceRecord? get target => vault.target;
 
-  InstancePortrait? portraitOf(String url) => portraits[url];
+  InstancePortrait? portraitOf(String url) =>
+      portraits[url] ?? peers[url]?.portrait;
 
   Uint8List? iconOf(String url) {
-    final uuid = portraits[url]?.iconUuid;
+    final uuid = portraitOf(url)?.iconUuid;
     if (uuid == null) return null;
     return icons['${originOf(url)}/$uuid'];
   }
@@ -167,6 +168,7 @@ class AppModel extends ChangeNotifier {
 
   Future<void> selectTarget(String raw) async {
     final url = canonicalInstanceUrl(raw);
+    targetSettings = null;
     _activate(url);
     await _commit();
     await refreshTarget();
@@ -177,6 +179,7 @@ class AppModel extends ChangeNotifier {
     for (final instance in vault.instances) {
       instance.active = false;
     }
+    targetSettings = null;
     networkFailure = null;
     networkBusy = false;
     await _commit();
@@ -221,12 +224,15 @@ class AppModel extends ChangeNotifier {
       final client = api(originOf(current.url));
       final portrait = await client.portrait();
       if (ticket != _ticket) return;
-      portraits[current.url] = portrait;
-      _applyFlags(current, portrait);
+      final effective = targetSettings == null
+          ? portrait
+          : portrait.applySettings(targetSettings!);
+      portraits[current.url] = effective;
+      _applyFlags(current, effective);
       await _ensureTargetSession(current, client);
       if (ticket != _ticket) return;
       await _commit();
-      final limit = portrait.pagination < 1 ? 100 : portrait.pagination;
+      final limit = effective.pagination < 1 ? 100 : effective.pagination;
       final urls = await collectPages(
         limit: limit,
         fetch: (offset, pageLimit) =>
@@ -238,24 +244,31 @@ class AppModel extends ChangeNotifier {
             client.peers(offset: offset, limit: pageLimit),
       );
       if (ticket != _ticket) return;
+      peers.clear();
+      for (final head in heads) {
+        final canonical = _keepUrl(head.url);
+        if (canonical.isEmpty) continue;
+        peers[canonical] = PeerHead(
+          uuid: head.uuid,
+          url: canonical,
+          trust: head.trust,
+          lastPing: head.lastPing,
+          collectionStatus: head.collectionStatus,
+          collectionError: head.collectionError,
+          consecutiveSuccessCount: head.consecutiveSuccessCount,
+          lastSuccessDatetime: head.lastSuccessDatetime,
+          lastAttemptDatetime: head.lastAttemptDatetime,
+          portrait: head.portrait,
+        );
+        if (head.portrait != null) {
+          portraits[canonical] ??= head.portrait!;
+        }
+      }
       discovered
         ..clear()
         ..addAll(urls.map(_keepUrl))
+        ..addAll(peers.keys)
         ..remove('');
-      peers
-        ..clear()
-        ..addEntries([
-          for (final head in heads)
-            if (_keepUrl(head.url).isNotEmpty)
-              MapEntry(
-                _keepUrl(head.url),
-                PeerHead(
-                  uuid: head.uuid,
-                  url: _keepUrl(head.url),
-                  trust: head.trust,
-                ),
-              ),
-        ]);
       for (final url in {...discovered, current.url}) {
         _ensureRecord(url);
       }
@@ -359,14 +372,30 @@ class AppModel extends ChangeNotifier {
   Future<void> loadSettings() async {
     final current = _ownerTarget();
     targetSettings = await api(originOf(current.url)).settings(current.token!);
+    final existing = portraits[current.url];
+    if (existing != null && targetSettings != null) {
+      final updated = existing.applySettings(targetSettings!);
+      portraits[current.url] = updated;
+      _applyFlags(current, updated);
+    }
     notifyListeners();
   }
 
-  Future<void> patchSetting(String key, Object? value) async {
+  Future<void> patchSetting(String key, Object? value) {
+    return patchSettings({key: value});
+  }
+
+  Future<void> patchSettings(Map<String, Object?> patch) async {
     final current = _ownerTarget();
     targetSettings = await api(originOf(current.url))
-        .patchSettings(current.token!, {key: value});
-    notifyListeners();
+        .patchSettings(current.token!, patch);
+    final existing = portraits[current.url];
+    if (existing != null && targetSettings != null) {
+      final updated = existing.applySettings(targetSettings!);
+      portraits[current.url] = updated;
+      _applyFlags(current, updated);
+    }
+    await _commit();
     await refreshTarget();
   }
 
@@ -375,14 +404,28 @@ class AppModel extends ChangeNotifier {
     await api(originOf(current.url)).reboot(current.token!);
   }
 
+  /// Backend allows Admin and Owner (`[UserRole.ADMIN]`) to start integration tests.
   Future<void> runIntegrationTests() async {
-    final current = _ownerTarget();
+    final current = _staffTarget();
     await api(originOf(current.url)).integrationTests(current.token!);
   }
 
   Future<void> setInstanceIcon(Uint8List png) async {
     final current = _ownerTarget();
-    await api(originOf(current.url)).uploadInstanceIcon(current.token!, png);
+    final newUuid = await api(originOf(current.url))
+        .uploadInstanceIcon(current.token!, png);
+    final uuid = newUuid ?? portraits[current.url]?.iconUuid;
+    if (uuid != null && uuid.isNotEmpty) {
+      icons['${originOf(current.url)}/$uuid'] = png;
+      final existing = portraits[current.url];
+      if (existing != null) {
+        portraits[current.url] = existing.copyWith(iconUuid: uuid);
+      }
+      if (targetSettings != null) {
+        targetSettings = {...targetSettings!, 'icon_uuid': uuid};
+      }
+    }
+    notifyListeners();
     await refreshTarget();
   }
 
@@ -501,7 +544,16 @@ class AppModel extends ChangeNotifier {
             icons[key] ??= await api(originOf(url)).icon(uuid);
           }
           notifyListeners();
-        } catch (_) {}
+        } catch (_) {
+          final cachedUuid = portraits[url]?.iconUuid;
+          if (cachedUuid != null) {
+            final key = '${originOf(url)}/$cachedUuid';
+            try {
+              icons[key] ??= await api(originOf(url)).icon(cachedUuid);
+              notifyListeners();
+            } catch (_) {}
+          }
+        }
       }
     }
 

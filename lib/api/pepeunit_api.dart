@@ -97,11 +97,30 @@ class PepeunitApi {
       final url = row['url'] as String?;
       final uuid = row['uuid'] as String?;
       if (url == null || uuid == null) continue;
+      final stateRaw = row['state'];
+      InstancePortrait? cachedPortrait;
+      if (stateRaw is Map) {
+        try {
+          cachedPortrait = portraitFromJson(
+            stateRaw.cast<String, Object?>(),
+            url: url,
+          );
+        } catch (_) {}
+      }
+      final pingRaw = row['last_ping'];
+      final countRaw = row['consecutive_success_count'];
       items.add(
         PeerHead(
           uuid: uuid,
           url: url,
           trust: row['trust_status'] as String? ?? '',
+          lastPing: pingRaw is num ? pingRaw.toDouble() : null,
+          collectionStatus: row['last_collection_status'] as String?,
+          collectionError: row['last_collection_error'] as String?,
+          consecutiveSuccessCount: countRaw is num ? countRaw.round() : 0,
+          lastSuccessDatetime: row['last_success_datetime'] as String?,
+          lastAttemptDatetime: row['last_attempt_datetime'] as String?,
+          portrait: cachedPortrait,
         ),
       );
     }
@@ -267,11 +286,11 @@ class PepeunitApi {
     _ensureOk(response);
   }
 
-  Future<void> uploadIcon(String token, String userUuid, Uint8List png) {
+  Future<String?> uploadIcon(String token, String userUuid, Uint8List png) {
     return _uploadIcon(token, userUuid, 'User', png);
   }
 
-  Future<void> uploadInstanceIcon(String token, Uint8List png) {
+  Future<String?> uploadInstanceIcon(String token, Uint8List png) {
     return _uploadIcon(token, instanceSettingsUuid, 'Instance', png);
   }
 
@@ -281,7 +300,7 @@ class PepeunitApi {
     return response.bodyBytes;
   }
 
-  Future<void> _uploadIcon(
+  Future<String?> _uploadIcon(
     String token,
     String entityUuid,
     String entityType,
@@ -297,6 +316,12 @@ class PepeunitApi {
     final streamed = await _client.send(request).timeout(_timeout);
     final response = await http.Response.fromStream(streamed);
     _ensureOk(response);
+    if (response.body.trim().isEmpty) return null;
+    try {
+      final json = jsonDecode(response.body);
+      if (json is Map) return json['uuid'] as String?;
+    } catch (_) {}
+    return null;
   }
 
   void _ensureOk(http.Response response) {

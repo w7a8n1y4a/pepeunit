@@ -1,16 +1,13 @@
-import 'dart:typed_data';
-
-import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../account/icon_file.dart';
 import '../../app_model.dart';
 import '../../app_scope.dart';
 import '../../features/account/account_nav.dart';
 import '../../features/account/error_reader.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
+import '../../instances/portrait.dart';
 import 'line_cell.dart';
 import 'network_chrome.dart';
 
@@ -25,9 +22,9 @@ class InstancePage extends StatefulWidget {
 
 class _InstancePageState extends State<InstancePage> {
   String? _failure;
-  String? _failureOn;
   var _open = false;
   var _busy = false;
+  var _moderating = false;
 
   @override
   Widget build(BuildContext context) {
@@ -41,25 +38,36 @@ class _InstancePageState extends State<InstancePage> {
     final owner = isTarget && (target?.ownsInstance ?? false);
     final staff = target?.managesPeers ?? false;
     final federation = model.portraitOf(target?.url ?? '')?.federation != false;
-    final actions = [
-      'identity',
-      ...cardActions(
-        isTarget: isTarget,
-        owner: owner,
-        staff: staff,
-        federation: federation,
-        telegram: portrait?.telegram == true,
-        trust: model.peers[url]?.trust,
-      ),
-    ];
+    final peer = model.peers[url];
+    final canModerate = !isTarget && staff && peer != null;
+
+    final List<String> actions;
+    if (_moderating && canModerate) {
+      actions = [
+        'identity',
+        ...peerActions(trust: peer.trust, federation: federation),
+      ];
+    } else {
+      actions = [
+        'identity',
+        ...cardActions(
+          isTarget: isTarget,
+          owner: owner,
+          staff: staff,
+          federation: federation,
+          telegram: portrait?.telegram == true,
+          trust: peer?.trust,
+        ),
+      ];
+    }
+
+    final placed = cardBoard(actions);
     final slots = <HexSlot>[
-      for (final slot in cardBoard(actions))
-        _slot(slot, model, language, color, url, owner && isTarget),
+      for (final slot in placed)
+        _slot(slot, model, language, color, url, isTarget, owner, staff),
     ];
     if (_failure != null) {
-      final spot = _failureOn == 'relogin'
-          ? (1, 0)
-          : errorSpot(slots.map((slot) => BoardSlot(slot.id, slot.q, slot.r)));
+      final spot = errorSpot(placed);
       slots.add(
         HexSlot(
           id: 'error',
@@ -83,14 +91,7 @@ class _InstancePageState extends State<InstancePage> {
       color: sceneBackground,
       child: HexScene(
         slots: slots,
-        onTap: (id) => _tap(id, language, owner && isTarget),
-        wrap: (slot, child) {
-          if (slot.id != 'identity' || !owner) return child;
-          return DropTarget(
-            onDragDone: (detail) => _dropped(detail),
-            child: child,
-          );
-        },
+        onTap: (id) => _tap(id, language, canModerate),
       ),
     );
   }
@@ -101,9 +102,13 @@ class _InstancePageState extends State<InstancePage> {
     String language,
     Color color,
     String url,
-    bool iconEditable,
+    bool isTarget,
+    bool owner,
+    bool staff,
   ) {
     final portrait = model.portraitOf(url);
+    final peer = model.peers[url];
+    final record = model.vault.recordFor(url);
     final active = _busy ? const Color(0xFFFFFFFF) : color;
     switch (slot.id) {
       case 'back':
@@ -116,31 +121,42 @@ class _InstancePageState extends State<InstancePage> {
           icon: 'assets/icons/back.svg',
         );
       case 'identity':
+        final String? leftCaption;
+        if (isTarget) {
+          leftCaption = netText(language, 'Текущий', 'Target');
+        } else if (peer != null) {
+          leftCaption = trustLabel(language, peer.trust);
+        } else {
+          leftCaption = null;
+        }
         return instanceMark(
           id: 'identity',
           url: url,
           language: language,
           q: slot.q,
           r: slot.r,
-          color: color,
-          current: model.target?.url == url,
+          color: isTarget ? color : trustColor(peer?.trust, color),
+          current: isTarget,
+          footerLeft: leftCaption,
+          footerLeftColor: isTarget
+              ? const Color(0xFFFFFFFF)
+              : trustColor(peer?.trust, const Color(0xFFFFFFFF)),
           version: portrait?.version,
           image: model.iconOf(url),
-          icon: iconEditable
-              ? 'assets/icons/icon_load.svg'
-              : 'assets/icons/instances.svg',
-          tappable: iconEditable,
+          tappable: false,
         );
       case 'relogin':
-        return _action(
-          slot,
-          language,
-          'Перезайти',
-          'Sign in again',
-          active,
-          'assets/icons/reload.svg',
+        return HexSlot(
+          id: 'relogin',
+          title: netText(language, 'Перезайти', 'Sign in again'),
+          footer: record?.role,
+          color: active,
+          q: slot.q,
+          r: slot.r,
+          icon: 'assets/icons/reload.svg',
         );
       case 'metrics':
+        final pages = _summaryPages(language, portrait, peer);
         return HexSlot(
           id: 'metrics',
           title: netText(language, 'Сводка', 'Summary'),
@@ -149,25 +165,12 @@ class _InstancePageState extends State<InstancePage> {
           r: slot.r,
           tappable: false,
           body: MetricsCell(
-            lines: [
-              netText(
-                language,
-                'Юзеры ${portrait?.users ?? '—'}',
-                'Users ${portrait?.users ?? '—'}',
-              ),
-              netText(
-                language,
-                'Устройства ${portrait?.units ?? '—'}',
-                'Units ${portrait?.units ?? '—'}',
-              ),
-              netText(
-                language,
-                'Репозитории ${portrait?.repos ?? '—'}',
-                'Repos ${portrait?.repos ?? '—'}',
-              ),
-              if (portrait?.testsStatus != null)
-                '${portrait!.testsStatus} ${portrait.testsPercent?.round() ?? ''}%',
-            ],
+            lines: pages.first.lines,
+            pages: pages,
+            copyText: url,
+            copyLabel: netText(language, 'Скопировать ссылку', 'Copy link'),
+            prevLabel: netText(language, 'Предыдущая сводка', 'Previous summary'),
+            nextLabel: netText(language, 'Следующая сводка', 'Next summary'),
           ),
         );
       case 'target':
@@ -198,31 +201,33 @@ class _InstancePageState extends State<InstancePage> {
           'assets/icons/send.svg',
         );
       case 'settings':
-        return _action(
-          slot,
-          language,
-          'Параметры',
-          'Parameters',
-          color,
-          'assets/icons/settings.svg',
+        return HexSlot(
+          id: 'settings',
+          title: owner
+              ? netText(language, 'Параметры', 'Parameters')
+              : netText(language, 'Управление', 'Control'),
+          footer: record?.role,
+          color: color,
+          q: slot.q,
+          r: slot.r,
+          icon: 'assets/icons/settings.svg',
+          iconScale: 1.35,
         );
-      case 'reboot':
-        return _action(
-          slot,
-          language,
-          'Перезапуск',
-          'Reboot',
-          active,
-          'assets/icons/power.svg',
-        );
-      case 'tests':
-        return _action(
-          slot,
-          language,
-          'Тесты',
-          'Tests',
-          active,
-          'assets/icons/reload.svg',
+      case 'peer':
+        final trust = peer?.trust ?? '';
+        final peerIcon = switch (trust) {
+          'Trust' => 'assets/icons/check.svg',
+          'Blocking' => 'assets/icons/ban.svg',
+          _ => 'assets/icons/settings.svg',
+        };
+        return HexSlot(
+          id: 'peer',
+          title: netText(language, 'Модерация', 'Moderation'),
+          footer: trust.isEmpty ? null : trustLabel(language, trust),
+          color: trustColor(trust, color),
+          q: slot.q,
+          r: slot.r,
+          icon: peerIcon,
         );
       case 'trust':
         return _action(
@@ -230,7 +235,7 @@ class _InstancePageState extends State<InstancePage> {
           language,
           'Доверять',
           'Trust',
-          color,
+          active,
           'assets/icons/check.svg',
         );
       case 'block':
@@ -239,7 +244,7 @@ class _InstancePageState extends State<InstancePage> {
           language,
           'Блокировать',
           'Block',
-          color,
+          active,
           'assets/icons/ban.svg',
         );
       case 'delete':
@@ -248,7 +253,7 @@ class _InstancePageState extends State<InstancePage> {
           language,
           'Удалить',
           'Delete',
-          color,
+          errorColor,
           'assets/icons/close.svg',
         );
       case 'scan':
@@ -271,6 +276,84 @@ class _InstancePageState extends State<InstancePage> {
     }
   }
 
+  List<SummaryPage> _summaryPages(
+    String language,
+    InstancePortrait? portrait,
+    PeerHead? peer,
+  ) {
+    final metricsLines = <String>[
+      netText(
+        language,
+        'Юзеры ${portrait?.users ?? '—'}',
+        'Users ${portrait?.users ?? '—'}',
+      ),
+      netText(
+        language,
+        'Устройства ${portrait?.units ?? '—'}',
+        'Units ${portrait?.units ?? '—'}',
+      ),
+      netText(
+        language,
+        'Репозитории ${portrait?.repos ?? '—'}',
+        'Repos ${portrait?.repos ?? '—'}',
+      ),
+      if (portrait?.unitIos != null)
+        netText(
+          language,
+          'UnitIO ${portrait!.unitIos}',
+          'UnitIO ${portrait.unitIos}',
+        ),
+      if (portrait?.testsStatus != null)
+        '${portrait!.testsStatus} ${portrait.testsPercent?.round() ?? ''}%',
+    ];
+    final pages = <SummaryPage>[
+      SummaryPage(
+        title: netText(language, 'Метрики', 'Metrics'),
+        lines: metricsLines,
+      ),
+    ];
+
+    final statusLines = <String>[
+      if (peer != null)
+        '${netText(language, 'Статус', 'Status')}: ${peer.collectionStatus ?? peer.trust}',
+      if (peer?.lastPing != null)
+        '${netText(language, 'Пинг', 'Ping')}: ${peer!.lastPing!.round()} ${netText(language, 'мс', 'ms')}',
+      if (peer != null && peer.consecutiveSuccessCount > 0)
+        '${netText(language, 'Серия', 'Streak')}: ${peer.consecutiveSuccessCount}',
+      if (portrait != null && portrait.email.isNotEmpty) portrait.email,
+      if (portrait != null && portrait.telegramContact.isNotEmpty)
+        portrait.telegramContact,
+      if (portrait != null && portrait.license.isNotEmpty) portrait.license,
+    ];
+    if (statusLines.isNotEmpty) {
+      pages.add(
+        SummaryPage(
+          title: netText(language, 'Инфо', 'Info'),
+          lines: statusLines,
+        ),
+      );
+    }
+
+    if (portrait != null &&
+        (portrait.datapipe != null ||
+            portrait.federation != null ||
+            portrait.grafana != null ||
+            portrait.notifications != null)) {
+      String mark(bool? v) => v == true ? '+' : '-';
+      pages.add(
+        SummaryPage(
+          title: netText(language, 'Флаги', 'Flags'),
+          lines: [
+            'Pipe ${mark(portrait.datapipe)} · Fed ${mark(portrait.federation)}',
+            'Graf ${mark(portrait.grafana)} · Alert ${mark(portrait.notifications)}',
+            'Prom ${mark(portrait.prometheus)} · TG ${mark(portrait.telegram)}',
+          ],
+        ),
+      );
+    }
+    return pages;
+  }
+
   HexSlot _action(
     BoardSlot slot,
     String language,
@@ -289,37 +372,46 @@ class _InstancePageState extends State<InstancePage> {
     );
   }
 
-  Future<void> _tap(String id, String language, bool iconEditable) async {
+  Future<void> _tap(String id, String language, bool canModerate) async {
     final model = AppScope.of(context);
     final url = widget.url;
     switch (id) {
       case 'back':
+        if (_moderating) {
+          setState(() {
+            _moderating = false;
+            _failure = null;
+            _open = false;
+          });
+          return;
+        }
         popOrHome(context);
       case 'error':
         setState(() => _open = true);
-      case 'identity':
-        if (iconEditable) await _pick(language);
+      case 'peer':
+        if (canModerate) {
+          setState(() {
+            _moderating = true;
+            _failure = null;
+            _open = false;
+          });
+        }
       case 'relogin':
         if (!model.vault.hasKey) {
           setState(() {
             _failure = netText(language, 'Нет ключа', 'No key');
-            _failureOn = 'relogin';
           });
           return;
         }
-        await _run(() => model.resign(url), from: 'relogin');
+        await _run(() => model.resign(url));
       case 'target':
         await _run(() => model.selectTarget(url));
       case 'clear':
         await _run(model.clearTarget);
       case 'telegram':
-        await _telegram();
+        await _telegram(language);
       case 'settings':
         context.push('/peers/tune');
-      case 'reboot':
-        await _run(model.reboot);
-      case 'tests':
-        await _run(model.runIntegrationTests);
       case 'trust':
         await _run(() => model.setTrust(url, 'Trust'));
       case 'block':
@@ -332,20 +424,28 @@ class _InstancePageState extends State<InstancePage> {
     }
   }
 
-  Future<void> _telegram() async {
+  Future<void> _telegram(String language) async {
     final model = AppScope.of(context);
+    if (!model.vault.hasKey) {
+      final botUrl = model.portraitOf(widget.url)?.telegramBot ?? '';
+      if (botUrl.isNotEmpty) {
+        await _run(() => model.openExternal(Uri.parse(botUrl)));
+        return;
+      }
+      setState(() => _failure = netText(language, 'Нет ключа', 'No key'));
+      return;
+    }
     await _run(() async {
       final link = await model.verificationLink(widget.url);
       await model.openExternal(Uri.parse(link));
     });
   }
 
-  Future<void> _run(Future<void> Function() action, {String? from}) async {
+  Future<void> _run(Future<void> Function() action) async {
     if (_busy) return;
     setState(() {
       _busy = true;
       _failure = null;
-      _failureOn = null;
       _open = false;
     });
     try {
@@ -357,57 +457,7 @@ class _InstancePageState extends State<InstancePage> {
       setState(() {
         _busy = false;
         _failure = '$error';
-        _failureOn = from;
       });
     }
-  }
-
-  Future<void> _pick(String language) async {
-    final model = AppScope.of(context);
-    final bytes = await model.files.pick(
-      dialogTitle: netText(language, 'Картинка инстанса', 'Instance picture'),
-    );
-    if (bytes == null || !mounted) return;
-    await _accept(bytes);
-  }
-
-  Future<void> _dropped(DropDoneDetails detail) async {
-    if (detail.files.isEmpty) return;
-    final bytes = await detail.files.first.readAsBytes();
-    if (!mounted) return;
-    await _accept(bytes);
-  }
-
-  Future<void> _accept(Uint8List bytes) async {
-    final problem = iconProblem(bytes);
-    if (problem != null) {
-      final language = AppScope.of(context).vault.language;
-      setState(() => _failure = _iconText(problem, language));
-      return;
-    }
-    await _run(() => AppScope.of(context).setInstanceIcon(bytes));
-  }
-}
-
-String _iconText(String code, String language) {
-  switch (code) {
-    case 'empty':
-      return netText(language, 'Файл пустой', 'The file is empty');
-    case 'large':
-      return netText(
-        language,
-        'Картинка больше 128 КБ',
-        'The picture is larger than 128 KB',
-      );
-    case 'png':
-      return netText(language, 'Нужен файл PNG', 'A PNG file is required');
-    case 'size':
-      return netText(
-        language,
-        'Нужен размер 192x192',
-        'The picture must be 192x192',
-      );
-    default:
-      return code;
   }
 }

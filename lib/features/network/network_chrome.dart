@@ -1,7 +1,8 @@
+import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../hive/hex_scene.dart';
@@ -16,6 +17,30 @@ Color get networkColor =>
 String netText(String language, String ru, String en) =>
     phrase(language, {'ru': ru, 'en': en});
 
+String trustLabel(String language, String trust) {
+  switch (trust) {
+    case 'Trust':
+      return netText(language, 'Доверие', 'Trust');
+    case 'Pending':
+      return netText(language, 'Карантин', 'Pending');
+    case 'Blocking':
+      return netText(language, 'Блок', 'Blocking');
+    default:
+      return trust;
+  }
+}
+
+Color trustColor(String? trust, Color accent) {
+  switch (trust) {
+    case 'Blocking':
+      return errorColor;
+    case 'Pending':
+      return hexMuted;
+    default:
+      return accent;
+  }
+}
+
 /// The current-instance cell, the same shape on the home menu, the network
 /// menu and the instance card.
 HexSlot instanceMark({
@@ -27,6 +52,8 @@ HexSlot instanceMark({
   required Color color,
   required bool current,
   String? version,
+  String? footerLeft,
+  Color footerLeftColor = const Color(0xFFFFFFFF),
   Uint8List? image,
   String icon = 'assets/icons/instances.svg',
   bool tappable = true,
@@ -35,7 +62,9 @@ HexSlot instanceMark({
   return HexSlot(
     id: id,
     title: instanceHost(url),
-    footerLeft: current ? netText(language, 'Текущий', 'Target') : null,
+    footerLeft:
+        footerLeft ?? (current ? netText(language, 'Текущий', 'Target') : null),
+    footerLeftColor: footerLeftColor,
     footer: version,
     color: color,
     q: q,
@@ -45,6 +74,82 @@ HexSlot instanceMark({
     tappable: tappable,
     enabled: enabled,
   );
+}
+
+HexSlot pageStepSlot({
+  required String id,
+  required bool left,
+  required String language,
+  required Color color,
+  required int q,
+  required int r,
+  required int page,
+  required int pages,
+  required bool enabled,
+  VoidCallback? onTap,
+}) {
+  return HexSlot(
+    id: id,
+    title: left
+        ? netText(language, 'Предыдущие', 'Previous')
+        : netText(language, 'Следующие', 'Next'),
+    footer: pages > 1 ? '${page + 1}/$pages' : null,
+    color: color,
+    q: q,
+    r: r,
+    enabled: enabled,
+    body: GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: enabled ? onTap : null,
+      child: Center(
+        child: FractionallySizedBox(
+          widthFactor: 0.34,
+          heightFactor: 0.34,
+          child: CustomPaint(
+            painter: ChevronMarkPainter(
+              left: left,
+              color: enabled ? const Color(0xFFFFFFFF) : hexMuted,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
+
+class ChevronMarkPainter extends CustomPainter {
+  const ChevronMarkPainter({required this.left, required this.color});
+
+  final bool left;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = max(1.6, size.shortestSide * 0.09)
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round
+      ..color = color;
+    final mid = size.height / 2;
+    final path = Path();
+    if (left) {
+      path
+        ..moveTo(size.width * 0.66, size.height * 0.24)
+        ..lineTo(size.width * 0.34, mid)
+        ..lineTo(size.width * 0.66, size.height * 0.76);
+    } else {
+      path
+        ..moveTo(size.width * 0.34, size.height * 0.24)
+        ..lineTo(size.width * 0.66, mid)
+        ..lineTo(size.width * 0.34, size.height * 0.76);
+    }
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant ChevronMarkPainter oldDelegate) =>
+      oldDelegate.left != left || oldDelegate.color != color;
 }
 
 class ScopeFrame extends StatefulWidget {
@@ -107,7 +212,16 @@ class _ScopeFrameState extends State<ScopeFrame> {
 }
 
 (int, int) errorSpot(Iterable<BoardSlot> slots) {
-  const spots = [(0, 2), (-2, 1), (2, -2), (3, -1)];
+  const spots = [
+    (-1, 1),
+    (-1, 0),
+    (1, 0),
+    (0, 1),
+    (0, 2),
+    (-2, 1),
+    (2, -2),
+    (3, -1),
+  ];
   for (final spot in spots) {
     final taken = slots.any((slot) => slot.q == spot.$1 && slot.r == spot.$2);
     if (!taken) return spot;

@@ -58,7 +58,9 @@ class NetworkQuery {
   }
 }
 
-/// Buttons on one instance card. Order is the order around the card.
+/// Primary actions on the root instance card. Always fits on a single ring
+/// (at most 6 cells around Back); role-specific administration and peer
+/// moderation live in dedicated submenus so the card never bloats into 2 rings.
 List<String> cardActions({
   required bool isTarget,
   required bool owner,
@@ -70,22 +72,58 @@ List<String> cardActions({
   final actions = <String>['metrics', 'relogin'];
   actions.add(isTarget ? 'clear' : 'target');
   if (telegram) actions.add('telegram');
-  if (owner && isTarget) {
-    actions.addAll(const ['settings', 'reboot', 'tests']);
-  }
-  if (staff && trust != null) {
-    switch (trust) {
-      case 'Pending':
-        actions.addAll(const ['trust', 'block', 'delete']);
-      case 'Trust':
-        actions.add('block');
-        if (federation) actions.add('scan');
-        actions.add('delete');
-      case 'Blocking':
-        actions.addAll(const ['trust', 'delete']);
-    }
+  if (isTarget && (owner || staff)) {
+    actions.add('settings');
+  } else if (!isTarget && staff && trust != null) {
+    actions.add('peer');
   }
   return actions;
+}
+
+/// Moderation actions for an external peer when opened by Admin or Owner.
+List<String> peerActions({
+  required String? trust,
+  required bool federation,
+}) {
+  switch (trust) {
+    case 'Pending':
+      return const ['trust', 'block', 'delete'];
+    case 'Trust':
+      return ['block', if (federation) 'scan', 'delete'];
+    case 'Blocking':
+      return const ['trust', 'delete'];
+    default:
+      return const [];
+  }
+}
+
+/// Top-level items on `/peers/tune` for Owner and Admin. Always fits in 1 ring.
+List<String> tuneActions({
+  required bool owner,
+  required bool staff,
+  required bool federation,
+}) {
+  if (owner) {
+    return const ['icon', 'ops', 'flags', 'core', 'services', 'transport'];
+  }
+  if (staff) {
+    return ['identity', 'tests', if (federation) 'scan-all'];
+  }
+  return const [];
+}
+
+/// Instance operation commands inside `/peers/tune/ops` (or Admin `/peers/tune`).
+List<String> operationActions({
+  required bool owner,
+  required bool staff,
+  required bool federation,
+}) {
+  if (!owner && !staff) return const [];
+  return [
+    'tests',
+    if (federation) 'scan-all',
+    if (owner) 'reboot',
+  ];
 }
 
 const _dirs = <(int, int)>[(1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1)];
@@ -149,8 +187,9 @@ NetworkBoard networkBoard({required String? target}) {
   );
 }
 
-/// Peer cards live on the search menu. The text, the trust filters and the
-/// staff controls stay on the first ring. Further rings page.
+/// Peer cards live on the search menu. The search + trust filter shares a
+/// single cell at (0, -1), so peer instances are visible right on the first
+/// ring even when Admin or Owner is signed in.
 NetworkBoard searchBoard({
   required int scope,
   required bool staff,
@@ -163,9 +202,6 @@ NetworkBoard searchBoard({
   final reserved = <(int, int), String>{
     (0, 0): 'back',
     (0, -1): 'text',
-    (1, 0): 'Trust',
-    (0, 1): 'Pending',
-    (-1, 1): 'Blocking',
   };
   if (staff) reserved[(1, -1)] = 'add';
   if (scanAll) reserved[(-1, 0)] = 'scan-all';
@@ -248,33 +284,47 @@ NetworkBoard catalogBoard({
   );
 }
 
-/// Back is the center. The picture is top-left, the summary is top-right,
-/// and signing in again is bottom-right.
-/// One ring when the other actions fit, two rings when they do not.
+/// Single-ring layout around Back (0, 0). Anchored actions stay at fixed
+/// positions so the instance card has a consistent, balanced geometry.
 List<BoardSlot> cardBoard(List<String> ids) {
   const anchored = <String, (int, int)>{
     'identity': (0, -1),
     'metrics': (1, -1),
+    'target': (1, 0),
+    'clear': (1, 0),
     'relogin': (0, 1),
+    'telegram': (-1, 1),
+    'settings': (-1, 0),
+    'peer': (-1, 0),
   };
-  final rest = [
-    for (final id in ids)
-      if (!anchored.containsKey(id)) id,
+  final placed = <BoardSlot>[const BoardSlot('back', 0, 0)];
+  final taken = <(int, int)>{(0, 0)};
+  final rest = <String>[];
+  for (final id in ids) {
+    final spot = anchored[id];
+    if (spot != null && !taken.contains(spot)) {
+      placed.add(BoardSlot(id, spot.$1, spot.$2));
+      taken.add(spot);
+    } else {
+      rest.add(id);
+    }
+  }
+  const ringOrder = <(int, int)>[
+    (0, -1),
+    (1, -1),
+    (1, 0),
+    (0, 1),
+    (-1, 1),
+    (-1, 0),
   ];
-  final rings = rest.length <= 3 ? 1 : 2;
-  final taken = {for (final spot in anchored.values) spot};
   final spots = [
-    for (final cell in hexDisk(rings).skip(1))
+    for (final cell in ringOrder)
       if (!taken.contains(cell)) cell,
   ];
-  return [
-    const BoardSlot('back', 0, 0),
-    for (final id in ids)
-      if (anchored.containsKey(id))
-        BoardSlot(id, anchored[id]!.$1, anchored[id]!.$2),
-    for (var i = 0; i < rest.length && i < spots.length; i++)
-      BoardSlot(rest[i], spots[i].$1, spots[i].$2),
-  ];
+  for (var i = 0; i < rest.length && i < spots.length; i++) {
+    placed.add(BoardSlot(rest[i], spots[i].$1, spots[i].$2));
+  }
+  return placed;
 }
 
 Future<List<T>> collectPages<T>({

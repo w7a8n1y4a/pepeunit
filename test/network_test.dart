@@ -3,8 +3,6 @@ import 'dart:ui' show Tristate;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:go_router/go_router.dart';
-import 'package:pepeunit_client/features/network/network_search_page.dart';
 import 'package:pepeunit_client/account/identity.dart';
 import 'package:pepeunit_client/account/vault.dart';
 import 'package:pepeunit_client/account/vault_store.dart';
@@ -111,6 +109,10 @@ void main() {
     );
     expect(first.slots.any((slot) => slot.id == 'add'), isTrue);
     expect(first.slots.any((slot) => slot.id == 'scan-all'), isTrue);
+    expect(
+      first.slots.where((slot) => slot.id == 'instance').length,
+      3,
+    );
     expect(first.canZoomIn, isTrue);
     final outer = searchBoard(
       scope: 2,
@@ -124,7 +126,7 @@ void main() {
     expect(outer.canZoomIn, isFalse);
   });
 
-  test('role decides which instance actions exist', () {
+  test('role decides which instance actions exist without bloating the card', () {
     expect(
       cardActions(
         isTarget: true,
@@ -144,17 +146,19 @@ void main() {
       telegram: true,
       trust: 'Trust',
     );
+    expect(owner, ['metrics', 'relogin', 'clear', 'telegram', 'settings']);
+    expect(cardBoard(['identity', ...owner]).length, lessThanOrEqualTo(7));
     expect(
-      owner,
-      containsAll([
-        'settings',
-        'reboot',
-        'tests',
-        'telegram',
-        'block',
-        'scan',
-        'delete',
-      ]),
+      tuneActions(owner: true, staff: true, federation: true),
+      ['icon', 'ops', 'flags', 'core', 'services', 'transport'],
+    );
+    expect(
+      operationActions(owner: true, staff: true, federation: true),
+      ['tests', 'scan-all', 'reboot'],
+    );
+    expect(
+      operationActions(owner: false, staff: true, federation: true),
+      ['tests', 'scan-all'],
     );
     expect(
       cardActions(
@@ -162,20 +166,21 @@ void main() {
         owner: false,
         staff: true,
         federation: true,
-        telegram: false,
+        telegram: true,
         trust: 'Pending',
       ),
-      containsAll(['target', 'trust', 'block', 'delete']),
+      ['metrics', 'relogin', 'target', 'telegram', 'peer'],
     );
     expect(
-      cardActions(
-        isTarget: false,
-        owner: false,
-        staff: true,
-        federation: false,
-        telegram: false,
-        trust: 'Trust',
-      ),
+      peerActions(trust: 'Pending', federation: true),
+      ['trust', 'block', 'delete'],
+    );
+    expect(
+      peerActions(trust: 'Trust', federation: true),
+      ['block', 'scan', 'delete'],
+    );
+    expect(
+      peerActions(trust: 'Trust', federation: false),
       isNot(contains('scan')),
     );
   });
@@ -197,18 +202,32 @@ void main() {
     expect(menuSectionEnabled('alerts', hasTarget: true), isTrue);
   });
 
-  test('settings categories cover the owner fields once', () {
+  test('settings categories cover the owner fields once and groups stay 1-ring', () {
     final keys = [
       for (final category in settingCategories)
         for (final field in category.fields) field.key,
     ];
     expect(keys.toSet().length, keys.length);
     expect(keys.length, 58);
+    for (final category in settingCategories) {
+      expect(category.fields.length, lessThanOrEqualTo(6));
+    }
+    final groupedCategories = [
+      'flags',
+      for (final group in settingGroups) ...group.categoryIds,
+    ];
+    expect(
+      groupedCategories.toSet(),
+      settingCategories.map((c) => c.id).toSet(),
+    );
     expect(keys, contains('pu_ff_telegram_bot_enable'));
     expect(keys, contains('pu_telegram_token'));
     expect(keys, isNot(contains('icon_uuid')));
     expect(parseSetting(settingCategory('users')!.fields.first, '0'), isNull);
     expect(parseSetting(settingCategory('users')!.fields.first, '16'), 16);
+    final emailField = settingCategory('contacts')!.fields.first;
+    expect(parseSetting(emailField, 'not-an-email'), isNull);
+    expect(parseSetting(emailField, 'owner@pepeunit.com'), 'owner@pepeunit.com');
   });
 
   test('peer pages stop at the reported total', () async {
@@ -259,7 +278,7 @@ void main() {
     expect(session.uuid, 'user-1');
   });
 
-  testWidgets('flags, search and the owner card follow the target', (
+  testWidgets('flags, search, peer moderation and the owner hub stay 1-ring', (
     tester,
   ) async {
     final model = AppModel(
@@ -310,31 +329,38 @@ void main() {
     await tester.pump();
     expect(find.bySemanticsLabel('Добавить'), findsOneWidget);
     expect(find.bySemanticsLabel('Опросить все'), findsOneWidget);
+    // Peers remain visible on the first ring (scope=0) even when Admin is logged in!
+    expect(find.bySemanticsLabel('unit.pepeunit.com'), findsOneWidget);
+    expect(find.bySemanticsLabel('dcunit.pepeunit.com'), findsOneWidget);
 
     await tester.enterText(
       find.byKey(const ValueKey('network-search')),
       'dcunit',
     );
     await tester.pump();
-    GoRouter.of(tester.element(find.byType(NetworkSearchPage)))
-        .replace('/peers/search?scope=1');
-    await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('unit.pepeunit.com'), findsNothing);
     expect(find.bySemanticsLabel('dcunit.pepeunit.com'), findsOneWidget);
 
     model.setSearch('');
-    await tester.pump();
-    GoRouter.of(tester.element(find.byType(NetworkSearchPage)))
-        .replace('/peers/search?scope=1');
     await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('unit.pepeunit.com'));
     await tester.pumpAndSettle();
-    expect(find.bySemanticsLabel('Доверять'), findsOneWidget);
-    expect(find.bySemanticsLabel('Опрос'), findsNothing);
-    expect(find.bySemanticsLabel('Параметры'), findsNothing);
     expect(find.bySemanticsLabel('Сделать Текущим'), findsOneWidget);
     expect(find.bySemanticsLabel('Telegram'), findsOneWidget);
     expect(find.bySemanticsLabel('Перезайти'), findsOneWidget);
+    expect(find.bySemanticsLabel('Модерация'), findsOneWidget);
+    expect(find.bySemanticsLabel('Доверять'), findsNothing);
+
+    await tester.tap(find.bySemanticsLabel('Модерация'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Доверять'), findsOneWidget);
+    expect(find.bySemanticsLabel('Блокировать'), findsOneWidget);
+    expect(find.bySemanticsLabel('Удалить'), findsOneWidget);
+    expect(find.bySemanticsLabel('Опрос'), findsNothing);
+
+    await tester.tap(find.bySemanticsLabel('Назад'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Модерация'), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('Назад'));
     await tester.pumpAndSettle();
@@ -346,9 +372,39 @@ void main() {
     await tester.tap(find.bySemanticsLabel('devunit.pepeunit.com'));
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('Параметры'), findsOneWidget);
+    expect(find.bySemanticsLabel('Отменить выбор'), findsOneWidget);
+    expect(find.bySemanticsLabel('Перезапуск'), findsNothing);
+    expect(find.bySemanticsLabel('Тесты'), findsNothing);
+
+    await tester.tap(find.bySemanticsLabel('Параметры'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Аватар инстанса'), findsOneWidget);
+    expect(find.bySemanticsLabel('Операции'), findsOneWidget);
+    expect(find.bySemanticsLabel('Флаги'), findsOneWidget);
+    expect(find.bySemanticsLabel('Система'), findsOneWidget);
+    expect(find.bySemanticsLabel('Сервисы'), findsOneWidget);
+    expect(find.bySemanticsLabel('Транспорт'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Операции'));
+    await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('Перезапуск'), findsOneWidget);
     expect(find.bySemanticsLabel('Тесты'), findsOneWidget);
-    expect(find.bySemanticsLabel('Отменить выбор'), findsOneWidget);
+    expect(find.bySemanticsLabel('Опросить все'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Назад'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('Система'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Контакты'), findsOneWidget);
+    expect(find.bySemanticsLabel('Пользователи'), findsOneWidget);
+    expect(find.bySemanticsLabel('Федерация'), findsOneWidget);
+    expect(find.bySemanticsLabel('Журнал'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Пользователи'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Макс. юзеров'), findsOneWidget);
+    expect(find.bySemanticsLabel('Макс. групп'), findsOneWidget);
+    expect(find.bySemanticsLabel('Срок токена (с)'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

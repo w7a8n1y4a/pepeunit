@@ -1,8 +1,12 @@
 import 'dart:math';
+import 'dart:typed_data';
 
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../account/icon_file.dart';
+import '../../app_model.dart';
 import '../../app_scope.dart';
 import '../../features/account/account_nav.dart';
 import '../../features/account/error_reader.dart';
@@ -12,6 +16,10 @@ import '../../instances/settings_catalog.dart';
 import '../../locale/languages.dart';
 import 'network_chrome.dart';
 
+/// Instance administration hub (`/peers/tune`).
+///
+/// Always stays within a single ring (`hexDisk(1)` — at most 6 cells around
+/// Back) so the screen never bloats when Owner or Admin opens it.
 class InstanceTunePage extends StatefulWidget {
   const InstanceTunePage({super.key});
 
@@ -22,14 +30,20 @@ class InstanceTunePage extends StatefulWidget {
 class _InstanceTunePageState extends State<InstanceTunePage> {
   String? _failure;
   var _open = false;
+  var _busy = false;
+  var _dragHot = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       if (!mounted) return;
+      final model = AppScope.of(context);
+      final target = model.target;
+      if (target == null || !target.managesPeers) return;
+      if (!target.ownsInstance) return;
       try {
-        await AppScope.of(context).loadSettings();
+        await model.loadSettings();
       } catch (error) {
         if (!mounted) return;
         setState(() => _failure = '$error');
@@ -39,36 +53,39 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
 
   @override
   Widget build(BuildContext context) {
-    final language = AppScope.of(context).vault.language;
+    final model = AppScope.of(context);
+    final language = model.vault.language;
     final color = networkColor;
-    final spots = hexDisk(2).skip(1).toList();
+    final target = model.target;
+    final owner = target?.ownsInstance ?? false;
+    final staff = target?.managesPeers ?? false;
+    final portrait = target == null ? null : model.portraitOf(target.url);
+    final federation = portrait?.federation != false;
+
+    final ids = tuneActions(
+      owner: owner,
+      staff: staff,
+      federation: federation,
+    );
+    final ring = hexDisk(1).skip(1).toList();
+    final placed = <BoardSlot>[
+      const BoardSlot('back', 0, 0),
+      for (var i = 0; i < ids.length && i < ring.length; i++)
+        BoardSlot(ids[i], ring[i].$1, ring[i].$2),
+    ];
     final slots = <HexSlot>[
-      HexSlot(
-        id: 'back',
-        title: netText(language, 'Назад', 'Back'),
-        color: hexMuted,
-        q: 0,
-        r: 0,
-        icon: 'assets/icons/back.svg',
-      ),
-      for (var i = 0; i < settingCategories.length && i < spots.length; i++)
-        HexSlot(
-          id: settingCategories[i].id,
-          title: phrase(language, settingCategories[i].titles),
-          color: color,
-          q: spots[i].$1,
-          r: spots[i].$2,
-        ),
+      for (final slot in placed) _slot(slot, model, language, color),
     ];
     if (_failure != null) {
+      final spot = errorSpot(placed);
       slots.add(
         HexSlot(
           id: 'error',
           title: netText(language, 'Ошибка', 'Error'),
           color: errorColor,
           titleColor: errorColor,
-          q: 0,
-          r: 2,
+          q: spot.$1,
+          r: spot.$2,
           icon: 'assets/icons/error.svg',
           iconScale: 1.2,
           body: _open
@@ -84,20 +101,208 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
       color: sceneBackground,
       child: HexScene(
         slots: slots,
-        onTap: (id) {
-          if (id == 'back') {
-            popOrHome(context);
-          } else if (id == 'error') {
-            setState(() => _open = true);
-          } else {
-            context.push('/peers/tune/$id');
-          }
+        onTap: (id) => _tap(id, language, owner),
+        wrap: (slot, child) {
+          if (slot.id != 'icon' || !owner) return child;
+          return DropTarget(
+            enable: !_busy,
+            onDragEntered: (_) {
+              if (!_dragHot) setState(() => _dragHot = true);
+            },
+            onDragExited: (_) {
+              if (_dragHot) setState(() => _dragHot = false);
+            },
+            onDragDone: (detail) => _dropped(detail, language),
+            child: child,
+          );
         },
       ),
     );
   }
+
+  HexSlot _slot(
+    BoardSlot slot,
+    AppModel model,
+    String language,
+    Color color,
+  ) {
+    final targetUrl = model.target?.url ?? '';
+    final portrait = targetUrl.isEmpty ? null : model.portraitOf(targetUrl);
+    final active = _busy ? const Color(0xFFFFFFFF) : color;
+    switch (slot.id) {
+      case 'back':
+        return HexSlot(
+          id: 'back',
+          title: netText(language, 'Назад', 'Back'),
+          color: hexMuted,
+          q: slot.q,
+          r: slot.r,
+          icon: 'assets/icons/back.svg',
+        );
+      case 'identity':
+        return instanceMark(
+          id: 'identity',
+          url: targetUrl,
+          language: language,
+          q: slot.q,
+          r: slot.r,
+          color: color,
+          current: true,
+          version: portrait?.version,
+          image: targetUrl.isEmpty ? null : model.iconOf(targetUrl),
+          tappable: false,
+        );
+      case 'icon':
+        final image = targetUrl.isEmpty ? null : model.iconOf(targetUrl);
+        return HexSlot(
+          id: 'icon',
+          title: netText(language, 'Аватар инстанса', 'Instance icon'),
+          footer: portrait?.version,
+          color: _busy || _dragHot ? const Color(0xFFFFFFFF) : color,
+          q: slot.q,
+          r: slot.r,
+          icon: image == null ? 'assets/icons/icon_load.svg' : null,
+          image: image,
+          iconScale: 1.15,
+        );
+      case 'ops':
+        return HexSlot(
+          id: 'ops',
+          title: netText(language, 'Операции', 'Operations'),
+          footer: portrait?.testsStatus,
+          color: color,
+          q: slot.q,
+          r: slot.r,
+          icon: 'assets/icons/power.svg',
+        );
+      case 'flags':
+        return HexSlot(
+          id: 'flags',
+          title: netText(language, 'Флаги', 'Flags'),
+          color: color,
+          q: slot.q,
+          r: slot.r,
+          icon: 'assets/icons/check.svg',
+        );
+      case 'tests':
+        return HexSlot(
+          id: 'tests',
+          title: netText(language, 'Тесты', 'Tests'),
+          footer: portrait?.testsStatus,
+          color: active,
+          q: slot.q,
+          r: slot.r,
+          icon: 'assets/icons/reload.svg',
+        );
+      case 'scan-all':
+        return HexSlot(
+          id: 'scan-all',
+          title: netText(language, 'Опросить все', 'Scan all'),
+          color: active,
+          q: slot.q,
+          r: slot.r,
+          icon: 'assets/icons/instances.svg',
+        );
+      default:
+        final group = settingGroup(slot.id);
+        if (group != null) {
+          return HexSlot(
+            id: group.id,
+            title: phrase(language, group.titles),
+            color: color,
+            q: slot.q,
+            r: slot.r,
+            icon: group.icon,
+          );
+        }
+        return HexSlot(
+          id: slot.id,
+          title: slot.id,
+          color: color,
+          q: slot.q,
+          r: slot.r,
+        );
+    }
+  }
+
+  Future<void> _tap(String id, String language, bool owner) async {
+    final model = AppScope.of(context);
+    switch (id) {
+      case 'back':
+        popOrHome(context);
+      case 'error':
+        setState(() => _open = true);
+      case 'icon':
+        if (owner) await _pick(language);
+      case 'tests':
+        await _run(model.runIntegrationTests);
+      case 'scan-all':
+        await _run(model.scanAll);
+      case 'ops':
+      case 'flags':
+      case 'core':
+      case 'services':
+      case 'transport':
+        context.push('/peers/tune/$id');
+    }
+  }
+
+  Future<void> _run(Future<void> Function() action) async {
+    if (_busy) return;
+    setState(() {
+      _busy = true;
+      _failure = null;
+      _open = false;
+    });
+    try {
+      await action();
+      if (!mounted) return;
+      setState(() => _busy = false);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _busy = false;
+        _failure = '$error';
+      });
+    }
+  }
+
+  Future<void> _pick(String language) async {
+    if (_busy) return;
+    final model = AppScope.of(context);
+    final bytes = await model.files.pick(
+      dialogTitle: netText(language, 'Картинка инстанса', 'Instance picture'),
+    );
+    if (bytes == null || !mounted) return;
+    await _accept(bytes, language);
+  }
+
+  Future<void> _dropped(DropDoneDetails detail, String language) async {
+    if (_dragHot) setState(() => _dragHot = false);
+    if (_busy || detail.files.isEmpty) return;
+    final bytes = await detail.files.first.readAsBytes();
+    if (!mounted) return;
+    await _accept(bytes, language);
+  }
+
+  Future<void> _accept(Uint8List bytes, String language) async {
+    final problem = iconProblem(bytes);
+    if (problem != null) {
+      setState(() {
+        _failure = _iconText(problem, language);
+        _open = false;
+      });
+      return;
+    }
+    await _run(() => AppScope.of(context).setInstanceIcon(bytes));
+  }
 }
 
+/// Renders either:
+/// - `ops`: the 1-ring instance operations menu (`tests`, `scan-all`, `reboot`)
+/// - a `SettingGroup` (`core`, `services`, `transport`): 1-ring submenu of categories
+/// - a leaf `SettingCategory` (`flags`, `contacts`, `users`, ...): 1-ring cluster
+///   where every setting field is its own hexagon around Back!
 class SettingCategoryPage extends StatefulWidget {
   const SettingCategoryPage({required this.categoryId, super.key});
 
@@ -111,51 +316,64 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
   String? _failure;
   var _open = false;
   var _busy = false;
-  String? _editing;
+  final Map<String, String> _drafts = {};
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      if (!mounted) return;
+      final model = AppScope.of(context);
+      if (model.targetSettings != null) return;
+      if (model.target?.ownsInstance != true) return;
+      try {
+        await model.loadSettings();
+      } catch (error) {
+        if (!mounted) return;
+        setState(() => _failure = '$error');
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final model = AppScope.of(context);
     final language = model.vault.language;
     final color = networkColor;
-    final category = settingCategory(widget.categoryId);
-    final slots = <HexSlot>[
-      HexSlot(
-        id: 'back',
-        title: netText(language, 'Назад', 'Back'),
-        color: hexMuted,
-        q: 0,
-        r: 0,
-        icon: 'assets/icons/back.svg',
-      ),
-      if (category != null)
+    final id = widget.categoryId;
+
+    final List<HexSlot> slots;
+    if (id == 'ops') {
+      slots = _opsSlots(model, language, color);
+    } else if (settingGroup(id) != null) {
+      slots = _groupSlots(settingGroup(id)!, language, color);
+    } else if (settingCategory(id) != null) {
+      slots = _categorySlots(settingCategory(id)!, model, language, color);
+    } else {
+      slots = [
         HexSlot(
-          id: 'form',
-          title: phrase(language, category.titles),
-          color: _busy ? const Color(0xFFFFFFFF) : color,
+          id: 'back',
+          title: netText(language, 'Назад', 'Back'),
+          color: hexMuted,
           q: 0,
-          r: -1,
-          body: SettingForm(
-            category: category,
-            values: model.targetSettings ?? const {},
-            editing: _editing,
-            color: color,
-            language: language,
-            onToggle: _toggle,
-            onEdit: (key) => setState(() => _editing = key),
-            onSubmit: _submit,
-          ),
+          r: 0,
+          icon: 'assets/icons/back.svg',
         ),
-    ];
+      ];
+    }
+
     if (_failure != null) {
+      final spot = errorSpot(
+        slots.map((slot) => BoardSlot(slot.id, slot.q, slot.r)),
+      );
       slots.add(
         HexSlot(
           id: 'error',
           title: netText(language, 'Ошибка', 'Error'),
           color: errorColor,
           titleColor: errorColor,
-          q: 1,
-          r: -1,
+          q: spot.$1,
+          r: spot.$2,
           icon: 'assets/icons/error.svg',
           iconScale: 1.2,
           body: _open
@@ -169,57 +387,289 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     }
     return ColoredBox(
       color: sceneBackground,
-      child: HexScene(
-        slots: slots,
-        onTap: (id) {
-          if (id == 'back') popOrHome(context);
-          if (id == 'error') setState(() => _open = true);
+      child: HexScene(slots: slots, onTap: _tap),
+    );
+  }
+
+  List<HexSlot> _opsSlots(AppModel model, String language, Color color) {
+    final target = model.target;
+    final owner = target?.ownsInstance ?? false;
+    final staff = target?.managesPeers ?? false;
+    final targetUrl = target?.url ?? '';
+    final portrait = targetUrl.isEmpty ? null : model.portraitOf(targetUrl);
+    final federation = portrait?.federation != false;
+    final active = _busy ? const Color(0xFFFFFFFF) : color;
+    final ops = operationActions(
+      owner: owner,
+      staff: staff,
+      federation: federation,
+    );
+    final spots = hexDisk(1).skip(1).toList();
+    final items = ['identity', ...ops];
+    return [
+      HexSlot(
+        id: 'back',
+        title: netText(language, 'Назад', 'Back'),
+        color: hexMuted,
+        q: 0,
+        r: 0,
+        icon: 'assets/icons/back.svg',
+      ),
+      for (var i = 0; i < items.length && i < spots.length; i++)
+        switch (items[i]) {
+          'identity' => instanceMark(
+            id: 'identity',
+            url: targetUrl,
+            language: language,
+            q: spots[i].$1,
+            r: spots[i].$2,
+            color: color,
+            current: true,
+            version: portrait?.version,
+            image: targetUrl.isEmpty ? null : model.iconOf(targetUrl),
+            tappable: false,
+          ),
+          'tests' => HexSlot(
+            id: 'tests',
+            title: netText(language, 'Тесты', 'Tests'),
+            footer: portrait?.testsStatus,
+            color: active,
+            q: spots[i].$1,
+            r: spots[i].$2,
+            icon: 'assets/icons/reload.svg',
+          ),
+          'scan-all' => HexSlot(
+            id: 'scan-all',
+            title: netText(language, 'Опросить все', 'Scan all'),
+            color: active,
+            q: spots[i].$1,
+            r: spots[i].$2,
+            icon: 'assets/icons/instances.svg',
+          ),
+          'reboot' => HexSlot(
+            id: 'reboot',
+            title: netText(language, 'Перезапуск', 'Reboot'),
+            color: _busy ? const Color(0xFFFFFFFF) : errorColor,
+            q: spots[i].$1,
+            r: spots[i].$2,
+            icon: 'assets/icons/power.svg',
+          ),
+          _ => HexSlot(
+            id: items[i],
+            title: items[i],
+            color: color,
+            q: spots[i].$1,
+            r: spots[i].$2,
+          ),
         },
+    ];
+  }
+
+  List<HexSlot> _groupSlots(
+    SettingGroup group,
+    String language,
+    Color color,
+  ) {
+    final spots = hexDisk(1).skip(1).toList();
+    final categories = [
+      for (final id in group.categoryIds)
+        if (settingCategory(id) != null) settingCategory(id)!,
+    ];
+    return [
+      HexSlot(
+        id: 'back',
+        title: netText(language, 'Назад', 'Back'),
+        color: hexMuted,
+        q: 0,
+        r: 0,
+        icon: 'assets/icons/back.svg',
+      ),
+      for (var i = 0; i < categories.length && i < spots.length; i++)
+        HexSlot(
+          id: 'cat:${categories[i].id}',
+          title: phrase(language, categories[i].titles),
+          footer: '${categories[i].fields.length}',
+          color: color,
+          q: spots[i].$1,
+          r: spots[i].$2,
+          icon: categories[i].icon,
+        ),
+    ];
+  }
+
+  List<HexSlot> _categorySlots(
+    SettingCategory category,
+    AppModel model,
+    String language,
+    Color color,
+  ) {
+    final values = model.targetSettings ?? const <String, Object?>{};
+    final spots = hexDisk(1).skip(1).toList();
+    return [
+      HexSlot(
+        id: 'back',
+        title: netText(language, 'Назад', 'Back'),
+        color: hexMuted,
+        q: 0,
+        r: 0,
+        icon: 'assets/icons/back.svg',
+      ),
+      for (var i = 0; i < category.fields.length && i < spots.length; i++)
+        _fieldSlot(
+          category,
+          category.fields[i],
+          spots[i].$1,
+          spots[i].$2,
+          values,
+          language,
+          color,
+        ),
+    ];
+  }
+
+  HexSlot _fieldSlot(
+    SettingCategory category,
+    SettingField field,
+    int q,
+    int r,
+    Map<String, Object?> values,
+    String language,
+    Color color,
+  ) {
+    final current = values[field.key];
+    final title = field.label(language);
+    if (field.kind == 'bool') {
+      final enabled = current == true;
+      return HexSlot(
+        id: 'bool:${field.key}',
+        title: title,
+        footer: enabled
+            ? netText(language, 'вкл', 'on')
+            : netText(language, 'выкл', 'off'),
+        color: _busy
+            ? const Color(0xFFFFFFFF)
+            : (enabled ? color : hexMuted),
+        q: q,
+        r: r,
+        icon: enabled ? 'assets/icons/check.svg' : 'assets/icons/close.svg',
+      );
+    }
+    if (field.kind == 'enum') {
+      return HexSlot(
+        id: 'enum:${field.key}',
+        title: title,
+        footer: current == null ? null : '$current',
+        color: _busy ? const Color(0xFFFFFFFF) : color,
+        q: q,
+        r: r,
+        body: EnumSettingCell(
+          field: field,
+          current: current == null ? '' : '$current',
+          onSelect: (option) => _send({field.key: option}),
+        ),
+      );
+    }
+    return HexSlot(
+      id: 'field:${field.key}',
+      title: title,
+      footer: field.rangeHint(),
+      color: _busy ? const Color(0xFFFFFFFF) : color,
+      q: q,
+      r: r,
+      body: ValueSettingCell(
+        field: field,
+        value: current,
+        color: color,
+        language: language,
+        onChanged: (raw) => _drafts[field.key] = raw,
+        onSubmit: (raw) => _submitField(category, field, raw, values),
       ),
     );
   }
 
-  Future<void> _toggle(SettingField field) async {
+  Future<void> _tap(String id) async {
     final model = AppScope.of(context);
-    final current = model.targetSettings?[field.key];
-    if (field.kind == 'enum') {
-      final options = field.options;
-      final index = options.indexOf('$current');
-      final next = options[(index + 1) % options.length];
-      await _send(field.key, next);
+    if (id.startsWith('cat:')) {
+      context.push('/peers/tune/${id.substring(4)}');
       return;
     }
-    if (field.kind == 'bool') {
-      await _send(field.key, current != true);
+    if (id.startsWith('bool:')) {
+      final key = id.substring(5);
+      final current = model.targetSettings?[key] == true;
+      await _send({key: !current});
+      return;
+    }
+    switch (id) {
+      case 'back':
+        popOrHome(context);
+      case 'error':
+        setState(() => _open = true);
+      case 'tests':
+        await _run(model.runIntegrationTests);
+      case 'scan-all':
+        await _run(model.scanAll);
+      case 'reboot':
+        await _run(model.reboot);
     }
   }
 
-  Future<void> _submit(SettingField field, String raw) async {
-    final value = parseSetting(field, raw);
-    if (value == null && raw.trim().isNotEmpty) {
-      setState(
-        () => _failure = netText(
-          AppScope.of(context).vault.language,
-          'Значение вне диапазона',
-          'Value is out of range',
-        ),
-      );
+  Future<void> _submitField(
+    SettingCategory category,
+    SettingField field,
+    String raw,
+    Map<String, Object?> currentValues,
+  ) async {
+    final language = AppScope.of(context).vault.language;
+    final parsed = parseSetting(field, raw);
+    if (parsed == null && raw.trim().isNotEmpty) {
+      setState(() {
+        _failure = netText(
+          language,
+          'Некорректное значение (${field.rangeHint() ?? field.kind})',
+          'Invalid value (${field.rangeHint() ?? field.kind})',
+        );
+        _open = false;
+      });
       return;
     }
-    if (value == null && !field.nullable) {
-      setState(
-        () => _failure = netText(
-          AppScope.of(context).vault.language,
-          'Пустое значение',
-          'Empty value',
-        ),
-      );
+    if (parsed == null && !field.nullable) {
+      setState(() {
+        _failure = netText(language, 'Пустое значение', 'Empty value');
+        _open = false;
+      });
       return;
     }
-    await _send(field.key, value);
+    if (category.id == 'github') {
+      final nameKey = 'pu_instance_github_token_name';
+      final patKey = 'pu_instance_github_token_pat';
+      final nameVal = field.key == nameKey
+          ? '$parsed'
+          : (_drafts[nameKey] ?? '${currentValues[nameKey] ?? ''}').trim();
+      final patVal = field.key == patKey
+          ? '$parsed'
+          : (_drafts[patKey] ?? '${currentValues[patKey] ?? ''}').trim();
+      if (nameVal.isNotEmpty != patVal.isNotEmpty) {
+        setState(() {
+          _failure = netText(
+            language,
+            'Заполните оба поля GitHub и нажмите Enter',
+            'Fill both GitHub fields and press Enter',
+          );
+          _open = false;
+        });
+        return;
+      }
+      await _send({nameKey: nameVal, patKey: patVal});
+      return;
+    }
+    await _send({field.key: parsed});
   }
 
-  Future<void> _send(String key, Object? value) async {
+  Future<void> _send(Map<String, Object?> patch) async {
+    await _run(() => AppScope.of(context).patchSettings(patch));
+  }
+
+  Future<void> _run(Future<void> Function() action) async {
     if (_busy) return;
     setState(() {
       _busy = true;
@@ -227,12 +677,9 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
       _open = false;
     });
     try {
-      await AppScope.of(context).patchSetting(key, value);
+      await action();
       if (!mounted) return;
-      setState(() {
-        _busy = false;
-        _editing = null;
-      });
+      setState(() => _busy = false);
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -243,133 +690,249 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
   }
 }
 
-class SettingForm extends StatefulWidget {
-  const SettingForm({
-    required this.category,
-    required this.values,
-    required this.editing,
+class EnumSettingCell extends StatelessWidget {
+  const EnumSettingCell({
+    required this.field,
+    required this.current,
+    required this.onSelect,
+    super.key,
+  });
+
+  final SettingField field;
+  final String current;
+  final ValueChanged<String> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final side = constraints.maxWidth;
+        final font = max(10.0, side * 0.068);
+        return Padding(
+          padding: EdgeInsets.fromLTRB(
+            side * 0.16,
+            side * 0.24,
+            side * 0.16,
+            side * 0.22,
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              for (final option in field.options)
+                Flexible(
+                  child: Semantics(
+                    button: true,
+                    selected: option == current,
+                    label: option,
+                    excludeSemantics: true,
+                    onTap: () => onSelect(option),
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: () => onSelect(option),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 2),
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            option,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: option == current
+                                  ? const Color(0xFFFFFFFF)
+                                  : hexMuted,
+                              fontFamily: 'OpenGost Type B',
+                              fontSize: font,
+                              height: 1.1,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+class ValueSettingCell extends StatefulWidget {
+  const ValueSettingCell({
+    required this.field,
+    required this.value,
     required this.color,
     required this.language,
-    required this.onToggle,
-    required this.onEdit,
+    required this.onChanged,
     required this.onSubmit,
     super.key,
   });
 
-  final SettingCategory category;
-  final Map<String, Object?> values;
-  final String? editing;
+  final SettingField field;
+  final Object? value;
   final Color color;
   final String language;
-  final ValueChanged<SettingField> onToggle;
-  final ValueChanged<String> onEdit;
-  final void Function(SettingField field, String raw) onSubmit;
+  final ValueChanged<String> onChanged;
+  final ValueChanged<String> onSubmit;
 
   @override
-  State<SettingForm> createState() => _SettingFormState();
+  State<ValueSettingCell> createState() => _ValueSettingCellState();
 }
 
-class _SettingFormState extends State<SettingForm> {
-  final _controller = TextEditingController();
+class _ValueSettingCellState extends State<ValueSettingCell> {
+  late final TextEditingController _controller;
+  final _focus = FocusNode();
+  var _dirty = false;
+
+  String get _serverText => widget.value == null ? '' : '${widget.value}';
 
   @override
-  void didUpdateWidget(SettingForm oldWidget) {
+  void initState() {
+    super.initState();
+    _controller = TextEditingController(text: _serverText);
+  }
+
+  @override
+  void didUpdateWidget(ValueSettingCell oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (widget.editing != oldWidget.editing && widget.editing != null) {
-      final value = widget.values[widget.editing];
-      _controller.text = value == null ? '' : '$value';
+    if (widget.value != oldWidget.value && !_focus.hasFocus) {
+      _controller.text = _serverText;
+      _dirty = false;
     }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _focus.dispose();
     super.dispose();
+  }
+
+  void _submit() {
+    _dirty = false;
+    widget.onSubmit(_controller.text);
   }
 
   @override
   Widget build(BuildContext context) {
-    final editing = widget.category.fields.where(
-      (field) => field.key == widget.editing,
-    );
-    final field = editing.isEmpty ? null : editing.first;
+    final hint = widget.field.hint ??
+        (widget.field.nullable
+            ? netText(widget.language, 'пусто', 'empty')
+            : '');
     return LayoutBuilder(
       builder: (context, constraints) {
         final side = constraints.maxWidth;
-        final font = max(10.0, side * 0.055);
+        final font = max(11.0, side * 0.075);
         return Material(
           type: MaterialType.transparency,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              side * 0.14,
-              side * 0.24,
-              side * 0.14,
-              side * 0.12,
-            ),
-            child: Column(
-              children: [
-                Expanded(
-                  child: ListView(
-                    padding: EdgeInsets.zero,
-                    children: [
-                      for (final item in widget.category.fields)
-                        _row(item, font),
-                    ],
-                  ),
-                ),
-                if (field != null &&
-                    field.kind != 'bool' &&
-                    field.kind != 'enum')
-                  TextField(
-                    controller: _controller,
-                    style: TextStyle(
-                      color: const Color(0xFFFFFFFF),
-                      fontFamily: 'OpenGost Type B',
-                      fontSize: font,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _focus.requestFocus(),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(
+                side * 0.16,
+                side * 0.26,
+                side * 0.16,
+                side * 0.22,
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: side * 0.16,
+                    child: TextField(
+                      key: ValueKey('setting-${widget.field.key}'),
+                      controller: _controller,
+                      focusNode: _focus,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: const Color(0xFFFFFFFF),
+                        fontFamily: 'OpenGost Type B',
+                        fontSize: font,
+                        height: 1,
+                        decoration: TextDecoration.none,
+                      ),
+                      cursorColor: widget.color,
+                      decoration: InputDecoration(
+                        isCollapsed: true,
+                        isDense: true,
+                        contentPadding: EdgeInsets.zero,
+                        hintText: hint,
+                        hintStyle: TextStyle(
+                          color: hexMuted,
+                          fontFamily: 'OpenGost Type B',
+                          fontSize: font,
+                          height: 1,
+                        ),
+                        border: InputBorder.none,
+                      ),
+                      onChanged: (text) {
+                        widget.onChanged(text);
+                        final changed = text.trim() != _serverText.trim();
+                        if (changed != _dirty) {
+                          setState(() => _dirty = changed);
+                        }
+                      },
+                      onSubmitted: (_) => _submit(),
                     ),
-                    cursorColor: widget.color,
-                    decoration: const InputDecoration(
-                      isCollapsed: true,
-                      border: InputBorder.none,
-                    ),
-                    onSubmitted: (value) => widget.onSubmit(field, value),
                   ),
-              ],
+                  SizedBox(height: side * 0.03),
+                  Container(
+                    height: max(1, side * 0.008),
+                    color: _dirty ? const Color(0xFFFFFFFF) : widget.color,
+                  ),
+                  if (_dirty) ...[
+                    SizedBox(height: side * 0.03),
+                    Semantics(
+                      button: true,
+                      label: netText(widget.language, 'Сохранить', 'Save'),
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: _submit,
+                        child: Text(
+                          'OK',
+                          style: TextStyle(
+                            color: widget.color,
+                            fontFamily: 'OpenGost Type B',
+                            fontSize: max(10.0, side * 0.058),
+                            height: 1,
+                            decoration: TextDecoration.none,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
           ),
         );
       },
     );
   }
+}
 
-  Widget _row(SettingField field, double font) {
-    final value = widget.values[field.key];
-    final shown = value == null ? '—' : '$value';
-    return GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: () {
-        if (field.kind == 'bool' || field.kind == 'enum') {
-          widget.onToggle(field);
-        } else {
-          widget.onEdit(field.key);
-        }
-      },
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 2),
-        child: Text(
-          '${field.label()}: $shown',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            color: widget.editing == field.key
-                ? const Color(0xFFFFFFFF)
-                : hexMuted,
-            decoration: TextDecoration.none,
-            fontFamily: 'OpenGost Type B',
-            fontSize: font,
-            height: 1.2,
-          ),
-        ),
-      ),
-    );
+String _iconText(String code, String language) {
+  switch (code) {
+    case 'empty':
+      return netText(language, 'Файл пустой', 'The file is empty');
+    case 'large':
+      return netText(
+        language,
+        'Картинка больше 128 КБ',
+        'The picture is larger than 128 KB',
+      );
+    case 'png':
+      return netText(language, 'Нужен файл PNG', 'A PNG file is required');
+    case 'size':
+      return netText(
+        language,
+        'Нужен размер 192x192',
+        'The picture must be 192x192',
+      );
+    default:
+      return code;
   }
 }
