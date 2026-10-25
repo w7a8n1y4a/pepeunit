@@ -14,7 +14,7 @@ Code is the source of truth. Read these files; do not copy them into answers or 
 - routes — `lib/main.dart` (`go_router`, path URL strategy)
 - backend window — `backendCompatible` in `lib/api/backend_version.dart` (currently `1.5.x`)
 - scene colors — `sceneBackground`, `hexFill`, `hexMuted`, `errorColor` in `lib/hive/hex_scene.dart`
-- plan and open questions — `docs/ru/roadmap/frontend-refactor.md`, and only when the task is about the plan
+- plan and open questions — `roadmap/frontend-refactor.md` and the files it links, and only when the task is about the plan
 
 Modules: `account/`, `instances/`, `hive/`, `features/{account,network,home,menu}`, `locale/`, `api/`.
 
