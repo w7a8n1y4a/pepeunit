@@ -51,7 +51,7 @@
     }
 
     #boot svg {
-      width: min(46vmin, 280px);
+      width: min(64.4vmin, 392px);
       height: auto;
     }
 
@@ -100,7 +100,7 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
-  <div id="boot" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="загрузка">
+  <div id="boot" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-label="Загрузка">
     <svg viewBox="0 0 240 240" aria-hidden="true">
       <polygon
         points="120,20 206.603,70 206.603,170 120,220 33.397,170 33.397,70"
@@ -123,7 +123,7 @@
         text-anchor="middle"
         dominant-baseline="central"
       >
-        <textPath id="boot-label" href="#boot-edge" startOffset="50%">загрузка</textPath>
+        <textPath id="boot-label" href="#boot-edge" startOffset="50%">Загрузка</textPath>
       </text>
     </svg>
   </div>
@@ -135,8 +135,8 @@
       var pctText = document.getElementById('boot-pct');
       var language = (navigator.language || 'ru').toLowerCase();
       if (boot && label && language.indexOf('en') === 0) {
-        label.textContent = 'loading';
-        boot.setAttribute('aria-label', 'loading');
+        label.textContent = 'Loading';
+        boot.setAttribute('aria-label', 'Loading');
       }
 
       var radius = Number(meter.getAttribute('r'));
@@ -144,9 +144,15 @@
       meter.setAttribute('stroke-dasharray', String(ring));
       meter.setAttribute('stroke-dashoffset', String(ring));
 
-      // Release bundles are static files with a length. The dev server
-      // compiles on the fly and reports no total, so it keeps the spinner.
+      // The dev build keeps the spinner. A cached refresh finishes too
+      // fast to trust a percent and stays on the spinner too. A real
+      // download fills the arc and keeps it up to 99 until the first
+      // frame, so the percent does not vanish while the engine starts.
+      // main.dart.js is left as a script tag so it can parse while it
+      // downloads.
       var parts = {};
+      var startedAt = 0;
+      var cached = false;
       function releaseBuild() {
         var builds = window._flutter && window._flutter.buildConfig && window._flutter.buildConfig.builds;
         if (!builds) return false;
@@ -155,123 +161,116 @@
         }
         return false;
       }
-      function paint() {
+      function measure() {
         var urls = Object.keys(parts);
-        if (!urls.length) return;
+        if (!urls.length) return null;
         var loaded = 0;
         var total = 0;
         for (var i = 0; i < urls.length; i++) {
           var part = parts[urls[i]];
-          if (!part.total) return;
-          loaded += part.loaded;
+          if (!part.total) return null;
+          loaded += Math.min(part.loaded, part.total);
           total += part.total;
         }
-        var pct = loaded >= total ? 100 : Math.floor(loaded * 100 / total);
+        if (!total) return null;
+        return { loaded: loaded, total: total };
+      }
+      function paint() {
+        if (cached) return;
+        var measured = measure();
+        if (!measured || wasmReadyFast()) {
+          if (wasmReadyFast()) cached = true;
+          return;
+        }
+        if (measured.loaded >= measured.total && performance.now() - startedAt < 400) {
+          cached = true;
+          return;
+        }
+        if (performance.now() - startedAt < 400) return;
+        var pct = Math.min(99, Math.floor(measured.loaded * 100 / measured.total));
         boot.classList.add('boot-known');
         meter.setAttribute('stroke-dashoffset', String(ring * (1 - pct / 100)));
         pctText.textContent = pct + '%';
         boot.setAttribute('aria-valuenow', String(pct));
         boot.setAttribute('aria-valuetext', pct + '%');
       }
+      function wasmReadyFast() {
+        var urls = Object.keys(parts);
+        if (!urls.length || performance.now() - startedAt >= 400) return false;
+        for (var i = 0; i < urls.length; i++) {
+          var part = parts[urls[i]];
+          if (!part.total || part.loaded < part.total) return false;
+        }
+        return true;
+      }
       function note(url, loaded, total) {
+        if (!startedAt) {
+          startedAt = performance.now();
+          setTimeout(paint, 420);
+        }
         parts[url] = { loaded: loaded, total: total > 0 ? total : 0 };
         paint();
       }
-      function forget(url) {
-        delete parts[url];
-        paint();
-      }
 
-      var jobs = {};
-      function fetchBytes(url) {
-        if (jobs[url]) return jobs[url];
-        jobs[url] = new Promise(function (resolve, reject) {
-          var xhr = new XMLHttpRequest();
-          xhr.open('GET', url);
-          xhr.responseType = 'arraybuffer';
-          xhr.onprogress = function (event) {
-            note(url, event.loaded, event.lengthComputable ? event.total : 0);
-          };
-          xhr.onload = function () {
-            if (xhr.status >= 200 && xhr.status < 300 && xhr.response) {
-              // Progress events report the compressed length. The decoded
-              // buffer is larger, so the finished file keeps the length
-              // the bar was already using.
-              var known = parts[url] && parts[url].total;
-              var size = known || xhr.response.byteLength;
-              note(url, size, size);
-              resolve(xhr.response);
-            } else {
-              forget(url);
-              reject(new Error('load'));
-            }
-          };
-          xhr.onerror = function () {
-            forget(url);
-            reject(new Error('network'));
-          };
-          xhr.send();
-        });
-        return jobs[url];
-      }
-
-      var headAppend = document.head.append;
-      var headAppendChild = document.head.appendChild;
-      function bundleScript(node) {
-        if (!node || node.nodeName !== 'SCRIPT' || !releaseBuild()) return false;
-        var src;
-        try {
-          src = new URL(node.src, document.baseURI);
-        } catch (error) {
-          return false;
-        }
-        if (!src.pathname.endsWith('/main.dart.js')) return false;
-        var url = src.href;
-        fetchBytes(url).then(function (buf) {
-          node.src = URL.createObjectURL(new Blob([buf], { type: 'text/javascript' }));
-          headAppend.call(document.head, node);
-        }, function () {
-          headAppend.call(document.head, node);
-        });
-        return true;
-      }
-      document.head.append = function () {
-        if (arguments.length === 1 && bundleScript(arguments[0])) return;
-        return headAppend.apply(document.head, arguments);
-      };
-      document.head.appendChild = function (node) {
-        if (bundleScript(node)) return node;
-        return headAppendChild.call(document.head, node);
-      };
+      var nativeFetch = window.fetch.bind(window);
 
       function wasmUrl(input) {
         var url = typeof input === 'string' ? input : input && input.url;
         if (!url || url.indexOf('blob:') === 0 || url.indexOf('data:') === 0) return '';
+        var parsed;
         try {
-          var parsed = new URL(url, document.baseURI);
+          parsed = new URL(url, document.baseURI);
         } catch (error) {
           return '';
         }
         if (!parsed.pathname.endsWith('.wasm')) return '';
         return parsed.href;
       }
-      var nativeFetch = window.fetch.bind(window);
+      function wasmDecodedSize(url) {
+        // Chrome keeps the compressed Content-Length and gives the page the
+        // decoded bytes, so the header cannot fill the arc. This is the
+        // decoded size of chromium/canvaskit.wasm for the current engine.
+        // A different build misses the check and keeps the spinner.
+        var revision = window._flutter && window._flutter.buildConfig && window._flutter.buildConfig.engineRevision;
+        if (revision === 'deb287481e3ce9468f3434937ced4240a70539ca' &&
+            url.indexOf('/chromium/canvaskit.wasm') !== -1) {
+          return 5428806;
+        }
+        return 0;
+      }
       window.fetch = function (input, init) {
         var url = wasmUrl(input);
         if (!url || !releaseBuild()) return nativeFetch(input, init);
-        return fetchBytes(url).then(function (buf) {
-          return new Response(buf, {
-            status: 200,
-            headers: { 'Content-Type': 'application/wasm' },
+        return nativeFetch(input, init).then(function (response) {
+          var total = wasmDecodedSize(url);
+          if (!response.ok || !response.body || !total) return response;
+          var reader = response.body.getReader();
+          var loaded = 0;
+          var stream = new ReadableStream({
+            pull: function (controller) {
+              return reader.read().then(function (result) {
+                if (result.done) {
+                  note(url, total, total);
+                  controller.close();
+                  return;
+                }
+                loaded += result.value.byteLength;
+                note(url, loaded >= total ? total - 1 : loaded, total);
+                controller.enqueue(result.value);
+              });
+            },
+            cancel: function (reason) {
+              return reader.cancel(reason);
+            }
           });
-        }, function () {
-          return nativeFetch(input, init);
+          return new Response(stream, {
+            status: response.status,
+            headers: { 'Content-Type': response.headers.get('Content-Type') || 'application/wasm' }
+          });
         });
       };
 
       window.addEventListener('flutter-first-frame', function () {
-        document.head.append = headAppend;
-        document.head.appendChild = headAppendChild;
         window.fetch = nativeFetch;
         if (!boot) return;
         boot.classList.add('boot-hide');
