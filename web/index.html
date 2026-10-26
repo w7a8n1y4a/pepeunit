@@ -19,6 +19,57 @@
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
   <meta name="description" content="Pepeunit">
+  <meta name="theme-color" content="#1B1B1F">
+  <meta name="color-scheme" content="dark">
+  <style>
+    @font-face {
+      font-family: "OpenGost Type B";
+      src: url("assets/assets/fonts/OpenGostTypeB-Regular.ttf") format("truetype");
+      font-display: swap;
+    }
+
+    html, body {
+      margin: 0;
+      height: 100%;
+      background: #1B1B1F;
+      color-scheme: dark;
+    }
+
+    #boot {
+      position: fixed;
+      inset: 0;
+      z-index: 999999;
+      display: grid;
+      place-items: center;
+      background: #1B1B1F;
+      transition: opacity 180ms linear;
+    }
+
+    #boot.boot-hide {
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    #boot svg {
+      width: min(46vmin, 280px);
+      height: auto;
+    }
+
+    #boot .wait {
+      transform-box: fill-box;
+      transform-origin: center;
+      animation: boot-spin 1.1s linear infinite;
+    }
+
+    @keyframes boot-spin {
+      to { transform: rotate(360deg); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      #boot { transition: none; }
+      #boot .wait { animation: none; }
+    }
+  </style>
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -33,6 +84,52 @@
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
+  <div id="boot" role="status" aria-label="загрузка">
+    <svg viewBox="0 0 240 240" aria-hidden="true">
+      <polygon
+        points="120,20 206.603,70 206.603,170 120,220 33.397,170 33.397,70"
+        fill="#14161B"
+        stroke="#FFFFFF"
+        stroke-width="3"
+        stroke-linejoin="miter"
+      />
+      <g class="wait" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round">
+        <circle cx="120" cy="120" r="48.55" stroke-dasharray="63.05 38.64" />
+      </g>
+      <path id="boot-edge" fill="none" d="M45.73 81.36 L115.67 40.98" />
+      <text
+        fill="#FFFFFF"
+        font-family="OpenGost Type B, sans-serif"
+        font-size="19"
+        text-anchor="middle"
+        dominant-baseline="central"
+      >
+        <textPath id="boot-label" href="#boot-edge" startOffset="50%">загрузка</textPath>
+      </text>
+    </svg>
+  </div>
+  <script>
+    (function () {
+      var boot = document.getElementById('boot');
+      var label = document.getElementById('boot-label');
+      var language = (navigator.language || 'ru').toLowerCase();
+      if (boot && label && language.indexOf('en') === 0) {
+        label.textContent = 'loading';
+        boot.setAttribute('aria-label', 'loading');
+      }
+
+      window.addEventListener('flutter-first-frame', function () {
+        var boot = document.getElementById('boot');
+        if (!boot) return;
+        boot.classList.add('boot-hide');
+        var remove = function () {
+          if (boot.parentNode) boot.remove();
+        };
+        boot.addEventListener('transitionend', remove);
+        setTimeout(remove, 400);
+      });
+    })();
+  </script>
   <!--
     You can customize the "flutter_bootstrap.js" script.
     This is useful to provide a custom configuration to the Flutter loader
