@@ -5,6 +5,10 @@ import 'dart:ui' show PathMetric, Tangent;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+/// Text inside a cell: a choice and a value that sits with it.
+/// Log levels and the account parameters cell are the reference.
+double cellFont(double side) => max(11, side * 0.068);
+
 const hexFill = Color(0xFF14161B);
 const sceneBackground = Color(0xFF1B1B1F);
 const hexMuted = Color(0xFFA1A1AA);
@@ -53,6 +57,7 @@ class HexSlot {
     this.body,
     this.tappable = true,
     this.enabled = true,
+    this.busy = false,
   });
 
   final String id;
@@ -90,6 +95,9 @@ class HexSlot {
 
   /// False for a control that is shown and does nothing yet.
   final bool enabled;
+
+  /// True while this cell is waiting on a request.
+  final bool busy;
 }
 
 typedef HexSlotWrap = Widget Function(HexSlot slot, Widget child);
@@ -113,7 +121,6 @@ class HexScene extends StatelessWidget {
         final layout = HexLayout.fit(slots, constraints.biggest);
         return Stack(
           children: [
-            CustomPaint(size: constraints.biggest, painter: HexPainter(layout)),
             for (final placed in layout.placed)
               Positioned(
                 left: placed.center.dx - placed.radius,
@@ -164,13 +171,21 @@ class HexScene extends StatelessWidget {
     if (!slot.enabled) {
       child = ColorFiltered(colorFilter: _mutedFilter, child: child);
     }
+    final frame = _CellFrame(
+      key: ValueKey(slot.id),
+      slot: slot,
+      button: body == null,
+      interactive: body == null && slot.tappable && slot.enabled,
+      onTap: () => onTap(slot.id),
+      child: child,
+    );
     Widget tile;
     if (body != null) {
       tile = Semantics(
         container: true,
         explicitChildNodes: true,
         label: slot.title,
-        child: child,
+        child: frame,
       );
     } else {
       tile = Semantics(
@@ -178,16 +193,12 @@ class HexScene extends StatelessWidget {
         enabled: slot.enabled,
         label: slot.title,
         value: slot.footer,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: slot.tappable && slot.enabled ? () => onTap(slot.id) : null,
-          child: child,
-        ),
+        child: frame,
       );
     }
     final wrap = this.wrap;
     if (wrap != null) tile = wrap(placed.slot, tile);
-    return tile;
+    return RepaintBoundary(child: tile);
   }
 }
 
@@ -287,35 +298,33 @@ class _Glyph {
 }
 
 class HexPainter extends CustomPainter {
-  HexPainter(this.layout);
+  HexPainter(this.slot);
 
-  final HexLayout layout;
+  final HexSlot slot;
 
   @override
   void paint(Canvas canvas, Size size) {
-    for (final placed in layout.placed) {
-      final path = pointyHex(placed.center, placed.radius);
-      final enabled = placed.slot.enabled;
-      canvas.drawPath(path, Paint()..color = hexFill);
-      canvas.drawPath(
-        path,
-        Paint()
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = max(1.4, placed.radius * 0.03)
-          ..color = enabled ? placed.slot.color : hexMuted,
-      );
-      _label(canvas, placed);
-    }
+    final radius = size.shortestSide / 2;
+    final center = Offset(size.width / 2, size.height / 2);
+    final path = pointyHex(center, radius);
+    final enabled = slot.enabled;
+    canvas.drawPath(path, Paint()..color = hexFill);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = max(1.4, radius * 0.03)
+        ..color = enabled ? slot.color : hexMuted,
+    );
+    _label(canvas, center, radius);
   }
 
-  void _label(Canvas canvas, PlacedHex placed) {
-    final radius = placed.radius;
-    final enabled = placed.slot.enabled;
-    final slot = placed.slot;
+  void _label(Canvas canvas, Offset center, double radius) {
+    final enabled = slot.enabled;
     final muted = !enabled;
     _half(
       canvas,
-      placed.center,
+      center,
       radius,
       upper: true,
       left: slot.title,
@@ -325,7 +334,7 @@ class HexPainter extends CustomPainter {
     );
     _half(
       canvas,
-      placed.center,
+      center,
       radius,
       upper: false,
       left: slot.footerLeft,
@@ -662,5 +671,299 @@ class HexPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant HexPainter oldDelegate) => true;
+  bool shouldRepaint(covariant HexPainter oldDelegate) {
+    final previous = oldDelegate.slot;
+    return slot.color != previous.color ||
+        slot.enabled != previous.enabled ||
+        slot.title != previous.title ||
+        slot.titleColor != previous.titleColor ||
+        slot.titleRight != previous.titleRight ||
+        slot.titleRightColor != previous.titleRightColor ||
+        slot.footer != previous.footer ||
+        slot.footerColor != previous.footerColor ||
+        slot.footerLeft != previous.footerLeft ||
+        slot.footerLeftColor != previous.footerLeftColor;
+  }
+}
+
+/// Hover, press, and the waiting mark for one cell.
+class _CellFrame extends StatefulWidget {
+  const _CellFrame({
+    required this.slot,
+    required this.button,
+    required this.interactive,
+    required this.onTap,
+    required this.child,
+    super.key,
+  });
+
+  final HexSlot slot;
+  final bool button;
+  final bool interactive;
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  State<_CellFrame> createState() => _CellFrameState();
+}
+
+class _CellFrameState extends State<_CellFrame> with TickerProviderStateMixin {
+  AnimationController? _burst;
+  AnimationController? _spin;
+  var _hover = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.slot.busy) _spinning(true);
+  }
+
+  @override
+  void didUpdateWidget(_CellFrame oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.slot.busy != oldWidget.slot.busy) _spinning(widget.slot.busy);
+  }
+
+  @override
+  void dispose() {
+    _burst?.dispose();
+    _spin?.dispose();
+    super.dispose();
+  }
+
+  void _spinning(bool on) {
+    if (!on) {
+      _spin?.stop();
+      return;
+    }
+    final spin = _spin ??= AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1100),
+    );
+    if (!spin.isAnimating) spin.repeat();
+  }
+
+  void _tap() {
+    final route = ModalRoute.of(context);
+    widget.onTap();
+    // A menu change leaves this route before the next frame. The burst
+    // stays on the screen the tap did not leave.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || route?.isCurrent == false) return;
+      _flash();
+    });
+  }
+
+  void _flash() {
+    var burst = _burst;
+    if (burst == null) {
+      burst = AnimationController(
+        vsync: this,
+        duration: const Duration(milliseconds: 420),
+      );
+      burst.addStatusListener((status) {
+        if (status == AnimationStatus.completed && mounted) setState(() {});
+      });
+      _burst = burst;
+    }
+    burst.forward(from: 0);
+    setState(() {});
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final interactive = widget.interactive;
+    final burst = _burst;
+    final spin = _spin;
+    Widget scene = Transform.scale(
+      scale: _hover && interactive ? 1.02 : 1,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          CustomPaint(painter: HexPainter(widget.slot)),
+          widget.child,
+          if (_hover && interactive)
+            IgnorePointer(
+              child: CustomPaint(painter: _RimPainter(widget.slot.color)),
+            ),
+          if (burst != null && burst.isAnimating)
+            IgnorePointer(
+              child: AnimatedBuilder(
+                animation: burst,
+                builder: (context, _) => CustomPaint(
+                  painter: _RayPainter(widget.slot.color, burst.value),
+                ),
+              ),
+            ),
+          if (widget.slot.busy && spin != null)
+            IgnorePointer(
+              child: RepaintBoundary(
+                child: RotationTransition(
+                  turns: spin,
+                  child: CustomPaint(
+                    painter: _WaitRingPainter(
+                      widget.slot.color,
+                      _markReach(widget.slot),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
+    );
+    if (!widget.button) return scene;
+    final detector = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: interactive ? _tap : null,
+      child: scene,
+    );
+    if (!interactive) return detector;
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      // onEnter also fires when a new menu is built under a still cursor.
+      // Hover starts only after the pointer actually moves.
+      onHover: (_) {
+        if (_hover) return;
+        setState(() => _hover = true);
+      },
+      onExit: (_) {
+        if (_hover) setState(() => _hover = false);
+      },
+      child: detector,
+    );
+  }
+}
+
+/// A small grow for a control that sits inside a cell.
+class HoverPop extends StatefulWidget {
+  const HoverPop({required this.child, this.enabled = true, super.key});
+
+  final Widget child;
+  final bool enabled;
+
+  @override
+  State<HoverPop> createState() => _HoverPopState();
+}
+
+class _HoverPopState extends State<HoverPop> {
+  var _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final on = widget.enabled && _hover;
+    return MouseRegion(
+      cursor: widget.enabled ? SystemMouseCursors.click : MouseCursor.defer,
+      onHover: (_) {
+        if (!widget.enabled || _hover) return;
+        setState(() => _hover = true);
+      },
+      onExit: (_) {
+        if (_hover) setState(() => _hover = false);
+      },
+      child: Transform.scale(scale: on ? 1.06 : 1, child: widget.child),
+    );
+  }
+}
+
+class _RimPainter extends CustomPainter {
+  const _RimPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final radius = size.shortestSide / 2;
+    final path = pointyHex(Offset(size.width / 2, size.height / 2), radius);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = max(1.4, radius * 0.03)
+        ..color = Color.lerp(color, const Color(0xFFFFFFFF), 0.16)!,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _RimPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
+class _RayPainter extends CustomPainter {
+  const _RayPainter(this.color, this.t);
+
+  final Color color;
+  final double t;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final alpha = (1 - t).clamp(0.0, 1.0);
+    if (alpha == 0) return;
+    final center = Offset(size.width / 2, size.height / 2);
+    final radius = size.shortestSide / 2;
+    final paint = Paint()
+      ..strokeCap = StrokeCap.round
+      ..strokeWidth = max(1.4, radius * 0.035)
+      ..color = Color.lerp(
+        color,
+        const Color(0xFFFFFFFF),
+        0.35,
+      )!.withValues(alpha: alpha);
+    for (var i = 0; i < 6; i++) {
+      final angle = pi / 3 * i - pi / 2;
+      final dir = Offset(cos(angle), sin(angle));
+      final start = center + dir * radius * (0.28 + 0.42 * t);
+      final end = center + dir * radius * (0.55 + 0.4 * t);
+      canvas.drawLine(start, end, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _RayPainter oldDelegate) =>
+      oldDelegate.t != t || oldDelegate.color != color;
+}
+
+/// How far the center mark reaches, as a fraction of the vertex radius.
+double _markReach(HexSlot slot) {
+  if (slot.image != null) return 1.15 * 0.85 / 2;
+  if (slot.icon != null) return 0.72 * slot.iconScale / 2;
+  return 0.36;
+}
+
+class _WaitRingPainter extends CustomPainter {
+  const _WaitRingPainter(this.color, this.mark);
+
+  final Color color;
+
+  /// Outer radius of the center mark, as a fraction of the vertex radius.
+  final double mark;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final vertex = size.shortestSide / 2;
+    // Labels sit on a path inset from the edge, and the glyphs hang inward.
+    final textInner = vertex * (sqrt(3) / 2 - 0.16 - 0.095);
+    final stroke = max(1.4, vertex * 0.03);
+    final iconOuter = vertex * mark + stroke / 2;
+    final labelInner = textInner - stroke / 2;
+    final radius = iconOuter < labelInner
+        ? (iconOuter + labelInner) / 2
+        : labelInner;
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = stroke
+      ..strokeCap = StrokeCap.round
+      ..color = color;
+    const segments = 3;
+    final sweep = pi * 2 / segments * 0.62;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    for (var i = 0; i < segments; i++) {
+      canvas.drawArc(rect, i * pi * 2 / segments, sweep, false, paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _WaitRingPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.mark != mark;
 }

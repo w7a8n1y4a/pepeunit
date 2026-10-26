@@ -12,8 +12,10 @@ Menu cell anatomy:
 
 1. Border uses the section accent. The Back cell uses `hexMuted`.
 2. Label sits on the upper-left edge. Text longer than 12 characters runs along both upper edges.
-3. Center is an SVG icon or a PNG avatar.
+3. Center is an SVG icon, a PNG avatar, or text. A choice and a value in the same cell use `cellFont`: 0.068 of the cell side, at least 11. Log levels and account parameters are the reference.
 4. Lower edges may carry `footer` and `footerLeft`.
+5. Hover on a tappable cell brightens the border and scales the border, the edge labels, and the picture together, and only after the pointer moves. A form cell stays still; the clickable rows inside it scale on their own. A tap that stays on the screen sends a short ray burst. A tap that opens another menu does not.
+6. While `busy` is set on that cell, three arc segments rotate in the gap between the center mark and the edge labels until the request ends. The cell keeps its own color. Only the pressed cell is busy.
 
 Placement, fill order, and menu Back slots are in `hex-layout.mdc`.
 

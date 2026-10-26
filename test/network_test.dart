@@ -288,8 +288,11 @@ void main() {
       expect(keys, contains('pu_ff_telegram_bot_enable'));
       expect(keys, contains('pu_telegram_token'));
       expect(keys, isNot(contains('icon_uuid')));
-      expect(parseSetting(settingCategory('users')!.fields.first, '0'), isNull);
-      expect(parseSetting(settingCategory('users')!.fields.first, '16'), 16);
+      final users = settingCategory('users')!.fields.first;
+      expect(parseSetting(users, '0'), isNull);
+      expect(settingIssue(users, '0', 'ru'), 'Вне диапазона 1..1000000');
+      expect(settingIssue(users, '16', 'ru'), isNull);
+      expect(parseSetting(users, '16'), 16);
       final emailField = settingCategory('contacts')!.fields.first;
       expect(parseSetting(emailField, 'not-an-email'), isNull);
       expect(
@@ -402,10 +405,17 @@ void main() {
     expect(find.bySemanticsLabel('unit.pepeunit.com'), findsOneWidget);
     expect(find.bySemanticsLabel('dcunit.pepeunit.com'), findsOneWidget);
 
-    await tester.enterText(
-      find.byKey(const ValueKey('network-search')),
-      'dcunit',
-    );
+    final search = find.byKey(const ValueKey('network-search'));
+    await tester.tap(search);
+    await tester.pump();
+    await tester.enterText(search, 'd');
+    await tester.pump();
+    await tester.enterText(search, 'dc');
+    await tester.pump();
+    final field = tester.widget<TextField>(search);
+    expect(field.controller!.text, 'dc');
+    expect(field.focusNode!.hasFocus, isTrue);
+    await tester.enterText(search, 'dcunit');
     await tester.pump();
     expect(find.bySemanticsLabel('unit.pepeunit.com'), findsNothing);
     expect(find.bySemanticsLabel('dcunit.pepeunit.com'), findsOneWidget);

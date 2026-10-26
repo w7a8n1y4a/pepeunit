@@ -43,9 +43,9 @@ HexSlot backSlot({required String title, required int q, required int r}) {
   );
 }
 
-/// White while a request is in flight, otherwise [color].
-Color busyColor(bool busy, Color color) =>
-    busy ? const Color(0xFFFFFFFF) : color;
+/// White while a file is dragged over the cell, otherwise [color].
+Color dropColor(bool hot, Color color) =>
+    hot ? const Color(0xFFFFFFFF) : color;
 
 /// Error cell in the next free slot. Nothing is added when [message] is null.
 void appendError(

@@ -179,13 +179,15 @@ class _MetricsCellState extends State<MetricsCell> {
                           child: GestureDetector(
                             behavior: HitTestBehavior.opaque,
                             onTap: () => _step(-1, allPages.length),
-                            child: SizedBox(
-                              width: side * 0.15,
-                              height: side * 0.15,
-                              child: const CustomPaint(
-                                painter: ChevronMarkPainter(
-                                  left: true,
-                                  color: Color(0xFFFFFFFF),
+                            child: HoverPop(
+                              child: SizedBox(
+                                width: side * 0.15,
+                                height: side * 0.15,
+                                child: const CustomPaint(
+                                  painter: ChevronMarkPainter(
+                                    left: true,
+                                    color: Color(0xFFFFFFFF),
+                                  ),
                                 ),
                               ),
                             ),
@@ -202,14 +204,16 @@ class _MetricsCellState extends State<MetricsCell> {
                             child: GestureDetector(
                               behavior: HitTestBehavior.opaque,
                               onTap: _copy,
-                              child: SizedBox(
-                                width: side * 0.14,
-                                height: side * 0.13,
-                                child: CustomPaint(
-                                  painter: CopyMarkPainter(
-                                    _copied
-                                        ? const Color(0xFF4CAF50)
-                                        : const Color(0xFFFFFFFF),
+                              child: HoverPop(
+                                child: SizedBox(
+                                  width: side * 0.14,
+                                  height: side * 0.13,
+                                  child: CustomPaint(
+                                    painter: CopyMarkPainter(
+                                      _copied
+                                          ? const Color(0xFF4CAF50)
+                                          : const Color(0xFFFFFFFF),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -223,13 +227,15 @@ class _MetricsCellState extends State<MetricsCell> {
                           child: GestureDetector(
                             behavior: HitTestBehavior.opaque,
                             onTap: () => _step(1, allPages.length),
-                            child: SizedBox(
-                              width: side * 0.15,
-                              height: side * 0.15,
-                              child: const CustomPaint(
-                                painter: ChevronMarkPainter(
-                                  left: false,
-                                  color: Color(0xFFFFFFFF),
+                            child: HoverPop(
+                              child: SizedBox(
+                                width: side * 0.15,
+                                height: side * 0.15,
+                                child: const CustomPaint(
+                                  painter: ChevronMarkPainter(
+                                    left: false,
+                                    color: Color(0xFFFFFFFF),
+                                  ),
                                 ),
                               ),
                             ),

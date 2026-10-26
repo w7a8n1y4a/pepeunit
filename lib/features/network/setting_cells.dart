@@ -24,7 +24,7 @@ class EnumSettingCell extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final side = constraints.maxWidth;
-        final font = max(10.0, side * 0.068);
+        final font = cellFont(side);
         return Padding(
           padding: EdgeInsets.fromLTRB(
             side * 0.16,
@@ -46,21 +46,23 @@ class EnumSettingCell extends StatelessWidget {
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: () => onSelect(option),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 2),
-                        child: FittedBox(
-                          fit: BoxFit.scaleDown,
-                          child: Text(
-                            option,
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: option == current
-                                  ? const Color(0xFFFFFFFF)
-                                  : hexMuted,
-                              fontFamily: 'OpenGost Type B',
-                              fontSize: font,
-                              height: 1.1,
-                              decoration: TextDecoration.none,
+                      child: HoverPop(
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              option,
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color: option == current
+                                    ? const Color(0xFFFFFFFF)
+                                    : hexMuted,
+                                fontFamily: 'OpenGost Type B',
+                                fontSize: font,
+                                height: 1.1,
+                                decoration: TextDecoration.none,
+                              ),
                             ),
                           ),
                         ),
@@ -128,9 +130,13 @@ class _ValueSettingCellState extends State<ValueSettingCell> {
   }
 
   void _submit() {
+    if (_problem != null) return;
     _dirty = false;
     widget.onSubmit(_controller.text);
   }
+
+  String? get _problem =>
+      settingIssue(widget.field, _controller.text, widget.language);
 
   @override
   Widget build(BuildContext context) {
@@ -139,19 +145,19 @@ class _ValueSettingCellState extends State<ValueSettingCell> {
         (widget.field.nullable
             ? netText(widget.language, 'пусто', 'empty')
             : '');
+    final problem = _dirty ? _problem : null;
     return LineInput(
       color: widget.color,
       controller: _controller,
       focusNode: _focus,
       fieldKey: ValueKey('setting-${widget.field.key}'),
       hint: hint,
-      issue: '',
+      issue: problem ?? '',
       lineColor: _dirty ? const Color(0xFFFFFFFF) : widget.color,
-      caption: _dirty ? _save() : null,
+      caption: _dirty && problem == null ? _save() : null,
       onChanged: (text) {
         widget.onChanged(text);
-        final changed = text.trim() != _serverText.trim();
-        if (changed != _dirty) setState(() => _dirty = changed);
+        setState(() => _dirty = text.trim() != _serverText.trim());
       },
       onSubmitted: (_) => _submit(),
     );
@@ -170,16 +176,18 @@ class _ValueSettingCellState extends State<ValueSettingCell> {
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: _submit,
-            child: Align(
-              alignment: Alignment.center,
-              child: Text(
-                'OK',
-                style: TextStyle(
-                  color: widget.color,
-                  fontFamily: 'OpenGost Type B',
-                  fontSize: font,
-                  height: 1,
-                  decoration: TextDecoration.none,
+            child: HoverPop(
+              child: Align(
+                alignment: Alignment.center,
+                child: Text(
+                  'OK',
+                  style: TextStyle(
+                    color: widget.color,
+                    fontFamily: 'OpenGost Type B',
+                    fontSize: font,
+                    height: 1,
+                    decoration: TextDecoration.none,
+                  ),
                 ),
               ),
             ),

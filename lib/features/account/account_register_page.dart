@@ -43,7 +43,8 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
       HexSlot(
         id: 'generate',
         title: accountText(language, 'Генерация ключа', 'Generate key'),
-        color: busyColor(_busy, color),
+        color: color,
+        busy: _busy,
         q: generate.$1,
         r: generate.$2,
         icon: 'assets/icons/key_gen.svg',

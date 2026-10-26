@@ -29,7 +29,7 @@ class InstanceTunePage extends StatefulWidget {
 class _InstanceTunePageState extends State<InstanceTunePage> {
   String? _failure;
   var _open = false;
-  var _busy = false;
+  String? _pending;
   var _dragHot = false;
 
   @override
@@ -88,7 +88,7 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
       wrap: (slot, child) {
         if (slot.id != 'icon' || !owner) return child;
         return FileDrop(
-          enable: !_busy,
+          enable: _pending == null,
           hot: _dragHot,
           onHot: (hot) => setState(() => _dragHot = hot),
           onDrop: (detail) => _dropped(detail, language),
@@ -101,7 +101,6 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
   HexSlot _slot(BoardSlot slot, AppModel model, String language, Color color) {
     final targetUrl = model.target?.url ?? '';
     final portrait = targetUrl.isEmpty ? null : model.portraitOf(targetUrl);
-    final active = busyColor(_busy, color);
     switch (slot.id) {
       case 'back':
         return backSlot(
@@ -128,7 +127,8 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
           id: 'icon',
           title: netText(language, 'Аватар инстанса', 'Instance icon'),
           footer: portrait?.version,
-          color: busyColor(_busy || _dragHot, color),
+          color: dropColor(_dragHot, color),
+          busy: _pending == 'icon',
           q: slot.q,
           r: slot.r,
           icon: image == null ? 'assets/icons/icon_load.svg' : null,
@@ -159,7 +159,8 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
           id: 'tests',
           title: netText(language, 'Тесты', 'Tests'),
           footer: portrait?.testsStatus,
-          color: active,
+          color: color,
+          busy: _pending == 'tests',
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/reload.svg',
@@ -168,7 +169,8 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
         return HexSlot(
           id: 'scan-all',
           title: netText(language, 'Опросить все', 'Scan all'),
-          color: active,
+          color: color,
+          busy: _pending == 'scan-all',
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/instances.svg',
@@ -205,9 +207,9 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
       case 'icon':
         if (owner) await _pick(language);
       case 'tests':
-        await _run(model.runIntegrationTests);
+        await _run('tests', model.runIntegrationTests);
       case 'scan-all':
-        await _run(model.scanAll);
+        await _run('scan-all', model.scanAll);
       case 'ops':
       case 'flags':
       case 'core':
@@ -217,28 +219,28 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
     }
   }
 
-  Future<void> _run(Future<void> Function() action) async {
-    if (_busy) return;
+  Future<void> _run(String id, Future<void> Function() action) async {
+    if (_pending != null) return;
     setState(() {
-      _busy = true;
+      _pending = id;
       _failure = null;
       _open = false;
     });
     try {
       await action();
       if (!mounted) return;
-      setState(() => _busy = false);
+      setState(() => _pending = null);
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _busy = false;
+        _pending = null;
         _failure = '$error';
       });
     }
   }
 
   Future<void> _pick(String language) async {
-    if (_busy) return;
+    if (_pending != null) return;
     final model = AppScope.of(context);
     final bytes = await model.files.pick(
       dialogTitle: netText(language, 'Картинка инстанса', 'Instance picture'),
@@ -249,7 +251,7 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
 
   Future<void> _dropped(DropDoneDetails detail, String language) async {
     if (_dragHot) setState(() => _dragHot = false);
-    if (_busy || detail.files.isEmpty) return;
+    if (_pending != null || detail.files.isEmpty) return;
     final bytes = await detail.files.first.readAsBytes();
     if (!mounted) return;
     await _accept(bytes, language);
@@ -264,6 +266,6 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
       });
       return;
     }
-    await _run(() => AppScope.of(context).setInstanceIcon(bytes));
+    await _run('icon', () => AppScope.of(context).setInstanceIcon(bytes));
   }
 }

@@ -74,14 +74,16 @@ class _ErrorCellState extends State<ErrorCell> {
                 child: GestureDetector(
                   onTap: _copy,
                   behavior: HitTestBehavior.opaque,
-                  child: SizedBox(
-                    width: side * 0.18,
-                    height: side * 0.16,
-                    child: CustomPaint(
-                      painter: CopyMarkPainter(
-                        _copied
-                            ? const Color(0xFF4CAF50)
-                            : const Color(0xFFFFFFFF),
+                  child: HoverPop(
+                    child: SizedBox(
+                      width: side * 0.18,
+                      height: side * 0.16,
+                      child: CustomPaint(
+                        painter: CopyMarkPainter(
+                          _copied
+                              ? const Color(0xFF4CAF50)
+                              : const Color(0xFFFFFFFF),
+                        ),
                       ),
                     ),
                   ),

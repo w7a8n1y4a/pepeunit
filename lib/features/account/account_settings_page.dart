@@ -28,7 +28,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   String? _failure;
   String? _report;
   var _failureOpen = false;
-  var _busy = false;
+  String? _pending;
   var _dragHot = false;
 
   @override
@@ -46,7 +46,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     final language = model.vault.language;
     final color = peopleColor;
     final png = iconBytes(model.vault.iconPng);
-    final iconColor = busyColor(_busy || _dragHot, color);
+    final iconColor = dropColor(_dragHot, color);
     final failure = _report ?? iconProblemText(_failure, language);
     final wide = hexWide(MediaQuery.sizeOf(context));
     final frame = hexFrame(count: 4, back: HexBack.center, wide: wide);
@@ -60,6 +60,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           'en': 'Upload avatar',
         }),
         color: iconColor,
+        busy: _pending == 'icon',
         q: spot[0].$1,
         r: spot[0].$2,
         icon: png == null ? 'assets/icons/icon_load.svg' : null,
@@ -85,7 +86,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           'ru': 'Отправить в сеть',
           'en': 'Send to network',
         }),
-        color: busyColor(_busy, color),
+        color: color,
+        busy: _pending == 'sync',
         q: spot[2].$1,
         r: spot[2].$2,
         icon: 'assets/icons/rocket.svg',
@@ -114,7 +116,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       wrap: (slot, child) {
         if (slot.id != 'icon') return child;
         return FileDrop(
-          enable: !_busy,
+          enable: _pending == null,
           hot: _dragHot,
           onHot: (hot) => setState(() => _dragHot = hot),
           onDrop: _dropped,
@@ -141,9 +143,9 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   }
 
   Future<void> _pick(String language) async {
-    if (_busy) return;
+    if (_pending != null) return;
     final model = AppScope.of(context);
-    setState(() => _busy = true);
+    setState(() => _pending = 'icon');
     try {
       final bytes = await model.files.pick(
         dialogTitle: phrase(language, {
@@ -153,7 +155,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       );
       if (!mounted) return;
       if (bytes == null) {
-        setState(() => _busy = false);
+        setState(() => _pending = null);
         return;
       }
       await _accept(bytes);
@@ -165,8 +167,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
 
   Future<void> _dropped(DropDoneDetails detail) async {
     if (_dragHot) setState(() => _dragHot = false);
-    if (_busy || detail.files.isEmpty) return;
-    setState(() => _busy = true);
+    if (_pending != null || detail.files.isEmpty) return;
+    setState(() => _pending = 'icon');
     try {
       final bytes = await detail.files.first.readAsBytes();
       if (!mounted) return;
@@ -204,7 +206,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     await model.setIcon(bytes);
     if (!mounted) return;
     setState(() {
-      _busy = false;
+      _pending = null;
       _failure = null;
       _report = null;
       _failureOpen = false;
@@ -212,9 +214,9 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   }
 
   Future<void> _sync(String language) async {
-    if (_busy) return;
+    if (_pending != null) return;
     setState(() {
-      _busy = true;
+      _pending = 'sync';
       _failure = null;
       _report = null;
       _failureOpen = false;
@@ -230,14 +232,14 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       message = null;
     }
     setState(() {
-      _busy = false;
+      _pending = null;
       _report = message;
     });
   }
 
   void _fail(String reason) {
     setState(() {
-      _busy = false;
+      _pending = null;
       _failure = reason;
       _report = null;
       _failureOpen = false;

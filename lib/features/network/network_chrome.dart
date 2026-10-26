@@ -22,7 +22,7 @@ String trustLabel(String language, String trust) {
     case 'Pending':
       return netText(language, 'Карантин', 'Pending');
     case 'Blocking':
-      return netText(language, 'Блок', 'Blocking');
+      return netText(language, 'Блокировка', 'Blocking');
     default:
       return trust;
   }
@@ -50,6 +50,7 @@ HexSlot instanceMark({
   required Color color,
   required bool current,
   String? version,
+  Color footerColor = const Color(0xFFFFFFFF),
   String? footerLeft,
   Color footerLeftColor = const Color(0xFFFFFFFF),
   Uint8List? image,
@@ -64,6 +65,7 @@ HexSlot instanceMark({
         footerLeft ?? (current ? netText(language, 'Текущий', 'Target') : null),
     footerLeftColor: footerLeftColor,
     footer: version,
+    footerColor: footerColor,
     color: color,
     q: q,
     r: r,
@@ -100,13 +102,16 @@ HexSlot pageStepSlot({
       behavior: HitTestBehavior.opaque,
       onTap: enabled ? onTap : null,
       child: Center(
-        child: FractionallySizedBox(
-          widthFactor: 0.34,
-          heightFactor: 0.34,
-          child: CustomPaint(
-            painter: ChevronMarkPainter(
-              left: left,
-              color: enabled ? const Color(0xFFFFFFFF) : hexMuted,
+        child: HoverPop(
+          enabled: enabled,
+          child: FractionallySizedBox(
+            widthFactor: 0.34,
+            heightFactor: 0.34,
+            child: CustomPaint(
+              painter: ChevronMarkPainter(
+                left: left,
+                color: enabled ? const Color(0xFFFFFFFF) : hexMuted,
+              ),
             ),
           ),
         ),

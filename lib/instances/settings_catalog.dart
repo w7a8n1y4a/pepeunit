@@ -617,6 +617,42 @@ final _bytesRateRe = RegExp(
   caseSensitive: false,
 );
 
+/// Why [raw] cannot be saved, or null when it can.
+///
+/// Shown under the field. A range on the cell edge is the hint; this is the check.
+String? settingIssue(SettingField field, String raw, String language) {
+  final text = raw.trim();
+  if (field.nullable && text.isEmpty) return null;
+  if (parseSetting(field, raw) != null) return null;
+  if (text.isEmpty) {
+    return phrase(language, {'ru': 'Пустое значение', 'en': 'Empty value'});
+  }
+  if (field.kind == 'int' || field.kind == 'number') {
+    final number = field.kind == 'int' ? int.tryParse(text) : num.tryParse(text);
+    if (number == null) {
+      return phrase(language, {'ru': 'Нужно число', 'en': 'Need a number'});
+    }
+    final range = field.rangeHint();
+    if (range != null) {
+      return phrase(language, {
+        'ru': 'Вне диапазона $range',
+        'en': 'Outside $range',
+      });
+    }
+  }
+  final hint = field.rangeHint();
+  if (hint != null) {
+    return phrase(language, {
+      'ru': 'Не подходит: $hint',
+      'en': 'Does not match: $hint',
+    });
+  }
+  return phrase(language, {
+    'ru': 'Некорректное значение',
+    'en': 'Invalid value',
+  });
+}
+
 /// A value the settings patch will accept, or null when [raw] is not valid.
 Object? parseSetting(SettingField field, String raw) {
   final text = raw.trim();

@@ -29,7 +29,7 @@ class SettingCategoryPage extends StatefulWidget {
 class _SettingCategoryPageState extends State<SettingCategoryPage> {
   String? _failure;
   var _open = false;
-  var _busy = false;
+  String? _pending;
   final Map<String, String> _drafts = {};
 
   @override
@@ -105,7 +105,6 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     final targetUrl = target?.url ?? '';
     final portrait = targetUrl.isEmpty ? null : model.portraitOf(targetUrl);
     final federation = portrait?.federation != false;
-    final active = busyColor(_busy, color);
     final ops = operationActions(
       owner: owner,
       staff: staff,
@@ -143,7 +142,8 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
             id: 'tests',
             title: netText(language, 'Тесты', 'Tests'),
             footer: portrait?.testsStatus,
-            color: active,
+            color: color,
+            busy: _pending == 'tests',
             q: spots[i].$1,
             r: spots[i].$2,
             icon: 'assets/icons/reload.svg',
@@ -151,7 +151,8 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
           'scan-all' => HexSlot(
             id: 'scan-all',
             title: netText(language, 'Опросить все', 'Scan all'),
-            color: active,
+            color: color,
+            busy: _pending == 'scan-all',
             q: spots[i].$1,
             r: spots[i].$2,
             icon: 'assets/icons/instances.svg',
@@ -159,7 +160,8 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
           'reboot' => HexSlot(
             id: 'reboot',
             title: netText(language, 'Перезапуск', 'Reboot'),
-            color: busyColor(_busy, errorColor),
+            color: errorColor,
+            busy: _pending == 'reboot',
             q: spots[i].$1,
             r: spots[i].$2,
             icon: 'assets/icons/power.svg',
@@ -264,7 +266,8 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
         footer: enabled
             ? netText(language, 'вкл', 'on')
             : netText(language, 'выкл', 'off'),
-        color: busyColor(_busy, enabled ? color : hexMuted),
+        color: enabled ? color : hexMuted,
+        busy: _pending == 'bool:${field.key}',
         q: q,
         r: r,
         icon: enabled ? 'assets/icons/check.svg' : 'assets/icons/close.svg',
@@ -275,13 +278,14 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
         id: 'enum:${field.key}',
         title: title,
         footer: current == null ? null : '$current',
-        color: busyColor(_busy, color),
+        color: color,
+        busy: _pending == 'enum:${field.key}',
         q: q,
         r: r,
         body: EnumSettingCell(
           field: field,
           current: current == null ? '' : '$current',
-          onSelect: (option) => _send({field.key: option}),
+          onSelect: (option) => _send('enum:${field.key}', {field.key: option}),
         ),
       );
     }
@@ -289,7 +293,8 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
       id: 'field:${field.key}',
       title: title,
       footer: field.rangeHint(),
-      color: busyColor(_busy, color),
+      color: color,
+      busy: _pending == 'field:${field.key}',
       q: q,
       r: r,
       body: ValueSettingCell(
@@ -312,7 +317,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     if (id.startsWith('bool:')) {
       final key = id.substring(5);
       final current = model.targetSettings?[key] == true;
-      await _send({key: !current});
+      await _send(id, {key: !current});
       return;
     }
     switch (id) {
@@ -321,11 +326,11 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
       case 'error':
         setState(() => _open = true);
       case 'tests':
-        await _run(model.runIntegrationTests);
+        await _run('tests', model.runIntegrationTests);
       case 'scan-all':
-        await _run(model.scanAll);
+        await _run('scan-all', model.scanAll);
       case 'reboot':
-        await _run(model.reboot);
+        await _run('reboot', model.reboot);
     }
   }
 
@@ -375,31 +380,31 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
         });
         return;
       }
-      await _send({nameKey: nameVal, patKey: patVal});
+      await _send('field:${field.key}', {nameKey: nameVal, patKey: patVal});
       return;
     }
-    await _send({field.key: parsed});
+    await _send('field:${field.key}', {field.key: parsed});
   }
 
-  Future<void> _send(Map<String, Object?> patch) async {
-    await _run(() => AppScope.of(context).patchSettings(patch));
+  Future<void> _send(String id, Map<String, Object?> patch) async {
+    await _run(id, () => AppScope.of(context).patchSettings(patch));
   }
 
-  Future<void> _run(Future<void> Function() action) async {
-    if (_busy) return;
+  Future<void> _run(String id, Future<void> Function() action) async {
+    if (_pending != null) return;
     setState(() {
-      _busy = true;
+      _pending = id;
       _failure = null;
       _open = false;
     });
     try {
       await action();
       if (!mounted) return;
-      setState(() => _busy = false);
+      setState(() => _pending = null);
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _busy = false;
+        _pending = null;
         _failure = '$error';
       });
     }

@@ -23,7 +23,7 @@ class InstancePage extends StatefulWidget {
 class _InstancePageState extends State<InstancePage> {
   String? _failure;
   var _open = false;
-  var _busy = false;
+  String? _pending;
   var _moderating = false;
 
   @override
@@ -94,7 +94,6 @@ class _InstancePageState extends State<InstancePage> {
     final portrait = model.portraitOf(url);
     final peer = model.peers[url];
     final record = model.vault.recordFor(url);
-    final active = busyColor(_busy, color);
     switch (slot.id) {
       case 'back':
         return backSlot(
@@ -132,7 +131,8 @@ class _InstancePageState extends State<InstancePage> {
           id: 'relogin',
           title: netText(language, 'Перезайти', 'Sign in again'),
           footer: record?.role,
-          color: active,
+          color: color,
+          busy: _pending == 'relogin',
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/reload.svg',
@@ -183,7 +183,7 @@ class _InstancePageState extends State<InstancePage> {
           language,
           'Telegram',
           'Telegram',
-          active,
+          color,
           'assets/icons/send.svg',
         );
       case 'settings':
@@ -221,7 +221,7 @@ class _InstancePageState extends State<InstancePage> {
           language,
           'Доверять',
           'Trust',
-          active,
+          color,
           'assets/icons/check.svg',
         );
       case 'block':
@@ -230,7 +230,7 @@ class _InstancePageState extends State<InstancePage> {
           language,
           'Блокировать',
           'Block',
-          active,
+          color,
           'assets/icons/ban.svg',
         );
       case 'delete':
@@ -248,7 +248,7 @@ class _InstancePageState extends State<InstancePage> {
           language,
           'Опрос',
           'Scan',
-          active,
+          color,
           'assets/icons/reload.svg',
         );
       default:
@@ -352,6 +352,7 @@ class _InstancePageState extends State<InstancePage> {
       id: slot.id,
       title: netText(language, ru, en),
       color: color,
+      busy: _pending == slot.id,
       q: slot.q,
       r: slot.r,
       icon: icon,
@@ -389,24 +390,24 @@ class _InstancePageState extends State<InstancePage> {
           });
           return;
         }
-        await _run(() => model.resign(url));
+        await _run('relogin', () => model.resign(url));
       case 'target':
-        await _run(() => model.selectTarget(url));
+        await _run('target', () => model.selectTarget(url));
       case 'clear':
-        await _run(model.clearTarget);
+        await _run('clear', model.clearTarget);
       case 'telegram':
         await _telegram(language);
       case 'settings':
         context.push('/peers/tune');
       case 'trust':
-        await _run(() => model.setTrust(url, 'Trust'));
+        await _run('trust', () => model.setTrust(url, 'Trust'));
       case 'block':
-        await _run(() => model.setTrust(url, 'Blocking'));
+        await _run('block', () => model.setTrust(url, 'Blocking'));
       case 'delete':
-        await _run(() => model.deletePeer(url));
+        await _run('delete', () => model.deletePeer(url));
         if (mounted && _failure == null) popOrHome(context);
       case 'scan':
-        await _run(() => model.scanPeer(url));
+        await _run('scan', () => model.scanPeer(url));
     }
   }
 
@@ -415,33 +416,33 @@ class _InstancePageState extends State<InstancePage> {
     if (!model.vault.hasKey) {
       final botUrl = model.portraitOf(widget.url)?.telegramBot ?? '';
       if (botUrl.isNotEmpty) {
-        await _run(() => model.openExternal(Uri.parse(botUrl)));
+        await _run('telegram', () => model.openExternal(Uri.parse(botUrl)));
         return;
       }
       setState(() => _failure = netText(language, 'Нет ключа', 'No key'));
       return;
     }
-    await _run(() async {
+    await _run('telegram', () async {
       final link = await model.verificationLink(widget.url);
       await model.openExternal(Uri.parse(link));
     });
   }
 
-  Future<void> _run(Future<void> Function() action) async {
-    if (_busy) return;
+  Future<void> _run(String id, Future<void> Function() action) async {
+    if (_pending != null) return;
     setState(() {
-      _busy = true;
+      _pending = id;
       _failure = null;
       _open = false;
     });
     try {
       await action();
       if (!mounted) return;
-      setState(() => _busy = false);
+      setState(() => _pending = null);
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _busy = false;
+        _pending = null;
         _failure = '$error';
       });
     }

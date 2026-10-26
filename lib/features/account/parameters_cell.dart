@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
+import '../../hive/hex_scene.dart';
 import '../../hive/marks.dart';
 import '../../locale/languages.dart';
 import '../../locale/time_zones.dart';
@@ -22,7 +23,7 @@ class ParametersCell extends StatelessWidget {
         final side = constraints.maxWidth;
         final style = TextStyle(
           fontFamily: 'OpenGost Type B',
-          fontSize: max(11, side * 0.068),
+          fontSize: cellFont(side),
           decoration: TextDecoration.none,
           height: 1.05,
         );
@@ -129,15 +130,17 @@ class _LanguageChoice extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 2),
-          child: Text(
-            name,
-            textAlign: TextAlign.center,
-            style: style.copyWith(
-              color: selected
-                  ? const Color(0xFFFFFFFF)
-                  : const Color(0xFFA1A1AA),
+        child: HoverPop(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Text(
+              name,
+              textAlign: TextAlign.center,
+              style: style.copyWith(
+                color: selected
+                    ? const Color(0xFFFFFFFF)
+                    : const Color(0xFFA1A1AA),
+              ),
             ),
           ),
         ),
@@ -167,13 +170,15 @@ class _ZoneStep extends StatelessWidget {
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: onTap,
-        child: SizedBox(
-          width: extent,
-          height: extent,
-          child: CustomPaint(
-            painter: ChevronMarkPainter(
-              left: left,
-              color: const Color(0xFFFFFFFF),
+        child: HoverPop(
+          child: SizedBox(
+            width: extent,
+            height: extent,
+            child: CustomPaint(
+              painter: ChevronMarkPainter(
+                left: left,
+                color: const Color(0xFFFFFFFF),
+              ),
             ),
           ),
         ),

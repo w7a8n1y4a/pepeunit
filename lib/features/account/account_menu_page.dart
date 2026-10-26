@@ -85,7 +85,6 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
     bool wide,
   ) {
     final model = AppScope.of(context);
-    final active = busyColor(_busy, color);
     final png = iconBytes(model.vault.iconPng);
     final login = model.vault.login;
     final frame = hexFrame(count: 4, back: HexBack.center, wide: wide);
@@ -115,7 +114,8 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         id: 'key',
         title: accountText(language, 'Скачать ключ', 'Download key'),
         footer: keyMarkFromBase64(model.vault.publicKey),
-        color: active,
+        color: color,
+        busy: _busy,
         q: spot[2].$1,
         r: spot[2].$2,
         icon: 'assets/icons/key.svg',

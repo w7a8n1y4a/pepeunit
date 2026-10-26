@@ -39,7 +39,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
   Widget build(BuildContext context) {
     final language = AppScope.of(context).vault.language;
     final color = peopleColor;
-    final loadColor = busyColor(_busy || _dragHot, color);
+    final loadColor = dropColor(_dragHot, color);
     final wide = hexWide(MediaQuery.sizeOf(context));
     final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
     final load = frame.cells.first;
@@ -49,6 +49,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
         id: 'load',
         title: accountText(language, 'Загрузка ключа', 'Load key'),
         color: loadColor,
+        busy: _busy,
         q: load.$1,
         r: load.$2,
         icon: 'assets/icons/key_load.svg',
