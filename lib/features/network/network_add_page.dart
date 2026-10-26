@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app_scope.dart';
-import '../../features/account/account_nav.dart';
-import '../../features/account/error_reader.dart';
 import '../../hive/hex_order.dart';
 import '../../hive/hex_scene.dart';
+import '../../navigation/back.dart';
+import '../hex_page.dart';
 import 'line_cell.dart';
 import 'network_chrome.dart';
 
@@ -25,7 +25,7 @@ class _NetworkAddPageState extends State<NetworkAddPage> {
   Widget build(BuildContext context) {
     final model = AppScope.of(context);
     final language = model.vault.language;
-    final color = _busy ? const Color(0xFFFFFFFF) : networkColor;
+    final color = busyColor(_busy, networkColor);
     final wide = hexWide(MediaQuery.sizeOf(context));
     final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
     final url = frame.cells.first;
@@ -43,47 +43,27 @@ class _NetworkAddPageState extends State<NetworkAddPage> {
           onSubmit: _submit,
         ),
       ),
-      HexSlot(
-        id: 'back',
+      backSlot(
         title: netText(language, 'Назад', 'Back'),
-        color: hexMuted,
         q: backAt.$1,
         r: backAt.$2,
-        icon: 'assets/icons/back.svg',
       ),
     ];
-    if (_failure != null) {
-      final spot = nextHex([
-        for (final slot in slots) (slot.q, slot.r),
-      ], wide: wide);
-      slots.add(
-        HexSlot(
-          id: 'error',
-          title: netText(language, 'Ошибка', 'Error'),
-          color: errorColor,
-          titleColor: errorColor,
-          q: spot.$1,
-          r: spot.$2,
-          icon: 'assets/icons/error.svg',
-          iconScale: 1.2,
-          body: _open
-              ? ErrorCell(
-                  message: _failure!,
-                  copyLabel: netText(language, 'Скопировать', 'Copy'),
-                )
-              : null,
-        ),
-      );
-    }
-    return ColoredBox(
-      color: sceneBackground,
-      child: HexScene(
-        slots: slots,
-        onTap: (id) {
-          if (id == 'back') popOrHome(context);
-          if (id == 'error') setState(() => _open = true);
-        },
-      ),
+    appendError(
+      slots,
+      message: _failure,
+      open: _open,
+      language: language,
+      text: netText,
+      wide: wide,
+      iconScale: 1.2,
+    );
+    return HexPage(
+      slots: slots,
+      onTap: (id) {
+        if (id == 'back') popOrHome(context);
+        if (id == 'error') setState(() => _open = true);
+      },
     );
   }
 

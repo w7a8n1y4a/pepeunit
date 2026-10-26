@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
+import '../../hive/marks.dart';
 import '../../locale/languages.dart';
 import '../../locale/time_zones.dart';
 
@@ -169,43 +170,14 @@ class _ZoneStep extends StatelessWidget {
         child: SizedBox(
           width: extent,
           height: extent,
-          child: CustomPaint(painter: _ChevronPainter(left)),
+          child: CustomPaint(
+            painter: ChevronMarkPainter(
+              left: left,
+              color: const Color(0xFFFFFFFF),
+            ),
+          ),
         ),
       ),
     );
   }
-}
-
-class _ChevronPainter extends CustomPainter {
-  const _ChevronPainter(this.left);
-
-  final bool left;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = max(1.4, size.shortestSide * 0.09)
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..color = const Color(0xFFFFFFFF);
-    final mid = size.height / 2;
-    final path = Path();
-    if (left) {
-      path
-        ..moveTo(size.width * 0.68, size.height * 0.28)
-        ..lineTo(size.width * 0.32, mid)
-        ..lineTo(size.width * 0.68, size.height * 0.72);
-    } else {
-      path
-        ..moveTo(size.width * 0.32, size.height * 0.28)
-        ..lineTo(size.width * 0.68, mid)
-        ..lineTo(size.width * 0.32, size.height * 0.72);
-    }
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant _ChevronPainter oldDelegate) =>
-      oldDelegate.left != left;
 }

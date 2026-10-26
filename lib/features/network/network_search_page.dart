@@ -5,11 +5,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../app_model.dart';
 import '../../app_scope.dart';
-import '../../features/account/account_nav.dart';
-import '../../features/account/error_reader.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../instances/portrait.dart';
+import '../../navigation/back.dart';
+import '../hex_page.dart';
+import '../line_input.dart';
 import 'network_chrome.dart';
 
 class NetworkSearchPage extends StatefulWidget {
@@ -51,34 +52,22 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
       for (final slot in board.slots)
         _slot(slot, model, language, color, board),
     ];
-    if (_failure != null) {
-      final spot = errorSpot(board.slots, wide: wide);
-      slots.add(
-        HexSlot(
-          id: 'error',
-          title: netText(language, 'Ошибка', 'Error'),
-          color: errorColor,
-          titleColor: errorColor,
-          q: spot.$1,
-          r: spot.$2,
-          icon: 'assets/icons/error.svg',
-          iconScale: 1.62,
-          body: _open
-              ? ErrorCell(
-                  message: _failure!,
-                  copyLabel: netText(language, 'Скопировать', 'Copy'),
-                )
-              : null,
-        ),
-      );
-    }
-    return ColoredBox(
-      color: sceneBackground,
-      child: ScopeFrame(
+    appendError(
+      slots,
+      message: _failure,
+      open: _open,
+      language: language,
+      text: netText,
+      wide: wide,
+    );
+    return HexPage(
+      slots: slots,
+      onTap: (id) => _tap(id, board),
+      frame: (scene) => ScopeFrame(
         scope: widget.scope,
         canZoomIn: board.canZoomIn,
         path: '/peers/search',
-        child: HexScene(slots: slots, onTap: (id) => _tap(id, board)),
+        child: scene,
       ),
     );
   }
@@ -90,16 +79,13 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
     Color color,
     NetworkBoard board,
   ) {
-    final busy = model.networkBusy ? const Color(0xFFFFFFFF) : color;
+    final busy = busyColor(model.networkBusy, color);
     switch (slot.id) {
       case 'back':
-        return HexSlot(
-          id: 'back',
+        return backSlot(
           title: netText(language, 'Назад', 'Back'),
-          color: hexMuted,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/back.svg',
         );
       case 'text':
         return HexSlot(
@@ -298,81 +284,67 @@ class _LineFieldState extends State<LineField> {
 
   @override
   Widget build(BuildContext context) {
+    final toggle = widget.onToggleTrust;
+    return LineInput(
+      color: widget.color,
+      controller: _controller,
+      fieldKey: const ValueKey('network-search'),
+      hint: widget.hint,
+      issue: '',
+      onChanged: widget.onChanged,
+      caption: toggle == null
+          ? null
+          : _TrustBand(
+              active: widget.activeTrust,
+              color: widget.color,
+              onToggle: toggle,
+            ),
+    );
+  }
+}
+
+class _TrustBand extends StatelessWidget {
+  const _TrustBand({
+    required this.active,
+    required this.color,
+    required this.onToggle,
+  });
+
+  final Set<String> active;
+  final Color color;
+  final ValueChanged<String> onToggle;
+
+  @override
+  Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final side = constraints.maxWidth;
-        final font = max(10.0, side * 0.068);
-        final chipFont = max(8.5, side * 0.052);
-        return Material(
-          type: MaterialType.transparency,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(
-              side * 0.14,
-              side * 0.24,
-              side * 0.14,
-              side * 0.16,
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                SizedBox(
-                  height: side * 0.15,
-                  child: TextField(
-                    key: const ValueKey('network-search'),
-                    controller: _controller,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: const Color(0xFFFFFFFF),
-                      fontFamily: 'OpenGost Type B',
-                      fontSize: font,
-                      height: 1,
-                      decoration: TextDecoration.none,
-                    ),
-                    cursorColor: widget.color,
-                    decoration: InputDecoration(
-                      isCollapsed: true,
-                      isDense: true,
-                      contentPadding: EdgeInsets.zero,
-                      hintText: widget.hint,
-                      hintStyle: TextStyle(
-                        color: hexMuted,
-                        fontFamily: 'OpenGost Type B',
-                        fontSize: font,
-                        height: 1,
-                      ),
-                      border: InputBorder.none,
-                    ),
-                    onChanged: widget.onChanged,
+        final band = constraints.maxHeight;
+        final font = band.isFinite
+            ? min(max(8.0, constraints.maxWidth * 0.075), band * 0.46)
+            : 10.0;
+        return Row(
+          children: [
+            for (final status in trustStatuses)
+              Expanded(
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: _TrustToggle(
+                    status: status,
+                    shortLabel: _short(status),
+                    selected: active.contains(status),
+                    color: color,
+                    fontSize: font,
+                    onTap: () => onToggle(status),
                   ),
                 ),
-                SizedBox(height: side * 0.025),
-                Container(height: max(1, side * 0.008), color: widget.color),
-                if (widget.onToggleTrust != null) ...[
-                  SizedBox(height: side * 0.045),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                      for (final status in trustStatuses)
-                        _TrustToggle(
-                          status: status,
-                          shortLabel: _shortTrust(status),
-                          selected: widget.activeTrust.contains(status),
-                          color: widget.color,
-                          fontSize: chipFont,
-                          onTap: () => widget.onToggleTrust!(status),
-                        ),
-                    ],
-                  ),
-                ],
-              ],
-            ),
-          ),
+              ),
+          ],
         );
       },
     );
   }
 
-  String _shortTrust(String status) {
+  String _short(String status) {
     switch (status) {
       case 'Trust':
         return 'T';

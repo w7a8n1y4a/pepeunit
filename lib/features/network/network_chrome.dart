@@ -1,4 +1,3 @@
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/gestures.dart';
@@ -6,13 +5,12 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../hive/hex_scene.dart';
+import '../../hive/marks.dart';
 import '../../instances/instance.dart';
-import '../../instances/network_view.dart';
 import '../../locale/languages.dart';
 import '../../navigation/sections.dart';
 
-Color get networkColor =>
-    sectionById('peers')?.color ?? const Color(0xFFFF9800);
+Color get networkColor => sectionById('peers')!.color;
 
 String netText(String language, String ru, String en) =>
     phrase(language, {'ru': ru, 'en': en});
@@ -117,41 +115,6 @@ HexSlot pageStepSlot({
   );
 }
 
-class ChevronMarkPainter extends CustomPainter {
-  const ChevronMarkPainter({required this.left, required this.color});
-
-  final bool left;
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = max(1.6, size.shortestSide * 0.09)
-      ..strokeCap = StrokeCap.round
-      ..strokeJoin = StrokeJoin.round
-      ..color = color;
-    final mid = size.height / 2;
-    final path = Path();
-    if (left) {
-      path
-        ..moveTo(size.width * 0.66, size.height * 0.24)
-        ..lineTo(size.width * 0.34, mid)
-        ..lineTo(size.width * 0.66, size.height * 0.76);
-    } else {
-      path
-        ..moveTo(size.width * 0.34, size.height * 0.24)
-        ..lineTo(size.width * 0.66, mid)
-        ..lineTo(size.width * 0.34, size.height * 0.76);
-    }
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(covariant ChevronMarkPainter oldDelegate) =>
-      oldDelegate.left != left || oldDelegate.color != color;
-}
-
 class ScopeFrame extends StatefulWidget {
   const ScopeFrame({
     required this.scope,
@@ -209,10 +172,6 @@ class _ScopeFrameState extends State<ScopeFrame> {
       ),
     );
   }
-}
-
-(int, int) errorSpot(Iterable<BoardSlot> slots, {bool wide = false}) {
-  return nextHex([for (final slot in slots) (slot.q, slot.r)], wide: wide);
 }
 
 int scopeOf(Uri uri) {

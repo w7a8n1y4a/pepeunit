@@ -8,6 +8,7 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/sections.dart';
+import '../hex_page.dart';
 import '../network/network_chrome.dart';
 
 class HomePage extends StatelessWidget {
@@ -17,24 +18,21 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final model = AppScope.of(context);
     final language = model.vault.language;
-    return ColoredBox(
-      color: sceneBackground,
-      child: HexScene(
-        slots: [
-          for (final section in menuSections) _slot(section, model, language),
-        ],
-        onTap: (id) {
-          if (!menuSectionEnabled(
-            id,
-            hasTarget: model.target != null,
-            notifications: model.target?.notifications,
-            grafana: model.target?.grafana,
-          )) {
-            return;
-          }
-          context.push('/$id');
-        },
-      ),
+    return HexPage(
+      slots: [
+        for (final section in menuSections) _slot(section, model, language),
+      ],
+      onTap: (id) {
+        if (!menuSectionEnabled(
+          id,
+          hasTarget: model.target != null,
+          notifications: model.target?.notifications,
+          grafana: model.target?.grafana,
+        )) {
+          return;
+        }
+        context.push('/$id');
+      },
     );
   }
 }

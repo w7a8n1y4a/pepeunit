@@ -13,6 +13,7 @@ import 'features/home/home_page.dart';
 import 'features/menu/placeholder_page.dart';
 import 'features/network/instance_page.dart';
 import 'features/network/instance_settings_page.dart';
+import 'features/network/setting_category_page.dart';
 import 'features/network/network_add_page.dart';
 import 'features/network/network_chrome.dart';
 import 'features/network/network_lists_page.dart';
@@ -137,18 +138,16 @@ class _PepeunitAppState extends State<PepeunitApp> {
           headlineSmall: TextStyle(color: Color(0xFFFFFFFF), fontSize: 28),
         ),
         inputDecorationTheme: const InputDecorationTheme(
-          filled: true,
-          fillColor: hexFill,
-          labelStyle: TextStyle(color: Color(0xFFA1A1AA)),
-          border: OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0xFFA1A1AA)),
-          ),
-          enabledBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0xFFA1A1AA)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderSide: BorderSide(color: Color(0xFFFF9800)),
-          ),
+          filled: false,
+          isDense: true,
+          isCollapsed: true,
+          contentPadding: EdgeInsets.zero,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          disabledBorder: InputBorder.none,
+          errorBorder: InputBorder.none,
+          focusedErrorBorder: InputBorder.none,
         ),
       ),
       routerConfig: _router,

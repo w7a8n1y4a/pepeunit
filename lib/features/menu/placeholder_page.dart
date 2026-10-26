@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../app_scope.dart';
 import '../../hive/hex_order.dart';
 import '../../hive/hex_scene.dart';
+import '../../navigation/back.dart';
 import '../../navigation/sections.dart';
+import '../hex_page.dart';
 
 class PlaceholderPage extends StatelessWidget {
   const PlaceholderPage({required this.sectionId, super.key});
@@ -26,45 +27,29 @@ class PlaceholderPage extends StatelessWidget {
     );
     final at = frame.cells;
     final backAt = frame.back!;
-    return ColoredBox(
-      color: sceneBackground,
-      child: HexScene(
-        slots: [
-          HexSlot(
-            id: sectionId,
-            title: title,
-            color: section?.color ?? const Color(0xFFA1A1AA),
-            q: at[0].$1,
-            r: at[0].$2,
-            icon: section?.icon,
-            iconScale: section?.iconScale ?? 1,
-          ),
-          HexSlot(
-            id: 'soon',
-            title: soon,
-            color: const Color(0xFFA1A1AA),
-            q: at[1].$1,
-            r: at[1].$2,
-          ),
-          HexSlot(
-            id: 'back',
-            title: back,
-            color: const Color(0xFFA1A1AA),
-            q: backAt.$1,
-            r: backAt.$2,
-            icon: 'assets/icons/back.svg',
-          ),
-        ],
-        onTap: (id) {
-          if (id == 'back') {
-            if (context.canPop()) {
-              context.pop();
-            } else {
-              context.go('/');
-            }
-          }
-        },
-      ),
+    return HexPage(
+      slots: [
+        HexSlot(
+          id: sectionId,
+          title: title,
+          color: section?.color ?? hexMuted,
+          q: at[0].$1,
+          r: at[0].$2,
+          icon: section?.icon,
+          iconScale: section?.iconScale ?? 1,
+        ),
+        HexSlot(
+          id: 'soon',
+          title: soon,
+          color: hexMuted,
+          q: at[1].$1,
+          r: at[1].$2,
+        ),
+        backSlot(title: back, q: backAt.$1, r: backAt.$2),
+      ],
+      onTap: (id) {
+        if (id == 'back') popOrHome(context);
+      },
     );
   }
 }

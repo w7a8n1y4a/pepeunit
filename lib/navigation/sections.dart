@@ -89,3 +89,5 @@ MenuSection? sectionById(String id) {
   }
   return null;
 }
+
+Color get peopleColor => sectionById('people')!.color;

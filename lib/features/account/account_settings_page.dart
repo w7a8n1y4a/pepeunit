@@ -11,8 +11,9 @@ import '../../hive/hex_order.dart';
 import '../../hive/hex_scene.dart';
 import '../../locale/languages.dart';
 import '../../navigation/sections.dart';
+import '../file_drop.dart';
+import '../hex_page.dart';
 import 'account_nav.dart';
-import 'error_reader.dart';
 import 'login_cell.dart';
 import 'parameters_cell.dart';
 
@@ -43,11 +44,10 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   Widget build(BuildContext context) {
     final model = AppScope.of(context);
     final language = model.vault.language;
-    final color = sectionById('people')?.color ?? const Color(0xFFFF3333);
+    final color = peopleColor;
     final png = iconBytes(model.vault.iconPng);
-    final iconColor = _busy || _dragHot ? const Color(0xFFFFFFFF) : color;
-    final muted = const Color(0xFFA1A1AA);
-    final failure = _report ?? _failureText(language);
+    final iconColor = busyColor(_busy || _dragHot, color);
+    final failure = _report ?? iconProblemText(_failure, language);
     final wide = hexWide(MediaQuery.sizeOf(context));
     final frame = hexFrame(count: 4, back: HexBack.center, wide: wide);
     final spot = frame.cells;
@@ -74,13 +74,10 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         r: spot[1].$2,
         body: LoginCell(color: color),
       ),
-      HexSlot(
-        id: 'back',
+      backSlot(
         title: phrase(language, {'ru': 'Назад', 'en': 'Back'}),
-        color: muted,
         q: backAt.$1,
         r: backAt.$2,
-        icon: 'assets/icons/back.svg',
       ),
       HexSlot(
         id: 'sync',
@@ -88,7 +85,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
           'ru': 'Отправить в сеть',
           'en': 'Send to network',
         }),
-        color: _busy ? const Color(0xFFFFFFFF) : color,
+        color: busyColor(_busy, color),
         q: spot[2].$1,
         r: spot[2].$2,
         icon: 'assets/icons/rocket.svg',
@@ -103,85 +100,28 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         body: const ParametersCell(),
       ),
     ];
-    if (failure != null) {
-      final errorAt = nextHex([
-        for (final slot in slots) (slot.q, slot.r),
-      ], wide: wide);
-      slots.add(
-        HexSlot(
-          id: 'error',
-          title: phrase(language, {'ru': 'Ошибка', 'en': 'Error'}),
-          color: errorColor,
-          titleColor: errorColor,
-          q: errorAt.$1,
-          r: errorAt.$2,
-          icon: 'assets/icons/error.svg',
-          iconScale: 1.62,
-          body: _failureOpen
-              ? ErrorCell(
-                  message: failure,
-                  copyLabel: phrase(language, {
-                    'ru': 'Скопировать',
-                    'en': 'Copy',
-                  }),
-                )
-              : null,
-        ),
-      );
-    }
-    return ColoredBox(
-      color: sceneBackground,
-      child: HexScene(
-        slots: slots,
-        onTap: (id) => _tap(id, language),
-        wrap: (slot, child) {
-          if (slot.id != 'icon') return child;
-          return DropTarget(
-            enable: !_busy,
-            onDragEntered: (_) {
-              if (!_dragHot) setState(() => _dragHot = true);
-            },
-            onDragExited: (_) {
-              if (_dragHot) setState(() => _dragHot = false);
-            },
-            onDragDone: _dropped,
-            child: child,
-          );
-        },
-      ),
+    appendError(
+      slots,
+      message: failure,
+      open: _failureOpen,
+      language: language,
+      text: accountText,
+      wide: wide,
     );
-  }
-
-  String? _failureText(String language) {
-    switch (_failure) {
-      case 'empty':
-        return phrase(language, {
-          'ru': 'Файл пустой',
-          'en': 'The file is empty',
-        });
-      case 'large':
-        return phrase(language, {
-          'ru': 'Картинка больше 128 КБ',
-          'en': 'The picture is larger than 128 KB',
-        });
-      case 'png':
-        return phrase(language, {
-          'ru': 'Нужен файл PNG',
-          'en': 'A PNG file is required',
-        });
-      case 'size':
-        return phrase(language, {
-          'ru': 'Нужен размер 192x192',
-          'en': 'The picture must be 192x192',
-        });
-      case 'read':
-        return phrase(language, {
-          'ru': 'Не удалось прочитать файл',
-          'en': 'The file could not be read',
-        });
-      default:
-        return null;
-    }
+    return HexPage(
+      slots: slots,
+      onTap: (id) => _tap(id, language),
+      wrap: (slot, child) {
+        if (slot.id != 'icon') return child;
+        return FileDrop(
+          enable: !_busy,
+          hot: _dragHot,
+          onHot: (hot) => setState(() => _dragHot = hot),
+          onDrop: _dropped,
+          child: child,
+        );
+      },
+    );
   }
 
   Future<void> _tap(String id, String language) async {

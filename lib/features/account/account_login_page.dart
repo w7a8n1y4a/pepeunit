@@ -9,8 +9,9 @@ import '../../app_scope.dart';
 import '../../hive/hex_order.dart';
 import '../../hive/hex_scene.dart';
 import '../../navigation/sections.dart';
+import '../file_drop.dart';
+import '../hex_page.dart';
 import 'account_nav.dart';
-import 'error_reader.dart';
 
 class AccountLoginPage extends StatefulWidget {
   const AccountLoginPage({super.key});
@@ -37,8 +38,8 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
   @override
   Widget build(BuildContext context) {
     final language = AppScope.of(context).vault.language;
-    final color = sectionById('people')?.color ?? const Color(0xFFFF3333);
-    final loadColor = _busy || _dragHot ? const Color(0xFFFFFFFF) : color;
+    final color = peopleColor;
+    final loadColor = busyColor(_busy || _dragHot, color);
     final wide = hexWide(MediaQuery.sizeOf(context));
     final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
     final load = frame.cells.first;
@@ -53,58 +54,33 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
         icon: 'assets/icons/key_load.svg',
         iconScale: 1.2,
       ),
-      HexSlot(
-        id: 'back',
+      backSlot(
         title: accountText(language, 'Назад', 'Back'),
-        color: const Color(0xFFA1A1AA),
         q: backAt.$1,
         r: backAt.$2,
-        icon: 'assets/icons/back.svg',
       ),
     ];
-    if (_failure != null) {
-      final spot = nextHex([
-        for (final slot in slots) (slot.q, slot.r),
-      ], wide: wide);
-      slots.add(
-        HexSlot(
-          id: 'error',
-          title: accountText(language, 'Ошибка', 'Error'),
-          color: errorColor,
-          titleColor: errorColor,
-          q: spot.$1,
-          r: spot.$2,
-          icon: 'assets/icons/error.svg',
-          iconScale: 1.62,
-          body: _failureOpen
-              ? ErrorCell(
-                  message: _failure!,
-                  copyLabel: accountText(language, 'Скопировать', 'Copy'),
-                )
-              : null,
-        ),
-      );
-    }
-    return ColoredBox(
-      color: sceneBackground,
-      child: HexScene(
-        slots: slots,
-        onTap: (id) => _tap(id, language),
-        wrap: (slot, child) {
-          if (slot.id != 'load') return child;
-          return DropTarget(
-            enable: !_busy,
-            onDragEntered: (_) {
-              if (!_dragHot) setState(() => _dragHot = true);
-            },
-            onDragExited: (_) {
-              if (_dragHot) setState(() => _dragHot = false);
-            },
-            onDragDone: (detail) => _dropped(detail, language),
-            child: child,
-          );
-        },
-      ),
+    appendError(
+      slots,
+      message: _failure,
+      open: _failureOpen,
+      language: language,
+      text: accountText,
+      wide: wide,
+    );
+    return HexPage(
+      slots: slots,
+      onTap: (id) => _tap(id, language),
+      wrap: (slot, child) {
+        if (slot.id != 'load') return child;
+        return FileDrop(
+          enable: !_busy,
+          hot: _dragHot,
+          onHot: (hot) => setState(() => _dragHot = hot),
+          onDrop: (detail) => _dropped(detail, language),
+          child: child,
+        );
+      },
     );
   }
 

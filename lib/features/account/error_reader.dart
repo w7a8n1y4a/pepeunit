@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../hive/hex_scene.dart';
+import '../../hive/marks.dart';
 
 /// The error message, drawn inside its own cell. The rest of the menu stays put.
 class ErrorCell extends StatefulWidget {
@@ -77,7 +78,7 @@ class _ErrorCellState extends State<ErrorCell> {
                     width: side * 0.18,
                     height: side * 0.16,
                     child: CustomPaint(
-                      painter: _CopyMarkPainter(
+                      painter: CopyMarkPainter(
                         _copied
                             ? const Color(0xFF4CAF50)
                             : const Color(0xFFFFFFFF),
@@ -92,49 +93,4 @@ class _ErrorCellState extends State<ErrorCell> {
       },
     );
   }
-}
-
-/// Two overlapping sheets, the same copy mark as the previous web client.
-class _CopyMarkPainter extends CustomPainter {
-  const _CopyMarkPainter(this.color);
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = size.shortestSide * 0.07
-      ..strokeJoin = StrokeJoin.round
-      ..color = color;
-    final radius = Radius.circular(size.shortestSide * 0.12);
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          size.width * 0.34,
-          size.height * 0.08,
-          size.width * 0.54,
-          size.height * 0.62,
-        ),
-        radius,
-      ),
-      paint,
-    );
-    canvas.drawRRect(
-      RRect.fromRectAndRadius(
-        Rect.fromLTWH(
-          size.width * 0.1,
-          size.height * 0.28,
-          size.width * 0.54,
-          size.height * 0.62,
-        ),
-        radius,
-      ),
-      paint,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _CopyMarkPainter oldDelegate) =>
-      oldDelegate.color != color;
 }

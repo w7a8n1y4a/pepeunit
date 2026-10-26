@@ -7,8 +7,8 @@ import '../../app_scope.dart';
 import '../../hive/hex_order.dart';
 import '../../hive/hex_scene.dart';
 import '../../navigation/sections.dart';
+import '../hex_page.dart';
 import 'account_nav.dart';
-import 'error_reader.dart';
 
 class AccountRegisterPage extends StatefulWidget {
   const AccountRegisterPage({super.key});
@@ -34,7 +34,7 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
   @override
   Widget build(BuildContext context) {
     final language = AppScope.of(context).vault.language;
-    final color = sectionById('people')?.color ?? const Color(0xFFFF3333);
+    final color = peopleColor;
     final wide = hexWide(MediaQuery.sizeOf(context));
     final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
     final generate = frame.cells.first;
@@ -43,48 +43,27 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
       HexSlot(
         id: 'generate',
         title: accountText(language, 'Генерация ключа', 'Generate key'),
-        color: _busy ? const Color(0xFFFFFFFF) : color,
+        color: busyColor(_busy, color),
         q: generate.$1,
         r: generate.$2,
         icon: 'assets/icons/key_gen.svg',
         iconScale: 1.4,
       ),
-      HexSlot(
-        id: 'back',
+      backSlot(
         title: accountText(language, 'Назад', 'Back'),
-        color: const Color(0xFFA1A1AA),
         q: backAt.$1,
         r: backAt.$2,
-        icon: 'assets/icons/back.svg',
       ),
     ];
-    if (_failure != null) {
-      final spot = nextHex([
-        for (final slot in slots) (slot.q, slot.r),
-      ], wide: wide);
-      slots.add(
-        HexSlot(
-          id: 'error',
-          title: accountText(language, 'Ошибка', 'Error'),
-          color: errorColor,
-          titleColor: errorColor,
-          q: spot.$1,
-          r: spot.$2,
-          icon: 'assets/icons/error.svg',
-          iconScale: 1.62,
-          body: _failureOpen
-              ? ErrorCell(
-                  message: _failure!,
-                  copyLabel: accountText(language, 'Скопировать', 'Copy'),
-                )
-              : null,
-        ),
-      );
-    }
-    return ColoredBox(
-      color: sceneBackground,
-      child: HexScene(slots: slots, onTap: (id) => _tap(id, language)),
+    appendError(
+      slots,
+      message: _failure,
+      open: _failureOpen,
+      language: language,
+      text: accountText,
+      wide: wide,
     );
+    return HexPage(slots: slots, onTap: (id) => _tap(id, language));
   }
 
   Future<void> _tap(String id, String language) async {

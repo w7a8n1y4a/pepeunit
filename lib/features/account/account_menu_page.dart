@@ -11,8 +11,8 @@ import '../../app_scope.dart';
 import '../../hive/hex_order.dart';
 import '../../hive/hex_scene.dart';
 import '../../navigation/sections.dart';
+import '../hex_page.dart';
 import 'account_nav.dart';
-import 'error_reader.dart';
 
 class AccountMenuPage extends StatefulWidget {
   const AccountMenuPage({super.key});
@@ -30,46 +30,30 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
   Widget build(BuildContext context) {
     final model = AppScope.of(context);
     final language = model.vault.language;
-    final color = sectionById('people')?.color ?? const Color(0xFFFF3333);
+    final color = peopleColor;
     final back = accountText(language, 'Назад', 'Back');
+    final wide = hexWide(MediaQuery.sizeOf(context));
     final slots = model.vault.hasKey
-        ? _signedIn(language, color, back)
-        : _signedOut(language, color, back);
-    if (_failure != null) {
-      final spot = nextHex([
-        for (final slot in slots) (slot.q, slot.r),
-      ], wide: hexWide(MediaQuery.sizeOf(context)));
-      slots.add(
-        HexSlot(
-          id: 'error',
-          title: accountText(language, 'Ошибка', 'Error'),
-          color: errorColor,
-          titleColor: errorColor,
-          q: spot.$1,
-          r: spot.$2,
-          icon: 'assets/icons/error.svg',
-          iconScale: 1.62,
-          body: _failureOpen
-              ? ErrorCell(
-                  message: _failure!,
-                  copyLabel: accountText(language, 'Скопировать', 'Copy'),
-                )
-              : null,
-        ),
-      );
-    }
-    return ColoredBox(
-      color: sceneBackground,
-      child: HexScene(slots: slots, onTap: (id) => _tap(id, language)),
+        ? _signedIn(language, color, back, wide)
+        : _signedOut(language, color, back, wide);
+    appendError(
+      slots,
+      message: _failure,
+      open: _failureOpen,
+      language: language,
+      text: accountText,
+      wide: wide,
     );
+    return HexPage(slots: slots, onTap: (id) => _tap(id, language));
   }
 
-  List<HexSlot> _signedOut(String language, Color color, String back) {
-    final frame = hexFrame(
-      count: 2,
-      back: HexBack.center,
-      wide: hexWide(MediaQuery.sizeOf(context)),
-    );
+  List<HexSlot> _signedOut(
+    String language,
+    Color color,
+    String back,
+    bool wide,
+  ) {
+    final frame = hexFrame(count: 2, back: HexBack.center, wide: wide);
     final spot = frame.cells;
     final backAt = frame.back!;
     return [
@@ -90,27 +74,21 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         r: spot[1].$2,
         icon: 'assets/icons/registration.svg',
       ),
-      HexSlot(
-        id: 'back',
-        title: back,
-        color: const Color(0xFFA1A1AA),
-        q: backAt.$1,
-        r: backAt.$2,
-        icon: 'assets/icons/back.svg',
-      ),
+      backSlot(title: back, q: backAt.$1, r: backAt.$2),
     ];
   }
 
-  List<HexSlot> _signedIn(String language, Color color, String back) {
+  List<HexSlot> _signedIn(
+    String language,
+    Color color,
+    String back,
+    bool wide,
+  ) {
     final model = AppScope.of(context);
-    final active = _busy ? const Color(0xFFFFFFFF) : color;
+    final active = busyColor(_busy, color);
     final png = iconBytes(model.vault.iconPng);
     final login = model.vault.login;
-    final frame = hexFrame(
-      count: 4,
-      back: HexBack.center,
-      wide: hexWide(MediaQuery.sizeOf(context)),
-    );
+    final frame = hexFrame(count: 4, back: HexBack.center, wide: wide);
     final spot = frame.cells;
     final backAt = frame.back!;
     return [
@@ -152,14 +130,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         icon: 'assets/icons/signout.svg',
         iconScale: 1.08,
       ),
-      HexSlot(
-        id: 'back',
-        title: back,
-        color: const Color(0xFFA1A1AA),
-        q: backAt.$1,
-        r: backAt.$2,
-        icon: 'assets/icons/back.svg',
-      ),
+      backSlot(title: back, q: backAt.$1, r: backAt.$2),
     ];
   }
 

@@ -3,11 +3,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../app_model.dart';
 import '../../app_scope.dart';
-import '../../features/account/account_nav.dart';
-import '../../features/account/error_reader.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../instances/portrait.dart';
+import '../../navigation/back.dart';
+import '../hex_page.dart';
 import 'line_cell.dart';
 import 'network_chrome.dart';
 
@@ -67,33 +67,17 @@ class _InstancePageState extends State<InstancePage> {
       for (final slot in placed)
         _slot(slot, model, language, color, url, isTarget, owner, staff),
     ];
-    if (_failure != null) {
-      final spot = errorSpot(placed, wide: wide);
-      slots.add(
-        HexSlot(
-          id: 'error',
-          title: netText(language, 'Ошибка', 'Error'),
-          color: errorColor,
-          titleColor: errorColor,
-          q: spot.$1,
-          r: spot.$2,
-          icon: 'assets/icons/error.svg',
-          iconScale: 1.62,
-          body: _open
-              ? ErrorCell(
-                  message: _failure!,
-                  copyLabel: netText(language, 'Скопировать', 'Copy'),
-                )
-              : null,
-        ),
-      );
-    }
-    return ColoredBox(
-      color: sceneBackground,
-      child: HexScene(
-        slots: slots,
-        onTap: (id) => _tap(id, language, canModerate),
-      ),
+    appendError(
+      slots,
+      message: _failure,
+      open: _open,
+      language: language,
+      text: netText,
+      wide: wide,
+    );
+    return HexPage(
+      slots: slots,
+      onTap: (id) => _tap(id, language, canModerate),
     );
   }
 
@@ -110,16 +94,13 @@ class _InstancePageState extends State<InstancePage> {
     final portrait = model.portraitOf(url);
     final peer = model.peers[url];
     final record = model.vault.recordFor(url);
-    final active = _busy ? const Color(0xFFFFFFFF) : color;
+    final active = busyColor(_busy, color);
     switch (slot.id) {
       case 'back':
-        return HexSlot(
-          id: 'back',
+        return backSlot(
           title: netText(language, 'Назад', 'Back'),
-          color: hexMuted,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/back.svg',
         );
       case 'identity':
         final String? leftCaption;

@@ -3,10 +3,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../app_model.dart';
 import '../../app_scope.dart';
-import '../../features/account/account_nav.dart';
-import '../../features/account/error_reader.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
+import '../../navigation/back.dart';
+import '../hex_page.dart';
 import 'line_cell.dart';
 import 'network_chrome.dart';
 
@@ -42,43 +42,24 @@ class _NetworkPageState extends State<NetworkPage> {
     final slots = [
       for (final slot in board.slots) _slot(slot, model, language, color),
     ];
-    if (failure != null) {
-      final spot = errorSpot(board.slots, wide: wide);
-      slots.add(
-        HexSlot(
-          id: 'error',
-          title: netText(language, 'Ошибка', 'Error'),
-          color: errorColor,
-          titleColor: errorColor,
-          q: spot.$1,
-          r: spot.$2,
-          icon: 'assets/icons/error.svg',
-          iconScale: 1.62,
-          body: _failureOpen
-              ? ErrorCell(
-                  message: failure,
-                  copyLabel: netText(language, 'Скопировать', 'Copy'),
-                )
-              : null,
-        ),
-      );
-    }
-    return ColoredBox(
-      color: sceneBackground,
-      child: HexScene(slots: slots, onTap: _tap),
+    appendError(
+      slots,
+      message: failure,
+      open: _failureOpen,
+      language: language,
+      text: netText,
+      wide: wide,
     );
+    return HexPage(slots: slots, onTap: _tap);
   }
 
   HexSlot _slot(BoardSlot slot, AppModel model, String language, Color color) {
     switch (slot.id) {
       case 'back':
-        return HexSlot(
-          id: 'back',
+        return backSlot(
           title: netText(language, 'Назад', 'Back'),
-          color: hexMuted,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/back.svg',
         );
       case 'search':
         final text = model.query.text.trim();

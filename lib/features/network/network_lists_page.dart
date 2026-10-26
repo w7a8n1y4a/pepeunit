@@ -3,11 +3,11 @@ import 'package:go_router/go_router.dart';
 
 import '../../app_model.dart';
 import '../../app_scope.dart';
-import '../../features/account/account_nav.dart';
-import '../../features/account/error_reader.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/instance.dart';
 import '../../instances/network_view.dart';
+import '../../navigation/back.dart';
+import '../hex_page.dart';
 import 'line_cell.dart';
 import 'network_chrome.dart';
 
@@ -60,55 +60,35 @@ class _NetworkListsPageState extends State<NetworkListsPage> {
         r: at[2].$2,
         body: LineCell(hint: 'host', color: color, onSubmit: _pin),
       ),
-      HexSlot(
-        id: 'back',
+      backSlot(
         title: netText(language, 'Назад', 'Back'),
-        color: hexMuted,
         q: back.$1,
         r: back.$2,
-        icon: 'assets/icons/back.svg',
       ),
     ];
-    if (_failure != null) {
-      final spot = nextHex([
-        for (final slot in slots) (slot.q, slot.r),
-      ], wide: wide);
-      slots.add(
-        HexSlot(
-          id: 'error',
-          title: netText(language, 'Ошибка', 'Error'),
-          color: errorColor,
-          titleColor: errorColor,
-          q: spot.$1,
-          r: spot.$2,
-          icon: 'assets/icons/error.svg',
-          iconScale: 1.2,
-          body: _open
-              ? ErrorCell(
-                  message: _failure!,
-                  copyLabel: netText(language, 'Скопировать', 'Copy'),
-                )
-              : null,
-        ),
-      );
-    }
-    return ColoredBox(
-      color: sceneBackground,
-      child: HexScene(
-        slots: slots,
-        onTap: (id) {
-          switch (id) {
-            case 'back':
-              popOrHome(context);
-            case 'allow':
-              context.push('/peers/allow');
-            case 'deny':
-              context.push('/peers/deny');
-            case 'error':
-              setState(() => _open = true);
-          }
-        },
-      ),
+    appendError(
+      slots,
+      message: _failure,
+      open: _open,
+      language: language,
+      text: netText,
+      wide: wide,
+      iconScale: 1.2,
+    );
+    return HexPage(
+      slots: slots,
+      onTap: (id) {
+        switch (id) {
+          case 'back':
+            popOrHome(context);
+          case 'allow':
+            context.push('/peers/allow');
+          case 'deny':
+            context.push('/peers/deny');
+          case 'error':
+            setState(() => _open = true);
+        }
+      },
     );
   }
 
@@ -161,35 +141,24 @@ class _NetworkListPageState extends State<NetworkListPage> {
       for (final slot in board.slots)
         _slot(slot, model, language, color, board),
     ];
-    if (_failure != null) {
-      final spot = errorSpot(board.slots, wide: wide);
-      slots.add(
-        HexSlot(
-          id: 'error',
-          title: netText(language, 'Ошибка', 'Error'),
-          color: errorColor,
-          titleColor: errorColor,
-          q: spot.$1,
-          r: spot.$2,
-          icon: 'assets/icons/error.svg',
-          iconScale: 1.2,
-          body: _open
-              ? ErrorCell(
-                  message: _failure!,
-                  copyLabel: netText(language, 'Скопировать', 'Copy'),
-                )
-              : null,
-        ),
-      );
-    }
+    appendError(
+      slots,
+      message: _failure,
+      open: _open,
+      language: language,
+      text: netText,
+      wide: wide,
+      iconScale: 1.2,
+    );
     final path = widget.deny ? '/peers/deny' : '/peers/allow';
-    return ColoredBox(
-      color: sceneBackground,
-      child: ScopeFrame(
+    return HexPage(
+      slots: slots,
+      onTap: (id) => _tap(id, board),
+      frame: (scene) => ScopeFrame(
         scope: widget.scope,
         canZoomIn: board.canZoomIn,
         path: path,
-        child: HexScene(slots: slots, onTap: (id) => _tap(id, board)),
+        child: scene,
       ),
     );
   }
@@ -203,13 +172,10 @@ class _NetworkListPageState extends State<NetworkListPage> {
   ) {
     switch (slot.id) {
       case 'back':
-        return HexSlot(
-          id: 'back',
+        return backSlot(
           title: netText(language, 'Назад', 'Back'),
-          color: hexMuted,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/back.svg',
         );
       case 'prev':
         return pageStepSlot(
