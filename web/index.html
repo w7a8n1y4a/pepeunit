@@ -15,6 +15,7 @@
     the `--base-href` argument provided to `flutter build`.
   -->
   <base href="$FLUTTER_BASE_HREF">
+  <link rel="preload" href="assets/assets/fonts/OpenGostTypeB-Regular.ttf" as="font" type="font/ttf" crossorigin>
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
@@ -25,7 +26,7 @@
     @font-face {
       font-family: "OpenGost Type B";
       src: url("assets/assets/fonts/OpenGostTypeB-Regular.ttf") format("truetype");
-      font-display: swap;
+      font-display: block;
     }
 
     html, body {
@@ -53,6 +54,14 @@
     #boot svg {
       width: min(64.4vmin, 392px);
       height: auto;
+    }
+
+    #boot text {
+      visibility: hidden;
+    }
+
+    #boot.boot-font text {
+      visibility: visible;
     }
 
     #boot .wait {
@@ -130,6 +139,15 @@
   <script>
     (function () {
       var boot = document.getElementById('boot');
+      var showBootFont = function () {
+        if (boot) boot.classList.add('boot-font');
+      };
+      if (document.fonts && document.fonts.load) {
+        document.fonts.load('19px "OpenGost Type B"').then(showBootFont, showBootFont);
+        setTimeout(showBootFont, 1500);
+      } else {
+        showBootFont();
+      }
       var label = document.getElementById('boot-label');
       var meter = document.getElementById('boot-meter');
       var pctText = document.getElementById('boot-pct');
