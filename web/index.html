@@ -144,15 +144,11 @@
       meter.setAttribute('stroke-dasharray', String(ring));
       meter.setAttribute('stroke-dashoffset', String(ring));
 
-      // The dev build keeps the spinner. A cached refresh finishes too
-      // fast to trust a percent and stays on the spinner too. A real
-      // download fills the arc and keeps it up to 99 until the first
-      // frame, so the percent does not vanish while the engine starts.
-      // main.dart.js is left as a script tag so it can parse while it
-      // downloads.
+      // The dev build keeps the spinner. A release build fills the arc
+      // from the decoded CanvasKit size and leaves it on screen, up to
+      // 99, until the first frame. main.dart.js stays a script tag so
+      // the browser can parse it while it downloads.
       var parts = {};
-      var startedAt = 0;
-      var cached = false;
       function releaseBuild() {
         var builds = window._flutter && window._flutter.buildConfig && window._flutter.buildConfig.builds;
         if (!builds) return false;
@@ -176,17 +172,8 @@
         return { loaded: loaded, total: total };
       }
       function paint() {
-        if (cached) return;
         var measured = measure();
-        if (!measured || wasmReadyFast()) {
-          if (wasmReadyFast()) cached = true;
-          return;
-        }
-        if (measured.loaded >= measured.total && performance.now() - startedAt < 400) {
-          cached = true;
-          return;
-        }
-        if (performance.now() - startedAt < 400) return;
+        if (!measured) return;
         var pct = Math.min(99, Math.floor(measured.loaded * 100 / measured.total));
         boot.classList.add('boot-known');
         meter.setAttribute('stroke-dashoffset', String(ring * (1 - pct / 100)));
@@ -194,20 +181,7 @@
         boot.setAttribute('aria-valuenow', String(pct));
         boot.setAttribute('aria-valuetext', pct + '%');
       }
-      function wasmReadyFast() {
-        var urls = Object.keys(parts);
-        if (!urls.length || performance.now() - startedAt >= 400) return false;
-        for (var i = 0; i < urls.length; i++) {
-          var part = parts[urls[i]];
-          if (!part.total || part.loaded < part.total) return false;
-        }
-        return true;
-      }
       function note(url, loaded, total) {
-        if (!startedAt) {
-          startedAt = performance.now();
-          setTimeout(paint, 420);
-        }
         parts[url] = { loaded: loaded, total: total > 0 ? total : 0 };
         paint();
       }
@@ -244,6 +218,7 @@
         return nativeFetch(input, init).then(function (response) {
           var total = wasmDecodedSize(url);
           if (!response.ok || !response.body || !total) return response;
+          note(url, 0, total);
           var reader = response.body.getReader();
           var loaded = 0;
           var stream = new ReadableStream({
