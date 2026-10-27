@@ -1,18 +1,10 @@
-import 'dart:typed_data';
-
-import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../account/icon_file.dart';
-import '../../app_model.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
-import '../../instances/settings_catalog.dart';
-import '../../locale/languages.dart';
 import '../../navigation/back.dart';
-import '../file_drop.dart';
 import '../hex_page.dart';
 import 'network_chrome.dart';
 
@@ -29,8 +21,6 @@ class InstanceTunePage extends StatefulWidget {
 class _InstanceTunePageState extends State<InstanceTunePage> {
   String? _failure;
   var _open = false;
-  String? _pending;
-  var _dragHot = false;
 
   @override
   void initState() {
@@ -67,7 +57,7 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
         BoardSlot(ids[i], frame.cells[i].$1, frame.cells[i].$2),
     ];
     final slots = <HexSlot>[
-      for (final slot in placed) _slot(slot, model, language, color),
+      for (final slot in placed) _slot(slot, language, color),
     ];
     appendError(
       slots,
@@ -78,45 +68,20 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
       wide: wide,
       iconScale: 1.2,
     );
-    return HexPage(
-      slots: slots,
-      onTap: (id) => _tap(id, language, owner),
-      wrap: (slot, child) {
-        if (slot.id != 'icon' || !owner) return child;
-        return FileDrop(
-          enable: _pending == null,
-          hot: _dragHot,
-          onHot: (hot) => setState(() => _dragHot = hot),
-          onDrop: (detail) => _dropped(detail, language),
-          child: child,
-        );
-      },
-    );
+    return HexPage(slots: slots, onTap: _tap);
   }
 
-  HexSlot _slot(BoardSlot slot, AppModel model, String language, Color color) {
-    final targetUrl = model.target?.url ?? '';
-    final portrait = targetUrl.isEmpty ? null : model.portraitOf(targetUrl);
+  HexSlot _slot(BoardSlot slot, String language, Color color) {
+    final targetUrl = AppScope.of(context).target?.url ?? '';
+    final portrait = targetUrl.isEmpty
+        ? null
+        : AppScope.of(context).portraitOf(targetUrl);
     switch (slot.id) {
       case 'back':
         return backSlot(
           title: netText(language, 'Назад', 'Back'),
           q: slot.q,
           r: slot.r,
-        );
-      case 'icon':
-        final image = targetUrl.isEmpty ? null : model.iconOf(targetUrl);
-        return HexSlot(
-          id: 'icon',
-          title: netText(language, 'Загрузить аватар', 'Upload avatar'),
-          footer: portrait?.version,
-          color: dropColor(_dragHot, color),
-          busy: _pending == 'icon',
-          q: slot.q,
-          r: slot.r,
-          icon: image == null ? 'assets/icons/icon_load.svg' : null,
-          image: image,
-          iconScale: 1.15,
         );
       case 'settings':
         return HexSlot(
@@ -139,17 +104,6 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
           icon: 'assets/icons/power.svg',
         );
       default:
-        final group = settingGroup(slot.id);
-        if (group != null) {
-          return HexSlot(
-            id: group.id,
-            title: phrase(language, group.titles),
-            color: color,
-            q: slot.q,
-            r: slot.r,
-            icon: group.icon,
-          );
-        }
         return HexSlot(
           id: slot.id,
           title: slot.id,
@@ -160,68 +114,16 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
     }
   }
 
-  Future<void> _tap(String id, String language, bool owner) async {
+  void _tap(String id) {
     switch (id) {
       case 'back':
         popOrHome(context);
       case 'error':
         setState(() => _open = true);
-      case 'icon':
-        if (owner) await _pick(language);
       case 'settings':
         context.push('/peers/tune/settings');
       case 'ops':
         context.push('/peers/tune/ops');
     }
-  }
-
-  Future<void> _run(String id, Future<void> Function() action) async {
-    if (_pending != null) return;
-    setState(() {
-      _pending = id;
-      _failure = null;
-      _open = false;
-    });
-    try {
-      await action();
-      if (!mounted) return;
-      setState(() => _pending = null);
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _pending = null;
-        _failure = '$error';
-      });
-    }
-  }
-
-  Future<void> _pick(String language) async {
-    if (_pending != null) return;
-    final model = AppScope.of(context);
-    final bytes = await model.files.pick(
-      dialogTitle: netText(language, 'Картинка инстанса', 'Instance picture'),
-    );
-    if (bytes == null || !mounted) return;
-    await _accept(bytes, language);
-  }
-
-  Future<void> _dropped(DropDoneDetails detail, String language) async {
-    if (_dragHot) setState(() => _dragHot = false);
-    if (_pending != null || detail.files.isEmpty) return;
-    final bytes = await detail.files.first.readAsBytes();
-    if (!mounted) return;
-    await _accept(bytes, language);
-  }
-
-  Future<void> _accept(Uint8List bytes, String language) async {
-    final problem = iconProblem(bytes);
-    if (problem != null) {
-      setState(() {
-        _failure = iconProblemText(problem, language) ?? problem;
-        _open = false;
-      });
-      return;
-    }
-    await _run('icon', () => AppScope.of(context).setInstanceIcon(bytes));
   }
 }

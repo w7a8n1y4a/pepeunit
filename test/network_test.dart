@@ -196,8 +196,15 @@ void main() {
       );
       expect(owner, ['metrics', 'settings', 'users', 'telegram', 'clear']);
       expect(cardBoard(['identity', ...owner]).length, lessThanOrEqualTo(7));
-      expect(tuneActions(owner: true), ['icon', 'settings', 'ops']);
-      expect(ownerSettingSections, ['services', 'transport', 'flags', 'core']);
+      expect(tuneActions(owner: true), ['settings', 'ops']);
+      expect(ownerSettingSections, [
+        'instance',
+        'mqtt',
+        'datapipe',
+        'notifications',
+        'telegram',
+        'icon',
+      ]);
       expect(tuneActions(owner: false), isEmpty);
       expect(operationActions(owner: true, staff: true, federation: true), [
         'tests',
@@ -253,42 +260,97 @@ void main() {
     expect(menuSectionEnabled('alerts', hasTarget: true), isTrue);
   });
 
-  test(
-    'settings categories cover the owner fields once and groups stay 1-ring',
-    () {
-      final keys = [
-        for (final category in settingCategories)
-          for (final field in category.fields) field.key,
-      ];
-      expect(keys.toSet().length, keys.length);
-      expect(keys.length, 58);
-      for (final category in settingCategories) {
-        expect(category.fields.length, lessThanOrEqualTo(6));
+  test('settings cover every owner field once and honor flag locks', () {
+    final keys = [
+      for (final category in settingCategories)
+        for (final field in category.fields) field.key,
+    ];
+    expect(keys.toSet().length, keys.length);
+    expect(keys.length, 58);
+    for (final category in settingCategories) {
+      expect(category.fields.length, lessThanOrEqualTo(6));
+      if (category.id != 'instance') {
+        expect(category.links.length, lessThanOrEqualTo(6));
       }
-      final groupedCategories = [
-        'flags',
-        for (final group in settingGroups) ...group.categoryIds,
-      ];
-      expect(
-        groupedCategories.toSet(),
-        settingCategories.map((c) => c.id).toSet(),
-      );
-      expect(keys, contains('pu_ff_telegram_bot_enable'));
-      expect(keys, contains('pu_telegram_token'));
-      expect(keys, isNot(contains('icon_uuid')));
-      final users = settingCategory('users')!.fields.first;
-      expect(parseSetting(users, '0'), isNull);
-      expect(settingIssue(users, '0', 'ru'), 'Вне диапазона 1..1000000');
-      expect(settingIssue(users, '16', 'ru'), isNull);
-      expect(parseSetting(users, '16'), 16);
-      final emailField = settingCategory('contacts')!.fields.first;
-      expect(parseSetting(emailField, 'not-an-email'), isNull);
-      expect(
-        parseSetting(emailField, 'owner@pepeunit.com'),
-        'owner@pepeunit.com',
-      );
-    },
-  );
+    }
+    expect(settingCategory('instance')!.links.length, 8);
+    final reachable = <String>{};
+    void walk(String id) {
+      final category = settingCategory(id);
+      if (category == null || !reachable.add(id)) return;
+      for (final link in category.links) {
+        walk(link);
+      }
+    }
+
+    for (final id in ownerSettingSections) {
+      walk(id);
+    }
+    expect(reachable, settingCategories.map((c) => c.id).toSet());
+    expect(keys, contains('pu_ff_telegram_bot_enable'));
+    expect(keys, contains('pu_telegram_token'));
+    expect(keys, isNot(contains('icon_uuid')));
+    final users = settingCategory('users')!.fields.first;
+    expect(parseSetting(users, '0'), isNull);
+    expect(settingIssue(users, '0', 'ru'), 'Вне диапазона 1..1000000');
+    expect(settingIssue(users, '16', 'ru'), isNull);
+    expect(parseSetting(users, '16'), 16);
+    final emailField = settingCategory('contacts')!.fields.first;
+    expect(parseSetting(emailField, 'not-an-email'), isNull);
+    expect(
+      parseSetting(emailField, 'owner@pepeunit.com'),
+      'owner@pepeunit.com',
+    );
+    final link = settingCategory('telegram-link')!;
+    const ready = {
+      'pu_telegram_token': '123456:ABC-def',
+      'pu_telegram_bot_mode': 'webhook',
+      'pu_telegram_bot_link': 'https://t.me/bot',
+      'pu_telegram_git_hash_length': 8,
+      'pu_telegram_proxy_url': 'socks5://127.0.0.1:9050',
+    };
+    expect(settingFieldsReady(link, const {}), isFalse);
+    expect(settingFieldsReady(link, ready), isTrue);
+    expect(
+      settingFieldsReady(link, {...ready, 'pu_telegram_token': 'bad'}),
+      isFalse,
+    );
+    expect(
+      settingSectionOpen(settingCategory('datapipe-basic')!, const {}),
+      isFalse,
+    );
+    expect(
+      settingSectionOpen(settingCategory('datapipe-link')!, {
+        'pu_ff_datapipe_enable': true,
+      }),
+      isTrue,
+    );
+    expect(
+      settingSectionOpen(settingCategory('notifications-basic')!, {
+        'pu_ff_notification_enable': true,
+      }),
+      isTrue,
+    );
+    expect(
+      settingSectionOpen(settingCategory('notifications-telegram')!, {
+        'pu_ff_notification_enable': true,
+      }),
+      isFalse,
+    );
+    expect(
+      settingSectionOpen(settingCategory('notifications-telegram')!, {
+        'pu_ff_notification_enable': true,
+        'pu_ff_telegram_bot_enable': true,
+      }),
+      isTrue,
+    );
+    expect(
+      settingSectionOpen(settingCategory('telegram-look')!, {
+        'pu_ff_telegram_bot_enable': false,
+      }),
+      isFalse,
+    );
+  });
 
   test('peer pages stop at the reported total', () async {
     final seen = <int>[];
@@ -527,7 +589,7 @@ void main() {
 
     await tester.tap(find.bySemanticsLabel('Управление инстансом'));
     await tester.pumpAndSettle();
-    expect(find.bySemanticsLabel('Загрузить аватар'), findsOneWidget);
+    expect(find.bySemanticsLabel('Загрузить аватар'), findsNothing);
     expect(find.bySemanticsLabel('Настройки'), findsOneWidget);
     expect(find.bySemanticsLabel('Команды'), findsOneWidget);
     expect(find.bySemanticsLabel('Флаги'), findsNothing);
@@ -544,23 +606,173 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('Настройки'));
     await tester.pumpAndSettle();
-    expect(find.bySemanticsLabel('Сервисы'), findsOneWidget);
-    expect(find.bySemanticsLabel('Транспорт'), findsOneWidget);
-    expect(find.bySemanticsLabel('Флаги'), findsOneWidget);
-    expect(find.bySemanticsLabel('Система'), findsOneWidget);
+    expect(find.bySemanticsLabel('Инстанс'), findsOneWidget);
+    expect(find.bySemanticsLabel('MQTT'), findsOneWidget);
+    expect(find.bySemanticsLabel('DataPipe'), findsOneWidget);
+    expect(find.bySemanticsLabel('Уведомления'), findsOneWidget);
+    expect(find.bySemanticsLabel('Telegram Бот'), findsOneWidget);
+    expect(find.bySemanticsLabel('Загрузить аватар'), findsOneWidget);
+    expect(find.bySemanticsLabel('Сервисы'), findsNothing);
+    expect(find.bySemanticsLabel('Транспорт'), findsNothing);
+    expect(find.bySemanticsLabel('Система'), findsNothing);
 
-    await tester.tap(find.bySemanticsLabel('Система'));
+    await tester.tap(find.bySemanticsLabel('Инстанс'));
     await tester.pumpAndSettle();
-    expect(find.bySemanticsLabel('Контакты'), findsOneWidget);
+    expect(find.bySemanticsLabel('Флаги'), findsOneWidget);
+    expect(find.bySemanticsLabel('Базовые'), findsOneWidget);
     expect(find.bySemanticsLabel('Пользователи'), findsOneWidget);
-    expect(find.bySemanticsLabel('Федерация'), findsOneWidget);
-    expect(find.bySemanticsLabel('Журнал'), findsOneWidget);
+    expect(find.bySemanticsLabel('Реестр'), findsOneWidget);
+    expect(find.bySemanticsLabel('Устройства'), findsOneWidget);
+    expect(find.bySemanticsLabel('GitHub'), findsOneWidget);
+    expect(find.bySemanticsLabel('Логи'), findsOneWidget);
+    expect(find.bySemanticsLabel('Контакты'), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('Пользователи'));
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('Макс. юзеров'), findsOneWidget);
     expect(find.bySemanticsLabel('Макс. групп'), findsOneWidget);
     expect(find.bySemanticsLabel('Срок токена (с)'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Назад'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('Назад'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('DataPipe'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('DataPipe Вкл ?'), findsOneWidget);
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Базовые'))
+          .flagsCollection
+          .isEnabled,
+      Tristate.isFalse,
+    );
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Соединение'))
+          .flagsCollection
+          .isEnabled,
+      Tristate.isFalse,
+    );
+
+    model.targetSettings = {'pu_ff_datapipe_enable': true};
+    model.notifyListeners();
+    await tester.pump();
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Базовые'))
+          .flagsCollection
+          .isEnabled,
+      Tristate.isTrue,
+    );
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Соединение'))
+          .flagsCollection
+          .isEnabled,
+      Tristate.isTrue,
+    );
+
+    await tester.tap(find.bySemanticsLabel('Назад'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('Telegram Бот'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Подключение'), findsOneWidget);
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Визуальные'))
+          .flagsCollection
+          .isEnabled,
+      Tristate.isFalse,
+    );
+    await tester.tap(find.bySemanticsLabel('Визуальные'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Подключение'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Подключение'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Токен бота'), findsOneWidget);
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Бот Вкл ?'))
+          .flagsCollection
+          .isEnabled,
+      Tristate.isFalse,
+    );
+
+    model.targetSettings = {
+      'pu_telegram_token': '123456:ABC-def',
+      'pu_telegram_bot_mode': 'webhook',
+      'pu_telegram_bot_link': 'https://t.me/bot',
+      'pu_telegram_git_hash_length': 8,
+      'pu_telegram_proxy_url': 'socks5://127.0.0.1:9050',
+    };
+    model.notifyListeners();
+    await tester.pump();
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Бот Вкл ?'))
+          .flagsCollection
+          .isEnabled,
+      Tristate.isTrue,
+    );
+
+    model.targetSettings = {
+      ...model.targetSettings!,
+      'pu_ff_telegram_bot_enable': true,
+      'pu_ff_notification_enable': false,
+    };
+    model.notifyListeners();
+    await tester.tap(find.bySemanticsLabel('Назад'));
+    await tester.pumpAndSettle();
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Визуальные'))
+          .flagsCollection
+          .isEnabled,
+      Tristate.isTrue,
+    );
+
+    await tester.tap(find.bySemanticsLabel('Назад'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('Уведомления'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Уведомления Вкл?'), findsOneWidget);
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Базовые'))
+          .flagsCollection
+          .isEnabled,
+      Tristate.isFalse,
+    );
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Telegram Бот'))
+          .flagsCollection
+          .isEnabled,
+      Tristate.isFalse,
+    );
+
+    model.targetSettings = {
+      ...model.targetSettings!,
+      'pu_ff_notification_enable': true,
+    };
+    model.notifyListeners();
+    await tester.pump();
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Базовые'))
+          .flagsCollection
+          .isEnabled,
+      Tristate.isTrue,
+    );
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Telegram Бот'))
+          .flagsCollection
+          .isEnabled,
+      Tristate.isTrue,
+    );
     expect(tester.takeException(), isNull);
   });
 }

@@ -110,14 +110,22 @@ List<String> peerActions({required String? trust, required bool federation}) {
   }
 }
 
-/// Owner controls on `/peers/tune`: avatar, settings, commands.
+/// Owner controls on `/peers/tune`: settings, then commands.
+/// Avatar upload lives inside settings.
 List<String> tuneActions({required bool owner}) {
   if (!owner) return const [];
-  return const ['icon', 'settings', 'ops'];
+  return const ['settings', 'ops'];
 }
 
-/// Groups gathered under `/peers/tune/settings`.
-const ownerSettingSections = <String>['services', 'transport', 'flags', 'core'];
+/// Screens gathered under `/peers/tune/settings`. Avatar is the last cell.
+const ownerSettingSections = <String>[
+  'instance',
+  'mqtt',
+  'datapipe',
+  'notifications',
+  'telegram',
+  'icon',
+];
 
 /// Commands inside `/peers/tune/ops`. Tracking a peer is owner-only.
 List<String> operationActions({

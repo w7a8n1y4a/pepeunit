@@ -39,28 +39,28 @@ class SettingCategory {
   const SettingCategory({
     required this.id,
     required this.titles,
-    required this.fields,
+    this.fields = const [],
+    this.links = const [],
     this.icon = 'assets/icons/settings.svg',
+    this.requires = const [],
+    this.flagNeedsFields = false,
   });
 
   final String id;
   final Map<String, String> titles;
+
+  /// Input cells on this screen. Empty when the screen only opens other screens.
   final List<SettingField> fields;
-  final String icon;
-}
 
-class SettingGroup {
-  const SettingGroup({
-    required this.id,
-    required this.titles,
-    required this.icon,
-    required this.categoryIds,
-  });
-
-  final String id;
-  final Map<String, String> titles;
+  /// Screens this menu opens, after [fields].
+  final List<String> links;
   final String icon;
-  final List<String> categoryIds;
+
+  /// Flag keys that must be true before this screen can be opened.
+  final List<String> requires;
+
+  /// Bool cells stay disabled until every other field on this screen is valid.
+  final bool flagNeedsFields;
 }
 
 const _bool = 'bool';
@@ -106,27 +106,34 @@ SettingField _line(
   required String ru,
   required String en,
   String? hint,
-}) => SettingField(
-  key,
-  kind: _text,
-  titles: {'ru': ru, 'en': en},
-  hint: hint,
-);
+}) => SettingField(key, kind: _text, titles: {'ru': ru, 'en': en}, hint: hint);
 
-/// One cell per category. Every category has at most six fields so its fields
-/// fit on a single first-ring hex cluster around Back.
+/// Leaf screens hold at most six fields, so those cells stay on the first ring
+/// around Back. Instance is the menu that continues onto the second ring.
 final settingCategories = <SettingCategory>[
   SettingCategory(
-    id: 'flags',
+    id: 'instance',
+    titles: {'ru': 'Инстанс', 'en': 'Instance'},
+    icon: 'assets/icons/instances.svg',
+    links: [
+      'instance-flags',
+      'instance-basic',
+      'users',
+      'registry',
+      'units',
+      'github',
+      'logs',
+      'contacts',
+    ],
+  ),
+  SettingCategory(
+    id: 'instance-flags',
     titles: {'ru': 'Флаги', 'en': 'Flags'},
     icon: 'assets/icons/check.svg',
     fields: [
-      _flag('pu_ff_datapipe_enable', 'DataPipe', 'DataPipe'),
       _flag('pu_ff_federation_enable', 'Федерация', 'Federation'),
-      _flag('pu_ff_grafana_integration_enable', 'Grafana', 'Grafana'),
-      _flag('pu_ff_notification_enable', 'Уведомления', 'Alerts'),
       _flag('pu_ff_prometheus_enable', 'Prometheus', 'Prometheus'),
-      _flag('pu_ff_telegram_bot_enable', 'Telegram бот', 'Telegram bot'),
+      _flag('pu_ff_grafana_integration_enable', 'Grafana', 'Grafana'),
     ],
   ),
   SettingCategory(
@@ -193,16 +200,37 @@ final settingCategories = <SettingCategory>[
     ],
   ),
   SettingCategory(
-    id: 'federation',
-    titles: {'ru': 'Федерация', 'en': 'Federation'},
-    icon: 'assets/icons/instances.svg',
+    id: 'instance-basic',
+    titles: {'ru': 'Базовые', 'en': 'Basic'},
+    icon: 'assets/icons/settings.svg',
     fields: [
       _whole(
-        'pu_instance_retention_days',
+        'pu_instance_cipher_max_length',
+        0,
+        5000000,
+        ru: 'Лимит шифра (Б)',
+        en: 'Cipher max (B)',
+      ),
+      _real(
+        'pu_instance_http_connect_timeout',
+        1,
+        60,
+        ru: 'Таймаут соед. (с)',
+        en: 'Connect timeout',
+      ),
+      _real(
+        'pu_instance_http_timeout',
         1,
         120,
-        ru: 'Хранение пиров (дн)',
-        en: 'Retention (days)',
+        ru: 'HTTP таймаут (с)',
+        en: 'HTTP timeout (s)',
+      ),
+      _whole(
+        'pu_instance_max_pagination_size',
+        1,
+        500,
+        ru: 'Пагинация',
+        en: 'Pagination size',
       ),
       _whole(
         'pu_instance_max_state_size',
@@ -212,38 +240,17 @@ final settingCategories = <SettingCategory>[
         en: 'Max state (B)',
       ),
       _whole(
-        'pu_instance_max_pagination_size',
-        1,
-        500,
-        ru: 'Пагинация',
-        en: 'Pagination size',
-      ),
-      _real(
-        'pu_instance_http_timeout',
+        'pu_instance_retention_days',
         1,
         120,
-        ru: 'HTTP таймаут (с)',
-        en: 'HTTP timeout (s)',
-      ),
-      _real(
-        'pu_instance_http_connect_timeout',
-        1,
-        60,
-        ru: 'Таймаут соед. (с)',
-        en: 'Connect timeout',
-      ),
-      _whole(
-        'pu_instance_cipher_max_length',
-        0,
-        5000000,
-        ru: 'Лимит шифра (Б)',
-        en: 'Cipher max (B)',
+        ru: 'Хранение пиров (дн)',
+        en: 'Retention (days)',
       ),
     ],
   ),
   SettingCategory(
-    id: 'repos',
-    titles: {'ru': 'Репозитории', 'en': 'Repositories'},
+    id: 'registry',
+    titles: {'ru': 'Реестр', 'en': 'Registry'},
     icon: 'assets/icons/copy.svg',
     fields: [
       _whole(
@@ -260,13 +267,13 @@ final settingCategories = <SettingCategory>[
         ru: 'Интервал синка (с)',
         en: 'Sync interval (s)',
       ),
-      _whole(
-        'pu_instance_unit_state_send_interval',
-        1,
-        600,
-        ru: 'Отправка стейта (с)',
-        en: 'State interval (s)',
-      ),
+    ],
+  ),
+  SettingCategory(
+    id: 'units',
+    titles: {'ru': 'Устройства', 'en': 'Units'},
+    icon: 'assets/icons/micro.svg',
+    fields: [
       _whole(
         'pu_instance_unit_log_expiration',
         60,
@@ -274,66 +281,12 @@ final settingCategories = <SettingCategory>[
         ru: 'Срок логов (с)',
         en: 'Log TTL (s)',
       ),
-    ],
-  ),
-  SettingCategory(
-    id: 'datapipe',
-    titles: {'ru': 'DataPipe', 'en': 'DataPipe'},
-    icon: 'assets/icons/panel.svg',
-    fields: [
-      _flag(
-        'pu_datapipe_default_last_value_enable',
-        'Посл. значение',
-        'Default last value',
-      ),
       _whole(
-        'pu_datapipe_limit_unit_io_per_one_panel',
+        'pu_instance_unit_state_send_interval',
         1,
-        32,
-        ru: 'UnitIO на панель',
-        en: 'UnitIO per panel',
-      ),
-      _whole(
-        'pu_datapipe_buffer_max_size',
-        1,
-        1000000,
-        ru: 'Буфер Pipe',
-        en: 'Buffer max size',
-      ),
-      _whole(
-        'pu_datapipe_mqtt_keepalive',
-        0,
         600,
-        ru: 'Keepalive (с)',
-        en: 'Keepalive (s)',
-      ),
-    ],
-  ),
-  SettingCategory(
-    id: 'datapipe-time',
-    titles: {'ru': 'DataPipe время', 'en': 'DataPipe time'},
-    icon: 'assets/icons/reload.svg',
-    fields: [
-      _whole(
-        'pu_datapipe_buffer_flush_interval',
-        1,
-        3600,
-        ru: 'Сброс буфера (с)',
-        en: 'Buffer flush (s)',
-      ),
-      _whole(
-        'pu_datapipe_config_sync_interval',
-        1,
-        86400,
-        ru: 'Синк конфига (с)',
-        en: 'Config sync (s)',
-      ),
-      _whole(
-        'pu_datapipe_nrecords_cleanup_interval',
-        1,
-        604800,
-        ru: 'Очистка записей (с)',
-        en: 'Cleanup (s)',
+        ru: 'Отправка стейта (с)',
+        en: 'State interval (s)',
       ),
     ],
   ),
@@ -341,6 +294,12 @@ final settingCategories = <SettingCategory>[
     id: 'mqtt',
     titles: {'ru': 'MQTT', 'en': 'MQTT'},
     icon: 'assets/icons/micro.svg',
+    links: ['mqtt-basic', 'mqtt-clients'],
+  ),
+  SettingCategory(
+    id: 'mqtt-basic',
+    titles: {'ru': 'Базовые', 'en': 'Basic'},
+    icon: 'assets/icons/settings.svg',
     fields: [
       _whole(
         'pu_mqtt_keepalive',
@@ -349,46 +308,7 @@ final settingCategories = <SettingCategory>[
         ru: 'Keepalive (с)',
         en: 'Keepalive (s)',
       ),
-      _whole(
-        'pu_mqtt_max_clients',
-        1,
-        1024,
-        ru: 'Макс. клиентов',
-        en: 'Max clients',
-      ),
       _whole('pu_mqtt_max_qos', 0, 2, ru: 'Макс. QoS', en: 'Max QoS'),
-      _line(
-        'pu_mqtt_client_max_messages_rate',
-        ru: 'Лимит сообщ.',
-        en: 'Messages rate',
-        hint: '30/s',
-      ),
-      _line(
-        'pu_mqtt_client_max_bytes_rate',
-        ru: 'Лимит трафика',
-        en: 'Bytes rate',
-        hint: '1MB/s',
-      ),
-      _line(
-        'pu_mqtt_max_client_connection_rate',
-        ru: 'Лимит подключ.',
-        en: 'Connect rate',
-        hint: '20/s',
-      ),
-    ],
-  ),
-  SettingCategory(
-    id: 'mqtt-size',
-    titles: {'ru': 'MQTT размеры', 'en': 'MQTT sizes'},
-    icon: 'assets/icons/settings.svg',
-    fields: [
-      _whole(
-        'pu_mqtt_max_client_id_len',
-        1,
-        1024,
-        ru: 'Длина Client ID',
-        en: 'Client ID len',
-      ),
       _whole(
         'pu_mqtt_max_len_message_queue',
         1,
@@ -420,9 +340,128 @@ final settingCategories = <SettingCategory>[
     ],
   ),
   SettingCategory(
+    id: 'mqtt-clients',
+    titles: {'ru': 'Клиенты', 'en': 'Clients'},
+    icon: 'assets/icons/instances.svg',
+    fields: [
+      _whole(
+        'pu_mqtt_max_client_id_len',
+        1,
+        1024,
+        ru: 'Длина Client ID',
+        en: 'Client ID len',
+      ),
+      _whole(
+        'pu_mqtt_max_clients',
+        1,
+        1024,
+        ru: 'Макс. клиентов',
+        en: 'Max clients',
+      ),
+      _line(
+        'pu_mqtt_client_max_bytes_rate',
+        ru: 'Лимит трафика',
+        en: 'Bytes rate',
+        hint: '1MB/s',
+      ),
+      _line(
+        'pu_mqtt_client_max_messages_rate',
+        ru: 'Лимит сообщ.',
+        en: 'Messages rate',
+        hint: '30/s',
+      ),
+      _line(
+        'pu_mqtt_max_client_connection_rate',
+        ru: 'Лимит подключ.',
+        en: 'Connect rate',
+        hint: '20/s',
+      ),
+    ],
+  ),
+  SettingCategory(
+    id: 'datapipe',
+    titles: {'ru': 'DataPipe', 'en': 'DataPipe'},
+    icon: 'assets/icons/panel.svg',
+    fields: [_flag('pu_ff_datapipe_enable', 'DataPipe Вкл ?', 'DataPipe on?')],
+    links: ['datapipe-basic', 'datapipe-link'],
+  ),
+  SettingCategory(
+    id: 'datapipe-basic',
+    titles: {'ru': 'Базовые', 'en': 'Basic'},
+    icon: 'assets/icons/settings.svg',
+    requires: ['pu_ff_datapipe_enable'],
+    fields: [
+      _whole(
+        'pu_datapipe_buffer_flush_interval',
+        1,
+        3600,
+        ru: 'Сброс буфера (с)',
+        en: 'Buffer flush (s)',
+      ),
+      _whole(
+        'pu_datapipe_buffer_max_size',
+        1,
+        1000000,
+        ru: 'Буфер Pipe',
+        en: 'Buffer max size',
+      ),
+      _whole(
+        'pu_datapipe_config_sync_interval',
+        1,
+        86400,
+        ru: 'Синк конфига (с)',
+        en: 'Config sync (s)',
+      ),
+      _flag(
+        'pu_datapipe_default_last_value_enable',
+        'Посл. значение',
+        'Default last value',
+      ),
+      _whole(
+        'pu_datapipe_limit_unit_io_per_one_panel',
+        1,
+        32,
+        ru: 'UnitIO на панель',
+        en: 'UnitIO per panel',
+      ),
+      _whole(
+        'pu_datapipe_nrecords_cleanup_interval',
+        1,
+        604800,
+        ru: 'Очистка записей (с)',
+        en: 'Cleanup (s)',
+      ),
+    ],
+  ),
+  SettingCategory(
+    id: 'datapipe-link',
+    titles: {'ru': 'Соединение', 'en': 'Connection'},
+    icon: 'assets/icons/micro.svg',
+    requires: ['pu_ff_datapipe_enable'],
+    fields: [
+      _whole(
+        'pu_datapipe_mqtt_keepalive',
+        0,
+        600,
+        ru: 'Keepalive (с)',
+        en: 'Keepalive (s)',
+      ),
+    ],
+  ),
+  SettingCategory(
     id: 'notifications',
     titles: {'ru': 'Уведомления', 'en': 'Notifications'},
     icon: 'assets/icons/notifications.svg',
+    fields: [
+      _flag('pu_ff_notification_enable', 'Уведомления Вкл?', 'Alerts on?'),
+    ],
+    links: ['notifications-basic', 'notifications-telegram'],
+  ),
+  SettingCategory(
+    id: 'notifications-basic',
+    titles: {'ru': 'Базовые', 'en': 'Basic'},
+    icon: 'assets/icons/settings.svg',
+    requires: ['pu_ff_notification_enable'],
     fields: [
       _whole(
         'pu_notification_data_pipe_alert_batch',
@@ -445,6 +484,14 @@ final settingCategories = <SettingCategory>[
         ru: 'Буфер стрима',
         en: 'Stream maxlen',
       ),
+    ],
+  ),
+  SettingCategory(
+    id: 'notifications-telegram',
+    titles: {'ru': 'Telegram Бот', 'en': 'Telegram Bot'},
+    icon: 'assets/icons/send.svg',
+    requires: ['pu_ff_telegram_bot_enable', 'pu_ff_notification_enable'],
+    fields: [
       _whole(
         'pu_notification_telegram_alert_text_limit',
         1,
@@ -470,14 +517,22 @@ final settingCategories = <SettingCategory>[
   ),
   SettingCategory(
     id: 'telegram',
-    titles: {'ru': 'Telegram', 'en': 'Telegram'},
+    titles: {'ru': 'Telegram Бот', 'en': 'Telegram Bot'},
     icon: 'assets/icons/send.svg',
+    links: ['telegram-link', 'telegram-look'],
+  ),
+  SettingCategory(
+    id: 'telegram-link',
+    titles: {'ru': 'Подключение', 'en': 'Connection'},
+    icon: 'assets/icons/key.svg',
+    flagNeedsFields: true,
     fields: [
+      _flag('pu_ff_telegram_bot_enable', 'Бот Вкл ?', 'Bot on?'),
       _line(
-        'pu_telegram_bot_link',
-        ru: 'Ссылка на бота',
-        en: 'Bot link',
-        hint: 'https://t.me/bot',
+        'pu_telegram_token',
+        ru: 'Токен бота',
+        en: 'Bot token',
+        hint: '123456:ABC-def',
       ),
       const SettingField(
         'pu_telegram_bot_mode',
@@ -486,10 +541,17 @@ final settingCategories = <SettingCategory>[
         options: ['webhook', 'pooling'],
       ),
       _line(
-        'pu_telegram_token',
-        ru: 'Токен бота',
-        en: 'Bot token',
-        hint: '123456:ABC-def',
+        'pu_telegram_bot_link',
+        ru: 'Ссылка на бота',
+        en: 'Bot link',
+        hint: 'https://t.me/bot',
+      ),
+      _whole(
+        'pu_telegram_git_hash_length',
+        1,
+        16,
+        ru: 'Длина git-хеша',
+        en: 'Git hash len',
       ),
       _line(
         'pu_telegram_proxy_url',
@@ -500,17 +562,11 @@ final settingCategories = <SettingCategory>[
     ],
   ),
   SettingCategory(
-    id: 'telegram-size',
-    titles: {'ru': 'Telegram размеры', 'en': 'Telegram sizes'},
+    id: 'telegram-look',
+    titles: {'ru': 'Визуальные', 'en': 'Visual'},
     icon: 'assets/icons/library.svg',
+    requires: ['pu_ff_telegram_bot_enable'],
     fields: [
-      _whole(
-        'pu_telegram_items_per_page',
-        1,
-        20,
-        ru: 'Записей на стр.',
-        en: 'Items per page',
-      ),
       _whole(
         'pu_telegram_header_entity_length',
         1,
@@ -519,17 +575,17 @@ final settingCategories = <SettingCategory>[
         en: 'Header length',
       ),
       _whole(
-        'pu_telegram_git_hash_length',
+        'pu_telegram_items_per_page',
         1,
-        16,
-        ru: 'Длина git-хеша',
-        en: 'Git hash len',
+        20,
+        ru: 'Записей на стр.',
+        en: 'Items per page',
       ),
     ],
   ),
   SettingCategory(
     id: 'logs',
-    titles: {'ru': 'Журнал', 'en': 'Log'},
+    titles: {'ru': 'Логи', 'en': 'Logs'},
     icon: 'assets/icons/library.svg',
     fields: [
       const SettingField(
@@ -567,34 +623,6 @@ final settingCategories = <SettingCategory>[
   ),
 ];
 
-/// Top-level groups so the owner settings menu stays on a single ring.
-const settingGroups = <SettingGroup>[
-  SettingGroup(
-    id: 'core',
-    titles: {'ru': 'Система', 'en': 'System'},
-    icon: 'assets/icons/instances.svg',
-    categoryIds: ['contacts', 'users', 'federation', 'logs'],
-  ),
-  SettingGroup(
-    id: 'services',
-    titles: {'ru': 'Сервисы', 'en': 'Services'},
-    icon: 'assets/icons/panel.svg',
-    categoryIds: [
-      'repos',
-      'github',
-      'datapipe',
-      'datapipe-time',
-      'notifications',
-    ],
-  ),
-  SettingGroup(
-    id: 'transport',
-    titles: {'ru': 'Транспорт', 'en': 'Transport'},
-    icon: 'assets/icons/micro.svg',
-    categoryIds: ['mqtt', 'mqtt-size', 'telegram', 'telegram-size'],
-  ),
-];
-
 SettingCategory? settingCategory(String id) {
   for (final category in settingCategories) {
     if (category.id == id) return category;
@@ -602,11 +630,29 @@ SettingCategory? settingCategory(String id) {
   return null;
 }
 
-SettingGroup? settingGroup(String id) {
-  for (final group in settingGroups) {
-    if (group.id == id) return group;
+/// True when every flag in [category.requires] is on.
+bool settingSectionOpen(SettingCategory category, Map<String, Object?> values) {
+  for (final key in category.requires) {
+    if (values[key] != true) return false;
   }
-  return null;
+  return true;
+}
+
+/// True when a bool cell on [category] may be toggled.
+///
+/// Screens without [SettingCategory.flagNeedsFields] are always ready.
+/// Otherwise every non-bool field must already hold a valid value.
+bool settingFieldsReady(SettingCategory category, Map<String, Object?> values) {
+  if (!category.flagNeedsFields) return true;
+  for (final field in category.fields) {
+    if (field.kind == 'bool') continue;
+    final raw = values[field.key];
+    if (raw == null) return false;
+    final text = '$raw'.trim();
+    if (text.isEmpty) return false;
+    if (parseSetting(field, text) == null) return false;
+  }
+  return true;
 }
 
 final _emailRe = RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$');
@@ -628,7 +674,9 @@ String? settingIssue(SettingField field, String raw, String language) {
     return phrase(language, {'ru': 'Пустое значение', 'en': 'Empty value'});
   }
   if (field.kind == 'int' || field.kind == 'number') {
-    final number = field.kind == 'int' ? int.tryParse(text) : num.tryParse(text);
+    final number = field.kind == 'int'
+        ? int.tryParse(text)
+        : num.tryParse(text);
     if (number == null) {
       return phrase(language, {'ru': 'Нужно число', 'en': 'Need a number'});
     }
