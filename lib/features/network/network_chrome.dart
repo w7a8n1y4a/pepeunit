@@ -18,11 +18,11 @@ String netText(String language, String ru, String en) =>
 String trustLabel(String language, String trust) {
   switch (trust) {
     case 'Trust':
-      return netText(language, 'Доверие', 'Trust');
+      return netText(language, 'Доверенный', 'Trusted');
     case 'Pending':
-      return netText(language, 'Карантин', 'Pending');
+      return netText(language, 'Ожидает', 'Waiting');
     case 'Blocking':
-      return netText(language, 'Блокировка', 'Blocking');
+      return netText(language, 'Заблокирован', 'Blocked');
     default:
       return trust;
   }
@@ -57,12 +57,14 @@ HexSlot instanceMark({
   String icon = 'assets/icons/instances.svg',
   bool tappable = true,
   bool enabled = true,
+  bool busy = false,
 }) {
   return HexSlot(
     id: id,
     title: instanceHost(url),
     footerLeft:
-        footerLeft ?? (current ? netText(language, 'Текущий', 'Target') : null),
+        footerLeft ??
+        (current ? netText(language, 'Избранный', 'Favorite') : null),
     footerLeftColor: footerLeftColor,
     footer: version,
     footerColor: footerColor,
@@ -73,6 +75,7 @@ HexSlot instanceMark({
     image: image,
     tappable: tappable,
     enabled: enabled,
+    busy: busy,
   );
 }
 

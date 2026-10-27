@@ -66,10 +66,12 @@ class _PepeunitAppState extends State<PepeunitApp> {
             path: 'search',
             builder: (context, state) =>
                 NetworkSearchPage(scope: scopeOf(state.uri)),
-          ),
-          GoRoute(
-            path: 'lists',
-            builder: (context, state) => const NetworkListsPage(),
+            routes: [
+              GoRoute(
+                path: 'settings',
+                builder: (context, state) => const NetworkSearchSettingsPage(),
+              ),
+            ],
           ),
           GoRoute(
             path: 'allow',
@@ -84,6 +86,10 @@ class _PepeunitAppState extends State<PepeunitApp> {
           GoRoute(
             path: 'add',
             builder: (context, state) => const NetworkAddPage(),
+          ),
+          GoRoute(
+            path: 'track',
+            builder: (context, state) => const NetworkAddPage(track: true),
           ),
           GoRoute(
             path: 'instance',

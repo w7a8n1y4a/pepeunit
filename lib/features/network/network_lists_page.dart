@@ -8,19 +8,13 @@ import '../../instances/instance.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
 import '../hex_page.dart';
-import 'line_cell.dart';
 import 'network_chrome.dart';
 
-class NetworkListsPage extends StatefulWidget {
-  const NetworkListsPage({super.key});
-
-  @override
-  State<NetworkListsPage> createState() => _NetworkListsPageState();
-}
-
-class _NetworkListsPageState extends State<NetworkListsPage> {
-  String? _failure;
-  var _open = false;
+/// Search settings: allow list, deny list, then local add.
+///
+/// Back stays in the center. Local add is available to every role.
+class NetworkSearchSettingsPage extends StatelessWidget {
+  const NetworkSearchSettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -30,82 +24,75 @@ class _NetworkListsPageState extends State<NetworkListsPage> {
     final allow = model.vault.allow.length;
     final deny = model.vault.deny.length;
     final wide = hexWide(MediaQuery.sizeOf(context));
-    final frame = hexFrame(count: 3, back: HexBack.center, wide: wide);
-    final at = frame.cells;
+    final ids = <String>['allow', 'deny', 'add'];
+    final frame = hexFrame(count: ids.length, back: HexBack.center, wide: wide);
     final back = frame.back!;
     final slots = <HexSlot>[
-      HexSlot(
-        id: 'allow',
-        title: netText(language, 'Белый список', 'Allow list'),
-        footer: allow == 0 ? netText(language, 'все', 'all') : '$allow',
-        color: color,
-        q: at[0].$1,
-        r: at[0].$2,
-        icon: 'assets/icons/check.svg',
-      ),
-      HexSlot(
-        id: 'deny',
-        title: netText(language, 'Чёрный список', 'Deny list'),
-        footer: '$deny',
-        color: color,
-        q: at[1].$1,
-        r: at[1].$2,
-        icon: 'assets/icons/ban.svg',
-      ),
-      HexSlot(
-        id: 'pin',
-        title: netText(language, 'Добавить адрес', 'Add address'),
-        color: color,
-        q: at[2].$1,
-        r: at[2].$2,
-        body: LineCell(hint: 'host', color: color, onSubmit: _pin),
-      ),
+      for (var i = 0; i < ids.length; i++)
+        _slot(ids[i], frame.cells[i], language, color, allow, deny),
       backSlot(
         title: netText(language, 'Назад', 'Back'),
         q: back.$1,
         r: back.$2,
       ),
     ];
-    appendError(
-      slots,
-      message: _failure,
-      open: _open,
-      language: language,
-      text: netText,
-      wide: wide,
-      iconScale: 1.2,
-    );
     return HexPage(
       slots: slots,
       onTap: (id) {
         switch (id) {
           case 'back':
             popOrHome(context);
+          case 'add':
+            context.push('/peers/add');
           case 'allow':
             context.push('/peers/allow');
           case 'deny':
             context.push('/peers/deny');
-          case 'error':
-            setState(() => _open = true);
         }
       },
     );
   }
 
-  Future<void> _pin(String value) async {
-    try {
-      await AppScope.of(context).pin(value);
-      if (!mounted) return;
-      setState(() {
-        _failure = null;
-        _open = false;
-      });
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _failure = '$error';
-        _open = false;
-      });
+  HexSlot _slot(
+    String id,
+    (int, int) at,
+    String language,
+    Color color,
+    int allow,
+    int deny,
+  ) {
+    switch (id) {
+      case 'add':
+        return HexSlot(
+          id: 'add',
+          title: netText(language, 'Добавить локально', 'Add locally'),
+          color: color,
+          q: at.$1,
+          r: at.$2,
+          icon: 'assets/icons/plus.svg',
+        );
+      case 'allow':
+        return HexSlot(
+          id: 'allow',
+          title: netText(language, 'Белый список', 'Allow list'),
+          footer: allow == 0 ? netText(language, 'все', 'all') : '$allow',
+          color: color,
+          q: at.$1,
+          r: at.$2,
+          icon: 'assets/icons/check.svg',
+        );
+      case 'deny':
+        return HexSlot(
+          id: 'deny',
+          title: netText(language, 'Чёрный список', 'Deny list'),
+          footer: '$deny',
+          color: color,
+          q: at.$1,
+          r: at.$2,
+          icon: 'assets/icons/ban.svg',
+        );
+      default:
+        return HexSlot(id: id, title: id, color: color, q: at.$1, r: at.$2);
     }
   }
 }

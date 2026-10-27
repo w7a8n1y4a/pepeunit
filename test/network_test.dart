@@ -32,13 +32,16 @@ void main() {
     );
   });
 
-  test('search keeps at least one trust status', () {
+  test('search keeps at least one trust status and hides blocked', () {
     final query = NetworkQuery();
+    expect(query.trust, {'Trust', 'Pending'});
     expect(query.matches(_unit, null), isTrue);
-    expect(query.matches(_unit, 'Blocking'), isTrue);
+    expect(query.matches(_unit, 'Blocking'), isFalse);
     query.text = 'https://unit.pepeunit.com';
     expect(query.matches(_unit, 'Trust'), isTrue);
     expect(query.matches(_dc, 'Trust'), isFalse);
+    query.toggleTrust('Blocking');
+    expect(query.matches(_unit, 'Blocking'), isTrue);
     query.toggleTrust('Trust');
     query.toggleTrust('Pending');
     expect(query.trust, {'Blocking'});
@@ -107,23 +110,16 @@ void main() {
     );
 
     final quiet = networkBoard(target: null);
-    expect(quiet.slots.map((slot) => slot.id), [
-      'settings',
-      'address',
-      'search',
-      'back',
-    ]);
+    expect(quiet.slots.map((slot) => slot.id), ['idle', 'search', 'back']);
     expect(quiet.slots.any((slot) => slot.id == 'instance'), isFalse);
     expect(quiet.canZoomIn, isFalse);
-    expect(quiet.slots.firstWhere((slot) => slot.id == 'settings').q, 0);
-    expect(quiet.slots.firstWhere((slot) => slot.id == 'settings').r, -1);
+    expect(quiet.slots.firstWhere((slot) => slot.id == 'idle').q, 0);
+    expect(quiet.slots.firstWhere((slot) => slot.id == 'idle').r, -1);
     expect(quiet.slots.firstWhere((slot) => slot.id == 'back').q, 0);
     expect(quiet.slots.firstWhere((slot) => slot.id == 'back').r, 0);
-    expect(quiet.slots.firstWhere((slot) => slot.id == 'address').q, 1);
-    expect(quiet.slots.firstWhere((slot) => slot.id == 'address').r, -1);
-    expect(quiet.slots.firstWhere((slot) => slot.id == 'search').q, 0);
-    expect(quiet.slots.firstWhere((slot) => slot.id == 'search').r, 1);
-    final placed = cardBoard(const ['identity', 'metrics', 'relogin']);
+    expect(quiet.slots.firstWhere((slot) => slot.id == 'search').q, 1);
+    expect(quiet.slots.firstWhere((slot) => slot.id == 'search').r, -1);
+    final placed = cardBoard(const ['identity', 'metrics', 'settings']);
     final back = placed.firstWhere((slot) => slot.id == 'back');
     expect((back.q, back.r), (0, 0));
     expect(
@@ -142,8 +138,8 @@ void main() {
     );
     expect(
       (
-        placed.firstWhere((slot) => slot.id == 'relogin').q,
-        placed.firstWhere((slot) => slot.id == 'relogin').r,
+        placed.firstWhere((slot) => slot.id == 'settings').q,
+        placed.firstWhere((slot) => slot.id == 'settings').r,
       ),
       (0, 1),
     );
@@ -156,24 +152,13 @@ void main() {
       aimed.slots.firstWhere((slot) => slot.id == 'target').url,
       defaultInstanceUrl,
     );
-    final first = searchBoard(
-      scope: 0,
-      staff: true,
-      scanAll: true,
-      urls: many,
-      page: 0,
-    );
-    expect(first.slots.any((slot) => slot.id == 'add'), isTrue);
-    expect(first.slots.any((slot) => slot.id == 'scan-all'), isTrue);
-    expect(first.slots.where((slot) => slot.id == 'instance').length, 3);
+    final first = searchBoard(scope: 0, urls: many, page: 0);
+    expect(first.slots.any((slot) => slot.id == 'settings'), isTrue);
+    expect(first.slots.any((slot) => slot.id == 'add'), isFalse);
+    expect(first.slots.any((slot) => slot.id == 'scan-all'), isFalse);
+    expect(first.slots.where((slot) => slot.id == 'instance').length, 4);
     expect(first.canZoomIn, isTrue);
-    final outer = searchBoard(
-      scope: 2,
-      staff: true,
-      scanAll: true,
-      urls: many,
-      page: 0,
-    );
+    final outer = searchBoard(scope: 2, urls: many, page: 0);
     expect(outer.pages, greaterThan(1));
     expect(outer.slots.any((slot) => slot.id == 'next'), isTrue);
     expect(outer.canZoomIn, isFalse);
@@ -187,33 +172,37 @@ void main() {
           isTarget: true,
           owner: false,
           staff: false,
-          federation: true,
           telegram: false,
           trust: 'Trust',
         ),
-        ['metrics', 'relogin', 'clear'],
+        ['metrics', 'clear'],
+      );
+      expect(
+        cardActions(
+          isTarget: true,
+          owner: false,
+          staff: true,
+          telegram: false,
+          trust: 'Trust',
+        ),
+        ['metrics', 'users', 'clear'],
       );
       final owner = cardActions(
         isTarget: true,
         owner: true,
         staff: true,
-        federation: true,
         telegram: true,
         trust: 'Trust',
       );
-      expect(owner, ['metrics', 'relogin', 'clear', 'telegram', 'settings']);
+      expect(owner, ['metrics', 'settings', 'users', 'telegram', 'clear']);
       expect(cardBoard(['identity', ...owner]).length, lessThanOrEqualTo(7));
-      expect(tuneActions(owner: true, staff: true, federation: true), [
-        'icon',
-        'ops',
-        'flags',
-        'core',
-        'services',
-        'transport',
-      ]);
+      expect(tuneActions(owner: true), ['icon', 'settings', 'ops']);
+      expect(ownerSettingSections, ['services', 'transport', 'flags', 'core']);
+      expect(tuneActions(owner: false), isEmpty);
       expect(operationActions(owner: true, staff: true, federation: true), [
         'tests',
         'scan-all',
+        'track',
         'reboot',
       ]);
       expect(operationActions(owner: false, staff: true, federation: true), [
@@ -225,11 +214,10 @@ void main() {
           isTarget: false,
           owner: false,
           staff: true,
-          federation: true,
           telegram: true,
           trust: 'Pending',
         ),
-        ['metrics', 'relogin', 'target', 'telegram', 'peer'],
+        ['metrics', 'peer', 'telegram', 'target'],
       );
       expect(peerActions(trust: 'Pending', federation: true), [
         'trust',
@@ -341,6 +329,48 @@ void main() {
     );
   });
 
+  test('local add reads current and does not create a peer', () async {
+    final api = _QuietApi();
+    final model = AppModel(
+      store: MemoryVaultStore(),
+      api: (_) => api,
+      hostedUrl: () async => null,
+    );
+    await model.load();
+    await model.rememberInstance('https://unit.pepeunit.com');
+    expect(api.portraits, 1);
+    expect(api.created, isEmpty);
+    expect(model.vault.pinned, [_unit]);
+    expect(model.portraitOf(_unit)?.version, '1.5.0');
+    expect(model.visibleInstances(), contains(_unit));
+  });
+
+  test('only the owner can post a tracked peer', () async {
+    final api = _QuietApi();
+    final store = MemoryVaultStore();
+    store.vault = Vault.fromJson({
+      'instances': [
+        {'url': defaultInstanceUrl, 'active': true, 'role': 'User'},
+      ],
+    });
+    final model = AppModel(
+      store: store,
+      api: (_) => api,
+      hostedUrl: () async => defaultInstanceUrl,
+    );
+    await model.load();
+    await expectLater(
+      model.trackInstance('https://unit.pepeunit.com'),
+      throwsA(isA<StateError>()),
+    );
+    expect(api.created, isEmpty);
+    model.target!.role = 'Owner';
+    model.target!.token = 'token';
+    model.target!.userUuid = 'user-1';
+    await model.trackInstance('https://unit.pepeunit.com');
+    expect(api.created, [_unit]);
+  });
+
   test('a missing user is registered before the challenge is signed', () async {
     final identity = Identity.generate();
     final api = _SessionApi();
@@ -389,21 +419,57 @@ void main() {
     await tester.tap(find.bySemanticsLabel('devunit.pepeunit.com'));
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('unit.pepeunit.com'), findsNothing);
-    expect(find.bySemanticsLabel('Добавить'), findsNothing);
+    expect(find.bySemanticsLabel('Добавить локально'), findsNothing);
+    expect(find.bySemanticsLabel('Настройки'), findsNothing);
 
-    await tester.tap(find.bySemanticsLabel('Поиск пиров'));
+    await tester.tap(find.bySemanticsLabel('Поиск инстансов'));
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('unit.pepeunit.com'), findsOneWidget);
     expect(find.bySemanticsLabel('dcunit.pepeunit.com'), findsOneWidget);
+    expect(find.bySemanticsLabel('devunit.pepeunit.com'), findsOneWidget);
+    expect(find.bySemanticsLabel('Настройки'), findsOneWidget);
+    expect(find.bySemanticsLabel('Опросить соседей'), findsNothing);
+    expect(find.bySemanticsLabel('Доверенный'), findsNothing);
+    expect(find.bySemanticsLabel('Ожидает'), findsNothing);
+    expect(find.bySemanticsLabel('Заблокирован'), findsNothing);
 
     model.target!.role = 'Admin';
     model.notifyListeners();
     await tester.pump();
-    expect(find.bySemanticsLabel('Добавить'), findsOneWidget);
-    expect(find.bySemanticsLabel('Опросить все'), findsOneWidget);
-    // Peers remain visible on the first ring (scope=0) even when Admin is logged in!
+    expect(find.bySemanticsLabel('Добавить локально'), findsNothing);
+    expect(find.bySemanticsLabel('Опросить соседей'), findsNothing);
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Доверенный'))
+          .flagsCollection
+          .isSelected,
+      Tristate.isTrue,
+    );
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Ожидает'))
+          .flagsCollection
+          .isSelected,
+      Tristate.isTrue,
+    );
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Заблокирован'))
+          .flagsCollection
+          .isSelected,
+      Tristate.isFalse,
+    );
     expect(find.bySemanticsLabel('unit.pepeunit.com'), findsOneWidget);
     expect(find.bySemanticsLabel('dcunit.pepeunit.com'), findsOneWidget);
+
+    await tester.tap(find.bySemanticsLabel('Настройки'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Добавить локально'), findsOneWidget);
+    expect(find.bySemanticsLabel('Белый список'), findsOneWidget);
+    expect(find.bySemanticsLabel('Чёрный список'), findsOneWidget);
+    expect(find.bySemanticsLabel('Добавить адрес'), findsNothing);
+    await tester.tap(find.bySemanticsLabel('Назад'));
+    await tester.pumpAndSettle();
 
     final search = find.byKey(const ValueKey('network-search'));
     await tester.tap(search);
@@ -424,9 +490,10 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.bySemanticsLabel('unit.pepeunit.com'));
     await tester.pumpAndSettle();
-    expect(find.bySemanticsLabel('Сделать Текущим'), findsOneWidget);
-    expect(find.bySemanticsLabel('Telegram'), findsOneWidget);
-    expect(find.bySemanticsLabel('Перезайти'), findsOneWidget);
+    expect(find.bySemanticsLabel('Сделать избранным'), findsOneWidget);
+    expect(find.bySemanticsLabel('Telegram Bot'), findsOneWidget);
+    expect(find.bySemanticsLabel('Перезайти'), findsNothing);
+    expect(find.bySemanticsLabel('Команды'), findsNothing);
     expect(find.bySemanticsLabel('Модерация'), findsOneWidget);
     expect(find.bySemanticsLabel('Доверять'), findsNothing);
 
@@ -450,28 +517,38 @@ void main() {
     await tester.pump();
     await tester.tap(find.bySemanticsLabel('devunit.pepeunit.com'));
     await tester.pumpAndSettle();
-    expect(find.bySemanticsLabel('Параметры'), findsOneWidget);
-    expect(find.bySemanticsLabel('Отменить выбор'), findsOneWidget);
+    expect(find.bySemanticsLabel('Управление инстансом'), findsOneWidget);
+    expect(find.bySemanticsLabel('Пользователи'), findsOneWidget);
+    expect(find.bySemanticsLabel('Разжаловать'), findsOneWidget);
+    expect(find.bySemanticsLabel('Команды'), findsNothing);
+    expect(find.bySemanticsLabel('Перезайти'), findsNothing);
     expect(find.bySemanticsLabel('Перезапуск'), findsNothing);
     expect(find.bySemanticsLabel('Тесты'), findsNothing);
 
-    await tester.tap(find.bySemanticsLabel('Параметры'));
+    await tester.tap(find.bySemanticsLabel('Управление инстансом'));
     await tester.pumpAndSettle();
-    expect(find.bySemanticsLabel('Аватар инстанса'), findsOneWidget);
-    expect(find.bySemanticsLabel('Операции'), findsOneWidget);
-    expect(find.bySemanticsLabel('Флаги'), findsOneWidget);
-    expect(find.bySemanticsLabel('Система'), findsOneWidget);
-    expect(find.bySemanticsLabel('Сервисы'), findsOneWidget);
-    expect(find.bySemanticsLabel('Транспорт'), findsOneWidget);
+    expect(find.bySemanticsLabel('Загрузить аватар'), findsOneWidget);
+    expect(find.bySemanticsLabel('Настройки'), findsOneWidget);
+    expect(find.bySemanticsLabel('Команды'), findsOneWidget);
+    expect(find.bySemanticsLabel('Флаги'), findsNothing);
+    expect(find.bySemanticsLabel('Система'), findsNothing);
 
-    await tester.tap(find.bySemanticsLabel('Операции'));
+    await tester.tap(find.bySemanticsLabel('Команды'));
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('Перезапуск'), findsOneWidget);
     expect(find.bySemanticsLabel('Тесты'), findsOneWidget);
-    expect(find.bySemanticsLabel('Опросить все'), findsOneWidget);
+    expect(find.bySemanticsLabel('Опросить соседей'), findsOneWidget);
+    expect(find.bySemanticsLabel('Отслеживать инстанс'), findsOneWidget);
 
     await tester.tap(find.bySemanticsLabel('Назад'));
     await tester.pumpAndSettle();
+    await tester.tap(find.bySemanticsLabel('Настройки'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Сервисы'), findsOneWidget);
+    expect(find.bySemanticsLabel('Транспорт'), findsOneWidget);
+    expect(find.bySemanticsLabel('Флаги'), findsOneWidget);
+    expect(find.bySemanticsLabel('Система'), findsOneWidget);
+
     await tester.tap(find.bySemanticsLabel('Система'));
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('Контакты'), findsOneWidget);
@@ -525,6 +602,29 @@ class _DirectoryApi extends PepeunitApi {
       total: 1,
       items: const [PeerHead(uuid: 'peer-1', url: _unit, trust: 'Pending')],
     );
+  }
+}
+
+class _QuietApi extends _DirectoryApi {
+  _QuietApi() : super('https://devunit.pepeunit.com');
+
+  var portraits = 0;
+  final created = <String>[];
+
+  @override
+  Future<InstancePortrait> portrait() async {
+    portraits++;
+    return super.portrait();
+  }
+
+  @override
+  Future<void> createPeer(String token, String url) async {
+    created.add(url);
+  }
+
+  @override
+  Future<({String role, String uuid})> user(String token, String uuid) async {
+    return (role: 'Owner', uuid: uuid);
   }
 }
 

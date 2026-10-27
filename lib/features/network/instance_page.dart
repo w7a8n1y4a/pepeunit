@@ -54,7 +54,6 @@ class _InstancePageState extends State<InstancePage> {
           isTarget: isTarget,
           owner: owner,
           staff: staff,
-          federation: federation,
           telegram: portrait?.telegram == true,
           trust: peer?.trust,
         ),
@@ -65,7 +64,7 @@ class _InstancePageState extends State<InstancePage> {
     final placed = cardBoard(actions, wide: wide);
     final slots = <HexSlot>[
       for (final slot in placed)
-        _slot(slot, model, language, color, url, isTarget, owner, staff),
+        _slot(slot, model, language, color, url, isTarget),
     ];
     appendError(
       slots,
@@ -88,8 +87,6 @@ class _InstancePageState extends State<InstancePage> {
     Color color,
     String url,
     bool isTarget,
-    bool owner,
-    bool staff,
   ) {
     final portrait = model.portraitOf(url);
     final peer = model.peers[url];
@@ -102,14 +99,10 @@ class _InstancePageState extends State<InstancePage> {
           r: slot.r,
         );
       case 'identity':
-        final String? leftCaption;
-        if (isTarget) {
-          leftCaption = netText(language, 'Текущий', 'Target');
-        } else if (peer != null) {
-          leftCaption = trustLabel(language, peer.trust);
-        } else {
-          leftCaption = null;
-        }
+        final ping = peer?.lastPing;
+        final pingText = ping == null
+            ? null
+            : '${ping.round()} ${netText(language, 'мс', 'ms')}';
         return instanceMark(
           id: 'identity',
           url: url,
@@ -118,24 +111,11 @@ class _InstancePageState extends State<InstancePage> {
           r: slot.r,
           color: isTarget ? color : trustColor(peer?.trust, color),
           current: isTarget,
-          footerLeft: leftCaption,
-          footerLeftColor: isTarget
-              ? const Color(0xFFFFFFFF)
-              : trustColor(peer?.trust, const Color(0xFFFFFFFF)),
+          footerLeft: isTarget ? null : pingText,
           version: portrait?.version,
           image: model.iconOf(url),
-          tappable: false,
-        );
-      case 'relogin':
-        return HexSlot(
-          id: 'relogin',
-          title: netText(language, 'Перезайти', 'Sign in again'),
-          footer: record?.role,
-          color: color,
-          busy: _pending == 'relogin',
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/reload.svg',
+          tappable: isTarget,
+          busy: _pending == 'identity',
         );
       case 'metrics':
         final pages = _summaryPages(language, portrait, peer);
@@ -163,41 +143,49 @@ class _InstancePageState extends State<InstancePage> {
         return _action(
           slot,
           language,
-          'Сделать Текущим',
-          'Make current',
-          color,
+          'Сделать избранным',
+          'Make favorite',
+          const Color(0xFF4CAF50),
           'assets/icons/sight.svg',
         );
       case 'clear':
         return _action(
           slot,
           language,
-          'Отменить выбор',
-          'Clear selection',
-          color,
+          'Разжаловать',
+          'Demote',
+          errorColor,
           'assets/icons/close.svg',
         );
       case 'telegram':
         return _action(
           slot,
           language,
-          'Telegram',
-          'Telegram',
+          'Telegram Bot',
+          'Telegram Bot',
           color,
           'assets/icons/send.svg',
         );
       case 'settings':
         return HexSlot(
           id: 'settings',
-          title: owner
-              ? netText(language, 'Параметры', 'Parameters')
-              : netText(language, 'Управление', 'Control'),
+          title: netText(language, 'Управление инстансом', 'Manage instance'),
           footer: record?.role,
           color: color,
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/settings.svg',
           iconScale: 1.35,
+        );
+      case 'users':
+        return HexSlot(
+          id: 'users',
+          title: netText(language, 'Пользователи', 'Users'),
+          color: color,
+          q: slot.q,
+          r: slot.r,
+          icon: 'assets/icons/account.svg',
+          tappable: false,
         );
       case 'peer':
         final trust = peer?.trust ?? '';
@@ -383,14 +371,15 @@ class _InstancePageState extends State<InstancePage> {
             _open = false;
           });
         }
-      case 'relogin':
+      case 'identity':
+        if (model.target?.url != url) return;
         if (!model.vault.hasKey) {
           setState(() {
             _failure = netText(language, 'Нет ключа', 'No key');
           });
           return;
         }
-        await _run('relogin', () => model.resign(url));
+        await _run('identity', () => model.resign(url));
       case 'target':
         await _run('target', () => model.selectTarget(url));
       case 'clear':

@@ -45,7 +45,12 @@ class InstancePolicy {
 
 class NetworkQuery {
   String text = '';
-  final Set<String> trust = {...trustStatuses};
+
+  /// Blocked peers stay hidden until an Admin or Owner turns that status on.
+  final Set<String> trust = {
+    for (final status in trustStatuses)
+      if (status != 'Blocking') status,
+  };
 
   bool matches(String url, String? trustStatus) {
     final needle = text.trim().toLowerCase();
@@ -70,25 +75,24 @@ class NetworkQuery {
   }
 }
 
-/// Primary actions on the root instance card. Always fits on a single ring
-/// (at most 6 cells around Back); role-specific administration and peer
-/// moderation live in dedicated submenus so the card never bloats into 2 rings.
+/// Actions on the instance card, after the identity cell.
+///
+/// Order: summary, management, users, telegram, then demote or favorite.
+/// Peer moderation takes the administration slot on another instance.
+/// Identity plus these actions stay on one ring around Back.
 List<String> cardActions({
   required bool isTarget,
   required bool owner,
   required bool staff,
-  required bool federation,
   required bool telegram,
   required String? trust,
 }) {
-  final actions = <String>['metrics', 'relogin'];
-  actions.add(isTarget ? 'clear' : 'target');
+  final actions = <String>['metrics'];
+  if (isTarget && owner) actions.add('settings');
+  if (isTarget && (owner || staff)) actions.add('users');
+  if (!isTarget && staff && trust != null) actions.add('peer');
   if (telegram) actions.add('telegram');
-  if (isTarget && (owner || staff)) {
-    actions.add('settings');
-  } else if (!isTarget && staff && trust != null) {
-    actions.add('peer');
-  }
+  actions.add(isTarget ? 'clear' : 'target');
   return actions;
 }
 
@@ -106,29 +110,28 @@ List<String> peerActions({required String? trust, required bool federation}) {
   }
 }
 
-/// Top-level items on `/peers/tune` for Owner and Admin. Always fits in 1 ring.
-List<String> tuneActions({
-  required bool owner,
-  required bool staff,
-  required bool federation,
-}) {
-  if (owner) {
-    return const ['icon', 'ops', 'flags', 'core', 'services', 'transport'];
-  }
-  if (staff) {
-    return ['identity', 'tests', if (federation) 'scan-all'];
-  }
-  return const [];
+/// Owner controls on `/peers/tune`: avatar, settings, commands.
+List<String> tuneActions({required bool owner}) {
+  if (!owner) return const [];
+  return const ['icon', 'settings', 'ops'];
 }
 
-/// Instance operation commands inside `/peers/tune/ops` (or Admin `/peers/tune`).
+/// Groups gathered under `/peers/tune/settings`.
+const ownerSettingSections = <String>['services', 'transport', 'flags', 'core'];
+
+/// Commands inside `/peers/tune/ops`. Tracking a peer is owner-only.
 List<String> operationActions({
   required bool owner,
   required bool staff,
   required bool federation,
 }) {
   if (!owner && !staff) return const [];
-  return ['tests', if (federation) 'scan-all', if (owner) 'reboot'];
+  return [
+    'tests',
+    if (federation) 'scan-all',
+    if (owner) 'track',
+    if (owner) 'reboot',
+  ];
 }
 
 class BoardSlot {
@@ -154,13 +157,12 @@ class NetworkBoard {
   final int pages;
 }
 
-/// Settings, the current instance, then search. Back stays in the center.
+/// The current instance, then peer search. Back stays in the center.
+///
+/// On a tall screen the instance sits at 120° and search at 60°.
+/// Without a target the first cell is the plain network section.
 NetworkBoard networkBoard({required String? target, bool wide = false}) {
-  final ids = <String>[
-    'settings',
-    target == null ? 'address' : 'target',
-    'search',
-  ];
+  final ids = <String>[target == null ? 'idle' : 'target', 'search'];
   final frame = hexFrame(count: ids.length, back: HexBack.center, wide: wide);
   final back = frame.back!;
   return NetworkBoard(
@@ -180,18 +182,16 @@ NetworkBoard networkBoard({required String? target, bool wide = false}) {
   );
 }
 
-/// Search field, then add and scan when they exist, then peer cards.
+/// Filter, then search settings, then peer cards.
 /// Back stays in the center. A pager takes the last two free cells.
 NetworkBoard searchBoard({
   required int scope,
-  required bool staff,
-  required bool scanAll,
   required List<String> urls,
   required int page,
   bool wide = false,
 }) {
   final rings = scope.clamp(0, 2) + 1;
-  final chrome = <String>['text', if (staff) 'add', if (scanAll) 'scan-all'];
+  final chrome = <String>['text', 'settings'];
   final free = hexDisk(rings, wide: wide).length - 1;
   final instanceCap = free - chrome.length;
   final overflow = urls.length > instanceCap;

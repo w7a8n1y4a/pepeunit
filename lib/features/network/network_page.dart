@@ -6,8 +6,8 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
+import '../../navigation/sections.dart';
 import '../hex_page.dart';
-import 'line_cell.dart';
 import 'network_chrome.dart';
 
 class NetworkPage extends StatefulWidget {
@@ -18,7 +18,6 @@ class NetworkPage extends StatefulWidget {
 }
 
 class _NetworkPageState extends State<NetworkPage> {
-  String? _failure;
   var _failureOpen = false;
 
   @override
@@ -36,7 +35,7 @@ class _NetworkPageState extends State<NetworkPage> {
     final language = model.vault.language;
     final color = networkColor;
     final target = model.target;
-    final failure = _failure ?? model.networkFailure;
+    final failure = model.networkFailure;
     final wide = hexWide(MediaQuery.sizeOf(context));
     final board = networkBoard(target: target?.url, wide: wide);
     final slots = [
@@ -65,36 +64,24 @@ class _NetworkPageState extends State<NetworkPage> {
         final text = model.query.text.trim();
         return HexSlot(
           id: 'search',
-          title: netText(language, 'Поиск пиров', 'Search peers'),
+          title: netText(language, 'Поиск инстансов', 'Search instances'),
           footer: text.isEmpty ? null : text,
           color: color,
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/search.svg',
         );
-      case 'settings':
+      case 'idle':
+        final section = sectionById('peers')!;
         return HexSlot(
-          id: 'settings',
-          title: netText(language, 'Настройки', 'Settings'),
-          color: color,
+          id: 'idle',
+          title: section.title(language),
+          color: section.color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/settings.svg',
-          iconScale: 1.4,
-        );
-      case 'address':
-        return HexSlot(
-          id: 'address',
-          title: netText(language, 'Адрес', 'Address'),
-          color: color,
-          q: slot.q,
-          r: slot.r,
-          body: LineCell(
-            hint: 'host',
-            color: color,
-            error: _failure,
-            onSubmit: (value) => _select(value),
-          ),
+          icon: section.icon,
+          iconScale: section.iconScale,
+          tappable: false,
         );
       case 'target':
         final url = slot.url!;
@@ -131,28 +118,8 @@ class _NetworkPageState extends State<NetworkPage> {
         popOrHome(context);
       case 'search':
         context.push('/peers/search');
-      case 'settings':
-        context.push('/peers/lists');
       case 'error':
         setState(() => _failureOpen = true);
-    }
-  }
-
-  Future<void> _select(String raw) async {
-    final model = AppScope.of(context);
-    try {
-      await model.selectTarget(raw);
-      if (!mounted) return;
-      setState(() {
-        _failure = null;
-        _failureOpen = false;
-      });
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _failure = '$error';
-        _failureOpen = false;
-      });
     }
   }
 }

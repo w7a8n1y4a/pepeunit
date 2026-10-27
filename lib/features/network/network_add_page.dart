@@ -10,7 +10,10 @@ import 'line_cell.dart';
 import 'network_chrome.dart';
 
 class NetworkAddPage extends StatefulWidget {
-  const NetworkAddPage({super.key});
+  const NetworkAddPage({this.track = false, super.key});
+
+  /// True posts a peer. False only reads `/instances/current` and stores it.
+  final bool track;
 
   @override
   State<NetworkAddPage> createState() => _NetworkAddPageState();
@@ -76,7 +79,12 @@ class _NetworkAddPageState extends State<NetworkAddPage> {
       _open = false;
     });
     try {
-      await AppScope.of(context).createPeer(value);
+      final model = AppScope.of(context);
+      if (widget.track) {
+        await model.trackInstance(value);
+      } else {
+        await model.rememberInstance(value);
+      }
       if (!mounted) return;
       context.pop();
     } catch (error) {

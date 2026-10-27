@@ -13,7 +13,8 @@ import 'network_chrome.dart';
 import 'setting_cells.dart';
 
 /// Renders either:
-/// - `ops`: the 1-ring instance operations menu (`tests`, `scan-all`, `reboot`)
+/// - `ops`: the 1-ring instance commands menu (`tests`, `scan-all`, `reboot`)
+/// - `settings`: services, transport, flags and system
 /// - a `SettingGroup` (`core`, `services`, `transport`): 1-ring submenu of categories
 /// - a leaf `SettingCategory` (`flags`, `contacts`, `users`, ...): 1-ring cluster
 ///   where every setting field is its own hexagon around Back!
@@ -60,6 +61,8 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     final List<HexSlot> slots;
     if (id == 'ops') {
       slots = _opsSlots(model, language, color, wide);
+    } else if (id == 'settings') {
+      slots = _setupSlots(language, color, wide);
     } else if (settingGroup(id) != null) {
       slots = _groupSlots(settingGroup(id)!, language, color, wide);
     } else if (settingCategory(id) != null) {
@@ -150,12 +153,20 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
           ),
           'scan-all' => HexSlot(
             id: 'scan-all',
-            title: netText(language, 'Опросить все', 'Scan all'),
+            title: netText(language, 'Опросить соседей', 'Poll neighbors'),
             color: color,
             busy: _pending == 'scan-all',
             q: spots[i].$1,
             r: spots[i].$2,
             icon: 'assets/icons/instances.svg',
+          ),
+          'track' => HexSlot(
+            id: 'track',
+            title: netText(language, 'Отслеживать инстанс', 'Track instance'),
+            color: color,
+            q: spots[i].$1,
+            r: spots[i].$2,
+            icon: 'assets/icons/sight.svg',
           ),
           'reboot' => HexSlot(
             id: 'reboot',
@@ -175,6 +186,57 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
           ),
         },
     ];
+  }
+
+  List<HexSlot> _setupSlots(String language, Color color, bool wide) {
+    final frame = hexFrame(
+      count: ownerSettingSections.length,
+      back: HexBack.center,
+      wide: wide,
+    );
+    final spots = frame.cells;
+    final back = frame.back!;
+    return [
+      backSlot(
+        title: netText(language, 'Назад', 'Back'),
+        q: back.$1,
+        r: back.$2,
+      ),
+      for (var i = 0; i < ownerSettingSections.length && i < spots.length; i++)
+        _sectionSlot(
+          ownerSettingSections[i],
+          spots[i].$1,
+          spots[i].$2,
+          language,
+          color,
+        ),
+    ];
+  }
+
+  HexSlot _sectionSlot(String id, int q, int r, String language, Color color) {
+    final group = settingGroup(id);
+    if (group != null) {
+      return HexSlot(
+        id: group.id,
+        title: phrase(language, group.titles),
+        color: color,
+        q: q,
+        r: r,
+        icon: group.icon,
+      );
+    }
+    final category = settingCategory(id);
+    if (category != null) {
+      return HexSlot(
+        id: category.id,
+        title: phrase(language, category.titles),
+        color: color,
+        q: q,
+        r: r,
+        icon: category.icon,
+      );
+    }
+    return HexSlot(id: id, title: id, color: color, q: q, r: r);
   }
 
   List<HexSlot> _groupSlots(
@@ -329,6 +391,13 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
         await _run('tests', model.runIntegrationTests);
       case 'scan-all':
         await _run('scan-all', model.scanAll);
+      case 'track':
+        context.push('/peers/track');
+      case 'services':
+      case 'transport':
+      case 'flags':
+      case 'core':
+        context.push('/peers/tune/$id');
       case 'reboot':
         await _run('reboot', model.reboot);
     }

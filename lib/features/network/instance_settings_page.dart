@@ -57,11 +57,7 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
     final color = networkColor;
     final target = model.target;
     final owner = target?.ownsInstance ?? false;
-    final staff = target?.managesPeers ?? false;
-    final portrait = target == null ? null : model.portraitOf(target.url);
-    final federation = portrait?.federation != false;
-
-    final ids = tuneActions(owner: owner, staff: staff, federation: federation);
+    final ids = tuneActions(owner: owner);
     final wide = hexWide(MediaQuery.sizeOf(context));
     final frame = hexFrame(count: ids.length, back: HexBack.center, wide: wide);
     final back = frame.back!;
@@ -108,24 +104,11 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
           q: slot.q,
           r: slot.r,
         );
-      case 'identity':
-        return instanceMark(
-          id: 'identity',
-          url: targetUrl,
-          language: language,
-          q: slot.q,
-          r: slot.r,
-          color: color,
-          current: true,
-          version: portrait?.version,
-          image: targetUrl.isEmpty ? null : model.iconOf(targetUrl),
-          tappable: false,
-        );
       case 'icon':
         final image = targetUrl.isEmpty ? null : model.iconOf(targetUrl);
         return HexSlot(
           id: 'icon',
-          title: netText(language, 'Аватар инстанса', 'Instance icon'),
+          title: netText(language, 'Загрузить аватар', 'Upload avatar'),
           footer: portrait?.version,
           color: dropColor(_dragHot, color),
           busy: _pending == 'icon',
@@ -135,45 +118,25 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
           image: image,
           iconScale: 1.15,
         );
+      case 'settings':
+        return HexSlot(
+          id: 'settings',
+          title: netText(language, 'Настройки', 'Settings'),
+          color: color,
+          q: slot.q,
+          r: slot.r,
+          icon: 'assets/icons/settings.svg',
+          iconScale: 1.4,
+        );
       case 'ops':
         return HexSlot(
           id: 'ops',
-          title: netText(language, 'Операции', 'Operations'),
+          title: netText(language, 'Команды', 'Commands'),
           footer: portrait?.testsStatus,
           color: color,
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/power.svg',
-        );
-      case 'flags':
-        return HexSlot(
-          id: 'flags',
-          title: netText(language, 'Флаги', 'Flags'),
-          color: color,
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/check.svg',
-        );
-      case 'tests':
-        return HexSlot(
-          id: 'tests',
-          title: netText(language, 'Тесты', 'Tests'),
-          footer: portrait?.testsStatus,
-          color: color,
-          busy: _pending == 'tests',
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/reload.svg',
-        );
-      case 'scan-all':
-        return HexSlot(
-          id: 'scan-all',
-          title: netText(language, 'Опросить все', 'Scan all'),
-          color: color,
-          busy: _pending == 'scan-all',
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/instances.svg',
         );
       default:
         final group = settingGroup(slot.id);
@@ -198,7 +161,6 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
   }
 
   Future<void> _tap(String id, String language, bool owner) async {
-    final model = AppScope.of(context);
     switch (id) {
       case 'back':
         popOrHome(context);
@@ -206,16 +168,10 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
         setState(() => _open = true);
       case 'icon':
         if (owner) await _pick(language);
-      case 'tests':
-        await _run('tests', model.runIntegrationTests);
-      case 'scan-all':
-        await _run('scan-all', model.scanAll);
+      case 'settings':
+        context.push('/peers/tune/settings');
       case 'ops':
-      case 'flags':
-      case 'core':
-      case 'services':
-      case 'transport':
-        context.push('/peers/tune/$id');
+        context.push('/peers/tune/ops');
     }
   }
 

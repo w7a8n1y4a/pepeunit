@@ -22,27 +22,16 @@ class NetworkSearchPage extends StatefulWidget {
 
 class _NetworkSearchPageState extends State<NetworkSearchPage> {
   var _page = 0;
-  String? _failure;
-  var _open = false;
-  String? _pending;
 
   @override
   Widget build(BuildContext context) {
     final model = AppScope.of(context);
     final language = model.vault.language;
     final color = networkColor;
-    final target = model.target;
-    final staff = target?.managesPeers ?? false;
-    final federation = model.portraitOf(target?.url ?? '')?.federation != false;
-    final urls = [
-      for (final url in model.visibleInstances())
-        if (url != target?.url) url,
-    ];
+    final urls = model.visibleInstances();
     final wide = hexWide(MediaQuery.sizeOf(context));
     final board = searchBoard(
       scope: widget.scope,
-      staff: staff,
-      scanAll: staff && federation && target != null,
       urls: urls,
       page: _page,
       wide: wide,
@@ -51,14 +40,6 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
       for (final slot in board.slots)
         _slot(slot, model, language, color, board),
     ];
-    appendError(
-      slots,
-      message: _failure,
-      open: _open,
-      language: language,
-      text: netText,
-      wide: wide,
-    );
     return HexPage(
       slots: slots,
       onTap: (id) => _tap(id, board),
@@ -94,24 +75,15 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
           r: slot.r,
           body: LineSearch(color: color),
         );
-      case 'add':
+      case 'settings':
         return HexSlot(
-          id: 'add',
-          title: netText(language, 'Добавить', 'Add'),
+          id: 'settings',
+          title: netText(language, 'Настройки', 'Settings'),
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/plus.svg',
-        );
-      case 'scan-all':
-        return HexSlot(
-          id: 'scan-all',
-          title: netText(language, 'Опросить все', 'Scan all'),
-          color: color,
-          busy: _pending == 'scan-all',
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/reload.svg',
+          icon: 'assets/icons/settings.svg',
+          iconScale: 1.4,
         );
       case 'prev':
         return pageStepSlot(
@@ -144,9 +116,8 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
         final peer = model.peers[url];
         final portrait = model.portraitOf(url);
         final ping = peer?.lastPing;
-        final trust = peer?.trust ?? '';
+        final favorite = model.target?.url == url;
         final versionText = portrait?.version ?? '';
-        final trustText = trust.isEmpty ? null : trustLabel(language, trust);
         final pingText = ping == null
             ? null
             : '${ping.round()} ${netText(language, 'мс', 'ms')}';
@@ -156,17 +127,10 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
           language: language,
           q: slot.q,
           r: slot.r,
-          color: trustColor(trust, color),
-          current: false,
-          footerLeft:
-              pingText ??
-              (trustText != null && versionText.isNotEmpty
-                  ? versionText
-                  : null),
-          version: trustText ?? (versionText.isEmpty ? null : versionText),
-          footerColor: trustText == null
-              ? const Color(0xFFFFFFFF)
-              : trustColor(trust, const Color(0xFFFFFFFF)),
+          color: favorite ? color : trustColor(peer?.trust, color),
+          current: favorite,
+          footerLeft: favorite ? null : pingText,
+          version: versionText.isEmpty ? null : versionText,
           image: model.iconOf(url),
         );
       default:
@@ -190,44 +154,23 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
     switch (id) {
       case 'back':
         popOrHome(context);
-      case 'add':
-        context.push('/peers/add');
-      case 'error':
-        setState(() => _open = true);
+      case 'settings':
+        context.push('/peers/search/settings');
       case 'prev':
         setState(() => _page = board.page - 1);
       case 'next':
         setState(() => _page = board.page + 1);
-      case 'scan-all':
-        await _scan(model);
       default:
-        if (trustStatuses.contains(id)) model.toggleTrust(id);
-    }
-  }
-
-  Future<void> _scan(AppModel model) async {
-    if (_pending != null) return;
-    setState(() {
-      _pending = 'scan-all';
-      _failure = null;
-      _open = false;
-    });
-    try {
-      await model.scanAll();
-      if (!mounted) return;
-      setState(() => _pending = null);
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _pending = null;
-        _failure = '$error';
-      });
+        if (model.target?.managesPeers == true && trustStatuses.contains(id)) {
+          model.toggleTrust(id);
+        }
     }
   }
 }
 
-/// Combines peer search input and the three trust status toggles inside one
-/// cell so the surrounding ring stays open for peer cards.
+/// Combines peer search input with trust status toggles inside one cell so
+/// the surrounding ring stays open for peer cards. The status words are an
+/// Admin and Owner control; other roles get the field alone.
 class LineSearch extends StatelessWidget {
   const LineSearch({required this.color, super.key});
 
@@ -237,6 +180,7 @@ class LineSearch extends StatelessWidget {
   Widget build(BuildContext context) {
     final model = AppScope.of(context);
     final language = model.vault.language;
+    final staff = model.target?.managesPeers ?? false;
     return LineField(
       color: color,
       value: model.query.text,
@@ -244,7 +188,7 @@ class LineSearch extends StatelessWidget {
       language: language,
       activeTrust: model.query.trust,
       onChanged: model.setSearch,
-      onToggleTrust: model.toggleTrust,
+      onToggleTrust: staff ? model.toggleTrust : null,
     );
   }
 }
@@ -256,7 +200,7 @@ class LineField extends StatefulWidget {
     required this.hint,
     required this.language,
     required this.onChanged,
-    this.activeTrust = const {'Trust', 'Pending', 'Blocking'},
+    this.activeTrust = const {'Trust', 'Pending'},
     this.onToggleTrust,
     super.key,
   });

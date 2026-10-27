@@ -185,14 +185,6 @@ class AppModel extends ChangeNotifier {
     await _commit();
   }
 
-  Future<void> pin(String raw) async {
-    final url = canonicalInstanceUrl(raw);
-    if (!vault.pinned.contains(url)) vault.pinned.add(url);
-    _ensureRecord(url);
-    await _commit();
-    notifyListeners();
-  }
-
   Future<void> allowInstance(String raw) async {
     final url = canonicalInstanceUrl(raw);
     vault.deny.remove(url);
@@ -330,11 +322,36 @@ class AppModel extends ChangeNotifier {
     await _commit();
   }
 
+  /// Remembers an instance on this client after reading its public portrait.
+  ///
+  /// Does not create a peer, whatever the role is.
+  Future<void> rememberInstance(String raw) async {
+    final url = canonicalInstanceUrl(raw);
+    final client = api(originOf(url));
+    final portrait = await client.portrait();
+    portraits[url] = portrait;
+    final uuid = portrait.iconUuid;
+    if (uuid != null) {
+      try {
+        icons['${originOf(url)}/$uuid'] ??= await client.icon(uuid);
+      } catch (_) {}
+    }
+    if (!vault.pinned.contains(url)) vault.pinned.add(url);
+    _ensureRecord(url);
+    await _commit();
+  }
+
   Future<void> createPeer(String raw) async {
     final current = _staffTarget();
     final url = canonicalInstanceUrl(raw);
     await api(originOf(current.url)).createPeer(current.token!, url);
     await refreshTarget();
+  }
+
+  /// Owner asks the current instance to start tracking [raw] as a peer.
+  Future<void> trackInstance(String raw) async {
+    _ownerTarget();
+    await createPeer(raw);
   }
 
   Future<void> setTrust(String url, String trust) async {
