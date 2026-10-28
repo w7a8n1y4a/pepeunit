@@ -83,7 +83,6 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/settings.svg',
-          iconScale: 1.4,
         );
       case 'prev':
         return pageStepSlot(

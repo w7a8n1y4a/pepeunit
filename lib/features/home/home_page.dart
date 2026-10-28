@@ -66,7 +66,6 @@ HexSlot _slot(MenuSection section, AppModel model, String language) {
     r: section.r,
     icon: png == null ? section.icon : null,
     image: png,
-    iconScale: section.iconScale,
     enabled: menuSectionEnabled(
       section.id,
       hasTarget: vault.target != null,

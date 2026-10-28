@@ -54,7 +54,7 @@ HexSlot instanceMark({
   String? footerLeft,
   Color footerLeftColor = const Color(0xFFFFFFFF),
   Uint8List? image,
-  String icon = 'assets/icons/instances.svg',
+  String icon = 'assets/icons/instance.svg',
   bool tappable = true,
   bool enabled = true,
   bool busy = false,

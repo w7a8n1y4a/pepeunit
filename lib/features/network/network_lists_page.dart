@@ -135,7 +135,6 @@ class _NetworkListPageState extends State<NetworkListPage> {
       language: language,
       text: netText,
       wide: wide,
-      iconScale: 1.2,
     );
     final path = widget.deny ? '/peers/deny' : '/peers/allow';
     return HexPage(
@@ -202,7 +201,7 @@ class _NetworkListPageState extends State<NetworkListPage> {
           color: listed ? const Color(0xFFFFFFFF) : color,
           q: slot.q,
           r: slot.r,
-          icon: model.iconOf(url) == null ? 'assets/icons/instances.svg' : null,
+          icon: model.iconOf(url) == null ? 'assets/icons/instance.svg' : null,
           image: model.iconOf(url),
         );
     }

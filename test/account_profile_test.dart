@@ -241,7 +241,7 @@ void main() {
     expect(find.bySemanticsLabel('Сводки'), findsOneWidget);
     expect(find.bySemanticsLabel('Время UTC'), findsOneWidget);
     expect(find.bySemanticsLabel('DataPipe'), findsOneWidget);
-    expect(find.bySemanticsLabel('Telegram'), findsOneWidget);
+    expect(find.bySemanticsLabel('Телеграм'), findsOneWidget);
     expect(find.bySemanticsLabel('16:00'), findsOneWidget);
     expect(tester.getSemantics(find.bySemanticsLabel('Сводки')).value, 'вкл');
 

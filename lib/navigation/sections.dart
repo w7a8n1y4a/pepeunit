@@ -10,7 +10,6 @@ class MenuSection {
     required this.q,
     required this.r,
     required this.icon,
-    this.iconScale = 1,
   });
 
   final String id;
@@ -19,7 +18,6 @@ class MenuSection {
   final int q;
   final int r;
   final String icon;
-  final double iconScale;
 
   String title(String language) => phrase(language, titles);
 }

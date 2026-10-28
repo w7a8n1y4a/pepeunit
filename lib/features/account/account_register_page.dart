@@ -48,7 +48,6 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
         q: generate.$1,
         r: generate.$2,
         icon: 'assets/icons/key_gen.svg',
-        iconScale: 1.4,
       ),
       backSlot(
         title: accountText(language, 'Назад', 'Back'),

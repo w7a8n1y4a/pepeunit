@@ -44,8 +44,7 @@ HexSlot backSlot({required String title, required int q, required int r}) {
 }
 
 /// White while a file is dragged over the cell, otherwise [color].
-Color dropColor(bool hot, Color color) =>
-    hot ? const Color(0xFFFFFFFF) : color;
+Color dropColor(bool hot, Color color) => hot ? const Color(0xFFFFFFFF) : color;
 
 /// Error cell in the next free slot. Nothing is added when [message] is null.
 void appendError(
@@ -55,7 +54,6 @@ void appendError(
   required String language,
   required String Function(String language, String ru, String en) text,
   required bool wide,
-  double iconScale = 1.62,
 }) {
   if (message == null) return;
   final spot = nextHex([
@@ -70,7 +68,6 @@ void appendError(
       q: spot.$1,
       r: spot.$2,
       icon: 'assets/icons/error.svg',
-      iconScale: iconScale,
       body: open
           ? ErrorCell(
               message: message,

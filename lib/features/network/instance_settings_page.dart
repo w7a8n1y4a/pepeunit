@@ -66,7 +66,6 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
       language: language,
       text: netText,
       wide: wide,
-      iconScale: 1.2,
     );
     return HexPage(slots: slots, onTap: _tap);
   }
@@ -91,7 +90,6 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/settings.svg',
-          iconScale: 1.4,
         );
       case 'ops':
         return HexSlot(
@@ -101,7 +99,7 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/power.svg',
+          icon: 'assets/icons/terminal.svg',
         );
       default:
         return HexSlot(

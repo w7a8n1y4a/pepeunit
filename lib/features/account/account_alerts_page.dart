@@ -67,7 +67,7 @@ class _AccountAlertsPageState extends State<AccountAlertsPage> {
         ),
         _toggle(
           id: 'telegram',
-          title: 'Telegram',
+          title: phrase(language, {'ru': 'Телеграм', 'en': 'Telegram'}),
           on: alerts.telegram,
           language: language,
           color: color,

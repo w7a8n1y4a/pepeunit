@@ -87,7 +87,6 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
       language: language,
       text: netText,
       wide: wide,
-      iconScale: 1.2,
     );
     return HexPage(
       slots: slots,
@@ -160,7 +159,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
             busy: _pending == 'tests',
             q: spots[i].$1,
             r: spots[i].$2,
-            icon: 'assets/icons/reload.svg',
+            icon: 'assets/icons/rorschach.svg',
           ),
           'scan-all' => HexSlot(
             id: 'scan-all',
@@ -252,7 +251,6 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
         r: r,
         icon: image == null ? 'assets/icons/icon_load.svg' : null,
         image: image,
-        iconScale: 1.15,
       );
     }
     final category = settingCategory(id);
@@ -358,7 +356,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
         busy: _pending == 'bool:${field.key}',
         q: q,
         r: r,
-        icon: on ? 'assets/icons/check.svg' : 'assets/icons/close.svg',
+        icon: on ? 'assets/icons/flag.svg' : 'assets/icons/close.svg',
       );
     }
     if (field.kind == 'enum') {

@@ -36,7 +36,6 @@ class PlaceholderPage extends StatelessWidget {
           q: at[0].$1,
           r: at[0].$2,
           icon: section?.icon,
-          iconScale: section?.iconScale ?? 1,
         ),
         HexSlot(
           id: 'soon',

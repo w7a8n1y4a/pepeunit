@@ -5,6 +5,8 @@ import 'dart:ui' show PathMetric, Tangent;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'icon_scale.dart';
+
 /// Text inside a cell: a choice and a value that sits with it.
 /// Log levels and the account parameters cell are the reference.
 double cellFont(double side) => max(11, side * 0.068);
@@ -45,7 +47,6 @@ class HexSlot {
     required this.q,
     required this.r,
     this.icon,
-    this.iconScale = 1,
     this.image,
     this.titleColor = const Color(0xFFFFFFFF),
     this.titleRight,
@@ -66,7 +67,6 @@ class HexSlot {
   final int q;
   final int r;
   final String? icon;
-  final double iconScale;
 
   /// PNG bytes drawn in the center, in place of [icon].
   final Uint8List? image;
@@ -157,11 +157,12 @@ class HexScene extends StatelessWidget {
         ),
       );
     } else if (icon != null) {
+      final scale = iconScaleOf(icon);
       child = Center(
         child: SvgPicture.asset(
           icon,
-          width: placed.radius * 0.72 * placed.slot.iconScale,
-          height: placed.radius * 0.72 * placed.slot.iconScale,
+          width: placed.radius * 0.72 * scale,
+          height: placed.radius * 0.72 * scale,
         ),
       );
     } else {
@@ -926,7 +927,7 @@ class _RayPainter extends CustomPainter {
 /// How far the center mark reaches, as a fraction of the vertex radius.
 double _markReach(HexSlot slot) {
   if (slot.image != null) return 1.15 * 0.85 / 2;
-  if (slot.icon != null) return 0.72 * slot.iconScale / 2;
+  if (slot.icon != null) return 0.72 * iconScaleOf(slot.icon!) / 2;
   return 0.36;
 }
 

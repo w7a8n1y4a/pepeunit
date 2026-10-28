@@ -60,7 +60,6 @@ class _NetworkAddPageState extends State<NetworkAddPage> {
       language: language,
       text: netText,
       wide: wide,
-      iconScale: 1.2,
     );
     return HexPage(
       slots: slots,

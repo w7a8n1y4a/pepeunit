@@ -64,7 +64,6 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         q: spot[0].$1,
         r: spot[0].$2,
         icon: 'assets/icons/signin.svg',
-        iconScale: 1.2,
       ),
       HexSlot(
         id: 'registration',
@@ -108,7 +107,6 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         q: spot[1].$1,
         r: spot[1].$2,
         icon: 'assets/icons/settings.svg',
-        iconScale: 1.4,
       ),
       HexSlot(
         id: 'key',
@@ -119,7 +117,6 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         q: spot[2].$1,
         r: spot[2].$2,
         icon: 'assets/icons/key.svg',
-        iconScale: 1.4,
       ),
       HexSlot(
         id: 'signout',
@@ -128,7 +125,6 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         q: spot[3].$1,
         r: spot[3].$2,
         icon: 'assets/icons/signout.svg',
-        iconScale: 1.08,
       ),
       backSlot(title: back, q: backAt.$1, r: backAt.$2),
     ];

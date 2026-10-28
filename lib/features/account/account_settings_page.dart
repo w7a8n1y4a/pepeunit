@@ -81,7 +81,6 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         r: spot[0].$2,
         icon: png == null ? 'assets/icons/icon_load.svg' : null,
         image: png,
-        iconScale: 1.15,
       ),
       HexSlot(
         id: 'login',
@@ -111,7 +110,6 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         q: spot[2].$1,
         r: spot[2].$2,
         icon: 'assets/icons/rocket.svg',
-        iconScale: 1.45,
       ),
       HexSlot(
         id: 'parameters',

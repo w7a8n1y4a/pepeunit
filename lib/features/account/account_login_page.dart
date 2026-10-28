@@ -53,7 +53,6 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
         q: load.$1,
         r: load.$2,
         icon: 'assets/icons/key_load.svg',
-        iconScale: 1.2,
       ),
       backSlot(
         title: accountText(language, 'Назад', 'Back'),

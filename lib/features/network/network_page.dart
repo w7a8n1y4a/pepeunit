@@ -6,7 +6,6 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
-import '../../navigation/sections.dart';
 import '../hex_page.dart';
 import 'network_chrome.dart';
 
@@ -72,15 +71,13 @@ class _NetworkPageState extends State<NetworkPage> {
           icon: 'assets/icons/search.svg',
         );
       case 'idle':
-        final section = sectionById('peers')!;
         return HexSlot(
           id: 'idle',
-          title: section.title(language),
-          color: section.color,
+          title: netText(language, 'Найди инстанс', 'Find instance'),
+          color: color,
           q: slot.q,
           r: slot.r,
-          icon: section.icon,
-          iconScale: section.iconScale,
+          icon: 'assets/icons/exclaim.svg',
           tappable: false,
         );
       case 'target':

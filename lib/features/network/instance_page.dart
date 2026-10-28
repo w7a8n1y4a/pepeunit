@@ -155,16 +155,16 @@ class _InstancePageState extends State<InstancePage> {
           'Разжаловать',
           'Demote',
           errorColor,
-          'assets/icons/close.svg',
+          'assets/icons/demote.svg',
         );
       case 'telegram':
         return _action(
           slot,
           language,
-          'Telegram Bot',
+          'Телеграм бот',
           'Telegram Bot',
           color,
-          'assets/icons/send.svg',
+          'assets/icons/telegram.svg',
         );
       case 'settings':
         return HexSlot(
@@ -175,7 +175,6 @@ class _InstancePageState extends State<InstancePage> {
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/settings.svg',
-          iconScale: 1.35,
         );
       case 'users':
         return HexSlot(
@@ -184,7 +183,7 @@ class _InstancePageState extends State<InstancePage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/account.svg',
+          icon: 'assets/icons/users.svg',
           tappable: false,
         );
       case 'peer':

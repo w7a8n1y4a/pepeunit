@@ -114,7 +114,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'instance',
     titles: {'ru': 'Инстанс', 'en': 'Instance'},
-    icon: 'assets/icons/instances.svg',
+    icon: 'assets/icons/instance.svg',
     links: [
       'instance-flags',
       'instance-basic',
@@ -129,7 +129,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'instance-flags',
     titles: {'ru': 'Флаги', 'en': 'Flags'},
-    icon: 'assets/icons/check.svg',
+    icon: 'assets/icons/flag.svg',
     fields: [
       _flag('pu_ff_federation_enable', 'Федерация', 'Federation'),
       _flag('pu_ff_prometheus_enable', 'Prometheus', 'Prometheus'),
@@ -139,7 +139,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'contacts',
     titles: {'ru': 'Контакты', 'en': 'Contacts'},
-    icon: 'assets/icons/send.svg',
+    icon: 'assets/icons/phone.svg',
     fields: [
       _line(
         'pu_instance_owner_email',
@@ -149,7 +149,7 @@ final settingCategories = <SettingCategory>[
       ),
       _line(
         'pu_instance_owner_tg',
-        ru: 'Telegram контакт',
+        ru: 'Телеграм контакт',
         en: 'Owner Telegram',
         hint: '@username',
       ),
@@ -293,7 +293,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'mqtt',
     titles: {'ru': 'MQTT', 'en': 'MQTT'},
-    icon: 'assets/icons/micro.svg',
+    icon: 'assets/icons/wifi.svg',
     links: ['mqtt-basic', 'mqtt-clients'],
   ),
   SettingCategory(
@@ -381,7 +381,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'datapipe',
     titles: {'ru': 'DataPipe', 'en': 'DataPipe'},
-    icon: 'assets/icons/panel.svg',
+    icon: 'assets/icons/pipe.svg',
     fields: [_flag('pu_ff_datapipe_enable', 'DataPipe Вкл ?', 'DataPipe on?')],
     links: ['datapipe-basic', 'datapipe-link'],
   ),
@@ -436,7 +436,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'datapipe-link',
     titles: {'ru': 'Соединение', 'en': 'Connection'},
-    icon: 'assets/icons/micro.svg',
+    icon: 'assets/icons/chain.svg',
     requires: ['pu_ff_datapipe_enable'],
     fields: [
       _whole(
@@ -488,8 +488,8 @@ final settingCategories = <SettingCategory>[
   ),
   SettingCategory(
     id: 'notifications-telegram',
-    titles: {'ru': 'Telegram Бот', 'en': 'Telegram Bot'},
-    icon: 'assets/icons/send.svg',
+    titles: {'ru': 'Телеграм бот', 'en': 'Telegram Bot'},
+    icon: 'assets/icons/telegram.svg',
     requires: ['pu_ff_telegram_bot_enable', 'pu_ff_notification_enable'],
     fields: [
       _whole(
@@ -517,8 +517,8 @@ final settingCategories = <SettingCategory>[
   ),
   SettingCategory(
     id: 'telegram',
-    titles: {'ru': 'Telegram Бот', 'en': 'Telegram Bot'},
-    icon: 'assets/icons/send.svg',
+    titles: {'ru': 'Телеграм бот', 'en': 'Telegram Bot'},
+    icon: 'assets/icons/telegram.svg',
     links: ['telegram-link', 'telegram-look'],
   ),
   SettingCategory(

@@ -312,7 +312,10 @@ void main() {
     expect(parseSetting(cipherMax, '99999'), isNull);
     expect(parseSetting(cipherMax, '100000'), 100000);
     expect(parseSetting(cipherMax, '5000000'), 5000000);
-    expect(settingIssue(cipherMax, '99999', 'ru'), 'Вне диапазона 100000..5000000');
+    expect(
+      settingIssue(cipherMax, '99999', 'ru'),
+      'Вне диапазона 100000..5000000',
+    );
     expect(settingIssue(users, '16', 'ru'), isNull);
     expect(parseSetting(users, '16'), 16);
     final emailField = settingCategory('contacts')!.fields.first;
@@ -573,7 +576,7 @@ void main() {
     await tester.tap(find.bySemanticsLabel('unit.pepeunit.com'));
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('Сделать избранным'), findsOneWidget);
-    expect(find.bySemanticsLabel('Telegram Bot'), findsOneWidget);
+    expect(find.bySemanticsLabel('Телеграм бот'), findsOneWidget);
     expect(find.bySemanticsLabel('Перезайти'), findsNothing);
     expect(find.bySemanticsLabel('Команды'), findsNothing);
     expect(find.bySemanticsLabel('Модерация'), findsOneWidget);
@@ -630,7 +633,7 @@ void main() {
     expect(find.bySemanticsLabel('MQTT'), findsOneWidget);
     expect(find.bySemanticsLabel('DataPipe'), findsOneWidget);
     expect(find.bySemanticsLabel('Уведомления'), findsOneWidget);
-    expect(find.bySemanticsLabel('Telegram Бот'), findsOneWidget);
+    expect(find.bySemanticsLabel('Телеграм бот'), findsOneWidget);
     expect(find.bySemanticsLabel('Загрузить аватар'), findsOneWidget);
     expect(find.bySemanticsLabel('Сервисы'), findsNothing);
     expect(find.bySemanticsLabel('Транспорт'), findsNothing);
@@ -695,7 +698,7 @@ void main() {
 
     await tester.tap(find.bySemanticsLabel('Назад'));
     await tester.pumpAndSettle();
-    await tester.tap(find.bySemanticsLabel('Telegram Бот'));
+    await tester.tap(find.bySemanticsLabel('Телеграм бот'));
     await tester.pumpAndSettle();
     expect(find.bySemanticsLabel('Подключение'), findsOneWidget);
     expect(
@@ -767,7 +770,7 @@ void main() {
     );
     expect(
       tester
-          .getSemantics(find.bySemanticsLabel('Telegram Бот'))
+          .getSemantics(find.bySemanticsLabel('Телеграм бот'))
           .flagsCollection
           .isEnabled,
       Tristate.isFalse,
@@ -788,7 +791,7 @@ void main() {
     );
     expect(
       tester
-          .getSemantics(find.bySemanticsLabel('Telegram Бот'))
+          .getSemantics(find.bySemanticsLabel('Телеграм бот'))
           .flagsCollection
           .isEnabled,
       Tristate.isTrue,
