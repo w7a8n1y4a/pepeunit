@@ -4,6 +4,7 @@ import 'dart:ui' show Tristate;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pepeunit_client/account/alerts.dart';
 import 'package:pepeunit_client/account/identity.dart';
 import 'package:pepeunit_client/account/key_file_port.dart';
 import 'package:pepeunit_client/account/secret_key_file.dart';
@@ -149,6 +150,8 @@ void main() {
     model.vault.login = 'pepe';
     model.vault.iconPng = 'png';
     model.vault.language = 'en';
+    model.vault.alerts = const AlertPrefs(scheduled: false, time: '01:02');
+    model.vault.profileSentAt = 5;
     await model.adoptIdentity(
       Identity(
         publicKey: Uint8List.fromList([1]),
@@ -167,6 +170,9 @@ void main() {
     expect(model.vault.hasKey, isFalse);
     expect(model.vault.login, isEmpty);
     expect(model.vault.iconPng, isNull);
+    expect(model.vault.alerts.scheduled, isTrue);
+    expect(model.vault.alerts.time, AlertPrefs.defaultTime);
+    expect(model.vault.profileSentAt, isNull);
     expect(model.vault.language, 'en');
     expect(model.vault.instances.single.token, isNull);
     expect(model.vault.instances.single.userUuid, isNull);
@@ -190,7 +196,7 @@ void main() {
 
     expect(model.vault.hasKey, isTrue);
     expect(find.bySemanticsLabel('Вход'), findsNothing);
-    expect(find.bySemanticsLabel('Отправить в сеть'), findsNothing);
+    expect(find.bySemanticsLabel('Отправить в избранный'), findsNothing);
     expect(find.bySemanticsLabel('Логин'), findsOneWidget);
     expect(find.bySemanticsLabel('Скачать ключ'), findsOneWidget);
     expect(find.bySemanticsLabel('Выход'), findsOneWidget);

@@ -5,6 +5,7 @@ import 'dart:ui' as ui;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:pepeunit_client/account/alerts.dart';
 import 'package:pepeunit_client/account/icon_file.dart';
 import 'package:pepeunit_client/account/identity.dart';
 import 'package:pepeunit_client/account/key_file_port.dart';
@@ -12,8 +13,10 @@ import 'package:pepeunit_client/account/key_mark.dart';
 import 'package:pepeunit_client/account/login_name.dart';
 import 'package:pepeunit_client/account/vault.dart';
 import 'package:pepeunit_client/account/vault_store.dart';
+import 'package:pepeunit_client/api/pepeunit_api.dart';
 import 'package:pepeunit_client/app_model.dart';
 import 'package:pepeunit_client/app_scope.dart';
+import 'package:pepeunit_client/instances/instance.dart';
 import 'package:pepeunit_client/locale/languages.dart';
 import 'package:pepeunit_client/locale/time_zones.dart';
 import 'package:pepeunit_client/main.dart';
@@ -90,6 +93,86 @@ void main() {
     expect(Vault.fresh().timeZone, '0');
   });
 
+  test('alert time stays HH:MM and round-trips with the account', () {
+    expect(canonicalAlertTime('16:00'), '16:00');
+    expect(canonicalAlertTime('16:00:00'), isNull);
+    expect(canonicalAlertTime('25:00'), isNull);
+    expect(stepAlertHour('00:10', -1), '23:10');
+    expect(stepAlertHour('23:10', 1), '00:10');
+    expect(stepAlertMinute('07:00', -1), '07:59');
+    expect(stepAlertMinute('07:59', 1), '07:00');
+    expect(cooldownClock(const Duration(milliseconds: 1)), '0:01');
+    expect(cooldownClock(const Duration(seconds: 60)), '1:00');
+    final vault = Vault.fromJson({
+      'alerts': {'scheduled': false, 'time': 'bad', 'dataPipe': false},
+    });
+    expect(vault.alerts.scheduled, isFalse);
+    expect(vault.alerts.time, AlertPrefs.defaultTime);
+    expect(vault.alerts.dataPipe, isFalse);
+    expect(vault.alerts.telegram, isTrue);
+    final restored = Vault.decode(vault.encode());
+    expect(restored.alerts.scheduled, isFalse);
+    expect(restored.alerts.dataPipe, isFalse);
+    expect(restored.alerts.telegram, isTrue);
+    expect(restored.alerts.time, AlertPrefs.defaultTime);
+  });
+
+  test('profile send hits the favorite once, then waits a minute', () async {
+    final api = _ProfileApi();
+    final origins = <String>[];
+    final store = MemoryVaultStore();
+    final model = AppModel(
+      store: store,
+      api: (origin) {
+        origins.add(origin);
+        return api;
+      },
+      hostedUrl: () async => null,
+    );
+    await model.load();
+    await model.adoptIdentity(Identity.generate());
+    model.vault.login = 'pepe';
+    model.vault.iconPng = base64.encode(Uint8List.fromList(const [1, 2, 3]));
+    model.vault.alerts = const AlertPrefs(scheduled: false, time: '07:30');
+    model.vault.instances.add(
+      InstanceRecord(url: 'https://unit.pepeunit.com', active: true),
+    );
+    model.vault.instances.add(
+      InstanceRecord(url: 'https://other.pepeunit.com'),
+    );
+
+    final report = await model.broadcast();
+    expect(report.problems, isEmpty);
+    expect(report.reached, 1);
+    expect(origins, ['https://unit.pepeunit.com']);
+    expect(api.logins, ['pepe']);
+    expect(api.icons, [3]);
+    expect(api.alerts.single, {
+      'is_scheduled_alert_enable': false,
+      'scheduled_notification_time': '07:30',
+      'is_data_pipe_alert_enable': true,
+      'is_telegram_alert_enable': true,
+    });
+    expect(model.canSendProfile, isFalse);
+    expect((await store.read()).profileSentAt, isNotNull);
+
+    final again = await model.broadcast();
+    expect(again.empty, isTrue);
+    expect(api.logins, ['pepe']);
+    expect(origins, ['https://unit.pepeunit.com']);
+
+    model.vault.profileSentAt =
+        DateTime.now().millisecondsSinceEpoch -
+        const Duration(seconds: 61).inMilliseconds;
+    for (final instance in model.vault.instances) {
+      instance.active = false;
+    }
+    final idle = await model.broadcast();
+    expect(idle.empty, isTrue);
+    expect(api.logins, ['pepe']);
+    expect(model.canSendProfile, isFalse);
+  });
+
   testWidgets('settings store the profile and the home cell shows it', (
     tester,
   ) async {
@@ -110,7 +193,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.bySemanticsLabel('Логин'), findsOneWidget);
-    expect(find.bySemanticsLabel('Отправить в сеть'), findsNothing);
+    expect(find.bySemanticsLabel('Отправить в избранный'), findsNothing);
     expect(
       tester.getSemantics(find.bySemanticsLabel('Скачать ключ')).value,
       mark,
@@ -120,8 +203,16 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.bySemanticsLabel('Загрузить аватар'), findsOneWidget);
-    expect(find.bySemanticsLabel('Параметры'), findsOneWidget);
-    expect(find.bySemanticsLabel('Отправить в сеть'), findsOneWidget);
+    expect(find.bySemanticsLabel('Приложение'), findsOneWidget);
+    expect(find.bySemanticsLabel('Уведомления'), findsOneWidget);
+    expect(find.bySemanticsLabel('Отправить в избранный'), findsOneWidget);
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Отправить в избранный'))
+          .flagsCollection
+          .isEnabled,
+      ui.Tristate.isFalse,
+    );
     expect(find.bySemanticsLabel('Лондон +0'), findsOneWidget);
 
     await tester.enterText(find.byKey(const ValueKey('login-field')), 'ab');
@@ -145,12 +236,38 @@ void main() {
     expect(find.bySemanticsLabel('Лагос +1'), findsOneWidget);
     expect((await store.read()).timeZone, '60');
 
+    await tester.tap(find.bySemanticsLabel('Уведомления'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Сводки'), findsOneWidget);
+    expect(find.bySemanticsLabel('Время UTC'), findsOneWidget);
+    expect(find.bySemanticsLabel('DataPipe'), findsOneWidget);
+    expect(find.bySemanticsLabel('Telegram'), findsOneWidget);
+    expect(find.bySemanticsLabel('16:00'), findsOneWidget);
+    expect(tester.getSemantics(find.bySemanticsLabel('Сводки')).value, 'вкл');
+
+    await tester.tap(find.bySemanticsLabel('Сводки'));
+    await tester.pump();
+    expect(model.vault.alerts.scheduled, isFalse);
+    expect((await store.read()).alerts.scheduled, isFalse);
+    expect(tester.getSemantics(find.bySemanticsLabel('Сводки')).value, 'выкл');
+
+    await tester.tap(find.bySemanticsLabel('Следующий час'));
+    await tester.pump();
+    expect(model.vault.alerts.time, '17:00');
+    expect(find.bySemanticsLabel('17:00'), findsOneWidget);
+    expect((await store.read()).alerts.time, '17:00');
+
+    await tester.tap(find.bySemanticsLabel('Назад'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Приложение'), findsOneWidget);
+
     await tester.tap(find.text('English'));
     await tester.pump();
     expect(model.vault.language, 'en');
     expect(find.bySemanticsLabel('Upload avatar'), findsOneWidget);
-    expect(find.bySemanticsLabel('Parameters'), findsOneWidget);
-    expect(find.bySemanticsLabel('Send to network'), findsOneWidget);
+    expect(find.bySemanticsLabel('Application'), findsOneWidget);
+    expect(find.bySemanticsLabel('Notifications'), findsOneWidget);
+    expect(find.bySemanticsLabel('Send to favorite'), findsOneWidget);
     expect(find.bySemanticsLabel('Lagos +1'), findsOneWidget);
     expect((await store.read()).language, 'en');
 
@@ -239,6 +356,51 @@ Uint8List _chunk(String type, Uint8List data) {
     ...data,
     ...crc.buffer.asUint8List(),
   ]);
+}
+
+class _ProfileApi extends PepeunitApi {
+  _ProfileApi() : super('https://example.test');
+
+  final logins = <String>[];
+  final icons = <int>[];
+  final alerts = <Map<String, Object?>>[];
+
+  @override
+  Future<String> challenge(String hashPublicKey) async => 'challenge';
+
+  @override
+  Future<String> auth(String challengeToken, String signatureBase64) async {
+    final payload = base64Url.encode(utf8.encode('{"uuid":"user-1"}'));
+    return 'h.$payload.s';
+  }
+
+  @override
+  Future<({String role, String uuid})> user(String token, String uuid) async {
+    return (role: 'User', uuid: uuid);
+  }
+
+  @override
+  Future<void> updateLogin(String token, String userUuid, String login) async {
+    logins.add(login);
+  }
+
+  @override
+  Future<String?> uploadIcon(
+    String token,
+    String userUuid,
+    Uint8List png,
+  ) async {
+    icons.add(png.length);
+    return 'icon-1';
+  }
+
+  @override
+  Future<void> updateNotificationSettings(
+    String token,
+    Map<String, Object?> patch,
+  ) async {
+    alerts.add(patch);
+  }
 }
 
 int _crc32(List<int> data) {

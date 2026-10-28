@@ -286,6 +286,20 @@ class PepeunitApi {
     _ensureOk(response);
   }
 
+  Future<void> updateNotificationSettings(
+    String token,
+    Map<String, Object?> patch,
+  ) async {
+    final response = await _client
+        .patch(
+          _uri('/notifications/settings'),
+          headers: _jsonHeaders(token),
+          body: jsonEncode(patch),
+        )
+        .timeout(_timeout);
+    _ensureOk(response);
+  }
+
   Future<String?> uploadIcon(String token, String userUuid, Uint8List png) {
     return _uploadIcon(token, userUuid, 'User', png);
   }

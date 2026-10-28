@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 
@@ -5,6 +6,7 @@ import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../account/alerts.dart';
 import '../../account/icon_file.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_order.dart';
@@ -30,14 +32,25 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   var _failureOpen = false;
   String? _pending;
   var _dragHot = false;
+  Timer? _cooldown;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (!AppScope.of(context).vault.hasKey) context.go('/people');
+      if (!AppScope.of(context).vault.hasKey) {
+        context.go('/people');
+        return;
+      }
+      _watchCooldown();
     });
+  }
+
+  @override
+  void dispose() {
+    _cooldown?.cancel();
+    super.dispose();
   }
 
   @override
@@ -49,7 +62,10 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     final iconColor = dropColor(_dragHot, color);
     final failure = _report ?? iconProblemText(_failure, language);
     final wide = hexWide(MediaQuery.sizeOf(context));
-    final frame = hexFrame(count: 4, back: HexBack.center, wide: wide);
+    final waiting = _pending == 'sync';
+    final ready = model.canSendProfile;
+    final cooling = model.profileCooldownLeft;
+    final frame = hexFrame(count: 5, back: HexBack.center, wide: wide);
     final spot = frame.cells;
     final backAt = frame.back!;
     final slots = <HexSlot>[
@@ -83,11 +99,15 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       HexSlot(
         id: 'sync',
         title: phrase(language, {
-          'ru': 'Отправить в сеть',
-          'en': 'Send to network',
+          'ru': 'Отправить в избранный',
+          'en': 'Send to favorite',
         }),
-        color: color,
-        busy: _pending == 'sync',
+        footer: !waiting && cooling > Duration.zero
+            ? cooldownClock(cooling)
+            : null,
+        color: waiting || ready ? color : hexMuted,
+        enabled: waiting || ready,
+        busy: waiting,
         q: spot[2].$1,
         r: spot[2].$2,
         icon: 'assets/icons/rocket.svg',
@@ -95,11 +115,19 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       ),
       HexSlot(
         id: 'parameters',
-        title: phrase(language, {'ru': 'Параметры', 'en': 'Parameters'}),
+        title: phrase(language, {'ru': 'Приложение', 'en': 'Application'}),
         color: color,
         q: spot[3].$1,
         r: spot[3].$2,
         body: const ParametersCell(),
+      ),
+      HexSlot(
+        id: 'alerts',
+        title: phrase(language, {'ru': 'Уведомления', 'en': 'Notifications'}),
+        color: color,
+        q: spot[4].$1,
+        r: spot[4].$2,
+        icon: 'assets/icons/notifications.svg',
       ),
     ];
     appendError(
@@ -137,6 +165,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       case 'login':
       case 'parameters':
         break;
+      case 'alerts':
+        context.push('/people/settings/alerts');
       case 'sync':
         await _sync(language);
     }
@@ -214,18 +244,19 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
   }
 
   Future<void> _sync(String language) async {
-    if (_pending != null) return;
+    final model = AppScope.of(context);
+    if (_pending != null || !model.canSendProfile) return;
     setState(() {
       _pending = 'sync';
       _failure = null;
       _report = null;
       _failureOpen = false;
     });
-    final report = await AppScope.of(context).broadcast();
+    final report = await model.broadcast();
     if (!mounted) return;
     final String? message;
     if (report.empty) {
-      message = phrase(language, {'ru': 'Нет инстансов', 'en': 'No instances'});
+      message = phrase(language, {'ru': 'Нет избранного', 'en': 'No favorite'});
     } else if (report.problems.isNotEmpty) {
       message = report.problems.join('\n');
     } else {
@@ -234,6 +265,23 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     setState(() {
       _pending = null;
       _report = message;
+    });
+    _watchCooldown();
+  }
+
+  void _watchCooldown() {
+    _cooldown?.cancel();
+    if (!mounted || AppScope.of(context).profileCooldownLeft == Duration.zero) {
+      _cooldown = null;
+      return;
+    }
+    _cooldown = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      setState(() {});
+      if (AppScope.of(context).profileCooldownLeft == Duration.zero) {
+        _cooldown?.cancel();
+        _cooldown = null;
+      }
     });
   }
 

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import 'account/vault_store.dart';
 import 'app_model.dart';
 import 'app_scope.dart';
+import 'features/account/account_alerts_page.dart';
 import 'features/account/account_login_page.dart';
 import 'features/account/account_menu_page.dart';
 import 'features/account/account_register_page.dart';
@@ -55,6 +56,12 @@ class _PepeunitAppState extends State<PepeunitApp> {
           GoRoute(
             path: 'settings',
             builder: (context, state) => const AccountSettingsPage(),
+            routes: [
+              GoRoute(
+                path: 'alerts',
+                builder: (context, state) => const AccountAlertsPage(),
+              ),
+            ],
           ),
         ],
       ),

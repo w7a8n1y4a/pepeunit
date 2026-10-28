@@ -3,6 +3,7 @@ import 'dart:convert';
 import '../instances/instance.dart';
 import '../locale/languages.dart';
 import '../locale/time_zones.dart';
+import 'alerts.dart';
 
 class Vault {
   Vault({
@@ -10,6 +11,8 @@ class Vault {
     this.secretKey,
     this.login = '',
     this.iconPng,
+    this.alerts = const AlertPrefs(),
+    this.profileSentAt,
     this.language = 'ru',
     this.timeZone = '0',
     List<String>? allow,
@@ -25,6 +28,10 @@ class Vault {
   String? secretKey;
   String login;
   String? iconPng;
+  AlertPrefs alerts;
+
+  /// Epoch milliseconds of the last profile send. Limits the next one.
+  int? profileSentAt;
   String language;
   String timeZone;
 
@@ -46,6 +53,8 @@ class Vault {
     secretKey = null;
     login = '';
     iconPng = null;
+    alerts = const AlertPrefs();
+    profileSentAt = null;
     for (final instance in instances) {
       instance.token = null;
       instance.userUuid = null;
@@ -81,6 +90,8 @@ class Vault {
       secretKey: secretKey,
       login: login,
       iconPng: iconPng,
+      alerts: alerts,
+      profileSentAt: profileSentAt,
       language: language,
       timeZone: timeZone,
       allow: [...allow],
@@ -98,6 +109,8 @@ class Vault {
       'secretKey': secretKey,
       'login': login,
       'iconPng': iconPng,
+      'alerts': alerts.toJson(),
+      'profileSentAt': profileSentAt,
       'language': language,
       'timeZone': timeZone,
       'allow': allow,
@@ -117,6 +130,8 @@ class Vault {
       secretKey: json['secretKey'] as String?,
       login: json['login'] as String? ?? '',
       iconPng: json['iconPng'] as String?,
+      alerts: AlertPrefs.fromJson(json['alerts']),
+      profileSentAt: json['profileSentAt'] as int?,
       language: _language(json['language'] as String?),
       timeZone: _timeZone(json['timeZone'] as String?),
       allow: _urls(json['allow']),

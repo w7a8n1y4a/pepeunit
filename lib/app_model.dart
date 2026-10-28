@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 
+import 'account/alerts.dart';
 import 'account/icon_file.dart';
 import 'account/identity.dart';
 import 'account/key_file_port.dart';
@@ -57,6 +58,21 @@ class AppModel extends ChangeNotifier {
   var _ticket = 0;
 
   InstanceRecord? get target => vault.target;
+
+  static const profileCooldown = Duration(minutes: 1);
+
+  /// Time left before the profile can be sent again.
+  Duration get profileCooldownLeft {
+    final sent = vault.profileSentAt;
+    if (sent == null) return Duration.zero;
+    final elapsed = DateTime.now().millisecondsSinceEpoch - sent;
+    final window = profileCooldown.inMilliseconds;
+    if (elapsed < 0 || elapsed >= window) return Duration.zero;
+    return Duration(milliseconds: window - elapsed);
+  }
+
+  bool get canSendProfile =>
+      vault.target != null && profileCooldownLeft == Duration.zero;
 
   InstancePortrait? portraitOf(String url) =>
       portraits[url] ?? peers[url]?.portrait;
@@ -153,6 +169,31 @@ class AppModel extends ChangeNotifier {
     final stored = minutes.toString();
     if (vault.timeZone == stored) return Future<void>.value();
     vault.timeZone = stored;
+    return _commit();
+  }
+
+  Future<void> setScheduledAlerts(bool value) {
+    if (vault.alerts.scheduled == value) return Future<void>.value();
+    vault.alerts = vault.alerts.copyWith(scheduled: value);
+    return _commit();
+  }
+
+  Future<void> setDataPipeAlerts(bool value) {
+    if (vault.alerts.dataPipe == value) return Future<void>.value();
+    vault.alerts = vault.alerts.copyWith(dataPipe: value);
+    return _commit();
+  }
+
+  Future<void> setTelegramAlerts(bool value) {
+    if (vault.alerts.telegram == value) return Future<void>.value();
+    vault.alerts = vault.alerts.copyWith(telegram: value);
+    return _commit();
+  }
+
+  Future<void> setAlertTime(String raw) {
+    final time = canonicalAlertTime(raw);
+    if (time == null || vault.alerts.time == time) return Future<void>.value();
+    vault.alerts = vault.alerts.copyWith(time: time);
     return _commit();
   }
 
@@ -280,36 +321,47 @@ class AppModel extends ChangeNotifier {
     }
   }
 
+  /// Pushes the avatar, login, and notification prefs to the favorite instance.
+  ///
+  /// The avatar is sent when one is stored. A minute must pass before the
+  /// next send, counting from the moment this starts.
   Future<SyncReport> broadcast() async {
     if (!vault.hasKey) return const SyncReport(0, ['no-key']);
-    final urls = visibleInstances(searched: false);
-    if (urls.isEmpty) return const SyncReport(0, []);
-    final identity = Identity.fromParts(vault.publicKey!, vault.secretKey!);
-    final png = iconBytes(vault.iconPng);
-    final problems = <String>[];
-    var reached = 0;
-    for (final url in urls) {
-      try {
-        final record = _ensureRecord(url);
-        final client = api(originOf(url));
-        await _open(record, client, identity);
-        if (vault.login.isNotEmpty) {
-          await client.updateLogin(
-            record.token!,
-            record.userUuid!,
-            vault.login,
-          );
-        }
-        if (png != null) {
-          await client.uploadIcon(record.token!, record.userUuid!, png);
-        }
-        reached++;
-      } catch (error) {
-        problems.add('${instanceHost(url)}: $error');
-      }
+    final current = vault.target;
+    if (current == null || profileCooldownLeft != Duration.zero) {
+      return const SyncReport(0, []);
     }
+    vault.profileSentAt = DateTime.now().millisecondsSinceEpoch;
     await _commit();
-    return SyncReport(reached, problems);
+    final url = current.url;
+    final host = instanceHost(url);
+    try {
+      final identity = Identity.fromParts(vault.publicKey!, vault.secretKey!);
+      final record = _ensureRecord(url);
+      final client = api(originOf(url));
+      await _open(record, client, identity);
+      final token = record.token!;
+      final userUuid = record.userUuid!;
+      final png = iconBytes(vault.iconPng);
+      final problems = <String>[];
+      Future<void> run(Future<void> job) async {
+        try {
+          await job;
+        } catch (error) {
+          problems.add('$host: $error');
+        }
+      }
+
+      await Future.wait([
+        if (png != null) run(client.uploadIcon(token, userUuid, png)),
+        run(client.updateLogin(token, userUuid, vault.login)),
+        run(client.updateNotificationSettings(token, vault.alerts.toPatch())),
+      ]);
+      await _commit();
+      return SyncReport(problems.isEmpty ? 1 : 0, problems);
+    } catch (error) {
+      return SyncReport(0, ['$host: $error']);
+    }
   }
 
   /// Asks the instance for a fresh JWT with the same key login.
