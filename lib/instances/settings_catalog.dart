@@ -206,7 +206,7 @@ final settingCategories = <SettingCategory>[
     fields: [
       _whole(
         'pu_instance_cipher_max_length',
-        0,
+        100000,
         5000000,
         ru: 'Лимит шифра (Б)',
         en: 'Cipher max (B)',
@@ -255,7 +255,7 @@ final settingCategories = <SettingCategory>[
     fields: [
       _whole(
         'pu_instance_repo_max_size',
-        0,
+        1,
         1024,
         ru: 'Макс. репо (МБ)',
         en: 'Max repo (MB)',
@@ -303,7 +303,7 @@ final settingCategories = <SettingCategory>[
     fields: [
       _whole(
         'pu_mqtt_keepalive',
-        0,
+        1,
         600,
         ru: 'Keepalive (с)',
         en: 'Keepalive (s)',
@@ -441,7 +441,7 @@ final settingCategories = <SettingCategory>[
     fields: [
       _whole(
         'pu_datapipe_mqtt_keepalive',
-        0,
+        1,
         600,
         ru: 'Keepalive (с)',
         en: 'Keepalive (s)',

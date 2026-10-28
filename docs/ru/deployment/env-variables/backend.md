@@ -25,8 +25,8 @@
 `PU_PROMETHEUS_MULTIPROC_DIR` | `./prometheus_metrics` | `≤ 128` симв. | Директория, которую [Prometheus](/deployment/dependencies/prometheus) использует для хранения статистик с нескольких `worker` - `uvicorn`. При старте приложения содержимое директории отчищается
 `PU_MIN_INTERVAL_SYNC_REPOSITORY` | `10` | `1`–`1800` | Время в секундах, которое должно пройти перед следующим запросом обновления репозитория из внешнего ресурса
 `PU_STATE_SEND_INTERVAL` | `60` | `1`–`600` | Частота в секундах, с которой [Unit'ы](/definitions#unit) должны отправлять своё состояние. Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) в поле `STATE_SEND_INTERVAL`
-`PU_MAX_EXTERNAL_REPO_SIZE` | `50` | `0`–`1024` | Значение в `МБ`, ограничивающее размер внешних [Git](/definitions#git) репозиториев для скачивания
-`PU_MAX_CIPHER_LENGTH` | `1000000` | `0`–`1000000` симв. | Максимальная длинна в символах для шифруемой информации
+`PU_MAX_EXTERNAL_REPO_SIZE` | `50` | `1`–`1024` | Значение в `МБ`, ограничивающее размер внешних [Git](/definitions#git) репозиториев для скачивания
+`PU_MAX_CIPHER_LENGTH` | `1000000` | `100000`–`5000000` симв. | Максимальная длинна в символах для шифруемой информации
 `PU_HTTP_TIMEOUT` | `30` | `0`–`120` | Таймаут в секундах для исходящих HTTP-запросов [Backend](/deployment/dependencies/backend): к [EMQX](/deployment/dependencies/emqx), [Grafana](/deployment/dependencies/grafana), внешним [Git](/definitions#git) репозиториям, а также другим инстансам [Pepeunit](/conception/overview)
 `PU_HTTP_CONNECT_TIMEOUT` | `15` | `0`–`60` | Таймаут в секундах на установление соединения для исходящих HTTP-запросов, а также для подключений к [Redis](/deployment/dependencies/redis) и [ClickHouse](/deployment/dependencies/clickhouse)
 `PU_INSTANCE_MAX_STATE_SIZE` | `4096` | `4096`–`65536` байт | Максимальный размер ответа внешнего инстанса [Pepeunit](/conception/overview) в байтах. Ответы большего размера отклоняются при сборе состояния
@@ -60,7 +60,7 @@
 `PU_MQTT_SECURE` | `True` | `True` / `False` | Если `True`, то [Backend](/deployment/dependencies/backend) будет использовать `https` для настройки [EMQX](/deployment/dependencies/emqx)
 `PU_MQTT_PORT` | `1883` | `1`–`65535` | Порт, по которому [Unit](/definitions#unit) и [Backend](/deployment/dependencies/backend) связываются c [EMQX](/deployment/dependencies/emqx). Устанавливается в [Unit ENV](/developer/files/struct-env-example-json) - в поле `PU_MQTT_PORT`
 `PU_MQTT_API_PORT` | `18083` | `1`–`65535` | Порт [API](/definitions#api) [EMQX](/deployment/dependencies/emqx), по которому [Backend](/deployment/dependencies/backend) производит настройку [EMQX](/deployment/dependencies/emqx)
-`PU_MQTT_KEEPALIVE` | `60` | `0`–`600` | Максимальный период в секундах между отправками `ping` от [Backend](/deployment/dependencies/backend) до [EMQX](/deployment/dependencies/emqx)
+`PU_MQTT_KEEPALIVE` | `60` | `1`–`600` | Максимальный период в секундах между отправками `ping` от [Backend](/deployment/dependencies/backend) до [EMQX](/deployment/dependencies/emqx)
 `PU_MQTT_USERNAME` | - | не пусто, `≤ 128` симв. | Имя пользователя [EMQX](/deployment/dependencies/emqx). [Backend](/deployment/dependencies/backend) использует его для первичной настройки брокера
 `PU_MQTT_PASSWORD` | - | не пусто, `≤ 128` симв. | Пароль пользователя [EMQX](/deployment/dependencies/emqx). [Backend](/deployment/dependencies/backend) использует его для первичной настройки брокера
 `PU_MQTT_REDIS_AUTH_URL` | `redis://redis:6379/0` | `redis` / `rediss`, `≤ 512` симв. | Ссылка для доступа к [Redis](/deployment/dependencies/redis), которую использует [EMQX](/deployment/dependencies/emqx) для соединения c [Redis](/deployment/dependencies/redis). Инстанс [Redis](/deployment/dependencies/redis) должен быть единым с `PU_REDIS_URL`
