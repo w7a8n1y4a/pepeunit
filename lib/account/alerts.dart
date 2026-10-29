@@ -39,6 +39,18 @@ class AlertPrefs {
     };
   }
 
+  /// Wire shape of `GET /notifications/settings`.
+  factory AlertPrefs.fromPatch(Map<String, Object?> json) {
+    final rawTime = json['scheduled_notification_time'];
+    return AlertPrefs(
+      scheduled: json['is_scheduled_alert_enable'] as bool? ?? true,
+      time:
+          canonicalAlertTime(rawTime is String ? rawTime : null) ?? defaultTime,
+      dataPipe: json['is_data_pipe_alert_enable'] as bool? ?? true,
+      telegram: json['is_telegram_alert_enable'] as bool? ?? true,
+    );
+  }
+
   Map<String, Object?> toJson() {
     return {
       'scheduled': scheduled,

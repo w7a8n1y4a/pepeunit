@@ -16,6 +16,7 @@ import 'package:pepeunit_client/account/vault_store.dart';
 import 'package:pepeunit_client/api/pepeunit_api.dart';
 import 'package:pepeunit_client/app_model.dart';
 import 'package:pepeunit_client/app_scope.dart';
+import 'package:pepeunit_client/instances/directory_user.dart';
 import 'package:pepeunit_client/instances/instance.dart';
 import 'package:pepeunit_client/locale/languages.dart';
 import 'package:pepeunit_client/locale/time_zones.dart';
@@ -173,6 +174,52 @@ void main() {
     expect(model.canSendProfile, isFalse);
   });
 
+  test('profile pull copies the favorite avatar, login and alerts', () async {
+    final api = _ProfileApi();
+    final store = MemoryVaultStore();
+    final model = AppModel(
+      store: store,
+      api: (origin) => api,
+      hostedUrl: () async => null,
+    );
+    await model.load();
+    await model.adoptIdentity(Identity.generate());
+    model.vault.login = 'local';
+    model.vault.alerts = const AlertPrefs(scheduled: true, time: '16:00');
+    model.vault.instances.add(
+      InstanceRecord(url: 'https://unit.pepeunit.com', active: true),
+    );
+
+    final idle = await model.recall();
+    expect(idle.empty, isFalse);
+
+    final png = _png(64, 64);
+    api.remoteLogin = 'remote';
+    api.remoteIcon = png;
+    api.remoteAlerts = {
+      'is_scheduled_alert_enable': false,
+      'scheduled_notification_time': '09:15',
+      'is_data_pipe_alert_enable': false,
+      'is_telegram_alert_enable': true,
+    };
+    final report = await model.recall();
+    expect(report.problems, isEmpty);
+    expect(report.reached, 1);
+    expect(model.vault.login, 'remote');
+    expect(model.vault.iconPng, base64.encode(png));
+    expect(model.vault.alerts.scheduled, isFalse);
+    expect(model.vault.alerts.time, '09:15');
+    expect(model.vault.alerts.dataPipe, isFalse);
+    expect(model.vault.alerts.telegram, isTrue);
+    expect((await store.read()).login, 'remote');
+    expect((await store.read()).alerts.time, '09:15');
+
+    model.vault.instances.clear();
+    final missing = await model.recall();
+    expect(missing.empty, isTrue);
+    expect(model.vault.login, 'remote');
+  });
+
   testWidgets('settings store the profile and the home cell shows it', (
     tester,
   ) async {
@@ -206,6 +253,14 @@ void main() {
     expect(find.bySemanticsLabel('Приложение'), findsOneWidget);
     expect(find.bySemanticsLabel('Уведомления'), findsOneWidget);
     expect(find.bySemanticsLabel('Отправить в избранный'), findsOneWidget);
+    expect(find.bySemanticsLabel('Вытянуть из избранного'), findsOneWidget);
+    expect(
+      tester
+          .getSemantics(find.bySemanticsLabel('Вытянуть из избранного'))
+          .flagsCollection
+          .isEnabled,
+      ui.Tristate.isFalse,
+    );
     expect(
       tester
           .getSemantics(find.bySemanticsLabel('Отправить в избранный'))
@@ -214,6 +269,18 @@ void main() {
       ui.Tristate.isFalse,
     );
     expect(find.bySemanticsLabel('Лондон +0'), findsOneWidget);
+
+    await model.setLogin('remote');
+    await tester.pump();
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const ValueKey('login-field')))
+          .controller!
+          .text,
+      'remote',
+    );
+    await model.setLogin('');
+    await tester.pump();
 
     await tester.enterText(find.byKey(const ValueKey('login-field')), 'ab');
     await tester.pump();
@@ -268,6 +335,7 @@ void main() {
     expect(find.bySemanticsLabel('Application'), findsOneWidget);
     expect(find.bySemanticsLabel('Notifications'), findsOneWidget);
     expect(find.bySemanticsLabel('Send to favorite'), findsOneWidget);
+    expect(find.bySemanticsLabel('Pull from favorite'), findsOneWidget);
     expect(find.bySemanticsLabel('Lagos +1'), findsOneWidget);
     expect((await store.read()).language, 'en');
 
@@ -364,6 +432,14 @@ class _ProfileApi extends PepeunitApi {
   final logins = <String>[];
   final icons = <int>[];
   final alerts = <Map<String, Object?>>[];
+  String? remoteLogin = 'kept';
+  Uint8List? remoteIcon;
+  Map<String, Object?> remoteAlerts = {
+    'is_scheduled_alert_enable': true,
+    'scheduled_notification_time': '16:00',
+    'is_data_pipe_alert_enable': true,
+    'is_telegram_alert_enable': true,
+  };
 
   @override
   Future<String> challenge(String hashPublicKey) async => 'challenge';
@@ -392,6 +468,26 @@ class _ProfileApi extends PepeunitApi {
   ) async {
     icons.add(png.length);
     return 'icon-1';
+  }
+
+  @override
+  Future<DirectoryUser> readDirectoryUser(String token, String uuid) async {
+    return DirectoryUser(
+      uuid: uuid,
+      role: 'User',
+      status: 'Active',
+      publicKey: 'key',
+      login: remoteLogin,
+      iconUuid: remoteIcon == null ? null : 'icon-remote',
+    );
+  }
+
+  @override
+  Future<Uint8List> icon(String uuid) async => remoteIcon ?? Uint8List(0);
+
+  @override
+  Future<Map<String, Object?>> notificationSettings(String token) async {
+    return remoteAlerts;
   }
 
   @override

@@ -65,7 +65,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     final waiting = _pending == 'sync';
     final ready = model.canSendProfile;
     final cooling = model.profileCooldownLeft;
-    final frame = hexFrame(count: 5, back: HexBack.center, wide: wide);
+    final frame = hexFrame(count: 6, back: HexBack.center, wide: wide);
     final spot = frame.cells;
     final backAt = frame.back!;
     final slots = <HexSlot>[
@@ -110,6 +110,19 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         q: spot[2].$1,
         r: spot[2].$2,
         icon: 'assets/icons/rocket.svg',
+      ),
+      HexSlot(
+        id: 'pull',
+        title: phrase(language, {
+          'ru': 'Вытянуть из избранного',
+          'en': 'Pull from favorite',
+        }),
+        color: _pending == 'pull' || model.target != null ? color : hexMuted,
+        enabled: _pending == 'pull' || model.target != null,
+        busy: _pending == 'pull',
+        q: spot[5].$1,
+        r: spot[5].$2,
+        icon: 'assets/icons/reentry.svg',
       ),
       HexSlot(
         id: 'parameters',
@@ -167,6 +180,8 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         context.push('/people/settings/alerts');
       case 'sync':
         await _sync(language);
+      case 'pull':
+        await _pull(language);
     }
   }
 
@@ -265,6 +280,31 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       _report = message;
     });
     _watchCooldown();
+  }
+
+  Future<void> _pull(String language) async {
+    final model = AppScope.of(context);
+    if (_pending != null || model.target == null) return;
+    setState(() {
+      _pending = 'pull';
+      _failure = null;
+      _report = null;
+      _failureOpen = false;
+    });
+    final report = await model.recall();
+    if (!mounted) return;
+    final String? message;
+    if (report.empty) {
+      message = phrase(language, {'ru': 'Нет избранного', 'en': 'No favorite'});
+    } else if (report.problems.isNotEmpty) {
+      message = report.problems.join('\n');
+    } else {
+      message = null;
+    }
+    setState(() {
+      _pending = null;
+      _report = message;
+    });
   }
 
   void _watchCooldown() {

@@ -287,6 +287,14 @@ class PepeunitApi {
     _ensureOk(response);
   }
 
+  Future<Map<String, Object?>> notificationSettings(String token) async {
+    final response = await _client
+        .get(_uri('/notifications/settings'), headers: _jsonHeaders(token))
+        .timeout(_timeout);
+    _ensureOk(response);
+    return (jsonDecode(response.body) as Map).cast<String, Object?>();
+  }
+
   Future<void> updateNotificationSettings(
     String token,
     Map<String, Object?> patch,

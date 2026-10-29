@@ -22,13 +22,26 @@ class _LoginCellState extends State<LoginCell> {
   late final TextEditingController _controller;
   var _rejected = false;
   var _loaded = false;
+  var _shown = '';
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_loaded) return;
-    _loaded = true;
-    _controller = TextEditingController(text: AppScope.of(context).vault.login);
+    final login = AppScope.of(context).vault.login;
+    if (!_loaded) {
+      _loaded = true;
+      _shown = login;
+      _controller = TextEditingController(text: login);
+      return;
+    }
+    if (login == _shown) return;
+    _shown = login;
+    _rejected = false;
+    if (_controller.text == login) return;
+    _controller.value = TextEditingValue(
+      text: login,
+      selection: TextSelection.collapsed(offset: login.length),
+    );
   }
 
   @override

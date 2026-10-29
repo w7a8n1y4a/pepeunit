@@ -476,6 +476,48 @@ class AppModel extends ChangeNotifier {
     }
   }
 
+  /// Copies the avatar, login, and notification prefs from the favorite
+  /// instance onto this device.
+  Future<SyncReport> recall() async {
+    if (!vault.hasKey) return const SyncReport(0, ['no-key']);
+    final current = vault.target;
+    if (current == null) return const SyncReport(0, []);
+    final url = current.url;
+    final host = instanceHost(url);
+    try {
+      final identity = Identity.fromParts(vault.publicKey!, vault.secretKey!);
+      final record = _ensureRecord(url);
+      final client = api(originOf(url));
+      await _open(record, client, identity);
+      final token = record.token!;
+      final user = await client.readDirectoryUser(token, record.userUuid!);
+      final problems = <String>[];
+      Uint8List? png;
+      final iconUuid = user.iconUuid;
+      if (iconUuid != null) {
+        try {
+          final bytes = await client.icon(iconUuid);
+          if (pngSize(bytes) != null) png = bytes;
+        } catch (error) {
+          problems.add('$host: $error');
+        }
+      }
+      AlertPrefs? alerts;
+      try {
+        alerts = AlertPrefs.fromPatch(await client.notificationSettings(token));
+      } catch (error) {
+        problems.add('$host: $error');
+      }
+      vault.login = user.login ?? '';
+      if (png != null) vault.iconPng = base64.encode(png);
+      if (alerts != null) vault.alerts = alerts;
+      await _commit();
+      return SyncReport(problems.isEmpty ? 1 : 0, problems);
+    } catch (error) {
+      return SyncReport(0, ['$host: $error']);
+    }
+  }
+
   /// Asks the instance for a fresh JWT with the same key login.
   Future<void> resign(String raw) async {
     if (!vault.hasKey) throw StateError('key');
