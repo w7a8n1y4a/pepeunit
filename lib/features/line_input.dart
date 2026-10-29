@@ -51,18 +51,21 @@ class LineInput extends StatefulWidget {
   /// The field itself stays on the vertical center, clear of the edge title.
   final bool roomyCaption;
 
-  /// Small SVG drawn at the start of the field, for example a search mark.
+  /// Search mark. It sits beside the hint, on the text midline. Once the
+  /// field has text, it slides left to about a fifth of the line. The text
+  /// itself scrolls along the line, as in a plain field, and stays clear of
+  /// the mark.
   final String? leading;
 
   @override
   State<LineInput> createState() => _LineInputState();
 }
 
-class _LineInputState extends State<LineInput>
-    with SingleTickerProviderStateMixin {
+class _LineInputState extends State<LineInput> with TickerProviderStateMixin {
   late FocusNode _focus;
   var _ownsFocus = false;
   late final AnimationController _blink;
+  late final AnimationController _park;
 
   @override
   void initState() {
@@ -72,6 +75,11 @@ class _LineInputState extends State<LineInput>
       vsync: this,
       duration: const Duration(milliseconds: 530),
     );
+    _park = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 320),
+    );
+    if (widget.controller.text.isNotEmpty) _park.value = 1;
     widget.controller.addListener(_onInput);
     _syncBlink();
   }
@@ -100,6 +108,7 @@ class _LineInputState extends State<LineInput>
       _bindFocus(widget.focusNode);
     }
     _syncBlink();
+    _syncPark();
   }
 
   bool get _showBlink =>
@@ -113,8 +122,18 @@ class _LineInputState extends State<LineInput>
     }
   }
 
+  void _syncPark() {
+    if (widget.leading == null) return;
+    if (widget.controller.text.isNotEmpty) {
+      _park.forward();
+    } else {
+      _park.reverse();
+    }
+  }
+
   void _onInput() {
     _syncBlink();
+    _syncPark();
     if (mounted) setState(() {});
   }
 
@@ -123,6 +142,7 @@ class _LineInputState extends State<LineInput>
     _focus.removeListener(_onInput);
     widget.controller.removeListener(_onInput);
     _blink.dispose();
+    _park.dispose();
     if (_ownsFocus) _focus.dispose();
     super.dispose();
   }
@@ -146,8 +166,8 @@ class _LineInputState extends State<LineInput>
           ),
         );
         final roomy = widget.roomyCaption;
-        final icon = font * 1.25;
-        final fieldHeight = widget.leading == null ? font : icon;
+        final mark = font * _searchMark;
+        final fieldHeight = widget.leading == null ? font : mark;
         final rule = Container(
           height: max(1.2, side * 0.008),
           margin: EdgeInsets.symmetric(horizontal: side * 0.08),
@@ -159,13 +179,19 @@ class _LineInputState extends State<LineInput>
             height: fieldHeight,
             child: Stack(
               alignment: Alignment.center,
+              clipBehavior: Clip.none,
               children: [
                 Theme(
                   data: selection,
                   child: DefaultSelectionStyle(
                     cursorColor: accent,
                     selectionColor: highlight,
-                    child: _field(font: font, bar: bar, accent: accent),
+                    child: _field(
+                      font: font,
+                      bar: bar,
+                      accent: accent,
+                      lineInset: side * 0.08,
+                    ),
                   ),
                 ),
                 if (_showBlink)
@@ -271,6 +297,7 @@ class _LineInputState extends State<LineInput>
     required double font,
     required double bar,
     required Color accent,
+    required double lineInset,
   }) {
     final leading = widget.leading;
     final hintStyle = TextStyle(
@@ -281,65 +308,107 @@ class _LineInputState extends State<LineInput>
       decoration: TextDecoration.none,
       overflow: TextOverflow.ellipsis,
     );
-    final field = TextField(
-      key: widget.fieldKey,
-      controller: widget.controller,
-      focusNode: _focus,
-      textAlign: TextAlign.center,
-      textAlignVertical: TextAlignVertical.center,
-      maxLines: 1,
-      autocorrect: false,
-      enableSuggestions: false,
-      smartDashesType: SmartDashesType.disabled,
-      smartQuotesType: SmartQuotesType.disabled,
-      textCapitalization: TextCapitalization.none,
-      cursorColor: accent,
-      cursorWidth: bar,
-      cursorHeight: font,
-      style: TextStyle(
-        color: const Color(0xFFFFFFFF),
-        fontFamily: 'OpenGost Type B',
-        fontSize: font,
-        decoration: TextDecoration.none,
-        height: 1,
-      ),
-      inputFormatters: widget.inputFormatters,
-      onChanged: widget.onChanged,
-      onSubmitted: widget.onSubmitted,
-      decoration: InputDecoration(
-        isCollapsed: true,
-        isDense: true,
-        counterText: '',
-        filled: false,
-        contentPadding: EdgeInsets.zero,
-        hintText: widget.hint,
-        hintStyle: hintStyle,
-        border: InputBorder.none,
-        enabledBorder: InputBorder.none,
-        focusedBorder: InputBorder.none,
-        disabledBorder: InputBorder.none,
-        errorBorder: InputBorder.none,
-        focusedErrorBorder: InputBorder.none,
-      ),
-    );
-    if (leading == null) return field;
-    final icon = font * 1.25;
-    return Stack(
-      alignment: Alignment.center,
-      children: [
-        field,
-        if (widget.controller.text.isEmpty)
-          ExcludeSemantics(
-            child: IgnorePointer(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.center,
+    Widget editor(EdgeInsets padding, {double? size}) {
+      final type = size ?? font;
+      return TextField(
+        key: widget.fieldKey,
+        controller: widget.controller,
+        focusNode: _focus,
+        textAlign: TextAlign.center,
+        textAlignVertical: TextAlignVertical.center,
+        maxLines: 1,
+        autocorrect: false,
+        enableSuggestions: false,
+        smartDashesType: SmartDashesType.disabled,
+        smartQuotesType: SmartQuotesType.disabled,
+        textCapitalization: TextCapitalization.none,
+        cursorColor: accent,
+        cursorWidth: bar,
+        cursorHeight: type,
+        style: TextStyle(
+          color: const Color(0xFFFFFFFF),
+          fontFamily: 'OpenGost Type B',
+          fontSize: type,
+          decoration: TextDecoration.none,
+          height: 1,
+        ),
+        strutStyle: StrutStyle(
+          fontFamily: 'OpenGost Type B',
+          fontSize: type,
+          height: 1,
+          leading: 0,
+          forceStrutHeight: true,
+        ),
+        inputFormatters: widget.inputFormatters,
+        onChanged: widget.onChanged,
+        onSubmitted: widget.onSubmitted,
+        decoration: InputDecoration(
+          isCollapsed: true,
+          isDense: true,
+          counterText: '',
+          filled: false,
+          contentPadding: padding,
+          hintText: widget.hint,
+          hintStyle: hintStyle,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          disabledBorder: InputBorder.none,
+          errorBorder: InputBorder.none,
+          focusedErrorBorder: InputBorder.none,
+        ),
+      );
+    }
+
+    if (leading == null) return editor(EdgeInsets.zero);
+    final type = font * _searchType;
+    final icon = font * _searchMark;
+    final gap = font * 0.35;
+    final drop = icon * _searchMarkDrop;
+    final showPrompt = widget.controller.text.isEmpty && !_focus.hasFocus;
+    final prompt = widget.hint ?? '';
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final promptWidth = _inkWidth(prompt, type);
+        final idleLeft = max(0.0, (width - icon - gap - promptWidth) / 2);
+        final parkedLeft = (width / 5 - icon / 2).clamp(
+          0.0,
+          max(0.0, width - icon),
+        );
+        final fieldLeft = lineInset.clamp(0.0, width / 2).toDouble();
+        return SizedBox(
+          width: width,
+          height: icon,
+          child: AnimatedBuilder(
+            animation: _park,
+            builder: (context, child) {
+              final travel = Curves.easeInOut.transform(_park.value);
+              final left = (idleLeft + (parkedLeft - idleLeft) * travel)
+                  .toDouble();
+              final textStart = widget.controller.text.isEmpty
+                  ? fieldLeft
+                  : min(left + icon + gap, width - fieldLeft).toDouble();
+              return Stack(
+                alignment: Alignment.center,
+                clipBehavior: Clip.none,
                 children: [
-                  Transform.translate(
-                    offset: Offset(0, icon * 0.06),
-                    child: SizedBox(
-                      width: icon,
-                      height: icon,
+                  Positioned(
+                    left: textStart,
+                    right: fieldLeft,
+                    top: 0,
+                    bottom: 0,
+                    child: Align(
+                      alignment: const Alignment(0, _searchTypeDrop),
+                      child: SizedBox(height: type, child: child),
+                    ),
+                  ),
+                  Positioned(
+                    left: left,
+                    top: drop,
+                    width: icon,
+                    height: icon,
+                    child: IgnorePointer(
                       child: SvgPicture.asset(
                         leading,
                         fit: BoxFit.contain,
@@ -351,20 +420,75 @@ class _LineInputState extends State<LineInput>
                       ),
                     ),
                   ),
-                  SizedBox(width: font * 0.28),
-                  Text(
-                    widget.hint ?? '',
-                    style: hintStyle.copyWith(color: hexMuted, height: 1),
-                    textHeightBehavior: const TextHeightBehavior(
-                      applyHeightToFirstAscent: false,
-                      applyHeightToLastDescent: false,
+                  if (showPrompt)
+                    Positioned(
+                      left: left + icon + gap,
+                      top: 0,
+                      bottom: 0,
+                      child: ExcludeSemantics(
+                        child: IgnorePointer(
+                          child: Align(
+                            alignment: const Alignment(0, _searchTypeDrop),
+                            child: Text(
+                              prompt,
+                              key: const ValueKey('line-prompt'),
+                              style: hintStyle.copyWith(
+                                color: hexMuted,
+                                height: 1,
+                                fontSize: type,
+                              ),
+                              textHeightBehavior: const TextHeightBehavior(
+                                applyHeightToFirstAscent: false,
+                                applyHeightToLastDescent: false,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
                     ),
-                  ),
                 ],
+              );
+            },
+            child: DefaultTextHeightBehavior(
+              textHeightBehavior: const TextHeightBehavior(
+                applyHeightToFirstAscent: false,
+                applyHeightToLastDescent: false,
               ),
+              child: editor(EdgeInsets.zero, size: type),
             ),
           ),
-      ],
+        );
+      },
     );
   }
+}
+
+/// Glass plus handle, in font heights. The glass sits above the box center.
+const _searchMark = 1.98;
+
+/// Share of the mark height that brings the glass onto the text midline.
+const _searchMarkDrop = 0.07;
+
+/// Search hint and typed text, relative to the cell font.
+const _searchType = 1.25;
+
+/// Align value that lowers a child by [_searchMarkDrop] of the icon box.
+const _searchTypeDrop = _searchMarkDrop * 2;
+
+double _inkWidth(String text, double font) {
+  if (text.isEmpty) return 0;
+  final painter = TextPainter(
+    text: TextSpan(
+      text: text,
+      style: TextStyle(
+        fontFamily: 'OpenGost Type B',
+        fontSize: font,
+        height: 1,
+        decoration: TextDecoration.none,
+      ),
+    ),
+    textDirection: TextDirection.ltr,
+    maxLines: 1,
+  )..layout();
+  return painter.width;
 }

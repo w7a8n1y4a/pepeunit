@@ -1,9 +1,11 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../account/alerts.dart';
 import '../../account/icon_file.dart';
 import '../../account/key_mark.dart';
 import '../../account/secret_key_file.dart';
@@ -25,6 +27,26 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
   String? _failure;
   var _failureOpen = false;
   var _busy = false;
+  Timer? _clock;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _watchRegistration());
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final route = ModalRoute.of(context);
+    if (route == null || route.isCurrent) _watchRegistration();
+  }
+
+  @override
+  void dispose() {
+    _clock?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +57,13 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
     final wide = hexWide(MediaQuery.sizeOf(context));
     final slots = model.vault.hasKey
         ? _signedIn(language, color, back, wide)
-        : _signedOut(language, color, back, wide);
+        : _signedOut(
+            language,
+            color,
+            back,
+            wide,
+            model.registrationCooldownLeft,
+          );
     appendError(
       slots,
       message: _failure,
@@ -52,6 +80,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
     Color color,
     String back,
     bool wide,
+    Duration cooling,
   ) {
     final frame = hexFrame(count: 2, back: HexBack.center, wide: wide);
     final spot = frame.cells;
@@ -65,14 +94,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         r: spot[0].$2,
         icon: 'assets/icons/signin.svg',
       ),
-      HexSlot(
-        id: 'registration',
-        title: accountText(language, 'Регистрация', 'Registration'),
-        color: color,
-        q: spot[1].$1,
-        r: spot[1].$2,
-        icon: 'assets/icons/registration.svg',
-      ),
+      _registration(language, color, spot[1].$1, spot[1].$2, cooling),
       backSlot(title: back, q: backAt.$1, r: backAt.$2),
     ];
   }
@@ -130,6 +152,26 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
     ];
   }
 
+  HexSlot _registration(
+    String language,
+    Color color,
+    int q,
+    int r,
+    Duration cooling,
+  ) {
+    final locked = cooling > Duration.zero;
+    return HexSlot(
+      id: 'registration',
+      title: accountText(language, 'Регистрация', 'Registration'),
+      footer: locked ? cooldownClock(cooling) : null,
+      color: locked ? hexMuted : color,
+      enabled: !locked,
+      q: q,
+      r: r,
+      icon: 'assets/icons/registration.svg',
+    );
+  }
+
   Future<void> _tap(String id, String language) async {
     switch (id) {
       case 'back':
@@ -137,6 +179,9 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
       case 'login':
         context.push('/people/login');
       case 'registration':
+        if (AppScope.of(context).registrationCooldownLeft != Duration.zero) {
+          return;
+        }
         context.push('/people/register');
       case 'error':
         setState(() => _failureOpen = true);
@@ -153,6 +198,36 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
       case 'profile':
         break;
     }
+  }
+
+  void _watchRegistration() {
+    _clock?.cancel();
+    final model = AppScope.of(context);
+    if (!mounted ||
+        model.vault.hasKey ||
+        model.registrationCooldownLeft == Duration.zero) {
+      _clock = null;
+      return;
+    }
+    final route = ModalRoute.of(context);
+    if (route != null && !route.isCurrent) {
+      _clock = null;
+      return;
+    }
+    _clock = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      final current = ModalRoute.of(context);
+      if (current != null && !current.isCurrent) {
+        _clock?.cancel();
+        _clock = null;
+        return;
+      }
+      setState(() {});
+      if (AppScope.of(context).registrationCooldownLeft == Duration.zero) {
+        _clock?.cancel();
+        _clock = null;
+      }
+    });
   }
 
   Future<void> _saveKey(String language) async {

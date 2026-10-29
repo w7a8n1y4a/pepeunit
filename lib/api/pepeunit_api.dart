@@ -501,13 +501,6 @@ class PepeunitApi {
     _ensureOk(response);
   }
 
-  Future<void> syncRepoStorage(String token) async {
-    final response = await _client
-        .patch(_uri('/repo/backend_sync_repo'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-  }
-
   Future<Uint8List> icon(String uuid) async {
     final response = await _client.get(_uri('/icons/$uuid')).timeout(_timeout);
     _ensureOk(response);

@@ -1,7 +1,9 @@
 import 'dart:convert';
-import 'dart:ui' show Tristate;
+import 'dart:ui' show PointerDeviceKind, Tristate;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:pepeunit_client/account/vault_store.dart';
@@ -203,6 +205,85 @@ void main() {
     expect(find.bySemanticsLabel('Приватные'), findsOneWidget);
     expect(find.bySemanticsLabel('А-Я'), findsOneWidget);
     expect(find.bySemanticsLabel('gitlab.com/pepe/unit, 1 КБ'), findsOneWidget);
+    final prompt = find.byKey(const ValueKey('line-prompt'));
+    expect(tester.widget<Text>(prompt).data, 'Поиск');
+    final promptBox = tester.getRect(prompt);
+    final promptDy = promptBox.center.dy;
+    final search = find.byKey(const ValueKey('registry-search'));
+    final searchBox = tester.getRect(search);
+    final mark = tester.getRect(_searchMark);
+    final pair = (mark.left + promptBox.right) / 2;
+    expect((pair - searchBox.center.dx).abs(), lessThan(16));
+    expect(promptBox.left - mark.right, inInclusiveRange(-1, 24));
+    expect(mark.left, greaterThan(searchBox.left));
+    expect(
+      (mark.center.dy - promptBox.center.dy).abs(),
+      lessThan(mark.height * 0.12),
+    );
+    expect(
+      find.ancestor(of: prompt, matching: find.byType(HoverPop)),
+      findsOneWidget,
+    );
+    final hover = await tester.createGesture(kind: PointerDeviceKind.mouse);
+    await hover.addPointer();
+    await hover.moveTo(promptBox.center);
+    await tester.pump();
+    final scale = tester.widget<Transform>(
+      find
+          .descendant(
+            of: find.ancestor(of: prompt, matching: find.byType(HoverPop)),
+            matching: find.byType(Transform),
+          )
+          .first,
+    );
+    expect(scale.transform.getMaxScaleOnAxis(), closeTo(1.06, 0.001));
+    await hover.removePointer();
+    await tester.tap(search);
+    await tester.pump();
+    expect(find.byKey(const ValueKey('line-prompt')), findsNothing);
+    expect(tester.widget<TextField>(search).focusNode!.hasFocus, isTrue);
+    await tester.enterText(search, 'p');
+    await tester.pump();
+    expect(tester.widget<TextField>(search).focusNode!.hasFocus, isTrue);
+    expect((tester.getRect(search).center.dy - promptDy).abs(), lessThan(4));
+    await tester.enterText(search, 'pepeunit-registry-search-query');
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(tester.widget<TextField>(search).focusNode!.hasFocus, isTrue);
+    final parked = tester.getRect(_searchMark);
+    final row = tester.getRect(
+      find
+          .ancestor(
+            of: search,
+            matching: find.byWidgetPredicate(
+              (widget) =>
+                  widget is SizedBox &&
+                  widget.width != null &&
+                  widget.height != null,
+            ),
+          )
+          .first,
+    );
+    expect(
+      (parked.center.dx - (row.left + row.width / 5)).abs(),
+      lessThan(row.width * 0.08),
+    );
+    expect(find.byType(ShaderMask), findsNothing);
+    final opened = tester.getRect(search);
+    expect(opened.left, greaterThan(parked.right - 1));
+    tester.widget<TextField>(search).controller!.selection =
+        const TextSelection.collapsed(offset: 0);
+    await tester.pump();
+    await tester.pump();
+    final editable = _editable(
+      tester.element(
+        find.descendant(of: search, matching: find.byType(EditableText)),
+      ),
+    )!;
+    final caret = editable.localToGlobal(
+      editable.getLocalRectForCaret(const TextPosition(offset: 0)).center,
+    );
+    final window = tester.getRect(search);
+    expect(caret.dx, inInclusiveRange(window.left - 2, window.right + 2));
 
     await tester.pumpWidget(
       AppScope(
@@ -261,6 +342,23 @@ void main() {
     expect(done.flagsCollection.isEnabled, Tristate.isTrue);
   });
 }
+
+RenderEditable? _editable(Element element) {
+  final object = element.renderObject;
+  if (object is RenderEditable) return object;
+  RenderEditable? found;
+  element.visitChildElements((child) {
+    found ??= _editable(child);
+  });
+  return found;
+}
+
+final _searchMark = find.byWidgetPredicate((widget) {
+  if (widget is! SvgPicture) return false;
+  final loader = widget.bytesLoader;
+  return loader is SvgAssetLoader &&
+      loader.assetName == 'assets/icons/search.svg';
+});
 
 class _RepoApi extends PepeunitApi {
   _RepoApi() : super('https://devunit.pepeunit.com');

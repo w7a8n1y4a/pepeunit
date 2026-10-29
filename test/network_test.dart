@@ -229,14 +229,14 @@ void main() {
       expect(operationActions(owner: true, staff: true, federation: true), [
         'tests',
         'scan-all',
-        'repo-ops',
+        'update-repos',
         'track',
         'reboot',
       ]);
       expect(operationActions(owner: false, staff: true, federation: true), [
         'tests',
         'scan-all',
-        'repo-ops',
+        'update-repos',
       ]);
       expect(
         cardActions(
@@ -798,8 +798,13 @@ void main() {
     await tester.pumpAndSettle();
 
     final search = find.byKey(const ValueKey('network-search'));
+    expect(
+      tester.widget<Text>(find.byKey(const ValueKey('line-prompt'))).data,
+      'Поиск',
+    );
     await tester.tap(search);
     await tester.pump();
+    expect(find.byKey(const ValueKey('line-prompt')), findsNothing);
     await tester.enterText(search, 'd');
     await tester.pump();
     await tester.enterText(search, 'dc');
@@ -865,6 +870,8 @@ void main() {
     expect(find.bySemanticsLabel('Тесты'), findsOneWidget);
     expect(find.bySemanticsLabel('Опросить соседей'), findsOneWidget);
     expect(find.bySemanticsLabel('Отслеживать инстанс'), findsOneWidget);
+    expect(find.bySemanticsLabel('Обновить репозитории'), findsOneWidget);
+    expect(find.bySemanticsLabel('Сверить копии'), findsNothing);
 
     await tester.tap(find.bySemanticsLabel('Назад'));
     await tester.pumpAndSettle();

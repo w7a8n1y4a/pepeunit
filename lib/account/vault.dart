@@ -13,6 +13,7 @@ class Vault {
     this.iconPng,
     this.alerts = const AlertPrefs(),
     this.profileSentAt,
+    this.registeredAt,
     this.language = 'ru',
     this.timeZone = '0',
     List<String>? allow,
@@ -32,6 +33,9 @@ class Vault {
 
   /// Epoch milliseconds of the last profile send. Limits the next one.
   int? profileSentAt;
+
+  /// Epoch milliseconds of the last registration press. Sign out keeps it.
+  int? registeredAt;
   String language;
   String timeZone;
 
@@ -92,6 +96,7 @@ class Vault {
       iconPng: iconPng,
       alerts: alerts,
       profileSentAt: profileSentAt,
+      registeredAt: registeredAt,
       language: language,
       timeZone: timeZone,
       allow: [...allow],
@@ -111,6 +116,7 @@ class Vault {
       'iconPng': iconPng,
       'alerts': alerts.toJson(),
       'profileSentAt': profileSentAt,
+      'registeredAt': registeredAt,
       'language': language,
       'timeZone': timeZone,
       'allow': allow,
@@ -132,6 +138,7 @@ class Vault {
       iconPng: json['iconPng'] as String?,
       alerts: AlertPrefs.fromJson(json['alerts']),
       profileSentAt: json['profileSentAt'] as int?,
+      registeredAt: json['registeredAt'] as int?,
       language: _language(json['language'] as String?),
       timeZone: _timeZone(json['timeZone'] as String?),
       allow: _urls(json['allow']),

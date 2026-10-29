@@ -183,7 +183,7 @@ class LineSearch extends StatelessWidget {
     return LineField(
       color: color,
       value: model.query.text,
-      hint: netText(language, 'поиск', 'search'),
+      hint: netText(language, 'Поиск', 'Search'),
       language: language,
       activeTrust: model.query.trust,
       onChanged: model.setSearch,

@@ -72,6 +72,7 @@ class AppModel extends ChangeNotifier {
 
   static const profileCooldown = Duration(minutes: 1);
   static const resignCooldown = Duration(minutes: 1);
+  static const registrationCooldown = Duration(minutes: 2);
 
   /// Epoch milliseconds of the last successful re-login, per instance url.
   final Map<String, int> resignAt = {};
@@ -83,6 +84,10 @@ class AppModel extends ChangeNotifier {
   /// Time left before the favorite instance can be signed in again.
   Duration resignCooldownLeft(String raw) =>
       _windowLeft(resignAt[canonicalInstanceUrl(raw)], resignCooldown);
+
+  /// Time left before another account can be registered.
+  Duration get registrationCooldownLeft =>
+      _windowLeft(vault.registeredAt, registrationCooldown);
 
   bool get canSendProfile =>
       vault.target != null && profileCooldownLeft == Duration.zero;
@@ -147,6 +152,15 @@ class AppModel extends ChangeNotifier {
     } else {
       notifyListeners();
     }
+  }
+
+  /// Starts the registration wait at the moment the cell is pressed.
+  ///
+  /// Sign out does not clear it, so the registration cell stays inactive
+  /// while the new account is still signed in and after a quick sign-out.
+  Future<void> holdRegistration() {
+    vault.registeredAt = DateTime.now().millisecondsSinceEpoch;
+    return _commit();
   }
 
   Future<void> adoptIdentity(Identity identity) {
@@ -376,12 +390,6 @@ class AppModel extends ChangeNotifier {
   Future<void> updateAllRepos() async {
     final current = _staffTarget();
     await api(originOf(current.url)).updateAllRepos(current.token!);
-  }
-
-  /// Asks the backend to fetch repository copies that are missing on disk.
-  Future<void> syncRepoStorage() async {
-    final current = _staffTarget();
-    await api(originOf(current.url)).syncRepoStorage(current.token!);
   }
 
   Future<DirectoryUser> readMember(String uuid) async {

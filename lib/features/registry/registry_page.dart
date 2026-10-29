@@ -298,7 +298,7 @@ class _QueryCellState extends State<_QueryCell> {
       color: widget.color,
       controller: _controller,
       fieldKey: const ValueKey('registry-search'),
-      hint: regText(language, 'поиск', 'search'),
+      hint: regText(language, 'Поиск', 'Search'),
       leading: 'assets/icons/search.svg',
       roomyCaption: true,
       onChanged: (text) {

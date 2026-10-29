@@ -300,7 +300,7 @@ class _MemberQueryCellState extends State<MemberQueryCell> {
       color: widget.color,
       controller: _controller,
       fieldKey: const ValueKey('member-search'),
-      hint: netText(language, 'поиск', 'search'),
+      hint: netText(language, 'Поиск', 'Search'),
       leading: 'assets/icons/search.svg',
       roomyCaption: true,
       onChanged: (text) {

@@ -1,7 +1,10 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../account/alerts.dart';
 import '../../account/identity.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_order.dart';
@@ -21,6 +24,7 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
   String? _failure;
   var _failureOpen = false;
   var _busy = false;
+  Timer? _clock;
 
   @override
   void initState() {
@@ -28,13 +32,23 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       if (AppScope.of(context).vault.hasKey) context.go('/people');
+      _watchRegistration();
     });
   }
 
   @override
+  void dispose() {
+    _clock?.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final language = AppScope.of(context).vault.language;
+    final model = AppScope.of(context);
+    final language = model.vault.language;
     final color = peopleColor;
+    final cooling = model.registrationCooldownLeft;
+    final locked = cooling > Duration.zero;
     final wide = hexWide(MediaQuery.sizeOf(context));
     final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
     final generate = frame.cells.first;
@@ -43,7 +57,9 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
       HexSlot(
         id: 'generate',
         title: accountText(language, 'Генерация ключа', 'Generate key'),
-        color: color,
+        footer: locked ? cooldownClock(cooling) : null,
+        color: locked ? hexMuted : color,
+        enabled: !locked,
         busy: _busy,
         q: generate.$1,
         r: generate.$2,
@@ -73,14 +89,38 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
       case 'error':
         setState(() => _failureOpen = true);
       case 'generate':
+        if (AppScope.of(context).registrationCooldownLeft != Duration.zero) {
+          return;
+        }
         await _generate(language);
     }
+  }
+
+  void _watchRegistration() {
+    _clock?.cancel();
+    if (!mounted ||
+        AppScope.of(context).registrationCooldownLeft == Duration.zero) {
+      _clock = null;
+      return;
+    }
+    _clock = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      setState(() {});
+      if (AppScope.of(context).registrationCooldownLeft == Duration.zero) {
+        _clock?.cancel();
+        _clock = null;
+      }
+    });
   }
 
   Future<void> _generate(String language) async {
     if (_busy) return;
     final model = AppScope.of(context);
+    if (model.registrationCooldownLeft != Duration.zero) return;
+    await model.holdRegistration();
+    if (!mounted) return;
     setState(() => _busy = true);
+    _watchRegistration();
     try {
       final (publicKey, secretKey) = await compute(generateMlDsa87KeyPair, 0);
       if (!mounted) return;

@@ -18,8 +18,7 @@ import 'network_chrome.dart';
 import 'setting_cells.dart';
 
 /// Renders either:
-/// - `ops`: the instance commands menu (`tests`, `scan-all`, registry, `reboot`)
-/// - `repo-ops`: update every repository, and sync copies missing on disk
+/// - `ops`: the instance commands menu (`tests`, `scan-all`, update repos, `reboot`)
 /// - `settings`: instance, MQTT, DataPipe, notifications, Telegram, avatar
 /// - a `SettingCategory`: child screens and, on a leaf, one cell per field
 class SettingCategoryPage extends StatefulWidget {
@@ -66,8 +65,6 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     final List<HexSlot> slots;
     if (id == 'ops') {
       slots = _opsSlots(model, language, color, wide);
-    } else if (id == 'repo-ops') {
-      slots = _repoOpsSlots(language, color, wide);
     } else if (id == 'settings') {
       slots = _setupSlots(model, language, color, wide);
     } else if (settingCategory(id) != null) {
@@ -173,13 +170,18 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
             r: spots[i].$2,
             icon: 'assets/icons/instances.svg',
           ),
-          'repo-ops' => HexSlot(
-            id: 'repo-ops',
-            title: netText(language, 'Репозитории', 'Repositories'),
+          'update-repos' => HexSlot(
+            id: 'update-repos',
+            title: netText(
+              language,
+              'Обновить репозитории',
+              'Update repositories',
+            ),
             color: color,
+            busy: _pending == 'update-repos',
             q: spots[i].$1,
             r: spots[i].$2,
-            icon: 'assets/icons/repo.svg',
+            icon: 'assets/icons/reload.svg',
           ),
           'track' => HexSlot(
             id: 'track',
@@ -197,56 +199,6 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
             q: spots[i].$1,
             r: spots[i].$2,
             icon: 'assets/icons/power.svg',
-          ),
-          _ => HexSlot(
-            id: items[i],
-            title: items[i],
-            color: color,
-            q: spots[i].$1,
-            r: spots[i].$2,
-          ),
-        },
-    ];
-  }
-
-  List<HexSlot> _repoOpsSlots(String language, Color color, bool wide) {
-    const items = ['update-repos', 'sync-copies'];
-    final frame = hexFrame(
-      count: items.length,
-      back: HexBack.center,
-      wide: wide,
-    );
-    final spots = frame.cells;
-    final back = frame.back!;
-    return [
-      backSlot(
-        title: netText(language, 'Назад', 'Back'),
-        q: back.$1,
-        r: back.$2,
-      ),
-      for (var i = 0; i < items.length && i < spots.length; i++)
-        switch (items[i]) {
-          'update-repos' => HexSlot(
-            id: 'update-repos',
-            title: netText(
-              language,
-              'Обновить репозитории',
-              'Update repositories',
-            ),
-            color: color,
-            busy: _pending == 'update-repos',
-            q: spots[i].$1,
-            r: spots[i].$2,
-            icon: 'assets/icons/reload.svg',
-          ),
-          'sync-copies' => HexSlot(
-            id: 'sync-copies',
-            title: netText(language, 'Сверить копии', 'Sync copies'),
-            color: color,
-            busy: _pending == 'sync-copies',
-            q: spots[i].$1,
-            r: spots[i].$2,
-            icon: 'assets/icons/repo.svg',
           ),
           _ => HexSlot(
             id: items[i],
@@ -483,12 +435,8 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
         await _run('tests', model.runIntegrationTests);
       case 'scan-all':
         await _run('scan-all', model.scanAll);
-      case 'repo-ops':
-        context.push('/peers/tune/repo-ops');
       case 'update-repos':
         await _run('update-repos', model.updateAllRepos);
-      case 'sync-copies':
-        await _run('sync-copies', model.syncRepoStorage);
       case 'track':
         context.push('/peers/track');
       case 'reboot':

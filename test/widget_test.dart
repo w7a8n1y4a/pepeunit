@@ -152,6 +152,7 @@ void main() {
     model.vault.language = 'en';
     model.vault.alerts = const AlertPrefs(scheduled: false, time: '01:02');
     model.vault.profileSentAt = 5;
+    model.vault.registeredAt = 5;
     await model.adoptIdentity(
       Identity(
         publicKey: Uint8List.fromList([1]),
@@ -173,11 +174,41 @@ void main() {
     expect(model.vault.alerts.scheduled, isTrue);
     expect(model.vault.alerts.time, AlertPrefs.defaultTime);
     expect(model.vault.profileSentAt, isNull);
+    expect(model.vault.registeredAt, 5);
     expect(model.vault.language, 'en');
     expect(model.vault.instances.single.token, isNull);
     expect(model.vault.instances.single.userUuid, isNull);
     expect(model.vault.instances.single.url, defaultInstanceUrl);
     expect((await store.read()).hasKey, isFalse);
+    expect((await store.read()).registeredAt, 5);
+  });
+
+  test('registration wait is two minutes and survives sign out', () async {
+    final model = AppModel(
+      store: MemoryVaultStore(),
+      files: MemoryKeyFilePort(),
+    );
+    await model.load();
+    await model.holdRegistration();
+    expect(
+      model.registrationCooldownLeft.inSeconds,
+      inInclusiveRange(110, 120),
+    );
+    await model.adoptIdentity(
+      Identity(
+        publicKey: Uint8List.fromList(const [1]),
+        secretKey: Uint8List.fromList(const [2]),
+      ),
+    );
+    expect(model.vault.hasKey, isTrue);
+    expect(model.registrationCooldownLeft, greaterThan(Duration.zero));
+    await model.signOut();
+    expect(model.vault.hasKey, isFalse);
+    expect(model.registrationCooldownLeft, greaterThan(Duration.zero));
+    model.vault.registeredAt =
+        DateTime.now().millisecondsSinceEpoch -
+        const Duration(minutes: 2).inMilliseconds;
+    expect(model.registrationCooldownLeft, Duration.zero);
   });
 
   testWidgets('registration and key login stay on the client', (tester) async {
@@ -200,6 +231,7 @@ void main() {
     expect(find.bySemanticsLabel('Логин'), findsOneWidget);
     expect(find.bySemanticsLabel('Скачать ключ'), findsOneWidget);
     expect(find.bySemanticsLabel('Выход'), findsOneWidget);
+    expect(find.bySemanticsLabel('Регистрация'), findsNothing);
     final secret = base64.decode(model.vault.secretKey!);
     final publicKey = model.vault.publicKey;
 
@@ -211,7 +243,9 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Выход'));
     await _waitFor(tester, 'Вход');
     expect(model.vault.hasKey, isFalse);
-    expect(find.bySemanticsLabel('Регистрация'), findsOneWidget);
+    final locked = tester.getSemantics(find.bySemanticsLabel('Регистрация'));
+    expect(locked.flagsCollection.isEnabled, Tristate.isFalse);
+    expect(locked.value, matches(RegExp(r'^\d+:\d{2}$')));
     expect(find.bySemanticsLabel('Настройки'), findsNothing);
 
     files.nextPick = files.saved;
