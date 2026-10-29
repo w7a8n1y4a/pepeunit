@@ -6,6 +6,21 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import '../hive/hex_scene.dart';
 
+/// Side inset of a roomy search cell, as a share of the cell.
+const roomySideInset = 0.10;
+
+/// Search stroke inset from the cell edge, as a share of the cell.
+const searchRuleInset = 0.08;
+
+/// How far a roomy enum sits under the search stroke, as a share of the cell.
+const _searchCaptionGap = 0.014;
+
+/// Width of the search stroke inside a roomy caption of [captionWidth].
+double searchLineWidth(double captionWidth) {
+  final side = captionWidth / (1 - 2 * roomySideInset);
+  return max(0.0, captionWidth - 2 * side * searchRuleInset);
+}
+
 /// Centered cell field: accent stroke and a validation line under it.
 /// Material's outline is not drawn.
 class LineInput extends StatefulWidget {
@@ -24,6 +39,7 @@ class LineInput extends StatefulWidget {
     this.blink = false,
     this.roomyCaption = false,
     this.leading,
+    this.captionGap,
     super.key,
   });
 
@@ -48,8 +64,13 @@ class LineInput extends StatefulWidget {
   final bool blink;
 
   /// Gives the caption the lower part of the cell, for a short list of choices.
-  /// The field itself stays on the vertical center, clear of the edge title.
+  /// The stroke sits just above that list. The field rests on the stroke,
+  /// clear of the top of the cell.
   final bool roomyCaption;
+
+  /// Gap under the stroke, as a share of the cell. The roomy caption uses
+  /// a small default when this is omitted.
+  final double? captionGap;
 
   /// Search mark. Its center stays a fifth of the line in from the left.
   /// The hint and the typed text stay on the center of the line, a tenth
@@ -155,7 +176,7 @@ class _LineInputState extends State<LineInput>
         final fieldHeight = widget.leading == null ? font : mark;
         final rule = Container(
           height: max(1.2, side * 0.008),
-          margin: EdgeInsets.symmetric(horizontal: side * 0.08),
+          margin: EdgeInsets.symmetric(horizontal: side * searchRuleInset),
           color: widget.lineColor ?? widget.color,
         );
         final input = HoverPop(
@@ -221,39 +242,39 @@ class _LineInputState extends State<LineInput>
             onTap: () => _focus.requestFocus(),
             child: Padding(
               padding: EdgeInsets.fromLTRB(
-                side * (roomy ? 0.1 : 0.18),
+                side * (roomy ? roomySideInset : 0.18),
                 side * (roomy ? 0.12 : 0.28),
-                side * (roomy ? 0.1 : 0.18),
+                side * (roomy ? roomySideInset : 0.18),
                 side * (roomy ? 0.12 : 0.2),
               ),
               child: roomy && showBand
-                  ? Stack(
+                  ? Column(
                       children: [
-                        Column(
-                          children: [
-                            Expanded(
-                              child: Align(
-                                alignment: Alignment.bottomCenter,
-                                child: Padding(
-                                  padding: EdgeInsets.only(
-                                    bottom: side * 0.035,
-                                  ),
-                                  child: input,
-                                ),
-                              ),
+                        Expanded(
+                          flex: 5,
+                          child: Align(
+                            alignment: Alignment.bottomCenter,
+                            child: Padding(
+                              padding: EdgeInsets.only(bottom: side * 0.035),
+                              child: input,
                             ),
-                            Expanded(
-                              child: Padding(
-                                padding: EdgeInsets.only(top: side * 0.04),
-                                child: SizedBox(
-                                  width: double.infinity,
-                                  child: bandChild,
-                                ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
-                        Align(alignment: Alignment.center, child: rule),
+                        rule,
+                        Expanded(
+                          flex: 8,
+                          child: Padding(
+                            padding: EdgeInsets.only(
+                              top:
+                                  side *
+                                  (widget.captionGap ?? _searchCaptionGap),
+                            ),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: bandChild,
+                            ),
+                          ),
+                        ),
                       ],
                     )
                   : Column(

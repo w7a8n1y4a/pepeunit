@@ -324,13 +324,11 @@ class _KindWords extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final font = cellFont(constraints.maxWidth) * 1.55;
-        return FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.topCenter,
-          child: SlantedChoices(
-            fontSize: font,
-            maxWidth: constraints.maxWidth,
-            choices: [
+        return SlantedChoices(
+          fontSize: font,
+          maxWidth: searchLineWidth(constraints.maxWidth),
+          rows: [
+            [
               for (final kind in repoKinds)
                 SlantedChoice(
                   label: repoKindLabel(language, kind),
@@ -340,7 +338,7 @@ class _KindWords extends StatelessWidget {
                   },
                 ),
             ],
-          ),
+          ],
         );
       },
     );

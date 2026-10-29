@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -304,6 +305,7 @@ class _MemberQueryCellState extends State<MemberQueryCell> {
       hint: netText(language, 'Поиск', 'Search'),
       leading: 'assets/icons/search.svg',
       roomyCaption: true,
+      captionGap: 0,
       onChanged: (text) {
         AppScope.of(context).setUserSearch(text);
         widget.onSearch();
@@ -326,58 +328,44 @@ class _MemberWords extends StatelessWidget {
     final query = model.userQuery;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final font = cellFont(constraints.maxWidth) * 1.4;
-        final gap = font * 0.7;
-        final span = spanForSlantedRows(
+        final side = constraints.maxWidth / (1 - 2 * roomySideInset);
+        final font = cellFont(side) * 1.1;
+        final line = searchLineWidth(constraints.maxWidth);
+        // The caption runs past the vertical edges. Keep both enums above
+        // the bottom of those edges.
+        final band = max(0.0, constraints.maxHeight - side * 0.13);
+        return SlantedChoices(
+          fontSize: font,
+          maxWidth: line,
+          spanLine: true,
+          spanRows: const {0},
+          rowWidthShare: const {1: 0.88},
+          rowGapShare: -0.35,
+          rowLineGap: const {1: 1 / 3},
+          lineGapShare: 0.05,
+          maxBlockHeight: band,
           rows: [
-            [for (final role in userRoles) roleLabel(language, role)],
+            [
+              for (final role in userRoles)
+                SlantedChoice(
+                  label: roleLabel(language, role),
+                  selected: query.roles.contains(role),
+                  onTap: () {
+                    if (model.toggleUserRole(role)) onRole();
+                  },
+                ),
+            ],
             [
               for (final status in userStatuses)
-                memberStatusLabel(language, status),
+                SlantedChoice(
+                  label: memberStatusLabel(language, status),
+                  selected: query.statuses.contains(status),
+                  onTap: () {
+                    if (model.toggleUserStatus(status)) onStatus();
+                  },
+                ),
             ],
           ],
-          fontSize: font,
-          scaler: MediaQuery.textScalerOf(context),
-          maxWidth: constraints.maxWidth,
-        );
-        return FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: Alignment.topCenter,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              SlantedChoices(
-                fontSize: font,
-                span: span,
-                choices: [
-                  for (final role in userRoles)
-                    SlantedChoice(
-                      label: roleLabel(language, role),
-                      selected: query.roles.contains(role),
-                      onTap: () {
-                        if (model.toggleUserRole(role)) onRole();
-                      },
-                    ),
-                ],
-              ),
-              SizedBox(height: gap),
-              SlantedChoices(
-                fontSize: font,
-                span: span,
-                choices: [
-                  for (final status in userStatuses)
-                    SlantedChoice(
-                      label: memberStatusLabel(language, status),
-                      selected: query.statuses.contains(status),
-                      onTap: () {
-                        if (model.toggleUserStatus(status)) onStatus();
-                      },
-                    ),
-                ],
-              ),
-            ],
-          ),
         );
       },
     );
