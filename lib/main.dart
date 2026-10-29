@@ -14,12 +14,14 @@ import 'features/home/home_page.dart';
 import 'features/menu/placeholder_page.dart';
 import 'features/network/instance_page.dart';
 import 'features/network/instance_settings_page.dart';
+import 'features/network/member_page.dart';
 import 'features/network/setting_category_page.dart';
 import 'features/network/network_add_page.dart';
 import 'features/network/network_chrome.dart';
 import 'features/network/network_lists_page.dart';
 import 'features/network/network_page.dart';
 import 'features/network/network_search_page.dart';
+import 'features/network/users_page.dart';
 import 'hive/hex_scene.dart';
 
 Future<void> main() async {
@@ -102,6 +104,18 @@ class _PepeunitAppState extends State<PepeunitApp> {
             path: 'instance',
             builder: (context, state) =>
                 InstancePage(url: state.uri.queryParameters['url'] ?? ''),
+          ),
+          GoRoute(
+            path: 'users',
+            builder: (context, state) =>
+                UsersPage(scope: userScopeOf(state.uri)),
+            routes: [
+              GoRoute(
+                path: 'member',
+                builder: (context, state) =>
+                    MemberPage(uuid: state.uri.queryParameters['uuid'] ?? ''),
+              ),
+            ],
           ),
           GoRoute(
             path: 'tune',

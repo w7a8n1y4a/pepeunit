@@ -15,7 +15,7 @@ Menu cell anatomy:
 3. Center is an SVG icon, a PNG avatar, or text. A choice and a value in the same cell use `cellFont`: 0.068 of the cell side, at least 11. Log levels and account parameters are the reference.
 
 Icon size is `iconScaleOf` in `lib/hive/icon_scale.dart`. `HexScene` applies it, and a screen does not pass a scale. One file is one size on every screen. The icon square is `0.72` of the cell radius, the size of `back.svg` and the home menu. Ink shorter than `instances.svg` (0.88 of that square) grows until its longer side matches. Icons that already fill the square stay at 1. The ceiling is 1.6, where the picture meets the edge labels. `settings.svg` is 1.6, `power.svg` is 1.5, `telegram.svg` and `sight.svg` are 1.2. Avatar circles stay `1.15 * 0.85` of the radius. When an icon file changes, re-measure its opaque pixels and update the fill.
-4. Lower edges may carry `footer` and `footerLeft`.
+4. Lower edges may carry `footer` and `footerLeft`. From 13 characters a lower caption spans both lower edges. `sideRight` runs along the right edge and is read from the bottom up; user cards put the role there.
 5. Hover on a tappable cell brightens the border and scales the border, the edge labels, and the picture together, and only after the pointer moves. A form cell stays still; the clickable rows inside it scale on their own. A tap that stays on the screen sends a short ray burst. A tap that opens another menu does not.
 6. While `busy` is set on that cell, three arc segments rotate in the gap between the center mark and the edge labels until the request ends. The cell keeps its own color. Only the pressed cell is busy.
 

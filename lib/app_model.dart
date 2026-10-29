@@ -10,6 +10,7 @@ import 'account/key_file_port.dart';
 import 'account/vault.dart';
 import 'account/vault_store.dart';
 import 'api/pepeunit_api.dart';
+import 'instances/directory_user.dart';
 import 'instances/hosted_url.dart';
 import 'instances/instance.dart';
 import 'instances/link.dart';
@@ -49,6 +50,11 @@ class AppModel extends ChangeNotifier {
   bool networkBusy = false;
   String? networkFailure;
   final NetworkQuery query = NetworkQuery();
+  final UserQuery userQuery = UserQuery();
+  ({int count, List<DirectoryUser> users})? directory;
+  var directoryOffset = 0;
+  var directoryLimit = 16;
+  var _directoryTicket = 0;
   final Set<String> discovered = {};
   final Map<String, PeerHead> peers = {};
   final Map<String, InstancePortrait> portraits = {};
@@ -76,6 +82,12 @@ class AppModel extends ChangeNotifier {
 
   InstancePortrait? portraitOf(String url) =>
       portraits[url] ?? peers[url]?.portrait;
+
+  Uint8List? cachedIcon(String? uuid) {
+    final url = target?.url;
+    if (url == null || uuid == null || uuid.isEmpty) return null;
+    return icons['${originOf(url)}/$uuid'];
+  }
 
   Uint8List? iconOf(String url) {
     final uuid = portraitOf(url)?.iconUuid;
@@ -205,6 +217,106 @@ class AppModel extends ChangeNotifier {
   void toggleTrust(String status) {
     query.toggleTrust(status);
     notifyListeners();
+  }
+
+  void setUserSearch(String text) {
+    if (userQuery.text == text) return;
+    userQuery.text = text;
+    notifyListeners();
+  }
+
+  bool toggleUserRole(String role) {
+    final changed = userQuery.toggleRole(role);
+    if (changed) notifyListeners();
+    return changed;
+  }
+
+  bool toggleUserStatus(String status) {
+    final changed = userQuery.toggleStatus(status);
+    if (changed) notifyListeners();
+    return changed;
+  }
+
+  bool setUserOrder(String value) {
+    final changed = userQuery.setOrder(value);
+    if (changed) notifyListeners();
+    return changed;
+  }
+
+  Future<bool> loadDirectory({required int offset, required int limit}) async {
+    final current = _signedTarget();
+    final ticket = ++_directoryTicket;
+    final page = await api(originOf(current.url)).directoryUsers(
+      token: current.token!,
+      offset: offset,
+      limit: limit,
+      search: userQuery.text,
+      roles: [
+        for (final role in userRoles)
+          if (userQuery.roles.contains(role)) role,
+      ],
+      statuses: [
+        for (final status in userStatuses)
+          if (userQuery.statuses.contains(status)) status,
+      ],
+      order: userQuery.order,
+    );
+    if (ticket != _directoryTicket) return false;
+    directory = page;
+    directoryOffset = offset;
+    directoryLimit = limit;
+    notifyListeners();
+    unawaited(_loadMemberIcons(ticket, current.url, page.users));
+    return true;
+  }
+
+  Future<DirectoryUser> readMember(String uuid) async {
+    final current = _signedTarget();
+    final user = await api(originOf(current.url))
+        .readDirectoryUser(current.token!, uuid);
+    unawaited(ensureIcon(user.iconUuid));
+    return user;
+  }
+
+  Future<DirectoryUser> grantMember(String uuid) {
+    return _changeMember(
+      uuid,
+      (client, token) => client.grantAdmin(token, uuid),
+      owner: true,
+    );
+  }
+
+  Future<DirectoryUser> revokeMember(String uuid) {
+    return _changeMember(
+      uuid,
+      (client, token) => client.revokeAdmin(token, uuid),
+      owner: true,
+    );
+  }
+
+  Future<DirectoryUser> blockMember(String uuid) {
+    return _changeMember(
+      uuid,
+      (client, token) => client.blockUser(token, uuid),
+    );
+  }
+
+  Future<DirectoryUser> unblockMember(String uuid) {
+    return _changeMember(
+      uuid,
+      (client, token) => client.unblockUser(token, uuid),
+    );
+  }
+
+  Future<void> ensureIcon(String? uuid) async {
+    final current = target;
+    if (current == null || uuid == null || uuid.isEmpty) return;
+    final key = '${originOf(current.url)}/$uuid';
+    if (icons.containsKey(key)) return;
+    try {
+      icons[key] = await api(originOf(current.url)).icon(uuid);
+      notifyListeners();
+    } catch (_) {}
   }
 
   Future<void> selectTarget(String raw) async {
@@ -509,6 +621,51 @@ class AppModel extends ChangeNotifier {
   }
 
   Future<void> openExternal(Uri uri) => (openLink ?? launchExternal)(uri);
+
+  Future<DirectoryUser> _changeMember(
+    String uuid,
+    Future<DirectoryUser> Function(PepeunitApi client, String token) change, {
+    bool owner = false,
+  }) async {
+    final current = owner ? _ownerTarget() : _staffTarget();
+    final user = await change(api(originOf(current.url)), current.token!);
+    try {
+      if (directory != null) {
+        await loadDirectory(offset: directoryOffset, limit: directoryLimit);
+      }
+    } catch (_) {}
+    unawaited(ensureIcon(user.iconUuid));
+    return user;
+  }
+
+  Future<void> _loadMemberIcons(
+    int ticket,
+    String url,
+    List<DirectoryUser> users,
+  ) async {
+    final origin = originOf(url);
+    final client = api(origin);
+    for (final user in users) {
+      if (ticket != _directoryTicket) return;
+      final uuid = user.iconUuid;
+      if (uuid == null || uuid.isEmpty) continue;
+      final key = '$origin/$uuid';
+      if (icons.containsKey(key)) continue;
+      try {
+        icons[key] = await client.icon(uuid);
+        if (ticket != _directoryTicket) return;
+        notifyListeners();
+      } catch (_) {}
+    }
+  }
+
+  InstanceRecord _signedTarget() {
+    final current = vault.target;
+    if (current == null || !current.signedIn) {
+      throw StateError('role');
+    }
+    return current;
+  }
 
   InstanceRecord _staffTarget() {
     final current = vault.target;

@@ -9,6 +9,7 @@ import 'package:pepeunit_client/account/vault_store.dart';
 import 'package:pepeunit_client/api/pepeunit_api.dart';
 import 'package:pepeunit_client/app_model.dart';
 import 'package:pepeunit_client/app_scope.dart';
+import 'package:pepeunit_client/instances/directory_user.dart';
 import 'package:pepeunit_client/instances/instance.dart';
 import 'package:pepeunit_client/instances/network_view.dart';
 import 'package:pepeunit_client/instances/portrait.dart';
@@ -181,6 +182,17 @@ void main() {
         cardActions(
           isTarget: true,
           owner: false,
+          staff: false,
+          signedIn: true,
+          telegram: false,
+          trust: 'Trust',
+        ),
+        ['metrics', 'users', 'clear'],
+      );
+      expect(
+        cardActions(
+          isTarget: true,
+          owner: false,
           staff: true,
           telegram: false,
           trust: 'Trust',
@@ -225,6 +237,124 @@ void main() {
           trust: 'Pending',
         ),
         ['metrics', 'peer', 'telegram', 'target'],
+      );
+      expect(
+        memberActions(
+          owner: false,
+          staff: false,
+          role: 'User',
+          status: 'Active',
+        ),
+        ['card'],
+      );
+      expect(
+        memberActions(
+          owner: false,
+          staff: true,
+          role: 'User',
+          status: 'Active',
+        ),
+        ['card', 'block'],
+      );
+      expect(
+        memberActions(owner: true, staff: true, role: 'User', status: 'Active'),
+        ['card', 'grant', 'block'],
+      );
+      expect(
+        memberActions(
+          owner: true,
+          staff: true,
+          role: 'Admin',
+          status: 'Blocked',
+        ),
+        ['card', 'revoke', 'unblock'],
+      );
+      expect(
+        memberActions(
+          owner: true,
+          staff: true,
+          role: 'Owner',
+          status: 'Active',
+        ),
+        ['card', 'block'],
+      );
+      final people = UserQuery();
+      expect(people.roles, {'User', 'Admin', 'Owner'});
+      expect(people.statuses, {'Active'});
+      expect(people.order, 'desc');
+      expect(people.toggleStatus('Blocked'), isTrue);
+      expect(people.statuses, {'Active', 'Blocked'});
+      expect(people.toggleStatus('Active'), isTrue);
+      expect(people.toggleStatus('Blocked'), isFalse);
+      expect(people.statuses, {'Blocked'});
+      expect(people.toggleRole('Admin'), isTrue);
+      expect(people.toggleRole('Owner'), isTrue);
+      expect(people.toggleRole('User'), isFalse);
+      expect(people.roles, {'User'});
+      expect(people.setOrder('asc'), isTrue);
+      expect(people.setOrder('asc'), isFalse);
+      expect(people.order, 'asc');
+      expect(userPageLimit(1), 16);
+      expect(userPageLimit(2), 34);
+      expect(
+        userWindowText(offset: 0, limit: 16, count: 40, ofWord: 'из'),
+        '1-16 из 40',
+      );
+      expect(
+        userWindowText(offset: 0, limit: 34, count: 40, ofWord: 'из'),
+        '1-34 из 40',
+      );
+      expect(
+        userWindowText(offset: 16, limit: 16, count: 40, ofWord: 'из'),
+        '17-32 из 40',
+      );
+      expect(
+        userWindowText(offset: 34, limit: 34, count: 80, ofWord: 'из'),
+        '35-68 из 80',
+      );
+      expect(
+        userWindowText(offset: 0, limit: 16, count: 0, ofWord: 'of'),
+        '0 of 0',
+      );
+      expect(userCanPageBack(offset: 0, count: 10), isFalse);
+      expect(userCanPageForward(offset: 0, limit: 16, count: 10), isFalse);
+      expect(userCanPageForward(offset: 0, limit: 16, count: 20), isTrue);
+      expect(userCanPageBack(offset: 16, count: 20), isTrue);
+      expect(userCanPageForward(offset: 0, limit: 34, count: 20), isFalse);
+      expect(userCanPageForward(offset: 0, limit: 34, count: 40), isTrue);
+      final narrow = usersBoard(
+        scope: 1,
+        uuids: [for (var i = 0; i < 16; i++) 'u$i'],
+      );
+      expect(narrow.slots.where((slot) => slot.id == 'user').length, 0);
+      expect(
+        narrow.slots.where((slot) => slot.id.startsWith('user:')).length,
+        16,
+      );
+      expect(narrow.slots.firstWhere((slot) => slot.id == 'back').q, 0);
+      expect(narrow.slots.firstWhere((slot) => slot.id == 'back').r, 0);
+      expect(narrow.slots.firstWhere((slot) => slot.id == 'query').r, -1);
+      expect(narrow.canZoomIn, isTrue);
+      final wideRing = usersBoard(
+        scope: 2,
+        uuids: [for (var i = 0; i < 34; i++) 'u$i'],
+      );
+      expect(
+        wideRing.slots.where((slot) => slot.id.startsWith('user:')).length,
+        34,
+      );
+      expect(wideRing.canZoomIn, isFalse);
+      expect(wideRing.slots.length, 37);
+      expect(
+        DirectoryUser.fromJson({
+          'uuid': 'u',
+          'role': 'Admin',
+          'status': 'Blocked',
+          'public_key': 'abc',
+          'login': '  pepe  ',
+          'icon_uuid': '',
+        }).login,
+        'pepe',
       );
       expect(peerActions(trust: 'Pending', federation: true), [
         'trust',

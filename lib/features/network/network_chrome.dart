@@ -4,8 +4,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../account/key_mark.dart';
 import '../../hive/hex_scene.dart';
 import '../../hive/marks.dart';
+import '../../instances/directory_user.dart';
 import '../../instances/instance.dart';
 import '../../locale/languages.dart';
 import '../../navigation/sections.dart';
@@ -26,6 +28,31 @@ String trustLabel(String language, String trust) {
     default:
       return trust;
   }
+}
+
+String roleLabel(String language, String role) {
+  switch (role) {
+    case 'Admin':
+      return netText(language, 'Админ', 'Admin');
+    case 'Owner':
+      return netText(language, 'Владелец', 'Owner');
+    default:
+      return netText(language, 'Пользователь', 'User');
+  }
+}
+
+String memberStatusLabel(String language, String status) {
+  switch (status) {
+    case 'Blocked':
+      return netText(language, 'Заблокирован', 'Blocked');
+    default:
+      return netText(language, 'Активный', 'Active');
+  }
+}
+
+String memberOrderLabel(String language, String order) {
+  if (order == 'asc') return netText(language, 'Старые', 'Old');
+  return netText(language, 'Новые', 'New');
 }
 
 Color trustColor(String? trust, Color accent) {
@@ -75,6 +102,35 @@ HexSlot instanceMark({
     image: image,
     tappable: tappable,
     enabled: enabled,
+    busy: busy,
+  );
+}
+
+/// Account-shaped card: login on the upper left, key mark across the bottom,
+/// role on the right edge. Blocked accounts use the error border.
+HexSlot userMark({
+  required String id,
+  required DirectoryUser user,
+  required String language,
+  required int q,
+  required int r,
+  required Color accent,
+  Uint8List? image,
+  bool tappable = true,
+  bool busy = false,
+}) {
+  final login = user.login ?? '';
+  return HexSlot(
+    id: id,
+    title: login,
+    footer: keyMarkFromBase64(user.publicKey),
+    sideRight: roleLabel(language, user.role),
+    color: user.status == 'Blocked' ? errorColor : accent,
+    q: q,
+    r: r,
+    icon: image == null ? 'assets/icons/account.svg' : null,
+    image: image,
+    tappable: tappable,
     busy: busy,
   );
 }
@@ -129,6 +185,8 @@ class ScopeFrame extends StatefulWidget {
     required this.canZoomIn,
     required this.path,
     required this.child,
+    this.minScope = 0,
+    this.maxScope = 2,
     super.key,
   });
 
@@ -136,6 +194,8 @@ class ScopeFrame extends StatefulWidget {
   final bool canZoomIn;
   final String path;
   final Widget child;
+  final int minScope;
+  final int maxScope;
 
   @override
   State<ScopeFrame> createState() => _ScopeFrameState();
@@ -146,7 +206,7 @@ class _ScopeFrameState extends State<ScopeFrame> {
 
   void _step(int delta) {
     if (delta > 0 && !widget.canZoomIn) return;
-    final next = (widget.scope + delta).clamp(0, 2);
+    final next = (widget.scope + delta).clamp(widget.minScope, widget.maxScope);
     if (next == widget.scope) return;
     final uri = Uri.parse(widget.path)
         .replace(queryParameters: {'scope': '$next'});
@@ -185,4 +245,10 @@ class _ScopeFrameState extends State<ScopeFrame> {
 int scopeOf(Uri uri) {
   final raw = int.tryParse(uri.queryParameters['scope'] ?? '') ?? 0;
   return raw.clamp(0, 2);
+}
+
+/// Users open on two rings. Scope 2 adds the third.
+int userScopeOf(Uri uri) {
+  final raw = int.tryParse(uri.queryParameters['scope'] ?? '') ?? 1;
+  return raw.clamp(1, 2);
 }

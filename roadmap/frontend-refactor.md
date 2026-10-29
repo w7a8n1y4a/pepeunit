@@ -8,6 +8,7 @@
 
 | Область | Состояние |
 | --- | --- |
+| Аккаунт и сеть | сделано |
 | Units / Registry / Dashboards / Alerts / Library | заглушки |
 | OpenAPI-генерация, Inter, фон-мозаика, апдейты, docs-in-client | план |
 | Масштаб главного меню, анимации, deep links unit/repo/UnitIO | план |
@@ -17,7 +18,7 @@
 - Полный охват пользовательских ручек OpenAPI; исключения: Grafana datasource, Telegram-обвязка, Prometheus и прочий сервисный слой
 - Кеш картинок (аватары/иконки инстансов) — довести до явной политики
 
-Флаги на главном меню, сверх общей оговорки в `client.mdc` (`menuSectionEnabled`):
+Флаги на главном меню уже в `menuSectionEnabled`:
 
 - без target доступны только `people`, `peers`, `library`
 - `alerts` скрывается при `pu_ff_notification_enable == false`

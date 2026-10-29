@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import '../instances/directory_user.dart';
 import '../instances/instance.dart';
 import '../instances/portrait.dart';
 import 'backend_version.dart';
@@ -306,6 +307,89 @@ class PepeunitApi {
 
   Future<String?> uploadInstanceIcon(String token, Uint8List png) {
     return _uploadIcon(token, instanceSettingsUuid, 'Instance', png);
+  }
+
+  Future<({int count, List<DirectoryUser> users})> directoryUsers({
+    required String token,
+    required int offset,
+    required int limit,
+    required String search,
+    required List<String> roles,
+    required List<String> statuses,
+    required String order,
+  }) async {
+    final pairs = <String>[
+      'offset=$offset',
+      'limit=$limit',
+      'order_by_create_date=${Uri.encodeQueryComponent(order)}',
+      if (search.trim().isNotEmpty)
+        'search_string=${Uri.encodeQueryComponent(search.trim())}',
+      for (final role in roles) 'role=${Uri.encodeQueryComponent(role)}',
+      for (final status in statuses)
+        'status=${Uri.encodeQueryComponent(status)}',
+    ];
+    final uri = Uri.parse('$origin/pepeunit/api/v1/users?${pairs.join('&')}');
+    final response = await _client
+        .get(uri, headers: _jsonHeaders(token))
+        .timeout(_timeout);
+    _ensureOk(response);
+    final json = (jsonDecode(response.body) as Map).cast<String, Object?>();
+    final users = <DirectoryUser>[];
+    for (final item in json['users'] as List<Object?>? ?? const []) {
+      if (item is! Map) continue;
+      final user = DirectoryUser.fromJson(item.cast<String, Object?>());
+      if (user.uuid.isEmpty) continue;
+      users.add(user);
+    }
+    final rawCount = json['count'];
+    return (
+      count: rawCount is num ? rawCount.round() : users.length,
+      users: users,
+    );
+  }
+
+  Future<DirectoryUser> readDirectoryUser(String token, String uuid) async {
+    final response = await _client
+        .get(_uri('/users/$uuid'), headers: _jsonHeaders(token))
+        .timeout(_timeout);
+    _ensureOk(response);
+    return DirectoryUser.fromJson(
+      (jsonDecode(response.body) as Map).cast<String, Object?>(),
+    );
+  }
+
+  Future<DirectoryUser> grantAdmin(String token, String uuid) {
+    return _patchUser(token, '/users/grant_admin/$uuid');
+  }
+
+  Future<DirectoryUser> revokeAdmin(String token, String uuid) {
+    return _patchUser(token, '/users/revoke_admin/$uuid');
+  }
+
+  Future<DirectoryUser> blockUser(String token, String uuid) async {
+    final response = await _client
+        .patch(_uri('/users/block/$uuid'), headers: _jsonHeaders(token))
+        .timeout(_timeout);
+    _ensureOk(response);
+    return readDirectoryUser(token, uuid);
+  }
+
+  Future<DirectoryUser> unblockUser(String token, String uuid) async {
+    final response = await _client
+        .patch(_uri('/users/unblock/$uuid'), headers: _jsonHeaders(token))
+        .timeout(_timeout);
+    _ensureOk(response);
+    return readDirectoryUser(token, uuid);
+  }
+
+  Future<DirectoryUser> _patchUser(String token, String path) async {
+    final response = await _client
+        .patch(_uri(path), headers: _jsonHeaders(token))
+        .timeout(_timeout);
+    _ensureOk(response);
+    return DirectoryUser.fromJson(
+      (jsonDecode(response.body) as Map).cast<String, Object?>(),
+    );
   }
 
   Future<Uint8List> icon(String uuid) async {

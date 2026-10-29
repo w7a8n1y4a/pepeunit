@@ -54,6 +54,7 @@ class _InstancePageState extends State<InstancePage> {
           isTarget: isTarget,
           owner: owner,
           staff: staff,
+          signedIn: target?.signedIn ?? false,
           telegram: portrait?.telegram == true,
           trust: peer?.trust,
         ),
@@ -184,7 +185,6 @@ class _InstancePageState extends State<InstancePage> {
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/users.svg',
-          tappable: false,
         );
       case 'peer':
         final trust = peer?.trust ?? '';
@@ -387,6 +387,8 @@ class _InstancePageState extends State<InstancePage> {
         await _telegram(language);
       case 'settings':
         context.push('/peers/tune');
+      case 'users':
+        context.push('/peers/users');
       case 'trust':
         await _run('trust', () => model.setTrust(url, 'Trust'));
       case 'block':

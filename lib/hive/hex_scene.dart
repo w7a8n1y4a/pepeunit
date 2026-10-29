@@ -55,6 +55,8 @@ class HexSlot {
     this.footerColor = const Color(0xFFFFFFFF),
     this.footerLeft,
     this.footerLeftColor = const Color(0xFFFFFFFF),
+    this.sideRight,
+    this.sideRightColor = const Color(0xFFFFFFFF),
     this.body,
     this.tappable = true,
     this.enabled = true,
@@ -87,6 +89,10 @@ class HexSlot {
   final String? footerLeft;
   final Color footerLeftColor;
 
+  /// Text along the right edge, read from the bottom up. User cards put the role here.
+  final String? sideRight;
+  final Color sideRightColor;
+
   /// Replaces the icon and stays inside this cell. Used for the error text.
   final Widget? body;
 
@@ -98,6 +104,13 @@ class HexSlot {
 
   /// True while this cell is waiting on a request.
   final bool busy;
+}
+
+String slotLabel(HexSlot slot) {
+  final side = slot.sideRight;
+  if (side == null || side.isEmpty) return slot.title;
+  if (slot.title.isEmpty) return side;
+  return '${slot.title}, $side';
 }
 
 typedef HexSlotWrap = Widget Function(HexSlot slot, Widget child);
@@ -185,14 +198,14 @@ class HexScene extends StatelessWidget {
       tile = Semantics(
         container: true,
         explicitChildNodes: true,
-        label: slot.title,
+        label: slotLabel(slot),
         child: frame,
       );
     } else {
       tile = Semantics(
         button: slot.tappable || !slot.enabled,
         enabled: slot.enabled,
-        label: slot.title,
+        label: slotLabel(slot),
         value: slot.footer,
         child: frame,
       );
@@ -343,6 +356,27 @@ class HexPainter extends CustomPainter {
       right: slot.footer,
       rightColor: muted ? hexMuted : slot.footerColor,
     );
+    _paintSide(canvas, center, radius);
+  }
+
+  /// The role follows the right edge. The path runs upward, so the word
+  /// is read from the bottom.
+  void _paintSide(Canvas canvas, Offset center, double radius) {
+    final text = slot.sideRight;
+    if (text == null || text.isEmpty) return;
+    final color = slot.enabled ? slot.sideRightColor : hexMuted;
+    final inset = radius * 0.16;
+    final pad = radius * 0.12;
+    final x = center.dx + radius * cos(pi / 6) - inset;
+    final top = center.dy - radius * 0.5 + pad;
+    final bottom = center.dy + radius * 0.5 - pad;
+    final path = Path()
+      ..moveTo(x, bottom)
+      ..lineTo(x, top);
+    _paintText(canvas, text, color, radius, (
+      path: path,
+      centerAt: (bottom - top) / 2,
+    ));
   }
 
   /// A caption of 13 characters or more bends across both edges of its half.
@@ -683,7 +717,9 @@ class HexPainter extends CustomPainter {
         slot.footer != previous.footer ||
         slot.footerColor != previous.footerColor ||
         slot.footerLeft != previous.footerLeft ||
-        slot.footerLeftColor != previous.footerLeftColor;
+        slot.footerLeftColor != previous.footerLeftColor ||
+        slot.sideRight != previous.sideRight ||
+        slot.sideRightColor != previous.sideRightColor;
   }
 }
 

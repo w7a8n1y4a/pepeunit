@@ -75,21 +75,131 @@ class NetworkQuery {
   }
 }
 
+/// `GET /users` is any signed-in user. Owner and Admin are signed in too.
+const userRoles = ['User', 'Admin', 'Owner'];
+const userStatuses = ['Active', 'Blocked'];
+
+/// Filters for the instance directory. Newest accounts stay first so they
+/// land closer to the center.
+class UserQuery {
+  String text = '';
+  final Set<String> roles = {'User', 'Admin', 'Owner'};
+  final Set<String> statuses = {'Active'};
+  String order = 'desc';
+
+  bool toggleRole(String role) => _toggle(roles, userRoles, role);
+
+  bool toggleStatus(String status) => _toggle(statuses, userStatuses, status);
+
+  bool setOrder(String value) {
+    if ((value != 'asc' && value != 'desc') || value == order) return false;
+    order = value;
+    return true;
+  }
+
+  bool _toggle(Set<String> selected, List<String> allowed, String value) {
+    if (!allowed.contains(value)) return false;
+    if (selected.contains(value)) {
+      if (selected.length == 1) return false;
+      selected.remove(value);
+    } else {
+      selected.add(value);
+    }
+    return true;
+  }
+}
+
+/// Rings 1 and 2 hold 16 cards. Ring 3 adds 18.
+int userPageLimit(int scope) => scope >= 2 ? 34 : 16;
+
+String userWindowText({
+  required int offset,
+  required int limit,
+  required int count,
+  required String ofWord,
+}) {
+  if (count <= 0) return '0 $ofWord 0';
+  final start = offset + 1;
+  if (start > count) return '0 $ofWord $count';
+  final end = offset + limit < count ? offset + limit : count;
+  return '$start-$end $ofWord $count';
+}
+
+/// Arrows stay still until the directory is larger than the first two rings.
+bool userCanPageBack({required int offset, required int count}) =>
+    count > 16 && offset > 0;
+
+bool userCanPageForward({
+  required int offset,
+  required int limit,
+  required int count,
+}) => count > 16 && offset + limit < count;
+
+/// Back, two filter cells, then user cards. Scope 1 is two rings, scope 2
+/// opens the third.
+NetworkBoard usersBoard({
+  required int scope,
+  required List<String> uuids,
+  bool wide = false,
+}) {
+  final rings = scope.clamp(1, 2) + 1;
+  final ids = <String>[
+    'query',
+    'window',
+    for (final uuid in uuids) 'user:$uuid',
+  ];
+  final frame = hexFrame(
+    count: ids.length,
+    back: HexBack.center,
+    wide: wide,
+    rings: rings,
+  );
+  final back = frame.back!;
+  return NetworkBoard(
+    slots: [
+      BoardSlot('back', back.$1, back.$2),
+      for (var i = 0; i < ids.length && i < frame.cells.length; i++)
+        BoardSlot(ids[i], frame.cells[i].$1, frame.cells[i].$2),
+    ],
+    canZoomIn: scope < 2,
+    page: 0,
+    pages: 1,
+  );
+}
+
+/// Inside a user card. Grant and revoke are owner-only. Block is Admin and
+/// Owner. A plain user only sees the card again.
+List<String> memberActions({
+  required bool owner,
+  required bool staff,
+  required String role,
+  required String status,
+}) {
+  final actions = <String>['card'];
+  if (owner && role != 'Owner') {
+    actions.add(role == 'Admin' ? 'revoke' : 'grant');
+  }
+  if (staff) actions.add(status == 'Blocked' ? 'unblock' : 'block');
+  return actions;
+}
+
 /// Actions on the instance card, after the identity cell.
 ///
 /// Order: summary, management, users, telegram, then demote or favorite.
 /// Peer moderation takes the administration slot on another instance.
 /// Identity plus these actions stay on one ring around Back.
+/// The users cell is any signed-in session on the favorite instance.
 List<String> cardActions({
   required bool isTarget,
   required bool owner,
   required bool staff,
   required bool telegram,
   required String? trust,
+  bool signedIn = false,
 }) {
   final actions = <String>['metrics'];
   if (isTarget && owner) actions.add('settings');
-  if (isTarget && (owner || staff)) actions.add('users');
+  if (isTarget && (signedIn || owner || staff)) actions.add('users');
   if (!isTarget && staff && trust != null) actions.add('peer');
   if (telegram) actions.add('telegram');
   actions.add(isTarget ? 'clear' : 'target');
