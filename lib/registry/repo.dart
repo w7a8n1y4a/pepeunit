@@ -12,6 +12,7 @@ class RegistryRepo {
     required this.public,
     required this.localSize,
     required this.branches,
+    this.childUnitCount = 0,
     this.creatorUuid = '',
     this.releasesData,
     this.syncStatus,
@@ -32,6 +33,9 @@ class RegistryRepo {
 
   /// Bytes on disk.
   final int localSize;
+
+  /// Units linked to this repository.
+  final int childUnitCount;
   final String? releasesData;
   final String? syncStatus;
   final String? syncError;
@@ -42,6 +46,7 @@ class RegistryRepo {
 
   factory RegistryRepo.fromJson(Map<String, Object?> json) {
     final size = json['local_repository_size'];
+    final units = json['child_unit_count'];
     final icon = json['icon_uuid'];
     final releases = json['releases_data'];
     final creator = json['creator_uuid'];
@@ -53,6 +58,7 @@ class RegistryRepo {
       public: json['is_public_repository'] == true,
       creatorUuid: creator is String ? creator : '',
       localSize: size is num ? size.round() : 0,
+      childUnitCount: units is num ? units.round() : 0,
       releasesData: releases is String && releases.isNotEmpty ? releases : null,
       syncStatus: json['sync_status'] as String?,
       syncError: json['sync_error'] as String?,

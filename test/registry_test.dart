@@ -122,6 +122,7 @@ void main() {
       'repository_url': 'https://github.com/pepe/unit.git',
       'is_public_repository': false,
       'local_repository_size': 2048,
+      'child_unit_count': 3,
       'sync_status': 'Updated',
       'sync_last_datetime': '2026-03-04T05:06:07Z',
       'create_datetime': '2026-01-02T03:04:05Z',
@@ -132,6 +133,7 @@ void main() {
     });
     expect(repo.platform, 'Github');
     expect(repo.public, isFalse);
+    expect(repo.childUnitCount, 3);
     expect(repo.branches, ['main', 'dev']);
     final lines = [for (final page in repoSummaries(repo, 'ru')) ...page.lines]
         .join('\n');
@@ -152,10 +154,10 @@ void main() {
     expect(english.contains('2 KB · Branches 2'), isTrue);
     expect(shortStamp(repo.created), '2026.01.02 03:04');
     final slot = repoMark(id: 'card', repo: repo, language: 'ru', q: 0, r: 0);
-    expect(slot.footerLeft, 'Приватный');
+    expect(slot.footerLeft, '3 шт.');
     expect(slot.sideRight, '2 КБ');
     expect(slot.sideLeft, isNull);
-    expect(slot.footer, 'Гитхаб');
+    expect(slot.footer, 'Приватный');
     expect(slotLabel(slot), 'github.com/pepe/unit, 2 КБ');
   });
 
