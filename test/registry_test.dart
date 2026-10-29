@@ -212,14 +212,14 @@ void main() {
     final search = find.byKey(const ValueKey('registry-search'));
     final searchBox = tester.getRect(search);
     final mark = tester.getRect(_searchMark);
-    final pair = (mark.left + promptBox.right) / 2;
-    expect((pair - searchBox.center.dx).abs(), lessThan(16));
-    expect(promptBox.left - mark.right, inInclusiveRange(-1, 24));
-    expect(mark.left, greaterThan(searchBox.left));
+    final row = tester.getRect(_searchRow(search));
+    expect((promptBox.center.dx - row.center.dx).abs(), lessThan(4));
     expect(
-      (mark.center.dy - promptBox.center.dy).abs(),
-      lessThan(mark.height * 0.12),
+      (mark.center.dx - (row.left + row.width / 5)).abs(),
+      lessThan(row.width * 0.04),
     );
+    expect(promptBox.center.dy - row.center.dy, greaterThan(row.height * 0.09));
+    expect((searchBox.center.dy - promptBox.center.dy).abs(), lessThan(4));
     expect(
       find.ancestor(of: prompt, matching: find.byType(HoverPop)),
       findsOneWidget,
@@ -247,29 +247,42 @@ void main() {
     expect(tester.widget<TextField>(search).focusNode!.hasFocus, isTrue);
     expect((tester.getRect(search).center.dy - promptDy).abs(), lessThan(4));
     await tester.enterText(search, 'pepeunit-registry-search-query');
-    await tester.pump(const Duration(milliseconds: 400));
+    await tester.pump();
+    await tester.pump();
     expect(tester.widget<TextField>(search).focusNode!.hasFocus, isTrue);
     final parked = tester.getRect(_searchMark);
-    final row = tester.getRect(
-      find
-          .ancestor(
-            of: search,
-            matching: find.byWidgetPredicate(
-              (widget) =>
-                  widget is SizedBox &&
-                  widget.width != null &&
-                  widget.height != null,
-            ),
-          )
-          .first,
+    final typedRow = tester.getRect(_searchRow(search));
+    expect(
+      (parked.center.dx - (typedRow.left + typedRow.width / 5)).abs(),
+      lessThan(typedRow.width * 0.04),
     );
     expect(
-      (parked.center.dx - (row.left + row.width / 5)).abs(),
-      lessThan(row.width * 0.08),
+      (tester.getRect(search).center.dx - typedRow.center.dx).abs(),
+      lessThan(4),
+    );
+    final clip = tester.renderObject<RenderClipRect>(
+      find.byKey(const ValueKey('search-text-clip')),
+    );
+    final clipRect = clip.clipper!.getClip(clip.size);
+    final clipLeft = clip.localToGlobal(Offset(clipRect.left, 0)).dx;
+    expect(clipLeft, greaterThan(parked.left + parked.width * 0.55));
+    expect(clipLeft, lessThan(parked.right + 8));
+    final query = 'pepeunit-registry-search-query';
+    final middle = _editable(
+      tester.element(
+        find.descendant(of: search, matching: find.byType(EditableText)),
+      ),
+    )!;
+    final midCaret = middle.localToGlobal(
+      middle
+          .getLocalRectForCaret(TextPosition(offset: query.length ~/ 2))
+          .center,
+    );
+    expect(
+      (midCaret.dx - typedRow.center.dx).abs(),
+      lessThan(typedRow.width * 0.08),
     );
     expect(find.byType(ShaderMask), findsNothing);
-    final opened = tester.getRect(search);
-    expect(opened.left, greaterThan(parked.right - 1));
     tester.widget<TextField>(search).controller!.selection =
         const TextSelection.collapsed(offset: 0);
     await tester.pump();
@@ -282,8 +295,7 @@ void main() {
     final caret = editable.localToGlobal(
       editable.getLocalRectForCaret(const TextPosition(offset: 0)).center,
     );
-    final window = tester.getRect(search);
-    expect(caret.dx, inInclusiveRange(window.left - 2, window.right + 2));
+    expect(caret.dx, lessThan(typedRow.center.dx));
 
     await tester.pumpWidget(
       AppScope(
@@ -351,6 +363,20 @@ RenderEditable? _editable(Element element) {
     found ??= _editable(child);
   });
   return found;
+}
+
+Finder _searchRow(Finder field) {
+  return find
+      .ancestor(
+        of: field,
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is SizedBox &&
+              widget.width != null &&
+              widget.height != null,
+        ),
+      )
+      .first;
 }
 
 final _searchMark = find.byWidgetPredicate((widget) {

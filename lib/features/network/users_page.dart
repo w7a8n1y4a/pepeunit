@@ -12,6 +12,7 @@ import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
 import '../hex_page.dart';
 import '../line_input.dart';
+import '../slanted_choices.dart';
 import 'network_chrome.dart';
 
 class UsersPage extends StatefulWidget {
@@ -325,76 +326,60 @@ class _MemberWords extends StatelessWidget {
     final query = model.userQuery;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final font = cellFont(constraints.maxWidth);
+        final font = cellFont(constraints.maxWidth) * 1.4;
+        final gap = font * 0.7;
+        final span = spanForSlantedRows(
+          rows: [
+            [for (final role in userRoles) roleLabel(language, role)],
+            [
+              for (final status in userStatuses)
+                memberStatusLabel(language, status),
+            ],
+          ],
+          fontSize: font,
+          scaler: MediaQuery.textScalerOf(context),
+          maxWidth: constraints.maxWidth,
+        );
         return FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.topCenter,
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              for (final role in userRoles)
-                _word(
-                  label: roleLabel(language, role),
-                  on: query.roles.contains(role),
-                  font: font,
-                  onTap: () {
-                    if (model.toggleUserRole(role)) onRole();
-                  },
-                ),
-              Container(
-                height: 1,
-                width: font * 8,
-                margin: EdgeInsets.symmetric(vertical: font * 0.2),
-                color: hexMuted.withValues(alpha: 0.45),
+              SlantedChoices(
+                fontSize: font,
+                span: span,
+                choices: [
+                  for (final role in userRoles)
+                    SlantedChoice(
+                      label: roleLabel(language, role),
+                      selected: query.roles.contains(role),
+                      onTap: () {
+                        if (model.toggleUserRole(role)) onRole();
+                      },
+                    ),
+                ],
               ),
-              for (final status in userStatuses)
-                _word(
-                  label: memberStatusLabel(language, status),
-                  on: query.statuses.contains(status),
-                  font: font,
-                  onTap: () {
-                    if (model.toggleUserStatus(status)) onStatus();
-                  },
-                ),
+              SizedBox(height: gap),
+              SlantedChoices(
+                fontSize: font,
+                span: span,
+                choices: [
+                  for (final status in userStatuses)
+                    SlantedChoice(
+                      label: memberStatusLabel(language, status),
+                      selected: query.statuses.contains(status),
+                      onTap: () {
+                        if (model.toggleUserStatus(status)) onStatus();
+                      },
+                    ),
+                ],
+              ),
             ],
           ),
         );
       },
-    );
-  }
-
-  Widget _word({
-    required String label,
-    required bool on,
-    required double font,
-    required VoidCallback onTap,
-  }) {
-    return Semantics(
-      button: true,
-      selected: on,
-      label: label,
-      excludeSemantics: true,
-      onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: HoverPop(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: font * 0.04),
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: on ? const Color(0xFFFFFFFF) : hexMuted,
-                fontFamily: 'OpenGost Type B',
-                fontSize: font,
-                height: 1,
-                decoration: TextDecoration.none,
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

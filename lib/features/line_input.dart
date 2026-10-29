@@ -51,21 +51,22 @@ class LineInput extends StatefulWidget {
   /// The field itself stays on the vertical center, clear of the edge title.
   final bool roomyCaption;
 
-  /// Search mark. It sits beside the hint, on the text midline. Once the
-  /// field has text, it slides left to about a fifth of the line. The text
-  /// itself scrolls along the line, as in a plain field, and stays clear of
-  /// the mark.
+  /// Search mark. Its center stays a fifth of the line in from the left.
+  /// The hint and the typed text stay on the center of the line, a tenth
+  /// of the row below that center. A long line stays centered and is cut
+  /// off on the left before it reaches the mark.
   final String? leading;
 
   @override
   State<LineInput> createState() => _LineInputState();
 }
 
-class _LineInputState extends State<LineInput> with TickerProviderStateMixin {
+class _LineInputState extends State<LineInput>
+    with SingleTickerProviderStateMixin {
   late FocusNode _focus;
   var _ownsFocus = false;
   late final AnimationController _blink;
-  late final AnimationController _park;
+  final ScrollController _searchScroll = ScrollController();
 
   @override
   void initState() {
@@ -75,11 +76,6 @@ class _LineInputState extends State<LineInput> with TickerProviderStateMixin {
       vsync: this,
       duration: const Duration(milliseconds: 530),
     );
-    _park = AnimationController(
-      vsync: this,
-      duration: const Duration(milliseconds: 320),
-    );
-    if (widget.controller.text.isNotEmpty) _park.value = 1;
     widget.controller.addListener(_onInput);
     _syncBlink();
   }
@@ -108,7 +104,6 @@ class _LineInputState extends State<LineInput> with TickerProviderStateMixin {
       _bindFocus(widget.focusNode);
     }
     _syncBlink();
-    _syncPark();
   }
 
   bool get _showBlink =>
@@ -122,18 +117,8 @@ class _LineInputState extends State<LineInput> with TickerProviderStateMixin {
     }
   }
 
-  void _syncPark() {
-    if (widget.leading == null) return;
-    if (widget.controller.text.isNotEmpty) {
-      _park.forward();
-    } else {
-      _park.reverse();
-    }
-  }
-
   void _onInput() {
     _syncBlink();
-    _syncPark();
     if (mounted) setState(() {});
   }
 
@@ -142,7 +127,7 @@ class _LineInputState extends State<LineInput> with TickerProviderStateMixin {
     _focus.removeListener(_onInput);
     widget.controller.removeListener(_onInput);
     _blink.dispose();
-    _park.dispose();
+    _searchScroll.dispose();
     if (_ownsFocus) _focus.dispose();
     super.dispose();
   }
@@ -293,6 +278,15 @@ class _LineInputState extends State<LineInput> with TickerProviderStateMixin {
     );
   }
 
+  void _pinSearchText() {
+    if (!mounted || widget.leading == null || !_searchScroll.hasClients) return;
+    final position = _searchScroll.position;
+    if (!position.hasContentDimensions) return;
+    final target = position.maxScrollExtent / 2;
+    if ((position.pixels - target).abs() < 0.5) return;
+    position.jumpTo(target);
+  }
+
   Widget _field({
     required double font,
     required double bar,
@@ -308,7 +302,12 @@ class _LineInputState extends State<LineInput> with TickerProviderStateMixin {
       decoration: TextDecoration.none,
       overflow: TextOverflow.ellipsis,
     );
-    Widget editor(EdgeInsets padding, {double? size}) {
+    Widget editor(
+      EdgeInsets padding, {
+      double? size,
+      ScrollController? scroll,
+      ScrollPhysics? physics,
+    }) {
       final type = size ?? font;
       return TextField(
         key: widget.fieldKey,
@@ -325,6 +324,8 @@ class _LineInputState extends State<LineInput> with TickerProviderStateMixin {
         cursorColor: accent,
         cursorWidth: bar,
         cursorHeight: type,
+        scrollController: scroll,
+        scrollPhysics: physics,
         style: TextStyle(
           color: const Color(0xFFFFFFFF),
           fontFamily: 'OpenGost Type B',
@@ -362,100 +363,115 @@ class _LineInputState extends State<LineInput> with TickerProviderStateMixin {
 
     if (leading == null) return editor(EdgeInsets.zero);
     final type = font * _searchType;
-    final icon = font * _searchMark;
-    final gap = font * 0.35;
-    final drop = icon * _searchMarkDrop;
+    final row = font * _searchMark;
+    final glyph = row * _searchMarkScale;
     final showPrompt = widget.controller.text.isEmpty && !_focus.hasFocus;
     final prompt = widget.hint ?? '';
+    final lower = Offset(0, row * _searchTextLower);
     return LayoutBuilder(
       builder: (context, constraints) {
         final width = constraints.maxWidth;
-        final promptWidth = _inkWidth(prompt, type);
-        final idleLeft = max(0.0, (width - icon - gap - promptWidth) / 2);
-        final parkedLeft = (width / 5 - icon / 2).clamp(
-          0.0,
-          max(0.0, width - icon),
+        final markLeft = (width / 5 - glyph / 2)
+            .clamp(0.0, max(0.0, width - glyph))
+            .toDouble();
+        final markTop = _searchMarkTop(
+          row: row,
+          glyph: glyph,
+          lineInset: lineInset,
         );
         final fieldLeft = lineInset.clamp(0.0, width / 2).toDouble();
+        final markRight = markLeft + glyph * _searchGlassRight;
+        final clipLeft = (markRight + font * 0.28 - fieldLeft)
+            .clamp(0.0, width / 2)
+            .toDouble();
+        WidgetsBinding.instance.addPostFrameCallback((_) => _pinSearchText());
         return SizedBox(
           width: width,
-          height: icon,
-          child: AnimatedBuilder(
-            animation: _park,
-            builder: (context, child) {
-              final travel = Curves.easeInOut.transform(_park.value);
-              final left = (idleLeft + (parkedLeft - idleLeft) * travel)
-                  .toDouble();
-              final textStart = widget.controller.text.isEmpty
-                  ? fieldLeft
-                  : min(left + icon + gap, width - fieldLeft).toDouble();
-              return Stack(
-                alignment: Alignment.center,
-                clipBehavior: Clip.none,
-                children: [
-                  Positioned(
-                    left: textStart,
-                    right: fieldLeft,
-                    top: 0,
-                    bottom: 0,
-                    child: Align(
-                      alignment: const Alignment(0, _searchTypeDrop),
-                      child: SizedBox(height: type, child: child),
-                    ),
-                  ),
-                  Positioned(
-                    left: left,
-                    top: drop,
-                    width: icon,
-                    height: icon,
-                    child: IgnorePointer(
-                      child: SvgPicture.asset(
-                        leading,
-                        fit: BoxFit.contain,
-                        alignment: Alignment.center,
-                        colorFilter: const ColorFilter.mode(
-                          hexMuted,
-                          BlendMode.srcIn,
+          height: row,
+          child: Stack(
+            alignment: Alignment.center,
+            clipBehavior: Clip.none,
+            children: [
+              Positioned(
+                left: fieldLeft,
+                right: fieldLeft,
+                top: 0,
+                bottom: 0,
+                child: ClipRect(
+                  key: const ValueKey('search-text-clip'),
+                  clipper: _SearchInkClip(clipLeft),
+                  child: Align(
+                    alignment: Alignment.center,
+                    child: Transform.translate(
+                      offset: lower,
+                      child: SizedBox(
+                        height: type,
+                        child: DefaultTextHeightBehavior(
+                          textHeightBehavior: const TextHeightBehavior(
+                            applyHeightToFirstAscent: false,
+                            applyHeightToLastDescent: false,
+                          ),
+                          child: editor(
+                            EdgeInsets.zero,
+                            size: type,
+                            scroll: _searchScroll,
+                            physics: const NeverScrollableScrollPhysics(),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                  if (showPrompt)
-                    Positioned(
-                      left: left + icon + gap,
-                      top: 0,
-                      bottom: 0,
-                      child: ExcludeSemantics(
-                        child: IgnorePointer(
-                          child: Align(
-                            alignment: const Alignment(0, _searchTypeDrop),
-                            child: Text(
-                              prompt,
-                              key: const ValueKey('line-prompt'),
-                              style: hintStyle.copyWith(
-                                color: hexMuted,
-                                height: 1,
-                                fontSize: type,
-                              ),
-                              textHeightBehavior: const TextHeightBehavior(
-                                applyHeightToFirstAscent: false,
-                                applyHeightToLastDescent: false,
-                              ),
+                ),
+              ),
+              Positioned(
+                left: markLeft,
+                top: markTop,
+                width: glyph,
+                height: glyph,
+                child: IgnorePointer(
+                  child: SvgPicture.asset(
+                    leading,
+                    fit: BoxFit.contain,
+                    alignment: Alignment.center,
+                    colorFilter: const ColorFilter.mode(
+                      hexMuted,
+                      BlendMode.srcIn,
+                    ),
+                  ),
+                ),
+              ),
+              if (showPrompt)
+                Positioned(
+                  left: fieldLeft,
+                  right: fieldLeft,
+                  top: 0,
+                  bottom: 0,
+                  child: ExcludeSemantics(
+                    child: IgnorePointer(
+                      child: Align(
+                        alignment: Alignment.center,
+                        child: Transform.translate(
+                          offset: lower,
+                          child: Text(
+                            prompt,
+                            key: const ValueKey('line-prompt'),
+                            textAlign: TextAlign.center,
+                            style: hintStyle.copyWith(
+                              color: hexMuted,
+                              height: 1,
+                              fontSize: type,
+                            ),
+                            textHeightBehavior: const TextHeightBehavior(
+                              applyHeightToFirstAscent: false,
+                              applyHeightToLastDescent: false,
                             ),
                           ),
                         ),
                       ),
                     ),
-                ],
-              );
-            },
-            child: DefaultTextHeightBehavior(
-              textHeightBehavior: const TextHeightBehavior(
-                applyHeightToFirstAscent: false,
-                applyHeightToLastDescent: false,
-              ),
-              child: editor(EdgeInsets.zero, size: type),
-            ),
+                  ),
+                ),
+            ],
           ),
         );
       },
@@ -463,32 +479,58 @@ class _LineInputState extends State<LineInput> with TickerProviderStateMixin {
   }
 }
 
-/// Glass plus handle, in font heights. The glass sits above the box center.
+/// Glass plus handle, in font heights. This is the search row.
 const _searchMark = 1.98;
 
-/// Share of the mark height that brings the glass onto the text midline.
+/// The drawn mark is a tenth smaller than the row.
+const _searchMarkScale = 0.9;
+
+/// Nudge that seats the full-size mark in the row.
 const _searchMarkDrop = 0.07;
+
+/// Lowest ink of `search.svg`, as a share of its view box.
+/// The handle ends at (52, 52); the round cap adds half the stroke on the diagonal.
+const _searchInkTip = (52 + 1.41421356237) / 64;
+
+/// How much of the gap between the handle and the stroke is closed.
+const _searchLineCloser = 0.10;
 
 /// Search hint and typed text, relative to the cell font.
 const _searchType = 1.25;
 
-/// Align value that lowers a child by [_searchMarkDrop] of the icon box.
-const _searchTypeDrop = _searchMarkDrop * 2;
+/// How far the hint and the typed text sit below the row center,
+/// as a share of the row height.
+const _searchTextLower = 0.10;
 
-double _inkWidth(String text, double font) {
-  if (text.isEmpty) return 0;
-  final painter = TextPainter(
-    text: TextSpan(
-      text: text,
-      style: TextStyle(
-        fontFamily: 'OpenGost Type B',
-        fontSize: font,
-        height: 1,
-        decoration: TextDecoration.none,
-      ),
-    ),
-    textDirection: TextDirection.ltr,
-    maxLines: 1,
-  )..layout();
-  return painter.width;
+/// Right edge of the glass in `search.svg`, as a share of the view box.
+/// The handle continues past this, below the typed line.
+const _searchGlassRight = 42 / 64;
+
+/// Keeps a long search line centered, and hides it before the glass.
+class _SearchInkClip extends CustomClipper<Rect> {
+  const _SearchInkClip(this.left);
+
+  final double left;
+
+  @override
+  Rect getClip(Size size) => Rect.fromLTRB(left, 0, size.width, size.height);
+
+  @override
+  bool shouldReclip(covariant _SearchInkClip oldClipper) =>
+      oldClipper.left != left;
+}
+
+/// Top of the mark. The glyph is [_searchMarkScale] of the row, and its
+/// handle sits [_searchLineCloser] closer to the stroke than the full-size mark.
+double _searchMarkTop({
+  required double row,
+  required double glyph,
+  required double lineInset,
+}) {
+  final side = lineInset / 0.08;
+  final stroke = max(1.2, side * 0.008);
+  final under = side * 0.035 - stroke / 2;
+  final inkNow = row * _searchMarkDrop + _searchInkTip * row;
+  final gap = max(0.0, row + under - inkNow);
+  return inkNow + gap * _searchLineCloser - _searchInkTip * glyph;
 }

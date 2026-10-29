@@ -9,6 +9,7 @@ import '../../instances/portrait.dart';
 import '../../navigation/back.dart';
 import '../hex_page.dart';
 import '../line_input.dart';
+import '../slanted_choices.dart';
 import 'network_chrome.dart';
 
 class NetworkSearchPage extends StatefulWidget {
@@ -284,42 +285,19 @@ class _TrustWords extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final font = cellFont(constraints.maxWidth) * 1.5;
+        final font = cellFont(constraints.maxWidth) * 1.25;
         return FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.topCenter,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+          child: SlantedChoices(
+            fontSize: font,
+            maxWidth: constraints.maxWidth,
+            choices: [
               for (final status in trustStatuses)
-                Semantics(
-                  button: true,
-                  selected: active.contains(status),
+                SlantedChoice(
                   label: trustLabel(language, status),
-                  excludeSemantics: true,
+                  selected: active.contains(status),
                   onTap: () => onToggle(status),
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => onToggle(status),
-                    child: HoverPop(
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: font * 0.02),
-                        child: Text(
-                          trustLabel(language, status),
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            color: active.contains(status)
-                                ? const Color(0xFFFFFFFF)
-                                : hexMuted,
-                            fontFamily: 'OpenGost Type B',
-                            fontSize: font,
-                            height: 1,
-                            decoration: TextDecoration.none,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
                 ),
             ],
           ),

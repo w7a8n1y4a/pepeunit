@@ -14,6 +14,7 @@ import '../../registry/repo.dart';
 import '../hex_page.dart';
 import '../line_input.dart';
 import '../network/network_chrome.dart';
+import '../slanted_choices.dart';
 import 'registry_chrome.dart';
 
 class RegistryPage extends StatefulWidget {
@@ -322,18 +323,18 @@ class _KindWords extends StatelessWidget {
     final query = model.repoQuery;
     return LayoutBuilder(
       builder: (context, constraints) {
-        final font = cellFont(constraints.maxWidth);
+        final font = cellFont(constraints.maxWidth) * 1.55;
         return FittedBox(
           fit: BoxFit.scaleDown,
           alignment: Alignment.topCenter,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
+          child: SlantedChoices(
+            fontSize: font,
+            maxWidth: constraints.maxWidth,
+            choices: [
               for (final kind in repoKinds)
-                _word(
+                SlantedChoice(
                   label: repoKindLabel(language, kind),
-                  on: query.kinds.contains(kind),
-                  font: font,
+                  selected: query.kinds.contains(kind),
                   onTap: () {
                     if (model.toggleRepoKind(kind)) onKind();
                   },
@@ -342,41 +343,6 @@ class _KindWords extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  Widget _word({
-    required String label,
-    required bool on,
-    required double font,
-    required VoidCallback onTap,
-  }) {
-    return Semantics(
-      button: true,
-      selected: on,
-      label: label,
-      excludeSemantics: true,
-      onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: HoverPop(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: font * 0.08),
-            child: Text(
-              label,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: on ? const Color(0xFFFFFFFF) : hexMuted,
-                fontFamily: 'OpenGost Type B',
-                fontSize: font,
-                height: 1,
-                decoration: TextDecoration.none,
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }
