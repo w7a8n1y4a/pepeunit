@@ -329,47 +329,109 @@ class _MemberWords extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final side = constraints.maxWidth / (1 - 2 * roomySideInset);
-        final font = cellFont(side) * 1.1;
         final line = searchLineWidth(constraints.maxWidth);
-        // The caption runs past the vertical edges. Keep both enums above
-        // the bottom of those edges.
+        // The caption runs past the vertical edges. The shared size is the
+        // largest that still keeps both blocks above those edges.
         final band = max(0.0, constraints.maxHeight - side * 0.13);
-        return SlantedChoices(
-          fontSize: font,
-          maxWidth: line,
-          spanLine: true,
-          spanRows: const {0},
-          rowWidthShare: const {1: 0.88},
-          rowGapShare: -0.35,
-          rowLineGap: const {1: 1 / 3},
-          lineGapShare: 0.05,
-          maxBlockHeight: band,
-          rows: [
-            [
-              for (final role in userRoles)
-                SlantedChoice(
-                  label: roleLabel(language, role),
-                  selected: query.roles.contains(role),
-                  onTap: () {
-                    if (model.toggleUserRole(role)) onRole();
-                  },
-                ),
-            ],
-            [
-              for (final status in userStatuses)
-                SlantedChoice(
-                  label: memberStatusLabel(language, status),
-                  selected: query.statuses.contains(status),
-                  onTap: () {
-                    if (model.toggleUserStatus(status)) onStatus();
-                  },
-                ),
-            ],
+        final roles = [for (final role in userRoles) roleLabel(language, role)];
+        final statuses = [
+          for (final status in userStatuses)
+            memberStatusLabel(language, status),
+        ];
+        final font = _memberFont(
+          ceiling: cellFont(side) * 1.1,
+          line: line,
+          band: band,
+          scaler: MediaQuery.textScalerOf(context),
+          roles: roles,
+          statuses: statuses,
+        );
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SlantedChoices(
+              fontSize: font,
+              maxWidth: line,
+              spanLine: true,
+              lineGapShare: 0.05,
+              choices: [
+                for (final role in userRoles)
+                  SlantedChoice(
+                    label: roleLabel(language, role),
+                    selected: query.roles.contains(role),
+                    onTap: () {
+                      if (model.toggleUserRole(role)) onRole();
+                    },
+                  ),
+              ],
+            ),
+            Transform.translate(
+              offset: Offset(0, -font * 0.35),
+              child: SlantedChoices(
+                fontSize: font,
+                maxWidth: line * 0.88,
+                choices: [
+                  for (final status in userStatuses)
+                    SlantedChoice(
+                      label: memberStatusLabel(language, status),
+                      selected: query.statuses.contains(status),
+                      onTap: () {
+                        if (model.toggleUserStatus(status)) onStatus();
+                      },
+                    ),
+                ],
+              ),
+            ),
           ],
         );
       },
     );
   }
+}
+
+/// Largest size at or under [ceiling] whose two blocks fit in [band].
+double _memberFont({
+  required double ceiling,
+  required double line,
+  required double band,
+  required TextScaler scaler,
+  required List<String> roles,
+  required List<String> statuses,
+}) {
+  if (!line.isFinite || line <= 0) return ceiling;
+  bool fits(double font) {
+    final roleHeight = slantedEnumHeight(
+      labels: roles,
+      fontSize: font,
+      maxWidth: line,
+      scaler: scaler,
+      lineGapShare: 0.05,
+      span: true,
+    );
+    final statusHeight = slantedEnumHeight(
+      labels: statuses,
+      fontSize: font,
+      maxWidth: line,
+      scaler: scaler,
+      lineGapShare: 0.05,
+    );
+    if (roleHeight == null || statusHeight == null) return false;
+    return roleHeight + statusHeight + font * 0.5 <= band + 0.5;
+  }
+
+  if (fits(ceiling)) return ceiling;
+  var low = 1.0;
+  var high = ceiling;
+  if (high <= low || !fits(low)) return max(1.0, low);
+  for (var step = 0; step < 14; step++) {
+    final mid = (low + high) / 2;
+    if (fits(mid)) {
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+  return low;
 }
 
 class MemberWindowCell extends StatelessWidget {

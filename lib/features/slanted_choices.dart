@@ -30,65 +30,39 @@ class SlantedChoice {
   final VoidCallback onTap;
 }
 
-/// Search enums under one line.
+/// One search enum under the line.
 ///
-/// Each row is one enum. The block stays within [maxWidth] (the search
-/// stroke). In a row, every first letter sits on one horizontal line. The
-/// clear gap between stacked words is a third of a capital. A short row
-/// leans less, so it stays short; a long row leans more until it fits.
-/// Once a word has ended, the next word starts just after that ink instead
-/// of waiting on an imaginary continuation of the line. Rows sit half a
-/// font apart.
+/// The block stays within [maxWidth] (the search stroke). Every first
+/// letter sits on one horizontal line. The clear gap between stacked words
+/// is a third of a capital. A short enum leans less, so it stays short; a
+/// long one leans more until it fits. Once a word has ended, the next word
+/// starts just after that ink instead of waiting on an imaginary
+/// continuation of the line.
 ///
-/// [spanLine] keeps the largest size that still fills [maxWidth] and,
-/// when set, [maxBlockHeight]. [lineGapShare] is the clear gap between
-/// stacked words, as a share of a capital. A smaller share lets the row
-/// lean less and stay shorter at the same width.
+/// A second enum is a second [SlantedChoices] under this one. [spanLine]
+/// keeps the largest size at or under [fontSize] that still fills
+/// [maxWidth]. [lineGapShare] is the clear gap between stacked words, as a
+/// share of a capital. A smaller share lets the enum lean less and stay
+/// shorter at the same width.
 class SlantedChoices extends StatelessWidget {
   const SlantedChoices({
     required this.fontSize,
     required this.maxWidth,
-    required this.rows,
-    this.rowGap,
-    this.rowGapShare,
+    required this.choices,
     this.spanLine = false,
-    this.spanRows,
-    this.rowWidthShare = const {},
-    this.rowLineGap = const {},
     this.lineGapShare = 1 / 3,
-    this.maxBlockHeight,
     super.key,
   });
 
   final double fontSize;
   final double maxWidth;
-  final List<List<SlantedChoice>> rows;
-
-  /// Gap between enums. Defaults to half the fitted font, or [rowGapShare].
-  final double? rowGap;
-
-  /// Gap between enums as a share of the fitted font. A negative share
-  /// pulls the next row up. The font itself stays sized for half a font.
-  final double? rowGapShare;
+  final List<SlantedChoice> choices;
 
   /// Uses the full search stroke. The lean rises only as far as the size needs.
   final bool spanLine;
 
-  /// Rows that spread out to the stroke. Defaults to every row when
-  /// [spanLine] is set.
-  final Set<int>? spanRows;
-
-  /// Max width of a row, as a share of the stroke. Missing rows use the stroke.
-  final Map<int, double> rowWidthShare;
-
-  /// Clear-gap share for one row. Missing rows use [lineGapShare].
-  final Map<int, double> rowLineGap;
-
   /// Clear gap between stacked words, as a share of a capital.
   final double lineGapShare;
-
-  /// Largest block height. The letters shrink until the rows fit.
-  final double? maxBlockHeight;
 
   @override
   Widget build(BuildContext context) {
@@ -100,39 +74,22 @@ class SlantedChoices extends StatelessWidget {
           constraints.maxWidth,
         );
         final limit = widthCap.isFinite ? widthCap : maxWidth;
-        final font = spanLine || maxBlockHeight != null
-            ? _fontThatFits(limit, scaler)
-            : fontSize;
-        final gap = rowGap ?? font * (rowGapShare ?? 0.5);
-        final laid = _laidRows(font, limit, scaler, paint: true);
-        if (laid.isEmpty) return const SizedBox.shrink();
-        var blockWidth = 0.0;
-        for (final row in laid) {
-          blockWidth = max(blockWidth, row.layout.size.width);
-        }
-        final built = <Widget>[];
-        var lift = 0.0;
-        for (final row in laid) {
-          var child = _rowStack(
-            words: row.words,
-            layout: row.layout,
-            width: blockWidth,
-            scaler: scaler,
-          );
-          if (built.isNotEmpty) {
-            if (gap > 0) {
-              built.add(SizedBox(height: gap));
-            } else if (gap < 0) {
-              lift -= gap;
-              child = Transform.translate(
-                offset: Offset(0, -lift),
-                child: child,
-              );
-            }
-          }
-          built.add(child);
-        }
-        final block = Column(mainAxisSize: MainAxisSize.min, children: built);
+        final font = spanLine ? _fontThatFits(limit, scaler) : fontSize;
+        final laid = _layRow(
+          row: choices,
+          font: font,
+          maxWidth: limit,
+          scaler: scaler,
+          span: spanLine,
+          lineGapShare: lineGapShare,
+        );
+        if (laid == null) return const SizedBox.shrink();
+        final block = _rowStack(
+          words: laid.words,
+          layout: laid.layout,
+          width: laid.layout.size.width,
+          scaler: scaler,
+        );
         if (spanLine) return block;
         return Align(
           alignment: Alignment.topCenter,
@@ -152,63 +109,19 @@ class SlantedChoices extends StatelessWidget {
     );
   }
 
-  double _rowLimit(int index, double limit) {
-    final share = rowWidthShare[index];
-    if (share == null || !limit.isFinite) return limit;
-    return limit * share;
-  }
-
-  List<_LaidRow> _laidRows(
-    double font,
-    double limit,
-    TextScaler scaler, {
-    bool paint = false,
-  }) {
-    final laid = <_LaidRow>[];
-    for (var i = 0; i < rows.length; i++) {
-      final laidRow = _layRow(
-        row: rows[i],
-        font: font,
-        maxWidth: paint ? _rowLimit(i, limit) : limit,
-        scaler: scaler,
-        span: spanLine && (spanRows == null || spanRows!.contains(i)),
-        lineGapShare: paint ? (rowLineGap[i] ?? lineGapShare) : lineGapShare,
-      );
-      if (laidRow != null) laid.add(laidRow);
-    }
-    return laid;
-  }
-
-  double _blockHeight(List<_LaidRow> laid, double font) {
-    if (laid.isEmpty) return 0;
-    // Size the letters for the default gap. A tighter painted gap must
-    // not grow or shrink them.
-    final gap = font * 0.5;
-    var height = 0.0;
-    for (var i = 0; i < laid.length; i++) {
-      if (i > 0) height += gap;
-      height += laid[i].layout.size.height;
-    }
-    return height;
-  }
-
-  /// Largest size at or under [fontSize] that keeps the stroke and the band.
+  /// Largest size at or under [fontSize] that stays inside the stroke.
   double _fontThatFits(double limit, TextScaler scaler) {
     if (!limit.isFinite || limit <= 0) return fontSize;
-    final band = maxBlockHeight;
     bool fits(double font) {
-      final laid = _laidRows(font, limit, scaler);
-      var width = 0.0;
-      for (final row in laid) {
-        width = max(width, row.layout.size.width);
-      }
-      if (width > limit + 0.5) return false;
-      if (band != null &&
-          band.isFinite &&
-          _blockHeight(laid, font) > band + 0.5) {
-        return false;
-      }
-      return true;
+      final height = slantedEnumHeight(
+        labels: [for (final choice in choices) choice.label],
+        fontSize: font,
+        maxWidth: limit,
+        scaler: scaler,
+        lineGapShare: lineGapShare,
+        span: true,
+      );
+      return height != null;
     }
 
     if (fits(fontSize)) return fontSize;
@@ -226,6 +139,36 @@ class SlantedChoices extends StatelessWidget {
     return low;
   }
 }
+
+/// Height of one enum at [fontSize]. Null when the block is wider than
+/// [maxWidth].
+double? slantedEnumHeight({
+  required List<String> labels,
+  required double fontSize,
+  required double maxWidth,
+  required TextScaler scaler,
+  double lineGapShare = 1 / 3,
+  bool span = false,
+}) {
+  final laid = _layRow(
+    row: [
+      for (final label in labels)
+        SlantedChoice(label: label, selected: false, onTap: _unusedTap),
+    ],
+    font: fontSize,
+    maxWidth: maxWidth,
+    scaler: scaler,
+    span: span,
+    lineGapShare: lineGapShare,
+  );
+  if (laid == null) return 0;
+  if (maxWidth.isFinite && laid.layout.size.width > maxWidth + 0.5) {
+    return null;
+  }
+  return laid.layout.size.height;
+}
+
+void _unusedTap() {}
 
 class _Word {
   const _Word(this.choice, this.style, this.measured);

@@ -327,17 +327,15 @@ class _KindWords extends StatelessWidget {
         return SlantedChoices(
           fontSize: font,
           maxWidth: searchLineWidth(constraints.maxWidth),
-          rows: [
-            [
-              for (final kind in repoKinds)
-                SlantedChoice(
-                  label: repoKindLabel(language, kind),
-                  selected: query.kinds.contains(kind),
-                  onTap: () {
-                    if (model.toggleRepoKind(kind)) onKind();
-                  },
-                ),
-            ],
+          choices: [
+            for (final kind in repoKinds)
+              SlantedChoice(
+                label: repoKindLabel(language, kind),
+                selected: query.kinds.contains(kind),
+                onTap: () {
+                  if (model.toggleRepoKind(kind)) onKind();
+                },
+              ),
           ],
         );
       },

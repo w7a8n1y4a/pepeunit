@@ -289,15 +289,13 @@ class _TrustWords extends StatelessWidget {
         return SlantedChoices(
           fontSize: font,
           maxWidth: searchLineWidth(constraints.maxWidth),
-          rows: [
-            [
-              for (final status in trustStatuses)
-                SlantedChoice(
-                  label: trustLabel(language, status),
-                  selected: active.contains(status),
-                  onTap: () => onToggle(status),
-                ),
-            ],
+          choices: [
+            for (final status in trustStatuses)
+              SlantedChoice(
+                label: trustLabel(language, status),
+                selected: active.contains(status),
+                onTap: () => onToggle(status),
+              ),
           ],
         );
       },

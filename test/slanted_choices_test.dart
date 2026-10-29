@@ -137,25 +137,32 @@ void main() {
           body: SizedBox(
             width: 280,
             height: 180,
-            child: SlantedChoices(
-              fontSize: 18,
-              maxWidth: 160,
-              rows: [
-                [
-                  SlantedChoice(
-                    label: 'Admin',
-                    selected: true,
-                    onTap: () => taps++,
-                  ),
-                  SlantedChoice(label: 'User', selected: false, onTap: () {}),
-                ],
-                [
-                  const SlantedChoice(
-                    label: 'Active',
-                    selected: false,
-                    onTap: _noop,
-                  ),
-                ],
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                SlantedChoices(
+                  fontSize: 18,
+                  maxWidth: 160,
+                  choices: [
+                    SlantedChoice(
+                      label: 'Admin',
+                      selected: true,
+                      onTap: () => taps++,
+                    ),
+                    SlantedChoice(label: 'User', selected: false, onTap: () {}),
+                  ],
+                ),
+                const SlantedChoices(
+                  fontSize: 18,
+                  maxWidth: 160,
+                  choices: [
+                    SlantedChoice(
+                      label: 'Active',
+                      selected: false,
+                      onTap: _noop,
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -184,16 +191,14 @@ void main() {
               fontSize: 28,
               maxWidth: 160,
               spanLine: true,
-              rows: [
-                [
-                  SlantedChoice(
-                    label: 'Administrator',
-                    selected: true,
-                    onTap: _noop,
-                  ),
-                  SlantedChoice(label: 'Member', selected: false, onTap: _noop),
-                  SlantedChoice(label: 'Owner', selected: false, onTap: _noop),
-                ],
+              choices: [
+                SlantedChoice(
+                  label: 'Administrator',
+                  selected: true,
+                  onTap: _noop,
+                ),
+                SlantedChoice(label: 'Member', selected: false, onTap: _noop),
+                SlantedChoice(label: 'Owner', selected: false, onTap: _noop),
               ],
             ),
           ),
