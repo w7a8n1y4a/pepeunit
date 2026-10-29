@@ -51,7 +51,7 @@ void main() {
     expect(query.trust, {'Blocking'});
   });
 
-  test('three rings grow by six cells and the outer ring pages', () {
+  test('rings keep their order and the last scale tick pages', () {
     expect(hexDisk(0), [(0, 0)]);
     expect(hexDisk(1), [
       (0, 0),
@@ -154,16 +154,20 @@ void main() {
       aimed.slots.firstWhere((slot) => slot.id == 'target').url,
       defaultInstanceUrl,
     );
-    final first = searchBoard(scope: 0, urls: many, page: 0);
+    final first = searchBoard(tick: 1, urls: many, page: 0);
     expect(first.slots.any((slot) => slot.id == 'settings'), isTrue);
     expect(first.slots.any((slot) => slot.id == 'add'), isFalse);
     expect(first.slots.any((slot) => slot.id == 'scan-all'), isFalse);
     expect(first.slots.where((slot) => slot.id == 'instance').length, 4);
     expect(first.canZoomIn, isTrue);
-    final outer = searchBoard(scope: 2, urls: many, page: 0);
+    final opened = searchBoard(tick: searchScaleTick, urls: many, page: 0);
+    expect(opened.slots.where((slot) => slot.id == 'instance').length, 10);
+    expect(opened.slots.length, scaleTickCells(searchScaleTick));
+    final outer = searchBoard(tick: scaleTickMax, urls: many, page: 0);
     expect(outer.pages, greaterThan(1));
     expect(outer.slots.any((slot) => slot.id == 'next'), isTrue);
     expect(outer.canZoomIn, isFalse);
+    expect(outer.slots.length, scaleTickCells(scaleTickMax));
   });
 
   test(
@@ -304,8 +308,9 @@ void main() {
       expect(people.setOrder('asc'), isTrue);
       expect(people.setOrder('asc'), isFalse);
       expect(people.order, 'asc');
-      expect(userPageLimit(1), 16);
-      expect(userPageLimit(2), 34);
+      expect(userPageLimit(1), 4);
+      expect(userPageLimit(searchScaleTick), 10);
+      expect(userPageLimit(scaleTickMax), 16);
       expect(
         userWindowText(offset: 0, limit: 16, count: 40, ofWord: 'из'),
         '1-16 из 40',
@@ -333,28 +338,28 @@ void main() {
       expect(userCanPageForward(offset: 0, limit: 34, count: 20), isFalse);
       expect(userCanPageForward(offset: 0, limit: 34, count: 40), isTrue);
       final narrow = usersBoard(
-        scope: 1,
+        tick: searchScaleTick,
         uuids: [for (var i = 0; i < 16; i++) 'u$i'],
       );
       expect(narrow.slots.where((slot) => slot.id == 'user').length, 0);
       expect(
         narrow.slots.where((slot) => slot.id.startsWith('user:')).length,
-        16,
+        10,
       );
       expect(narrow.slots.firstWhere((slot) => slot.id == 'back').q, 0);
       expect(narrow.slots.firstWhere((slot) => slot.id == 'back').r, 0);
       expect(narrow.slots.firstWhere((slot) => slot.id == 'query').r, -1);
       expect(narrow.canZoomIn, isTrue);
       final wideRing = usersBoard(
-        scope: 2,
+        tick: scaleTickMax,
         uuids: [for (var i = 0; i < 34; i++) 'u$i'],
       );
       expect(
         wideRing.slots.where((slot) => slot.id.startsWith('user:')).length,
-        34,
+        16,
       );
       expect(wideRing.canZoomIn, isFalse);
-      expect(wideRing.slots.length, 37);
+      expect(wideRing.slots.length, scaleTickCells(scaleTickMax));
       expect(
         DirectoryUser.fromJson({
           'uuid': 'u',

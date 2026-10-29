@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../account/key_mark.dart';
+import '../../hive/hex_order.dart';
 import '../../hive/hex_scene.dart';
 import '../../hive/marks.dart';
 import '../../instances/directory_user.dart';
@@ -179,14 +180,18 @@ HexSlot pageStepSlot({
   );
 }
 
+/// Wheel and pinch move [scope] by one scale tick.
+///
+/// The listener fills the scene, so the gesture lands on empty gaps as well
+/// as on a cell. [scope] is the tick in the query key `scope`.
 class ScopeFrame extends StatefulWidget {
   const ScopeFrame({
     required this.scope,
     required this.canZoomIn,
     required this.path,
     required this.child,
-    this.minScope = 0,
-    this.maxScope = 2,
+    this.minScope = scaleTickMin,
+    this.maxScope = scaleTickMax,
     super.key,
   });
 
@@ -215,40 +220,39 @@ class _ScopeFrameState extends State<ScopeFrame> {
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      onPointerSignal: (event) {
-        if (event is! PointerScrollEvent) return;
-        if (event.scrollDelta.dy < 0) {
-          _step(1);
-        } else if (event.scrollDelta.dy > 0) {
-          _step(-1);
-        }
-      },
-      child: GestureDetector(
-        onScaleStart: (_) => _pinched = false,
-        onScaleUpdate: (details) {
-          if (details.pointerCount < 2 || _pinched) return;
-          if (details.scale > 1.08) {
-            _pinched = true;
+    return SizedBox.expand(
+      child: Listener(
+        behavior: HitTestBehavior.opaque,
+        onPointerSignal: (event) {
+          if (event is! PointerScrollEvent) return;
+          if (event.scrollDelta.dy < 0) {
             _step(1);
-          } else if (details.scale < 0.92) {
-            _pinched = true;
+          } else if (event.scrollDelta.dy > 0) {
             _step(-1);
           }
         },
-        child: widget.child,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onScaleStart: (_) => _pinched = false,
+          onScaleUpdate: (details) {
+            if (details.pointerCount < 2 || _pinched) return;
+            if (details.scale > 1.08) {
+              _pinched = true;
+              _step(1);
+            } else if (details.scale < 0.92) {
+              _pinched = true;
+              _step(-1);
+            }
+          },
+          child: widget.child,
+        ),
       ),
     );
   }
 }
 
-int scopeOf(Uri uri) {
-  final raw = int.tryParse(uri.queryParameters['scope'] ?? '') ?? 0;
-  return raw.clamp(0, 2);
-}
-
-/// Users open on two rings. Scope 2 adds the third.
-int userScopeOf(Uri uri) {
-  final raw = int.tryParse(uri.queryParameters['scope'] ?? '') ?? 1;
-  return raw.clamp(1, 2);
+/// The `scope` query value is a scale tick. [fallback] is used when it is absent.
+int scaleTickOf(Uri uri, {int fallback = menuScaleTick}) {
+  final raw = int.tryParse(uri.queryParameters['scope'] ?? '');
+  return (raw ?? fallback).clamp(scaleTickMin, scaleTickMax);
 }

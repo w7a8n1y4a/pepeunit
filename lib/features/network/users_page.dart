@@ -64,7 +64,7 @@ class _UsersPageState extends State<UsersPage> {
     final page = model.directory;
     final users = page?.users ?? const <DirectoryUser>[];
     final board = usersBoard(
-      scope: widget.scope,
+      tick: widget.scope,
       uuids: [for (final user in users) user.uuid],
       wide: wide,
     );
@@ -86,9 +86,7 @@ class _UsersPageState extends State<UsersPage> {
       onTap: (id) => _tap(id, language),
       frame: (scene) => ScopeFrame(
         scope: widget.scope,
-        canZoomIn: widget.scope < 2,
-        minScope: 1,
-        maxScope: 2,
+        canZoomIn: widget.scope < scaleTickMax,
         path: '/peers/users',
         child: scene,
       ),

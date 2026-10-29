@@ -62,8 +62,9 @@ void main() {
     expect(query.setOrder('desc'), isTrue);
     expect(query.setOrder('desc'), isFalse);
     expect(query.setOrder('sideways'), isFalse);
-    expect(repoPageLimit(1), 16);
-    expect(repoPageLimit(2), 34);
+    expect(repoPageLimit(1), 4);
+    expect(repoPageLimit(searchScaleTick), 10);
+    expect(repoPageLimit(scaleTickMax), 16);
     expect(
       repoWindowText(offset: 0, limit: 16, count: 40, ofWord: 'из'),
       '1-16 из 40',
@@ -71,7 +72,7 @@ void main() {
     expect(repoCanPageBack(offset: 0, count: 40), isFalse);
     expect(repoCanPageForward(offset: 0, limit: 16, count: 40), isTrue);
     final board = reposBoard(
-      scope: 1,
+      tick: scaleTickMax,
       uuids: [for (var i = 0; i < 16; i++) 'r$i'],
     );
     expect(board.slots.firstWhere((slot) => slot.id == 'back').q, 0);
@@ -92,19 +93,19 @@ void main() {
   });
 
   test('branches stay on one ring until the list outgrows it', () {
-    final few = branchesBoard(scope: 0, page: 0, names: const ['main', 'dev']);
+    final few = branchesBoard(tick: 1, page: 0, names: const ['main', 'dev']);
     expect(few.slots.where((slot) => slot.id.startsWith('branch:')).length, 2);
     expect(few.canZoomIn, isFalse);
     expect(few.slots.where((slot) => slot.id == 'prev'), isEmpty);
     final many = branchesBoard(
-      scope: 0,
+      tick: 1,
       page: 0,
       names: [for (var i = 0; i < 8; i++) 'b$i'],
     );
     expect(many.slots.where((slot) => slot.id.startsWith('branch:')).length, 6);
     expect(many.canZoomIn, isTrue);
     final paged = branchesBoard(
-      scope: 2,
+      tick: scaleTickMax,
       page: 0,
       names: [for (var i = 0; i < 40; i++) 'feature/$i'],
     );

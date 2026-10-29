@@ -6,12 +6,20 @@ export '../hive/hex_order.dart'
     show
         HexBack,
         HexFrame,
+        errorBudget,
         hexBackCell,
+        hexBudget,
         hexDisk,
         hexFrame,
         hexSlots,
         hexWide,
-        nextHex;
+        menuScaleTick,
+        nextHex,
+        scaleTickCells,
+        scaleTickForCount,
+        scaleTickMax,
+        scaleTickMin,
+        searchScaleTick;
 
 /// Sections that stay available before a target instance is chosen.
 const openSections = {'people', 'peers', 'library'};
@@ -109,8 +117,9 @@ class UserQuery {
   }
 }
 
-/// Rings 1 and 2 hold 16 cards. Ring 3 adds 18.
-int userPageLimit(int scope) => scope >= 2 ? 34 : 16;
+/// Cards beside Back, the filter, and the page window at this tick.
+int userPageLimit(int tick) =>
+    scaleTickCells(tick.clamp(scaleTickMin, scaleTickMax)) - 3;
 
 String userWindowText({
   required int offset,
@@ -125,24 +134,23 @@ String userWindowText({
   return '$start-$end $ofWord $count';
 }
 
-/// Arrows stay still until the directory is larger than the first two rings.
+/// Arrows stay still until the directory is larger than the last scale tick.
 bool userCanPageBack({required int offset, required int count}) =>
-    count > 16 && offset > 0;
+    count > userPageLimit(scaleTickMax) && offset > 0;
 
 bool userCanPageForward({
   required int offset,
   required int limit,
   required int count,
-}) => count > 16 && offset + limit < count;
+}) => count > userPageLimit(scaleTickMax) && offset + limit < count;
 
-/// Back, two filter cells, then user cards. Scope 1 is two rings, scope 2
-/// opens the third.
+/// Back, two filter cells, then user cards. The tick caps the disk.
 NetworkBoard usersBoard({
-  required int scope,
+  required int tick,
   required List<String> uuids,
   bool wide = false,
 }) {
-  final rings = scope.clamp(1, 2) + 1;
+  final step = tick.clamp(scaleTickMin, scaleTickMax);
   final ids = <String>[
     'query',
     'window',
@@ -152,7 +160,7 @@ NetworkBoard usersBoard({
     count: ids.length,
     back: HexBack.center,
     wide: wide,
-    rings: rings,
+    cells: scaleTickCells(step),
   );
   final back = frame.back!;
   return NetworkBoard(
@@ -161,7 +169,7 @@ NetworkBoard usersBoard({
       for (var i = 0; i < ids.length && i < frame.cells.length; i++)
         BoardSlot(ids[i], frame.cells[i].$1, frame.cells[i].$2),
     ],
-    canZoomIn: scope < 2,
+    canZoomIn: step < scaleTickMax,
     page: 0,
     pages: 1,
   );
@@ -302,19 +310,19 @@ NetworkBoard networkBoard({required String? target, bool wide = false}) {
 }
 
 /// Filter, then search settings, then peer cards.
-/// Back stays in the center. A pager takes the last two free cells.
+/// Back stays in the center. The last tick may give its tail to a pager.
 NetworkBoard searchBoard({
-  required int scope,
+  required int tick,
   required List<String> urls,
   required int page,
   bool wide = false,
 }) {
-  final rings = scope.clamp(0, 2) + 1;
+  final step = tick.clamp(scaleTickMin, scaleTickMax);
   final chrome = <String>['text', 'settings'];
-  final free = hexDisk(rings, wide: wide).length - 1;
+  final free = scaleTickCells(step) - 1;
   final instanceCap = free - chrome.length;
   final overflow = urls.length > instanceCap;
-  final paging = scope >= 2 && overflow && instanceCap >= 3;
+  final paging = step >= scaleTickMax && overflow && instanceCap >= 3;
   final urlRoom = instanceCap - (paging ? 2 : 0);
   final pages = paging && urlRoom > 0 ? (urls.length / urlRoom).ceil() : 1;
   final safePage = page.clamp(0, pages - 1);
@@ -325,7 +333,7 @@ NetworkBoard searchBoard({
     count: chrome.length + slice.length,
     back: HexBack.center,
     wide: wide,
-    rings: rings,
+    cells: scaleTickCells(step),
     tail: paging ? 2 : 0,
   );
   final back = frame.back!;
@@ -347,7 +355,7 @@ NetworkBoard searchBoard({
   ];
   return NetworkBoard(
     slots: slots,
-    canZoomIn: scope < 2 && overflow,
+    canZoomIn: step < scaleTickMax,
     page: safePage,
     pages: pages,
   );
@@ -355,15 +363,15 @@ NetworkBoard searchBoard({
 
 /// One url per free cell. Back sits in the center. A pager takes the tail.
 NetworkBoard catalogBoard({
-  required int scope,
+  required int tick,
   required List<String> urls,
   required int page,
   bool wide = false,
 }) {
-  final rings = scope.clamp(0, 2) + 1;
-  final free = hexDisk(rings, wide: wide).length - 1;
+  final step = tick.clamp(scaleTickMin, scaleTickMax);
+  final free = scaleTickCells(step) - 1;
   final overflow = urls.length > free;
-  final paging = scope >= 2 && overflow && free >= 3;
+  final paging = step >= scaleTickMax && overflow && free >= 3;
   final room = free - (paging ? 2 : 0);
   final pages = paging && room > 0 ? (urls.length / room).ceil() : 1;
   final safePage = page.clamp(0, pages - 1);
@@ -374,7 +382,7 @@ NetworkBoard catalogBoard({
     count: slice.length,
     back: HexBack.center,
     wide: wide,
-    rings: rings,
+    cells: scaleTickCells(step),
     tail: paging ? 2 : 0,
   );
   final back = frame.back!;
@@ -389,7 +397,7 @@ NetworkBoard catalogBoard({
   ];
   return NetworkBoard(
     slots: slots,
-    canZoomIn: scope < 2 && overflow,
+    canZoomIn: step < scaleTickMax && overflow,
     page: safePage,
     pages: pages,
   );

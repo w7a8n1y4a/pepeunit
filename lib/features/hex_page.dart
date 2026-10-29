@@ -47,6 +47,9 @@ HexSlot backSlot({required String title, required int q, required int r}) {
 Color dropColor(bool hot, Color color) => hot ? const Color(0xFFFFFFFF) : color;
 
 /// Error cell in the next free slot. Nothing is added when [message] is null.
+///
+/// The slot stays inside the current scale tick. A full tick may grow by one
+/// so the error still appears. The query tick does not change.
 void appendError(
   List<HexSlot> slots, {
   required String? message,
@@ -56,9 +59,8 @@ void appendError(
   required bool wide,
 }) {
   if (message == null) return;
-  final spot = nextHex([
-    for (final slot in slots) (slot.q, slot.r),
-  ], wide: wide);
+  final taken = [for (final slot in slots) (slot.q, slot.r)];
+  final spot = _errorSpot(taken, wide: wide);
   slots.add(
     HexSlot(
       id: 'error',
@@ -76,4 +78,12 @@ void appendError(
           : null,
     ),
   );
+}
+
+(int, int) _errorSpot(List<(int, int)> taken, {required bool wide}) {
+  final used = taken.toSet();
+  for (final cell in hexBudget(errorBudget(taken.length), wide: wide)) {
+    if (!used.contains(cell)) return cell;
+  }
+  return nextHex(taken, wide: wide);
 }

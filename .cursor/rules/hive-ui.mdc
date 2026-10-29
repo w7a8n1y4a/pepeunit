@@ -25,6 +25,6 @@ The gap between borders scales with the cell. Sizes are standard, reduced, enlar
 
 Screen size changes labels, cells, and icons. Platform changes input only. Outside a menu, Back sits where that screen defines it.
 
-Enable `scope` (wheel / pinch) only when the next step adds cells to the render. Static forms keep zoom off. Network already has `?scope=0|1|2` via `ScopeFrame`, `scopeOf`, and `hexDisk` rings.
+Scale ticks, the wheel, and pinch are in `hex-scale.mdc`. `ScopeFrame` reads the tick from `?scope=`. Static forms keep zoom off.
 
 On a combined screen, secondary actions go into a submenu. Cell size shows hierarchy. A card does not show every action at once.

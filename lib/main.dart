@@ -26,6 +26,7 @@ import 'features/registry/branches_page.dart';
 import 'features/registry/credentials_page.dart';
 import 'features/registry/registry_page.dart';
 import 'features/registry/repo_page.dart';
+import 'hive/hex_order.dart';
 import 'hive/hex_scene.dart';
 
 Future<void> main() async {
@@ -77,8 +78,9 @@ class _PepeunitAppState extends State<PepeunitApp> {
         routes: [
           GoRoute(
             path: 'search',
-            builder: (context, state) =>
-                NetworkSearchPage(scope: scopeOf(state.uri)),
+            builder: (context, state) => NetworkSearchPage(
+              scope: scaleTickOf(state.uri, fallback: searchScaleTick),
+            ),
             routes: [
               GoRoute(
                 path: 'settings',
@@ -89,12 +91,12 @@ class _PepeunitAppState extends State<PepeunitApp> {
           GoRoute(
             path: 'allow',
             builder: (context, state) =>
-                NetworkListPage(deny: false, scope: scopeOf(state.uri)),
+                NetworkListPage(deny: false, scope: scaleTickOf(state.uri)),
           ),
           GoRoute(
             path: 'deny',
             builder: (context, state) =>
-                NetworkListPage(deny: true, scope: scopeOf(state.uri)),
+                NetworkListPage(deny: true, scope: scaleTickOf(state.uri)),
           ),
           GoRoute(
             path: 'add',
@@ -111,8 +113,9 @@ class _PepeunitAppState extends State<PepeunitApp> {
           ),
           GoRoute(
             path: 'users',
-            builder: (context, state) =>
-                UsersPage(scope: userScopeOf(state.uri)),
+            builder: (context, state) => UsersPage(
+              scope: scaleTickOf(state.uri, fallback: searchScaleTick),
+            ),
             routes: [
               GoRoute(
                 path: 'member',
@@ -137,8 +140,9 @@ class _PepeunitAppState extends State<PepeunitApp> {
       ),
       GoRoute(
         path: '/registry',
-        builder: (context, state) =>
-            RegistryPage(scope: userScopeOf(state.uri)),
+        builder: (context, state) => RegistryPage(
+          scope: scaleTickOf(state.uri, fallback: searchScaleTick),
+        ),
         routes: [
           GoRoute(
             path: 'repo/:uuid',
@@ -154,7 +158,7 @@ class _PepeunitAppState extends State<PepeunitApp> {
                 path: 'branches',
                 builder: (context, state) => BranchesPage(
                   uuid: state.pathParameters['uuid']!,
-                  scope: scopeOf(state.uri),
+                  scope: scaleTickOf(state.uri),
                 ),
               ),
             ],

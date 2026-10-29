@@ -11,8 +11,8 @@ import '../network/network_chrome.dart';
 import 'registry_chrome.dart';
 
 /// Branches are names, so each one is a cell with the name across the top.
-/// One ring holds a short list. Zoom opens the next rings. A pager appears
-/// only when the third ring is still too small.
+/// Tick 1 holds a short list. A higher tick shows more. A pager appears
+/// only when the last tick is still too small.
 class BranchesPage extends StatefulWidget {
   const BranchesPage({required this.uuid, required this.scope, super.key});
 
@@ -53,7 +53,7 @@ class _BranchesPageState extends State<BranchesPage> {
     final board = names.isEmpty
         ? null
         : branchesBoard(
-            scope: widget.scope,
+            tick: widget.scope,
             page: _page,
             names: names,
             wide: wide,
@@ -122,8 +122,6 @@ class _BranchesPageState extends State<BranchesPage> {
           : (scene) => ScopeFrame(
               scope: widget.scope,
               canZoomIn: board.canZoomIn,
-              minScope: 0,
-              maxScope: 2,
               path: '/registry/repo/${widget.uuid}/branches',
               child: scene,
             ),

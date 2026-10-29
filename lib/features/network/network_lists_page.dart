@@ -119,7 +119,7 @@ class _NetworkListPageState extends State<NetworkListPage> {
     final color = networkColor;
     final wide = hexWide(MediaQuery.sizeOf(context));
     final board = catalogBoard(
-      scope: widget.scope,
+      tick: widget.scope,
       urls: model.catalog(),
       page: _page,
       wide: wide,

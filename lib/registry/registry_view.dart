@@ -35,8 +35,9 @@ class RepoQuery {
   }
 }
 
-/// Rings 1 and 2 hold 16 cards. Ring 3 adds 18. Same room as the user search.
-int repoPageLimit(int scope) => scope >= 2 ? 34 : 16;
+/// Cards beside Back, the filter, and the page window at this tick.
+int repoPageLimit(int tick) =>
+    scaleTickCells(tick.clamp(scaleTickMin, scaleTickMax)) - 3;
 
 String repoWindowText({
   required int offset,
@@ -52,21 +53,21 @@ String repoWindowText({
 }
 
 bool repoCanPageBack({required int offset, required int count}) =>
-    count > 16 && offset > 0;
+    count > repoPageLimit(scaleTickMax) && offset > 0;
 
 bool repoCanPageForward({
   required int offset,
   required int limit,
   required int count,
-}) => count > 16 && offset + limit < count;
+}) => count > repoPageLimit(scaleTickMax) && offset + limit < count;
 
-/// Back, filter, page window, then repo cards. Scope 1 is two rings.
+/// Back, filter, page window, then repo cards. The tick caps the disk.
 NetworkBoard reposBoard({
-  required int scope,
+  required int tick,
   required List<String> uuids,
   bool wide = false,
 }) {
-  final rings = scope.clamp(1, 2) + 1;
+  final step = tick.clamp(scaleTickMin, scaleTickMax);
   final ids = <String>[
     'query',
     'window',
@@ -76,7 +77,7 @@ NetworkBoard reposBoard({
     count: ids.length,
     back: HexBack.center,
     wide: wide,
-    rings: rings,
+    cells: scaleTickCells(step),
   );
   final back = frame.back!;
   return NetworkBoard(
@@ -85,7 +86,7 @@ NetworkBoard reposBoard({
       for (var i = 0; i < ids.length && i < frame.cells.length; i++)
         BoardSlot(ids[i], frame.cells[i].$1, frame.cells[i].$2),
     ],
-    canZoomIn: scope < 2,
+    canZoomIn: step < scaleTickMax,
     page: 0,
     pages: 1,
   );
@@ -105,18 +106,18 @@ List<String> repoMenuIds({required bool private, required bool owned}) {
   ];
 }
 
-/// One cell per branch. Scope 0 is one ring. At scope 2 a pager takes the tail
+/// One cell per branch. Tick 1 is seven cells. The last tick pages the tail
 /// when the names still do not fit.
 NetworkBoard branchesBoard({
-  required int scope,
+  required int tick,
   required int page,
   required List<String> names,
   bool wide = false,
 }) {
-  final rings = scope.clamp(0, 2) + 1;
-  final free = hexDisk(rings, wide: wide).length - 1;
+  final step = tick.clamp(scaleTickMin, scaleTickMax);
+  final free = scaleTickCells(step) - 1;
   final overflow = names.length > free;
-  final paging = scope >= 2 && overflow && free >= 3;
+  final paging = step >= scaleTickMax && overflow && free >= 3;
   final room = free - (paging ? 2 : 0);
   final pages = paging && room > 0 ? (names.length / room).ceil() : 1;
   final safePage = page.clamp(0, pages - 1);
@@ -127,7 +128,7 @@ NetworkBoard branchesBoard({
     count: slice.length,
     back: HexBack.center,
     wide: wide,
-    rings: rings,
+    cells: scaleTickCells(step),
     tail: paging ? 2 : 0,
   );
   final back = frame.back!;
@@ -146,7 +147,7 @@ NetworkBoard branchesBoard({
         BoardSlot('next', frame.tail[1].$1, frame.tail[1].$2),
       ],
     ],
-    canZoomIn: scope < 2 && overflow,
+    canZoomIn: step < scaleTickMax && overflow,
     page: safePage,
     pages: pages,
   );

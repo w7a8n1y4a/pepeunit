@@ -14,6 +14,7 @@ Code is the source of truth. Read these files; do not copy them into answers or 
 - routes — `lib/main.dart` (`go_router`, path URL strategy)
 - backend window — `backendCompatible` in `lib/api/backend_version.dart` (currently `1.5.x`)
 - scene colors — `sceneBackground`, `hexFill`, `hexMuted`, `errorColor` in `lib/hive/hex_scene.dart`
+- scale ticks — `scaleTickCells` in `lib/hive/hex_order.dart`
 - plan and open questions — `roadmap/frontend-refactor.md` and the files it links, and only when the task is about the plan
 
 Modules: `account/`, `instances/`, `hive/`, `features/{account,network,home,menu}`, `locale/`, `api/`. Shared screen pieces: `features/hex_page.dart` (background, Back, error cell), `features/file_drop.dart`, and `features/line_input.dart` (underlined field and its validation line). `popOrHome` is `navigation/back.dart`.

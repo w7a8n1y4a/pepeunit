@@ -32,7 +32,7 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
     final urls = model.visibleInstances();
     final wide = hexWide(MediaQuery.sizeOf(context));
     final board = searchBoard(
-      scope: widget.scope,
+      tick: widget.scope,
       urls: urls,
       page: _page,
       wide: wide,
@@ -46,7 +46,7 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
       onTap: (id) => _tap(id, board),
       frame: (scene) => ScopeFrame(
         scope: widget.scope,
-        canZoomIn: board.canZoomIn,
+        canZoomIn: widget.scope < scaleTickMax,
         path: '/peers/search',
         child: scene,
       ),

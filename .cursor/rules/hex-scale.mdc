@@ -1,0 +1,24 @@
+---
+description: Scale ticks — how many hex cells a screen may show, and how wheel and pinch move that cap
+alwaysApply: true
+---
+
+# Hex scale
+
+A scale tick caps how many cells may be on screen, including Back. The count is `scaleTickCells` in `lib/hive/hex_order.dart`. Placement and fill order stay as in `hex-layout.mdc`. A tick only decides how far along that order the screen may go.
+
+- Tick 1: 7 cells
+- Tick 2: 10 cells
+- Tick 3: 13 cells
+- Tick 4: 16 cells
+- Tick 5: 19 cells
+
+Each step after tick 1 adds three cells. The wheel and a two-finger pinch move one tick. Scroll up or pinch apart raises the tick. Scroll down or pinch together lowers it. The gesture hits the whole scene, including empty gaps, not only a cell.
+
+Menus stay on tick 1 and do not zoom. A static form does not zoom; it keeps the cells that screen defines.
+
+Search screens open on tick 3: peer search, user search, and repository search. Their tick moves from 1 through 5 in either direction. A list that still overflows at tick 5 pages. Other zoomable lists open on tick 1 and rise only while the next tick still shows another cell.
+
+An error is always shown. It takes the next free slot in the current tick. When that tick is full, the screen may use one tick more, and the error takes the next free slot there. The query tick does not change.
+
+The query key stays `scope`. Its value is the tick.

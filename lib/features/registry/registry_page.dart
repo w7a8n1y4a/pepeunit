@@ -65,7 +65,7 @@ class _RegistryPageState extends State<RegistryPage> {
     final page = model.registry;
     final repos = page?.repos ?? const <RegistryRepo>[];
     final board = reposBoard(
-      scope: widget.scope,
+      tick: widget.scope,
       uuids: [for (final repo in repos) repo.uuid],
       wide: wide,
     );
@@ -87,9 +87,7 @@ class _RegistryPageState extends State<RegistryPage> {
       onTap: (id) => _tap(id),
       frame: (scene) => ScopeFrame(
         scope: widget.scope,
-        canZoomIn: widget.scope < 2,
-        minScope: 1,
-        maxScope: 2,
+        canZoomIn: widget.scope < scaleTickMax,
         path: '/registry',
         child: scene,
       ),

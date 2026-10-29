@@ -6,6 +6,44 @@ const _dirs = <(int, int)>[(1, 0), (1, -1), (0, -1), (-1, 0), (-1, 1), (0, 1)];
 /// True when the screen is wider than it is tall. A square is tall.
 bool hexWide(Size size) => size.width > size.height;
 
+/// Lowest wheel step. Menus stay here.
+const scaleTickMin = 1;
+
+/// Highest wheel step. One further tick exists only for an error.
+const scaleTickMax = 5;
+
+/// Menus do not zoom.
+const menuScaleTick = scaleTickMin;
+
+/// Peer search, user search, and the repository list open here.
+const searchScaleTick = 3;
+
+/// Cells a tick may show, including the center.
+///
+/// Tick 1 is 7. Each later tick adds three. A tick past [scaleTickMax] is
+/// only for an error that did not fit.
+int scaleTickCells(int tick) {
+  final step = tick < scaleTickMin ? scaleTickMin : tick;
+  return 7 + (step - 1) * 3;
+}
+
+/// Smallest tick whose cap holds [count] cells.
+int scaleTickForCount(int count) {
+  var tick = scaleTickMin;
+  while (scaleTickCells(tick) < count) {
+    tick += 1;
+  }
+  return tick;
+}
+
+/// Slots an error may use. A full tick may grow by one.
+int errorBudget(int occupied) {
+  final tick = scaleTickForCount(occupied);
+  final room = scaleTickCells(tick);
+  if (occupied >= room) return scaleTickCells(tick + 1);
+  return room;
+}
+
 /// Cells in appearance order: the center, then each full ring.
 ///
 /// A tall screen fills a ring from the top (120° toward 60°), then the bottom
@@ -18,6 +56,22 @@ List<(int, int)> hexDisk(int rings, {bool wide = false}) {
     cells.addAll(_ring(radius, wide: wide));
   }
   return cells;
+}
+
+/// The first [count] cells in appearance order, including the center.
+List<(int, int)> hexBudget(int count, {bool wide = false}) {
+  if (count < 1) return const [];
+  return hexDisk(_ringsHolding(count), wide: wide).take(count).toList();
+}
+
+int _ringsHolding(int count) {
+  var rings = 0;
+  var held = 1;
+  while (held < count) {
+    rings += 1;
+    held += 6 * rings;
+  }
+  return rings;
 }
 
 /// The first [count] cells in appearance order that are not [reserved].
@@ -69,24 +123,30 @@ class HexFrame {
 
 /// Places [count] content cells after reserving Back.
 ///
-/// [rings] above zero clips the cluster to that disk and, when [tail] is
-/// positive, keeps the last free slots for a pager. Otherwise the cluster grows.
+/// [cells] caps the disk, including Back, to that many slots in fill order.
+/// [rings] caps it to a whole disk. A positive [cells] wins. When [tail] is
+/// positive, the last free slots of that cap stay reserved for a pager.
+/// Without either cap the cluster grows with [count].
 HexFrame hexFrame({
   required int count,
   HexBack back = HexBack.none,
   bool wide = false,
   int rings = 0,
   int tail = 0,
+  int cells = 0,
 }) {
   final backCell = hexBackCell(back);
-  if (rings <= 0) {
+  final budget = cells > 0
+      ? cells
+      : (rings > 0 ? hexDisk(rings, wide: wide).length : 0);
+  if (budget <= 0) {
     return HexFrame(
       cells: hexSlots(count, reserved: [?backCell], wide: wide),
       back: backCell,
     );
   }
   final free = [
-    for (final cell in hexDisk(rings, wide: wide))
+    for (final cell in hexBudget(budget, wide: wide))
       if (cell != backCell) cell,
   ];
   final tailCount = tail > 0 && free.length >= tail ? tail : 0;

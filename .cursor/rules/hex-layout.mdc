@@ -35,6 +35,6 @@ Top and bottom are filled first on a tall screen, so the cluster gains height be
 
 ## Menu
 
-A menu has at most 7 cells, unless a scope tick says otherwise. An 8th cell is allowed only for an error and takes the next free slot.
+A menu stays on scale tick 1. How many cells a tick allows, and when an error may raise that tick, is in `hex-scale.mdc`.
 
 Back is `assets/icons/back.svg` with a `hexMuted` border. The home root has none. On an intermediate menu layer, Back is ring 1 at 300°. On the last menu layer, Back is the center. That slot is reserved. Content cells take the next free slot in the fill order.
