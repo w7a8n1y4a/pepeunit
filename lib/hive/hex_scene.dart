@@ -55,6 +55,8 @@ class HexSlot {
     this.footerColor = const Color(0xFFFFFFFF),
     this.footerLeft,
     this.footerLeftColor = const Color(0xFFFFFFFF),
+    this.sideLeft,
+    this.sideLeftColor = const Color(0xFFFFFFFF),
     this.sideRight,
     this.sideRightColor = const Color(0xFFFFFFFF),
     this.body,
@@ -89,6 +91,10 @@ class HexSlot {
   final String? footerLeft;
   final Color footerLeftColor;
 
+  /// Text along the left edge, read from the bottom up. Repo cards put the size here.
+  final String? sideLeft;
+  final Color sideLeftColor;
+
   /// Text along the right edge, read from the bottom up. User cards put the role here.
   final String? sideRight;
   final Color sideRightColor;
@@ -107,10 +113,15 @@ class HexSlot {
 }
 
 String slotLabel(HexSlot slot) {
-  final side = slot.sideRight;
-  if (side == null || side.isEmpty) return slot.title;
-  if (slot.title.isEmpty) return side;
-  return '${slot.title}, $side';
+  final left = slot.sideLeft;
+  final right = slot.sideRight;
+  final parts = <String>[
+    if (slot.title.isNotEmpty) slot.title,
+    if (left != null && left.isNotEmpty) left,
+    if (right != null && right.isNotEmpty) right,
+  ];
+  if (parts.isEmpty) return slot.title;
+  return parts.join(', ');
 }
 
 typedef HexSlotWrap = Widget Function(HexSlot slot, Widget child);
@@ -356,18 +367,27 @@ class HexPainter extends CustomPainter {
       right: slot.footer,
       rightColor: muted ? hexMuted : slot.footerColor,
     );
-    _paintSide(canvas, center, radius);
+    _paintSide(canvas, center, radius, right: false);
+    _paintSide(canvas, center, radius, right: true);
   }
 
-  /// The role follows the right edge. The path runs upward, so the word
-  /// is read from the bottom.
-  void _paintSide(Canvas canvas, Offset center, double radius) {
-    final text = slot.sideRight;
+  /// A side caption follows a vertical edge. The path runs upward, so the
+  /// word is read from the bottom.
+  void _paintSide(
+    Canvas canvas,
+    Offset center,
+    double radius, {
+    required bool right,
+  }) {
+    final text = right ? slot.sideRight : slot.sideLeft;
     if (text == null || text.isEmpty) return;
-    final color = slot.enabled ? slot.sideRightColor : hexMuted;
+    final color = !slot.enabled
+        ? hexMuted
+        : (right ? slot.sideRightColor : slot.sideLeftColor);
     final inset = radius * 0.16;
     final pad = radius * 0.12;
-    final x = center.dx + radius * cos(pi / 6) - inset;
+    final edge = radius * cos(pi / 6);
+    final x = right ? center.dx + edge - inset : center.dx - edge + inset;
     final top = center.dy - radius * 0.5 + pad;
     final bottom = center.dy + radius * 0.5 - pad;
     final path = Path()
@@ -718,6 +738,8 @@ class HexPainter extends CustomPainter {
         slot.footerColor != previous.footerColor ||
         slot.footerLeft != previous.footerLeft ||
         slot.footerLeftColor != previous.footerLeftColor ||
+        slot.sideLeft != previous.sideLeft ||
+        slot.sideLeftColor != previous.sideLeftColor ||
         slot.sideRight != previous.sideRight ||
         slot.sideRightColor != previous.sideRightColor;
   }

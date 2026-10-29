@@ -22,6 +22,10 @@ import 'features/network/network_lists_page.dart';
 import 'features/network/network_page.dart';
 import 'features/network/network_search_page.dart';
 import 'features/network/users_page.dart';
+import 'features/registry/branches_page.dart';
+import 'features/registry/credentials_page.dart';
+import 'features/registry/registry_page.dart';
+import 'features/registry/repo_page.dart';
 import 'hive/hex_scene.dart';
 
 Future<void> main() async {
@@ -125,6 +129,32 @@ class _PepeunitAppState extends State<PepeunitApp> {
                 path: ':category',
                 builder: (context, state) => SettingCategoryPage(
                   categoryId: state.pathParameters['category']!,
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/registry',
+        builder: (context, state) =>
+            RegistryPage(scope: userScopeOf(state.uri)),
+        routes: [
+          GoRoute(
+            path: 'repo/:uuid',
+            builder: (context, state) =>
+                RepoPage(uuid: state.pathParameters['uuid']!),
+            routes: [
+              GoRoute(
+                path: 'credentials',
+                builder: (context, state) =>
+                    CredentialsPage(uuid: state.pathParameters['uuid']!),
+              ),
+              GoRoute(
+                path: 'branches',
+                builder: (context, state) => BranchesPage(
+                  uuid: state.pathParameters['uuid']!,
+                  scope: scopeOf(state.uri),
                 ),
               ),
             ],

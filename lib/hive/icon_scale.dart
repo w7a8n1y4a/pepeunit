@@ -39,6 +39,7 @@ const _inkFill = <String, double>{
   'assets/icons/search.svg': 0.66,
   'assets/icons/check.svg': 0.62,
   'assets/icons/ban.svg': 0.62,
+  'assets/icons/repo.svg': 0.86,
 };
 
 /// How far to grow [asset] inside the icon square. The same file always

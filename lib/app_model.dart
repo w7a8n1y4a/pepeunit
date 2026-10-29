@@ -18,6 +18,8 @@ import 'instances/network_view.dart';
 import 'instances/portrait.dart';
 import 'instances/session.dart';
 import 'locale/languages.dart';
+import 'registry/registry_view.dart';
+import 'registry/repo.dart';
 
 class SyncReport {
   const SyncReport(this.reached, this.problems);
@@ -55,6 +57,9 @@ class AppModel extends ChangeNotifier {
   var directoryOffset = 0;
   var directoryLimit = 16;
   var _directoryTicket = 0;
+  final RepoQuery repoQuery = RepoQuery();
+  ({int count, List<RegistryRepo> repos})? registry;
+  var _registryTicket = 0;
   final Set<String> discovered = {};
   final Map<String, PeerHead> peers = {};
   final Map<String, InstancePortrait> portraits = {};
@@ -243,6 +248,24 @@ class AppModel extends ChangeNotifier {
     return changed;
   }
 
+  void setRepoSearch(String text) {
+    if (repoQuery.text == text) return;
+    repoQuery.text = text;
+    notifyListeners();
+  }
+
+  bool toggleRepoKind(String kind) {
+    final changed = repoQuery.toggleKind(kind);
+    if (changed) notifyListeners();
+    return changed;
+  }
+
+  bool setRepoOrder(String value) {
+    final changed = repoQuery.setOrder(value);
+    if (changed) notifyListeners();
+    return changed;
+  }
+
   Future<bool> loadDirectory({required int offset, required int limit}) async {
     final current = _signedTarget();
     final ticket = ++_directoryTicket;
@@ -268,6 +291,95 @@ class AppModel extends ChangeNotifier {
     notifyListeners();
     unawaited(_loadMemberIcons(ticket, current.url, page.users));
     return true;
+  }
+
+  Future<bool> loadRegistry({required int offset, required int limit}) async {
+    final current = _signedTarget();
+    final ticket = ++_registryTicket;
+    final page = await api(originOf(current.url)).repos(
+      token: current.token!,
+      offset: offset,
+      limit: limit,
+      search: repoQuery.text,
+      order: repoQuery.order,
+      public: repoQuery.publicOnly,
+    );
+    if (ticket != _registryTicket) return false;
+    registry = page;
+    notifyListeners();
+    unawaited(_loadRepoIcons(ticket, current.url, page.repos));
+    return true;
+  }
+
+  Future<RegistryRepo> readRepo(String uuid) async {
+    final current = _signedTarget();
+    final repo = await api(originOf(current.url))
+        .readRepo(current.token!, uuid);
+    _replaceListedRepo(repo);
+    unawaited(ensureIcon(repo.iconUuid));
+    return repo;
+  }
+
+  Future<void> deleteRepo(String uuid) async {
+    final current = _signedTarget();
+    await api(originOf(current.url)).deleteRepo(current.token!, uuid);
+    final page = registry;
+    if (page == null) return;
+    registry = (
+      count: page.count > 0 ? page.count - 1 : 0,
+      repos: [
+        for (final item in page.repos)
+          if (item.uuid != uuid) item,
+      ],
+    );
+    notifyListeners();
+  }
+
+  void _replaceListedRepo(RegistryRepo repo) {
+    final page = registry;
+    if (page == null) return;
+    if (!page.repos.any((item) => item.uuid == repo.uuid)) return;
+    registry = (
+      count: page.count,
+      repos: [
+        for (final item in page.repos)
+          if (item.uuid == repo.uuid) repo else item,
+      ],
+    );
+    notifyListeners();
+  }
+
+  Future<void> updateLocalRepo(String uuid) async {
+    final current = _signedTarget();
+    await api(originOf(current.url))
+        .updateLocalRepository(current.token!, uuid);
+  }
+
+  Future<RepoCredentials?> readRepoCredentials(String uuid) async {
+    final current = _signedTarget();
+    return api(originOf(current.url)).repoCredentials(current.token!, uuid);
+  }
+
+  Future<void> saveRepoCredentials(
+    String uuid,
+    String username,
+    String pat,
+  ) async {
+    final current = _signedTarget();
+    await api(originOf(current.url))
+        .setRepoCredentials(current.token!, uuid, username, pat);
+  }
+
+  /// Admin and Owner. Schedules an update of every repository.
+  Future<void> updateAllRepos() async {
+    final current = _staffTarget();
+    await api(originOf(current.url)).updateAllRepos(current.token!);
+  }
+
+  /// Asks the backend to fetch repository copies that are missing on disk.
+  Future<void> syncRepoStorage() async {
+    final current = _staffTarget();
+    await api(originOf(current.url)).syncRepoStorage(current.token!);
   }
 
   Future<DirectoryUser> readMember(String uuid) async {
@@ -696,6 +808,27 @@ class AppModel extends ChangeNotifier {
       try {
         icons[key] = await client.icon(uuid);
         if (ticket != _directoryTicket) return;
+        notifyListeners();
+      } catch (_) {}
+    }
+  }
+
+  Future<void> _loadRepoIcons(
+    int ticket,
+    String url,
+    List<RegistryRepo> repos,
+  ) async {
+    final origin = originOf(url);
+    final client = api(origin);
+    for (final repo in repos) {
+      if (ticket != _registryTicket) return;
+      final uuid = repo.iconUuid;
+      if (uuid.isEmpty) continue;
+      final key = '$origin/$uuid';
+      if (icons.containsKey(key)) continue;
+      try {
+        icons[key] = await client.icon(uuid);
+        if (ticket != _registryTicket) return;
         notifyListeners();
       } catch (_) {}
     }

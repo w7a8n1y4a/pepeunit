@@ -33,7 +33,7 @@ const menuSections = <MenuSection>[
   ),
   MenuSection(
     id: 'units',
-    titles: {'ru': 'Устройства', 'en': 'Units'},
+    titles: {'ru': 'Аппараты', 'en': 'Units'},
     color: Color(0xFFFF0080),
     q: 1,
     r: -1,
@@ -49,7 +49,7 @@ const menuSections = <MenuSection>[
   ),
   MenuSection(
     id: 'registry',
-    titles: {'ru': 'Реестр', 'en': 'Registry'},
+    titles: {'ru': 'Репозитории', 'en': 'Repositories'},
     color: Color(0xFF7F00FF),
     q: 1,
     r: 0,

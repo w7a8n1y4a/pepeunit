@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import '../instances/directory_user.dart';
 import '../instances/instance.dart';
 import '../instances/portrait.dart';
+import '../registry/repo.dart';
 import 'backend_version.dart';
 
 class ApiException implements Exception {
@@ -398,6 +399,113 @@ class PepeunitApi {
     return DirectoryUser.fromJson(
       (jsonDecode(response.body) as Map).cast<String, Object?>(),
     );
+  }
+
+  Future<({int count, List<RegistryRepo> repos})> repos({
+    required String token,
+    required int offset,
+    required int limit,
+    required String search,
+    required String order,
+    bool? public,
+  }) async {
+    final response = await _client
+        .get(
+          _uri('/repo', {
+            'offset': offset,
+            'limit': limit,
+            'order_by_repository_url': order,
+            if (search.trim().isNotEmpty) 'search_string': search.trim(),
+            'is_public_repository': ?public,
+          }),
+          headers: _jsonHeaders(token),
+        )
+        .timeout(_timeout);
+    _ensureOk(response);
+    final json = (jsonDecode(response.body) as Map).cast<String, Object?>();
+    final repos = <RegistryRepo>[];
+    for (final item in json['repos'] as List<Object?>? ?? const []) {
+      if (item is! Map) continue;
+      final repo = RegistryRepo.fromJson(item.cast<String, Object?>());
+      if (repo.uuid.isEmpty) continue;
+      repos.add(repo);
+    }
+    final rawCount = json['count'];
+    return (
+      count: rawCount is num ? rawCount.round() : repos.length,
+      repos: repos,
+    );
+  }
+
+  Future<RegistryRepo> readRepo(String token, String uuid) async {
+    final response = await _client
+        .get(_uri('/repo/$uuid'), headers: _jsonHeaders(token))
+        .timeout(_timeout);
+    _ensureOk(response);
+    return RegistryRepo.fromJson(
+      (jsonDecode(response.body) as Map).cast<String, Object?>(),
+    );
+  }
+
+  Future<void> deleteRepo(String token, String uuid) async {
+    final response = await _client
+        .delete(_uri('/repo/$uuid'), headers: _jsonHeaders(token))
+        .timeout(_timeout);
+    _ensureOk(response);
+  }
+
+  Future<void> updateLocalRepository(String token, String uuid) async {
+    final response = await _client
+        .patch(
+          _uri('/repo/update_local_repository/$uuid'),
+          headers: _jsonHeaders(token),
+        )
+        .timeout(_timeout);
+    _ensureOk(response);
+  }
+
+  Future<RepoCredentials?> repoCredentials(String token, String uuid) async {
+    final response = await _client
+        .get(_uri('/repo/get_credentials/$uuid'), headers: _jsonHeaders(token))
+        .timeout(_timeout);
+    _ensureOk(response);
+    if (response.body.trim().isEmpty) return null;
+    final decoded = jsonDecode(response.body);
+    if (decoded == null) return null;
+    if (decoded is! Map) {
+      throw ApiException(response.statusCode, response.body);
+    }
+    return RepoCredentials.fromJson(decoded.cast<String, Object?>());
+  }
+
+  Future<void> setRepoCredentials(
+    String token,
+    String uuid,
+    String username,
+    String pat,
+  ) async {
+    final response = await _client
+        .patch(
+          _uri('/repo/set_credentials/$uuid'),
+          headers: _jsonHeaders(token),
+          body: jsonEncode({'username': username, 'pat_token': pat}),
+        )
+        .timeout(_timeout);
+    _ensureOk(response);
+  }
+
+  Future<void> updateAllRepos(String token) async {
+    final response = await _client
+        .patch(_uri('/repo/update_all'), headers: _jsonHeaders(token))
+        .timeout(_timeout);
+    _ensureOk(response);
+  }
+
+  Future<void> syncRepoStorage(String token) async {
+    final response = await _client
+        .patch(_uri('/repo/backend_sync_repo'), headers: _jsonHeaders(token))
+        .timeout(_timeout);
+    _ensureOk(response);
   }
 
   Future<Uint8List> icon(String uuid) async {

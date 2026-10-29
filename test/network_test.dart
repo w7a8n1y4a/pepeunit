@@ -208,6 +208,13 @@ void main() {
       );
       expect(owner, ['metrics', 'settings', 'users', 'telegram', 'clear']);
       expect(cardBoard(['identity', ...owner]).length, lessThanOrEqualTo(7));
+      expect(
+        cardBoard([
+          'identity',
+          ...operationActions(owner: true, staff: true, federation: true),
+        ]).length,
+        lessThanOrEqualTo(7),
+      );
       expect(tuneActions(owner: true), ['settings', 'ops']);
       expect(ownerSettingSections, [
         'instance',
@@ -221,12 +228,14 @@ void main() {
       expect(operationActions(owner: true, staff: true, federation: true), [
         'tests',
         'scan-all',
+        'repo-ops',
         'track',
         'reboot',
       ]);
       expect(operationActions(owner: false, staff: true, federation: true), [
         'tests',
         'scan-all',
+        'repo-ops',
       ]);
       expect(
         cardActions(
@@ -625,7 +634,7 @@ void main() {
     );
     expect(
       tester
-          .getSemantics(find.bySemanticsLabel('Устройства'))
+          .getSemantics(find.bySemanticsLabel('Аппараты'))
           .flagsCollection
           .isEnabled,
       Tristate.isTrue,
@@ -774,8 +783,8 @@ void main() {
     expect(find.bySemanticsLabel('Флаги'), findsOneWidget);
     expect(find.bySemanticsLabel('Базовые'), findsOneWidget);
     expect(find.bySemanticsLabel('Пользователи'), findsOneWidget);
-    expect(find.bySemanticsLabel('Реестр'), findsOneWidget);
-    expect(find.bySemanticsLabel('Устройства'), findsOneWidget);
+    expect(find.bySemanticsLabel('Репозитории'), findsOneWidget);
+    expect(find.bySemanticsLabel('Аппараты'), findsOneWidget);
     expect(find.bySemanticsLabel('GitHub'), findsOneWidget);
     expect(find.bySemanticsLabel('Логи'), findsOneWidget);
     expect(find.bySemanticsLabel('Контакты'), findsOneWidget);

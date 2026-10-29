@@ -67,11 +67,11 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.bySemanticsLabel('Аккаунт'), findsOneWidget);
-    final units = tester.getSemantics(find.bySemanticsLabel('Устройства'));
+    final units = tester.getSemantics(find.bySemanticsLabel('Аппараты'));
     expect(units.flagsCollection.isEnabled, Tristate.isFalse);
     expect(
       tester
-          .getSemantics(find.bySemanticsLabel('Реестр'))
+          .getSemantics(find.bySemanticsLabel('Репозитории'))
           .flagsCollection
           .isEnabled,
       Tristate.isFalse,

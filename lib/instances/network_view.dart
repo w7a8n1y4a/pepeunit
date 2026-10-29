@@ -247,6 +247,7 @@ List<String> operationActions({
   return [
     'tests',
     if (federation) 'scan-all',
+    'repo-ops',
     if (owner) 'track',
     if (owner) 'reboot',
   ];

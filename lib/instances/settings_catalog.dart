@@ -250,7 +250,7 @@ final settingCategories = <SettingCategory>[
   ),
   SettingCategory(
     id: 'registry',
-    titles: {'ru': 'Реестр', 'en': 'Registry'},
+    titles: {'ru': 'Репозитории', 'en': 'Repositories'},
     icon: 'assets/icons/copy.svg',
     fields: [
       _whole(
@@ -271,7 +271,7 @@ final settingCategories = <SettingCategory>[
   ),
   SettingCategory(
     id: 'units',
-    titles: {'ru': 'Устройства', 'en': 'Units'},
+    titles: {'ru': 'Аппараты', 'en': 'Units'},
     icon: 'assets/icons/micro.svg',
     fields: [
       _whole(

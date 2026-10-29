@@ -262,7 +262,7 @@ class _InstancePageState extends State<InstancePage> {
       ),
       netText(
         language,
-        'Устройства ${portrait?.units ?? '—'}',
+        'Аппараты ${portrait?.units ?? '—'}',
         'Units ${portrait?.units ?? '—'}',
       ),
       netText(
