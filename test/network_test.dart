@@ -8,6 +8,7 @@ import 'package:pepeunit_client/account/vault.dart';
 import 'package:pepeunit_client/account/vault_store.dart';
 import 'package:pepeunit_client/api/pepeunit_api.dart';
 import 'package:pepeunit_client/app_model.dart';
+import 'package:pepeunit_client/features/network/instance_page.dart';
 import 'package:pepeunit_client/app_scope.dart';
 import 'package:pepeunit_client/instances/directory_user.dart';
 import 'package:pepeunit_client/instances/instance.dart';
@@ -604,6 +605,103 @@ void main() {
     expect(session.uuid, 'user-1');
   });
 
+  test('re-login waits a minute before the next registration', () async {
+    final api = _SessionApi();
+    final model = AppModel(
+      store: MemoryVaultStore(),
+      api: (_) => api,
+      hostedUrl: () async => null,
+    );
+    await model.load();
+    await model.adoptIdentity(Identity.generate());
+    model.vault.instances.add(InstanceRecord(url: _unit, active: true));
+
+    await model.resign(_unit);
+    expect(api.registered, isTrue);
+    expect(api.challenges, 2);
+    expect(model.resignCooldownLeft(_unit) > Duration.zero, isTrue);
+
+    await model.resign(_unit);
+    expect(api.challenges, 2);
+
+    model.resignAt[_unit] =
+        DateTime.now().millisecondsSinceEpoch -
+        const Duration(seconds: 61).inMilliseconds;
+    expect(model.resignCooldownLeft(_unit), Duration.zero);
+    await model.resign(_unit);
+    expect(api.challenges, 3);
+  });
+
+  testWidgets('the favorite cell stays inactive for a minute after re-login', (
+    tester,
+  ) async {
+    final api = _SessionApi();
+    final model = AppModel(
+      store: MemoryVaultStore(),
+      api: (_) => api,
+      hostedUrl: () async => null,
+    );
+    await model.load();
+    await model.adoptIdentity(Identity.generate());
+    model.vault.instances.add(
+      InstanceRecord(
+        url: _unit,
+        token: 't',
+        userUuid: 'user-1',
+        role: 'User',
+        active: true,
+      ),
+    );
+    model.portraits[_unit] = const InstancePortrait(
+      url: _unit,
+      version: '1.5.0',
+    );
+    await tester.pumpWidget(
+      AppScope(
+        model: model,
+        child: const MaterialApp(home: InstancePage(url: _unit)),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final open = tester.getSemantics(
+      find.bySemanticsLabel('unit.pepeunit.com'),
+    );
+    expect(open.value, '1.5.0');
+    expect(open.flagsCollection.isEnabled, Tristate.isTrue);
+
+    await tester.tap(find.bySemanticsLabel('unit.pepeunit.com'));
+    String? clock;
+    for (var i = 0; i < 20 && clock != '1:00' && clock != '0:59'; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+      clock = tester
+          .getSemantics(find.bySemanticsLabel('unit.pepeunit.com'))
+          .value;
+    }
+    final cooling = tester.getSemantics(
+      find.bySemanticsLabel('unit.pepeunit.com'),
+    );
+    expect(clock, anyOf('1:00', '0:59'));
+    expect(cooling.flagsCollection.isEnabled, Tristate.isFalse);
+    expect(api.challenges, 2);
+
+    await tester.tap(
+      find.bySemanticsLabel('unit.pepeunit.com'),
+      warnIfMissed: false,
+    );
+    await tester.pump();
+    expect(api.challenges, 2);
+
+    model.resignAt[_unit] =
+        DateTime.now().millisecondsSinceEpoch -
+        const Duration(seconds: 61).inMilliseconds;
+    await tester.pump(const Duration(seconds: 1));
+    final ready = tester.getSemantics(
+      find.bySemanticsLabel('unit.pepeunit.com'),
+    );
+    expect(ready.value, '1.5.0');
+    expect(ready.flagsCollection.isEnabled, Tristate.isTrue);
+  });
+
   testWidgets('flags, search, peer moderation and the owner hub stay 1-ring', (
     tester,
   ) async {
@@ -638,6 +736,10 @@ void main() {
           .flagsCollection
           .isEnabled,
       Tristate.isTrue,
+    );
+    expect(
+      tester.getSemantics(find.bySemanticsLabel('Репозитории')).value,
+      '2 шт.',
     );
 
     await tester.tap(find.bySemanticsLabel('devunit.pepeunit.com'));

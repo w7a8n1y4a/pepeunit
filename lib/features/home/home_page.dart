@@ -8,6 +8,7 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/sections.dart';
+import '../../registry/repo.dart';
 import '../hex_page.dart';
 import '../network/network_chrome.dart';
 
@@ -55,12 +56,17 @@ HexSlot _slot(MenuSection section, AppModel model, String language) {
   }
   final signedIn = section.id == 'people' && vault.hasKey;
   final png = signedIn ? iconBytes(vault.iconPng) : null;
+  final repoCount = section.id == 'registry' && target != null
+      ? model.portraitOf(target.url)?.repos
+      : null;
   return HexSlot(
     id: section.id,
     title: signedIn && vault.login.isNotEmpty
         ? vault.login
         : section.title(language),
-    footer: signedIn ? keyMarkFromBase64(vault.publicKey) : null,
+    footer: signedIn
+        ? keyMarkFromBase64(vault.publicKey)
+        : (repoCount == null ? null : pieceCount(language, repoCount)),
     color: section.color,
     q: section.q,
     r: section.r,

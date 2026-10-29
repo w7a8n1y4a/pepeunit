@@ -8,6 +8,7 @@ import 'package:pepeunit_client/account/vault_store.dart';
 import 'package:pepeunit_client/api/pepeunit_api.dart';
 import 'package:pepeunit_client/app_model.dart';
 import 'package:pepeunit_client/app_scope.dart';
+import 'package:pepeunit_client/features/registry/registry_chrome.dart';
 import 'package:pepeunit_client/features/registry/registry_page.dart';
 import 'package:pepeunit_client/features/registry/repo_page.dart';
 import 'package:pepeunit_client/hive/hex_scene.dart';
@@ -147,16 +148,12 @@ void main() {
     expect(english.contains('Private · GitHub'), isTrue);
     expect(english.contains('2 KB · Branches 2'), isTrue);
     expect(shortStamp(repo.created), '2026.01.02 03:04');
-    final slot = HexSlot(
-      id: 'card',
-      title: repoCaption(repo.repositoryUrl),
-      color: const Color(0xFF7F00FF),
-      q: 0,
-      r: 0,
-      sideLeft: repoSizeLabel(repo.localSize, 'ru'),
-      sideRight: repoAccessLabel('ru', repo.public),
-    );
-    expect(slotLabel(slot), 'github.com/pepe/unit, 2 КБ, Приватный');
+    final slot = repoMark(id: 'card', repo: repo, language: 'ru', q: 0, r: 0);
+    expect(slot.footerLeft, 'Приватный');
+    expect(slot.sideRight, '2 КБ');
+    expect(slot.sideLeft, isNull);
+    expect(slot.footer, 'Гитхаб');
+    expect(slotLabel(slot), 'github.com/pepe/unit, 2 КБ');
   });
 
   test('repo list sends only the url sort and skips creator', () async {
@@ -205,10 +202,7 @@ void main() {
     expect(find.bySemanticsLabel('Публичные'), findsOneWidget);
     expect(find.bySemanticsLabel('Приватные'), findsOneWidget);
     expect(find.bySemanticsLabel('А-Я'), findsOneWidget);
-    expect(
-      find.bySemanticsLabel('gitlab.com/pepe/unit, 1 КБ, Публичный'),
-      findsOneWidget,
-    );
+    expect(find.bySemanticsLabel('gitlab.com/pepe/unit, 1 КБ'), findsOneWidget);
 
     await tester.pumpWidget(
       AppScope(
@@ -221,13 +215,11 @@ void main() {
     expect(find.bySemanticsLabel('Креды'), findsNothing);
     expect(find.bySemanticsLabel('Удалить'), findsNothing);
     expect(find.bySemanticsLabel('Ветки'), findsOneWidget);
+    expect(tester.getSemantics(find.bySemanticsLabel('Ветки')).value, '1 шт.');
     expect(find.bySemanticsLabel('Синхронизировать репо'), findsOneWidget);
     final unit = tester.getSemantics(find.bySemanticsLabel('Создать аппарат'));
     expect(unit.flagsCollection.isEnabled, Tristate.isFalse);
-    expect(
-      find.bySemanticsLabel('gitlab.com/pepe/unit, 1 КБ, Публичный'),
-      findsOneWidget,
-    );
+    expect(find.bySemanticsLabel('gitlab.com/pepe/unit, 1 КБ'), findsOneWidget);
   });
 
   testWidgets('update copy watches the repo until it leaves updating', (

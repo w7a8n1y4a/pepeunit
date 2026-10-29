@@ -1,6 +1,9 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../account/alerts.dart';
 import '../../app_model.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
@@ -25,6 +28,26 @@ class _InstancePageState extends State<InstancePage> {
   var _open = false;
   String? _pending;
   var _moderating = false;
+  Timer? _resignClock;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _watchResign());
+  }
+
+  @override
+  void didUpdateWidget(InstancePage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.url == widget.url) return;
+    _watchResign();
+  }
+
+  @override
+  void dispose() {
+    _resignClock?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -104,18 +127,25 @@ class _InstancePageState extends State<InstancePage> {
         final pingText = ping == null
             ? null
             : '${ping.round()} ${netText(language, 'мс', 'ms')}';
+        final cooling = isTarget
+            ? model.resignCooldownLeft(url)
+            : Duration.zero;
+        final locked = cooling > Duration.zero;
         return instanceMark(
           id: 'identity',
           url: url,
           language: language,
           q: slot.q,
           r: slot.r,
-          color: isTarget ? color : trustColor(peer?.trust, color),
+          color: locked
+              ? hexMuted
+              : (isTarget ? color : trustColor(peer?.trust, color)),
           current: isTarget,
           footerLeft: isTarget ? null : pingText,
-          version: portrait?.version,
+          version: locked ? cooldownClock(cooling) : portrait?.version,
           image: model.iconOf(url),
-          tappable: isTarget,
+          tappable: isTarget && !locked,
+          enabled: !locked,
           busy: _pending == 'identity',
         );
       case 'metrics':
@@ -378,7 +408,9 @@ class _InstancePageState extends State<InstancePage> {
           });
           return;
         }
+        if (model.resignCooldownLeft(url) != Duration.zero) return;
         await _run('identity', () => model.resign(url));
+        _watchResign();
       case 'target':
         await _run('target', () => model.selectTarget(url));
       case 'clear':
@@ -415,6 +447,24 @@ class _InstancePageState extends State<InstancePage> {
     await _run('telegram', () async {
       final link = await model.verificationLink(widget.url);
       await model.openExternal(Uri.parse(link));
+    });
+  }
+
+  void _watchResign() {
+    _resignClock?.cancel();
+    if (!mounted ||
+        AppScope.of(context).resignCooldownLeft(widget.url) == Duration.zero) {
+      _resignClock = null;
+      return;
+    }
+    _resignClock = Timer.periodic(const Duration(seconds: 1), (_) {
+      if (!mounted) return;
+      setState(() {});
+      if (AppScope.of(context).resignCooldownLeft(widget.url) ==
+          Duration.zero) {
+        _resignClock?.cancel();
+        _resignClock = null;
+      }
     });
   }
 

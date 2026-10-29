@@ -29,7 +29,7 @@ String repoOrderLabel(String language, String order) {
 /// Search card and the identity cell inside a repository.
 ///
 /// The link sits on the upper left. The platform sits on the lower right.
-/// Public or private runs up the right edge. The size runs up the left edge.
+/// Public or private sits on the lower left. The size runs up the right edge.
 HexSlot repoMark({
   required String id,
   required RegistryRepo repo,
@@ -45,8 +45,8 @@ HexSlot repoMark({
     id: id,
     title: repoCaption(repo.repositoryUrl),
     footer: platform.isEmpty ? null : platform,
-    sideLeft: repoSizeLabel(repo.localSize, language),
-    sideRight: repoAccessLabel(language, repo.public),
+    footerLeft: repoAccessLabel(language, repo.public),
+    sideRight: repoSizeLabel(repo.localSize, language),
     color: registryColor,
     q: q,
     r: r,

@@ -180,7 +180,7 @@ class _RepoPageState extends State<RepoPage> {
         return HexSlot(
           id: 'branches',
           title: regText(language, 'Ветки', 'Branches'),
-          footer: count == null ? null : '$count',
+          footer: count == null ? null : pieceCount(language, count),
           color: color,
           q: slot.q,
           r: slot.r,

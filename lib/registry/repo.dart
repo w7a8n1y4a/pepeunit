@@ -121,6 +121,11 @@ String tailText(String text, int limit) {
   return String.fromCharCodes(runes.sublist(runes.length - limit));
 }
 
+/// `12 шт.` / `12 pcs`.
+String pieceCount(String language, int count) {
+  return phrase(language, {'ru': '$count шт.', 'en': '$count pcs'});
+}
+
 /// Bare size: `512 Б` / `512 B`, `1.5 КБ` / `1.5 KB`. Powers of 1024.
 String repoSizeLabel(int bytes, String language) {
   const units = ['B', 'KB', 'MB', 'GB', 'TB'];

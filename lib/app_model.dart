@@ -71,16 +71,18 @@ class AppModel extends ChangeNotifier {
   InstanceRecord? get target => vault.target;
 
   static const profileCooldown = Duration(minutes: 1);
+  static const resignCooldown = Duration(minutes: 1);
+
+  /// Epoch milliseconds of the last successful re-login, per instance url.
+  final Map<String, int> resignAt = {};
 
   /// Time left before the profile can be sent again.
-  Duration get profileCooldownLeft {
-    final sent = vault.profileSentAt;
-    if (sent == null) return Duration.zero;
-    final elapsed = DateTime.now().millisecondsSinceEpoch - sent;
-    final window = profileCooldown.inMilliseconds;
-    if (elapsed < 0 || elapsed >= window) return Duration.zero;
-    return Duration(milliseconds: window - elapsed);
-  }
+  Duration get profileCooldownLeft =>
+      _windowLeft(vault.profileSentAt, profileCooldown);
+
+  /// Time left before the favorite instance can be signed in again.
+  Duration resignCooldownLeft(String raw) =>
+      _windowLeft(resignAt[canonicalInstanceUrl(raw)], resignCooldown);
 
   bool get canSendProfile =>
       vault.target != null && profileCooldownLeft == Duration.zero;
@@ -631,12 +633,16 @@ class AppModel extends ChangeNotifier {
   }
 
   /// Asks the instance for a fresh JWT with the same key login.
+  ///
+  /// A successful call waits a minute. The instance cell stays inactive.
   Future<void> resign(String raw) async {
     if (!vault.hasKey) throw StateError('key');
     final url = canonicalInstanceUrl(raw);
+    if (resignCooldownLeft(url) != Duration.zero) return;
     final record = _ensureRecord(url);
     final identity = Identity.fromParts(vault.publicKey!, vault.secretKey!);
     await _open(record, api(originOf(url)), identity);
+    resignAt[url] = DateTime.now().millisecondsSinceEpoch;
     await _commit();
   }
 
@@ -986,4 +992,12 @@ class AppModel extends ChangeNotifier {
     _pending = _pending.then((_) => store.write(snapshot));
     return _pending;
   }
+}
+
+Duration _windowLeft(int? stamp, Duration window) {
+  if (stamp == null) return Duration.zero;
+  final elapsed = DateTime.now().millisecondsSinceEpoch - stamp;
+  final width = window.inMilliseconds;
+  if (elapsed < 0 || elapsed >= width) return Duration.zero;
+  return Duration(milliseconds: width - elapsed);
 }
