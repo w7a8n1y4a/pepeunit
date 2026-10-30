@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 
+import '../alerts/notice.dart';
 import '../instances/directory_user.dart';
 import '../instances/instance.dart';
 import '../instances/portrait.dart';
@@ -308,6 +309,84 @@ class PepeunitApi {
         )
         .timeout(_timeout);
     _ensureOk(response);
+  }
+
+  Future<({int count, List<Notice> items})> notices({
+    required String token,
+    required int offset,
+    required int limit,
+    bool? isRead,
+    List<String>? types,
+  }) async {
+    final pairs = <String>[
+      'offset=$offset',
+      'limit=$limit',
+      if (isRead != null) 'is_read=$isRead',
+      for (final type in types ?? const <String>[])
+        'type=${Uri.encodeQueryComponent(type)}',
+    ];
+    final uri = Uri.parse(
+      '$origin/pepeunit/api/v1/notifications?${pairs.join('&')}',
+    );
+    final response = await _client
+        .get(uri, headers: _jsonHeaders(token))
+        .timeout(_timeout);
+    _ensureOk(response);
+    return _noticePage(response.body);
+  }
+
+  Future<Notice> markNoticeRead(String token, String uuid) async {
+    final response = await _client
+        .patch(_uri('/notifications/$uuid/read'), headers: _jsonHeaders(token))
+        .timeout(_timeout);
+    _ensureOk(response);
+    return Notice.fromJson(
+      (jsonDecode(response.body) as Map).cast<String, Object?>(),
+    );
+  }
+
+  Future<int> markAllNoticesRead(String token) async {
+    final response = await _client
+        .patch(_uri('/notifications/read'), headers: _jsonHeaders(token))
+        .timeout(_timeout);
+    _ensureOk(response);
+    final decoded = jsonDecode(response.body);
+    return decoded is num ? decoded.round() : 0;
+  }
+
+  /// Live events for one signed-in user. [client] is closed by the caller
+  /// to drop the connection. Comment frames (`: ping`) are skipped.
+  Stream<Notice> watchNotices(String token, http.Client client) async* {
+    final request = http.Request('GET', _uri('/notifications/stream'));
+    request.headers.addAll(_jsonHeaders(token));
+    request.headers['accept'] = 'text/event-stream';
+    final response = await client.send(request);
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      final body = await response.stream.bytesToString();
+      throw ApiException(response.statusCode, body);
+    }
+    final buffer = SseBuffer();
+    await for (final chunk in response.stream.transform(utf8.decoder)) {
+      for (final notice in buffer.add(chunk)) {
+        yield notice;
+      }
+    }
+  }
+
+  ({int count, List<Notice> items}) _noticePage(String body) {
+    final json = (jsonDecode(body) as Map).cast<String, Object?>();
+    final items = <Notice>[];
+    for (final item in json['notifications'] as List<Object?>? ?? const []) {
+      if (item is! Map) continue;
+      final notice = Notice.fromJson(item.cast<String, Object?>());
+      if (notice.uuid.isEmpty) continue;
+      items.add(notice);
+    }
+    final rawCount = json['count'];
+    return (
+      count: rawCount is num ? rawCount.round() : items.length,
+      items: items,
+    );
   }
 
   Future<String?> uploadIcon(String token, String userUuid, Uint8List png) {

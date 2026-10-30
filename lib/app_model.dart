@@ -2,8 +2,10 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 
 import 'account/alerts.dart';
+import 'alerts/notice.dart';
 import 'account/icon_file.dart';
 import 'account/identity.dart';
 import 'account/key_file_port.dart';
@@ -60,6 +62,17 @@ class AppModel extends ChangeNotifier {
   final RepoQuery repoQuery = RepoQuery();
   ({int count, List<RegistryRepo> repos})? registry;
   var _registryTicket = 0;
+  final NoticeQuery noticeQuery = NoticeQuery();
+  ({int count, List<Notice> items})? notices;
+  var noticeOffset = 0;
+  var noticeLimit = 0;
+  var noticeRevision = 0;
+  var unreadCount = 0;
+  var _noticeTicket = 0;
+  var _noticeLoad = 0;
+  String? _noticeKey;
+  http.Client? _noticeClient;
+  final Set<String> _noticeSeen = {};
   final Set<String> discovered = {};
   final Map<String, PeerHead> peers = {};
   final Map<String, InstancePortrait> portraits = {};
@@ -176,6 +189,7 @@ class AppModel extends ChangeNotifier {
   Future<void> signOut() {
     vault.clearSession();
     targetSettings = null;
+    _syncNoticeStream();
     return _commit();
   }
 
@@ -327,6 +341,218 @@ class AppModel extends ChangeNotifier {
     return true;
   }
 
+  /// Keeps every type the role can receive selected until the user toggles one.
+  void alignNoticeTypes(String? role) {
+    final available = noticeTypesForRole(role).toSet();
+    if (!noticeQuery.tuned) {
+      noticeQuery.types
+        ..clear()
+        ..addAll(available);
+      return;
+    }
+    noticeQuery.types.removeWhere((type) => !available.contains(type));
+  }
+
+  bool setNoticeRead(String value) {
+    if (!noticeReads.contains(value) || value == noticeQuery.read) {
+      return false;
+    }
+    noticeQuery.read = value;
+    noticeRevision++;
+    notifyListeners();
+    return true;
+  }
+
+  bool toggleNoticeType(String type) {
+    final role = target?.role;
+    final available = noticeTypesForRole(role);
+    if (!available.contains(type)) return false;
+    alignNoticeTypes(role);
+    noticeQuery.tuned = true;
+    if (noticeQuery.types.contains(type)) {
+      noticeQuery.types.remove(type);
+    } else {
+      noticeQuery.types.add(type);
+    }
+    noticeRevision++;
+    notifyListeners();
+    return true;
+  }
+
+  List<String> _selectedNoticeTypes(String? role) {
+    final available = noticeTypesForRole(role);
+    return [
+      for (final type in available)
+        if (noticeQuery.types.contains(type)) type,
+    ];
+  }
+
+  Future<bool> loadNotices({required int offset, required int limit}) async {
+    final current = _signedTarget();
+    alignNoticeTypes(current.role);
+    final types = _selectedNoticeTypes(current.role);
+    final ticket = ++_noticeLoad;
+    noticeOffset = offset;
+    noticeLimit = limit;
+    if (types.isEmpty) {
+      notices = (count: 0, items: const <Notice>[]);
+      notifyListeners();
+      return ticket == _noticeLoad;
+    }
+    final page = await api(originOf(current.url)).notices(
+      token: current.token!,
+      offset: offset,
+      limit: limit,
+      isRead: switch (noticeQuery.read) {
+        'read' => true,
+        'unread' => false,
+        _ => null,
+      },
+      types: types,
+    );
+    if (ticket != _noticeLoad) return false;
+    notices = page;
+    if (offset == 0 &&
+        noticeQuery.read == 'unread' &&
+        noticeQuery.showsAll(current.role)) {
+      unreadCount = page.count;
+    }
+    notifyListeners();
+    return true;
+  }
+
+  Future<void> markNoticeRead(String uuid) async {
+    final current = _signedTarget();
+    final updated = await api(originOf(current.url))
+        .markNoticeRead(current.token!, uuid);
+    final page = notices;
+    if (page != null) {
+      final hide = noticeQuery.read == 'unread' && updated.isRead;
+      final items = <Notice>[];
+      var removed = false;
+      for (final item in page.items) {
+        if (item.uuid != uuid) {
+          items.add(item);
+          continue;
+        }
+        if (hide) {
+          removed = true;
+          continue;
+        }
+        items.add(updated);
+      }
+      notices = (
+        count: removed && page.count > 0 ? page.count - 1 : page.count,
+        items: items,
+      );
+    }
+    final wasUnread = page?.items.any(
+      (item) => item.uuid == uuid && !item.isRead,
+    );
+    if ((wasUnread ?? true) && updated.isRead && unreadCount > 0) {
+      unreadCount -= 1;
+    }
+    notifyListeners();
+  }
+
+  Future<void> markAllNoticesRead() async {
+    final current = _signedTarget();
+    await api(originOf(current.url)).markAllNoticesRead(current.token!);
+    unreadCount = 0;
+    final page = notices;
+    if (page != null) {
+      if (noticeQuery.read == 'unread') {
+        notices = (count: 0, items: const <Notice>[]);
+      } else {
+        notices = (
+          count: page.count,
+          items: [for (final item in page.items) item.copyWith(isRead: true)],
+        );
+      }
+    }
+    notifyListeners();
+  }
+
+  void _takeNotice(Notice notice) {
+    if (notice.uuid.isEmpty || !_noticeSeen.add(notice.uuid)) return;
+    if (_noticeSeen.length > 200) {
+      _noticeSeen.remove(_noticeSeen.first);
+    }
+    if (!notice.isRead) unreadCount += 1;
+    final page = notices;
+    final current = target;
+    if (page != null && current != null && noticeQuery.accepts(notice)) {
+      final items = [...page.items];
+      if (noticeOffset == 0 && !items.any((item) => item.uuid == notice.uuid)) {
+        items.insert(0, notice);
+        if (noticeLimit > 0 && items.length > noticeLimit) {
+          items.removeLast();
+        }
+      }
+      notices = (count: page.count + 1, items: items);
+    }
+    notifyListeners();
+  }
+
+  void _syncNoticeStream() {
+    final current = target;
+    if (current == null ||
+        !current.signedIn ||
+        current.notifications == false) {
+      if (_noticeKey != null) _stopNoticeStream();
+      return;
+    }
+    final key = '${current.url}|${current.token}';
+    if (key == _noticeKey) return;
+    _stopNoticeStream();
+    _noticeKey = key;
+    final ticket = ++_noticeTicket;
+    unawaited(_followNotices(ticket, current));
+  }
+
+  void _stopNoticeStream() {
+    _noticeTicket++;
+    _noticeKey = null;
+    _noticeClient?.close();
+    _noticeClient = null;
+    _noticeSeen.clear();
+    final dirty = unreadCount != 0 || notices != null;
+    notices = null;
+    unreadCount = 0;
+    if (dirty) notifyListeners();
+  }
+
+  Future<void> _followNotices(int ticket, InstanceRecord record) async {
+    final origin = originOf(record.url);
+    final token = record.token;
+    if (token == null || token.isEmpty) return;
+    try {
+      final page = await api(origin)
+          .notices(token: token, offset: 0, limit: 1, isRead: false);
+      if (ticket != _noticeTicket) return;
+      unreadCount = page.count;
+      notifyListeners();
+    } catch (_) {}
+    while (ticket == _noticeTicket) {
+      final client = http.Client();
+      _noticeClient = client;
+      try {
+        await for (final notice in api(origin).watchNotices(token, client)) {
+          if (ticket != _noticeTicket) return;
+          _takeNotice(notice);
+        }
+      } on ApiException catch (error) {
+        if (error.status >= 400 && error.status < 500) return;
+      } catch (_) {
+      } finally {
+        client.close();
+        if (identical(_noticeClient, client)) _noticeClient = null;
+      }
+      if (ticket != _noticeTicket) return;
+      await Future<void>.delayed(const Duration(seconds: 3));
+    }
+  }
+
   Future<RegistryRepo> readRepo(String uuid) async {
     final current = _signedTarget();
     final repo = await api(originOf(current.url))
@@ -457,6 +683,7 @@ class AppModel extends ChangeNotifier {
     targetSettings = null;
     networkFailure = null;
     networkBusy = false;
+    _syncNoticeStream();
     await _commit();
   }
 
@@ -550,6 +777,7 @@ class AppModel extends ChangeNotifier {
     } finally {
       if (ticket == _ticket) {
         networkBusy = false;
+        _syncNoticeStream();
         notifyListeners();
       }
     }
@@ -651,6 +879,7 @@ class AppModel extends ChangeNotifier {
     final identity = Identity.fromParts(vault.publicKey!, vault.secretKey!);
     await _open(record, api(originOf(url)), identity);
     resignAt[url] = DateTime.now().millisecondsSinceEpoch;
+    _syncNoticeStream();
     await _commit();
   }
 

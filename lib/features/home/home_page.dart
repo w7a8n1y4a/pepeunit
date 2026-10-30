@@ -72,6 +72,9 @@ HexSlot _slot(MenuSection section, AppModel model, String language) {
     r: section.r,
     icon: png == null ? section.icon : null,
     image: png,
+    badge: section.id == 'alerts' && model.unreadCount > 0
+        ? model.unreadCount
+        : null,
     enabled: menuSectionEnabled(
       section.id,
       hasTarget: vault.target != null,

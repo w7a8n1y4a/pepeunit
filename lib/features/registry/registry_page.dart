@@ -6,7 +6,6 @@ import 'package:go_router/go_router.dart';
 import '../../app_model.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
-import '../../hive/marks.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
 import '../../registry/registry_view.dart';
@@ -14,6 +13,7 @@ import '../../registry/repo.dart';
 import '../hex_page.dart';
 import '../line_input.dart';
 import '../network/network_chrome.dart';
+import '../page_window.dart';
 import '../slanted_choices.dart';
 import 'registry_chrome.dart';
 
@@ -413,32 +413,15 @@ class _WindowCell extends StatelessWidget {
                 color: const Color(0xFFA1A1AA),
               ),
               Expanded(
-                child: Row(
-                  children: [
-                    _chevron(
-                      left: true,
-                      extent: side * 0.18,
-                      enabled: back,
-                      label: regText(language, 'Предыдущие', 'Previous'),
-                      onTap: () => onStep(-1),
-                    ),
-                    Expanded(
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          range,
-                          style: style.copyWith(color: const Color(0xFFFFFFFF)),
-                        ),
-                      ),
-                    ),
-                    _chevron(
-                      left: false,
-                      extent: side * 0.18,
-                      enabled: forward,
-                      label: regText(language, 'Следующие', 'Next'),
-                      onTap: () => onStep(1),
-                    ),
-                  ],
+                child: PageWindow(
+                  range: range,
+                  canBack: back,
+                  canForward: forward,
+                  previousLabel: regText(language, 'Предыдущие', 'Previous'),
+                  nextLabel: regText(language, 'Следующие', 'Next'),
+                  onStep: onStep,
+                  style: style,
+                  chevronExtent: side * 0.18,
                 ),
               ),
             ],
@@ -470,35 +453,6 @@ class _WindowCell extends StatelessWidget {
               style: style.copyWith(
                 color: on ? const Color(0xFFFFFFFF) : hexMuted,
               ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  Widget _chevron({
-    required bool left,
-    required double extent,
-    required bool enabled,
-    required String label,
-    required VoidCallback onTap,
-  }) {
-    final color = enabled ? const Color(0xFFFFFFFF) : hexMuted;
-    return Semantics(
-      button: true,
-      enabled: enabled,
-      label: label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: enabled ? onTap : null,
-        child: HoverPop(
-          enabled: enabled,
-          child: SizedBox(
-            width: extent,
-            height: extent,
-            child: CustomPaint(
-              painter: ChevronMarkPainter(left: left, color: color),
             ),
           ),
         ),

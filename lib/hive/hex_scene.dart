@@ -60,6 +60,9 @@ class HexSlot {
     this.sideRight,
     this.sideRightColor = const Color(0xFFFFFFFF),
     this.body,
+    this.center,
+    this.centerColor = const Color(0xFFFFFFFF),
+    this.badge,
     this.tappable = true,
     this.enabled = true,
     this.busy = false,
@@ -102,6 +105,13 @@ class HexSlot {
   /// Replaces the icon and stays inside this cell. Used for the error text.
   final Widget? body;
 
+  /// Text in the middle of the cell. The cell stays a button.
+  final String? center;
+  final Color centerColor;
+
+  /// Unread count drawn on the upper-right vertex. Zero and null stay hidden.
+  final int? badge;
+
   /// False for a caption that does not open anything.
   final bool tappable;
 
@@ -119,6 +129,7 @@ String slotLabel(HexSlot slot) {
     if (slot.title.isNotEmpty) slot.title,
     if (left != null && left.isNotEmpty) left,
     if (right != null && right.isNotEmpty) right,
+    if (slot.badge != null && slot.badge! > 0) '${slot.badge}',
   ];
   if (parts.isEmpty) return slot.title;
   return parts.join(', ');
@@ -190,7 +201,45 @@ class HexScene extends StatelessWidget {
         ),
       );
     } else {
-      child = const SizedBox.expand();
+      final center = placed.slot.center;
+      if (center != null && center.isNotEmpty) {
+        final radius = placed.radius;
+        // The flat middle of the hex. Notification `small_text` is capped
+        // by `pu_notification_small_text_limit`: 48 characters by default,
+        // 96 at most. The block is a little wider and a little smaller so
+        // that whole range stays in the middle, clear of the edge captions.
+        child = IgnorePointer(
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: radius * 0.30,
+              vertical: radius * 0.52,
+            ),
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(maxWidth: radius * 1.38),
+                  child: ExcludeSemantics(
+                    child: Text(
+                      center,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: placed.slot.centerColor,
+                        fontFamily: 'OpenGost Type B',
+                        fontSize: radius * 0.13,
+                        height: 1.15,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      } else {
+        child = const SizedBox.expand();
+      }
     }
     final slot = placed.slot;
     if (!slot.enabled) {
@@ -854,6 +903,8 @@ class _CellFrameState extends State<_CellFrame> with TickerProviderStateMixin {
                 ),
               ),
             ),
+          if (widget.slot.badge != null && widget.slot.badge! > 0)
+            IgnorePointer(child: _UnreadBadge(widget.slot.badge!)),
           if (widget.slot.busy && spin != null)
             IgnorePointer(
               child: RepaintBoundary(
@@ -890,6 +941,61 @@ class _CellFrameState extends State<_CellFrame> with TickerProviderStateMixin {
         if (_hover) setState(() => _hover = false);
       },
       child: detector,
+    );
+  }
+}
+
+/// Red count on the vertex where the upper-right edge meets the right edge.
+class _UnreadBadge extends StatelessWidget {
+  const _UnreadBadge(this.count);
+
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final side = constraints.maxWidth;
+        final radius = side / 2;
+        final center = Offset(radius, radius);
+        final vertex =
+            center + Offset(radius * cos(-pi / 6), radius * sin(-pi / 6));
+        final badge = radius * 0.2;
+        final dx = min(vertex.dx, side - badge);
+        final dy = max(vertex.dy, badge);
+        final label = count > 99 ? '99+' : '$count';
+        return Stack(
+          children: [
+            Positioned(
+              left: dx - badge,
+              top: dy - badge,
+              width: badge * 2,
+              height: badge * 2,
+              child: DecoratedBox(
+                decoration: const BoxDecoration(
+                  color: errorColor,
+                  shape: BoxShape.circle,
+                ),
+                child: Center(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      label,
+                      style: TextStyle(
+                        color: const Color(0xFFFFFFFF),
+                        fontFamily: 'OpenGost Type B',
+                        fontSize: badge * 0.95,
+                        height: 1,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

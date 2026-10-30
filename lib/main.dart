@@ -10,6 +10,8 @@ import 'features/account/account_login_page.dart';
 import 'features/account/account_menu_page.dart';
 import 'features/account/account_register_page.dart';
 import 'features/account/account_settings_page.dart';
+import 'features/alerts/alert_types_page.dart';
+import 'features/alerts/alerts_page.dart';
 import 'features/home/home_page.dart';
 import 'features/menu/placeholder_page.dart';
 import 'features/network/instance_page.dart';
@@ -162,6 +164,18 @@ class _PepeunitAppState extends State<PepeunitApp> {
                 ),
               ),
             ],
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/alerts',
+        builder: (context, state) => AlertsPage(
+          scope: scaleTickOf(state.uri, fallback: searchScaleTick),
+        ),
+        routes: [
+          GoRoute(
+            path: 'types',
+            builder: (context, state) => const AlertTypesPage(),
           ),
         ],
       ),

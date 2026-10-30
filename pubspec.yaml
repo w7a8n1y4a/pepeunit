@@ -72,6 +72,9 @@ flutter:
     - family: OpenGost Type B
       fonts:
         - asset: assets/fonts/OpenGostTypeB-Regular.ttf
+    - family: JetBrains Mono
+      fonts:
+        - asset: assets/fonts/JetBrainsMono-Regular.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:

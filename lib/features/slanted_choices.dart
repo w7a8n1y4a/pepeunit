@@ -51,6 +51,7 @@ class SlantedChoices extends StatelessWidget {
     required this.choices,
     this.spanLine = false,
     this.lineGapShare = 1 / 3,
+    this.pin,
     super.key,
   });
 
@@ -64,6 +65,10 @@ class SlantedChoices extends StatelessWidget {
   /// Clear gap between stacked words, as a share of a capital.
   final double lineGapShare;
 
+  /// Index of the word whose ink sits on the horizontal center of [maxWidth].
+  /// The lean steepens until that word can stay there.
+  final int? pin;
+
   @override
   Widget build(BuildContext context) {
     final scaler = MediaQuery.textScalerOf(context);
@@ -74,7 +79,9 @@ class SlantedChoices extends StatelessWidget {
           constraints.maxWidth,
         );
         final limit = widthCap.isFinite ? widthCap : maxWidth;
-        final font = spanLine ? _fontThatFits(limit, scaler) : fontSize;
+        final font = spanLine
+            ? _fontThatFits(limit, scaler)
+            : (pin == null ? fontSize : _fontThatFitsPin(limit, scaler));
         final laid = _layRow(
           row: choices,
           font: font,
@@ -82,13 +89,18 @@ class SlantedChoices extends StatelessWidget {
           scaler: scaler,
           span: spanLine,
           lineGapShare: lineGapShare,
+          pin: pin,
         );
         if (laid == null) return const SizedBox.shrink();
+        final boxWidth = pin != null && limit.isFinite
+            ? limit
+            : laid.layout.size.width;
         final block = _rowStack(
           words: laid.words,
           layout: laid.layout,
-          width: laid.layout.size.width,
+          width: boxWidth,
           scaler: scaler,
+          pin: pin,
         );
         if (spanLine) return block;
         return Align(
@@ -122,6 +134,37 @@ class SlantedChoices extends StatelessWidget {
         span: true,
       );
       return height != null;
+    }
+
+    if (fits(fontSize)) return fontSize;
+    var low = 1.0;
+    var high = fontSize;
+    if (high <= low || !fits(low)) return max(1.0, low);
+    for (var step = 0; step < 14; step++) {
+      final mid = (low + high) / 2;
+      if (fits(mid)) {
+        low = mid;
+      } else {
+        high = mid;
+      }
+    }
+    return low;
+  }
+
+  /// Largest size at or under [fontSize] whose pinned word stays centered.
+  double _fontThatFitsPin(double limit, TextScaler scaler) {
+    if (!limit.isFinite || limit <= 0 || pin == null) return fontSize;
+    bool fits(double font) {
+      final laid = _layRow(
+        row: choices,
+        font: font,
+        maxWidth: limit,
+        scaler: scaler,
+        lineGapShare: lineGapShare,
+        pin: pin,
+      );
+      if (laid == null) return false;
+      return _pinnedInside(laid.layout, limit, pin!);
     }
 
     if (fits(fontSize)) return fontSize;
@@ -194,6 +237,7 @@ _LaidRow? _layRow({
   required TextScaler scaler,
   bool span = false,
   double lineGapShare = 1 / 3,
+  int? pin,
 }) {
   final words = <_Word>[];
   for (final choice in row) {
@@ -210,6 +254,7 @@ _LaidRow? _layRow({
     maxWidth: maxWidth,
     lineGap: cap * lineGapShare,
     touchGap: max(1.0, cap * 0.12),
+    pin: pin,
   );
   if (span) layout = spanSlantedRow(layout, maxWidth);
   return _LaidRow(words, layout);
@@ -220,8 +265,12 @@ Widget _rowStack({
   required SlantedRowLayout layout,
   required double width,
   required TextScaler scaler,
+  int? pin,
 }) {
-  final shift = max(0.0, (width - layout.size.width) / 2);
+  final anchor = pin;
+  final shift = anchor != null && anchor >= 0 && anchor < layout.spots.length
+      ? width / 2 - layout.spots[anchor].box.center.dx
+      : max(0.0, (width - layout.size.width) / 2);
   return SizedBox(
     width: width,
     height: layout.size.height,
@@ -425,12 +474,22 @@ SlantedRowLayout placeSlantedRow({
   required double maxWidth,
   required double lineGap,
   required double touchGap,
+  int? pin,
 }) {
   if (words.isEmpty) {
     return const SlantedRowLayout(lean: _leanFloor, size: Size.zero, spots: []);
   }
-  final lean = _pickLean(words, maxWidth, lineGap, touchGap);
+  final lean = _pickLean(words, maxWidth, lineGap, touchGap, pin: pin);
   return _layoutAt(words, lean, lineGap, touchGap);
+}
+
+/// True when shifting [pin] onto the center of [maxWidth] keeps the row inside.
+bool _pinnedInside(SlantedRowLayout laid, double maxWidth, int pin) {
+  if (!maxWidth.isFinite || pin < 0 || pin >= laid.spots.length) {
+    return laid.size.width <= maxWidth + 0.5;
+  }
+  final shift = maxWidth / 2 - laid.spots[pin].box.center.dx;
+  return shift >= -0.5 && shift + laid.size.width <= maxWidth + 0.5;
 }
 
 /// Spreads [laid] so it meets [maxWidth]. Lean and height stay put.
@@ -487,9 +546,15 @@ double _pickLean(
   List<SlantedInk> words,
   double maxWidth,
   double lineGap,
-  double touchGap,
-) {
+  double touchGap, {
+  int? pin,
+}) {
   if (!maxWidth.isFinite) return _leanFloor;
+  bool fits(SlantedRowLayout laid) {
+    if (pin == null) return laid.size.width <= maxWidth;
+    return _pinnedInside(laid, maxWidth, pin);
+  }
+
   const steps = 32;
   var fitted = -1.0;
   var fittedAt = _leanCeil;
@@ -498,7 +563,7 @@ double _pickLean(
   for (var i = 0; i <= steps; i++) {
     final lean = _leanFloor + (_leanCeil - _leanFloor) * i / steps;
     final laid = _layoutAt(words, lean, lineGap, touchGap);
-    if (laid.size.width <= maxWidth) {
+    if (fits(laid)) {
       fitted = i == 0
           ? _leanFloor
           : _leanFloor + (_leanCeil - _leanFloor) * (i - 1) / steps;
@@ -516,13 +581,13 @@ double _pickLean(
   var high = fittedAt;
   for (var step = 0; step < 10; step++) {
     final mid = (low + high) / 2;
-    if (_layoutAt(words, mid, lineGap, touchGap).size.width <= maxWidth) {
+    if (fits(_layoutAt(words, mid, lineGap, touchGap))) {
       high = mid;
     } else {
       low = mid;
     }
   }
-  if (_layoutAt(words, high, lineGap, touchGap).size.width <= maxWidth) {
+  if (fits(_layoutAt(words, high, lineGap, touchGap))) {
     return high;
   }
   return fittedAt;
