@@ -22,6 +22,8 @@ import 'instances/session.dart';
 import 'locale/languages.dart';
 import 'registry/registry_view.dart';
 import 'registry/repo.dart';
+import 'units/unit.dart';
+import 'units/unit_view.dart';
 
 class SyncReport {
   const SyncReport(this.reached, this.problems);
@@ -60,6 +62,7 @@ class AppModel extends ChangeNotifier {
   var directoryLimit = 16;
   var _directoryTicket = 0;
   final RepoQuery repoQuery = RepoQuery();
+  final UnitQuery unitQuery = UnitQuery();
   ({int count, List<RegistryRepo> repos})? registry;
   var _registryTicket = 0;
   final NoticeQuery noticeQuery = NoticeQuery();
@@ -110,6 +113,22 @@ class AppModel extends ChangeNotifier {
 
   InstancePortrait? portraitOf(String url) =>
       portraits[url] ?? peers[url]?.portrait;
+
+  /// `pu_instance_max_pagination_size` from `/instances/current`.
+  int get pageLimit {
+    final url = target?.url;
+    final size = url == null ? null : portraitOf(url)?.pagination;
+    if (size == null || size < 1) return 100;
+    return size;
+  }
+
+  /// A list request never asks for more rows than [pageLimit].
+  int cappedLimit(int asked) {
+    final cap = pageLimit;
+    if (asked < 1) return 1;
+    if (asked > cap) return cap;
+    return asked;
+  }
 
   Uint8List? cachedIcon(String? uuid) {
     final url = target?.url;
@@ -299,13 +318,43 @@ class AppModel extends ChangeNotifier {
     return changed;
   }
 
+  void setUnitSearch(String text) {
+    if (unitQuery.text == text) return;
+    unitQuery.text = text;
+    notifyListeners();
+  }
+
+  bool setUnitOwner(String value) {
+    final changed = unitQuery.setOwner(value);
+    if (changed) notifyListeners();
+    return changed;
+  }
+
+  bool toggleUnitVisibility(String level) {
+    final changed = unitQuery.toggleVisibility(level);
+    if (changed) notifyListeners();
+    return changed;
+  }
+
+  bool toggleUnitAuto(String auto) {
+    final changed = unitQuery.toggleAuto(auto);
+    if (changed) notifyListeners();
+    return changed;
+  }
+
+  bool setUnitOrder(String value) {
+    final changed = unitQuery.setOrder(value);
+    if (changed) notifyListeners();
+    return changed;
+  }
+
   Future<bool> loadDirectory({required int offset, required int limit}) async {
     final current = _signedTarget();
     final ticket = ++_directoryTicket;
     final page = await api(originOf(current.url)).directoryUsers(
       token: current.token!,
       offset: offset,
-      limit: limit,
+      limit: cappedLimit(limit),
       search: userQuery.text,
       roles: [
         for (final role in userRoles)
@@ -332,7 +381,7 @@ class AppModel extends ChangeNotifier {
     final page = await api(originOf(current.url)).repos(
       token: current.token!,
       offset: offset,
-      limit: limit,
+      limit: cappedLimit(limit),
       search: repoQuery.text,
       order: repoQuery.order,
       public: repoQuery.publicOnly,
@@ -405,7 +454,7 @@ class AppModel extends ChangeNotifier {
     final page = await api(originOf(current.url)).notices(
       token: current.token!,
       offset: offset,
-      limit: limit,
+      limit: cappedLimit(limit),
       isRead: switch (noticeQuery.read) {
         'read' => true,
         'unread' => false,
@@ -625,6 +674,244 @@ class AppModel extends ChangeNotifier {
         .setRepoCredentials(current.token!, uuid, username, pat);
   }
 
+  PepeunitApi get _api {
+    final current = _signedTarget();
+    return api(originOf(current.url));
+  }
+
+  String get _token => _signedTarget().token!;
+
+  Future<({int count, List<Unit> units})> listUnits({
+    required int offset,
+    required int limit,
+    UnitQuery? query,
+    String? creatorUuid,
+    String? inputUuid,
+    bool includeIos = false,
+  }) {
+    final current = query ?? unitQuery;
+    final mine = current.owner == 'mine' ? _signedTarget().userUuid : null;
+    return _api.units(
+      token: _token,
+      offset: offset,
+      limit: cappedLimit(limit),
+      search: current.text,
+      order: current.order,
+      creatorUuid: creatorUuid ?? mine,
+      visibility: current.visibilityFilter,
+      auto: current.autoOnly,
+      inputUuid: inputUuid,
+      includeIos: includeIos,
+    );
+  }
+
+  Future<Unit> readUnit(String uuid) async {
+    final unit = await _api.readUnit(_token, uuid);
+    unawaited(ensureIcon(unit.iconUuid));
+    return unit;
+  }
+
+  Future<Unit> createUnit(Map<String, Object?> body) =>
+      _api.createUnit(_token, body);
+
+  Future<Unit> updateUnit(String uuid, Map<String, Object?> patch) =>
+      _api.updateUnit(_token, uuid, patch);
+
+  Future<void> deleteUnit(String uuid) => _api.deleteUnit(_token, uuid);
+
+  Future<Map<String, Object?>> unitEnv(String uuid) =>
+      _api.unitEnv(_token, uuid);
+
+  Future<void> setUnitEnv(String uuid, Map<String, Object?> env) =>
+      _api.setUnitEnv(_token, uuid, env);
+
+  Future<void> resetUnitEnv(String uuid) => _api.resetUnitEnv(_token, uuid);
+
+  Future<List<RepoCommit>> branchCommits(String uuid, String branch) =>
+      _api.branchCommits(_token, uuid, branch: branch);
+
+  Future<List<FirmwarePlatform>> firmwarePlatforms(
+    String uuid, {
+    String? branch,
+    String? commit,
+  }) => _api.firmwarePlatforms(_token, uuid, branch: branch, commit: commit);
+
+  Future<String> unitSchema(String uuid) => _api.unitSchema(_token, uuid);
+
+  Future<String> unitStateStorage(String uuid) =>
+      _api.unitStateStorage(_token, uuid);
+
+  Future<void> sendUnitCommand(String uuid, String command) =>
+      _api.sendUnitCommand(_token, uuid, command);
+
+  Future<void> bulkUpdateUnits() => _api.bulkUpdateUnits(_token);
+
+  Future<({int count, List<UnitLog> logs})> unitLogs({
+    required String uuid,
+    required int offset,
+    required int limit,
+    List<String>? levels,
+  }) => _api.unitLogs(
+    token: _token,
+    uuid: uuid,
+    offset: offset,
+    limit: cappedLimit(limit),
+    levels: levels,
+  );
+
+  Future<bool> saveBytes(String fileName, Uint8List bytes) =>
+      files.save(fileName: fileName, bytes: bytes);
+
+  Future<Uint8List> unitFirmware(String uuid, String kind) =>
+      _api.unitFirmware(_token, uuid, kind);
+
+  Future<Uint8List> downloadUnitLogs(String uuid) =>
+      _api.downloadUnitLogs(_token, uuid);
+
+  Future<({int count, List<UnitGroup> groups})> listGroups({
+    required int offset,
+    required int limit,
+    String search = '',
+    String order = 'asc',
+  }) => _api.groups(
+    token: _token,
+    offset: offset,
+    limit: cappedLimit(limit),
+    search: search,
+    order: order,
+  );
+
+  Future<UnitGroup> readGroup(String uuid) async {
+    final group = await _api.readGroup(_token, uuid);
+    unawaited(ensureIcon(group.iconUuid));
+    return group;
+  }
+
+  Future<UnitGroup> createGroup(String name) => _api.createGroup(_token, name);
+
+  Future<UnitGroup> renameGroup(String uuid, String name) =>
+      _api.renameGroup(_token, uuid, name);
+
+  Future<void> deleteGroup(String uuid) => _api.deleteGroup(_token, uuid);
+
+  Future<({int count, List<Unit> units})> groupUnits({
+    required String uuid,
+    required int offset,
+    required int limit,
+  }) => _api.groupUnits(
+    token: _token,
+    uuid: uuid,
+    offset: offset,
+    limit: cappedLimit(limit),
+  );
+
+  Future<void> linkGroupUnit(String uuid, String unitUuid) =>
+      _api.linkGroupUnit(_token, uuid, unitUuid);
+
+  Future<void> unlinkGroupUnit(String uuid, String unitUuid) =>
+      _api.unlinkGroupUnit(_token, uuid, unitUuid);
+
+  Future<({int count, List<UnitIo> ios})> listIos({
+    required int offset,
+    required int limit,
+    String? unitUuid,
+    List<String>? types,
+  }) => _api.unitIos(
+    token: _token,
+    offset: offset,
+    limit: cappedLimit(limit),
+    unitUuid: unitUuid,
+    types: types,
+  );
+
+  Future<UnitIo> readUnitIo(String uuid) => _api.readUnitIo(_token, uuid);
+
+  Future<UnitIo> updateUnitIo(String uuid, Map<String, Object?> patch) =>
+      _api.updateUnitIo(_token, uuid, patch);
+
+  Future<UnitIo> setInputState(String uuid, String state) =>
+      _api.setInputState(_token, uuid, state);
+
+  Future<void> createIoLink({
+    required String outputUuid,
+    required String inputUuid,
+  }) => _api.createIoLink(_token, outputUuid: outputUuid, inputUuid: inputUuid);
+
+  Future<List<PipeIssue>> checkPipe(Uint8List yml) =>
+      _api.checkPipe(_token, yml);
+
+  Future<void> setPipe(String uuid, Uint8List yml) =>
+      _api.setPipe(_token, uuid, yml);
+
+  Future<Uint8List> pipeConfig(String uuid) => _api.pipeConfig(_token, uuid);
+
+  Future<({int count, List<PipeRow> rows})> pipeData({
+    required String uuid,
+    required String type,
+    required int offset,
+    required int limit,
+  }) => _api.pipeData(
+    token: _token,
+    uuid: uuid,
+    type: type,
+    offset: offset,
+    limit: cappedLimit(limit),
+  );
+
+  Future<Uint8List> pipeCsv(String uuid) => _api.pipeCsv(_token, uuid);
+
+  Future<void> uploadPipeCsv(String uuid, Uint8List csv) =>
+      _api.uploadPipeCsv(_token, uuid, csv);
+
+  Future<void> deletePipeData(String uuid) => _api.deletePipeData(_token, uuid);
+
+  Future<({int count, List<AccessGrant> grants})> accessGrants({
+    required String resourceUuid,
+    required String resourceType,
+    required int offset,
+    required int limit,
+  }) => _api.accessGrants(
+    token: _token,
+    resourceUuid: resourceUuid,
+    resourceType: resourceType,
+    offset: offset,
+    limit: cappedLimit(limit),
+  );
+
+  Future<AccessGrant> createAccess({
+    required String agentUuid,
+    required String agentType,
+    required String resourceUuid,
+    required String resourceType,
+  }) => _api.createAccess(
+    _token,
+    agentUuid: agentUuid,
+    agentType: agentType,
+    resourceUuid: resourceUuid,
+    resourceType: resourceType,
+  );
+
+  Future<void> deleteAccess(AccessGrant grant) => _api.deleteAccess(
+    _token,
+    uuid: grant.uuid,
+    agentUuid: grant.agentUuid,
+    resourceUuid: grant.resourceUuid,
+  );
+
+  Future<void> uploadEntityIcon(
+    String entityUuid,
+    String entityType,
+    Uint8List png,
+  ) async {
+    final uuid = await _api.uploadEntityIcon(
+      _token,
+      entityUuid,
+      entityType,
+      png,
+    );
+    if (uuid != null) unawaited(ensureIcon(uuid));
+  }
+
   /// Admin and Owner. Schedules an update of every repository.
   Future<void> updateAllRepos() async {
     final current = _staffTarget();
@@ -741,12 +1028,12 @@ class AppModel extends ChangeNotifier {
       await _commit();
       final limit = effective.pagination < 1 ? 100 : effective.pagination;
       final urls = await collectPages(
-        limit: limit,
+        limit: cappedLimit(limit),
         fetch: (offset, pageLimit) =>
             client.peerUrls(offset: offset, limit: pageLimit),
       );
       final heads = await collectPages(
-        limit: limit,
+        limit: cappedLimit(limit),
         fetch: (offset, pageLimit) =>
             client.peers(offset: offset, limit: pageLimit),
       );

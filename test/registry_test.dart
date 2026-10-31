@@ -314,7 +314,7 @@ void main() {
     expect(tester.getSemantics(find.bySemanticsLabel('Ветки')).value, '1 шт.');
     expect(find.bySemanticsLabel('Синхронизировать репо'), findsOneWidget);
     final unit = tester.getSemantics(find.bySemanticsLabel('Создать аппарат'));
-    expect(unit.flagsCollection.isEnabled, Tristate.isFalse);
+    expect(unit.flagsCollection.isEnabled, Tristate.isTrue);
     expect(find.bySemanticsLabel('gitlab.com/pepe/unit, 1 КБ'), findsOneWidget);
   });
 

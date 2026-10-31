@@ -149,7 +149,7 @@ class _RepoPageState extends State<RepoPage> {
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/micro.svg',
-          enabled: false,
+          enabled: model.target?.signedIn == true,
         );
       case 'sync':
         final watching = _syncUntil != null;
@@ -224,6 +224,9 @@ class _RepoPageState extends State<RepoPage> {
         context.push('/registry/repo/${widget.uuid}/credentials');
       case 'branches':
         context.push('/registry/repo/${widget.uuid}/branches');
+      case 'unit':
+        if (AppScope.of(context).target?.signedIn != true) return;
+        context.push('/units/new?repo=${widget.uuid}');
     }
   }
 

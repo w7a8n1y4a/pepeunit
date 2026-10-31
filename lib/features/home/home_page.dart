@@ -57,10 +57,11 @@ HexSlot _slot(MenuSection section, AppModel model, String language) {
   }
   final signedIn = section.id == 'people' && vault.hasKey;
   final png = signedIn ? iconBytes(vault.iconPng) : null;
-  final repoCount = section.id == 'registry' && target != null
-      ? model.portraitOf(target.url)?.repos
-      : null;
+  final portrait = target == null ? null : model.portraitOf(target.url);
+  final repoCount = section.id == 'registry' ? portrait?.repos : null;
+  final unitCount = section.id == 'units' ? portrait?.units : null;
   final noticeTotal = section.id == 'alerts' ? model.noticeTotal : null;
+  final counted = repoCount ?? unitCount;
   return HexSlot(
     id: section.id,
     title: signedIn && vault.login.isNotEmpty
@@ -70,7 +71,7 @@ HexSlot _slot(MenuSection section, AppModel model, String language) {
         ? keyMarkFromBase64(vault.publicKey)
         : noticeTotal != null
         ? noticeTotalLabel(language, noticeTotal)
-        : (repoCount == null ? null : pieceCount(language, repoCount)),
+        : (counted == null ? null : pieceCount(language, counted)),
     color: section.color,
     q: section.q,
     r: section.r,

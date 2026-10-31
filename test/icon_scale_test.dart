@@ -4,7 +4,7 @@ import 'package:pepeunit_client/hive/icon_scale.dart';
 void main() {
   test('one file has one size, fitted to the home menu ink', () {
     expect(iconScaleOf('assets/icons/back.svg'), 1);
-    expect(iconScaleOf('assets/icons/account.svg'), 1);
+    expect(iconScaleOf('assets/icons/account.svg'), closeTo(menuInk / 0.80, 1e-9));
     expect(iconScaleOf('assets/icons/instances.svg'), 1);
     expect(iconScaleOf('assets/icons/users.svg'), 1);
     expect(iconScaleOf('assets/icons/instance.svg'), 1);
