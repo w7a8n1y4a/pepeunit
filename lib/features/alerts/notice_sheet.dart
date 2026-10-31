@@ -6,15 +6,12 @@ import '../../hive/hex_scene.dart';
 import 'alerts_chrome.dart';
 import 'notice_copy.dart';
 
-/// A pointy hex drawn over the open list, a little smaller than seven cells
-/// so the outer cells still show around it.
-///
-/// The table is monospaced and centered. A tap outside the hex closes it.
-/// The copy mark copies, and the close mark on the upper-right ray dismisses.
+/// Notice table. The panel follows the text until it meets the screen, then
+/// scrolls. A tap outside closes it.
 class NoticeSheet extends StatelessWidget {
   const NoticeSheet({
     required this.text,
-    required this.slots,
+    required this.title,
     required this.color,
     required this.copyLabel,
     required this.closeLabel,
@@ -23,7 +20,7 @@ class NoticeSheet extends StatelessWidget {
   });
 
   final String text;
-  final List<HexSlot> slots;
+  final String title;
   final Color color;
   final String copyLabel;
   final String closeLabel;
@@ -34,15 +31,43 @@ class NoticeSheet extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final size = constraints.biggest;
-        final radius = _sheetRadius(size);
-        final font = max(12.0, radius * 0.055);
-        final mark = radius * 0.16;
-        // Upper-right vertex, where the upper-right edge meets the right edge.
-        const along = 0.76;
-        final closeAt = Offset(
-          radius + radius * along * cos(-pi / 6),
-          radius + radius * along * sin(-pi / 6),
+        final margin = min(size.width, size.height) * 0.06;
+        final font = max(12.0, size.shortestSide * 0.018);
+        final tableFont = max(11.0, font * 0.72);
+        final button = font * 2.2;
+        final gap = font * 0.35;
+        final padL = font;
+        final padT = font * 0.6;
+        final padR = font * 0.85;
+        final padB = font;
+        final maxW = max(0.0, size.width - margin * 2);
+        final maxH = max(0.0, size.height - margin * 2);
+        final maxTableW = max(0.0, maxW - padL - padR);
+        final maxTableH = max(0.0, maxH - padT - padB - button - gap);
+        final scaler = MediaQuery.textScalerOf(context);
+        final titleStyle = TextStyle(
+          color: const Color(0xFFFFFFFF),
+          fontFamily: 'OpenGost Type B',
+          fontSize: font * 1.55,
+          decoration: TextDecoration.none,
         );
+        final tableStyle = noticeMono(tableFont);
+        final titleW = _painted(title, titleStyle, scaler).width;
+        final table = _painted(text, tableStyle, scaler);
+        final headerMin = titleW + font * 0.9 + button * 2;
+        const bar = 8.0;
+        const tail = bar + 6;
+        const side = bar + 4;
+        final tooWide = table.width > maxTableW + 1;
+        final tooTall = table.height > maxTableH + 1;
+        final scrollX = tooWide || (tooTall && table.width + side > maxTableW);
+        final scrollY = tooTall || (scrollX && table.height + tail > maxTableH);
+        final rightGap = scrollY ? side : 0.0;
+        final bottomGap = scrollX ? tail : 0.0;
+        final viewW = min(max(table.width + rightGap, headerMin), maxTableW);
+        final viewH = min(table.height + bottomGap, maxTableH);
+        final panelW = min(viewW + padL + padR, maxW);
+        final panelH = min(viewH + padT + padB + button + gap, maxH);
         return Stack(
           children: [
             Positioned.fill(
@@ -51,44 +76,68 @@ class NoticeSheet extends StatelessWidget {
                 onTap: onClose,
               ),
             ),
-            Positioned(
-              left: size.width / 2 - radius,
-              top: size.height / 2 - radius,
-              width: radius * 2,
-              height: radius * 2,
-              child: ClipPath(
-                clipper: const _PointClip(),
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    CustomPaint(painter: _SheetPainter(color)),
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(
-                        radius * 0.28,
-                        radius * 0.34,
-                        radius * 0.28,
-                        radius * 0.42,
-                      ),
-                      child: _TableText(text: text, fontSize: font),
-                    ),
-                    Align(
-                      alignment: const Alignment(0, 0.78),
-                      child: NoticeCopyButton(
-                        text: text,
-                        label: copyLabel,
-                        extent: mark,
+            Center(
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () {},
+                child: SizedBox(
+                  width: panelW,
+                  height: panelH,
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      color: hexFill,
+                      border: Border.all(
+                        color: color,
+                        width: max(1.4, font * 0.12),
                       ),
                     ),
-                    Positioned(
-                      left: closeAt.dx - mark / 2,
-                      top: closeAt.dy - mark / 2,
-                      child: NoticeCloseButton(
-                        label: closeLabel,
-                        extent: mark,
-                        onTap: onClose,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(padL, padT, padR, padB),
+                      child: Column(
+                        children: [
+                          SizedBox(
+                            height: button,
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: titleStyle,
+                                  ),
+                                ),
+                                SizedBox(width: font * 0.45),
+                                NoticeCopyButton(
+                                  text: text,
+                                  label: copyLabel,
+                                  extent: button,
+                                ),
+                                SizedBox(width: font * 0.45),
+                                NoticeCloseButton(
+                                  label: closeLabel,
+                                  extent: button,
+                                  onTap: onClose,
+                                ),
+                              ],
+                            ),
+                          ),
+                          SizedBox(height: gap),
+                          Expanded(
+                            child: _TableBody(
+                              text: text,
+                              style: tableStyle,
+                              textSize: table,
+                              scrollX: scrollX,
+                              scrollY: scrollY,
+                              rightGap: rightGap,
+                              bottomGap: bottomGap,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
@@ -99,114 +148,83 @@ class NoticeSheet extends StatelessWidget {
   }
 }
 
-/// Vertex radius of a hex about 15% inside the seven-cell cluster.
-double _sheetRadius(Size size) {
-  const cells = <(int, int)>[
-    (0, 0),
-    (1, 0),
-    (1, -1),
-    (0, -1),
-    (-1, 0),
-    (-1, 1),
-    (0, 1),
-  ];
-  final fitted = HexLayout.fit([
-    for (var i = 0; i < cells.length; i++)
-      HexSlot(
-        id: 'sheet-$i',
-        title: '',
-        color: const Color(0xFFFFFFFF),
-        q: cells[i].$1,
-        r: cells[i].$2,
-      ),
-  ], size);
-  final mid = Offset(size.width / 2, size.height / 2);
-  var reach = size.shortestSide * 0.42;
-  for (final placed in fitted.placed) {
-    final far = (placed.center - mid).distance + placed.radius;
-    if (far > reach) reach = far;
-  }
-  return reach * 0.85;
-}
-
-class _TableText extends StatelessWidget {
-  const _TableText({required this.text, required this.fontSize});
+class _TableBody extends StatelessWidget {
+  const _TableBody({
+    required this.text,
+    required this.style,
+    required this.textSize,
+    required this.scrollX,
+    required this.scrollY,
+    required this.rightGap,
+    required this.bottomGap,
+  });
 
   final String text;
-  final double fontSize;
+  final TextStyle style;
+  final Size textSize;
+  final bool scrollX;
+  final bool scrollY;
+  final double rightGap;
+  final double bottomGap;
 
   @override
   Widget build(BuildContext context) {
-    final style = noticeMono(fontSize);
-    final painter = TextPainter(
-      text: TextSpan(text: text, style: style),
-      textDirection: TextDirection.ltr,
-      textScaler: MediaQuery.textScalerOf(context),
-    )..layout();
-    final width = painter.width;
-    final height = painter.height;
-    painter.dispose();
-    final table = Text(
-      text,
-      key: const ValueKey('notice-sheet'),
-      textAlign: TextAlign.left,
-      style: style,
+    const bar = 8.0;
+    final theme = ScrollbarThemeData(
+      thickness: const WidgetStatePropertyAll(bar),
+      radius: const Radius.circular(4),
+      thumbColor: const WidgetStatePropertyAll(Color(0xFF8A8A92)),
+      trackColor: const WidgetStatePropertyAll(Color(0xFF2C2C32)),
+      trackBorderColor: const WidgetStatePropertyAll(Color(0x00000000)),
     );
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final viewW = constraints.maxWidth;
-        final viewH = constraints.maxHeight;
-        return SingleChildScrollView(
-          child: SizedBox(
-            width: viewW,
-            height: max(height, viewH),
-            child: SingleChildScrollView(
-              scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: max(width, viewW),
-                height: max(height, viewH),
-                child: Center(child: table),
+    return ScrollbarTheme(
+      data: theme,
+      child: Scrollbar(
+        thumbVisibility: scrollY,
+        trackVisibility: scrollY,
+        notificationPredicate: (notification) =>
+            notification.metrics.axis == Axis.vertical,
+        child: Scrollbar(
+          thumbVisibility: scrollX,
+          trackVisibility: scrollX,
+          notificationPredicate: (notification) =>
+              notification.metrics.axis == Axis.horizontal,
+          child: SingleChildScrollView(
+            physics: scrollY ? null : const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.only(bottom: bottomGap),
+            child: SizedBox(
+              height: max(textSize.height, 1),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                physics: scrollX ? null : const NeverScrollableScrollPhysics(),
+                child: SizedBox(
+                  width: max(textSize.width + rightGap, 1),
+                  height: max(textSize.height, 1),
+                  child: SelectionArea(
+                    child: Text(
+                      text,
+                      key: const ValueKey('notice-sheet'),
+                      softWrap: false,
+                      style: style,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 }
 
-class _PointClip extends CustomClipper<Path> {
-  const _PointClip();
-
-  @override
-  Path getClip(Size size) =>
-      pointyHex(Offset(size.width / 2, size.height / 2), size.shortestSide / 2);
-
-  @override
-  bool shouldReclip(covariant CustomClipper<Path> oldClipper) => false;
-}
-
-class _SheetPainter extends CustomPainter {
-  const _SheetPainter(this.color);
-
-  final Color color;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final radius = size.shortestSide / 2;
-    final center = Offset(size.width / 2, size.height / 2);
-    final path = pointyHex(center, radius * 0.98);
-    canvas.drawPath(path, Paint()..color = hexFill);
-    canvas.drawPath(
-      path,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = max(1.6, radius * 0.025)
-        ..color = color,
-    );
-  }
-
-  @override
-  bool shouldRepaint(covariant _SheetPainter oldDelegate) =>
-      oldDelegate.color != color;
+Size _painted(String text, TextStyle style, TextScaler scaler) {
+  final painter = TextPainter(
+    text: TextSpan(text: text, style: style),
+    textDirection: TextDirection.ltr,
+    textScaler: scaler,
+  )..layout();
+  final size = painter.size;
+  painter.dispose();
+  return size;
 }

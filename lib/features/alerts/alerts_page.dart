@@ -113,7 +113,7 @@ class _AlertsPageState extends State<AlertsPage> {
         else
           NoticeSheet(
             text: open.tableText,
-            slots: slots,
+            title: alertText(language, 'Уведомление', 'Notification'),
             color: color,
             copyLabel: copyLabel,
             closeLabel: closeLabel,

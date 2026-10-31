@@ -49,6 +49,7 @@ class _NoticeLogState extends State<NoticeLog> {
         final size = constraints.biggest;
         final margin = min(size.width, size.height) * 0.06;
         final font = max(12.0, size.shortestSide * 0.018);
+        final codeFont = max(11.0, font * 0.72);
         return Stack(
           children: [
             Positioned.fill(
@@ -89,7 +90,7 @@ class _NoticeLogState extends State<NoticeLog> {
                               style: TextStyle(
                                 color: const Color(0xFFFFFFFF),
                                 fontFamily: 'OpenGost Type B',
-                                fontSize: font * 1.15,
+                                fontSize: font * 1.55,
                                 decoration: TextDecoration.none,
                               ),
                             ),
@@ -111,7 +112,7 @@ class _NoticeLogState extends State<NoticeLog> {
                       Expanded(
                         child: _LogBody(
                           text: widget.text,
-                          fontSize: font,
+                          fontSize: codeFont,
                           vertical: _vertical,
                           horizontal: _horizontal,
                         ),
@@ -173,10 +174,11 @@ class _LogBody extends StatelessWidget {
       if (painter.width > codeWidth) codeWidth = painter.width;
       painter.dispose();
     }
+    const bar = 8.0;
     final theme = ScrollbarThemeData(
       thumbVisibility: const WidgetStatePropertyAll(true),
       trackVisibility: const WidgetStatePropertyAll(true),
-      thickness: const WidgetStatePropertyAll(8),
+      thickness: const WidgetStatePropertyAll(bar),
       radius: const Radius.circular(4),
       thumbColor: const WidgetStatePropertyAll(Color(0xFF8A8A92)),
       trackColor: const WidgetStatePropertyAll(Color(0xFF2C2C32)),
@@ -194,6 +196,7 @@ class _LogBody extends StatelessWidget {
               notification.metrics.axis == Axis.horizontal,
           child: SingleChildScrollView(
             controller: vertical,
+            padding: const EdgeInsets.only(bottom: bar + 6),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
