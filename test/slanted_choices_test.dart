@@ -38,7 +38,7 @@ void main() {
   test('a long word keeps the next letter one line-gap under its tail', () {
     final layout = placeSlantedRow(
       words: [word(200), word(40)],
-      maxWidth: 150,
+      maxWidth: 160,
       lineGap: lineGap,
       touchGap: touchGap,
     );
@@ -47,7 +47,7 @@ void main() {
     final ended = (200 + touchGap) / cos(layout.lean);
     expect(stacked, lessThan(ended));
     expect(dx, closeTo(stacked, 0.8));
-    expect(layout.size.width, lessThanOrEqualTo(150.5));
+    expect(layout.size.width, lessThanOrEqualTo(160.5));
   });
 
   test('the gap between stacked words stays within a third of a capital', () {
@@ -118,11 +118,11 @@ void main() {
     );
     final steep = placeSlantedRow(
       words: [word(220), word(180)],
-      maxWidth: 140,
+      maxWidth: 180,
       lineGap: lineGap,
       touchGap: touchGap,
     );
-    expect(flat.lean, lessThan(12 * pi / 180));
+    expect(flat.lean, closeTo(20 * pi / 180, 1e-9));
     expect(steep.lean, greaterThan(flat.lean));
     expect(flat.size.height, lessThan(steep.size.height));
   });

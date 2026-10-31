@@ -106,7 +106,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.bySemanticsLabel('Не прочитанные'), findsOneWidget);
+    expect(find.bySemanticsLabel('К прочтению'), findsOneWidget);
     expect(find.text('Прочитать все'), findsOneWidget);
     expect(find.text('boom'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('DataPipeAlert'));

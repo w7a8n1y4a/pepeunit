@@ -7,10 +7,10 @@ import 'package:flutter/rendering.dart';
 import '../hive/hex_scene.dart';
 
 /// Shallowest lean of a search enum, rising to the right.
-const _leanFloor = 6 * pi / 180;
+const _leanFloor = 20 * pi / 180;
 
 /// Steepest lean. Past this the row scales down instead of standing up.
-const _leanCeil = 62 * pi / 180;
+const _leanCeil = 45 * pi / 180;
 
 const _tight = ui.TextHeightBehavior(
   applyHeightToFirstAscent: false,

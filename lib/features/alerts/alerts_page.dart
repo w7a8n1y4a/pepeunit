@@ -355,12 +355,13 @@ class _FilterCell extends StatelessWidget {
           height: 1.05,
         );
         final line = side * 0.76;
+        final readAllSize = font * 1.35;
         return Padding(
           padding: EdgeInsets.fromLTRB(
             side * 0.12,
-            side * 0.20,
+            side * 0.26,
             side * 0.12,
-            side * 0.14,
+            side * 0.15,
           ),
           child: Column(
             children: [
@@ -375,7 +376,7 @@ class _FilterCell extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: side * 0.09),
+              SizedBox(height: side * 0.06),
               Semantics(
                 button: true,
                 label: alertText(language, 'Прочитать все', 'Read all'),
@@ -383,10 +384,19 @@ class _FilterCell extends StatelessWidget {
                   behavior: HitTestBehavior.opaque,
                   onTap: onReadAll,
                   child: HoverPop(
-                    child: Text(
-                      alertText(language, 'Прочитать все', 'Read all'),
-                      key: const ValueKey('notice-read-all'),
-                      style: style.copyWith(color: color),
+                    child: SizedBox(
+                      height: readAllSize * 1.08,
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          alertText(language, 'Прочитать все', 'Read all'),
+                          key: const ValueKey('notice-read-all'),
+                          style: style.copyWith(
+                            color: color,
+                            fontSize: readAllSize,
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -394,24 +404,31 @@ class _FilterCell extends StatelessWidget {
               Container(
                 height: 1,
                 margin: EdgeInsets.fromLTRB(
-                  side * 0.04,
+                  side * 0.08,
                   side * 0.012,
-                  side * 0.04,
+                  side * 0.08,
                   side * 0.008,
                 ),
                 color: hexMuted,
               ),
-              SizedBox(
-                height: side * 0.13,
-                child: PageWindow(
-                  range: range,
-                  canBack: back,
-                  canForward: forward,
-                  previousLabel: alertText(language, 'Предыдущие', 'Previous'),
-                  nextLabel: alertText(language, 'Следующие', 'Next'),
-                  onStep: onStep,
-                  style: style,
-                  chevronExtent: side * 0.14,
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: side * 0.06),
+                child: SizedBox(
+                  height: side * 0.13,
+                  child: PageWindow(
+                    range: range,
+                    canBack: back,
+                    canForward: forward,
+                    previousLabel: alertText(
+                      language,
+                      'Предыдущие',
+                      'Previous',
+                    ),
+                    nextLabel: alertText(language, 'Следующие', 'Next'),
+                    onStep: onStep,
+                    style: style,
+                    chevronExtent: side * 0.14,
+                  ),
                 ),
               ),
               const Spacer(),

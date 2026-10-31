@@ -68,6 +68,9 @@ class AppModel extends ChangeNotifier {
   var noticeLimit = 0;
   var noticeRevision = 0;
   var unreadCount = 0;
+
+  /// Every notice of this user, read and unread. Null until the first fetch.
+  int? noticeTotal;
   var _noticeTicket = 0;
   var _noticeLoad = 0;
   String? _noticeKey;
@@ -479,6 +482,7 @@ class AppModel extends ChangeNotifier {
       _noticeSeen.remove(_noticeSeen.first);
     }
     if (!notice.isRead) unreadCount += 1;
+    if (noticeTotal != null) noticeTotal = noticeTotal! + 1;
     final page = notices;
     final current = target;
     if (page != null && current != null && noticeQuery.accepts(notice)) {
@@ -516,9 +520,10 @@ class AppModel extends ChangeNotifier {
     _noticeClient?.close();
     _noticeClient = null;
     _noticeSeen.clear();
-    final dirty = unreadCount != 0 || notices != null;
+    final dirty = unreadCount != 0 || notices != null || noticeTotal != null;
     notices = null;
     unreadCount = 0;
+    noticeTotal = null;
     if (dirty) notifyListeners();
   }
 
@@ -527,10 +532,18 @@ class AppModel extends ChangeNotifier {
     final token = record.token;
     if (token == null || token.isEmpty) return;
     try {
-      final page = await api(origin)
-          .notices(token: token, offset: 0, limit: 1, isRead: false);
+      final clientApi = api(origin);
+      final unread = clientApi.notices(
+        token: token,
+        offset: 0,
+        limit: 1,
+        isRead: false,
+      );
+      final total = clientApi.notices(token: token, offset: 0, limit: 1);
+      final pages = await Future.wait([unread, total]);
       if (ticket != _noticeTicket) return;
-      unreadCount = page.count;
+      unreadCount = pages[0].count;
+      noticeTotal = pages[1].count;
       notifyListeners();
     } catch (_) {}
     while (ticket == _noticeTicket) {

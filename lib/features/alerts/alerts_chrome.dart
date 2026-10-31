@@ -28,9 +28,13 @@ String noticeReadLabel(String language, String read) {
     case 'read':
       return alertText(language, 'Прочитанные', 'Read');
     default:
-      return alertText(language, 'Не прочитанные', 'Unread');
+      return alertText(language, 'К прочтению', 'To read');
   }
 }
+
+/// `Всего 12 шт.` on the home alerts cell.
+String noticeTotalLabel(String language, int count) =>
+    alertText(language, 'Всего $count шт.', 'Total $count');
 
 String noticeStatusLabel(String language, {required bool read}) {
   if (read) return alertText(language, 'Прочитана', 'Read');

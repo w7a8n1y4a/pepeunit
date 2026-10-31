@@ -47,8 +47,9 @@ List<String> noticeTypesForRole(String? role) {
   ];
 }
 
-/// Read filter of the list. The backend sorts by creation time, newest first.
-const noticeReads = ['all', 'read', 'unread'];
+/// Read filter of the list, in menu order. The backend sorts by creation
+/// time, newest first.
+const noticeReads = ['unread', 'read', 'all'];
 
 class NoticeQuery {
   String read = 'unread';

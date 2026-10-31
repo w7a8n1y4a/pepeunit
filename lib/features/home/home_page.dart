@@ -9,6 +9,7 @@ import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/sections.dart';
 import '../../registry/repo.dart';
+import '../alerts/alerts_chrome.dart';
 import '../hex_page.dart';
 import '../network/network_chrome.dart';
 
@@ -59,6 +60,7 @@ HexSlot _slot(MenuSection section, AppModel model, String language) {
   final repoCount = section.id == 'registry' && target != null
       ? model.portraitOf(target.url)?.repos
       : null;
+  final noticeTotal = section.id == 'alerts' ? model.noticeTotal : null;
   return HexSlot(
     id: section.id,
     title: signedIn && vault.login.isNotEmpty
@@ -66,6 +68,8 @@ HexSlot _slot(MenuSection section, AppModel model, String language) {
         : section.title(language),
     footer: signedIn
         ? keyMarkFromBase64(vault.publicKey)
+        : noticeTotal != null
+        ? noticeTotalLabel(language, noticeTotal)
         : (repoCount == null ? null : pieceCount(language, repoCount)),
     color: section.color,
     q: section.q,
