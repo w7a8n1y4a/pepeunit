@@ -1,8 +1,10 @@
 # Разделы
 
-## Units / Registry / Dashboards / Alerts
+## Units / Dashboards
 
-Пока `PlaceholderPage`. Полный функционал pepeunit через OpenAPI; карточка Unit — по [комбинированным интерфейсам](interfaces.md).
+Пока `PlaceholderPage`. Полный функционал pepeunit через OpenAPI; карточка Unit — по [комбинированным интерфейсам](interfaces.md). На карточке репозитория сота создания аппарата уже стоит и не нажимается.
+
+Репозитории и уведомления собраны: [registry.md](registry.md), [alerts.md](alerts.md).
 
 ## Library
 

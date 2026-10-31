@@ -17,7 +17,7 @@ Each step after tick 1 adds three cells. The wheel and a two-finger pinch move o
 
 Menus stay on tick 1 and do not zoom. A static form does not zoom; it keeps the cells that screen defines.
 
-Search screens open on tick 3: peer search, user search, and repository search. Their tick moves from 1 through 5 in either direction. A list that still overflows at tick 5 pages. Other zoomable lists open on tick 1 and rise only while the next tick still shows another cell.
+Search screens open on tick 3: peer search, user search, repository search, and the alerts list. Their tick moves from 1 through 5 in either direction. A list that still overflows at tick 5 pages. Other zoomable lists open on tick 1 and rise only while the next tick still shows another cell.
 
 An error is always shown. It takes the next free slot in the current tick. When that tick is full, the screen may use one tick more, and the error takes the next free slot there. The query tick does not change.
 

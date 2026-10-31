@@ -1,6 +1,6 @@
 # Аккаунт и сеть
 
-Аккаунт и сеть собраны. Остальные разделы меню — заглушки, см. [sections.md](sections.md).
+Аккаунт и сеть собраны. Репозитории — [registry.md](registry.md), уведомления — [alerts.md](alerts.md). Units, Dashboards и Library — заглушки, см. [sections.md](sections.md).
 
 ## Аккаунт
 
