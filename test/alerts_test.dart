@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -109,6 +110,7 @@ void main() {
     expect(find.bySemanticsLabel('К прочтению'), findsOneWidget);
     expect(find.text('Прочитать все'), findsOneWidget);
     expect(find.text('boom'), findsOneWidget);
+    _expectReadEnumOnRule(tester);
     await tester.tap(find.bySemanticsLabel('DataPipeAlert'));
     await tester.pumpAndSettle();
     expect(find.text('unit | 1'), findsOneWidget);
@@ -209,6 +211,49 @@ void main() {
     expect(find.text('alpha'), findsNothing);
     expect(api.marked, ['n-1']);
   });
+}
+
+/// The read enum stays on the rule, and the rule keeps a gap inside the hex.
+void _expectReadEnumOnRule(WidgetTester tester) {
+  final rule = tester.getRect(
+    find.byKey(const ValueKey('notice-filter-rule')),
+  );
+  for (final label in ['К прочтению', 'Прочитанные', 'Все']) {
+    final word = tester.getRect(find.bySemanticsLabel(label));
+    expect(word.left, greaterThanOrEqualTo(rule.left - 1));
+    expect(word.right, lessThanOrEqualTo(rule.right + 1));
+  }
+  final readAll = tester.getRect(find.byKey(const ValueKey('notice-read-all')));
+  expect(readAll.left, greaterThanOrEqualTo(rule.left - 1));
+  expect(readAll.right, lessThanOrEqualTo(rule.right + 1));
+
+  final cell = _cellBox(
+    tester.renderObject<RenderBox>(
+      find.byKey(const ValueKey('notice-filter-rule')),
+    ),
+  );
+  final origin = cell.localToGlobal(Offset.zero);
+  final side = cell.size.width;
+  final flat = side * (1 - sqrt(3) / 2) / 2;
+  final gap = rule.left - origin.dx - flat;
+  expect(gap, greaterThan(side * 0.07));
+  expect(rule.right, lessThan(origin.dx + side - flat - side * 0.07));
+  expect(rule.width, greaterThan(side * 0.64));
+}
+
+RenderBox _cellBox(RenderBox start) {
+  RenderObject? current = start;
+  while (current != null) {
+    if (current is RenderBox) {
+      final size = current.size;
+      if ((size.width - size.height).abs() < 0.5 &&
+          size.width > start.size.width + 8) {
+        return current;
+      }
+    }
+    current = current.parent;
+  }
+  throw StateError('filter cell not found');
 }
 
 Future<AppModel> _signedIn(_NoticeApi api) async {

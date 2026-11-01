@@ -354,13 +354,16 @@ class _FilterCell extends StatelessWidget {
           decoration: TextDecoration.none,
           height: 1.05,
         );
-        final line = side * 0.76;
+        // The rule stays inside the hex flats. The enum uses that same width.
+        final padX = side * 0.12;
+        final ruleInset = side * 0.04;
+        final rule = side - 2 * padX - 2 * ruleInset;
         final readAllSize = font * 1.35;
         return Padding(
           padding: EdgeInsets.fromLTRB(
-            side * 0.12,
+            padX,
             side * 0.26,
-            side * 0.12,
+            padX,
             side * 0.15,
           ),
           child: Column(
@@ -371,7 +374,7 @@ class _FilterCell extends StatelessWidget {
                   fit: BoxFit.scaleDown,
                   alignment: Alignment.topCenter,
                   child: SizedBox(
-                    width: line,
+                    width: rule,
                     child: _ReadWords(onRead: onRead, side: side),
                   ),
                 ),
@@ -385,6 +388,7 @@ class _FilterCell extends StatelessWidget {
                   onTap: onReadAll,
                   child: HoverPop(
                     child: SizedBox(
+                      width: rule,
                       height: readAllSize * 1.08,
                       child: FittedBox(
                         fit: BoxFit.scaleDown,
@@ -401,15 +405,18 @@ class _FilterCell extends StatelessWidget {
                   ),
                 ),
               ),
-              Container(
-                height: 1,
-                margin: EdgeInsets.fromLTRB(
-                  side * 0.08,
+              Padding(
+                padding: EdgeInsets.fromLTRB(
+                  ruleInset,
                   side * 0.012,
-                  side * 0.08,
+                  ruleInset,
                   side * 0.008,
                 ),
-                color: hexMuted,
+                child: const ColoredBox(
+                  key: ValueKey('notice-filter-rule'),
+                  color: hexMuted,
+                  child: SizedBox(height: 1, width: double.infinity),
+                ),
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: side * 0.06),
