@@ -389,20 +389,70 @@ void main() {
   );
 
   test('menu follows the target and its flags', () {
-    expect(menuSectionEnabled('library', hasTarget: false), isTrue);
-    expect(menuSectionEnabled('peers', hasTarget: false), isTrue);
-    expect(menuSectionEnabled('people', hasTarget: false), isTrue);
-    expect(menuSectionEnabled('units', hasTarget: false), isFalse);
-    expect(menuSectionEnabled('units', hasTarget: true), isTrue);
+    const signed = true;
     expect(
-      menuSectionEnabled('alerts', hasTarget: true, notifications: false),
+      menuSectionEnabled('library', hasTarget: false, signedIn: false),
+      isTrue,
+    );
+    expect(
+      menuSectionEnabled('peers', hasTarget: false, signedIn: false),
+      isTrue,
+    );
+    expect(
+      menuSectionEnabled('people', hasTarget: false, signedIn: false),
+      isTrue,
+    );
+    expect(
+      menuSectionEnabled('units', hasTarget: false, signedIn: signed),
       isFalse,
     );
     expect(
-      menuSectionEnabled('dashboards', hasTarget: true, grafana: false),
+      menuSectionEnabled('units', hasTarget: true, signedIn: false),
       isFalse,
     );
-    expect(menuSectionEnabled('alerts', hasTarget: true), isTrue);
+    expect(
+      menuSectionEnabled('units', hasTarget: true, signedIn: signed),
+      isTrue,
+    );
+    expect(
+      menuSectionEnabled(
+        'alerts',
+        hasTarget: true,
+        signedIn: signed,
+        notifications: false,
+      ),
+      isFalse,
+    );
+    expect(
+      menuSectionEnabled(
+        'dashboards',
+        hasTarget: true,
+        signedIn: signed,
+        grafana: false,
+      ),
+      isFalse,
+    );
+    expect(
+      menuSectionEnabled('alerts', hasTarget: true, signedIn: signed),
+      isTrue,
+    );
+  });
+
+  test('an unauthorized target locks every signed section', () {
+    for (final id in ['units', 'dashboards', 'alerts', 'registry']) {
+      expect(
+        menuSectionEnabled(id, hasTarget: true, signedIn: false),
+        isFalse,
+        reason: id,
+      );
+    }
+    for (final id in ['people', 'peers', 'library']) {
+      expect(
+        menuSectionEnabled(id, hasTarget: true, signedIn: false),
+        isTrue,
+        reason: id,
+      );
+    }
   });
 
   test('settings cover every owner field once and honor flag locks', () {

@@ -27,6 +27,7 @@ class HomePage extends StatelessWidget {
         if (!menuSectionEnabled(
           id,
           hasTarget: model.target != null,
+          signedIn: model.target?.signedIn ?? false,
           notifications: model.target?.notifications,
           grafana: model.target?.grafana,
         )) {
@@ -79,9 +80,10 @@ HexSlot _slot(MenuSection section, AppModel model, String language) {
         : null,
     enabled: menuSectionEnabled(
       section.id,
-      hasTarget: vault.target != null,
-      notifications: vault.target?.notifications,
-      grafana: vault.target?.grafana,
+      hasTarget: target != null,
+      signedIn: target?.signedIn ?? false,
+      notifications: target?.notifications,
+      grafana: target?.grafana,
     ),
   );
 }

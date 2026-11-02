@@ -27,11 +27,14 @@ const openSections = {'people', 'peers', 'library'};
 bool menuSectionEnabled(
   String id, {
   required bool hasTarget,
+  required bool signedIn,
   bool? notifications,
   bool? grafana,
 }) {
   if (openSections.contains(id)) return true;
-  if (!hasTarget) return false;
+  // Dashboards, units, alerts and repositories need an authorized session on
+  // the target instance, not only a chosen target.
+  if (!hasTarget || !signedIn) return false;
   if (id == 'alerts' && notifications == false) return false;
   if (id == 'dashboards' && grafana == false) return false;
   return true;
