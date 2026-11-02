@@ -218,6 +218,13 @@ void main() {
           'identity',
           ...operationActions(owner: true, staff: true, federation: true),
         ]).length,
+        lessThanOrEqualTo(8),
+      );
+      expect(
+        cardBoard([
+          'identity',
+          ...operationActions(owner: false, staff: true, federation: true),
+        ]).length,
         lessThanOrEqualTo(7),
       );
       expect(tuneActions(owner: true), ['settings', 'ops']);
@@ -234,6 +241,7 @@ void main() {
         'tests',
         'scan-all',
         'update-repos',
+        'update-units',
         'track',
         'reboot',
       ]);
@@ -766,6 +774,8 @@ void main() {
       hostedUrl: () async => defaultInstanceUrl,
     );
     await model.load();
+    // The signed sections need a session on the target, not only a target.
+    model.target!.token = 't';
     await tester.pumpWidget(AppScope(model: model, child: const PepeunitApp()));
     await tester.pumpAndSettle();
 
@@ -926,6 +936,7 @@ void main() {
     expect(find.bySemanticsLabel('Опросить соседей'), findsOneWidget);
     expect(find.bySemanticsLabel('Отслеживать инстанс'), findsOneWidget);
     expect(find.bySemanticsLabel('Обновить репозитории'), findsOneWidget);
+    expect(find.bySemanticsLabel('Обновить все'), findsOneWidget);
     expect(find.bySemanticsLabel('Сверить копии'), findsNothing);
 
     await tester.tap(find.bySemanticsLabel('Назад'));

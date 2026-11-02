@@ -63,9 +63,9 @@ class UnitQuery {
   }
 }
 
-/// Cards beside Back, the filter, groups, bulk update and the page window.
+/// Cards beside Back, the filter, groups and the page window.
 int unitPageLimit(int tick) =>
-    scaleTickCells(tick.clamp(scaleTickMin, scaleTickMax)) - 5;
+    scaleTickCells(tick.clamp(scaleTickMin, scaleTickMax)) - 4;
 
 /// Cards beside Back, the filter and the page window.
 int headPageLimit(int tick, {int head = 2}) =>
@@ -86,7 +86,7 @@ NetworkBoard unitsBoard({
   final step = tick.clamp(scaleTickMin, scaleTickMax);
   final head = picking
       ? const ['query', 'window']
-      : const ['query', 'groups', 'bulk', 'window'];
+      : const ['query', 'groups', 'window'];
   final ids = <String>[...head, for (final uuid in uuids) 'unit:$uuid'];
   final frame = hexFrame(
     count: ids.length,

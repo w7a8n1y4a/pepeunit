@@ -17,7 +17,7 @@ import '../network/network_chrome.dart';
 import 'units_chrome.dart';
 
 /// Unit search. [pick] returns the chosen uuid with [pop] instead of opening
-/// the card, and hides the group and bulk cells.
+/// the card, and hides the group cell.
 class UnitsPage extends StatefulWidget {
   const UnitsPage({required this.scope, this.pick = false, super.key});
 
@@ -32,7 +32,6 @@ class _UnitsPageState extends State<UnitsPage> {
   var _offset = 0;
   var _loading = false;
   var _failureOpen = false;
-  var _bulk = false;
   String? _failure;
   var _ticket = 0;
   Timer? _searchWait;
@@ -139,16 +138,6 @@ class _UnitsPageState extends State<UnitsPage> {
           r: slot.r,
           icon: 'assets/icons/instances.svg',
         );
-      case 'bulk':
-        return HexSlot(
-          id: 'bulk',
-          title: unitText(language, 'Обновить все', 'Update all'),
-          color: color,
-          busy: _bulk,
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/reload.svg',
-        );
       case 'window':
         return HexSlot(
           id: 'window',
@@ -210,8 +199,6 @@ class _UnitsPageState extends State<UnitsPage> {
         setState(() => _failureOpen = true);
       case 'groups':
         context.push('/units/groups');
-      case 'bulk':
-        await _bulkUpdate();
     }
   }
 
@@ -250,27 +237,6 @@ class _UnitsPageState extends State<UnitsPage> {
     }
     setState(() => _offset += direction * limit);
     _load();
-  }
-
-  Future<void> _bulkUpdate() async {
-    if (_bulk) return;
-    final model = AppScope.of(context);
-    setState(() {
-      _bulk = true;
-      _failure = null;
-      _failureOpen = false;
-    });
-    try {
-      await model.bulkUpdateUnits();
-      if (!mounted) return;
-      setState(() => _bulk = false);
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _bulk = false;
-        _failure = '$error';
-      });
-    }
   }
 
   Future<void> _load() async {

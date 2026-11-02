@@ -31,7 +31,7 @@ void main() {
     expect(unitNameOk('ab'), isFalse);
     expect(unitNameOk('room.1'), isTrue);
     expect(unitNameOk('bad name'), isFalse);
-    expect(unitPageLimit(searchScaleTick), 8);
+    expect(unitPageLimit(searchScaleTick), 9);
     expect(
       unitMenuIds(owned: true, private: true),
       containsAll(['settings', 'env', 'operate', 'access']),

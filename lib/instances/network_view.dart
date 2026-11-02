@@ -248,7 +248,8 @@ const ownerSettingSections = <String>[
   'icon',
 ];
 
-/// Commands inside `/peers/tune/ops`. Tracking a peer is owner-only.
+/// Commands inside `/peers/tune/ops`. Tracking, reboot and updating every
+/// unit are owner-only.
 List<String> operationActions({
   required bool owner,
   required bool staff,
@@ -259,6 +260,7 @@ List<String> operationActions({
     'tests',
     if (federation) 'scan-all',
     'update-repos',
+    if (owner) 'update-units',
     if (owner) 'track',
     if (owner) 'reboot',
   ];
