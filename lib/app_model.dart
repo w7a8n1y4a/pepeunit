@@ -42,12 +42,13 @@ class AppModel extends ChangeNotifier {
     Future<String?> Function()? hostedUrl,
     this.openLink,
   }) : files = files ?? PlatformKeyFilePort(),
-       api = api ?? PepeunitApi.new,
-       hostedUrl = hostedUrl ?? readHostedInstanceUrl;
+       hostedUrl = hostedUrl ?? readHostedInstanceUrl {
+    this.api = api ?? _cachedApi;
+  }
 
   final VaultStore store;
   final KeyFilePort files;
-  final PepeunitApi Function(String origin) api;
+  late final PepeunitApi Function(String origin) api;
   final Future<String?> Function() hostedUrl;
   final Future<void> Function(Uri uri)? openLink;
 
@@ -55,6 +56,26 @@ class AppModel extends ChangeNotifier {
   bool ready = false;
   bool networkBusy = false;
   String? networkFailure;
+
+  /// One HTTP client is shared by every origin the model talks to, so a
+  /// page or an icon does not open a fresh pool and handshake per call.
+  final http.Client _apiClient = http.Client();
+  final Map<String, PepeunitApi> _apiCache = {};
+
+  PepeunitApi _cachedApi(String origin) {
+    return _apiCache[origin] ??= PepeunitApi(origin, client: _apiClient);
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    // Cached api objects share [_apiClient]; the cache never fills when a
+    // caller injected its own factory.
+    _apiCache.clear();
+    _apiClient.close();
+    _noticeClient?.close();
+    super.dispose();
+  }
   final NetworkQuery query = NetworkQuery();
   final UserQuery userQuery = UserQuery();
   ({int count, List<DirectoryUser> users})? directory;
@@ -79,6 +100,7 @@ class AppModel extends ChangeNotifier {
   String? _noticeKey;
   http.Client? _noticeClient;
   final Set<String> _noticeSeen = {};
+  int _noticeRetrySeconds = 3;
   final Set<String> discovered = {};
   final Map<String, PeerHead> peers = {};
   final Map<String, InstancePortrait> portraits = {};
@@ -86,6 +108,20 @@ class AppModel extends ChangeNotifier {
   Map<String, Object?>? targetSettings;
   Future<void> _pending = Future<void>.value();
   var _ticket = 0;
+  var _disposed = false;
+  var _notifyScheduled = false;
+
+  /// Marks the model dirty and notifies once on the next microtask. A burst
+  /// of notices or icons rebuilds the screens once, not once per event.
+  void _notifySoon() {
+    if (_notifyScheduled) return;
+    _notifyScheduled = true;
+    scheduleMicrotask(() {
+      _notifyScheduled = false;
+      if (_disposed) return;
+      notifyListeners();
+    });
+  }
 
   InstanceRecord? get target => vault.target;
 
@@ -544,7 +580,7 @@ class AppModel extends ChangeNotifier {
       }
       notices = (count: page.count + 1, items: items);
     }
-    notifyListeners();
+    _notifySoon();
   }
 
   void _syncNoticeStream() {
@@ -569,6 +605,7 @@ class AppModel extends ChangeNotifier {
     _noticeClient?.close();
     _noticeClient = null;
     _noticeSeen.clear();
+    _noticeRetrySeconds = 3;
     final dirty = unreadCount != 0 || notices != null || noticeTotal != null;
     notices = null;
     unreadCount = 0;
@@ -598,9 +635,11 @@ class AppModel extends ChangeNotifier {
     while (ticket == _noticeTicket) {
       final client = http.Client();
       _noticeClient = client;
+      var received = false;
       try {
         await for (final notice in api(origin).watchNotices(token, client)) {
           if (ticket != _noticeTicket) return;
+          received = true;
           _takeNotice(notice);
         }
       } on ApiException catch (error) {
@@ -611,7 +650,12 @@ class AppModel extends ChangeNotifier {
         if (identical(_noticeClient, client)) _noticeClient = null;
       }
       if (ticket != _noticeTicket) return;
-      await Future<void>.delayed(const Duration(seconds: 3));
+      // A dead stream is retried 3, 6, 12 ... 60 seconds apart. A stream
+      // that proved alive with at least one notice starts the ladder again.
+      await Future<void>.delayed(Duration(seconds: _noticeRetrySeconds));
+      _noticeRetrySeconds = received
+          ? 3
+          : (_noticeRetrySeconds * 2 < 60 ? _noticeRetrySeconds * 2 : 60);
     }
   }
 
@@ -1339,42 +1383,61 @@ class AppModel extends ChangeNotifier {
     int ticket,
     String url,
     List<DirectoryUser> users,
-  ) async {
-    final origin = originOf(url);
-    final client = api(origin);
-    for (final user in users) {
-      if (ticket != _directoryTicket) return;
-      final uuid = user.iconUuid;
-      if (uuid == null || uuid.isEmpty) continue;
-      final key = '$origin/$uuid';
-      if (icons.containsKey(key)) continue;
-      try {
-        icons[key] = await client.icon(uuid);
-        if (ticket != _directoryTicket) return;
-        notifyListeners();
-      } catch (_) {}
-    }
+  ) {
+    return _fillIcons(
+      url: url,
+      uuids: [for (final user in users) user.iconUuid],
+      active: () => ticket == _directoryTicket,
+    );
   }
 
   Future<void> _loadRepoIcons(
     int ticket,
     String url,
     List<RegistryRepo> repos,
-  ) async {
+  ) {
+    return _fillIcons(
+      url: url,
+      uuids: [for (final repo in repos) repo.iconUuid],
+      active: () => ticket == _registryTicket,
+    );
+  }
+
+  /// Fetches the icons a page still lacks, four requests in flight, and
+  /// notifies once for the batch instead of once per icon.
+  Future<void> _fillIcons({
+    required String url,
+    required List<String?> uuids,
+    required bool Function() active,
+  }) async {
     final origin = originOf(url);
     final client = api(origin);
-    for (final repo in repos) {
-      if (ticket != _registryTicket) return;
-      final uuid = repo.iconUuid;
-      if (uuid.isEmpty) continue;
-      final key = '$origin/$uuid';
-      if (icons.containsKey(key)) continue;
-      try {
-        icons[key] = await client.icon(uuid);
-        if (ticket != _registryTicket) return;
-        notifyListeners();
-      } catch (_) {}
+    final missing = <String>[];
+    final wanted = <String>{};
+    for (final uuid in uuids) {
+      if (uuid == null || uuid.isEmpty || !wanted.add(uuid)) continue;
+      if (icons.containsKey('$origin/$uuid')) continue;
+      missing.add(uuid);
     }
+    if (missing.isEmpty) return;
+    var index = 0;
+    var filled = false;
+    Future<void> worker() async {
+      while (index < missing.length) {
+        if (!active()) return;
+        final uuid = missing[index++];
+        try {
+          final bytes = await client.icon(uuid);
+          if (!active()) return;
+          icons['$origin/$uuid'] = bytes;
+          filled = true;
+        } catch (_) {}
+      }
+    }
+
+    final width = missing.length < 4 ? missing.length : 4;
+    await Future.wait([for (var i = 0; i < width; i++) worker()]);
+    if (filled && active()) _notifySoon();
   }
 
   InstanceRecord _signedTarget() {

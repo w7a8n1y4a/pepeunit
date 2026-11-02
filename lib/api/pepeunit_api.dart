@@ -31,6 +31,10 @@ class PepeunitApi {
   final String origin;
   final http.Client _client;
 
+  /// Releases the HTTP client this api owns. A client shared with the model
+  /// is closed by the model instead.
+  void close() => _client.close();
+
   static const _timeout = Duration(seconds: 20);
 
   Uri _uri(String path, [Map<String, Object?>? query]) {

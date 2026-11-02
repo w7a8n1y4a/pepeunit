@@ -95,7 +95,7 @@ class _AlertsPageState extends State<AlertsPage> {
     );
     final open = _open;
     if (open == null) return scene;
-    final close = () => setState(() => _open = null);
+    void close() => setState(() => _open = null);
     final copyLabel = alertText(language, 'Скопировать', 'Copy');
     final closeLabel = alertText(language, 'Закрыть', 'Close');
     return Stack(

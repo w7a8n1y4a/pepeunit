@@ -162,7 +162,7 @@ class HexScene extends StatelessWidget {
                 top: placed.center.dy - placed.radius,
                 width: placed.radius * 2,
                 height: placed.radius * 2,
-                child: _tile(placed),
+                child: _tile(placed, MediaQuery.devicePixelRatioOf(context)),
               ),
           ],
         );
@@ -170,7 +170,7 @@ class HexScene extends StatelessWidget {
     );
   }
 
-  Widget _tile(PlacedHex placed) {
+  Widget _tile(PlacedHex placed, double ratio) {
     final icon = placed.slot.icon;
     final body = placed.slot.body;
     final image = placed.slot.image;
@@ -179,6 +179,9 @@ class HexScene extends StatelessWidget {
       child = ClipPath(clipper: const _CellClip(), child: body);
     } else if (image != null) {
       final side = placed.radius * 1.15 * 0.85;
+      // Decode straight to the drawn size in device pixels: no full-size
+      // raster in memory, no resample on every rebuild.
+      final decoded = (side * ratio).ceil();
       child = Center(
         child: ClipOval(
           child: Image.memory(
@@ -186,6 +189,8 @@ class HexScene extends StatelessWidget {
             width: side,
             height: side,
             fit: BoxFit.cover,
+            cacheWidth: decoded,
+            cacheHeight: decoded,
             gaplessPlayback: true,
             filterQuality: FilterQuality.medium,
           ),

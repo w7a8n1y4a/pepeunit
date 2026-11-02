@@ -152,3 +152,13 @@ class Identity {
     );
   }
 }
+
+/// [Identity.signChallenge] for `compute`: one top-level function so the
+/// ML-DSA-87 sign leaves the UI isolate on platforms that have isolates.
+Uint8List signChallengeDetached(({String secretKey, String challenge}) job) {
+  return MlDsa.sign(
+    base64.decode(job.secretKey),
+    Uint8List.fromList(utf8.encode(job.challenge)),
+    DilithiumParams.mlDsa87,
+  );
+}
