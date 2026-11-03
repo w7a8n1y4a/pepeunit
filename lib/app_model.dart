@@ -1465,27 +1465,42 @@ class AppModel extends ChangeNotifier {
       missing.add(job);
     }
     if (missing.isEmpty) return;
-    var index = 0;
     var filled = false;
-    Future<void> worker() async {
-      while (index < missing.length) {
-        if (!active()) return;
-        final job = missing[index++];
-        try {
-          await _icons.load(
-            origin: job.$1,
-            uuid: job.$2,
-            fetch: () => api(job.$1).icon(job.$2),
-          );
-          if (!active()) return;
-          filled = true;
-        } catch (_) {}
-      }
-    }
-
-    final width = missing.length < 4 ? missing.length : 4;
-    await Future.wait([for (var i = 0; i < width; i++) worker()]);
+    await _lanes(missing.length, (index) async {
+      if (!active()) return false;
+      final job = missing[index];
+      try {
+        await _icons.load(
+          origin: job.$1,
+          uuid: job.$2,
+          fetch: () => api(job.$1).icon(job.$2),
+        );
+        if (!active()) return false;
+        filled = true;
+      } catch (_) {}
+      return true;
+    });
     if (filled && active()) _notifySoon();
+  }
+
+  /// [width] requests at a time. A step that returns false stops that lane.
+  Future<void> _lanes(
+    int count,
+    Future<bool> Function(int index) step, {
+    int width = 4,
+  }) async {
+    if (count <= 0) return;
+    var index = 0;
+    final lanes = count < width ? count : width;
+    await Future.wait<void>([
+      for (var lane = 0; lane < lanes; lane++)
+        () async {
+          while (index < count) {
+            final current = index++;
+            if (!await step(current)) return;
+          }
+        }(),
+    ]);
   }
 
   InstanceRecord _signedTarget() {
@@ -1590,25 +1605,20 @@ class AppModel extends ChangeNotifier {
       jobs.add((originOf(url), uuid));
     }
 
-    var index = 0;
-    Future<void> worker() async {
-      while (index < pending.length) {
-        if (ticket != _ticket) return;
-        final url = pending[index++];
-        try {
-          final portrait = await api(originOf(url)).portrait();
-          if (ticket != _ticket) return;
-          portraits[url] = portrait;
-          take(url, portrait.iconUuid);
-          _notifySoon();
-        } catch (_) {
-          take(url, portraits[url]?.iconUuid);
-        }
+    await _lanes(pending.length, (index) async {
+      if (ticket != _ticket) return false;
+      final url = pending[index];
+      try {
+        final portrait = await api(originOf(url)).portrait();
+        if (ticket != _ticket) return false;
+        portraits[url] = portrait;
+        take(url, portrait.iconUuid);
+        _notifySoon();
+      } catch (_) {
+        take(url, portraits[url]?.iconUuid);
       }
-    }
-
-    final count = pending.length < 4 ? pending.length : 4;
-    await Future.wait([for (var i = 0; i < count; i++) worker()]);
+      return true;
+    });
     if (ticket != _ticket) return;
     final targetUrl = vault.target?.url;
     if (targetUrl != null) take(targetUrl, portraits[targetUrl]?.iconUuid);

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -539,6 +540,27 @@ class _SearchInkClip extends CustomClipper<Rect> {
   @override
   bool shouldReclip(covariant _SearchInkClip oldClipper) =>
       oldClipper.left != left;
+}
+
+/// Search lists wait until typing pauses, then ask the backend once.
+class SearchDelay {
+  Timer? _timer;
+
+  static const pause = Duration(milliseconds: 300);
+
+  void dispose() {
+    _timer?.cancel();
+  }
+
+  void cancel() {
+    _timer?.cancel();
+    _timer = null;
+  }
+
+  void later(VoidCallback action) {
+    _timer?.cancel();
+    _timer = Timer(pause, action);
+  }
 }
 
 /// Top of the mark. The glyph is [_searchMarkScale] of the row, and its

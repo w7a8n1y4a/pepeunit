@@ -10,7 +10,6 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
-import '../../registry/registry_view.dart';
 import '../../units/unit.dart';
 import '../../units/unit_view.dart';
 import '../file_drop.dart';
@@ -30,6 +29,8 @@ class GroupsPage extends StatefulWidget {
 
 class _GroupsPageState extends State<GroupsPage> {
   final _search = TextEditingController();
+  final _typing = SearchDelay();
+  var _ticket = 0;
   String _order = 'asc';
   var _offset = 0;
   var _count = 0;
@@ -54,6 +55,7 @@ class _GroupsPageState extends State<GroupsPage> {
 
   @override
   void dispose() {
+    _typing.dispose();
     _search.dispose();
     super.dispose();
   }
@@ -92,8 +94,11 @@ class _GroupsPageState extends State<GroupsPage> {
               hint: unitText(language, 'Поиск', 'Search'),
               leading: 'assets/icons/search.svg',
               onChanged: (_) {
-                _offset = 0;
-                _load();
+                _typing.later(() {
+                  if (!mounted) return;
+                  setState(() => _offset = 0);
+                  _load();
+                });
               },
             ),
           ),
@@ -117,9 +122,11 @@ class _GroupsPageState extends State<GroupsPage> {
               offset: _offset,
               limit: limit,
               count: _count,
+              capacity: headPageLimit(scaleTickMax, head: 3),
               order: _order,
               onOrder: (value) {
                 if (value == _order) return;
+                _typing.cancel();
                 setState(() {
                   _order = value;
                   _offset = 0;
@@ -189,18 +196,20 @@ class _GroupsPageState extends State<GroupsPage> {
   }
 
   void _step(int direction, int limit) {
-    if (direction < 0 && !repoCanPageBack(offset: _offset, count: _count)) {
-      return;
-    }
-    if (direction > 0 &&
-        !repoCanPageForward(offset: _offset, limit: limit, count: _count)) {
-      return;
-    }
-    setState(() => _offset += direction * limit);
+    final next = pageShift(
+      direction: direction,
+      offset: _offset,
+      limit: limit,
+      count: _count,
+      capacity: headPageLimit(scaleTickMax, head: 3),
+    );
+    if (next == null) return;
+    setState(() => _offset = next);
     _load();
   }
 
   Future<void> _load() async {
+    final ticket = ++_ticket;
     final model = AppScope.of(context);
     if (model.target?.signedIn != true) {
       setState(() {
@@ -217,7 +226,7 @@ class _GroupsPageState extends State<GroupsPage> {
         search: _search.text,
         order: _order,
       );
-      if (!mounted) return;
+      if (!mounted || ticket != _ticket) return;
       unawaited(
         model.ensureIcons([for (final group in page.groups) group.iconUuid]),
       );
@@ -228,7 +237,7 @@ class _GroupsPageState extends State<GroupsPage> {
         _failure = null;
       });
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted || ticket != _ticket) return;
       setState(() {
         _loading = false;
         _failure = '$error';
@@ -629,20 +638,17 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
               offset: _offset,
               limit: limit,
               count: _count,
+              capacity: headPageLimit(scaleTickMax),
               onStep: (direction) {
-                if (direction < 0 &&
-                    !repoCanPageBack(offset: _offset, count: _count)) {
-                  return;
-                }
-                if (direction > 0 &&
-                    !repoCanPageForward(
-                      offset: _offset,
-                      limit: limit,
-                      count: _count,
-                    )) {
-                  return;
-                }
-                setState(() => _offset += direction * limit);
+                final next = pageShift(
+                  direction: direction,
+                  offset: _offset,
+                  limit: limit,
+                  count: _count,
+                  capacity: headPageLimit(scaleTickMax),
+                );
+                if (next == null) return;
+                setState(() => _offset = next);
                 _load();
               },
             ),

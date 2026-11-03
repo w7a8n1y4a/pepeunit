@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
@@ -32,7 +30,7 @@ class _RegistryPageState extends State<RegistryPage> {
   var _failureOpen = false;
   String? _failure;
   var _ticket = 0;
-  Timer? _searchWait;
+  final _typing = SearchDelay();
 
   @override
   void initState() {
@@ -52,7 +50,7 @@ class _RegistryPageState extends State<RegistryPage> {
 
   @override
   void dispose() {
-    _searchWait?.cancel();
+    _typing.dispose();
     super.dispose();
   }
 
@@ -69,7 +67,7 @@ class _RegistryPageState extends State<RegistryPage> {
       uuids: [for (final repo in repos) repo.uuid],
       wide: wide,
     );
-    final limit = repoPageLimit(widget.scope);
+    final limit = _limit(model);
     final slots = <HexSlot>[
       for (final slot in board.slots)
         _slot(slot, language, color, repos, page?.count ?? 0, limit, model),
@@ -179,9 +177,10 @@ class _RegistryPageState extends State<RegistryPage> {
     }
   }
 
+  int _limit(AppModel model) => model.cappedLimit(repoPageLimit(widget.scope));
+
   void _searchLater() {
-    _searchWait?.cancel();
-    _searchWait = Timer(const Duration(milliseconds: 300), () {
+    _typing.later(() {
       if (!mounted) return;
       setState(() => _offset = 0);
       _load();
@@ -189,7 +188,7 @@ class _RegistryPageState extends State<RegistryPage> {
   }
 
   void _retune() {
-    _searchWait?.cancel();
+    _typing.cancel();
     setState(() => _offset = 0);
     _load();
   }
@@ -204,15 +203,16 @@ class _RegistryPageState extends State<RegistryPage> {
     if (_loading) return;
     final model = AppScope.of(context);
     final count = model.registry?.count ?? 0;
-    final limit = repoPageLimit(widget.scope);
-    if (direction < 0 && !repoCanPageBack(offset: _offset, count: count)) {
-      return;
-    }
-    if (direction > 0 &&
-        !repoCanPageForward(offset: _offset, limit: limit, count: count)) {
-      return;
-    }
-    setState(() => _offset += direction * limit);
+    final limit = _limit(model);
+    final next = pageShift(
+      direction: direction,
+      offset: _offset,
+      limit: limit,
+      count: count,
+      capacity: repoPageLimit(scaleTickMax),
+    );
+    if (next == null) return;
+    setState(() => _offset = next);
     _load();
   }
 
@@ -235,7 +235,7 @@ class _RegistryPageState extends State<RegistryPage> {
     try {
       final fresh = await model.loadRegistry(
         offset: _offset,
-        limit: repoPageLimit(widget.scope),
+        limit: _limit(model),
       );
       if (!mounted || ticket != _ticket || !fresh) return;
       setState(() => _loading = false);
@@ -361,102 +361,29 @@ class _WindowCell extends StatelessWidget {
     final model = AppScope.of(context);
     final language = model.vault.language;
     final order = model.repoQuery.order;
-    final range = repoWindowText(
+    final range = pageWindowText(
       offset: offset,
       limit: limit,
       count: count,
       ofWord: regText(language, 'из', 'of'),
     );
-    final back = repoCanPageBack(offset: offset, count: count);
-    final forward = repoCanPageForward(
-      offset: offset,
-      limit: limit,
-      count: count,
-    );
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final side = constraints.maxWidth;
-        final font = cellFont(side);
-        final style = TextStyle(
-          fontFamily: 'OpenGost Type B',
-          fontSize: font,
-          decoration: TextDecoration.none,
-          height: 1.05,
-        );
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-            side * 0.12,
-            side * 0.22,
-            side * 0.12,
-            side * 0.16,
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    for (final value in const ['asc', 'desc'])
-                      Expanded(
-                        child: _orderWord(
-                          label: repoOrderLabel(language, value),
-                          on: order == value,
-                          style: style,
-                          onTap: () => onOrder(value),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              Container(
-                height: 1,
-                margin: EdgeInsets.symmetric(horizontal: side * 0.06),
-                color: const Color(0xFFA1A1AA),
-              ),
-              Expanded(
-                child: PageWindow(
-                  range: range,
-                  canBack: back,
-                  canForward: forward,
-                  previousLabel: regText(language, 'Предыдущие', 'Previous'),
-                  nextLabel: regText(language, 'Следующие', 'Next'),
-                  onStep: onStep,
-                  style: style,
-                  chevronExtent: side * 0.18,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _orderWord({
-    required String label,
-    required bool on,
-    required TextStyle style,
-    required VoidCallback onTap,
-  }) {
-    return Semantics(
-      button: true,
-      selected: on,
-      label: label,
-      excludeSemantics: true,
-      onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: HoverPop(
-          child: Center(
-            child: Text(
-              label,
-              style: style.copyWith(
-                color: on ? const Color(0xFFFFFFFF) : hexMuted,
-              ),
-            ),
-          ),
-        ),
+    return OrderWindow(
+      orders: [
+        for (final value in const ['asc', 'desc'])
+          (value: value, label: repoOrderLabel(language, value)),
+      ],
+      selected: order,
+      onOrder: onOrder,
+      range: range,
+      canBack: repoCanPageBack(offset: offset, count: count),
+      canForward: repoCanPageForward(
+        offset: offset,
+        limit: limit,
+        count: count,
       ),
+      previousLabel: regText(language, 'Предыдущие', 'Previous'),
+      nextLabel: regText(language, 'Следующие', 'Next'),
+      onStep: onStep,
     );
   }
 }

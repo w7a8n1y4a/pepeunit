@@ -27,6 +27,7 @@ class AlertsPage extends StatefulWidget {
 class _AlertsPageState extends State<AlertsPage> {
   var _offset = 0;
   var _loading = true;
+  var _ticket = 0;
   var _failureOpen = false;
   String? _failure;
   var _revision = -1;
@@ -70,7 +71,7 @@ class _AlertsPageState extends State<AlertsPage> {
       uuids: [for (final item in items) item.uuid],
       wide: wide,
     );
-    final limit = noticePageLimit(widget.scope);
+    final limit = _limit(model);
     final slots = <HexSlot>[
       for (final slot in board.slots)
         _slot(slot, language, color, items, page?.count ?? 0, limit, model),
@@ -266,23 +267,28 @@ class _AlertsPageState extends State<AlertsPage> {
     }
   }
 
+  int _limit(AppModel model) =>
+      model.cappedLimit(noticePageLimit(widget.scope));
+
   void _step(int direction) {
     if (_loading) return;
     final model = AppScope.of(context);
     final count = model.notices?.count ?? 0;
-    final limit = noticePageLimit(widget.scope);
-    if (direction < 0 && !noticeCanPageBack(offset: _offset, count: count)) {
-      return;
-    }
-    if (direction > 0 &&
-        !noticeCanPageForward(offset: _offset, limit: limit, count: count)) {
-      return;
-    }
-    setState(() => _offset += direction * limit);
+    final limit = _limit(model);
+    final next = pageShift(
+      direction: direction,
+      offset: _offset,
+      limit: limit,
+      count: count,
+      capacity: noticePageLimit(scaleTickMax),
+    );
+    if (next == null) return;
+    setState(() => _offset = next);
     _load();
   }
 
   Future<void> _load() async {
+    final ticket = ++_ticket;
     final model = AppScope.of(context);
     final language = model.vault.language;
     if (model.target?.signedIn != true) {
@@ -300,12 +306,12 @@ class _AlertsPageState extends State<AlertsPage> {
     try {
       final fresh = await model.loadNotices(
         offset: _offset,
-        limit: noticePageLimit(widget.scope),
+        limit: _limit(model),
       );
-      if (!mounted || !fresh) return;
+      if (!mounted || ticket != _ticket || !fresh) return;
       setState(() => _loading = false);
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted || ticket != _ticket) return;
       setState(() {
         _loading = false;
         _failure = '$error';
@@ -337,7 +343,12 @@ class _FilterCell extends StatelessWidget {
   Widget build(BuildContext context) {
     final model = AppScope.of(context);
     final language = model.vault.language;
-    final range = _range(language);
+    final range = pageWindowText(
+      offset: offset,
+      limit: limit,
+      count: count,
+      ofWord: alertText(language, 'из', 'of'),
+    );
     final back = noticeCanPageBack(offset: offset, count: count);
     final forward = noticeCanPageForward(
       offset: offset,
@@ -360,12 +371,7 @@ class _FilterCell extends StatelessWidget {
         final rule = side - 2 * padX - 2 * ruleInset;
         final readAllSize = font * 1.35;
         return Padding(
-          padding: EdgeInsets.fromLTRB(
-            padX,
-            side * 0.26,
-            padX,
-            side * 0.15,
-          ),
+          padding: EdgeInsets.fromLTRB(padX, side * 0.26, padX, side * 0.15),
           child: Column(
             children: [
               ConstrainedBox(
@@ -444,18 +450,6 @@ class _FilterCell extends StatelessWidget {
         );
       },
     );
-  }
-
-  String _range(String language) {
-    if (count <= 0) {
-      return '0 ${alertText(language, 'из', 'of')} 0';
-    }
-    final start = offset + 1;
-    if (start > count) {
-      return '0 ${alertText(language, 'из', 'of')} $count';
-    }
-    final end = offset + limit < count ? offset + limit : count;
-    return '$start-$end ${alertText(language, 'из', 'of')} $count';
   }
 }
 

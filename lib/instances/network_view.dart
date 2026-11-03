@@ -103,7 +103,7 @@ class UserQuery {
   bool toggleStatus(String status) => _toggle(statuses, userStatuses, status);
 
   bool setOrder(String value) {
-    if ((value != 'asc' && value != 'desc') || value == order) return false;
+    if (!takeSort(order, value)) return false;
     order = value;
     return true;
   }
@@ -120,11 +120,16 @@ class UserQuery {
   }
 }
 
+/// `asc` and `desc` are the only orders. Repeating the current one changes nothing.
+bool takeSort(String current, String value) =>
+    (value == 'asc' || value == 'desc') && value != current;
+
 /// Cards beside Back, the filter, and the page window at this tick.
 int userPageLimit(int tick) =>
     scaleTickCells(tick.clamp(scaleTickMin, scaleTickMax)) - 3;
 
-String userWindowText({
+/// `start-end of count`. An empty list is `0 of 0`.
+String pageWindowText({
   required int offset,
   required int limit,
   required int count,
@@ -137,15 +142,72 @@ String userWindowText({
   return '$start-$end $ofWord $count';
 }
 
-/// Arrows stay still until the directory is larger than the last scale tick.
-bool userCanPageBack({required int offset, required int count}) =>
-    count > userPageLimit(scaleTickMax) && offset > 0;
+/// Arrows stay still until the list is larger than [capacity]: the cards that
+/// fit beside that screen's chrome at the last scale tick.
+bool pageCanBack({
+  required int offset,
+  required int count,
+  required int capacity,
+}) => count > capacity && offset > 0;
+
+bool pageCanForward({
+  required int offset,
+  required int limit,
+  required int count,
+  required int capacity,
+}) => count > capacity && offset + limit < count;
+
+/// Next offset, or null when that direction stays still.
+int? pageShift({
+  required int direction,
+  required int offset,
+  required int limit,
+  required int count,
+  required int capacity,
+}) {
+  if (direction < 0) {
+    if (!pageCanBack(offset: offset, count: count, capacity: capacity)) {
+      return null;
+    }
+  } else if (direction > 0) {
+    if (!pageCanForward(
+      offset: offset,
+      limit: limit,
+      count: count,
+      capacity: capacity,
+    )) {
+      return null;
+    }
+  } else {
+    return null;
+  }
+  return offset + direction * limit;
+}
+
+String userWindowText({
+  required int offset,
+  required int limit,
+  required int count,
+  required String ofWord,
+}) =>
+    pageWindowText(offset: offset, limit: limit, count: count, ofWord: ofWord);
+
+bool userCanPageBack({required int offset, required int count}) => pageCanBack(
+  offset: offset,
+  count: count,
+  capacity: userPageLimit(scaleTickMax),
+);
 
 bool userCanPageForward({
   required int offset,
   required int limit,
   required int count,
-}) => count > userPageLimit(scaleTickMax) && offset + limit < count;
+}) => pageCanForward(
+  offset: offset,
+  limit: limit,
+  count: count,
+  capacity: userPageLimit(scaleTickMax),
+);
 
 /// Back, two filter cells, then user cards. The tick caps the disk.
 NetworkBoard usersBoard({

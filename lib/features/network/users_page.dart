@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -31,7 +30,7 @@ class _UsersPageState extends State<UsersPage> {
   var _failureOpen = false;
   String? _failure;
   var _ticket = 0;
-  Timer? _searchWait;
+  final _typing = SearchDelay();
 
   @override
   void initState() {
@@ -51,7 +50,7 @@ class _UsersPageState extends State<UsersPage> {
 
   @override
   void dispose() {
-    _searchWait?.cancel();
+    _typing.dispose();
     super.dispose();
   }
 
@@ -68,7 +67,7 @@ class _UsersPageState extends State<UsersPage> {
       uuids: [for (final user in users) user.uuid],
       wide: wide,
     );
-    final limit = userPageLimit(widget.scope);
+    final limit = _limit(model);
     final slots = <HexSlot>[
       for (final slot in board.slots)
         _slot(slot, language, color, users, page?.count ?? 0, limit, model),
@@ -181,9 +180,10 @@ class _UsersPageState extends State<UsersPage> {
     }
   }
 
+  int _limit(AppModel model) => model.cappedLimit(userPageLimit(widget.scope));
+
   void _searchLater() {
-    _searchWait?.cancel();
-    _searchWait = Timer(const Duration(milliseconds: 300), () {
+    _typing.later(() {
       if (!mounted) return;
       setState(() => _offset = 0);
       _load();
@@ -191,7 +191,7 @@ class _UsersPageState extends State<UsersPage> {
   }
 
   void _retune() {
-    _searchWait?.cancel();
+    _typing.cancel();
     setState(() => _offset = 0);
     _load();
   }
@@ -206,15 +206,16 @@ class _UsersPageState extends State<UsersPage> {
     if (_loading) return;
     final model = AppScope.of(context);
     final count = model.directory?.count ?? 0;
-    final limit = userPageLimit(widget.scope);
-    if (direction < 0 && !userCanPageBack(offset: _offset, count: count)) {
-      return;
-    }
-    if (direction > 0 &&
-        !userCanPageForward(offset: _offset, limit: limit, count: count)) {
-      return;
-    }
-    setState(() => _offset += direction * limit);
+    final limit = _limit(model);
+    final next = pageShift(
+      direction: direction,
+      offset: _offset,
+      limit: limit,
+      count: count,
+      capacity: userPageLimit(scaleTickMax),
+    );
+    if (next == null) return;
+    setState(() => _offset = next);
     _load();
   }
 
@@ -237,7 +238,7 @@ class _UsersPageState extends State<UsersPage> {
     try {
       final fresh = await model.loadDirectory(
         offset: _offset,
-        limit: userPageLimit(widget.scope),
+        limit: _limit(model),
       );
       if (!mounted || ticket != _ticket || !fresh) return;
       setState(() => _loading = false);
@@ -453,103 +454,29 @@ class MemberWindowCell extends StatelessWidget {
     final model = AppScope.of(context);
     final language = model.vault.language;
     final order = model.userQuery.order;
-    final ofWord = netText(language, 'из', 'of');
-    final range = userWindowText(
+    final range = pageWindowText(
       offset: offset,
       limit: limit,
       count: count,
-      ofWord: ofWord,
+      ofWord: netText(language, 'из', 'of'),
     );
-    final back = userCanPageBack(offset: offset, count: count);
-    final forward = userCanPageForward(
-      offset: offset,
-      limit: limit,
-      count: count,
-    );
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final side = constraints.maxWidth;
-        final font = cellFont(side);
-        final style = TextStyle(
-          fontFamily: 'OpenGost Type B',
-          fontSize: font,
-          decoration: TextDecoration.none,
-          height: 1.05,
-        );
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-            side * 0.12,
-            side * 0.22,
-            side * 0.12,
-            side * 0.16,
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    for (final value in const ['desc', 'asc'])
-                      Expanded(
-                        child: _orderWord(
-                          label: memberOrderLabel(language, value),
-                          on: order == value,
-                          style: style,
-                          onTap: () => onOrder(value),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              Container(
-                height: 1,
-                margin: EdgeInsets.symmetric(horizontal: side * 0.06),
-                color: const Color(0xFFA1A1AA),
-              ),
-              Expanded(
-                child: PageWindow(
-                  range: range,
-                  canBack: back,
-                  canForward: forward,
-                  previousLabel: netText(language, 'Предыдущие', 'Previous'),
-                  nextLabel: netText(language, 'Следующие', 'Next'),
-                  onStep: onStep,
-                  style: style,
-                  chevronExtent: side * 0.18,
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _orderWord({
-    required String label,
-    required bool on,
-    required TextStyle style,
-    required VoidCallback onTap,
-  }) {
-    return Semantics(
-      button: true,
-      selected: on,
-      label: label,
-      excludeSemantics: true,
-      onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: HoverPop(
-          child: Center(
-            child: Text(
-              label,
-              style: style.copyWith(
-                color: on ? const Color(0xFFFFFFFF) : hexMuted,
-              ),
-            ),
-          ),
-        ),
+    return OrderWindow(
+      orders: [
+        for (final value in const ['desc', 'asc'])
+          (value: value, label: memberOrderLabel(language, value)),
+      ],
+      selected: order,
+      onOrder: onOrder,
+      range: range,
+      canBack: userCanPageBack(offset: offset, count: count),
+      canForward: userCanPageForward(
+        offset: offset,
+        limit: limit,
+        count: count,
       ),
+      previousLabel: netText(language, 'Предыдущие', 'Previous'),
+      nextLabel: netText(language, 'Следующие', 'Next'),
+      onStep: onStep,
     );
   }
 }

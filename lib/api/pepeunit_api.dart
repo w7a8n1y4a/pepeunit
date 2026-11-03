@@ -55,12 +55,76 @@ class PepeunitApi {
     };
   }
 
+  /// One timeout, one status check, and one JSON header set for every call.
+  ///
+  /// [json] stays off for the public reads, which send no headers. A null
+  /// [token] still sends `content-type` when [json] is on, matching register
+  /// and the challenge. [pairs] keeps repeated query keys a map cannot.
+  Future<http.Response> _send(
+    String method,
+    String path, {
+    String? token,
+    Map<String, Object?>? query,
+    Object? body,
+    List<String>? pairs,
+    Duration? timeout,
+    bool bytes = false,
+    bool json = true,
+  }) async {
+    final uri = pairs == null ? _uri(path, query) : _pairs(path, pairs);
+    final headers = json ? _jsonHeaders(token) : null;
+    final encoded = body == null ? null : jsonEncode(body);
+    final Future<http.Response> pending = switch (method) {
+      'POST' => _client.post(uri, headers: headers, body: encoded),
+      'PATCH' => _client.patch(uri, headers: headers, body: encoded),
+      'DELETE' => _client.delete(uri, headers: headers, body: encoded),
+      _ => _client.get(uri, headers: headers),
+    };
+    final response = await pending.timeout(timeout ?? _timeout);
+    if (bytes) {
+      _ensureBytes(response);
+    } else {
+      _ensureOk(response);
+    }
+    return response;
+  }
+
+  Map<String, Object?> _object(http.Response response) =>
+      (jsonDecode(response.body) as Map).cast<String, Object?>();
+
+  List<T> _list<T>(
+    http.Response response,
+    T Function(Map<String, Object?> row) read,
+  ) {
+    final decoded = jsonDecode(response.body);
+    if (decoded is! List) return <T>[];
+    return [
+      for (final item in decoded)
+        if (item is Map) read(item.cast<String, Object?>()),
+    ];
+  }
+
+  /// A counted page. [read] returns null to drop a row, such as an empty uuid.
+  ({int count, List<T> rows}) _page<T>(
+    http.Response response,
+    String key,
+    T? Function(Map<String, Object?> row) read,
+  ) {
+    final json = _object(response);
+    final rows = <T>[];
+    for (final item in json[key] as List<Object?>? ?? const []) {
+      if (item is! Map) continue;
+      final row = read(item.cast<String, Object?>());
+      if (row == null) continue;
+      rows.add(row);
+    }
+    final raw = json['count'];
+    return (count: raw is num ? raw.round() : rows.length, rows: rows);
+  }
+
   Future<InstancePortrait> portrait() async {
-    final response = await _client
-        .get(_uri('/instances/current'))
-        .timeout(_timeout);
-    _ensureOk(response);
-    final json = jsonDecode(response.body) as Map<String, Object?>;
+    final response = await _send('GET', '/instances/current', json: false);
+    final json = _object(response);
     final version = json['version'] as String? ?? '';
     if (version.isNotEmpty && !backendCompatible(version)) {
       throw ApiException(
@@ -77,11 +141,13 @@ class PepeunitApi {
     required int offset,
     required int limit,
   }) async {
-    final response = await _client
-        .get(_uri('/peers/urls', {'offset': offset, 'limit': limit}))
-        .timeout(_timeout);
-    _ensureOk(response);
-    final json = jsonDecode(response.body) as Map<String, Object?>;
+    final response = await _send(
+      'GET',
+      '/peers/urls',
+      query: {'offset': offset, 'limit': limit},
+      json: false,
+    );
+    final json = _object(response);
     final urls = [
       for (final item in json['urls'] as List<Object?>? ?? const [])
         if (item is String) item,
@@ -93,11 +159,13 @@ class PepeunitApi {
     required int offset,
     required int limit,
   }) async {
-    final response = await _client
-        .get(_uri('/peers', {'offset': offset, 'limit': limit}))
-        .timeout(_timeout);
-    _ensureOk(response);
-    final json = jsonDecode(response.body) as Map<String, Object?>;
+    final response = await _send(
+      'GET',
+      '/peers',
+      query: {'offset': offset, 'limit': limit},
+      json: false,
+    );
+    final json = _object(response);
     final items = <PeerHead>[];
     for (final item in json['peers'] as List<Object?>? ?? const []) {
       if (item is! Map) continue;
@@ -136,94 +204,55 @@ class PepeunitApi {
   }
 
   Future<void> createPeer(String token, String url) async {
-    final response = await _client
-        .post(
-          _uri('/peers'),
-          headers: _jsonHeaders(token),
-          body: jsonEncode({'url': url}),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('POST', '/peers', token: token, body: {'url': url});
   }
 
   Future<void> updatePeer(String token, String uuid, String trust) async {
-    final response = await _client
-        .patch(
-          _uri('/peers/$uuid'),
-          headers: _jsonHeaders(token),
-          body: jsonEncode({'trust_status': trust}),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send(
+      'PATCH',
+      '/peers/$uuid',
+      token: token,
+      body: {'trust_status': trust},
+    );
   }
 
   Future<void> deletePeer(String token, String uuid) async {
-    final response = await _client
-        .delete(_uri('/peers/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('DELETE', '/peers/$uuid', token: token);
   }
 
   Future<void> scanPeer(String token, String uuid) async {
-    final response = await _client
-        .post(_uri('/peers/scan/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('POST', '/peers/scan/$uuid', token: token);
   }
 
   Future<void> scanAll(String token) async {
-    final response = await _client
-        .post(_uri('/peers/scan_all'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('POST', '/peers/scan_all', token: token);
   }
 
   Future<void> register(String publicKeyBase64) async {
-    final response = await _client
-        .post(
-          _uri('/users'),
-          headers: _jsonHeaders(null),
-          body: jsonEncode({'public_key': publicKeyBase64}),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('POST', '/users', body: {'public_key': publicKeyBase64});
   }
 
   Future<String> challenge(String hashPublicKey) async {
-    final response = await _client
-        .post(
-          _uri('/users/auth/challenge'),
-          headers: _jsonHeaders(null),
-          body: jsonEncode({'hash_public_key': hashPublicKey}),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    final json = jsonDecode(response.body) as Map<String, Object?>;
-    return json['challenge']! as String;
+    final response = await _send(
+      'POST',
+      '/users/auth/challenge',
+      body: {'hash_public_key': hashPublicKey},
+    );
+    return _object(response)['challenge']! as String;
   }
 
   Future<String> auth(String challengeToken, String signatureBase64) async {
-    final response = await _client
-        .post(
-          _uri('/users/auth'),
-          headers: _jsonHeaders(null),
-          body: jsonEncode({
-            'challenge': challengeToken,
-            'signature': signatureBase64,
-          }),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    final json = jsonDecode(response.body) as Map<String, Object?>;
-    return json['token']! as String;
+    final response = await _send(
+      'POST',
+      '/users/auth',
+      body: {'challenge': challengeToken, 'signature': signatureBase64},
+    );
+    return _object(response)['token']! as String;
   }
 
   Future<({String role, String uuid})> user(String token, String uuid) async {
-    final response = await _client
-        .get(_uri('/users/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    final json = jsonDecode(response.body) as Map<String, Object?>;
+    final response = await _send('GET', '/users/$uuid', token: token);
+    final json = _object(response);
     return (
       role: json['role'] as String? ?? 'User',
       uuid: json['uuid']! as String,
@@ -231,89 +260,65 @@ class PepeunitApi {
   }
 
   Future<String> verificationLink(String token) async {
-    final response = await _client
-        .get(
-          _uri('/users/generate_verification_link/'),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    final response = await _send(
+      'GET',
+      '/users/generate_verification_link/',
+      token: token,
+    );
     final decoded = jsonDecode(response.body);
     if (decoded is String && decoded.isNotEmpty) return decoded;
     throw ApiException(response.statusCode, response.body);
   }
 
   Future<Map<String, Object?>> settings(String token) async {
-    final response = await _client
-        .get(_uri('/instances/settings'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    return (jsonDecode(response.body) as Map).cast<String, Object?>();
+    final response = await _send('GET', '/instances/settings', token: token);
+    return _object(response);
   }
 
   Future<Map<String, Object?>> patchSettings(
     String token,
     Map<String, Object?> patch,
   ) async {
-    final response = await _client
-        .patch(
-          _uri('/instances/settings'),
-          headers: _jsonHeaders(token),
-          body: jsonEncode(patch),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    return (jsonDecode(response.body) as Map).cast<String, Object?>();
+    final response = await _send(
+      'PATCH',
+      '/instances/settings',
+      token: token,
+      body: patch,
+    );
+    return _object(response);
   }
 
   Future<void> reboot(String token) async {
-    final response = await _client
-        .post(_uri('/instances/reboot'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('POST', '/instances/reboot', token: token);
   }
 
   Future<void> integrationTests(String token) async {
-    final response = await _client
-        .post(
-          _uri('/instances/integration_tests'),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('POST', '/instances/integration_tests', token: token);
   }
 
   Future<void> updateLogin(String token, String userUuid, String login) async {
-    final response = await _client
-        .patch(
-          _uri('/users/$userUuid'),
-          headers: _jsonHeaders(token),
-          body: jsonEncode({'login': login}),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send(
+      'PATCH',
+      '/users/$userUuid',
+      token: token,
+      body: {'login': login},
+    );
   }
 
   Future<Map<String, Object?>> notificationSettings(String token) async {
-    final response = await _client
-        .get(_uri('/notifications/settings'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    return (jsonDecode(response.body) as Map).cast<String, Object?>();
+    final response = await _send(
+      'GET',
+      '/notifications/settings',
+      token: token,
+    );
+    return _object(response);
   }
 
   Future<void> updateNotificationSettings(
     String token,
     Map<String, Object?> patch,
   ) async {
-    final response = await _client
-        .patch(
-          _uri('/notifications/settings'),
-          headers: _jsonHeaders(token),
-          body: jsonEncode(patch),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('PATCH', '/notifications/settings', token: token, body: patch);
   }
 
   Future<({int count, List<Notice> items})> notices({
@@ -323,38 +328,36 @@ class PepeunitApi {
     bool? isRead,
     List<String>? types,
   }) async {
-    final pairs = <String>[
-      'offset=$offset',
-      'limit=$limit',
-      if (isRead != null) 'is_read=$isRead',
-      for (final type in types ?? const <String>[])
-        'type=${Uri.encodeQueryComponent(type)}',
-    ];
-    final uri = Uri.parse(
-      '$origin/pepeunit/api/v1/notifications?${pairs.join('&')}',
+    final response = await _send(
+      'GET',
+      '/notifications',
+      token: token,
+      pairs: [
+        'offset=$offset',
+        'limit=$limit',
+        if (isRead != null) 'is_read=$isRead',
+        for (final type in types ?? const <String>[])
+          'type=${Uri.encodeQueryComponent(type)}',
+      ],
     );
-    final response = await _client
-        .get(uri, headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    return _noticePage(response.body);
+    final page = _page(response, 'notifications', (row) {
+      final notice = Notice.fromJson(row);
+      return notice.uuid.isEmpty ? null : notice;
+    });
+    return (count: page.count, items: page.rows);
   }
 
   Future<Notice> markNoticeRead(String token, String uuid) async {
-    final response = await _client
-        .patch(_uri('/notifications/$uuid/read'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    return Notice.fromJson(
-      (jsonDecode(response.body) as Map).cast<String, Object?>(),
+    final response = await _send(
+      'PATCH',
+      '/notifications/$uuid/read',
+      token: token,
     );
+    return Notice.fromJson(_object(response));
   }
 
   Future<int> markAllNoticesRead(String token) async {
-    final response = await _client
-        .patch(_uri('/notifications/read'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
+    final response = await _send('PATCH', '/notifications/read', token: token);
     final decoded = jsonDecode(response.body);
     return decoded is num ? decoded.round() : 0;
   }
@@ -376,22 +379,6 @@ class PepeunitApi {
         yield notice;
       }
     }
-  }
-
-  ({int count, List<Notice> items}) _noticePage(String body) {
-    final json = (jsonDecode(body) as Map).cast<String, Object?>();
-    final items = <Notice>[];
-    for (final item in json['notifications'] as List<Object?>? ?? const []) {
-      if (item is! Map) continue;
-      final notice = Notice.fromJson(item.cast<String, Object?>());
-      if (notice.uuid.isEmpty) continue;
-      items.add(notice);
-    }
-    final rawCount = json['count'];
-    return (
-      count: rawCount is num ? rawCount.round() : items.length,
-      items: items,
-    );
   }
 
   Future<String?> uploadIcon(String token, String userUuid, Uint8List png) {
@@ -421,34 +408,17 @@ class PepeunitApi {
       for (final status in statuses)
         'status=${Uri.encodeQueryComponent(status)}',
     ];
-    final uri = Uri.parse('$origin/pepeunit/api/v1/users?${pairs.join('&')}');
-    final response = await _client
-        .get(uri, headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    final json = (jsonDecode(response.body) as Map).cast<String, Object?>();
-    final users = <DirectoryUser>[];
-    for (final item in json['users'] as List<Object?>? ?? const []) {
-      if (item is! Map) continue;
-      final user = DirectoryUser.fromJson(item.cast<String, Object?>());
-      if (user.uuid.isEmpty) continue;
-      users.add(user);
-    }
-    final rawCount = json['count'];
-    return (
-      count: rawCount is num ? rawCount.round() : users.length,
-      users: users,
-    );
+    final response = await _send('GET', '/users', token: token, pairs: pairs);
+    final page = _page(response, 'users', (row) {
+      final user = DirectoryUser.fromJson(row);
+      return user.uuid.isEmpty ? null : user;
+    });
+    return (count: page.count, users: page.rows);
   }
 
   Future<DirectoryUser> readDirectoryUser(String token, String uuid) async {
-    final response = await _client
-        .get(_uri('/users/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    return DirectoryUser.fromJson(
-      (jsonDecode(response.body) as Map).cast<String, Object?>(),
-    );
+    final response = await _send('GET', '/users/$uuid', token: token);
+    return DirectoryUser.fromJson(_object(response));
   }
 
   Future<DirectoryUser> grantAdmin(String token, String uuid) {
@@ -460,29 +430,44 @@ class PepeunitApi {
   }
 
   Future<DirectoryUser> blockUser(String token, String uuid) async {
-    final response = await _client
-        .patch(_uri('/users/block/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    return readDirectoryUser(token, uuid);
+    final response = await _send('PATCH', '/users/block/$uuid', token: token);
+    return _userOrFetch(response, token, uuid);
   }
 
   Future<DirectoryUser> unblockUser(String token, String uuid) async {
-    final response = await _client
-        .patch(_uri('/users/unblock/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
+    final response = await _send('PATCH', '/users/unblock/$uuid', token: token);
+    return _userOrFetch(response, token, uuid);
+  }
+
+  /// Block and unblock sometimes return the user and sometimes an empty body.
+  /// A parsed user skips the follow-up read.
+  Future<DirectoryUser> _userOrFetch(
+    http.Response response,
+    String token,
+    String uuid,
+  ) async {
+    final parsed = _maybeUser(response);
+    if (parsed != null) return parsed;
     return readDirectoryUser(token, uuid);
   }
 
+  DirectoryUser? _maybeUser(http.Response response) {
+    try {
+      final trimmed = response.body.trim();
+      if (trimmed.isEmpty || trimmed == 'null') return null;
+      final decoded = jsonDecode(trimmed);
+      if (decoded is! Map) return null;
+      final user = DirectoryUser.fromJson(decoded.cast<String, Object?>());
+      if (user.uuid.isEmpty) return null;
+      return user;
+    } catch (_) {
+      return null;
+    }
+  }
+
   Future<DirectoryUser> _patchUser(String token, String path) async {
-    final response = await _client
-        .patch(_uri(path), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    return DirectoryUser.fromJson(
-      (jsonDecode(response.body) as Map).cast<String, Object?>(),
-    );
+    final response = await _send('PATCH', path, token: token);
+    return DirectoryUser.fromJson(_object(response));
   }
 
   Future<({int count, List<RegistryRepo> repos})> repos({
@@ -493,66 +478,44 @@ class PepeunitApi {
     required String order,
     bool? public,
   }) async {
-    final response = await _client
-        .get(
-          _uri('/repo', {
-            'offset': offset,
-            'limit': limit,
-            'order_by_repository_url': order,
-            if (search.trim().isNotEmpty) 'search_string': search.trim(),
-            'is_public_repository': ?public,
-          }),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    final json = (jsonDecode(response.body) as Map).cast<String, Object?>();
-    final repos = <RegistryRepo>[];
-    for (final item in json['repos'] as List<Object?>? ?? const []) {
-      if (item is! Map) continue;
-      final repo = RegistryRepo.fromJson(item.cast<String, Object?>());
-      if (repo.uuid.isEmpty) continue;
-      repos.add(repo);
-    }
-    final rawCount = json['count'];
-    return (
-      count: rawCount is num ? rawCount.round() : repos.length,
-      repos: repos,
+    final response = await _send(
+      'GET',
+      '/repo',
+      token: token,
+      query: {
+        'offset': offset,
+        'limit': limit,
+        'order_by_repository_url': order,
+        if (search.trim().isNotEmpty) 'search_string': search.trim(),
+        'is_public_repository': ?public,
+      },
     );
+    final page = _page(response, 'repos', (row) {
+      final repo = RegistryRepo.fromJson(row);
+      return repo.uuid.isEmpty ? null : repo;
+    });
+    return (count: page.count, repos: page.rows);
   }
 
   Future<RegistryRepo> readRepo(String token, String uuid) async {
-    final response = await _client
-        .get(_uri('/repo/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    return RegistryRepo.fromJson(
-      (jsonDecode(response.body) as Map).cast<String, Object?>(),
-    );
+    final response = await _send('GET', '/repo/$uuid', token: token);
+    return RegistryRepo.fromJson(_object(response));
   }
 
   Future<void> deleteRepo(String token, String uuid) async {
-    final response = await _client
-        .delete(_uri('/repo/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('DELETE', '/repo/$uuid', token: token);
   }
 
   Future<void> updateLocalRepository(String token, String uuid) async {
-    final response = await _client
-        .patch(
-          _uri('/repo/update_local_repository/$uuid'),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('PATCH', '/repo/update_local_repository/$uuid', token: token);
   }
 
   Future<RepoCredentials?> repoCredentials(String token, String uuid) async {
-    final response = await _client
-        .get(_uri('/repo/get_credentials/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
+    final response = await _send(
+      'GET',
+      '/repo/get_credentials/$uuid',
+      token: token,
+    );
     if (response.body.trim().isEmpty) return null;
     final decoded = jsonDecode(response.body);
     if (decoded == null) return null;
@@ -568,21 +531,16 @@ class PepeunitApi {
     String username,
     String pat,
   ) async {
-    final response = await _client
-        .patch(
-          _uri('/repo/set_credentials/$uuid'),
-          headers: _jsonHeaders(token),
-          body: jsonEncode({'username': username, 'pat_token': pat}),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send(
+      'PATCH',
+      '/repo/set_credentials/$uuid',
+      token: token,
+      body: {'username': username, 'pat_token': pat},
+    );
   }
 
   Future<void> updateAllRepos(String token) async {
-    final response = await _client
-        .patch(_uri('/repo/update_all'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('PATCH', '/repo/update_all', token: token);
   }
 
   Future<List<RepoCommit>> branchCommits(
@@ -593,23 +551,18 @@ class PepeunitApi {
     int offset = 0,
     int limit = 100,
   }) async {
-    final response = await _client
-        .get(
-          _uri('/repo/branch_commits/$uuid', {
-            'repo_branch': branch,
-            'only_tag': onlyTag,
-            'offset': offset,
-            'limit': limit,
-          }),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    return [
-      for (final item
-          in jsonDecode(response.body) as List<Object?>? ?? const [])
-        if (item is Map) RepoCommit.fromJson(item.cast<String, Object?>()),
-    ];
+    final response = await _send(
+      'GET',
+      '/repo/branch_commits/$uuid',
+      token: token,
+      query: {
+        'repo_branch': branch,
+        'only_tag': onlyTag,
+        'offset': offset,
+        'limit': limit,
+      },
+    );
+    return _list(response, RepoCommit.fromJson);
   }
 
   Future<List<FirmwarePlatform>> firmwarePlatforms(
@@ -619,37 +572,18 @@ class PepeunitApi {
     String? commit,
     String? tag,
   }) async {
-    final response = await _client
-        .get(
-          _uri('/repo/available_platforms/$uuid', {
-            'branch': ?branch,
-            'target_commit': ?commit,
-            'target_tag': ?tag,
-          }),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    return [
-      for (final item
-          in jsonDecode(response.body) as List<Object?>? ?? const [])
-        if (item is Map)
-          FirmwarePlatform.fromJson(item.cast<String, Object?>()),
-    ];
+    final response = await _send(
+      'GET',
+      '/repo/available_platforms/$uuid',
+      token: token,
+      query: {'branch': ?branch, 'target_commit': ?commit, 'target_tag': ?tag},
+    );
+    return _list(response, FirmwarePlatform.fromJson);
   }
 
   Future<Unit> createUnit(String token, Map<String, Object?> body) async {
-    final response = await _client
-        .post(
-          _uri('/units'),
-          headers: _jsonHeaders(token),
-          body: jsonEncode(body),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    return Unit.fromJson(
-      (jsonDecode(response.body) as Map).cast<String, Object?>(),
-    );
+    final response = await _send('POST', '/units', token: token, body: body);
+    return Unit.fromJson(_object(response));
   }
 
   Future<({int count, List<Unit> units})> units({
@@ -682,21 +616,13 @@ class PepeunitApi {
         'unit_io_input_uuid=${Uri.encodeQueryComponent(inputUuid)}',
       if (includeIos) 'is_include_output_unit_ios=true',
     ];
-    final response = await _client
-        .get(_pairs('/units', pairs), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    return _unitPage(response.body);
+    final response = await _send('GET', '/units', token: token, pairs: pairs);
+    return _units(response);
   }
 
   Future<Unit> readUnit(String token, String uuid) async {
-    final response = await _client
-        .get(_uri('/units/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    return Unit.fromJson(
-      (jsonDecode(response.body) as Map).cast<String, Object?>(),
-    );
+    final response = await _send('GET', '/units/$uuid', token: token);
+    return Unit.fromJson(_object(response));
   }
 
   Future<Unit> updateUnit(
@@ -704,32 +630,22 @@ class PepeunitApi {
     String uuid,
     Map<String, Object?> patch,
   ) async {
-    final response = await _client
-        .patch(
-          _uri('/units/$uuid'),
-          headers: _jsonHeaders(token),
-          body: jsonEncode(patch),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    return Unit.fromJson(
-      (jsonDecode(response.body) as Map).cast<String, Object?>(),
+    final response = await _send(
+      'PATCH',
+      '/units/$uuid',
+      token: token,
+      body: patch,
     );
+    return Unit.fromJson(_object(response));
   }
 
   Future<void> deleteUnit(String token, String uuid) async {
-    final response = await _client
-        .delete(_uri('/units/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('DELETE', '/units/$uuid', token: token);
   }
 
   Future<Map<String, Object?>> unitEnv(String token, String uuid) async {
-    final response = await _client
-        .get(_uri('/units/env/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    return (jsonDecode(response.body) as Map).cast<String, Object?>();
+    final response = await _send('GET', '/units/env/$uuid', token: token);
+    return _object(response);
   }
 
   Future<void> setUnitEnv(
@@ -737,35 +653,28 @@ class PepeunitApi {
     String uuid,
     Map<String, Object?> env,
   ) async {
-    final response = await _client
-        .patch(
-          _uri('/units/env/$uuid'),
-          headers: _jsonHeaders(token),
-          body: jsonEncode({'env_json_string': jsonEncode(env)}),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send(
+      'PATCH',
+      '/units/env/$uuid',
+      token: token,
+      body: {'env_json_string': jsonEncode(env)},
+    );
   }
 
   Future<void> resetUnitEnv(String token, String uuid) async {
-    final response = await _client
-        .delete(_uri('/units/env/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('DELETE', '/units/env/$uuid', token: token);
   }
 
   Future<({String commit, String? tag})> targetVersion(
     String token,
     String uuid,
   ) async {
-    final response = await _client
-        .get(
-          _uri('/units/get_target_version/$uuid'),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    final json = (jsonDecode(response.body) as Map).cast<String, Object?>();
+    final response = await _send(
+      'GET',
+      '/units/get_target_version/$uuid',
+      token: token,
+    );
+    final json = _object(response);
     final tag = json['tag'];
     return (
       commit: json['commit'] as String? ?? '',
@@ -774,38 +683,32 @@ class PepeunitApi {
   }
 
   Future<String> unitSchema(String token, String uuid) async {
-    final response = await _client
-        .get(
-          _uri('/units/get_current_schema/$uuid'),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    final response = await _send(
+      'GET',
+      '/units/get_current_schema/$uuid',
+      token: token,
+    );
     return response.body;
   }
 
   Future<Uint8List> unitFirmware(String token, String uuid, String kind) async {
-    final response = await _client
-        .get(
-          _uri(
-            '/units/firmware/$kind/$uuid',
-            kind == 'tgz' ? {'wbits': 9, 'level': 9} : null,
-          ),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(const Duration(seconds: 60));
-    _ensureBytes(response);
+    final response = await _send(
+      'GET',
+      '/units/firmware/$kind/$uuid',
+      token: token,
+      query: kind == 'tgz' ? {'wbits': 9, 'level': 9} : null,
+      timeout: const Duration(seconds: 60),
+      bytes: true,
+    );
     return response.bodyBytes;
   }
 
   Future<String> unitStateStorage(String token, String uuid) async {
-    final response = await _client
-        .get(
-          _uri('/units/get_state_storage/$uuid'),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    final response = await _send(
+      'GET',
+      '/units/get_state_storage/$uuid',
+      token: token,
+    );
     final decoded = jsonDecode(response.body);
     return decoded is String ? decoded : response.body;
   }
@@ -815,22 +718,16 @@ class PepeunitApi {
     String uuid,
     String command,
   ) async {
-    final response = await _client
-        .post(
-          _uri('/units/send_command_to_input_base_topic/$uuid', {
-            'command': command,
-          }),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send(
+      'POST',
+      '/units/send_command_to_input_base_topic/$uuid',
+      token: token,
+      query: {'command': command},
+    );
   }
 
   Future<void> bulkUpdateUnits(String token) async {
-    final response = await _client
-        .post(_uri('/units/bulk_update'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('POST', '/units/bulk_update', token: token);
   }
 
   Future<({int count, List<UnitLog> logs})> unitLogs({
@@ -849,45 +746,38 @@ class PepeunitApi {
       for (final level in levels ?? const <String>[])
         'level=${Uri.encodeQueryComponent(level)}',
     ];
-    final response = await _client
-        .get(_pairs('/units/log_list/', pairs), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    final json = (jsonDecode(response.body) as Map).cast<String, Object?>();
-    final logs = <UnitLog>[];
-    for (final item in json['unit_logs'] as List<Object?>? ?? const []) {
-      if (item is! Map) continue;
-      final log = UnitLog.fromJson(item.cast<String, Object?>());
-      if (log.uuid.isEmpty) continue;
-      logs.add(log);
-    }
-    final rawCount = json['count'];
-    return (
-      count: rawCount is num ? rawCount.round() : logs.length,
-      logs: logs,
+    final response = await _send(
+      'GET',
+      '/units/log_list/',
+      token: token,
+      pairs: pairs,
     );
+    final page = _page(response, 'unit_logs', (row) {
+      final log = UnitLog.fromJson(row);
+      return log.uuid.isEmpty ? null : log;
+    });
+    return (count: page.count, logs: page.rows);
   }
 
   Future<Uint8List> downloadUnitLogs(String token, String uuid) async {
-    final response = await _client
-        .get(_uri('/units/logs/$uuid'), headers: _jsonHeaders(token))
-        .timeout(const Duration(seconds: 60));
-    _ensureBytes(response);
+    final response = await _send(
+      'GET',
+      '/units/logs/$uuid',
+      token: token,
+      timeout: const Duration(seconds: 60),
+      bytes: true,
+    );
     return response.bodyBytes;
   }
 
   Future<UnitGroup> createGroup(String token, String name) async {
-    final response = await _client
-        .post(
-          _uri('/unit_groups'),
-          headers: _jsonHeaders(token),
-          body: jsonEncode({'name': name}),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    return UnitGroup.fromJson(
-      (jsonDecode(response.body) as Map).cast<String, Object?>(),
+    final response = await _send(
+      'POST',
+      '/unit_groups',
+      token: token,
+      body: {'name': name},
     );
+    return UnitGroup.fromJson(_object(response));
   }
 
   Future<({int count, List<UnitGroup> groups})> groups({
@@ -898,63 +788,42 @@ class PepeunitApi {
     String order = 'asc',
     String? unitUuid,
   }) async {
-    final response = await _client
-        .get(
-          _uri('/unit_groups', {
-            'offset': offset,
-            'limit': limit,
-            'order_by_group_name': order,
-            if (search.trim().isNotEmpty) 'search_string': search.trim(),
-            'unit_uuid': ?unitUuid,
-          }),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    final json = (jsonDecode(response.body) as Map).cast<String, Object?>();
-    final groups = <UnitGroup>[];
-    for (final item in json['unit_groups'] as List<Object?>? ?? const []) {
-      if (item is! Map) continue;
-      final group = UnitGroup.fromJson(item.cast<String, Object?>());
-      if (group.uuid.isEmpty) continue;
-      groups.add(group);
-    }
-    final rawCount = json['count'];
-    return (
-      count: rawCount is num ? rawCount.round() : groups.length,
-      groups: groups,
+    final response = await _send(
+      'GET',
+      '/unit_groups',
+      token: token,
+      query: {
+        'offset': offset,
+        'limit': limit,
+        'order_by_group_name': order,
+        if (search.trim().isNotEmpty) 'search_string': search.trim(),
+        'unit_uuid': ?unitUuid,
+      },
     );
+    final page = _page(response, 'unit_groups', (row) {
+      final group = UnitGroup.fromJson(row);
+      return group.uuid.isEmpty ? null : group;
+    });
+    return (count: page.count, groups: page.rows);
   }
 
   Future<UnitGroup> readGroup(String token, String uuid) async {
-    final response = await _client
-        .get(_uri('/unit_groups/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    return UnitGroup.fromJson(
-      (jsonDecode(response.body) as Map).cast<String, Object?>(),
-    );
+    final response = await _send('GET', '/unit_groups/$uuid', token: token);
+    return UnitGroup.fromJson(_object(response));
   }
 
   Future<UnitGroup> renameGroup(String token, String uuid, String name) async {
-    final response = await _client
-        .patch(
-          _uri('/unit_groups/$uuid'),
-          headers: _jsonHeaders(token),
-          body: jsonEncode({'name': name}),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    return UnitGroup.fromJson(
-      (jsonDecode(response.body) as Map).cast<String, Object?>(),
+    final response = await _send(
+      'PATCH',
+      '/unit_groups/$uuid',
+      token: token,
+      body: {'name': name},
     );
+    return UnitGroup.fromJson(_object(response));
   }
 
   Future<void> deleteGroup(String token, String uuid) async {
-    final response = await _client
-        .delete(_uri('/unit_groups/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('DELETE', '/unit_groups/$uuid', token: token);
   }
 
   Future<({int count, List<Unit> units})> groupUnits({
@@ -965,29 +834,22 @@ class PepeunitApi {
     String search = '',
     String order = 'asc',
   }) async {
-    final response = await _client
-        .get(
-          _uri('/unit_groups/$uuid/units', {
-            'offset': offset,
-            'limit': limit,
-            'order_by_unit_name': order,
-            if (search.trim().isNotEmpty) 'search_string': search.trim(),
-          }),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    return _unitPage(response.body);
+    final response = await _send(
+      'GET',
+      '/unit_groups/$uuid/units',
+      token: token,
+      query: {
+        'offset': offset,
+        'limit': limit,
+        'order_by_unit_name': order,
+        if (search.trim().isNotEmpty) 'search_string': search.trim(),
+      },
+    );
+    return _units(response);
   }
 
   Future<void> linkGroupUnit(String token, String uuid, String unitUuid) async {
-    final response = await _client
-        .post(
-          _uri('/unit_groups/$uuid/units/$unitUuid'),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('POST', '/unit_groups/$uuid/units/$unitUuid', token: token);
   }
 
   Future<void> unlinkGroupUnit(
@@ -995,13 +857,7 @@ class PepeunitApi {
     String uuid,
     String unitUuid,
   ) async {
-    final response = await _client
-        .delete(
-          _uri('/unit_groups/$uuid/units/$unitUuid'),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send('DELETE', '/unit_groups/$uuid/units/$unitUuid', token: token);
   }
 
   Future<({int count, List<UnitIo> ios})> unitIos({
@@ -1027,30 +883,22 @@ class PepeunitApi {
       if (outputUuid != null && outputUuid.isNotEmpty)
         'output_uuid=${Uri.encodeQueryComponent(outputUuid)}',
     ];
-    final response = await _client
-        .get(_pairs('/unit_ios', pairs), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    final json = (jsonDecode(response.body) as Map).cast<String, Object?>();
-    final ios = <UnitIo>[];
-    for (final item in json['unit_ios'] as List<Object?>? ?? const []) {
-      if (item is! Map) continue;
-      final io = UnitIo.fromJson(item.cast<String, Object?>());
-      if (io.uuid.isEmpty) continue;
-      ios.add(io);
-    }
-    final rawCount = json['count'];
-    return (count: rawCount is num ? rawCount.round() : ios.length, ios: ios);
+    final response = await _send(
+      'GET',
+      '/unit_ios',
+      token: token,
+      pairs: pairs,
+    );
+    final page = _page(response, 'unit_ios', (row) {
+      final io = UnitIo.fromJson(row);
+      return io.uuid.isEmpty ? null : io;
+    });
+    return (count: page.count, ios: page.rows);
   }
 
   Future<UnitIo> readUnitIo(String token, String uuid) async {
-    final response = await _client
-        .get(_uri('/unit_ios/$uuid'), headers: _jsonHeaders(token))
-        .timeout(_timeout);
-    _ensureOk(response);
-    return UnitIo.fromJson(
-      (jsonDecode(response.body) as Map).cast<String, Object?>(),
-    );
+    final response = await _send('GET', '/unit_ios/$uuid', token: token);
+    return UnitIo.fromJson(_object(response));
   }
 
   Future<UnitIo> updateUnitIo(
@@ -1058,31 +906,23 @@ class PepeunitApi {
     String uuid,
     Map<String, Object?> patch,
   ) async {
-    final response = await _client
-        .patch(
-          _uri('/unit_ios/$uuid'),
-          headers: _jsonHeaders(token),
-          body: jsonEncode(patch),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    return UnitIo.fromJson(
-      (jsonDecode(response.body) as Map).cast<String, Object?>(),
+    final response = await _send(
+      'PATCH',
+      '/unit_ios/$uuid',
+      token: token,
+      body: patch,
     );
+    return UnitIo.fromJson(_object(response));
   }
 
   Future<UnitIo> setInputState(String token, String uuid, String state) async {
-    final response = await _client
-        .patch(
-          _uri('/unit_ios/set_state_input/$uuid'),
-          headers: _jsonHeaders(token),
-          body: jsonEncode({'state': state}),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    return UnitIo.fromJson(
-      (jsonDecode(response.body) as Map).cast<String, Object?>(),
+    final response = await _send(
+      'PATCH',
+      '/unit_ios/set_state_input/$uuid',
+      token: token,
+      body: {'state': state},
     );
+    return UnitIo.fromJson(_object(response));
   }
 
   Future<void> createIoLink(
@@ -1090,17 +930,12 @@ class PepeunitApi {
     required String outputUuid,
     required String inputUuid,
   }) async {
-    final response = await _client
-        .post(
-          _uri('/unit_ios/create_link'),
-          headers: _jsonHeaders(token),
-          body: jsonEncode({
-            'output_uuid': outputUuid,
-            'input_uuid': inputUuid,
-          }),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send(
+      'POST',
+      '/unit_ios/create_link',
+      token: token,
+      body: {'output_uuid': outputUuid, 'input_uuid': inputUuid},
+    );
   }
 
   Future<List<PipeIssue>> checkPipe(String token, Uint8List yml) async {
@@ -1111,11 +946,7 @@ class PepeunitApi {
       'pipe.yml',
     );
     _ensureOk(response);
-    return [
-      for (final item
-          in jsonDecode(response.body) as List<Object?>? ?? const [])
-        if (item is Map) PipeIssue.fromJson(item.cast<String, Object?>()),
-    ];
+    return _list(response, PipeIssue.fromJson);
   }
 
   Future<void> setPipe(String token, String uuid, Uint8List yml) async {
@@ -1130,13 +961,12 @@ class PepeunitApi {
   }
 
   Future<Uint8List> pipeConfig(String token, String uuid) async {
-    final response = await _client
-        .get(
-          _uri('/unit_ios/get_data_pipe_config/$uuid'),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureBytes(response);
+    final response = await _send(
+      'GET',
+      '/unit_ios/get_data_pipe_config/$uuid',
+      token: token,
+      bytes: true,
+    );
     return response.bodyBytes;
   }
 
@@ -1147,40 +977,30 @@ class PepeunitApi {
     required int offset,
     required int limit,
   }) async {
-    final response = await _client
-        .get(
-          _uri('/unit_ios/get_data_pipe_data/', {
-            'uuid': uuid,
-            'type': type,
-            'offset': offset,
-            'limit': limit,
-            'order_by_create_date': 'desc',
-          }),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    final json = (jsonDecode(response.body) as Map).cast<String, Object?>();
-    final rows = <PipeRow>[];
-    for (final item in json['pipe_data'] as List<Object?>? ?? const []) {
-      if (item is! Map) continue;
-      rows.add(PipeRow.fromJson(item.cast<String, Object?>()));
-    }
-    final rawCount = json['count'];
-    return (
-      count: rawCount is num ? rawCount.round() : rows.length,
-      rows: rows,
+    final response = await _send(
+      'GET',
+      '/unit_ios/get_data_pipe_data/',
+      token: token,
+      query: {
+        'uuid': uuid,
+        'type': type,
+        'offset': offset,
+        'limit': limit,
+        'order_by_create_date': 'desc',
+      },
     );
+    final page = _page(response, 'pipe_data', PipeRow.fromJson);
+    return (count: page.count, rows: page.rows);
   }
 
   Future<Uint8List> pipeCsv(String token, String uuid) async {
-    final response = await _client
-        .get(
-          _uri('/unit_ios/get_data_pipe_data_csv/$uuid'),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(const Duration(seconds: 60));
-    _ensureBytes(response);
+    final response = await _send(
+      'GET',
+      '/unit_ios/get_data_pipe_data_csv/$uuid',
+      token: token,
+      timeout: const Duration(seconds: 60),
+      bytes: true,
+    );
     return response.bodyBytes;
   }
 
@@ -1196,13 +1016,11 @@ class PepeunitApi {
   }
 
   Future<void> deletePipeData(String token, String uuid) async {
-    final response = await _client
-        .delete(
-          _uri('/unit_ios/delete_data_pipe_data/$uuid'),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send(
+      'DELETE',
+      '/unit_ios/delete_data_pipe_data/$uuid',
+      token: token,
+    );
   }
 
   Future<AccessGrant> createAccess(
@@ -1212,22 +1030,18 @@ class PepeunitApi {
     required String resourceUuid,
     required String resourceType,
   }) async {
-    final response = await _client
-        .post(
-          _uri('/permission'),
-          headers: _jsonHeaders(token),
-          body: jsonEncode({
-            'agent_uuid': agentUuid,
-            'agent_type': agentType,
-            'resource_uuid': resourceUuid,
-            'resource_type': resourceType,
-          }),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    return AccessGrant.fromJson(
-      (jsonDecode(response.body) as Map).cast<String, Object?>(),
+    final response = await _send(
+      'POST',
+      '/permission',
+      token: token,
+      body: {
+        'agent_uuid': agentUuid,
+        'agent_type': agentType,
+        'resource_uuid': resourceUuid,
+        'resource_type': resourceType,
+      },
     );
+    return AccessGrant.fromJson(_object(response));
   }
 
   Future<({int count, List<AccessGrant> grants})> accessGrants({
@@ -1237,31 +1051,22 @@ class PepeunitApi {
     required int offset,
     required int limit,
   }) async {
-    final response = await _client
-        .get(
-          _uri('/permission/get_resource_agents', {
-            'resource_uuid': resourceUuid,
-            'resource_type': resourceType,
-            'offset': offset,
-            'limit': limit,
-          }),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
-    final json = (jsonDecode(response.body) as Map).cast<String, Object?>();
-    final grants = <AccessGrant>[];
-    for (final item in json['permissions'] as List<Object?>? ?? const []) {
-      if (item is! Map) continue;
-      final grant = AccessGrant.fromJson(item.cast<String, Object?>());
-      if (grant.uuid.isEmpty) continue;
-      grants.add(grant);
-    }
-    final rawCount = json['count'];
-    return (
-      count: rawCount is num ? rawCount.round() : grants.length,
-      grants: grants,
+    final response = await _send(
+      'GET',
+      '/permission/get_resource_agents',
+      token: token,
+      query: {
+        'resource_uuid': resourceUuid,
+        'resource_type': resourceType,
+        'offset': offset,
+        'limit': limit,
+      },
     );
+    final page = _page(response, 'permissions', (row) {
+      final grant = AccessGrant.fromJson(row);
+      return grant.uuid.isEmpty ? null : grant;
+    });
+    return (count: page.count, grants: page.rows);
   }
 
   Future<void> deleteAccess(
@@ -1270,16 +1075,12 @@ class PepeunitApi {
     required String agentUuid,
     required String resourceUuid,
   }) async {
-    final response = await _client
-        .delete(
-          _uri('/permission/$uuid', {
-            'agent_uuid': agentUuid,
-            'resource_uuid': resourceUuid,
-          }),
-          headers: _jsonHeaders(token),
-        )
-        .timeout(_timeout);
-    _ensureOk(response);
+    await _send(
+      'DELETE',
+      '/permission/$uuid',
+      token: token,
+      query: {'agent_uuid': agentUuid, 'resource_uuid': resourceUuid},
+    );
   }
 
   Future<String?> uploadEntityIcon(
@@ -1292,8 +1093,7 @@ class PepeunitApi {
   }
 
   Future<Uint8List> icon(String uuid) async {
-    final response = await _client.get(_uri('/icons/$uuid')).timeout(_timeout);
-    _ensureOk(response);
+    final response = await _send('GET', '/icons/$uuid', json: false);
     return response.bodyBytes;
   }
 
@@ -1326,20 +1126,12 @@ class PepeunitApi {
     return Uri.parse('$origin/pepeunit/api/v1$path$tail');
   }
 
-  ({int count, List<Unit> units}) _unitPage(String body) {
-    final json = (jsonDecode(body) as Map).cast<String, Object?>();
-    final units = <Unit>[];
-    for (final item in json['units'] as List<Object?>? ?? const []) {
-      if (item is! Map) continue;
-      final unit = Unit.fromJson(item.cast<String, Object?>());
-      if (unit.uuid.isEmpty) continue;
-      units.add(unit);
-    }
-    final rawCount = json['count'];
-    return (
-      count: rawCount is num ? rawCount.round() : units.length,
-      units: units,
-    );
+  ({int count, List<Unit> units}) _units(http.Response response) {
+    final page = _page(response, 'units', (row) {
+      final unit = Unit.fromJson(row);
+      return unit.uuid.isEmpty ? null : unit;
+    });
+    return (count: page.count, units: page.rows);
   }
 
   Future<http.Response> _file(

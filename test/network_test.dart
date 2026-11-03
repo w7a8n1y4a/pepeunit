@@ -345,6 +345,18 @@ void main() {
       expect(userCanPageBack(offset: 16, count: 20), isTrue);
       expect(userCanPageForward(offset: 0, limit: 34, count: 20), isFalse);
       expect(userCanPageForward(offset: 0, limit: 34, count: 40), isTrue);
+      expect(
+        pageShift(direction: 1, offset: 0, limit: 15, count: 16, capacity: 15),
+        15,
+      );
+      expect(
+        pageShift(direction: 1, offset: 0, limit: 16, count: 16, capacity: 16),
+        isNull,
+      );
+      expect(
+        pageWindowText(offset: 0, limit: 16, count: 0, ofWord: 'of'),
+        '0 of 0',
+      );
       final narrow = usersBoard(
         tick: searchScaleTick,
         uuids: [for (var i = 0; i < 16; i++) 'u$i'],

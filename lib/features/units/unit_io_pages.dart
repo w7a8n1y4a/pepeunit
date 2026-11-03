@@ -8,7 +8,6 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
-import '../../registry/registry_view.dart';
 import '../../units/unit.dart';
 import '../../units/unit_view.dart';
 import '../hex_page.dart';
@@ -1191,20 +1190,17 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
               offset: _offset,
               limit: limit,
               count: _count,
+              capacity: headPageLimit(scaleTickMax),
               onStep: (direction) {
-                if (direction < 0 &&
-                    !repoCanPageBack(offset: _offset, count: _count)) {
-                  return;
-                }
-                if (direction > 0 &&
-                    !repoCanPageForward(
-                      offset: _offset,
-                      limit: limit,
-                      count: _count,
-                    )) {
-                  return;
-                }
-                setState(() => _offset += direction * limit);
+                final next = pageShift(
+                  direction: direction,
+                  offset: _offset,
+                  limit: limit,
+                  count: _count,
+                  capacity: headPageLimit(scaleTickMax),
+                );
+                if (next == null) return;
+                setState(() => _offset = next);
                 _load();
               },
             ),

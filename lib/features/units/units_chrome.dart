@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import '../../hive/hex_scene.dart';
 import '../../locale/languages.dart';
 import '../../navigation/sections.dart';
-import '../../registry/registry_view.dart';
+import '../../instances/network_view.dart';
 import '../../units/unit.dart';
 import '../page_window.dart';
 import '../slanted_choices.dart';
@@ -65,6 +65,7 @@ class UnitWindow extends StatelessWidget {
     required this.offset,
     required this.limit,
     required this.count,
+    required this.capacity,
     required this.onStep,
     this.order,
     this.onOrder,
@@ -75,24 +76,47 @@ class UnitWindow extends StatelessWidget {
   final int offset;
   final int limit;
   final int count;
+
+  /// Cards that fit at the last scale tick. Arrows stay still until the
+  /// list is larger than this.
+  final int capacity;
   final ValueChanged<int> onStep;
   final String? order;
   final ValueChanged<String>? onOrder;
 
   @override
   Widget build(BuildContext context) {
-    final range = repoWindowText(
+    final range = pageWindowText(
       offset: offset,
       limit: limit,
       count: count,
       ofWord: unitText(language, 'из', 'of'),
     );
-    final back = repoCanPageBack(offset: offset, count: count);
-    final forward = repoCanPageForward(
+    final back = pageCanBack(offset: offset, count: count, capacity: capacity);
+    final forward = pageCanForward(
       offset: offset,
       limit: limit,
       count: count,
+      capacity: capacity,
     );
+    final previous = unitText(language, 'Предыдущие', 'Previous');
+    final next = unitText(language, 'Следующие', 'Next');
+    if (order != null && onOrder != null) {
+      return OrderWindow(
+        orders: [
+          for (final value in const ['asc', 'desc'])
+            (value: value, label: unitOrderLabel(language, value)),
+        ],
+        selected: order!,
+        onOrder: onOrder!,
+        range: range,
+        canBack: back,
+        canForward: forward,
+        previousLabel: previous,
+        nextLabel: next,
+        onStep: onStep,
+      );
+    }
     return LayoutBuilder(
       builder: (context, constraints) {
         final side = constraints.maxWidth;
@@ -102,78 +126,23 @@ class UnitWindow extends StatelessWidget {
           decoration: TextDecoration.none,
           height: 1.05,
         );
-        final window = PageWindow(
-          range: range,
-          canBack: back,
-          canForward: forward,
-          previousLabel: unitText(language, 'Предыдущие', 'Previous'),
-          nextLabel: unitText(language, 'Следующие', 'Next'),
-          onStep: onStep,
-          style: style,
-          chevronExtent: side * 0.18,
-        );
-        if (order == null || onOrder == null) {
-          return Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: side * 0.12,
-              vertical: side * 0.28,
-            ),
-            child: window,
-          );
-        }
         return Padding(
-          padding: EdgeInsets.fromLTRB(
-            side * 0.12,
-            side * 0.22,
-            side * 0.12,
-            side * 0.16,
+          padding: EdgeInsets.symmetric(
+            horizontal: side * 0.12,
+            vertical: side * 0.28,
           ),
-          child: Column(
-            children: [
-              Expanded(
-                child: Row(
-                  children: [
-                    for (final value in const ['asc', 'desc'])
-                      Expanded(child: _order(value, style)),
-                  ],
-                ),
-              ),
-              Container(
-                height: 1,
-                margin: EdgeInsets.symmetric(horizontal: side * 0.06),
-                color: const Color(0xFFA1A1AA),
-              ),
-              Expanded(child: window),
-            ],
+          child: PageWindow(
+            range: range,
+            canBack: back,
+            canForward: forward,
+            previousLabel: previous,
+            nextLabel: next,
+            onStep: onStep,
+            style: style,
+            chevronExtent: side * 0.18,
           ),
         );
       },
-    );
-  }
-
-  Widget _order(String value, TextStyle style) {
-    final on = order == value;
-    final label = unitOrderLabel(language, value);
-    return Semantics(
-      button: true,
-      selected: on,
-      label: label,
-      excludeSemantics: true,
-      onTap: () => onOrder!(value),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => onOrder!(value),
-        child: HoverPop(
-          child: Center(
-            child: Text(
-              label,
-              style: style.copyWith(
-                color: on ? const Color(0xFFFFFFFF) : hexMuted,
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

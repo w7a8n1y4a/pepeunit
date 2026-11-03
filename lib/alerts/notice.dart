@@ -167,13 +167,22 @@ int noticePageLimit(int tick) =>
     scaleTickCells(tick.clamp(scaleTickMin, scaleTickMax)) - 3;
 
 bool noticeCanPageBack({required int offset, required int count}) =>
-    count > noticePageLimit(scaleTickMax) && offset > 0;
+    pageCanBack(
+      offset: offset,
+      count: count,
+      capacity: noticePageLimit(scaleTickMax),
+    );
 
 bool noticeCanPageForward({
   required int offset,
   required int limit,
   required int count,
-}) => count > noticePageLimit(scaleTickMax) && offset + limit < count;
+}) => pageCanForward(
+  offset: offset,
+  limit: limit,
+  count: count,
+  capacity: noticePageLimit(scaleTickMax),
+);
 
 /// Back, filter, type menu, then notice cards. The tick caps the disk.
 NetworkBoard noticesBoard({

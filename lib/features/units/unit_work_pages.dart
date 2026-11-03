@@ -6,7 +6,6 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
-import '../../registry/registry_view.dart';
 import '../../registry/repo.dart';
 import '../../units/unit.dart';
 import '../../units/unit_view.dart';
@@ -253,6 +252,7 @@ class _UnitLogsPageState extends State<UnitLogsPage> {
             offset: _offset,
             limit: limit,
             count: _count,
+            capacity: headPageLimit(scaleTickMax, head: 3),
             onStep: _step,
           ),
         );
@@ -306,14 +306,15 @@ class _UnitLogsPageState extends State<UnitLogsPage> {
   void _step(int direction) {
     final limit = AppScope.of(context)
         .cappedLimit(headPageLimit(widget.scope, head: 3));
-    if (direction < 0 && !repoCanPageBack(offset: _offset, count: _count)) {
-      return;
-    }
-    if (direction > 0 &&
-        !repoCanPageForward(offset: _offset, limit: limit, count: _count)) {
-      return;
-    }
-    setState(() => _offset += direction * limit);
+    final next = pageShift(
+      direction: direction,
+      offset: _offset,
+      limit: limit,
+      count: _count,
+      capacity: headPageLimit(scaleTickMax, head: 3),
+    );
+    if (next == null) return;
+    setState(() => _offset = next);
     _load();
   }
 

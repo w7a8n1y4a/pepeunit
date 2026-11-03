@@ -8,7 +8,6 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
-import '../../registry/registry_view.dart';
 import '../../units/unit.dart';
 import '../../units/unit_view.dart';
 import '../hex_page.dart';
@@ -34,7 +33,7 @@ class _UnitsPageState extends State<UnitsPage> {
   var _failureOpen = false;
   String? _failure;
   var _ticket = 0;
-  Timer? _searchWait;
+  final _typing = SearchDelay();
   List<Unit> _units = const [];
   var _count = 0;
   late final UnitQuery _local = UnitQuery();
@@ -48,6 +47,9 @@ class _UnitsPageState extends State<UnitsPage> {
         : unitPageLimit(widget.scope);
     return AppScope.of(context).cappedLimit(asked);
   }
+
+  int _capacity() =>
+      widget.pick ? headPageLimit(scaleTickMax) : unitPageLimit(scaleTickMax);
 
   @override
   void initState() {
@@ -67,7 +69,7 @@ class _UnitsPageState extends State<UnitsPage> {
 
   @override
   void dispose() {
-    _searchWait?.cancel();
+    _typing.dispose();
     super.dispose();
   }
 
@@ -151,6 +153,7 @@ class _UnitsPageState extends State<UnitsPage> {
             offset: _offset,
             limit: limit,
             count: _count,
+            capacity: _capacity(),
             order: _query(context).order,
             onOrder: _order,
             onStep: _step,
@@ -203,8 +206,7 @@ class _UnitsPageState extends State<UnitsPage> {
   }
 
   void _searchLater() {
-    _searchWait?.cancel();
-    _searchWait = Timer(const Duration(milliseconds: 300), () {
+    _typing.later(() {
       if (!mounted) return;
       setState(() => _offset = 0);
       _load();
@@ -212,7 +214,7 @@ class _UnitsPageState extends State<UnitsPage> {
   }
 
   void _retune() {
-    _searchWait?.cancel();
+    _typing.cancel();
     setState(() => _offset = 0);
     _load();
   }
@@ -228,14 +230,15 @@ class _UnitsPageState extends State<UnitsPage> {
   void _step(int direction) {
     if (_loading) return;
     final limit = _rowLimit();
-    if (direction < 0 && !repoCanPageBack(offset: _offset, count: _count)) {
-      return;
-    }
-    if (direction > 0 &&
-        !repoCanPageForward(offset: _offset, limit: limit, count: _count)) {
-      return;
-    }
-    setState(() => _offset += direction * limit);
+    final next = pageShift(
+      direction: direction,
+      offset: _offset,
+      limit: limit,
+      count: _count,
+      capacity: _capacity(),
+    );
+    if (next == null) return;
+    setState(() => _offset = next);
     _load();
   }
 

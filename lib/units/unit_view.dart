@@ -57,7 +57,7 @@ class UnitQuery {
   }
 
   bool setOrder(String value) {
-    if ((value != 'asc' && value != 'desc') || value == order) return false;
+    if (!takeSort(order, value)) return false;
     order = value;
     return true;
   }

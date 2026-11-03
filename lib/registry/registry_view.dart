@@ -29,7 +29,7 @@ class RepoQuery {
   }
 
   bool setOrder(String value) {
-    if ((value != 'asc' && value != 'desc') || value == order) return false;
+    if (!takeSort(order, value)) return false;
     order = value;
     return true;
   }
@@ -44,22 +44,25 @@ String repoWindowText({
   required int limit,
   required int count,
   required String ofWord,
-}) {
-  if (count <= 0) return '0 $ofWord 0';
-  final start = offset + 1;
-  if (start > count) return '0 $ofWord $count';
-  final end = offset + limit < count ? offset + limit : count;
-  return '$start-$end $ofWord $count';
-}
+}) =>
+    pageWindowText(offset: offset, limit: limit, count: count, ofWord: ofWord);
 
-bool repoCanPageBack({required int offset, required int count}) =>
-    count > repoPageLimit(scaleTickMax) && offset > 0;
+bool repoCanPageBack({required int offset, required int count}) => pageCanBack(
+  offset: offset,
+  count: count,
+  capacity: repoPageLimit(scaleTickMax),
+);
 
 bool repoCanPageForward({
   required int offset,
   required int limit,
   required int count,
-}) => count > repoPageLimit(scaleTickMax) && offset + limit < count;
+}) => pageCanForward(
+  offset: offset,
+  limit: limit,
+  count: count,
+  capacity: repoPageLimit(scaleTickMax),
+);
 
 /// Back, filter, page window, then repo cards. The tick caps the disk.
 NetworkBoard reposBoard({
