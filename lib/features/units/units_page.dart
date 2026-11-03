@@ -263,9 +263,9 @@ class _UnitsPageState extends State<UnitsPage> {
         query: _query(context),
       );
       if (!mounted || ticket != _ticket) return;
-      for (final unit in page.units) {
-        unawaited(model.ensureIcon(unit.iconUuid));
-      }
+      unawaited(
+        model.ensureIcons([for (final unit in page.units) unit.iconUuid]),
+      );
       setState(() {
         _units = page.units;
         _count = page.count;

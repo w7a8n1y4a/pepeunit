@@ -38,6 +38,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   pqcrypto: ^0.4.3
   http: ^1.6.0
+  path_provider: ^2.1.5
   crypto: ^3.0.7
   flutter_secure_storage: ^11.2.0
   shared_preferences: ^2.5.6

@@ -11,6 +11,9 @@ import 'account/identity.dart';
 import 'account/key_file_port.dart';
 import 'account/vault.dart';
 import 'account/vault_store.dart';
+import 'api/icon_disk.dart';
+import 'api/icon_disk_open.dart';
+import 'api/icon_store.dart';
 import 'api/pepeunit_api.dart';
 import 'instances/directory_user.dart';
 import 'instances/hosted_url.dart';
@@ -40,9 +43,11 @@ class AppModel extends ChangeNotifier {
     KeyFilePort? files,
     PepeunitApi Function(String origin)? api,
     Future<String?> Function()? hostedUrl,
+    Future<IconDisk?> Function()? iconDisk,
     this.openLink,
   }) : files = files ?? PlatformKeyFilePort(),
-       hostedUrl = hostedUrl ?? readHostedInstanceUrl {
+       hostedUrl = hostedUrl ?? readHostedInstanceUrl,
+       _icons = IconStore(openDisk: iconDisk ?? openIconDisk) {
     this.api = api ?? _cachedApi;
   }
 
@@ -76,6 +81,7 @@ class AppModel extends ChangeNotifier {
     _noticeClient?.close();
     super.dispose();
   }
+
   final NetworkQuery query = NetworkQuery();
   final UserQuery userQuery = UserQuery();
   ({int count, List<DirectoryUser> users})? directory;
@@ -104,7 +110,10 @@ class AppModel extends ChangeNotifier {
   final Set<String> discovered = {};
   final Map<String, PeerHead> peers = {};
   final Map<String, InstancePortrait> portraits = {};
-  final Map<String, Uint8List> icons = {};
+
+  /// Icon bytes, keyed by origin and uuid. Reads go through [_icons].
+  final IconStore _icons;
+  Map<String, Uint8List> get icons => _icons.memory;
   Map<String, Object?>? targetSettings;
   Future<void> _pending = Future<void>.value();
   var _ticket = 0;
@@ -169,13 +178,13 @@ class AppModel extends ChangeNotifier {
   Uint8List? cachedIcon(String? uuid) {
     final url = target?.url;
     if (url == null || uuid == null || uuid.isEmpty) return null;
-    return icons['${originOf(url)}/$uuid'];
+    return _icons.peek(IconStore.keyOf(originOf(url), uuid));
   }
 
   Uint8List? iconOf(String url) {
     final uuid = portraitOf(url)?.iconUuid;
     if (uuid == null) return null;
-    return icons['${originOf(url)}/$uuid'];
+    return _icons.peek(IconStore.keyOf(originOf(url), uuid));
   }
 
   /// Urls the client knows, after the allow and deny lists and the search.
@@ -947,13 +956,13 @@ class AppModel extends ChangeNotifier {
     String entityType,
     Uint8List png,
   ) async {
-    final uuid = await _api.uploadEntityIcon(
-      _token,
-      entityUuid,
-      entityType,
-      png,
-    );
-    if (uuid != null) unawaited(ensureIcon(uuid));
+    final current = _signedTarget();
+    final uuid = await api(originOf(current.url))
+        .uploadEntityIcon(current.token!, entityUuid, entityType, png);
+    if (uuid != null && uuid.isNotEmpty) {
+      await _icons.remember(IconStore.keyOf(originOf(current.url), uuid), png);
+      _notifySoon();
+    }
   }
 
   /// Admin and Owner. Schedules an update of every repository.
@@ -1000,16 +1009,14 @@ class AppModel extends ChangeNotifier {
     );
   }
 
-  Future<void> ensureIcon(String? uuid) async {
+  /// Loads every icon the current instance still lacks, through [IconStore].
+  Future<void> ensureIcons(Iterable<String?> uuids) {
     final current = target;
-    if (current == null || uuid == null || uuid.isEmpty) return;
-    final key = '${originOf(current.url)}/$uuid';
-    if (icons.containsKey(key)) return;
-    try {
-      icons[key] = await api(originOf(current.url)).icon(uuid);
-      notifyListeners();
-    } catch (_) {}
+    if (current == null) return Future<void>.value();
+    return _fillIcons(url: current.url, uuids: uuids, active: () => !_disposed);
   }
+
+  Future<void> ensureIcon(String? uuid) => ensureIcons([uuid]);
 
   Future<void> selectTarget(String raw) async {
     final url = canonicalInstanceUrl(raw);
@@ -1071,16 +1078,26 @@ class AppModel extends ChangeNotifier {
       if (ticket != _ticket) return;
       await _commit();
       final limit = effective.pagination < 1 ? 100 : effective.pagination;
-      final urls = await collectPages(
-        limit: cappedLimit(limit),
-        fetch: (offset, pageLimit) =>
-            client.peerUrls(offset: offset, limit: pageLimit),
+      final pageLimit = cappedLimit(limit);
+      // The url list and the peer rows do not depend on each other.
+      final urlsFuture = collectPages(
+        limit: pageLimit,
+        fetch: (offset, size) => client.peerUrls(offset: offset, limit: size),
       );
-      final heads = await collectPages(
-        limit: cappedLimit(limit),
-        fetch: (offset, pageLimit) =>
-            client.peers(offset: offset, limit: pageLimit),
+      final headsFuture = collectPages(
+        limit: pageLimit,
+        fetch: (offset, size) => client.peers(offset: offset, limit: size),
       );
+      final List<String> urls;
+      final List<PeerHead> heads;
+      try {
+        urls = await urlsFuture;
+        heads = await headsFuture;
+      } catch (_) {
+        unawaited(urlsFuture.then((_) {}, onError: (_) {}));
+        unawaited(headsFuture.then((_) {}, onError: (_) {}));
+        rethrow;
+      }
       if (ticket != _ticket) return;
       peers.clear();
       for (final head in heads) {
@@ -1187,24 +1204,38 @@ class AppModel extends ChangeNotifier {
       final user = await client.readDirectoryUser(token, record.userUuid!);
       final problems = <String>[];
       Uint8List? png;
+      AlertPrefs? alerts;
       final iconUuid = user.iconUuid;
-      if (iconUuid != null) {
+      Future<void> pullIcon() async {
+        if (iconUuid == null) return;
         try {
-          final bytes = await client.icon(iconUuid);
+          final bytes = await _icons.load(
+            origin: originOf(url),
+            uuid: iconUuid,
+            fetch: () => client.icon(iconUuid),
+          );
           if (pngSize(bytes) != null) png = bytes;
         } catch (error) {
           problems.add('$host: $error');
         }
       }
-      AlertPrefs? alerts;
-      try {
-        alerts = AlertPrefs.fromPatch(await client.notificationSettings(token));
-      } catch (error) {
-        problems.add('$host: $error');
+
+      Future<void> pullAlerts() async {
+        try {
+          alerts = AlertPrefs.fromPatch(
+            await client.notificationSettings(token),
+          );
+        } catch (error) {
+          problems.add('$host: $error');
+        }
       }
+
+      await Future.wait([pullIcon(), pullAlerts()]);
+      final savedPng = png;
+      final savedAlerts = alerts;
       vault.login = user.login ?? '';
-      if (png != null) vault.iconPng = base64.encode(png);
-      if (alerts != null) vault.alerts = alerts;
+      if (savedPng != null) vault.iconPng = base64.encode(savedPng);
+      if (savedAlerts != null) vault.alerts = savedAlerts;
       await _commit();
       return SyncReport(problems.isEmpty ? 1 : 0, problems);
     } catch (error) {
@@ -1236,9 +1267,13 @@ class AppModel extends ChangeNotifier {
     final portrait = await client.portrait();
     portraits[url] = portrait;
     final uuid = portrait.iconUuid;
-    if (uuid != null) {
+    if (uuid != null && uuid.isNotEmpty) {
       try {
-        icons['${originOf(url)}/$uuid'] ??= await client.icon(uuid);
+        await _icons.load(
+          origin: originOf(url),
+          uuid: uuid,
+          fetch: () => client.icon(uuid),
+        );
       } catch (_) {}
     }
     if (!vault.pinned.contains(url)) vault.pinned.add(url);
@@ -1338,7 +1373,7 @@ class AppModel extends ChangeNotifier {
         .uploadInstanceIcon(current.token!, png);
     final uuid = newUuid ?? portraits[current.url]?.iconUuid;
     if (uuid != null && uuid.isNotEmpty) {
-      icons['${originOf(current.url)}/$uuid'] = png;
+      await _icons.remember(IconStore.keyOf(originOf(current.url), uuid), png);
       final existing = portraits[current.url];
       if (existing != null) {
         portraits[current.url] = existing.copyWith(iconUuid: uuid);
@@ -1407,17 +1442,27 @@ class AppModel extends ChangeNotifier {
   /// notifies once for the batch instead of once per icon.
   Future<void> _fillIcons({
     required String url,
-    required List<String?> uuids,
+    required Iterable<String?> uuids,
     required bool Function() active,
-  }) async {
+  }) {
     final origin = originOf(url);
-    final client = api(origin);
-    final missing = <String>[];
+    return _fillIconJobs([
+      for (final uuid in uuids)
+        if (uuid != null && uuid.isNotEmpty) (origin, uuid),
+    ], active);
+  }
+
+  Future<void> _fillIconJobs(
+    List<(String origin, String uuid)> jobs,
+    bool Function() active,
+  ) async {
+    final missing = <(String origin, String uuid)>[];
     final wanted = <String>{};
-    for (final uuid in uuids) {
-      if (uuid == null || uuid.isEmpty || !wanted.add(uuid)) continue;
-      if (icons.containsKey('$origin/$uuid')) continue;
-      missing.add(uuid);
+    for (final job in jobs) {
+      final key = IconStore.keyOf(job.$1, job.$2);
+      if (!wanted.add(key)) continue;
+      if (_icons.peek(key) != null) continue;
+      missing.add(job);
     }
     if (missing.isEmpty) return;
     var index = 0;
@@ -1425,11 +1470,14 @@ class AppModel extends ChangeNotifier {
     Future<void> worker() async {
       while (index < missing.length) {
         if (!active()) return;
-        final uuid = missing[index++];
+        final job = missing[index++];
         try {
-          final bytes = await client.icon(uuid);
+          await _icons.load(
+            origin: job.$1,
+            uuid: job.$2,
+            fetch: () => api(job.$1).icon(job.$2),
+          );
           if (!active()) return;
-          icons['$origin/$uuid'] = bytes;
           filled = true;
         } catch (_) {}
       }
@@ -1536,6 +1584,12 @@ class AppModel extends ChangeNotifier {
 
   Future<void> _loadPortraits(int ticket, Iterable<String> urls) async {
     final pending = urls.toList();
+    final jobs = <(String origin, String uuid)>[];
+    void take(String url, String? uuid) {
+      if (uuid == null || uuid.isEmpty) return;
+      jobs.add((originOf(url), uuid));
+    }
+
     var index = 0;
     Future<void> worker() async {
       while (index < pending.length) {
@@ -1545,37 +1599,20 @@ class AppModel extends ChangeNotifier {
           final portrait = await api(originOf(url)).portrait();
           if (ticket != _ticket) return;
           portraits[url] = portrait;
-          final uuid = portrait.iconUuid;
-          if (uuid != null) {
-            final key = '${originOf(url)}/$uuid';
-            icons[key] ??= await api(originOf(url)).icon(uuid);
-          }
-          notifyListeners();
+          take(url, portrait.iconUuid);
+          _notifySoon();
         } catch (_) {
-          final cachedUuid = portraits[url]?.iconUuid;
-          if (cachedUuid != null) {
-            final key = '${originOf(url)}/$cachedUuid';
-            try {
-              icons[key] ??= await api(originOf(url)).icon(cachedUuid);
-              notifyListeners();
-            } catch (_) {}
-          }
+          take(url, portraits[url]?.iconUuid);
         }
       }
     }
 
     final count = pending.length < 4 ? pending.length : 4;
     await Future.wait([for (var i = 0; i < count; i++) worker()]);
+    if (ticket != _ticket) return;
     final targetUrl = vault.target?.url;
-    final targetUuid = targetUrl == null
-        ? null
-        : portraits[targetUrl]?.iconUuid;
-    if (targetUrl != null && targetUuid != null) {
-      final key = '${originOf(targetUrl)}/$targetUuid';
-      try {
-        icons[key] ??= await api(originOf(targetUrl)).icon(targetUuid);
-      } catch (_) {}
-    }
+    if (targetUrl != null) take(targetUrl, portraits[targetUrl]?.iconUuid);
+    await _fillIconJobs(jobs, () => ticket == _ticket);
   }
 
   String _keepUrl(String raw) {

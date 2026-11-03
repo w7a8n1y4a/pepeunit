@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -216,9 +218,9 @@ class _GroupsPageState extends State<GroupsPage> {
         order: _order,
       );
       if (!mounted) return;
-      for (final group in page.groups) {
-        model.ensureIcon(group.iconUuid);
-      }
+      unawaited(
+        model.ensureIcons([for (final group in page.groups) group.iconUuid]),
+      );
       setState(() {
         _groups = page.groups;
         _count = page.count;
@@ -732,6 +734,10 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
         limit: AppScope.of(context).cappedLimit(headPageLimit(widget.scope)),
       );
       if (!mounted) return;
+      unawaited(
+        AppScope.of(context)
+            .ensureIcons([for (final unit in page.units) unit.iconUuid]),
+      );
       setState(() {
         _units = page.units;
         _count = page.count;
