@@ -85,11 +85,11 @@ class _GroupsPageState extends State<GroupsPage> {
           'query' => HexSlot(
             id: 'query',
             title: unitText(language, 'Фильтр', 'Filter'),
-            color: unitsColor,
+            color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
             body: LineInput(
-              color: unitsColor,
+              color: unitGroupsColor,
               controller: _search,
               hint: unitText(language, 'Поиск', 'Search'),
               leading: 'assets/icons/search.svg',
@@ -105,7 +105,7 @@ class _GroupsPageState extends State<GroupsPage> {
           'create' => HexSlot(
             id: 'create',
             title: unitText(language, 'Создать', 'Create'),
-            color: unitsColor,
+            color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
             icon: 'assets/icons/plus.svg',
@@ -113,7 +113,7 @@ class _GroupsPageState extends State<GroupsPage> {
           'window' => HexSlot(
             id: 'window',
             title: unitText(language, 'Страница', 'Page'),
-            color: unitsColor,
+            color: unitGroupsColor,
             busy: _loading,
             q: slot.q,
             r: slot.r,
@@ -139,7 +139,7 @@ class _GroupsPageState extends State<GroupsPage> {
           _ => HexSlot(
             id: slot.id,
             title: _title(slot.id),
-            color: unitsColor,
+            color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
             icon: model.cachedIcon(_icon(slot.id)) == null
@@ -281,12 +281,12 @@ class _GroupCreatePageState extends State<GroupCreatePage> {
           'name' => HexSlot(
             id: 'name',
             title: unitText(language, 'Имя', 'Name'),
-            color: unitsColor,
+            color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
             tappable: false,
             body: LineInput(
-              color: unitsColor,
+              color: unitGroupsColor,
               controller: _name,
               hint: unitText(language, 'группа', 'group'),
               onSubmitted: (_) => _create(),
@@ -295,7 +295,7 @@ class _GroupCreatePageState extends State<GroupCreatePage> {
           'create' => HexSlot(
             id: 'create',
             title: unitText(language, 'Создать', 'Create'),
-            color: unitsColor,
+            color: unitGroupsColor,
             busy: _busy,
             q: slot.q,
             r: slot.r,
@@ -304,7 +304,7 @@ class _GroupCreatePageState extends State<GroupCreatePage> {
           _ => HexSlot(
             id: slot.id,
             title: slot.id,
-            color: unitsColor,
+            color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
           ),
@@ -401,13 +401,13 @@ class _GroupPageState extends State<GroupPage> {
           'name' => HexSlot(
             id: 'name',
             title: unitText(language, 'Имя', 'Name'),
-            color: unitsColor,
+            color: unitGroupsColor,
             busy: _loading || _pending == 'name',
             q: slot.q,
             r: slot.r,
             tappable: false,
             body: LineInput(
-              color: unitsColor,
+              color: unitGroupsColor,
               controller: _name,
               hint: unitText(language, 'группа', 'group'),
               onSubmitted: (_) => _rename(),
@@ -416,7 +416,7 @@ class _GroupPageState extends State<GroupPage> {
           'icon' => HexSlot(
             id: 'icon',
             title: unitText(language, 'Иконка', 'Icon'),
-            color: dropColor(_hot, unitsColor),
+            color: dropColor(_hot, unitGroupsColor),
             q: slot.q,
             r: slot.r,
             icon: model.cachedIcon(_group?.iconUuid) == null
@@ -427,7 +427,7 @@ class _GroupPageState extends State<GroupPage> {
           'members' => HexSlot(
             id: 'members',
             title: unitText(language, 'Состав', 'Members'),
-            color: unitsColor,
+            color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
             icon: 'assets/icons/micro.svg',
@@ -444,7 +444,7 @@ class _GroupPageState extends State<GroupPage> {
           _ => HexSlot(
             id: slot.id,
             title: slot.id,
-            color: unitsColor,
+            color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
           ),
@@ -621,7 +621,7 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
           'add' => HexSlot(
             id: 'add',
             title: unitText(language, 'Добавить', 'Add'),
-            color: unitsColor,
+            color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
             icon: 'assets/icons/plus.svg',
@@ -629,7 +629,7 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
           'window' => HexSlot(
             id: 'window',
             title: unitText(language, 'Страница', 'Page'),
-            color: unitsColor,
+            color: unitGroupsColor,
             busy: _loading,
             q: slot.q,
             r: slot.r,
@@ -675,6 +675,7 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
             q: slot.q,
             r: slot.r,
             image: model.cachedIcon(_unit(slot.id)?.iconUuid),
+            color: unitGroupsColor,
           ),
         },
     ];
@@ -795,7 +796,7 @@ class _MembershipPageState extends State<MembershipPage> {
           'open' => HexSlot(
             id: 'open',
             title: unitText(language, 'Открыть', 'Open'),
-            color: unitsColor,
+            color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
             icon: 'assets/icons/micro.svg',
@@ -812,7 +813,7 @@ class _MembershipPageState extends State<MembershipPage> {
           _ => HexSlot(
             id: slot.id,
             title: slot.id,
-            color: unitsColor,
+            color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
           ),

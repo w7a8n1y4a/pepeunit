@@ -46,6 +46,7 @@ HexSlot unitMark({
   Uint8List? image,
   bool tappable = true,
   bool busy = false,
+  Color? color,
 }) {
   final commit = shortCommit(unit.currentCommit ?? unit.commit);
   final corner = commit.isEmpty ? unit.branch : commit;
@@ -54,7 +55,7 @@ HexSlot unitMark({
     title: unit.name,
     footer: unitVisibilityLabel(language, unit.visibility),
     footerLeft: corner.isEmpty ? null : corner,
-    color: unitsColor,
+    color: color ?? unitsColor,
     q: q,
     r: r,
     icon: image == null ? 'assets/icons/micro.svg' : null,
