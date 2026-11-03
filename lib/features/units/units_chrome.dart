@@ -12,6 +12,12 @@ import '../slanted_choices.dart';
 
 Color get unitsColor => sectionById('units')!.color;
 
+/// Create-unit cells. Green reads as «add».
+const unitAddColor = Color(0xFF00C853);
+
+/// Unit groups. No home section uses this hue.
+const unitGroupsColor = Color(0xFF00E5FF);
+
 String unitText(String language, String ru, String en) =>
     phrase(language, {'ru': ru, 'en': en});
 
@@ -140,68 +146,6 @@ class UnitWindow extends StatelessWidget {
             onStep: onStep,
             style: style,
             chevronExtent: side * 0.18,
-          ),
-        );
-      },
-    );
-  }
-}
-
-/// One horizontal filter row. The row scales down until it fits the cell.
-class FilterLine extends StatelessWidget {
-  const FilterLine({
-    required this.choices,
-    required this.selected,
-    required this.onTap,
-    super.key,
-  });
-
-  final List<({String id, String label})> choices;
-  final bool Function(String id) selected;
-  final ValueChanged<String> onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final font = cellFont(constraints.maxWidth);
-        return SizedBox(
-          width: constraints.maxWidth,
-          height: constraints.maxHeight,
-          child: FittedBox(
-            fit: BoxFit.scaleDown,
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                for (final choice in choices)
-                  Semantics(
-                    button: true,
-                    selected: selected(choice.id),
-                    label: choice.label,
-                    excludeSemantics: true,
-                    onTap: () => onTap(choice.id),
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onTap: () => onTap(choice.id),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(horizontal: font * 0.28),
-                        child: Text(
-                          choice.label,
-                          style: TextStyle(
-                            fontFamily: 'OpenGost Type B',
-                            fontSize: font,
-                            height: 1,
-                            decoration: TextDecoration.none,
-                            color: selected(choice.id)
-                                ? const Color(0xFFFFFFFF)
-                                : hexMuted,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-              ],
-            ),
           ),
         );
       },

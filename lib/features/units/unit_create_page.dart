@@ -173,7 +173,7 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
           busy: _busy,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/plus.svg',
+          icon: 'assets/icons/unit_add.svg',
         );
       default:
         return HexSlot(

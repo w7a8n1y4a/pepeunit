@@ -31,7 +31,7 @@ void main() {
     expect(unitNameOk('ab'), isFalse);
     expect(unitNameOk('room.1'), isTrue);
     expect(unitNameOk('bad name'), isFalse);
-    expect(unitPageLimit(searchScaleTick), 9);
+    expect(headPageLimit(searchScaleTick, head: unitsHead), 9);
     expect(
       unitMenuIds(owned: true, private: true),
       containsAll(['settings', 'env', 'operate', 'access']),
@@ -49,6 +49,18 @@ void main() {
       ioMenuIds(owned: false, input: true, private: false, datapipe: true),
       ['card', 'summary', 'value', 'links'],
     );
+  });
+
+  test('the units menu is Back in the center, add, search and groups', () {
+    final board = unitsMenuBoard();
+    expect([for (final slot in board.slots) slot.id], [
+      'back',
+      'add',
+      'search',
+      'groups',
+    ]);
+    expect((board.slots.first.q, board.slots.first.r), (0, 0));
+    expect(board.canZoomIn, isFalse);
   });
 
   testWidgets('search opens on own units and asks for the creator', (

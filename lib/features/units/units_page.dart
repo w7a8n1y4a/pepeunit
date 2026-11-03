@@ -13,10 +13,11 @@ import '../../units/unit_view.dart';
 import '../hex_page.dart';
 import '../line_input.dart';
 import '../network/network_chrome.dart';
+import '../slanted_choices.dart';
 import 'units_chrome.dart';
 
 /// Unit search. [pick] returns the chosen uuid with [pop] instead of opening
-/// the card, and hides the group cell.
+/// the card.
 class UnitsPage extends StatefulWidget {
   const UnitsPage({required this.scope, this.pick = false, super.key});
 
@@ -41,15 +42,11 @@ class _UnitsPageState extends State<UnitsPage> {
   UnitQuery _query(BuildContext context) =>
       widget.pick ? _local : AppScope.of(context).unitQuery;
 
-  int _rowLimit() {
-    final asked = widget.pick
-        ? headPageLimit(widget.scope)
-        : unitPageLimit(widget.scope);
-    return AppScope.of(context).cappedLimit(asked);
-  }
+  int _rowLimit() =>
+      AppScope.of(context)
+          .cappedLimit(headPageLimit(widget.scope, head: unitsHead));
 
-  int _capacity() =>
-      widget.pick ? headPageLimit(scaleTickMax) : unitPageLimit(scaleTickMax);
+  int _capacity() => headPageLimit(scaleTickMax, head: unitsHead);
 
   @override
   void initState() {
@@ -81,7 +78,6 @@ class _UnitsPageState extends State<UnitsPage> {
     final board = unitsBoard(
       tick: widget.scope,
       uuids: [for (final unit in _units) unit.uuid],
-      picking: widget.pick,
       wide: wide,
     );
     final limit = _rowLimit();
@@ -102,7 +98,7 @@ class _UnitsPageState extends State<UnitsPage> {
       frame: (scene) => ScopeFrame(
         scope: widget.scope,
         canZoomIn: widget.scope < scaleTickMax,
-        path: widget.pick ? '/units/pick' : '/units',
+        path: widget.pick ? '/units/pick' : '/units/search',
         child: scene,
       ),
     );
@@ -120,7 +116,7 @@ class _UnitsPageState extends State<UnitsPage> {
       case 'query':
         return HexSlot(
           id: 'query',
-          title: unitText(language, 'Фильтр', 'Filter'),
+          title: unitText(language, 'Поиск', 'Search'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -128,17 +124,21 @@ class _UnitsPageState extends State<UnitsPage> {
             query: _query(context),
             local: widget.pick,
             onSearch: _searchLater,
-            onRetune: _retune,
           ),
         );
-      case 'groups':
+      case 'filter':
         return HexSlot(
-          id: 'groups',
-          title: unitText(language, 'Группы', 'Groups'),
+          id: 'filter',
+          title: unitText(language, 'Показать', 'Show'),
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/instances.svg',
+          tappable: false,
+          body: _ShowCell(
+            query: _query(context),
+            local: widget.pick,
+            onRetune: _retune,
+          ),
         );
       case 'window':
         return HexSlot(
@@ -200,8 +200,6 @@ class _UnitsPageState extends State<UnitsPage> {
         popOrHome(context);
       case 'error':
         setState(() => _failureOpen = true);
-      case 'groups':
-        context.push('/units/groups');
     }
   }
 
@@ -289,13 +287,11 @@ class _QueryCell extends StatefulWidget {
     required this.query,
     required this.local,
     required this.onSearch,
-    required this.onRetune,
   });
 
   final UnitQuery query;
   final bool local;
   final VoidCallback onSearch;
-  final VoidCallback onRetune;
 
   @override
   State<_QueryCell> createState() => _QueryCellState();
@@ -334,9 +330,8 @@ class _QueryCellState extends State<_QueryCell> {
       color: unitsColor,
       controller: _controller,
       fieldKey: const ValueKey('unit-search'),
-      hint: unitText(language, 'Поиск', 'Search'),
+      hint: unitText(language, 'Название', 'Name'),
       leading: 'assets/icons/search.svg',
-      roomyCaption: true,
       onChanged: (text) {
         if (widget.local) {
           query.text = text;
@@ -345,58 +340,159 @@ class _QueryCellState extends State<_QueryCell> {
         }
         widget.onSearch();
       },
-      caption: Column(
-        children: [
-          Expanded(
-            child: FilterLine(
-              choices: [
-                for (final owner in const ['mine', 'all'])
-                  (id: owner, label: unitOwnerLabel(language, owner)),
-              ],
-              selected: (id) => query.owner == id,
-              onTap: (id) {
-                final changed = widget.local
-                    ? query.setOwner(id)
-                    : AppScope.of(context).setUnitOwner(id);
-                if (!changed) return;
-                widget.onRetune();
-              },
-            ),
-          ),
-          Expanded(
-            child: FilterLine(
-              choices: [
-                for (final level in unitVisibilities)
-                  (id: level, label: unitVisibilityLabel(language, level)),
-              ],
-              selected: query.visibility.contains,
-              onTap: (id) {
-                final changed = widget.local
-                    ? query.toggleVisibility(id)
-                    : AppScope.of(context).toggleUnitVisibility(id);
-                if (!changed) return;
-                widget.onRetune();
-              },
-            ),
-          ),
-          Expanded(
-            child: FilterLine(
-              choices: [
-                for (final auto in const ['on', 'off'])
-                  (id: auto, label: unitAutoLabel(language, auto)),
-              ],
-              selected: query.autos.contains,
-              onTap: (id) {
-                final changed = widget.local
-                    ? query.toggleAuto(id)
-                    : AppScope.of(context).toggleUnitAuto(id);
-                if (!changed) return;
-                widget.onRetune();
-              },
-            ),
-          ),
-        ],
-      ),
     );
   }
+}
+
+/// Owner, visibility and auto mode: one enum each, one shared size.
+class _ShowCell extends StatelessWidget {
+  const _ShowCell({
+    required this.query,
+    required this.local,
+    required this.onRetune,
+  });
+
+  final UnitQuery query;
+  final bool local;
+  final VoidCallback onRetune;
+
+  @override
+  Widget build(BuildContext context) {
+    final model = AppScope.of(context);
+    final language = model.vault.language;
+    const owners = ['mine', 'all'];
+    const autos = ['on', 'off'];
+    final groups = [
+      [for (final owner in owners) unitOwnerLabel(language, owner)],
+      [
+        for (final level in unitVisibilities)
+          unitVisibilityLabel(language, level),
+      ],
+      [for (final auto in autos) unitAutoLabel(language, auto)],
+    ];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final side = constraints.maxWidth;
+        final line = side * (1 - 2 * _showInset);
+        final font = _showFont(
+          ceiling: cellFont(side) * 1.55,
+          line: line,
+          band: side * _showBand,
+          scaler: MediaQuery.textScalerOf(context),
+          groups: groups,
+        );
+        Widget block(List<SlantedChoice> choices) => SlantedChoices(
+          fontSize: font,
+          maxWidth: line,
+          lineGapShare: _showGapShare,
+          choices: choices,
+        );
+        return Padding(
+          padding: EdgeInsets.only(top: side * _showDrop),
+          child: Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                block([
+                  for (final owner in owners)
+                    SlantedChoice(
+                      label: unitOwnerLabel(language, owner),
+                      selected: query.owner == owner,
+                      onTap: () {
+                        final changed = local
+                            ? query.setOwner(owner)
+                            : model.setUnitOwner(owner);
+                        if (changed) onRetune();
+                      },
+                    ),
+                ]),
+                SizedBox(height: font * _showBlockGap),
+                block([
+                  for (final level in unitVisibilities)
+                    SlantedChoice(
+                      label: unitVisibilityLabel(language, level),
+                      selected: query.visibility.contains(level),
+                      onTap: () {
+                        final changed = local
+                            ? query.toggleVisibility(level)
+                            : model.toggleUnitVisibility(level);
+                        if (changed) onRetune();
+                      },
+                    ),
+                ]),
+                SizedBox(height: font * _showBlockGap),
+                block([
+                  for (final auto in autos)
+                    SlantedChoice(
+                      label: unitAutoLabel(language, auto),
+                      selected: query.autos.contains(auto),
+                      onTap: () {
+                        final changed = local
+                            ? query.toggleAuto(auto)
+                            : model.toggleUnitAuto(auto);
+                        if (changed) onRetune();
+                      },
+                    ),
+                ]),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// How far the enums sit below the cell center, under the title.
+const _showDrop = 0.06;
+
+/// Side inset of the enums, as a share of the cell.
+const _showInset = 0.13;
+
+/// Height the enums may use, as a share of the cell.
+const _showBand = 0.54;
+
+const _showGapShare = 0.2;
+
+/// Clear space between two enums, in font heights.
+const _showBlockGap = 0.5;
+
+/// Largest size at or under [ceiling] whose enums fit in [line] and [band].
+double _showFont({
+  required double ceiling,
+  required double line,
+  required double band,
+  required TextScaler scaler,
+  required List<List<String>> groups,
+}) {
+  if (!line.isFinite || line <= 0) return ceiling;
+  bool fits(double font) {
+    var total = font * _showBlockGap * (groups.length - 1);
+    for (final labels in groups) {
+      final height = slantedEnumHeight(
+        labels: labels,
+        fontSize: font,
+        maxWidth: line,
+        scaler: scaler,
+        lineGapShare: _showGapShare,
+      );
+      if (height == null) return false;
+      total += height;
+    }
+    return total <= band + 0.5;
+  }
+
+  if (fits(ceiling)) return ceiling;
+  var low = 1.0;
+  var high = ceiling;
+  if (high <= low || !fits(low)) return low;
+  for (var step = 0; step < 14; step++) {
+    final mid = (low + high) / 2;
+    if (fits(mid)) {
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+  return low;
 }

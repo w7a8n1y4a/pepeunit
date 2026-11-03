@@ -148,7 +148,7 @@ class _RepoPageState extends State<RepoPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/micro.svg',
+          icon: 'assets/icons/unit_add.svg',
           enabled: model.target?.signedIn == true,
         );
       case 'sync':

@@ -36,6 +36,7 @@ import 'features/units/unit_group_pages.dart';
 import 'features/units/unit_io_pages.dart';
 import 'features/units/unit_page.dart';
 import 'features/units/unit_work_pages.dart';
+import 'features/units/units_menu_page.dart';
 import 'features/units/units_page.dart';
 import 'hive/hex_order.dart';
 import 'hive/hex_scene.dart';
@@ -193,9 +194,14 @@ class _PepeunitAppState extends State<PepeunitApp> {
       ),
       GoRoute(
         path: '/units',
-        builder: (context, state) =>
-            UnitsPage(scope: scaleTickOf(state.uri, fallback: searchScaleTick)),
+        builder: (context, state) => const UnitsMenuPage(),
         routes: [
+          GoRoute(
+            path: 'search',
+            builder: (context, state) => UnitsPage(
+              scope: scaleTickOf(state.uri, fallback: searchScaleTick),
+            ),
+          ),
           GoRoute(
             path: 'pick',
             builder: (context, state) => UnitsPage(
@@ -230,6 +236,13 @@ class _PepeunitAppState extends State<PepeunitApp> {
               repoUuid: state.uri.queryParameters['repo'] ?? '',
             ),
             routes: [
+              GoRoute(
+                path: 'repo',
+                builder: (context, state) => RegistryPage(
+                  scope: scaleTickOf(state.uri, fallback: searchScaleTick),
+                  forUnit: true,
+                ),
+              ),
               GoRoute(
                 path: 'branch',
                 builder: (context, state) {

@@ -63,10 +63,6 @@ class UnitQuery {
   }
 }
 
-/// Cards beside Back, the filter, groups and the page window.
-int unitPageLimit(int tick) =>
-    scaleTickCells(tick.clamp(scaleTickMin, scaleTickMax)) - 4;
-
 /// Cards beside Back, the filter and the page window.
 int headPageLimit(int tick, {int head = 2}) =>
     scaleTickCells(tick.clamp(scaleTickMin, scaleTickMax)) - 1 - head;
@@ -77,16 +73,34 @@ bool listCanZoom({required int tick, required int total, required int room}) {
   return total > room;
 }
 
+/// Add, search and groups around Back. The menu stays on tick 1.
+NetworkBoard unitsMenuBoard({bool wide = false}) {
+  const ids = ['add', 'search', 'groups'];
+  final frame = hexFrame(count: ids.length, back: HexBack.center, wide: wide);
+  final back = frame.back!;
+  return NetworkBoard(
+    slots: [
+      BoardSlot('back', back.$1, back.$2),
+      for (var i = 0; i < ids.length; i++)
+        BoardSlot(ids[i], frame.cells[i].$1, frame.cells[i].$2),
+    ],
+    canZoomIn: false,
+    page: 0,
+    pages: 1,
+  );
+}
+
+/// Cells ahead of the unit cards: search, the owner and auto enums, the page.
+const unitsHead = 3;
+
+/// Search, show, page window and unit cards around Back.
 NetworkBoard unitsBoard({
   required int tick,
   required List<String> uuids,
-  bool picking = false,
   bool wide = false,
 }) {
   final step = tick.clamp(scaleTickMin, scaleTickMax);
-  final head = picking
-      ? const ['query', 'window']
-      : const ['query', 'groups', 'window'];
+  const head = ['query', 'filter', 'window'];
   final ids = <String>[...head, for (final uuid in uuids) 'unit:$uuid'];
   final frame = hexFrame(
     count: ids.length,

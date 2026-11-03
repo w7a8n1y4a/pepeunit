@@ -15,10 +15,13 @@ import '../page_window.dart';
 import '../slanted_choices.dart';
 import 'registry_chrome.dart';
 
+/// Repository search. [forUnit] opens the unit form for the chosen
+/// repository instead of its card.
 class RegistryPage extends StatefulWidget {
-  const RegistryPage({required this.scope, super.key});
+  const RegistryPage({required this.scope, this.forUnit = false, super.key});
 
   final int scope;
+  final bool forUnit;
 
   @override
   State<RegistryPage> createState() => _RegistryPageState();
@@ -86,7 +89,7 @@ class _RegistryPageState extends State<RegistryPage> {
       frame: (scene) => ScopeFrame(
         scope: widget.scope,
         canZoomIn: widget.scope < scaleTickMax,
-        path: '/registry',
+        path: widget.forUnit ? '/units/new/repo' : '/registry',
         child: scene,
       ),
     );
@@ -166,7 +169,9 @@ class _RegistryPageState extends State<RegistryPage> {
   void _tap(String id) {
     if (id.startsWith('repo:')) {
       final uuid = id.substring(5);
-      context.push('/registry/repo/$uuid');
+      context.push(
+        widget.forUnit ? '/units/new?repo=$uuid' : '/registry/repo/$uuid',
+      );
       return;
     }
     switch (id) {
