@@ -33,7 +33,8 @@ RUN flutter pub get
 
 COPY --chown=flutter:flutter . ./
 
-RUN flutter build web --release --base-href /
+RUN flutter build web --release --base-href / \
+    && ./docker/stamp-main-js.sh
 
 FROM nginx:1.27-alpine
 
