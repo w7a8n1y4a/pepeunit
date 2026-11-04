@@ -25,7 +25,7 @@ class UnitsMenuPage extends StatelessWidget {
           case 'back':
             popOrHome(context);
           case 'add':
-            context.push('/units/new/repo');
+            context.push('/units/new');
           case 'search':
             context.push('/units/search');
           case 'groups':
@@ -46,7 +46,7 @@ class UnitsMenuPage extends StatelessWidget {
       case 'add':
         return HexSlot(
           id: 'add',
-          title: unitText(language, 'Добавить', 'Add'),
+          title: unitText(language, 'Создать аппарат', 'Create unit'),
           color: unitAddColor,
           q: slot.q,
           r: slot.r,

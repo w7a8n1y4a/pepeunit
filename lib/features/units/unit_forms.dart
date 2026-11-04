@@ -96,6 +96,16 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
     );
   }
 
+  bool get _compilable =>
+      (_unit?.compilable ?? false) ||
+      (_platform != null && _platform!.isNotEmpty);
+
+  String _tagsTitle(String language) {
+    if (_compilable) return unitText(language, 'Последний тег', 'Last tag');
+    if (_tags) return unitText(language, 'Только теги', 'Tags only');
+    return unitText(language, 'Последний коммит', 'Last commit');
+  }
+
   HexSlot _slot(BoardSlot slot, String language) {
     final color = unitsColor;
     switch (slot.id) {
@@ -155,10 +165,9 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
       case 'tags':
         return HexSlot(
           id: 'tags',
-          title: _tags
-              ? unitText(language, 'Только теги', 'Tags only')
-              : unitText(language, 'Любой коммит', 'Any commit'),
+          title: _tagsTitle(language),
           color: color,
+          enabled: !_compilable,
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/flag.svg',
@@ -181,7 +190,7 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/check.svg',
+          icon: 'assets/icons/commits.svg',
         );
       case 'platform':
         return HexSlot(
@@ -191,7 +200,7 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/micro.svg',
+          icon: 'assets/icons/platform.svg',
         );
       case 'icon':
         return HexSlot(
@@ -233,6 +242,7 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
       case 'auto':
         setState(() => _auto = !_auto);
       case 'tags':
+        if (_compilable) return;
         setState(() => _tags = !_tags);
       case 'branch':
         final picked = await context.push<String>(
@@ -242,8 +252,11 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
         setState(() => _branch = picked);
         await _platformsFor();
       case 'commit':
+        final compilable = (_unit?.compilable ?? false) ? '1' : '0';
         final picked = await context.push<String>(
-          '/units/new/commit?repo=$repo&branch=${Uri.encodeQueryComponent(_branch)}',
+          '/units/new/commit?repo=$repo'
+          '&branch=${Uri.encodeQueryComponent(_branch)}'
+          '&compilable=$compilable',
         );
         if (picked == null || !mounted) return;
         setState(() => _commit = picked);
@@ -333,7 +346,7 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
         'visibility_level': _visibility,
         'target_branch': _branch,
         'is_auto_update_unit': _auto,
-        'is_only_tag_update': _tags,
+        'is_only_tag_update': _compilable || _tags,
         'is_compilable_unit': _platform != null && _platform!.isNotEmpty,
         'target_commit': _auto ? null : _commit,
         'target_firmware_platform': _platform,

@@ -543,14 +543,16 @@ class PepeunitApi {
     await _send('PATCH', '/repo/update_all', token: token);
   }
 
-  Future<List<RepoCommit>> branchCommits(
+  Future<({int count, List<RepoCommit> commits})> branchCommits(
     String token,
     String uuid, {
     required String branch,
     bool onlyTag = false,
+    String search = '',
     int offset = 0,
     int limit = 100,
   }) async {
+    final needle = search.trim();
     final response = await _send(
       'GET',
       '/repo/branch_commits/$uuid',
@@ -560,9 +562,11 @@ class PepeunitApi {
         'only_tag': onlyTag,
         'offset': offset,
         'limit': limit,
+        if (needle.isNotEmpty) 'search_string': needle,
       },
     );
-    return _list(response, RepoCommit.fromJson);
+    final page = _page(response, 'commits', RepoCommit.fromJson);
+    return (count: page.count, commits: page.rows);
   }
 
   Future<List<FirmwarePlatform>> firmwarePlatforms(

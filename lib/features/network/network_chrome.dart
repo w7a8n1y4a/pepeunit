@@ -213,9 +213,10 @@ class _ScopeFrameState extends State<ScopeFrame> {
     if (delta > 0 && !widget.canZoomIn) return;
     final next = (widget.scope + delta).clamp(widget.minScope, widget.maxScope);
     if (next == widget.scope) return;
-    final uri = Uri.parse(widget.path)
-        .replace(queryParameters: {'scope': '$next'});
-    context.replace(uri.toString());
+    final current = Uri.parse(widget.path);
+    final query = Map<String, String>.from(current.queryParameters);
+    query['scope'] = '$next';
+    context.replace(current.replace(queryParameters: query).toString());
   }
 
   @override

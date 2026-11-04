@@ -17,6 +17,7 @@ class NamePickPage extends StatefulWidget {
     required this.scope,
     required this.path,
     required this.load,
+    this.icon,
     super.key,
   });
 
@@ -24,6 +25,7 @@ class NamePickPage extends StatefulWidget {
   final int scope;
   final String path;
   final Future<List<({String id, String label})>> Function() load;
+  final String? icon;
 
   @override
   State<NamePickPage> createState() => _NamePickPageState();
@@ -120,6 +122,7 @@ class _NamePickPageState extends State<NamePickPage> {
               color: unitsColor,
               q: slot.q,
               r: slot.r,
+              icon: widget.icon,
             ),
           );
         }

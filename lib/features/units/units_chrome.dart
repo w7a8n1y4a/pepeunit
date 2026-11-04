@@ -36,6 +36,18 @@ String unitAutoLabel(String language, String auto) {
   return unitText(language, 'Авто', 'Auto');
 }
 
+/// Auto or by hand, on the updates cell of the unit form.
+String unitHandsLabel(String language, bool auto) {
+  if (auto) return unitText(language, 'Авто', 'Auto');
+  return unitText(language, 'Руками', 'Manual');
+}
+
+/// Compilable or interpreted, short enough for one edge of that cell.
+String unitRunLabel(String language, bool compilable) {
+  if (compilable) return unitText(language, 'Компил', 'Comp');
+  return unitText(language, 'Интерп', 'Interp');
+}
+
 /// Search card and the identity cell of one unit.
 HexSlot unitMark({
   required String id,
@@ -160,6 +172,7 @@ class ChoiceWords extends StatelessWidget {
     required this.selected,
     required this.onTap,
     this.fontScale = 1.2,
+    this.center = false,
     super.key,
   });
 
@@ -168,14 +181,30 @@ class ChoiceWords extends StatelessWidget {
   final ValueChanged<String> onTap;
   final double fontScale;
 
+  /// Keeps the slanted row in the middle of the cell, inside the hex.
+  final bool center;
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
+        final side = constraints.maxWidth;
+        final line = center ? side * _centeredLine : side;
+        final labels = [for (final choice in choices) choice.label];
+        final font = center
+            ? _centeredEnumFont(
+                ceiling: cellFont(side) * fontScale,
+                line: line,
+                band: side * _centeredBand,
+                scaler: MediaQuery.textScalerOf(context),
+                labels: labels,
+              )
+            : cellFont(side) * fontScale;
         return SlantedChoices(
-          fontSize: cellFont(constraints.maxWidth) * fontScale,
-          maxWidth: constraints.maxWidth,
+          fontSize: font,
+          maxWidth: line,
           lineGapShare: 0.2,
+          alignment: center ? Alignment.center : Alignment.topCenter,
           choices: [
             for (final choice in choices)
               SlantedChoice(
@@ -188,4 +217,47 @@ class ChoiceWords extends StatelessWidget {
       },
     );
   }
+}
+
+/// Width of a centered enum, as a share of the cell. The pointy hex is
+/// narrower than the square, and the edge captions need the rim.
+const _centeredLine = 0.64;
+
+/// Height a centered enum may use, as a share of the cell.
+const _centeredBand = 0.52;
+
+double _centeredEnumFont({
+  required double ceiling,
+  required double line,
+  required double band,
+  required TextScaler scaler,
+  required List<String> labels,
+}) {
+  if (!line.isFinite || line <= 0 || !band.isFinite || band <= 0) {
+    return ceiling;
+  }
+  bool fits(double font) {
+    final height = slantedEnumHeight(
+      labels: labels,
+      fontSize: font,
+      maxWidth: line,
+      scaler: scaler,
+      lineGapShare: 0.2,
+    );
+    return height != null && height > 0 && height <= band;
+  }
+
+  if (fits(ceiling)) return ceiling;
+  var low = 1.0;
+  var high = ceiling;
+  if (high <= low || !fits(low)) return low;
+  for (var step = 0; step < 14; step++) {
+    final mid = (low + high) / 2;
+    if (fits(mid)) {
+      low = mid;
+    } else {
+      high = mid;
+    }
+  }
+  return low;
 }

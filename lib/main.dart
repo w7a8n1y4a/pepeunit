@@ -28,6 +28,7 @@ import 'features/registry/branches_page.dart';
 import 'features/registry/credentials_page.dart';
 import 'features/registry/registry_page.dart';
 import 'features/registry/repo_page.dart';
+import 'features/units/commit_pick_page.dart';
 import 'features/units/name_pick_page.dart';
 import 'features/units/unit_access_page.dart';
 import 'features/units/unit_create_page.dart';
@@ -264,21 +265,33 @@ class _PepeunitAppState extends State<PepeunitApp> {
               GoRoute(
                 path: 'commit',
                 builder: (context, state) {
-                  final repo = state.uri.queryParameters['repo'] ?? '';
-                  final branch = state.uri.queryParameters['branch'] ?? '';
-                  return NamePickPage(
-                    title: 'Commit',
-                    scope: scaleTickOf(state.uri),
-                    path:
-                        '/units/new/commit?repo=$repo&branch=${Uri.encodeQueryComponent(branch)}',
-                    load: () async {
-                      final rows = await AppScope.of(context)
-                          .branchCommits(repo, branch);
-                      return [
-                        for (final row in rows)
-                          (id: row.commit, label: row.tag ?? row.summary),
-                      ];
-                    },
+                  final query = state.uri.queryParameters;
+                  return CommitPickPage(
+                    repoUuid: query['repo'] ?? '',
+                    branch: query['branch'] ?? '',
+                    compilable: query['compilable'] == '1',
+                    scope: scaleTickOf(state.uri, fallback: searchScaleTick),
+                  );
+                },
+              ),
+              GoRoute(
+                path: 'updates',
+                builder: (context, state) {
+                  final query = state.uri.queryParameters;
+                  String? kept(String key) {
+                    final value = query[key];
+                    if (value == null || value.isEmpty) return null;
+                    return value;
+                  }
+
+                  return UnitUpdatesPage(
+                    repoUuid: query['repo'] ?? '',
+                    branch: query['branch'] ?? '',
+                    compilable: query['compilable'] == '1',
+                    auto: query['auto'] != '0',
+                    tagsOnly: query['tags'] != '0',
+                    commit: kept('commit'),
+                    platform: kept('platform'),
                   );
                 },
               ),
@@ -290,6 +303,7 @@ class _PepeunitAppState extends State<PepeunitApp> {
                   final commit = state.uri.queryParameters['commit'];
                   return NamePickPage(
                     title: 'Platform',
+                    icon: 'assets/icons/brick.svg',
                     scope: scaleTickOf(state.uri),
                     path: state.uri
                         .replace(

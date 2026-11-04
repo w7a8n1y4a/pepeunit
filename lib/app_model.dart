@@ -780,8 +780,22 @@ class AppModel extends ChangeNotifier {
 
   Future<void> resetUnitEnv(String uuid) => _api.resetUnitEnv(_token, uuid);
 
-  Future<List<RepoCommit>> branchCommits(String uuid, String branch) =>
-      _api.branchCommits(_token, uuid, branch: branch);
+  Future<({int count, List<RepoCommit> commits})> branchCommits(
+    String uuid,
+    String branch, {
+    bool onlyTag = false,
+    String search = '',
+    int offset = 0,
+    int limit = 100,
+  }) => _api.branchCommits(
+    _token,
+    uuid,
+    branch: branch,
+    onlyTag: onlyTag,
+    search: search,
+    offset: offset,
+    limit: limit,
+  );
 
   Future<List<FirmwarePlatform>> firmwarePlatforms(
     String uuid, {

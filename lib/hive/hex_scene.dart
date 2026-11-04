@@ -248,7 +248,9 @@ class HexScene extends StatelessWidget {
     }
     final slot = placed.slot;
     if (!slot.enabled) {
-      child = ColorFiltered(colorFilter: _mutedFilter, child: child);
+      child = IgnorePointer(
+        child: ColorFiltered(colorFilter: _mutedFilter, child: child),
+      );
     }
     final frame = _CellFrame(
       key: ValueKey(slot.id),

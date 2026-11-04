@@ -52,6 +52,7 @@ class SlantedChoices extends StatelessWidget {
     this.spanLine = false,
     this.lineGapShare = 1 / 3,
     this.pin,
+    this.alignment = Alignment.topCenter,
     super.key,
   });
 
@@ -68,6 +69,10 @@ class SlantedChoices extends StatelessWidget {
   /// Index of the word whose ink sits on the horizontal center of [maxWidth].
   /// The lean steepens until that word can stay there.
   final int? pin;
+
+  /// Where the row sits when it is shorter than the cell. Search enums stay
+  /// on the top. A form enum uses the center.
+  final Alignment alignment;
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +109,7 @@ class SlantedChoices extends StatelessWidget {
         );
         if (spanLine) return block;
         return Align(
-          alignment: Alignment.topCenter,
+          alignment: alignment,
           child: ConstrainedBox(
             constraints: BoxConstraints(
               maxWidth: widthCap.isFinite ? widthCap : double.infinity,
@@ -112,7 +117,7 @@ class SlantedChoices extends StatelessWidget {
             ),
             child: FittedBox(
               fit: BoxFit.scaleDown,
-              alignment: Alignment.topCenter,
+              alignment: alignment,
               child: block,
             ),
           ),
