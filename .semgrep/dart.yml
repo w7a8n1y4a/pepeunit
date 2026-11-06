@@ -1,0 +1,93 @@
+rules:
+  - id: pepeunit.dart.tls-accept-any-certificate
+    languages: [dart]
+    severity: ERROR
+    message: >-
+      badCertificateCallback returns true, so TLS certificate validation is
+      disabled and the connection is open to a man-in-the-middle.
+    metadata:
+      category: security
+      cwe: "CWE-295: Improper Certificate Validation"
+    pattern-either:
+      - pattern: $C.badCertificateCallback = ($CERT, $HOST, $PORT) => true
+      - pattern: |
+          $C.badCertificateCallback = ($CERT, $HOST, $PORT) {
+            return true;
+          }
+
+  - id: pepeunit.dart.insecure-http-url
+    languages: [dart]
+    severity: WARNING
+    message: >-
+      Hardcoded http:// URL. Tokens and payloads travel in clear text. Use
+      https:// unless this is a loopback address.
+    metadata:
+      category: security
+      cwe: "CWE-319: Cleartext Transmission of Sensitive Information"
+    patterns:
+      - pattern-either:
+          - pattern: Uri.parse("...")
+          - pattern: Uri.http(...)
+      - pattern-regex: http://(?!localhost|127\.0\.0\.1|\[::1\]|10\.0\.2\.2)
+      - pattern-not-regex: startsWith
+
+  - id: pepeunit.dart.secret-in-log
+    languages: [dart]
+    severity: WARNING
+    message: >-
+      A token, password or secret may reach the log. Logs end up in crash
+      reports and browser consoles.
+    metadata:
+      category: security
+      cwe: "CWE-532: Insertion of Sensitive Information into Log File"
+    patterns:
+      - pattern-either:
+          - pattern: print($ARG)
+          - pattern: debugPrint($ARG)
+          - pattern: log($ARG)
+      - pattern-regex: (?i)(token|passw|secret|credential|authorization|bearer)
+
+  - id: pepeunit.dart.weak-hash
+    languages: [dart]
+    severity: WARNING
+    message: >-
+      MD5 and SHA-1 are broken. Use SHA-256 or stronger, and a MAC or KDF
+      for secrets.
+    metadata:
+      category: security
+      cwe: "CWE-328: Use of Weak Hash"
+    pattern-either:
+      - pattern: md5.convert(...)
+      - pattern: sha1.convert(...)
+      - pattern: md5.hashCode
+      - pattern: Hmac(md5, ...)
+      - pattern: Hmac(sha1, ...)
+
+  - id: pepeunit.dart.shell-process
+    languages: [dart]
+    severity: ERROR
+    message: >-
+      Process started through a shell (runInShell: true). Arguments are parsed
+      by the shell, which allows command injection.
+    metadata:
+      category: security
+      cwe: "CWE-78: OS Command Injection"
+    pattern-either:
+      - pattern: 'Process.run(..., runInShell: true, ...)'
+      - pattern: 'Process.start(..., runInShell: true, ...)'
+      - pattern: 'Process.runSync(..., runInShell: true, ...)'
+
+  - id: pepeunit.dart.token-in-shared-preferences
+    languages: [dart]
+    severity: WARNING
+    message: >-
+      A secret is written to SharedPreferences, which is plain text on disk
+      and in web localStorage. Use PlatformVaultStore.
+    metadata:
+      category: security
+      cwe: "CWE-312: Cleartext Storage of Sensitive Information"
+    patterns:
+      - pattern: $P.setString($KEY, ...)
+      - metavariable-regex:
+          metavariable: $KEY
+          regex: (?i)^["'].*(token|passw|secret|credential).*["']$
