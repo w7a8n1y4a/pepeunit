@@ -104,8 +104,8 @@ class _GroupsPageState extends State<GroupsPage> {
           ),
           'create' => HexSlot(
             id: 'create',
-            title: unitText(language, 'Создать', 'Create'),
-            color: unitGroupsColor,
+            title: unitText(language, 'Создать группу', 'Create group'),
+            color: addColor,
             q: slot.q,
             r: slot.r,
             icon: 'assets/icons/plus.svg',
@@ -294,8 +294,8 @@ class _GroupCreatePageState extends State<GroupCreatePage> {
           ),
           'create' => HexSlot(
             id: 'create',
-            title: unitText(language, 'Создать', 'Create'),
-            color: unitGroupsColor,
+            title: unitText(language, 'Создать группу', 'Create group'),
+            color: addColor,
             busy: _busy,
             q: slot.q,
             r: slot.r,

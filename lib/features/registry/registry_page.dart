@@ -89,7 +89,7 @@ class _RegistryPageState extends State<RegistryPage> {
       frame: (scene) => ScopeFrame(
         scope: widget.scope,
         canZoomIn: widget.scope < scaleTickMax,
-        path: widget.forUnit ? '/units/new/repo' : '/registry',
+        path: widget.forUnit ? '/units/new/repo' : '/registry/search',
         child: scene,
       ),
     );

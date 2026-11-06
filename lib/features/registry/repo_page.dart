@@ -145,7 +145,7 @@ class _RepoPageState extends State<RepoPage> {
         return HexSlot(
           id: 'unit',
           title: regText(language, 'Создать аппарат', 'Create unit'),
-          color: color,
+          color: addColor,
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/unit_add.svg',

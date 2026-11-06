@@ -293,11 +293,11 @@ List<String> peerActions({required String? trust, required bool federation}) {
   }
 }
 
-/// Owner controls on `/peers/tune`: settings, then commands.
-/// Avatar upload lives inside settings.
+/// Owner controls on `/peers/tune`: settings, commands, then adding an
+/// instance to track. Avatar upload lives inside settings.
 List<String> tuneActions({required bool owner}) {
   if (!owner) return const [];
-  return const ['settings', 'ops'];
+  return const ['settings', 'ops', 'track'];
 }
 
 /// Screens gathered under `/peers/tune/settings`. Avatar is the last cell.
@@ -310,8 +310,8 @@ const ownerSettingSections = <String>[
   'icon',
 ];
 
-/// Commands inside `/peers/tune/ops`. Tracking, reboot and updating every
-/// unit are owner-only.
+/// Commands inside `/peers/tune/ops`. Reboot and updating every unit are
+/// owner-only.
 List<String> operationActions({
   required bool owner,
   required bool staff,
@@ -323,7 +323,6 @@ List<String> operationActions({
     if (federation) 'scan-all',
     'update-repos',
     if (owner) 'update-units',
-    if (owner) 'track',
     if (owner) 'reboot',
   ];
 }

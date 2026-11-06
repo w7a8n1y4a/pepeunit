@@ -101,6 +101,15 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
           r: slot.r,
           icon: 'assets/icons/terminal.svg',
         );
+      case 'track':
+        return HexSlot(
+          id: 'track',
+          title: netText(language, 'Добавить инстанс', 'Add instance'),
+          color: addColor,
+          q: slot.q,
+          r: slot.r,
+          icon: 'assets/icons/plus.svg',
+        );
       default:
         return HexSlot(
           id: slot.id,
@@ -122,6 +131,8 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
         context.push('/peers/tune/settings');
       case 'ops':
         context.push('/peers/tune/ops');
+      case 'track':
+        context.push('/peers/track');
     }
   }
 }

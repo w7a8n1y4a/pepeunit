@@ -95,6 +95,41 @@ NetworkBoard reposBoard({
   );
 }
 
+/// Wire values of `platform` in `POST /repo`.
+const repoPlatforms = ['Github', 'Gitlab'];
+
+/// Menu of the section: add a repository, then search.
+const registryMenuIds = ['add', 'search'];
+
+/// A repository link starts with `http://` or `https://`, has a host, and
+/// ends with `.git`. The backend refuses anything else.
+bool repoUrlOk(String raw) {
+  final text = raw.trim();
+  if (!text.startsWith('https://') && !text.startsWith('http://')) {
+    return false;
+  }
+  if (!text.endsWith('.git') || RegExp(r'\s').hasMatch(text)) return false;
+  final uri = Uri.tryParse(text);
+  if (uri == null || !uri.hasAuthority || uri.host.isEmpty) return false;
+  return uri.path.length > '/.git'.length;
+}
+
+/// Name and token typed on the credentials screen of the add form.
+class RepoCredsDraft {
+  const RepoCredsDraft({this.username = '', this.token = ''});
+
+  final String username;
+  final String token;
+
+  /// Both parts are required, as on a saved repository.
+  bool get ready => username.trim().isNotEmpty && token.trim().isNotEmpty;
+}
+
+/// Cells of the add form. The credentials menu goes with a private repository.
+List<String> repoCreateIds({required bool public}) {
+  return ['url', 'platform', 'access', if (!public) 'credentials', 'create'];
+}
+
 /// Cells inside a repository. Credentials stay on a private repo.
 /// Delete stays when the signed-in user is the creator.
 List<String> repoMenuIds({required bool private, required bool owned}) {

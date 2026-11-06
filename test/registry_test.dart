@@ -11,6 +11,9 @@ import 'package:pepeunit_client/api/pepeunit_api.dart';
 import 'package:pepeunit_client/app_model.dart';
 import 'package:pepeunit_client/app_scope.dart';
 import 'package:pepeunit_client/features/registry/registry_chrome.dart';
+import 'package:pepeunit_client/features/registry/registry_create_page.dart';
+import 'package:pepeunit_client/features/registry/registry_creds_page.dart';
+import 'package:pepeunit_client/features/registry/registry_menu_page.dart';
 import 'package:pepeunit_client/features/registry/registry_page.dart';
 import 'package:pepeunit_client/features/registry/repo_page.dart';
 import 'package:pepeunit_client/hive/hex_scene.dart';
@@ -181,6 +184,133 @@ void main() {
     expect(query.containsKey('order_by_create_date'), isFalse);
     expect(query.containsKey('order_by_last_update'), isFalse);
     expect(capture.uri!.path, '/pepeunit/api/v1/repo');
+  });
+
+  test('a repository link is http(s) and ends with .git', () {
+    expect(repoUrlOk('https://github.com/pepe/unit.git'), isTrue);
+    expect(repoUrlOk(' http://git.local:3000/a/b.git '), isTrue);
+    expect(repoUrlOk('https://github.com/pepe/unit'), isFalse);
+    expect(repoUrlOk('ftp://github.com/pepe/unit.git'), isFalse);
+    expect(repoUrlOk('github.com/pepe/unit.git'), isFalse);
+    expect(repoUrlOk('https://github.com/pepe/unit.GIT'), isFalse);
+    expect(repoUrlOk('https://.git'), isFalse);
+    expect(repoUrlOk('https:///.git'), isFalse);
+    expect(repoUrlOk('https://github.com/pe pe/unit.git'), isFalse);
+    expect(repoUrlOk(''), isFalse);
+  });
+
+  test('the add form asks for credentials only on a private repository', () {
+    expect(repoCreateIds(public: true), [
+      'url',
+      'platform',
+      'access',
+      'create',
+    ]);
+    expect(repoCreateIds(public: false), [
+      'url',
+      'platform',
+      'access',
+      'credentials',
+      'create',
+    ]);
+    expect(registryMenuIds, ['add', 'search']);
+    final board = cardBoard(registryMenuIds);
+    expect(board.length, 3);
+    expect(board.last.id, 'back');
+  });
+
+  test('create sends credentials only with a private repository', () async {
+    final capture = _Capture();
+    final api = PepeunitApi('https://devunit.pepeunit.com', client: capture);
+    await api.createRepo(
+      't',
+      url: 'https://github.com/a/b.git',
+      platform: 'Github',
+      public: true,
+    );
+    expect(capture.method, 'POST');
+    expect(capture.uri!.path, '/pepeunit/api/v1/repo');
+    expect(capture.body, {
+      'repository_url': 'https://github.com/a/b.git',
+      'platform': 'Github',
+      'is_public_repository': true,
+    });
+    await api.createRepo(
+      't',
+      url: 'https://gitlab.com/a/b.git',
+      platform: 'Gitlab',
+      public: false,
+      username: 'u',
+      pat: 'p',
+    );
+    expect(capture.body, {
+      'repository_url': 'https://gitlab.com/a/b.git',
+      'platform': 'Gitlab',
+      'is_public_repository': false,
+      'credentials': {'username': 'u', 'pat_token': 'p'},
+    });
+  });
+
+  testWidgets('the section opens on a menu with add and search', (
+    tester,
+  ) async {
+    final model = AppModel(store: MemoryVaultStore(), api: (_) => _RepoApi());
+    await model.load();
+    await tester.pumpWidget(
+      AppScope(
+        model: model,
+        child: const MaterialApp(home: RegistryMenuPage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Добавить репозиторий'), findsOneWidget);
+    expect(find.bySemanticsLabel('Поиск'), findsOneWidget);
+    expect(find.bySemanticsLabel('Назад'), findsOneWidget);
+  });
+
+  testWidgets('the add form shows credentials only for a private repository', (
+    tester,
+  ) async {
+    final model = AppModel(store: MemoryVaultStore(), api: (_) => _RepoApi());
+    await model.load();
+    await tester.pumpWidget(
+      AppScope(
+        model: model,
+        child: const MaterialApp(home: RegistryCreatePage()),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('repo-url')), findsOneWidget);
+    expect(find.bySemanticsLabel('Публичный'), findsOneWidget);
+    expect(find.bySemanticsLabel('Гитхаб'), findsOneWidget);
+    expect(find.bySemanticsLabel('Гитлаб'), findsOneWidget);
+    expect(find.bySemanticsLabel('Креды'), findsNothing);
+    await tester.enterText(find.byKey(const ValueKey('repo-url')), 'nope');
+    await tester.pump();
+    expect(find.text('Нужна ссылка http(s):// … .git'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Публичный'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Приватный'), findsOneWidget);
+    expect(find.bySemanticsLabel('Креды'), findsOneWidget);
+    expect(find.byKey(const ValueKey('repo-create-name')), findsNothing);
+  });
+
+  testWidgets('the credentials screen holds the name and the token', (
+    tester,
+  ) async {
+    final model = AppModel(store: MemoryVaultStore(), api: (_) => _RepoApi());
+    await model.load();
+    await tester.pumpWidget(
+      AppScope(
+        model: model,
+        child: const MaterialApp(
+          home: RegistryCredsPage(draft: RepoCredsDraft(username: 'bob')),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('repo-create-token')), findsOneWidget);
+    expect(find.text('bob'), findsOneWidget);
   });
 
   testWidgets('registry opens on search and a repo card lists its actions', (
@@ -448,12 +578,22 @@ class _WatchApi extends _RepoApi {
 
 class _Capture extends http.BaseClient {
   Uri? uri;
+  String? method;
+  Object? body;
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) async {
     uri = request.url;
+    method = request.method;
+    if (request is http.Request && request.body.isNotEmpty) {
+      body = jsonDecode(request.body);
+    }
     return http.StreamedResponse(
-      Stream<List<int>>.value(utf8.encode('{"count":0,"repos":[]}')),
+      Stream<List<int>>.value(
+        utf8.encode(
+          request.method == 'POST' ? '{"uuid":"u1"}' : '{"count":0,"repos":[]}',
+        ),
+      ),
       200,
     );
   }

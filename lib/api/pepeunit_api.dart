@@ -497,6 +497,29 @@ class PepeunitApi {
     return (count: page.count, repos: page.rows);
   }
 
+  /// `POST /repo`. `credentials` goes only with a private repository.
+  Future<RegistryRepo> createRepo(
+    String token, {
+    required String url,
+    required String platform,
+    required bool public,
+    String? username,
+    String? pat,
+  }) async {
+    final response = await _send(
+      'POST',
+      '/repo',
+      token: token,
+      body: {
+        'repository_url': url,
+        'platform': platform,
+        'is_public_repository': public,
+        if (!public) 'credentials': {'username': username, 'pat_token': pat},
+      },
+    );
+    return RegistryRepo.fromJson(_object(response));
+  }
+
   Future<RegistryRepo> readRepo(String token, String uuid) async {
     final response = await _send('GET', '/repo/$uuid', token: token);
     return RegistryRepo.fromJson(_object(response));

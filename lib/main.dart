@@ -26,6 +26,9 @@ import 'features/network/network_search_page.dart';
 import 'features/network/users_page.dart';
 import 'features/registry/branches_page.dart';
 import 'features/registry/credentials_page.dart';
+import 'features/registry/registry_create_page.dart';
+import 'features/registry/registry_creds_page.dart';
+import 'features/registry/registry_menu_page.dart';
 import 'features/registry/registry_page.dart';
 import 'features/registry/repo_page.dart';
 import 'features/units/commit_pick_page.dart';
@@ -42,6 +45,7 @@ import 'features/units/units_menu_page.dart';
 import 'features/units/units_page.dart';
 import 'hive/hex_order.dart';
 import 'hive/hex_scene.dart';
+import 'registry/registry_view.dart';
 
 Future<void> main() async {
   // push and replace are how every screen opens. Without this the web
@@ -157,10 +161,31 @@ class _PepeunitAppState extends State<PepeunitApp> {
       ),
       GoRoute(
         path: '/registry',
-        builder: (context, state) => RegistryPage(
-          scope: scaleTickOf(state.uri, fallback: searchScaleTick),
-        ),
+        builder: (context, state) => const RegistryMenuPage(),
         routes: [
+          GoRoute(
+            path: 'search',
+            builder: (context, state) => RegistryPage(
+              scope: scaleTickOf(state.uri, fallback: searchScaleTick),
+            ),
+          ),
+          GoRoute(
+            path: 'new',
+            builder: (context, state) => const RegistryCreatePage(),
+            routes: [
+              GoRoute(
+                path: 'credentials',
+                builder: (context, state) {
+                  final draft = state.extra;
+                  return RegistryCredsPage(
+                    draft: draft is RepoCredsDraft
+                        ? draft
+                        : const RepoCredsDraft(),
+                  );
+                },
+              ),
+            ],
+          ),
           GoRoute(
             path: 'repo/:uuid',
             builder: (context, state) =>

@@ -13,7 +13,7 @@ import '../slanted_choices.dart';
 Color get unitsColor => sectionById('units')!.color;
 
 /// Create-unit cells. Green reads as «add».
-const unitAddColor = Color(0xFF00C853);
+const unitAddColor = addColor;
 
 /// Unit groups. No home section uses this hue.
 const unitGroupsColor = Color(0xFF00E5FF);

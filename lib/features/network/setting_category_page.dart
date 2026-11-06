@@ -192,14 +192,6 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
             r: spots[i].$2,
             icon: 'assets/icons/micro.svg',
           ),
-          'track' => HexSlot(
-            id: 'track',
-            title: netText(language, 'Отслеживать инстанс', 'Track instance'),
-            color: color,
-            q: spots[i].$1,
-            r: spots[i].$2,
-            icon: 'assets/icons/sight.svg',
-          ),
           'reboot' => HexSlot(
             id: 'reboot',
             title: netText(language, 'Перезапуск', 'Reboot'),
@@ -448,8 +440,6 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
         await _run('update-repos', model.updateAllRepos);
       case 'update-units':
         await _run('update-units', model.bulkUpdateUnits);
-      case 'track':
-        context.push('/peers/track');
       case 'reboot':
         await _run('reboot', model.reboot);
     }

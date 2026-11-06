@@ -66,7 +66,7 @@ class NetworkSearchSettingsPage extends StatelessWidget {
         return HexSlot(
           id: 'add',
           title: netText(language, 'Добавить локально', 'Add locally'),
-          color: color,
+          color: addColor,
           q: at.$1,
           r: at.$2,
           icon: 'assets/icons/plus.svg',

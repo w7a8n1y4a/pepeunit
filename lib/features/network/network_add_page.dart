@@ -28,7 +28,7 @@ class _NetworkAddPageState extends State<NetworkAddPage> {
   Widget build(BuildContext context) {
     final model = AppScope.of(context);
     final language = model.vault.language;
-    final color = networkColor;
+    final color = addColor;
     final wide = hexWide(MediaQuery.sizeOf(context));
     final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
     final url = frame.cells.first;
@@ -43,7 +43,7 @@ class _NetworkAddPageState extends State<NetworkAddPage> {
         r: url.$2,
         body: LineCell(
           hint: '/instances/current',
-          color: networkColor,
+          color: color,
           onSubmit: _submit,
         ),
       ),

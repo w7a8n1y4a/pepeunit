@@ -251,7 +251,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'registry',
     titles: {'ru': 'Репозитории', 'en': 'Repositories'},
-    icon: 'assets/icons/copy.svg',
+    icon: 'assets/icons/git.svg',
     fields: [
       _whole(
         'pu_instance_repo_max_size',

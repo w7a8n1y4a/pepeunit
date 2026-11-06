@@ -17,6 +17,9 @@ const sceneBackground = Color(0xFF1B1B1F);
 const hexMuted = Color(0xFFA1A1AA);
 const errorColor = Color(0xFFFF3333);
 
+/// Cells that add something. Green reads as «add».
+const addColor = Color(0xFF00C853);
+
 const _mutedFilter = ColorFilter.matrix(<double>[
   0.33,
   0.33,

@@ -227,7 +227,7 @@ void main() {
         ]).length,
         lessThanOrEqualTo(7),
       );
-      expect(tuneActions(owner: true), ['settings', 'ops']);
+      expect(tuneActions(owner: true), ['settings', 'ops', 'track']);
       expect(ownerSettingSections, [
         'instance',
         'mqtt',
@@ -242,7 +242,6 @@ void main() {
         'scan-all',
         'update-repos',
         'update-units',
-        'track',
         'reboot',
       ]);
       expect(operationActions(owner: false, staff: true, federation: true), [
@@ -938,6 +937,7 @@ void main() {
     expect(find.bySemanticsLabel('Загрузить аватар'), findsNothing);
     expect(find.bySemanticsLabel('Настройки'), findsOneWidget);
     expect(find.bySemanticsLabel('Команды'), findsOneWidget);
+    expect(find.bySemanticsLabel('Добавить инстанс'), findsOneWidget);
     expect(find.bySemanticsLabel('Флаги'), findsNothing);
     expect(find.bySemanticsLabel('Система'), findsNothing);
 
@@ -946,7 +946,7 @@ void main() {
     expect(find.bySemanticsLabel('Перезапуск'), findsOneWidget);
     expect(find.bySemanticsLabel('Тесты'), findsOneWidget);
     expect(find.bySemanticsLabel('Опросить соседей'), findsOneWidget);
-    expect(find.bySemanticsLabel('Отслеживать инстанс'), findsOneWidget);
+    expect(find.bySemanticsLabel('Добавить инстанс'), findsNothing);
     expect(find.bySemanticsLabel('Обновить репозитории'), findsOneWidget);
     expect(find.bySemanticsLabel('Обновить все'), findsOneWidget);
     expect(find.bySemanticsLabel('Сверить копии'), findsNothing);

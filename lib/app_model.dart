@@ -677,6 +677,26 @@ class AppModel extends ChangeNotifier {
     return repo;
   }
 
+  Future<RegistryRepo> createRepo({
+    required String url,
+    required String platform,
+    required bool public,
+    String? username,
+    String? pat,
+  }) async {
+    final current = _signedTarget();
+    final repo = await api(originOf(current.url)).createRepo(
+      current.token!,
+      url: url,
+      platform: platform,
+      public: public,
+      username: username,
+      pat: pat,
+    );
+    unawaited(ensureIcon(repo.iconUuid));
+    return repo;
+  }
+
   Future<void> deleteRepo(String uuid) async {
     final current = _signedTarget();
     await api(originOf(current.url)).deleteRepo(current.token!, uuid);

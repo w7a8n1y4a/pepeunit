@@ -53,7 +53,7 @@ const menuSections = <MenuSection>[
     color: Color(0xFF7F00FF),
     q: 1,
     r: 0,
-    icon: 'assets/icons/copy.svg',
+    icon: 'assets/icons/git.svg',
   ),
   MenuSection(
     id: 'dashboards',
