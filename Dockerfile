@@ -36,7 +36,7 @@ COPY --chown=flutter:flutter . ./
 RUN flutter build web --release --base-href / \
     && ./docker/stamp-main-js.sh
 
-FROM nginx:1.27-alpine
+FROM nginx:1.30-alpine
 
 EXPOSE 80
 

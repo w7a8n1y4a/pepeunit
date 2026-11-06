@@ -2,21 +2,12 @@ variables:
   DOCKER_IMAGE_TAG: $CI_PIPELINE_IID
   DOCKER_IMAGE_NAME: $CI_REGISTRY_IMAGE/$CI_COMMIT_REF_SLUG
 
-# Trivy: pinned version, DB cache lives on the runner host in $HOME/.cache/trivy.
-# If ghcr.io is unreachable from the runner, set TRIVY_DB_REPOSITORY and
-# TRIVY_JAVA_DB_REPOSITORY (CI/CD variables) to a mirror.
 .trivy:
   variables:
     TRIVY_IMAGE: aquasec/trivy:0.76.2
-    # Strict mode: gate on MEDIUM and above, unfixed CVEs included
-    # (no --ignore-unfixed), comprehensive detection (also reports CVEs that
-    # the distro vendor has not confirmed / marked as affected yet).
     TRIVY_SEVERITY_GATE: MEDIUM,HIGH,CRITICAL
   tags:
     - shell-build-runer
-  # The shared on-host cache (trivy.db is mmap'ed by bbolt) must never be
-  # updated while another Trivy reads it, otherwise: "SIGBUS: bus error".
-  # resource_group serializes all Trivy jobs across pipelines.
   resource_group: trivy-cache
   before_script:
     - mkdir -p "$HOME/.cache/trivy"
@@ -32,9 +23,6 @@ variables:
           "$TRIVY_IMAGE" "$@"
       }
 
-# OSV-Scanner: pinned version. Queries api.osv.dev for every package in
-# pubspec.lock. Its pub data is broader than Trivy's, so the two scanners
-# complement each other.
 .osv:
   variables:
     OSV_IMAGE: ghcr.io/google/osv-scanner:v2.7.0
@@ -53,21 +41,16 @@ stages:
   - security
   - deploy_dev
 
-# Whole repo: Dart deps (pubspec.lock), Dockerfile misconfigurations,
-# hardcoded secrets.
 security:trivy_repo:
   extends: .trivy
   stage: security
   needs: []
-  # Findings turn the job orange (warning) but do not block the pipeline.
-  # Remove allow_failure to make the scan blocking again.
   allow_failure: true
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_COMMIT_REF_NAME == "master"
   script:
-    # 1) full report (all severities, incl. LOW/UNKNOWN), never fails; artifact
     - >
       trivy fs
       --scanners vuln,secret,misconfig
@@ -75,7 +58,6 @@ security:trivy_repo:
       --skip-dirs build,.dart_tool,.git
       --format json --output trivy-repo.json
       --exit-code 0 .
-    # 2) readable log + gate: fail on MEDIUM+ (fixed and unfixed)
     - >
       trivy fs
       --scanners vuln,secret,misconfig
@@ -90,7 +72,6 @@ security:trivy_repo:
     paths:
       - trivy-repo.json
 
-# Dart deps (pubspec.lock) against the OSV database.
 security:osv_repo:
   extends: .osv
   stage: security
@@ -101,9 +82,7 @@ security:osv_repo:
     - if: $CI_PIPELINE_SOURCE == "schedule"
     - if: $CI_COMMIT_REF_NAME == "master"
   script:
-    # 1) full report as an artifact, never fails
     - osv_scanner scan source -L pubspec.lock --format json --output-file osv-repo.json || true
-    # 2) readable log + gate: exit code 1 on any finding
     - osv_scanner scan source -L pubspec.lock
   artifacts:
     when: always
@@ -111,7 +90,6 @@ security:osv_repo:
     paths:
       - osv-repo.json
 
-# Final image: OS packages of nginx:alpine + the web build.
 security:trivy_image:
   extends: .trivy
   stage: security
