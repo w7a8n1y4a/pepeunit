@@ -26,6 +26,7 @@ class UnitPage extends StatefulWidget {
 
 class _UnitPageState extends State<UnitPage> {
   Unit? _unit;
+  ({int inputs, int outputs})? _ios;
   String? _failure;
   var _open = false;
   var _loading = true;
@@ -54,6 +55,7 @@ class _UnitPageState extends State<UnitPage> {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.uuid == widget.uuid) return;
     _stop();
+    _ios = null;
     _load();
   }
 
@@ -148,6 +150,7 @@ class _UnitPageState extends State<UnitPage> {
           id: 'nodes',
           title: unitText(language, 'Входы и выходы', 'Inputs and outputs'),
           color: unitIoColor,
+          rim: _ioRim(),
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/io.svg',
@@ -215,6 +218,43 @@ class _UnitPageState extends State<UnitPage> {
     }
   }
 
+  /// Inputs and outputs alternate around the border in proportion to their
+  /// counts. Inputs take segment 0.
+  List<Color>? _ioRim() {
+    final counts = _ios;
+    if (counts == null) return null;
+    return rimMix([
+      (unitIoColor, counts.inputs),
+      (unitOutputColor, counts.outputs),
+    ]);
+  }
+
+  Future<void> _loadIos() async {
+    final model = AppScope.of(context);
+    try {
+      final inputs = model.listIos(
+        offset: 0,
+        limit: 1,
+        unitUuid: widget.uuid,
+        types: const ['Input'],
+      );
+      final outputs = model.listIos(
+        offset: 0,
+        limit: 1,
+        unitUuid: widget.uuid,
+        types: const ['Output'],
+      );
+      final counts = (
+        inputs: (await inputs).count,
+        outputs: (await outputs).count,
+      );
+      if (!mounted) return;
+      setState(() => _ios = counts);
+    } catch (_) {
+      // The border stays one color; the list screen shows the error.
+    }
+  }
+
   Future<void> _load() async {
     final model = AppScope.of(context);
     final language = model.vault.language;
@@ -240,6 +280,7 @@ class _UnitPageState extends State<UnitPage> {
         _seen = true;
       });
       _watch(unit);
+      unawaited(_loadIos());
     } catch (error) {
       if (!mounted) return;
       setState(() {

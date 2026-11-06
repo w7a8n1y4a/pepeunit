@@ -28,10 +28,10 @@ Future<InstanceSession> openSession(PepeunitApi api, Identity identity) async {
   final signature = base64.encode(
     inFlutterTestRunner
         ? identity.signChallenge(challenge)
-        : await compute(
-            signChallengeDetached,
-            (secretKey: identity.secretKeyBase64, challenge: challenge),
-          ),
+        : await compute(signChallengeDetached, (
+            secretKey: identity.secretKeyBase64,
+            challenge: challenge,
+          )),
   );
   final token = await api.auth(challenge, signature);
   final uuid = jwtUuid(token);

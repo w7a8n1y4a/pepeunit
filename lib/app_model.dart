@@ -878,23 +878,45 @@ class AppModel extends ChangeNotifier {
   Future<void> unlinkGroupUnit(String uuid, String unitUuid) =>
       _api.unlinkGroupUnit(_token, uuid, unitUuid);
 
+  /// Direction of every IO seen so far, so a child screen takes its color
+  /// before its own request returns.
+  final _ioInputs = <String, bool>{};
+
+  bool? ioIsInput(String uuid) => _ioInputs[uuid];
+
+  Future<bool> ioInput(String uuid) async =>
+      _ioInputs[uuid] ?? (await readUnitIo(uuid)).input;
+
+  void _noteIo(UnitIo io) => _ioInputs[io.uuid] = io.input;
+
   Future<({int count, List<UnitIo> ios})> listIos({
     required int offset,
     required int limit,
     String? unitUuid,
     List<String>? types,
-  }) => _api.unitIos(
-    token: _token,
-    offset: offset,
-    limit: cappedLimit(limit),
-    unitUuid: unitUuid,
-    types: types,
-  );
+  }) async {
+    final page = await _api.unitIos(
+      token: _token,
+      offset: offset,
+      limit: cappedLimit(limit),
+      unitUuid: unitUuid,
+      types: types,
+    );
+    page.ios.forEach(_noteIo);
+    return page;
+  }
 
-  Future<UnitIo> readUnitIo(String uuid) => _api.readUnitIo(_token, uuid);
+  Future<UnitIo> readUnitIo(String uuid) async {
+    final io = await _api.readUnitIo(_token, uuid);
+    _noteIo(io);
+    return io;
+  }
 
-  Future<UnitIo> updateUnitIo(String uuid, Map<String, Object?> patch) =>
-      _api.updateUnitIo(_token, uuid, patch);
+  Future<UnitIo> updateUnitIo(String uuid, Map<String, Object?> patch) async {
+    final io = await _api.updateUnitIo(_token, uuid, patch);
+    _noteIo(io);
+    return io;
+  }
 
   Future<UnitIo> setInputState(String uuid, String state) =>
       _api.setInputState(_token, uuid, state);

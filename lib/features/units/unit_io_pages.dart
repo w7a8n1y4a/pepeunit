@@ -147,10 +147,10 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
       title: io?.topic ?? slot.id,
       sideRight: io?.type,
       footer: io == null ? null : unitVisibilityLabel(language, io.visibility),
-      color: unitIoColor,
+      color: unitIoTone(io?.input ?? true),
       q: slot.q,
       r: slot.r,
-      icon: 'assets/icons/io.svg',
+      icon: unitIoIcon(io?.input ?? true),
     );
   }
 
@@ -208,6 +208,9 @@ class _UnitIoPageState extends State<UnitIoPage> {
   var _open = false;
   var _loading = true;
 
+  bool get _input =>
+      _io?.input ?? AppScope.of(context).ioIsInput(widget.uuid) ?? true;
+
   @override
   void initState() {
     super.initState();
@@ -252,7 +255,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
   }
 
   HexSlot _slot(BoardSlot slot, String language, UnitIo? io) {
-    final color = unitIoColor;
+    final color = unitIoTone(_input);
     switch (slot.id) {
       case 'back':
         return backSlot(
@@ -269,7 +272,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
           busy: _loading,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/io.svg',
+          icon: unitIoIcon(_input),
         );
       case 'summary':
         final lines = io == null
@@ -293,15 +296,22 @@ class _UnitIoPageState extends State<UnitIoPage> {
           body: MetricsCell(lines: lines),
         );
       case 'settings':
-        return _nav(slot, language, 'Настройки', 'Settings', 'settings.svg');
+        return _nav(
+          slot,
+          language,
+          color,
+          'Настройки',
+          'Settings',
+          'settings.svg',
+        );
       case 'value':
-        return _nav(slot, language, 'Значение', 'Value', 'terminal.svg');
+        return _nav(slot, language, color, 'Значение', 'Value', 'terminal.svg');
       case 'links':
-        return _nav(slot, language, 'Связи', 'Links', 'chain.svg');
+        return _nav(slot, language, color, 'Связи', 'Links', 'chain.svg');
       case 'pipe':
-        return _nav(slot, language, 'DataPipe', 'DataPipe', 'pipe.svg');
+        return _nav(slot, language, color, 'DataPipe', 'DataPipe', 'pipe.svg');
       case 'access':
-        return _nav(slot, language, 'Доступы', 'Access', 'users.svg');
+        return _nav(slot, language, color, 'Доступы', 'Access', 'users.svg');
       default:
         return HexSlot(
           id: slot.id,
@@ -316,6 +326,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
   HexSlot _nav(
     BoardSlot slot,
     String language,
+    Color color,
     String ru,
     String en,
     String icon,
@@ -323,7 +334,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
     return HexSlot(
       id: slot.id,
       title: unitText(language, ru, en),
-      color: unitIoColor,
+      color: color,
       q: slot.q,
       r: slot.r,
       icon: 'assets/icons/$icon',
@@ -414,6 +425,9 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
     final language = AppScope.of(context).vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
     final input = _io?.input ?? false;
+    final tone = unitIoTone(
+      _io?.input ?? AppScope.of(context).ioIsInput(widget.uuid) ?? true,
+    );
     final ids = ['visibility', 'max', if (input) 'rewrite', 'pipe', 'save'];
     final placed = cardBoard(ids, wide: wide);
     final slots = <HexSlot>[
@@ -427,7 +441,7 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
           'visibility' => HexSlot(
             id: 'visibility',
             title: unitText(language, 'Видимость', 'Visibility'),
-            color: unitIoColor,
+            color: tone,
             q: slot.q,
             r: slot.r,
             tappable: false,
@@ -443,12 +457,12 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
           'max' => HexSlot(
             id: 'max',
             title: unitText(language, 'Связи', 'Links'),
-            color: unitIoColor,
+            color: tone,
             q: slot.q,
             r: slot.r,
             tappable: false,
             body: LineInput(
-              color: unitIoColor,
+              color: tone,
               controller: _max,
               hint: '0',
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -459,7 +473,7 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
             title: _rewritable
                 ? unitText(language, 'Перезапись', 'Rewritable')
                 : unitText(language, 'Без перезаписи', 'Not rewritable'),
-            color: unitIoColor,
+            color: tone,
             q: slot.q,
             r: slot.r,
             icon: 'assets/icons/terminal.svg',
@@ -469,7 +483,7 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
             title: _pipe
                 ? unitText(language, 'DataPipe включён', 'DataPipe on')
                 : unitText(language, 'DataPipe выключен', 'DataPipe off'),
-            color: unitIoColor,
+            color: tone,
             q: slot.q,
             r: slot.r,
             icon: 'assets/icons/pipe.svg',
@@ -477,7 +491,7 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
           'save' => HexSlot(
             id: 'save',
             title: unitText(language, 'Сохранить', 'Save'),
-            color: unitIoColor,
+            color: tone,
             busy: _busy,
             q: slot.q,
             r: slot.r,
@@ -486,7 +500,7 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
           _ => HexSlot(
             id: slot.id,
             title: slot.id,
-            color: unitIoColor,
+            color: tone,
             q: slot.q,
             r: slot.r,
           ),
@@ -832,11 +846,11 @@ class _UnitOutputsPageState extends State<UnitOutputsPage> {
                         )
                         ?.topic ??
                     slot.id,
-                color: unitIoColor,
+                color: unitOutputColor,
                 busy: _loading && _ios.isEmpty,
                 q: slot.q,
                 r: slot.r,
-                icon: 'assets/icons/io.svg',
+                icon: unitIoIcon(false),
               ),
     ];
     if (_ios.isEmpty && !_loading) {
@@ -854,7 +868,7 @@ class _UnitOutputsPageState extends State<UnitOutputsPage> {
           HexSlot(
             id: 'empty',
             title: unitText(language, 'Нет выходов', 'No outputs'),
-            color: unitIoColor,
+            color: unitOutputColor,
             tappable: false,
             q: frame.cells.first.$1,
             r: frame.cells.first.$2,
@@ -921,6 +935,10 @@ class _UnitPipePageState extends State<UnitPipePage> {
   String? _note;
   var _open = false;
   String? _pending;
+  bool? _input;
+
+  Color get _tone =>
+      unitIoTone(_input ?? AppScope.of(context).ioIsInput(widget.uuid) ?? true);
 
   @override
   void initState() {
@@ -964,7 +982,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
         id: 'editor',
         title: 'YAML',
         footer: _note,
-        color: unitIoColor,
+        color: _tone,
         busy: _pending == 'load',
         q: slot.q,
         r: slot.r,
@@ -974,7 +992,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
           child: TextField(
             controller: _editor,
             maxLines: null,
-            cursorColor: unitIoColor,
+            cursorColor: _tone,
             style: const TextStyle(
               color: Color(0xFFFFFFFF),
               fontFamily: 'JetBrains Mono',
@@ -998,7 +1016,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
     return HexSlot(
       id: slot.id,
       title: labels[slot.id] ?? slot.id,
-      color: slot.id == 'clear' ? errorColor : unitIoColor,
+      color: slot.id == 'clear' ? errorColor : _tone,
       busy: _pending == slot.id,
       q: slot.q,
       r: slot.r,
@@ -1095,7 +1113,9 @@ class _UnitPipePageState extends State<UnitPipePage> {
   Future<void> _load() async {
     setState(() => _pending = 'load');
     try {
-      final bytes = await AppScope.of(context).pipeConfig(widget.uuid);
+      final model = AppScope.of(context);
+      _input = await model.ioInput(widget.uuid);
+      final bytes = await model.pipeConfig(widget.uuid);
       if (!mounted) return;
       setState(() {
         _editor.text = utf8.decode(bytes);
@@ -1129,6 +1149,10 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
   String? _failure;
   var _open = false;
   var _loading = true;
+  bool? _input;
+
+  Color get _tone =>
+      unitIoTone(_input ?? AppScope.of(context).ioIsInput(widget.uuid) ?? true);
 
   @override
   void initState() {
@@ -1160,7 +1184,7 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
           'filter' => HexSlot(
             id: 'filter',
             title: unitText(language, 'Политика', 'Policy'),
-            color: unitIoColor,
+            color: _tone,
             q: slot.q,
             r: slot.r,
             tappable: false,
@@ -1181,7 +1205,7 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
           'window' => HexSlot(
             id: 'window',
             title: unitText(language, 'Страница', 'Page'),
-            color: unitIoColor,
+            color: _tone,
             busy: _loading,
             q: slot.q,
             r: slot.r,
@@ -1209,7 +1233,7 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
             id: slot.id,
             title: _rowTitle(slot.id),
             footer: _rowTime(slot.id),
-            color: unitIoColor,
+            color: _tone,
             q: slot.q,
             r: slot.r,
             tappable: false,
@@ -1257,6 +1281,8 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
       _failure = null;
     });
     try {
+      _input = await AppScope.of(context).ioInput(widget.uuid);
+      if (!mounted) return;
       final page = await AppScope.of(context).pipeData(
         uuid: widget.uuid,
         type: _type,

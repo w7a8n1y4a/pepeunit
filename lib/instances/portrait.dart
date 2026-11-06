@@ -130,8 +130,7 @@ class InstancePortrait {
       datapipe: settings['pu_ff_datapipe_enable'] as bool? ?? datapipe,
       notifications:
           settings['pu_ff_notification_enable'] as bool? ?? notifications,
-      grafana:
-          settings['pu_ff_grafana_integration_enable'] as bool? ?? grafana,
+      grafana: settings['pu_ff_grafana_integration_enable'] as bool? ?? grafana,
       prometheus: settings['pu_ff_prometheus_enable'] as bool? ?? prometheus,
       telegram: settings['pu_ff_telegram_bot_enable'] as bool? ?? telegram,
       federation: settings['pu_ff_federation_enable'] as bool? ?? federation,

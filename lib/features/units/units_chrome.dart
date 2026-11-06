@@ -21,6 +21,14 @@ const unitGroupsColor = Color(0xFF00E5FF);
 /// Inputs and outputs. The child screens of a node use this teal.
 const unitIoColor = Color(0xFF2BD9C3);
 
+/// Output cells. Inputs keep [unitIoColor].
+const unitOutputColor = Color(0xFFFF7A59);
+
+Color unitIoTone(bool input) => input ? unitIoColor : unitOutputColor;
+
+String unitIoIcon(bool input) =>
+    input ? 'assets/icons/input.svg' : 'assets/icons/output.svg';
+
 String unitText(String language, String ru, String en) =>
     phrase(language, {'ru': ru, 'en': en});
 

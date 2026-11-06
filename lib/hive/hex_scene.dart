@@ -2,6 +2,7 @@ import 'dart:math';
 import 'dart:typed_data';
 import 'dart:ui' show PathMetric, Tangent;
 
+import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -66,6 +67,7 @@ class HexSlot {
     this.tappable = true,
     this.enabled = true,
     this.busy = false,
+    this.rim,
   });
 
   final String id;
@@ -120,6 +122,144 @@ class HexSlot {
 
   /// True while this cell is waiting on a request.
   final bool busy;
+
+  /// Border colors, [hexRimSegments] long. Each side is cut into
+  /// [hexRimSideParts] parts. Segment 0 starts at the top vertex and the order
+  /// runs clockwise. Null keeps the border in [color]. A disabled cell stays
+  /// muted.
+  final List<Color>? rim;
+}
+
+const hexRimSideParts = 8;
+const hexRimSegments = 6 * hexRimSideParts;
+
+/// Mixes the colors around the border in proportion to their weights, so
+/// they alternate segment by segment. The first color takes segment 0. A color
+/// with a positive weight keeps at least one segment. Returns null when every
+/// weight is zero.
+List<Color>? rimMix(List<(Color, int)> parts) {
+  final live = [
+    for (final part in parts)
+      if (part.$2 > 0) part,
+  ];
+  if (live.isEmpty) return null;
+  final total = live.fold<int>(0, (sum, part) => sum + part.$2);
+  final exact = [for (final part in live) part.$2 * hexRimSegments / total];
+  final cells = [for (final share in exact) max(1, share.floor())];
+  var left = hexRimSegments - cells.fold<int>(0, (sum, count) => sum + count);
+  while (left != 0) {
+    var pick = -1;
+    for (var i = 0; i < cells.length; i++) {
+      if (left < 0 && cells[i] < 2) continue;
+      final gap = exact[i] - cells[i];
+      if (pick < 0) {
+        pick = i;
+      } else if (left > 0
+          ? gap > exact[pick] - cells[pick]
+          : gap < exact[pick] - cells[pick]) {
+        pick = i;
+      }
+    }
+    if (pick < 0) break;
+    cells[pick] += left > 0 ? 1 : -1;
+    left += left > 0 ? -1 : 1;
+  }
+  // Smooth weighted round robin: every color keeps its count and its
+  // segments are spread as evenly as the counts allow.
+  final credit = List<int>.filled(live.length, 0);
+  return [
+    for (var step = 0; step < hexRimSegments; step++)
+      () {
+        var pick = 0;
+        for (var i = 0; i < live.length; i++) {
+          credit[i] += cells[i];
+          if (credit[i] > credit[pick]) pick = i;
+        }
+        credit[pick] -= hexRimSegments;
+        return live[pick].$1;
+      }(),
+  ];
+}
+
+/// Draws the border of a pointy-top hex in [rim] colors. Runs of one color
+/// are stroked as one path, so the corners stay mitered.
+void paintHexRim(
+  Canvas canvas,
+  Offset center,
+  double radius,
+  double stroke,
+  List<Color> rim,
+) {
+  if (rim.length != hexRimSegments) return;
+  final corners = [
+    for (var i = 0; i < 6; i++)
+      Offset(
+        center.dx + radius * cos(pi / 3 * i - pi / 2),
+        center.dy + radius * sin(pi / 3 * i - pi / 2),
+      ),
+  ];
+  Offset at(int segment) {
+    final side = segment ~/ hexRimSideParts % 6;
+    final t = (segment - side * hexRimSideParts) / hexRimSideParts;
+    return Offset.lerp(corners[side], corners[(side + 1) % 6], t)!;
+  }
+
+  final paint = Paint()
+    ..style = PaintingStyle.stroke
+    ..strokeWidth = stroke
+    ..strokeCap = StrokeCap.butt
+    ..strokeJoin = StrokeJoin.miter;
+  var from = 0;
+  while (from < hexRimSegments) {
+    var to = from + 1;
+    while (to < hexRimSegments && rim[to] == rim[from]) {
+      to++;
+    }
+    final path = Path()..moveTo(at(from).dx, at(from).dy);
+    var corner = (from ~/ hexRimSideParts + 1) * hexRimSideParts;
+    for (; corner < to; corner += hexRimSideParts) {
+      final point = at(corner);
+      path.lineTo(point.dx, point.dy);
+    }
+    final end = at(to % hexRimSegments);
+    path.lineTo(end.dx, end.dy);
+    canvas.drawPath(path, paint..color = rim[from]);
+    from = to;
+  }
+
+  // Where the color changes on a vertex the two butt ends leave a notch on
+  // the outside. Each half of the miter goes to the color on its side.
+  final half = stroke / 2;
+  final reach = half / cos(pi / 6);
+  for (var i = 0; i < 6; i++) {
+    final next = rim[i * hexRimSideParts];
+    final prev =
+        rim[(i * hexRimSideParts - 1 + hexRimSegments) % hexRimSegments];
+    if (i != 0 && prev == next) continue;
+    final angle = pi / 3 * i - pi / 2;
+    final vertex = corners[i];
+    final before =
+        vertex + Offset(cos(angle - pi / 6), sin(angle - pi / 6)) * half;
+    final after =
+        vertex + Offset(cos(angle + pi / 6), sin(angle + pi / 6)) * half;
+    final tip = vertex + Offset(cos(angle), sin(angle)) * reach;
+    canvas.drawPath(
+      Path()
+        ..moveTo(vertex.dx, vertex.dy)
+        ..lineTo(before.dx, before.dy)
+        ..lineTo(tip.dx, tip.dy)
+        ..close(),
+      Paint()..color = prev,
+    );
+    canvas.drawPath(
+      Path()
+        ..moveTo(vertex.dx, vertex.dy)
+        ..lineTo(tip.dx, tip.dy)
+        ..lineTo(after.dx, after.dy)
+        ..close(),
+      Paint()..color = next,
+    );
+  }
 }
 
 String slotLabel(HexSlot slot) {
@@ -389,14 +529,20 @@ class HexPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final path = pointyHex(center, radius);
     final enabled = slot.enabled;
+    final stroke = max(1.4, radius * 0.03);
     canvas.drawPath(path, Paint()..color = hexFill);
-    canvas.drawPath(
-      path,
-      Paint()
-        ..style = PaintingStyle.stroke
-        ..strokeWidth = max(1.4, radius * 0.03)
-        ..color = enabled ? slot.color : hexMuted,
-    );
+    final rim = slot.rim;
+    if (enabled && rim != null) {
+      paintHexRim(canvas, center, radius, stroke, rim);
+    } else {
+      canvas.drawPath(
+        path,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = stroke
+          ..color = enabled ? slot.color : hexMuted,
+      );
+    }
     _label(canvas, center, radius);
   }
 
@@ -785,6 +931,7 @@ class HexPainter extends CustomPainter {
   bool shouldRepaint(covariant HexPainter oldDelegate) {
     final previous = oldDelegate.slot;
     return slot.color != previous.color ||
+        !listEquals(slot.rim, previous.rim) ||
         slot.enabled != previous.enabled ||
         slot.title != previous.title ||
         slot.titleColor != previous.titleColor ||
@@ -899,7 +1046,9 @@ class _CellFrameState extends State<_CellFrame> with TickerProviderStateMixin {
           widget.child,
           if (_hover && interactive)
             IgnorePointer(
-              child: CustomPaint(painter: _RimPainter(widget.slot.color)),
+              child: CustomPaint(
+                painter: _RimPainter(widget.slot.color, widget.slot.rim),
+              ),
             ),
           if (burst != null && burst.isAnimating)
             IgnorePointer(
@@ -1039,26 +1188,38 @@ class _HoverPopState extends State<HoverPop> {
 }
 
 class _RimPainter extends CustomPainter {
-  const _RimPainter(this.color);
+  const _RimPainter(this.color, this.rim);
 
   final Color color;
+  final List<Color>? rim;
+
+  static Color _lift(Color color) =>
+      Color.lerp(color, const Color(0xFFFFFFFF), 0.16)!;
 
   @override
   void paint(Canvas canvas, Size size) {
     final radius = size.shortestSide / 2;
-    final path = pointyHex(Offset(size.width / 2, size.height / 2), radius);
+    final center = Offset(size.width / 2, size.height / 2);
+    final stroke = max(1.4, radius * 0.03);
+    final rim = this.rim;
+    if (rim != null) {
+      paintHexRim(canvas, center, radius, stroke, [
+        for (final segment in rim) _lift(segment),
+      ]);
+      return;
+    }
     canvas.drawPath(
-      path,
+      pointyHex(center, radius),
       Paint()
         ..style = PaintingStyle.stroke
-        ..strokeWidth = max(1.4, radius * 0.03)
-        ..color = Color.lerp(color, const Color(0xFFFFFFFF), 0.16)!,
+        ..strokeWidth = stroke
+        ..color = _lift(color),
     );
   }
 
   @override
   bool shouldRepaint(covariant _RimPainter oldDelegate) =>
-      oldDelegate.color != color;
+      oldDelegate.color != color || !listEquals(oldDelegate.rim, rim);
 }
 
 class _RayPainter extends CustomPainter {

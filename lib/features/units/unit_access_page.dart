@@ -36,6 +36,7 @@ class _AccessPageState extends State<AccessPage> {
   var _open = false;
   var _loading = true;
   var _page = 0;
+  bool? _input;
 
   @override
   void initState() {
@@ -84,7 +85,13 @@ class _AccessPageState extends State<AccessPage> {
   }
 
   HexSlot _slot(BoardSlot slot, String language, NetworkBoard board) {
-    final color = widget.resourceType == 'UnitIO' ? unitIoColor : unitsColor;
+    final color = widget.resourceType == 'UnitIO'
+        ? unitIoTone(
+            _input ??
+                AppScope.of(context).ioIsInput(widget.resourceUuid) ??
+                true,
+          )
+        : unitsColor;
     if (slot.id == 'back') {
       return backSlot(
         title: unitText(language, 'Назад', 'Back'),
@@ -189,6 +196,9 @@ class _AccessPageState extends State<AccessPage> {
       return;
     }
     try {
+      if (widget.resourceType == 'UnitIO') {
+        _input = await model.ioInput(widget.resourceUuid);
+      }
       final page = await model.accessGrants(
         resourceUuid: widget.resourceUuid,
         resourceType: widget.resourceType,

@@ -11,6 +11,7 @@ Rendering is `HexSlot`, `HexPainter`, and `HexLayout` in `lib/hive/hex_scene.dar
 Menu cell anatomy:
 
 1. Border uses the section accent. The Back cell uses `hexMuted`.
+   A cell may carry `HexSlot.rim` instead of one border color: `hexRimSegments` colors (6 sides × 8), clockwise from the top vertex. `rimMix` alternates colors around the border in proportion to their weights. The unit menu `Inputs and outputs` cell is the first user: input and output counts.
 2. Label sits on the upper-left edge. Text longer than 12 characters runs along both upper edges.
 3. Center is an SVG icon, a PNG avatar, or text. A choice and a value in the same cell use `cellFont`: 0.068 of the cell side, at least 11. Log levels and account parameters are the reference.
 
