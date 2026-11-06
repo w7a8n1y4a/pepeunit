@@ -18,6 +18,9 @@ const unitAddColor = Color(0xFF00C853);
 /// Unit groups. No home section uses this hue.
 const unitGroupsColor = Color(0xFF00E5FF);
 
+/// Inputs and outputs. The child screens of a node use this teal.
+const unitIoColor = Color(0xFF2BD9C3);
+
 String unitText(String language, String ru, String en) =>
     phrase(language, {'ru': ru, 'en': en});
 

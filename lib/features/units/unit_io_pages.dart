@@ -73,7 +73,7 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
           title: _loading
               ? unitText(language, 'Входы и выходы', 'Inputs and outputs')
               : unitText(language, 'Пусто', 'Empty'),
-          color: unitsColor,
+          color: unitIoColor,
           busy: _loading,
           tappable: false,
           q: frame.cells.first.$1,
@@ -129,7 +129,7 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
         id: slot.id,
         left: !forward,
         language: language,
-        color: unitsColor,
+        color: unitIoColor,
         q: slot.q,
         r: slot.r,
         page: board.page,
@@ -147,10 +147,10 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
       title: io?.topic ?? slot.id,
       sideRight: io?.type,
       footer: io == null ? null : unitVisibilityLabel(language, io.visibility),
-      color: unitsColor,
+      color: unitIoColor,
       q: slot.q,
       r: slot.r,
-      icon: 'assets/icons/chain.svg',
+      icon: 'assets/icons/io.svg',
     );
   }
 
@@ -252,7 +252,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
   }
 
   HexSlot _slot(BoardSlot slot, String language, UnitIo? io) {
-    final color = unitsColor;
+    final color = unitIoColor;
     switch (slot.id) {
       case 'back':
         return backSlot(
@@ -269,7 +269,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
           busy: _loading,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/chain.svg',
+          icon: 'assets/icons/io.svg',
         );
       case 'summary':
         final lines = io == null
@@ -323,7 +323,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
     return HexSlot(
       id: slot.id,
       title: unitText(language, ru, en),
-      color: unitsColor,
+      color: unitIoColor,
       q: slot.q,
       r: slot.r,
       icon: 'assets/icons/$icon',
@@ -427,7 +427,7 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
           'visibility' => HexSlot(
             id: 'visibility',
             title: unitText(language, 'Видимость', 'Visibility'),
-            color: unitsColor,
+            color: unitIoColor,
             q: slot.q,
             r: slot.r,
             tappable: false,
@@ -443,12 +443,12 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
           'max' => HexSlot(
             id: 'max',
             title: unitText(language, 'Связи', 'Links'),
-            color: unitsColor,
+            color: unitIoColor,
             q: slot.q,
             r: slot.r,
             tappable: false,
             body: LineInput(
-              color: unitsColor,
+              color: unitIoColor,
               controller: _max,
               hint: '0',
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
@@ -459,7 +459,7 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
             title: _rewritable
                 ? unitText(language, 'Перезапись', 'Rewritable')
                 : unitText(language, 'Без перезаписи', 'Not rewritable'),
-            color: unitsColor,
+            color: unitIoColor,
             q: slot.q,
             r: slot.r,
             icon: 'assets/icons/terminal.svg',
@@ -469,7 +469,7 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
             title: _pipe
                 ? unitText(language, 'DataPipe включён', 'DataPipe on')
                 : unitText(language, 'DataPipe выключен', 'DataPipe off'),
-            color: unitsColor,
+            color: unitIoColor,
             q: slot.q,
             r: slot.r,
             icon: 'assets/icons/pipe.svg',
@@ -477,7 +477,7 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
           'save' => HexSlot(
             id: 'save',
             title: unitText(language, 'Сохранить', 'Save'),
-            color: unitsColor,
+            color: unitIoColor,
             busy: _busy,
             q: slot.q,
             r: slot.r,
@@ -486,7 +486,7 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
           _ => HexSlot(
             id: slot.id,
             title: slot.id,
-            color: unitsColor,
+            color: unitIoColor,
             q: slot.q,
             r: slot.r,
           ),
@@ -601,13 +601,13 @@ class _UnitIoValuePageState extends State<UnitIoValuePage> {
             : HexSlot(
                 id: 'value',
                 title: unitText(language, 'Значение', 'Value'),
-                color: unitsColor,
+                color: unitIoColor,
                 busy: _busy,
                 q: slot.q,
                 r: slot.r,
                 tappable: false,
                 body: LineInput(
-                  color: unitsColor,
+                  color: unitIoColor,
                   controller: _value,
                   hint: unitText(language, 'значение', 'value'),
                   onSubmitted: (_) => _send(),
@@ -691,7 +691,7 @@ class _UnitLinksPageState extends State<UnitLinksPage> {
           HexSlot(
             id: 'add',
             title: unitText(language, 'Добавить', 'Add'),
-            color: unitsColor,
+            color: unitIoColor,
             busy: _loading,
             q: slot.q,
             r: slot.r,
@@ -701,7 +701,7 @@ class _UnitLinksPageState extends State<UnitLinksPage> {
           HexSlot(
             id: slot.id,
             title: _name(slot.id),
-            color: unitsColor,
+            color: unitIoColor,
             q: slot.q,
             r: slot.r,
             icon: 'assets/icons/micro.svg',
@@ -832,11 +832,11 @@ class _UnitOutputsPageState extends State<UnitOutputsPage> {
                         )
                         ?.topic ??
                     slot.id,
-                color: unitsColor,
+                color: unitIoColor,
                 busy: _loading && _ios.isEmpty,
                 q: slot.q,
                 r: slot.r,
-                icon: 'assets/icons/chain.svg',
+                icon: 'assets/icons/io.svg',
               ),
     ];
     if (_ios.isEmpty && !_loading) {
@@ -854,7 +854,7 @@ class _UnitOutputsPageState extends State<UnitOutputsPage> {
           HexSlot(
             id: 'empty',
             title: unitText(language, 'Нет выходов', 'No outputs'),
-            color: unitsColor,
+            color: unitIoColor,
             tappable: false,
             q: frame.cells.first.$1,
             r: frame.cells.first.$2,
@@ -964,7 +964,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
         id: 'editor',
         title: 'YAML',
         footer: _note,
-        color: unitsColor,
+        color: unitIoColor,
         busy: _pending == 'load',
         q: slot.q,
         r: slot.r,
@@ -974,7 +974,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
           child: TextField(
             controller: _editor,
             maxLines: null,
-            cursorColor: unitsColor,
+            cursorColor: unitIoColor,
             style: const TextStyle(
               color: Color(0xFFFFFFFF),
               fontFamily: 'JetBrains Mono',
@@ -998,7 +998,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
     return HexSlot(
       id: slot.id,
       title: labels[slot.id] ?? slot.id,
-      color: slot.id == 'clear' ? errorColor : unitsColor,
+      color: slot.id == 'clear' ? errorColor : unitIoColor,
       busy: _pending == slot.id,
       q: slot.q,
       r: slot.r,
@@ -1160,7 +1160,7 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
           'filter' => HexSlot(
             id: 'filter',
             title: unitText(language, 'Политика', 'Policy'),
-            color: unitsColor,
+            color: unitIoColor,
             q: slot.q,
             r: slot.r,
             tappable: false,
@@ -1181,7 +1181,7 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
           'window' => HexSlot(
             id: 'window',
             title: unitText(language, 'Страница', 'Page'),
-            color: unitsColor,
+            color: unitIoColor,
             busy: _loading,
             q: slot.q,
             r: slot.r,
@@ -1209,7 +1209,7 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
             id: slot.id,
             title: _rowTitle(slot.id),
             footer: _rowTime(slot.id),
-            color: unitsColor,
+            color: unitIoColor,
             q: slot.q,
             r: slot.r,
             tappable: false,

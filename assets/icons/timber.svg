@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs>
+  <mask id="cover0" maskUnits="userSpaceOnUse">
+    <rect x="0" y="0" width="64" height="64" fill="white"/>
+    <path d="M 31.00 55.55 L 41.35 49.08 A 7.87 7.87 0 0 0 33.00 35.73 L 22.65 42.20 A 7.87 7.87 0 0 0 31.00 55.55 Z" fill="black" stroke="black" stroke-width="1.60"/>
+    <path d="M 46.75 55.55 L 57.10 49.08 A 7.87 7.87 0 0 0 48.75 35.73 L 38.40 42.20 A 7.87 7.87 0 0 0 46.75 55.55 Z" fill="black" stroke="black" stroke-width="1.60"/>
+    <path d="M 23.12 41.91 L 33.47 35.44 A 7.87 7.87 0 0 0 25.13 22.09 L 14.78 28.56 A 7.87 7.87 0 0 0 23.12 41.91 Z" fill="black" stroke="black" stroke-width="1.60"/>
+    <path d="M 38.87 41.91 L 49.22 35.44 A 7.87 7.87 0 0 0 40.88 22.09 L 30.53 28.56 A 7.87 7.87 0 0 0 38.87 41.91 Z" fill="black" stroke="black" stroke-width="1.60"/>
+    <path d="M 31.00 28.27 L 41.35 21.80 A 7.87 7.87 0 0 0 33.00 8.45 L 22.65 14.92 A 7.87 7.87 0 0 0 31.00 28.27 Z" fill="black" stroke="black" stroke-width="1.60"/>
+  </mask>
+  <mask id="cover1" maskUnits="userSpaceOnUse">
+    <rect x="0" y="0" width="64" height="64" fill="white"/>
+    <path d="M 46.75 55.55 L 57.10 49.08 A 7.87 7.87 0 0 0 48.75 35.73 L 38.40 42.20 A 7.87 7.87 0 0 0 46.75 55.55 Z" fill="black" stroke="black" stroke-width="1.60"/>
+    <path d="M 23.12 41.91 L 33.47 35.44 A 7.87 7.87 0 0 0 25.13 22.09 L 14.78 28.56 A 7.87 7.87 0 0 0 23.12 41.91 Z" fill="black" stroke="black" stroke-width="1.60"/>
+    <path d="M 38.87 41.91 L 49.22 35.44 A 7.87 7.87 0 0 0 40.88 22.09 L 30.53 28.56 A 7.87 7.87 0 0 0 38.87 41.91 Z" fill="black" stroke="black" stroke-width="1.60"/>
+    <path d="M 31.00 28.27 L 41.35 21.80 A 7.87 7.87 0 0 0 33.00 8.45 L 22.65 14.92 A 7.87 7.87 0 0 0 31.00 28.27 Z" fill="black" stroke="black" stroke-width="1.60"/>
+  </mask>
+  <mask id="cover2" maskUnits="userSpaceOnUse">
+    <rect x="0" y="0" width="64" height="64" fill="white"/>
+    <path d="M 23.12 41.91 L 33.47 35.44 A 7.87 7.87 0 0 0 25.13 22.09 L 14.78 28.56 A 7.87 7.87 0 0 0 23.12 41.91 Z" fill="black" stroke="black" stroke-width="1.60"/>
+    <path d="M 38.87 41.91 L 49.22 35.44 A 7.87 7.87 0 0 0 40.88 22.09 L 30.53 28.56 A 7.87 7.87 0 0 0 38.87 41.91 Z" fill="black" stroke="black" stroke-width="1.60"/>
+    <path d="M 31.00 28.27 L 41.35 21.80 A 7.87 7.87 0 0 0 33.00 8.45 L 22.65 14.92 A 7.87 7.87 0 0 0 31.00 28.27 Z" fill="black" stroke="black" stroke-width="1.60"/>
+  </mask>
+  <mask id="cover3" maskUnits="userSpaceOnUse">
+    <rect x="0" y="0" width="64" height="64" fill="white"/>
+    <path d="M 38.87 41.91 L 49.22 35.44 A 7.87 7.87 0 0 0 40.88 22.09 L 30.53 28.56 A 7.87 7.87 0 0 0 38.87 41.91 Z" fill="black" stroke="black" stroke-width="1.60"/>
+    <path d="M 31.00 28.27 L 41.35 21.80 A 7.87 7.87 0 0 0 33.00 8.45 L 22.65 14.92 A 7.87 7.87 0 0 0 31.00 28.27 Z" fill="black" stroke="black" stroke-width="1.60"/>
+  </mask>
+  <mask id="cover4" maskUnits="userSpaceOnUse">
+    <rect x="0" y="0" width="64" height="64" fill="white"/>
+    <path d="M 31.00 28.27 L 41.35 21.80 A 7.87 7.87 0 0 0 33.00 8.45 L 22.65 14.92 A 7.87 7.87 0 0 0 31.00 28.27 Z" fill="black" stroke="black" stroke-width="1.60"/>
+  </mask>
+  </defs>
+  <g mask="url(#cover0)" fill="none" stroke="#ffffff" stroke-width="1.60" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 6.90 42.20 L 17.25 35.73 A 7.87 7.87 0 0 1 25.60 49.08 L 15.25 55.55"/>
+    <path d="M 3.20 48.87 a 7.87 7.87 0 1 0 15.75 0 a 7.87 7.87 0 1 0 -15.75 0"/>
+    <path d="M 7.50 49.99 Q 8.49 44.73 13.21 46.05"/>
+    <path d="M 9.57 52.41 Q 13.83 53.28 14.50 48.41"/>
+    <path d="M 17.07 42.34 L 19.76 40.66"/>
+    <path d="M 19.94 45.56 L 22.43 44.01"/>
+  </g>
+  <g mask="url(#cover1)" fill="none" stroke="#ffffff" stroke-width="1.60" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 22.65 42.20 L 33.00 35.73 A 7.87 7.87 0 0 1 41.35 49.08 L 31.00 55.55"/>
+    <path d="M 18.95 48.87 a 7.87 7.87 0 1 0 15.75 0 a 7.87 7.87 0 1 0 -15.75 0"/>
+    <path d="M 23.25 49.99 Q 24.24 44.73 28.96 46.05"/>
+    <path d="M 25.32 52.41 Q 29.58 53.28 30.25 48.41"/>
+    <path d="M 32.82 42.34 L 35.51 40.66"/>
+    <path d="M 35.69 45.56 L 38.18 44.01"/>
+  </g>
+  <g mask="url(#cover2)" fill="none" stroke="#ffffff" stroke-width="1.60" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 38.40 42.20 L 48.75 35.73 A 7.87 7.87 0 0 1 57.10 49.08 L 46.75 55.55"/>
+    <path d="M 34.70 48.87 a 7.87 7.87 0 1 0 15.75 0 a 7.87 7.87 0 1 0 -15.75 0"/>
+    <path d="M 39.00 49.99 Q 39.99 44.73 44.71 46.05"/>
+    <path d="M 41.07 52.41 Q 45.33 53.28 46.00 48.41"/>
+    <path d="M 48.57 42.34 L 51.26 40.66"/>
+    <path d="M 51.44 45.56 L 53.93 44.01"/>
+  </g>
+  <g mask="url(#cover3)" fill="none" stroke="#ffffff" stroke-width="1.60" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 14.78 28.56 L 25.13 22.09 A 7.87 7.87 0 0 1 33.47 35.44 L 23.12 41.91"/>
+    <path d="M 11.07 35.23 a 7.87 7.87 0 1 0 15.75 0 a 7.87 7.87 0 1 0 -15.75 0"/>
+    <path d="M 15.38 36.35 Q 16.36 31.09 21.09 32.41"/>
+    <path d="M 17.45 38.77 Q 21.70 39.64 22.37 34.77"/>
+    <path d="M 24.94 28.70 L 27.63 27.02"/>
+    <path d="M 27.82 31.92 L 30.30 30.37"/>
+  </g>
+  <g mask="url(#cover4)" fill="none" stroke="#ffffff" stroke-width="1.60" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 30.53 28.56 L 40.88 22.09 A 7.87 7.87 0 0 1 49.22 35.44 L 38.87 41.91"/>
+    <path d="M 26.82 35.23 a 7.87 7.87 0 1 0 15.75 0 a 7.87 7.87 0 1 0 -15.75 0"/>
+    <path d="M 31.13 36.35 Q 32.11 31.09 36.84 32.41"/>
+    <path d="M 33.20 38.77 Q 37.45 39.64 38.12 34.77"/>
+    <path d="M 40.69 28.70 L 43.38 27.02"/>
+    <path d="M 43.57 31.92 L 46.05 30.37"/>
+  </g>
+  <g fill="none" stroke="#ffffff" stroke-width="1.60" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M 22.65 14.92 L 33.00 8.45 A 7.87 7.87 0 0 1 41.35 21.80 L 31.00 28.27"/>
+    <path d="M 18.95 21.59 a 7.87 7.87 0 1 0 15.75 0 a 7.87 7.87 0 1 0 -15.75 0"/>
+    <path d="M 23.25 22.71 Q 24.24 17.45 28.96 18.77"/>
+    <path d="M 25.32 25.13 Q 29.58 26.00 30.25 21.13"/>
+    <path d="M 32.82 15.06 L 35.51 13.38"/>
+    <path d="M 35.69 18.28 L 38.18 16.73"/>
+  </g>
+</svg>

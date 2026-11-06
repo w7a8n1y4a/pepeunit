@@ -84,6 +84,7 @@ class _AccessPageState extends State<AccessPage> {
   }
 
   HexSlot _slot(BoardSlot slot, String language, NetworkBoard board) {
+    final color = widget.resourceType == 'UnitIO' ? unitIoColor : unitsColor;
     if (slot.id == 'back') {
       return backSlot(
         title: unitText(language, 'Назад', 'Back'),
@@ -95,7 +96,7 @@ class _AccessPageState extends State<AccessPage> {
       return HexSlot(
         id: 'add',
         title: unitText(language, 'Добавить', 'Add'),
-        color: unitsColor,
+        color: color,
         busy: _loading,
         q: slot.q,
         r: slot.r,
@@ -108,7 +109,7 @@ class _AccessPageState extends State<AccessPage> {
         id: slot.id,
         left: !forward,
         language: language,
-        color: unitsColor,
+        color: color,
         q: slot.q,
         r: slot.r,
         page: board.page,
@@ -125,7 +126,7 @@ class _AccessPageState extends State<AccessPage> {
       id: slot.id,
       title: grant == null ? slot.id : grant.agentType,
       footer: grant == null ? null : shortCommit(grant.agentUuid),
-      color: unitsColor,
+      color: color,
       q: slot.q,
       r: slot.r,
       icon: grant?.agentType == 'Unit'

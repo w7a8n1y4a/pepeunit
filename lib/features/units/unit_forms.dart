@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -11,11 +9,10 @@ import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
 import '../../units/unit.dart';
-import '../../units/unit_view.dart';
 import '../file_drop.dart';
 import '../hex_page.dart';
 import '../line_input.dart';
-import '../network/network_chrome.dart';
+import 'unit_create_page.dart';
 import 'units_chrome.dart';
 
 class UnitSettingsPage extends StatefulWidget {
@@ -29,19 +26,23 @@ class UnitSettingsPage extends StatefulWidget {
 
 class _UnitSettingsPageState extends State<UnitSettingsPage> {
   final _name = TextEditingController();
+  final _nameFocus = FocusNode();
   Unit? _unit;
-  String _visibility = 'Private';
+  String _visibility = 'Internal';
+  var _compilable = false;
   var _auto = true;
-  var _tags = false;
+  var _tags = true;
   String _branch = '';
   String? _commit;
   String? _platform;
-  List<String> _platforms = const [];
   String? _failure;
+  String? _issue;
   var _open = false;
   var _loading = true;
   var _busy = false;
   var _hot = false;
+
+  bool get _ready => _unit != null && !_loading;
 
   @override
   void initState() {
@@ -52,26 +53,21 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
   @override
   void dispose() {
     _name.dispose();
+    _nameFocus.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    final language = AppScope.of(context).vault.language;
+    final model = AppScope.of(context);
+    final language = model.vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
-    final ids = [
-      'name',
-      'visibility',
-      'auto',
-      'tags',
-      'branch',
-      if (!_auto) 'commit',
-      if (_platforms.isNotEmpty || (_unit?.compilable ?? false)) 'platform',
-      'icon',
-      'save',
-    ];
+    const ids = ['avatar', 'name', 'visibility', 'branch', 'updates', 'save'];
     final placed = cardBoard(ids, wide: wide);
-    final slots = <HexSlot>[for (final slot in placed) _slot(slot, language)];
+    final image = model.cachedIcon(_unit?.iconUuid);
+    final slots = <HexSlot>[
+      for (final slot in placed) _slot(slot, language, image),
+    ];
     appendError(
       slots,
       message: _failure,
@@ -84,9 +80,9 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
       slots: slots,
       onTap: _tap,
       wrap: (slot, child) {
-        if (slot.id != 'icon') return child;
+        if (slot.id != 'avatar') return child;
         return FileDrop(
-          enable: true,
+          enable: _ready,
           hot: _hot,
           onHot: (hot) => setState(() => _hot = hot),
           onDrop: _drop,
@@ -96,18 +92,9 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
     );
   }
 
-  bool get _compilable =>
-      (_unit?.compilable ?? false) ||
-      (_platform != null && _platform!.isNotEmpty);
-
-  String _tagsTitle(String language) {
-    if (_compilable) return unitText(language, 'Последний тег', 'Last tag');
-    if (_tags) return unitText(language, 'Только теги', 'Tags only');
-    return unitText(language, 'Последний коммит', 'Last commit');
-  }
-
-  HexSlot _slot(BoardSlot slot, String language) {
+  HexSlot _slot(BoardSlot slot, String language, Uint8List? image) {
     final color = unitsColor;
+    final ready = _ready;
     switch (slot.id) {
       case 'back':
         return backSlot(
@@ -115,19 +102,34 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
           q: slot.q,
           r: slot.r,
         );
+      case 'avatar':
+        return HexSlot(
+          id: 'avatar',
+          title: unitText(language, 'Загрузить аватар', 'Upload avatar'),
+          color: dropColor(_hot, color),
+          busy: _loading,
+          enabled: ready,
+          q: slot.q,
+          r: slot.r,
+          icon: image == null ? 'assets/icons/icon_load.svg' : null,
+          image: image,
+        );
       case 'name':
         return HexSlot(
           id: 'name',
           title: unitText(language, 'Имя', 'Name'),
           color: color,
-          busy: _loading,
           q: slot.q,
           r: slot.r,
           tappable: false,
+          enabled: ready,
           body: LineInput(
             color: color,
             controller: _name,
+            focusNode: _nameFocus,
+            fieldKey: const ValueKey('unit-name'),
             hint: unitText(language, 'имя', 'name'),
+            issue: _issue ?? '',
             inputFormatters: [
               FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9_.-]')),
               LengthLimitingTextInputFormatter(20),
@@ -142,7 +144,9 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
           q: slot.q,
           r: slot.r,
           tappable: false,
+          enabled: ready,
           body: ChoiceWords(
+            center: true,
             choices: [
               for (final level in unitVisibilities)
                 (id: level, label: unitVisibilityLabel(language, level)),
@@ -151,72 +155,36 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
             onTap: (id) => setState(() => _visibility = id),
           ),
         );
-      case 'auto':
-        return HexSlot(
-          id: 'auto',
-          title: _auto
-              ? unitText(language, 'Автообновление', 'Auto-update')
-              : unitText(language, 'Вручную', 'Manual'),
-          color: color,
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/reload.svg',
-        );
-      case 'tags':
-        return HexSlot(
-          id: 'tags',
-          title: _tagsTitle(language),
-          color: color,
-          enabled: !_compilable,
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/flag.svg',
-        );
       case 'branch':
         return HexSlot(
           id: 'branch',
           title: unitText(language, 'Ветка', 'Branch'),
           footer: _branch.isEmpty ? null : _branch,
           color: color,
+          enabled: ready,
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/repo.svg',
         );
-      case 'commit':
+      case 'updates':
         return HexSlot(
-          id: 'commit',
-          title: unitText(language, 'Коммит', 'Commit'),
-          footer: shortCommit(_commit).isEmpty ? null : shortCommit(_commit),
+          id: 'updates',
+          title: unitText(language, 'Обновления', 'Updates'),
+          footer: unitRunLabel(language, _compilable),
+          footerLeft: unitHandsLabel(language, _auto),
           color: color,
+          enabled: ready,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/commits.svg',
-        );
-      case 'platform':
-        return HexSlot(
-          id: 'platform',
-          title: unitText(language, 'Платформа', 'Platform'),
-          footer: _platform,
-          color: color,
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/platform.svg',
-        );
-      case 'icon':
-        return HexSlot(
-          id: 'icon',
-          title: unitText(language, 'Иконка', 'Icon'),
-          color: dropColor(_hot, color),
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/icon_load.svg',
+          icon: 'assets/icons/updates.svg',
         );
       case 'save':
         return HexSlot(
           id: 'save',
           title: unitText(language, 'Сохранить', 'Save'),
-          color: color,
+          color: unitAddColor,
           busy: _busy,
+          enabled: ready,
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/check.svg',
@@ -233,46 +201,54 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
   }
 
   Future<void> _tap(String id) async {
-    final repo = _unit?.repoUuid ?? '';
     switch (id) {
       case 'back':
         popOrHome(context);
       case 'error':
         setState(() => _open = true);
-      case 'auto':
-        setState(() => _auto = !_auto);
-      case 'tags':
-        if (_compilable) return;
-        setState(() => _tags = !_tags);
+      case 'avatar':
+        if (!_ready) return;
+        await _pickIcon();
       case 'branch':
+        final repo = _unit?.repoUuid ?? '';
+        if (!_ready || repo.isEmpty) return;
         final picked = await context.push<String>(
           '/units/new/branch?repo=$repo',
         );
         if (picked == null || !mounted) return;
-        setState(() => _branch = picked);
-        await _platformsFor();
-      case 'commit':
-        final compilable = (_unit?.compilable ?? false) ? '1' : '0';
-        final picked = await context.push<String>(
-          '/units/new/commit?repo=$repo'
-          '&branch=${Uri.encodeQueryComponent(_branch)}'
-          '&compilable=$compilable',
-        );
+        setState(() {
+          _branch = picked;
+          _commit = null;
+          _platform = null;
+        });
+      case 'updates':
+        if (!_ready) return;
+        final picked = await context.push<UnitUpdateDraft>(_updatesPath());
         if (picked == null || !mounted) return;
-        setState(() => _commit = picked);
-        await _platformsFor();
-      case 'platform':
-        final picked = await context.push<String>(
-          '/units/new/platform?repo=$repo&branch=${Uri.encodeQueryComponent(_branch)}'
-          '${_commit == null ? '' : '&commit=${Uri.encodeQueryComponent(_commit!)}'}',
-        );
-        if (picked == null || !mounted) return;
-        setState(() => _platform = picked);
-      case 'icon':
-        await _pickIcon();
+        setState(() {
+          _compilable = picked.compilable;
+          _auto = picked.auto;
+          _tags = picked.compilable || picked.tagsOnly;
+          _commit = picked.commit;
+          _platform = picked.platform;
+        });
       case 'save':
         await _save();
     }
+  }
+
+  String _updatesPath() {
+    final repo = _unit?.repoUuid ?? '';
+    final query = <String, String>{
+      'repo': repo,
+      'branch': _branch,
+      'compilable': _compilable ? '1' : '0',
+      'auto': _auto ? '1' : '0',
+      'tags': (_compilable || _tags) ? '1' : '0',
+      if (_commit != null && _commit!.isNotEmpty) 'commit': _commit!,
+      if (_platform != null && _platform!.isNotEmpty) 'platform': _platform!,
+    };
+    return Uri(path: '/units/new/updates', queryParameters: query).toString();
   }
 
   Future<void> _load() async {
@@ -290,15 +266,15 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
       _name.text = unit.name;
       setState(() {
         _unit = unit;
-        _visibility = unit.visibility.isEmpty ? 'Private' : unit.visibility;
+        _visibility = unit.visibility.isEmpty ? 'Internal' : unit.visibility;
+        _compilable = unit.compilable;
         _auto = unit.auto;
-        _tags = unit.tagsOnly;
+        _tags = unit.compilable || unit.tagsOnly;
         _branch = unit.branch;
         _commit = unit.commit;
         _platform = unit.platform;
         _loading = false;
       });
-      await _platformsFor();
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -308,35 +284,49 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
     }
   }
 
-  Future<void> _platformsFor() async {
-    final repo = _unit?.repoUuid ?? '';
-    if (repo.isEmpty || _branch.isEmpty) return;
-    try {
-      final rows = await AppScope.of(context)
-          .firmwarePlatforms(repo, branch: _branch, commit: _commit);
-      if (!mounted) return;
-      setState(() {
-        _platforms = [for (final row in rows) row.name];
-      });
-    } catch (_) {}
-  }
-
   Future<void> _save() async {
-    if (_busy) return;
+    if (_busy || !_ready) return;
     final language = AppScope.of(context).vault.language;
     final name = _name.text.trim();
     if (!unitNameOk(name)) {
       setState(() {
-        _failure = unitText(
+        _issue = unitText(
           language,
           'От 4 до 20: буквы, цифры, _ . -',
           '4 to 20: letters, digits, _ . -',
+        );
+        _failure = null;
+      });
+      return;
+    }
+    if (_branch.isEmpty) {
+      setState(() {
+        _issue = null;
+        _failure = unitText(language, 'Нужна ветка', 'A branch is required');
+      });
+      return;
+    }
+    if (!_auto && (_commit == null || _commit!.isEmpty)) {
+      setState(() {
+        _issue = null;
+        _failure = unitText(language, 'Нужен коммит', 'A commit is required');
+      });
+      return;
+    }
+    if (_compilable && (_platform == null || _platform!.isEmpty)) {
+      setState(() {
+        _issue = null;
+        _failure = unitText(
+          language,
+          'Нужна платформа',
+          'A platform is required',
         );
       });
       return;
     }
     setState(() {
       _busy = true;
+      _issue = null;
       _failure = null;
       _open = false;
     });
@@ -346,10 +336,10 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
         'visibility_level': _visibility,
         'target_branch': _branch,
         'is_auto_update_unit': _auto,
+        'is_compilable_unit': _compilable,
         'is_only_tag_update': _compilable || _tags,
-        'is_compilable_unit': _platform != null && _platform!.isNotEmpty,
         'target_commit': _auto ? null : _commit,
-        'target_firmware_platform': _platform,
+        'target_firmware_platform': _compilable ? _platform : null,
       });
       if (!mounted) return;
       setState(() {
@@ -368,7 +358,7 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
   Future<void> _pickIcon() async {
     final model = AppScope.of(context);
     final bytes = await model.files.pick(
-      dialogTitle: unitText(model.vault.language, 'Иконка', 'Icon'),
+      dialogTitle: unitText(model.vault.language, 'Аватар', 'Avatar'),
     );
     if (bytes == null) return;
     await _storeIcon(bytes);
@@ -401,265 +391,4 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
       setState(() => _failure = '$error');
     }
   }
-}
-
-class UnitEnvPage extends StatefulWidget {
-  const UnitEnvPage({required this.uuid, required this.scope, super.key});
-
-  final String uuid;
-  final int scope;
-
-  @override
-  State<UnitEnvPage> createState() => _UnitEnvPageState();
-}
-
-class _UnitEnvPageState extends State<UnitEnvPage> {
-  Map<String, Object?> _original = {};
-  final Map<String, TextEditingController> _fields = {};
-  String? _failure;
-  var _open = false;
-  var _loading = true;
-  String? _pending;
-  var _page = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
-  }
-
-  @override
-  void didUpdateWidget(UnitEnvPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.scope != widget.scope) _page = 0;
-  }
-
-  @override
-  void dispose() {
-    for (final field in _fields.values) {
-      field.dispose();
-    }
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final language = AppScope.of(context).vault.language;
-    final wide = hexWide(MediaQuery.sizeOf(context));
-    final keys = _fields.keys.toList();
-    final board = tailBoard(
-      tick: widget.scope,
-      page: _page,
-      head: const ['save', 'reset'],
-      ids: [for (final key in keys) 'field:$key'],
-      wide: wide,
-    );
-    final slots = <HexSlot>[
-      for (final slot in board.slots) _slot(slot, language, board),
-    ];
-    appendError(
-      slots,
-      message: _failure,
-      open: _open,
-      language: language,
-      text: unitText,
-      wide: wide,
-    );
-    return HexPage(
-      slots: slots,
-      onTap: (id) async {
-        switch (id) {
-          case 'back':
-            popOrHome(context);
-          case 'error':
-            setState(() => _open = true);
-          case 'save':
-            await _save();
-          case 'reset':
-            await _reset();
-        }
-      },
-      frame: (scene) => ScopeFrame(
-        scope: widget.scope,
-        canZoomIn: board.canZoomIn,
-        path: '/units/${widget.uuid}/env',
-        child: scene,
-      ),
-    );
-  }
-
-  HexSlot _slot(BoardSlot slot, String language, NetworkBoard board) {
-    switch (slot.id) {
-      case 'back':
-        return backSlot(
-          title: unitText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
-      case 'save':
-        return HexSlot(
-          id: 'save',
-          title: unitText(language, 'Сохранить', 'Save'),
-          color: unitsColor,
-          busy: _loading || _pending == 'save',
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/check.svg',
-        );
-      case 'reset':
-        return HexSlot(
-          id: 'reset',
-          title: unitText(language, 'Сбросить', 'Reset'),
-          footer: unitText(language, 'PU_ до сохранения', 'PU_ until save'),
-          color: unitsColor,
-          busy: _loading || _pending == 'reset',
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/reload.svg',
-        );
-      case 'prev':
-      case 'next':
-        final forward = slot.id == 'next';
-        return pageStepSlot(
-          id: slot.id,
-          left: !forward,
-          language: language,
-          color: unitsColor,
-          q: slot.q,
-          r: slot.r,
-          page: board.page,
-          pages: board.pages,
-          enabled: forward ? board.page < board.pages - 1 : board.page > 0,
-          onTap: () => setState(() => _page = board.page + (forward ? 1 : -1)),
-        );
-      default:
-        final key = slot.id.startsWith('field:')
-            ? slot.id.substring(6)
-            : slot.id;
-        final field = _fields[key];
-        return HexSlot(
-          id: slot.id,
-          title: key,
-          color: unitsColor,
-          tappable: false,
-          q: slot.q,
-          r: slot.r,
-          body: field == null
-              ? null
-              : LineInput(
-                  color: unitsColor,
-                  controller: field,
-                  hint: unitText(language, 'значение', 'value'),
-                ),
-        );
-    }
-  }
-
-  void _fill(Map<String, Object?> env) {
-    final next = <String, TextEditingController>{};
-    for (final entry in env.entries) {
-      final shown = _show(entry.value);
-      final existing = _fields[entry.key];
-      if (existing == null) {
-        next[entry.key] = TextEditingController(text: shown);
-      } else {
-        if (existing.text != shown) existing.text = shown;
-        next[entry.key] = existing;
-      }
-    }
-    for (final entry in _fields.entries) {
-      if (!next.containsKey(entry.key)) entry.value.dispose();
-    }
-    _fields
-      ..clear()
-      ..addAll(next);
-    _original = env;
-  }
-
-  Future<void> _load() async {
-    final model = AppScope.of(context);
-    if (model.target?.signedIn != true) {
-      setState(() {
-        _loading = false;
-        _failure = unitText(model.vault.language, 'Нет входа', 'Not signed in');
-      });
-      return;
-    }
-    try {
-      final env = await model.unitEnv(widget.uuid);
-      if (!mounted) return;
-      setState(() {
-        _fill(env);
-        _loading = false;
-        _failure = null;
-      });
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _failure = '$error';
-      });
-    }
-  }
-
-  Future<void> _save() async {
-    if (_pending != null) return;
-    setState(() {
-      _pending = 'save';
-      _failure = null;
-      _open = false;
-    });
-    final next = <String, Object?>{};
-    for (final entry in _fields.entries) {
-      next[entry.key] = _keep(entry.value.text, _original[entry.key]);
-    }
-    try {
-      await AppScope.of(context).setUnitEnv(widget.uuid, next);
-      if (!mounted) return;
-      setState(() => _pending = null);
-      await _load();
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _pending = null;
-        _failure = '$error';
-      });
-    }
-  }
-
-  Future<void> _reset() async {
-    if (_pending != null) return;
-    setState(() {
-      _pending = 'reset';
-      _failure = null;
-      _open = false;
-    });
-    try {
-      await AppScope.of(context).resetUnitEnv(widget.uuid);
-      if (!mounted) return;
-      setState(() => _pending = null);
-      await _load();
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _pending = null;
-        _failure = '$error';
-      });
-    }
-  }
-}
-
-String _show(Object? value) {
-  if (value == null) return '';
-  if (value is String) return value;
-  return jsonEncode(value);
-}
-
-Object? _keep(String text, Object? previous) {
-  if (previous is num) return num.tryParse(text.trim()) ?? text;
-  if (previous is bool) {
-    if (text.trim() == 'true') return true;
-    if (text.trim() == 'false') return false;
-  }
-  return text;
 }

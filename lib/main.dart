@@ -34,6 +34,7 @@ import 'features/units/unit_access_page.dart';
 import 'features/units/unit_create_page.dart';
 import 'features/units/unit_forms.dart';
 import 'features/units/unit_group_pages.dart';
+import 'features/units/unit_info_page.dart';
 import 'features/units/unit_io_pages.dart';
 import 'features/units/unit_page.dart';
 import 'features/units/unit_work_pages.dart';
@@ -370,11 +371,9 @@ class _PepeunitAppState extends State<PepeunitApp> {
                     UnitSettingsPage(uuid: state.pathParameters['uuid']!),
               ),
               GoRoute(
-                path: 'env',
-                builder: (context, state) => UnitEnvPage(
-                  uuid: state.pathParameters['uuid']!,
-                  scope: scaleTickOf(state.uri),
-                ),
+                path: 'info',
+                builder: (context, state) =>
+                    UnitInfoPage(uuid: state.pathParameters['uuid']!),
               ),
               GoRoute(
                 path: 'work',
@@ -387,30 +386,19 @@ class _PepeunitAppState extends State<PepeunitApp> {
                         UnitCommandsPage(uuid: state.pathParameters['uuid']!),
                   ),
                   GoRoute(
-                    path: 'logs',
-                    builder: (context, state) => UnitLogsPage(
-                      uuid: state.pathParameters['uuid']!,
-                      scope: scaleTickOf(state.uri),
-                    ),
-                  ),
-                  GoRoute(
-                    path: 'firmware',
+                    path: 'archives',
                     builder: (context, state) =>
-                        UnitFirmwarePage(uuid: state.pathParameters['uuid']!),
+                        UnitArchivesPage(uuid: state.pathParameters['uuid']!),
                   ),
                   GoRoute(
-                    path: 'schema',
-                    builder: (context, state) => UnitTextPage(
-                      uuid: state.pathParameters['uuid']!,
-                      kind: 'schema',
-                    ),
+                    path: 'platforms',
+                    builder: (context, state) =>
+                        UnitPlatformsPage(uuid: state.pathParameters['uuid']!),
                   ),
                   GoRoute(
-                    path: 'state',
-                    builder: (context, state) => UnitTextPage(
-                      uuid: state.pathParameters['uuid']!,
-                      kind: 'state',
-                    ),
+                    path: 'delete',
+                    builder: (context, state) =>
+                        UnitDeletePage(uuid: state.pathParameters['uuid']!),
                   ),
                 ],
               ),

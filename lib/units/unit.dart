@@ -1,5 +1,4 @@
 import '../locale/languages.dart';
-import '../registry/repo.dart';
 
 /// `4..20` of letters, digits, `_`, `.` and `-`. Unique per user on the instance.
 final unitNamePattern = RegExp(r'^[A-Za-z0-9_.-]{4,20}$');
@@ -106,6 +105,7 @@ class UnitLive {
     this.memAlloc,
     this.freq,
     this.commit,
+    this.statvfs = const [],
     this.ifconfig = const [],
   });
 
@@ -114,6 +114,9 @@ class UnitLive {
   final num? memAlloc;
   final num? freq;
   final String? commit;
+
+  /// `statvfs` block: sizes, then block counts. See the state topic.
+  final List<num> statvfs;
   final List<String> ifconfig;
 
   factory UnitLive.fromJson(Map<String, Object?> json) {
@@ -123,6 +126,10 @@ class UnitLive {
       memAlloc: _num(json['mem_alloc']),
       freq: _num(json['freq']),
       commit: _text(json['pu_commit_version']),
+      statvfs: [
+        for (final item in json['statvfs'] as List<Object?>? ?? const [])
+          if (item is num) item,
+      ],
       ifconfig: [
         for (final item in json['ifconfig'] as List<Object?>? ?? const [])
           if (item != null) '$item',
@@ -335,13 +342,6 @@ class PipeRow {
   }
 }
 
-class UnitSheet {
-  const UnitSheet({required this.title, required this.lines});
-
-  final String title;
-  final List<String> lines;
-}
-
 bool unitOwnedBy(String creator, String? userUuid) {
   final user = userUuid?.trim() ?? '';
   if (creator.trim().isEmpty || user.isEmpty) return false;
@@ -364,15 +364,27 @@ String unitVisibilityLabel(String language, String visibility) {
 String unitCommandLabel(String language, String command) {
   switch (command) {
     case 'Update':
-      return phrase(language, {'ru': 'Прошивка', 'en': 'Firmware'});
+      return phrase(language, {
+        'ru': 'Обновить прошивку',
+        'en': 'Update firmware',
+      });
     case 'EnvUpdate':
-      return phrase(language, {'ru': 'Окружение', 'en': 'Env'});
+      return phrase(language, {
+        'ru': 'Обновить окружение',
+        'en': 'Update environment',
+      });
     case 'SchemaUpdate':
-      return phrase(language, {'ru': 'Схема', 'en': 'Schema'});
+      return phrase(language, {'ru': 'Обновить схему', 'en': 'Update schema'});
     case 'LogSync':
-      return phrase(language, {'ru': 'Логи', 'en': 'Logs'});
+      return phrase(language, {
+        'ru': 'Синхронизировать логи',
+        'en': 'Sync logs',
+      });
     case 'Reset':
-      return phrase(language, {'ru': 'Перезапуск', 'en': 'Reset'});
+      return phrase(language, {
+        'ru': 'Перезапустить аппарат',
+        'en': 'Restart unit',
+      });
     default:
       return command;
   }
@@ -391,69 +403,11 @@ String firmwareStatusLabel(String language, String? status) {
   }
 }
 
-/// First seven characters of a commit. The full hash stays on the summary.
+/// First seven characters of a commit.
 String shortCommit(String? commit) {
   final text = commit?.trim() ?? '';
   if (text.isEmpty) return '';
   return text.length <= 7 ? text : text.substring(0, 7);
-}
-
-List<UnitSheet> unitSheets(Unit unit, String language) {
-  final version = [
-    if (unit.branch.isNotEmpty) unit.branch,
-    if (shortCommit(unit.currentCommit ?? unit.commit).isNotEmpty)
-      shortCommit(unit.currentCommit ?? unit.commit),
-  ].join(' · ');
-  final live = unit.state;
-  final memory = live == null
-      ? '—'
-      : '${_amount(live.memFree)} / ${_amount(live.memAlloc)}';
-  return [
-    UnitSheet(
-      title: phrase(language, {'ru': 'Версия', 'en': 'Version'}),
-      lines: [
-        if (version.isEmpty) '—' else version,
-        if (unit.auto)
-          phrase(language, {'ru': 'Автообновление', 'en': 'Auto-update'})
-        else
-          phrase(language, {'ru': 'Вручную', 'en': 'Manual'}),
-        if (unit.tagsOnly)
-          phrase(language, {'ru': 'Только теги', 'en': 'Tags only'}),
-        if ((unit.platform ?? '').isNotEmpty) unit.platform!,
-      ],
-    ),
-    UnitSheet(
-      title: phrase(language, {'ru': 'Состояние', 'en': 'State'}),
-      lines: [
-        memory,
-        if (live?.freq != null) '${live!.freq}',
-        if ((live?.commit ?? '').isNotEmpty) live!.commit!,
-        for (final line in live?.ifconfig ?? const <String>[]) line,
-        if (live == null) '—',
-      ],
-    ),
-    UnitSheet(
-      title: phrase(language, {'ru': 'Прошивка', 'en': 'Firmware'}),
-      lines: [
-        firmwareStatusLabel(language, unit.firmwareStatus),
-        if ((unit.firmwareError ?? '').isNotEmpty) unit.firmwareError!,
-        if ((unit.firmwareAt ?? '').isNotEmpty) shortStamp(unit.firmwareAt),
-      ],
-    ),
-    UnitSheet(
-      title: phrase(language, {'ru': 'Даты', 'en': 'Dates'}),
-      lines: [
-        '${phrase(language, {'ru': 'Создан', 'en': 'Created'})} ${shortStamp(unit.created)}',
-        '${phrase(language, {'ru': 'Изменён', 'en': 'Updated'})} ${shortStamp(unit.updated)}',
-      ],
-    ),
-  ];
-}
-
-String _amount(num? value) {
-  if (value == null) return '—';
-  if (value is int || value == value.roundToDouble()) return '${value.round()}';
-  return '$value';
 }
 
 String? _text(Object? value) {

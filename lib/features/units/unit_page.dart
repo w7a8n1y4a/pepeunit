@@ -9,9 +9,10 @@ import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
 import '../../units/unit.dart';
+import '../../units/unit_read.dart';
 import '../../units/unit_view.dart';
 import '../hex_page.dart';
-import '../network/line_cell.dart';
+import 'unit_panels.dart';
 import 'units_chrome.dart';
 
 class UnitPage extends StatefulWidget {
@@ -28,6 +29,7 @@ class _UnitPageState extends State<UnitPage> {
   String? _failure;
   var _open = false;
   var _loading = true;
+  var _env = false;
   var _current = false;
   var _seen = false;
   Timer? _poll;
@@ -68,12 +70,9 @@ class _UnitPageState extends State<UnitPage> {
     final wide = hexWide(MediaQuery.sizeOf(context));
     final unit = _unit;
     final owned = unitOwnedBy(unit?.creatorUuid ?? '', model.target?.userUuid);
-    final placed = cardBoard(
-      unitMenuIds(owned: owned, private: unit?.visibility == 'Private'),
-      wide: wide,
-    );
+    final placed = cardBoard(unitMenuIds(owned: owned), wide: wide);
     final slots = <HexSlot>[
-      for (final slot in placed) _slot(slot, language, model, unit, owned),
+      for (final slot in placed) _slot(slot, language, model, unit),
     ];
     appendError(
       slots,
@@ -83,16 +82,22 @@ class _UnitPageState extends State<UnitPage> {
       text: unitText,
       wide: wide,
     );
-    return HexPage(slots: slots, onTap: (id) => _tap(id, unit));
+    final scene = HexPage(slots: slots, onTap: (id) => _tap(id, unit));
+    if (!_env) return scene;
+    return Stack(
+      children: [
+        scene,
+        UnitEnvPanel(
+          uuid: widget.uuid,
+          onClose: () {
+            if (mounted) setState(() => _env = false);
+          },
+        ),
+      ],
+    );
   }
 
-  HexSlot _slot(
-    BoardSlot slot,
-    String language,
-    AppModel model,
-    Unit? unit,
-    bool owned,
-  ) {
+  HexSlot _slot(BoardSlot slot, String language, AppModel model, Unit? unit) {
     final color = unitsColor;
     switch (slot.id) {
       case 'back':
@@ -120,50 +125,32 @@ class _UnitPageState extends State<UnitPage> {
           q: slot.q,
           r: slot.r,
           image: model.cachedIcon(unit.iconUuid),
-          busy: _loading || unit.firmwareStatus == 'RequestSent',
+          busy: _loading,
         );
-      case 'summary':
-        final pages = unit == null
-            ? const <SummaryPage>[]
-            : [
-                for (final page in unitSheets(unit, language))
-                  SummaryPage(title: page.title, lines: page.lines),
-              ];
+      case 'info':
         return HexSlot(
-          id: 'summary',
-          title: unitText(language, 'Сводка', 'Summary'),
+          id: 'info',
+          title: unitText(language, 'Информация', 'Information'),
+          footer: unit == null
+              ? null
+              : deviceTimeEdge(unit.state?.millis, language),
+          center:
+              (unit == null
+                      ? const ['—', '—', '—']
+                      : unitGlance(unit, language))
+                  .join('\n'),
           color: color,
           q: slot.q,
           r: slot.r,
-          tappable: false,
-          body: MetricsCell(
-            lines: pages.isEmpty ? const ['—'] : pages.first.lines,
-            pages: pages,
-            prevLabel: unitText(
-              language,
-              'Предыдущая сводка',
-              'Previous summary',
-            ),
-            nextLabel: unitText(language, 'Следующая сводка', 'Next summary'),
-          ),
-        );
-      case 'repo':
-        return HexSlot(
-          id: 'repo',
-          title: unitText(language, 'Репозиторий', 'Repository'),
-          color: color,
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/repo.svg',
         );
       case 'nodes':
         return HexSlot(
           id: 'nodes',
           title: unitText(language, 'Входы и выходы', 'Inputs and outputs'),
-          color: color,
+          color: unitIoColor,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/chain.svg',
+          icon: 'assets/icons/io.svg',
         );
       case 'settings':
         return HexSlot(
@@ -177,29 +164,24 @@ class _UnitPageState extends State<UnitPage> {
       case 'env':
         return HexSlot(
           id: 'env',
-          title: unitText(language, 'Окружение', 'Environment'),
+          title: unitText(
+            language,
+            'Переменные окружения',
+            'Environment variables',
+          ),
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/key.svg',
+          icon: 'assets/icons/env.svg',
         );
       case 'operate':
         return HexSlot(
           id: 'operate',
-          title: unitText(language, 'Работа', 'Operate'),
+          title: unitText(language, 'Управление аппаратом', 'Manage unit'),
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/power.svg',
-        );
-      case 'access':
-        return HexSlot(
-          id: 'access',
-          title: unitText(language, 'Доступы', 'Access'),
-          color: color,
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/users.svg',
+          icon: 'assets/icons/bulb.svg',
         );
       default:
         return HexSlot(
@@ -220,20 +202,16 @@ class _UnitPageState extends State<UnitPage> {
         setState(() => _open = true);
       case 'card':
         await _load();
-      case 'repo':
-        final repo = unit?.repoUuid ?? '';
-        if (repo.isEmpty) return;
-        context.push('/registry/repo/$repo');
+      case 'info':
+        context.push('/units/${widget.uuid}/info');
       case 'nodes':
         context.push('/units/${widget.uuid}/io');
       case 'settings':
         context.push('/units/${widget.uuid}/settings');
       case 'env':
-        context.push('/units/${widget.uuid}/env');
+        setState(() => _env = true);
       case 'operate':
         context.push('/units/${widget.uuid}/work');
-      case 'access':
-        context.push('/units/${widget.uuid}/access');
     }
   }
 
@@ -303,7 +281,7 @@ class _UnitPageState extends State<UnitPage> {
   }
 }
 
-/// Commands, logs, firmware, schema, state storage and delete.
+/// Commands, logs, archives, storage, platforms and delete.
 class UnitWorkPage extends StatefulWidget {
   const UnitWorkPage({required this.uuid, super.key});
 
@@ -314,15 +292,24 @@ class UnitWorkPage extends StatefulWidget {
 }
 
 class _UnitWorkPageState extends State<UnitWorkPage> {
+  Unit? _unit;
   String? _failure;
   var _open = false;
-  String? _pending;
+  var _logs = false;
+  var _storage = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
 
   @override
   Widget build(BuildContext context) {
     final language = AppScope.of(context).vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
-    final placed = cardBoard(unitOperateIds, wide: wide);
+    final ids = [...unitOperateIds, if (_unit?.compilable == true) 'platforms'];
+    final placed = cardBoard(ids, wide: wide);
     final slots = <HexSlot>[
       for (final slot in placed)
         switch (slot.id) {
@@ -336,23 +323,34 @@ class _UnitWorkPageState extends State<UnitWorkPage> {
             language,
             'Команды',
             'Commands',
-            'send.svg',
+            'terminal.svg',
           ),
-          'logs' => _cell(slot, language, 'Логи', 'Logs', 'terminal.svg'),
-          'firmware' => _cell(
+          'logs' => _cell(slot, language, 'Логи', 'Logs', 'timber.svg'),
+          'archives' => _cell(
             slot,
             language,
-            'Прошивка',
-            'Firmware',
-            'rocket.svg',
+            'Архивы программ',
+            'Program archives',
+            'archive.svg',
           ),
-          'schema' => _cell(slot, language, 'Схема', 'Schema', 'copy.svg'),
-          'state' => _cell(slot, language, 'Хранилище', 'Storage', 'sight.svg'),
+          'state' => _cell(
+            slot,
+            language,
+            'Хранилище',
+            'Storage',
+            'fridge.svg',
+          ),
+          'platforms' => _cell(
+            slot,
+            language,
+            'Платформы',
+            'Platforms',
+            'brick.svg',
+          ),
           'delete' => HexSlot(
             id: 'delete',
-            title: unitText(language, 'Удалить', 'Delete'),
+            title: unitText(language, 'Удалить аппарат', 'Delete unit'),
             color: errorColor,
-            busy: _pending == 'delete',
             q: slot.q,
             r: slot.r,
             icon: 'assets/icons/close.svg',
@@ -374,7 +372,27 @@ class _UnitWorkPageState extends State<UnitWorkPage> {
       text: unitText,
       wide: wide,
     );
-    return HexPage(slots: slots, onTap: _tap);
+    final scene = HexPage(slots: slots, onTap: _tap);
+    if (!_logs && !_storage) return scene;
+    return Stack(
+      children: [
+        scene,
+        if (_logs)
+          UnitLogPanel(
+            uuid: widget.uuid,
+            onClose: () {
+              if (mounted) setState(() => _logs = false);
+            },
+          ),
+        if (_storage)
+          UnitStoragePanel(
+            uuid: widget.uuid,
+            onClose: () {
+              if (mounted) setState(() => _storage = false);
+            },
+          ),
+      ],
+    );
   }
 
   HexSlot _cell(
@@ -403,35 +421,26 @@ class _UnitWorkPageState extends State<UnitWorkPage> {
       case 'commands':
         context.push('/units/${widget.uuid}/work/commands');
       case 'logs':
-        context.push('/units/${widget.uuid}/work/logs');
-      case 'firmware':
-        context.push('/units/${widget.uuid}/work/firmware');
-      case 'schema':
-        context.push('/units/${widget.uuid}/work/schema');
+        setState(() => _logs = true);
+      case 'archives':
+        context.push('/units/${widget.uuid}/work/archives');
       case 'state':
-        context.push('/units/${widget.uuid}/work/state');
+        setState(() => _storage = true);
+      case 'platforms':
+        context.push('/units/${widget.uuid}/work/platforms');
       case 'delete':
-        await _delete();
+        context.push('/units/${widget.uuid}/work/delete');
     }
   }
 
-  Future<void> _delete() async {
-    if (_pending != null) return;
-    setState(() {
-      _pending = 'delete';
-      _failure = null;
-      _open = false;
-    });
+  Future<void> _load() async {
     try {
-      await AppScope.of(context).deleteUnit(widget.uuid);
+      final unit = await AppScope.of(context).readUnit(widget.uuid);
       if (!mounted) return;
-      context.go('/units');
+      setState(() => _unit = unit);
     } catch (error) {
       if (!mounted) return;
-      setState(() {
-        _pending = null;
-        _failure = '$error';
-      });
+      setState(() => _failure = '$error');
     }
   }
 }

@@ -199,26 +199,20 @@ NetworkBoard tailBoard({
   );
 }
 
-/// Creator sees the full card. A guest sees the mark, the summary, the
-/// repository and the nodes.
-List<String> unitMenuIds({required bool owned, required bool private}) {
+/// Creator sees the card, the info, settings, device control, the nodes and
+/// the environment. A guest sees the card, the info and the nodes.
+List<String> unitMenuIds({required bool owned}) {
   return [
     'card',
-    'summary',
-    'repo',
+    'info',
+    if (owned) 'settings',
+    if (owned) 'operate',
     'nodes',
-    if (owned) ...['settings', 'env', 'operate', if (private) 'access'],
+    if (owned) 'env',
   ];
 }
 
-const unitOperateIds = [
-  'commands',
-  'logs',
-  'firmware',
-  'schema',
-  'state',
-  'delete',
-];
+const unitOperateIds = ['commands', 'logs', 'archives', 'state', 'delete'];
 
 List<String> ioMenuIds({
   required bool owned,

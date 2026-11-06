@@ -1,6 +1,9 @@
+import 'dart:convert';
 import 'dart:ui' show Tristate;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:pepeunit_client/account/vault_store.dart';
@@ -9,12 +12,13 @@ import 'package:pepeunit_client/app_model.dart';
 import 'package:pepeunit_client/app_scope.dart';
 import 'package:pepeunit_client/features/units/commit_pick_page.dart';
 import 'package:pepeunit_client/features/units/unit_create_page.dart';
-import 'package:pepeunit_client/features/units/unit_forms.dart';
+import 'package:pepeunit_client/features/units/unit_panels.dart';
 import 'package:pepeunit_client/features/units/units_menu_page.dart';
 import 'package:pepeunit_client/features/units/units_page.dart';
 import 'package:pepeunit_client/hive/hex_order.dart';
 import 'package:pepeunit_client/instances/instance.dart';
 import 'package:pepeunit_client/units/unit.dart';
+import 'package:pepeunit_client/units/unit_read.dart';
 import 'package:pepeunit_client/units/unit_view.dart';
 
 void main() {
@@ -37,15 +41,16 @@ void main() {
     expect(unitNameOk('room.1'), isTrue);
     expect(unitNameOk('bad name'), isFalse);
     expect(headPageLimit(searchScaleTick, head: unitsHead), 9);
-    expect(
-      unitMenuIds(owned: true, private: true),
-      containsAll(['settings', 'env', 'operate', 'access']),
-    );
-    expect(
-      unitMenuIds(owned: false, private: true),
-      isNot(contains('settings')),
-    );
-    expect(unitMenuIds(owned: true, private: false), isNot(contains('access')));
+    expect(unitMenuIds(owned: true), [
+      'card',
+      'info',
+      'settings',
+      'operate',
+      'nodes',
+      'env',
+    ]);
+    expect(unitMenuIds(owned: false), ['card', 'info', 'nodes']);
+    expect(unitMenuIds(owned: true), isNot(contains('access')));
     expect(
       ioMenuIds(owned: true, input: true, private: true, datapipe: false),
       isNot(contains('pipe')),
@@ -93,7 +98,123 @@ void main() {
     expect(find.bySemanticsLabel('pump'), findsOneWidget);
   });
 
-  testWidgets('environment fields sit inside the cell', (tester) async {
+  test('storage, env syntax and the info glance', () {
+    expect(presentStorage('{"a":1}'), '{\n    "a": 1\n}');
+    final encoded = base64Encode(utf8.encode('{"alpha":1}'));
+    expect(presentStorage(encoded), '{\n    "alpha": 1\n}');
+    final note = base64Encode(utf8.encode('hello from pepeunit'));
+    expect(presentStorage(note), 'hello from pepeunit');
+    expect(presentStorage('plain text'), 'plain text');
+
+    final broken = envIssue('ru', '{\n  "DELAY":\n}');
+    expect(broken!.line, 2);
+    expect(broken.text, contains('DELAY'));
+    final later = envIssue('ru', '{\n    "a": 1,\n    "b": 2\n    "c": 3\n}');
+    expect(later!.line, 4);
+    expect(envIssue('ru', '{\n    "name": "ab')!.line, 2);
+    expect(envIssue('ru', '{\n    "DELAY": 1\n}'), isNull);
+
+    expect(unitCommandLabel('ru', 'EnvUpdate'), 'Обновить окружение');
+    expect(unitCommandLabel('ru', 'LogSync'), 'Синхронизировать логи');
+    expect(deviceTimeEdge(595925249, 'ru'), '6д 21ч');
+
+    const unit = Unit(
+      uuid: 'u',
+      iconUuid: '',
+      visibility: 'Private',
+      name: 'pump',
+      created: '',
+      auto: true,
+      compilable: false,
+      tagsOnly: false,
+      branch: 'main',
+      updated: '',
+      creatorUuid: 'me',
+      repoUuid: 'r',
+      state: UnitLive(
+        millis: 595925249,
+        memFree: 12368,
+        memAlloc: 25648,
+        freq: 80000000,
+        statvfs: [4096, 4096, 763, 716, 716, 0, 0, 0, 0, 255],
+      ),
+    );
+    expect(unitGlance(unit, 'ru'), ['RAM 12 КБ', 'Flash 2.8 МБ', '80 МГц']);
+  });
+
+  testWidgets('environment line numbers cover the closing brace', (
+    tester,
+  ) async {
+    final font = FontLoader('JetBrains Mono')
+      ..addFont(rootBundle.load('assets/fonts/JetBrainsMono-Regular.ttf'));
+    await font.load();
+    tester.view.physicalSize = const Size(720, 480);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    final api = _UnitsApi()
+      ..env = {
+        for (var i = 0; i < 30; i++) 'KEY_$i': i == 4 ? 'x' * 180 : 'v$i',
+      };
+    final model = AppModel(store: MemoryVaultStore(), api: (_) => api);
+    await model.load();
+    model.vault.instances.add(
+      InstanceRecord(
+        url: defaultInstanceUrl,
+        token: 't',
+        role: 'User',
+        userUuid: 'me',
+        active: true,
+      ),
+    );
+    await tester.pumpWidget(
+      AppScope(
+        model: model,
+        child: MaterialApp(
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: const TextScaler.linear(1.25)),
+            child: child!,
+          ),
+          home: UnitEnvPanel(uuid: 'u1', onClose: () {}),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    final scrollable = find.descendant(
+      of: find.byType(TextField),
+      matching: find.byType(Scrollable),
+    );
+    final position = tester.state<ScrollableState>(scrollable);
+    if (position.position.maxScrollExtent > 0) {
+      position.position.jumpTo(position.position.maxScrollExtent);
+      await tester.pump();
+    }
+    final field = tester.widget<TextField>(find.byType(TextField));
+    final text = field.controller!.text;
+    final lines = text.split('\n');
+    RenderEditable? editable;
+    void seek(RenderObject object) {
+      if (object is RenderEditable) editable = object;
+      object.visitChildren(seek);
+    }
+
+    seek(tester.renderObject(find.byType(TextField)));
+    final origin = editable!.localToGlobal(Offset.zero);
+    final caret = editable!.getLocalRectForCaret(
+      TextPosition(offset: text.lastIndexOf('}')),
+    );
+    final number = tester.renderObject<RenderBox>(find.text('${lines.length}'));
+    final top = number.localToGlobal(Offset.zero);
+    final editorBottom = origin.dy + editable!.size.height;
+    expect(top.dy + number.size.height, lessThanOrEqualTo(editorBottom + 0.5));
+    expect(
+      (top.dy - (origin.dy + caret.top)).abs(),
+      lessThan(number.size.height / 2),
+    );
+  });
+
+  testWidgets('environment opens as json', (tester) async {
     final api = _UnitsApi();
     final model = AppModel(store: MemoryVaultStore(), api: (_) => api);
     await model.load();
@@ -109,12 +230,14 @@ void main() {
     await tester.pumpWidget(
       AppScope(
         model: model,
-        child: const MaterialApp(home: UnitEnvPage(uuid: 'u1', scope: 1)),
+        child: MaterialApp(
+          home: UnitEnvPanel(uuid: 'u1', onClose: () {}),
+        ),
       ),
     );
     await tester.pumpAndSettle();
     expect(find.byType(TextField), findsOneWidget);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.textContaining('DELAY_PUB_MSG'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -383,10 +506,11 @@ class _UnitsApi extends PepeunitApi {
   _UnitsApi() : super('https://devunit.pepeunit.com');
 
   String? creator;
+  Map<String, Object?>? env;
 
   @override
   Future<Map<String, Object?>> unitEnv(String token, String uuid) async {
-    return {'DELAY_PUB_MSG': 1};
+    return env ?? {'DELAY_PUB_MSG': 1};
   }
 
   @override

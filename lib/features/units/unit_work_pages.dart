@@ -1,17 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
-import '../../registry/repo.dart';
 import '../../units/unit.dart';
-import '../../units/unit_view.dart';
 import '../hex_page.dart';
-import '../network/line_cell.dart';
-import '../network/network_chrome.dart';
 import 'units_chrome.dart';
 
 class UnitCommandsPage extends StatefulWidget {
@@ -59,7 +56,7 @@ class _UnitCommandsPageState extends State<UnitCommandsPage> {
                 enabled: _pending == null,
                 q: slot.q,
                 r: slot.r,
-                icon: 'assets/icons/send.svg',
+                icon: 'assets/icons/terminal.svg',
               ),
     ];
     appendError(
@@ -126,257 +123,18 @@ class _UnitCommandsPageState extends State<UnitCommandsPage> {
   }
 }
 
-class UnitLogsPage extends StatefulWidget {
-  const UnitLogsPage({required this.uuid, required this.scope, super.key});
-
-  final String uuid;
-  final int scope;
-
-  @override
-  State<UnitLogsPage> createState() => _UnitLogsPageState();
-}
-
-class _UnitLogsPageState extends State<UnitLogsPage> {
-  final Set<String> _levels = {...logLevels};
-  var _offset = 0;
-  var _count = 0;
-  List<UnitLog> _logs = const [];
-  String? _failure;
-  var _open = false;
-  var _loading = true;
-  String? _openLog;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
-  }
-
-  @override
-  void didUpdateWidget(UnitLogsPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.scope == widget.scope) return;
-    _offset = 0;
-    _load();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final language = AppScope.of(context).vault.language;
-    final wide = hexWide(MediaQuery.sizeOf(context));
-    final limit = AppScope.of(context)
-        .cappedLimit(headPageLimit(widget.scope, head: 3));
-    final board = headBoard(
-      tick: widget.scope,
-      head: const ['filter', 'download', 'window'],
-      ids: [for (final log in _logs) log.uuid],
-      prefix: 'log:',
-      total: _count,
-      wide: wide,
-    );
-    final slots = <HexSlot>[
-      for (final slot in board.slots) _slot(slot, language, limit),
-    ];
-    appendError(
-      slots,
-      message: _failure,
-      open: _open,
-      language: language,
-      text: unitText,
-      wide: wide,
-    );
-    return HexPage(
-      slots: slots,
-      onTap: _tap,
-      frame: (scene) => ScopeFrame(
-        scope: widget.scope,
-        canZoomIn: board.canZoomIn,
-        path: '/units/${widget.uuid}/work/logs',
-        child: scene,
-      ),
-    );
-  }
-
-  HexSlot _slot(BoardSlot slot, String language, int limit) {
-    final color = unitsColor;
-    switch (slot.id) {
-      case 'back':
-        return backSlot(
-          title: unitText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
-      case 'filter':
-        return HexSlot(
-          id: 'filter',
-          title: unitText(language, 'Уровни', 'Levels'),
-          color: color,
-          q: slot.q,
-          r: slot.r,
-          tappable: false,
-          body: ChoiceWords(
-            choices: [for (final level in logLevels) (id: level, label: level)],
-            selected: _levels.contains,
-            onTap: (id) {
-              if (_levels.contains(id)) {
-                if (_levels.length == 1) return;
-                _levels.remove(id);
-              } else {
-                _levels.add(id);
-              }
-              setState(() => _offset = 0);
-              _load();
-            },
-          ),
-        );
-      case 'download':
-        return HexSlot(
-          id: 'download',
-          title: unitText(language, 'Скачать', 'Download'),
-          color: color,
-          busy: _loading && _logs.isEmpty,
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/icon_load.svg',
-        );
-      case 'window':
-        return HexSlot(
-          id: 'window',
-          title: unitText(language, 'Страница', 'Page'),
-          color: color,
-          busy: _loading,
-          q: slot.q,
-          r: slot.r,
-          body: UnitWindow(
-            language: language,
-            offset: _offset,
-            limit: limit,
-            count: _count,
-            capacity: headPageLimit(scaleTickMax, head: 3),
-            onStep: _step,
-          ),
-        );
-      default:
-        final uuid = slot.id.startsWith('log:') ? slot.id.substring(4) : '';
-        UnitLog? log;
-        for (final item in _logs) {
-          if (item.uuid == uuid) log = item;
-        }
-        return HexSlot(
-          id: slot.id,
-          title: log?.level ?? '',
-          footer: log == null ? null : shortStamp(log.created),
-          color: log?.level == 'Error' || log?.level == 'Critical'
-              ? errorColor
-              : color,
-          q: slot.q,
-          r: slot.r,
-          body: log != null && _openLog == log.uuid
-              ? MetricsCell(
-                  lines: [log.text],
-                  copyText: log.text,
-                  copyLabel: unitText(language, 'Скопировать', 'Copy'),
-                )
-              : null,
-        );
-    }
-  }
-
-  Future<void> _tap(String id) async {
-    if (id == 'back') {
-      popOrHome(context);
-      return;
-    }
-    if (id == 'error') {
-      setState(() => _open = true);
-      return;
-    }
-    if (id == 'download') {
-      await _download();
-      return;
-    }
-    if (!id.startsWith('log:')) return;
-    final uuid = id.substring(4);
-    for (final log in _logs) {
-      if (log.uuid != uuid) continue;
-      setState(() => _openLog = log.uuid);
-    }
-  }
-
-  void _step(int direction) {
-    final limit = AppScope.of(context)
-        .cappedLimit(headPageLimit(widget.scope, head: 3));
-    final next = pageShift(
-      direction: direction,
-      offset: _offset,
-      limit: limit,
-      count: _count,
-      capacity: headPageLimit(scaleTickMax, head: 3),
-    );
-    if (next == null) return;
-    setState(() => _offset = next);
-    _load();
-  }
-
-  Future<void> _load() async {
-    final model = AppScope.of(context);
-    if (model.target?.signedIn != true) {
-      setState(() {
-        _loading = false;
-        _failure = unitText(model.vault.language, 'Нет входа', 'Not signed in');
-      });
-      return;
-    }
-    setState(() {
-      _loading = true;
-      _failure = null;
-    });
-    try {
-      final page = await model.unitLogs(
-        uuid: widget.uuid,
-        offset: _offset,
-        limit: model.cappedLimit(headPageLimit(widget.scope, head: 3)),
-        levels: _levels.length == logLevels.length ? null : _levels.toList(),
-      );
-      if (!mounted) return;
-      setState(() {
-        _logs = page.logs;
-        _count = page.count;
-        _loading = false;
-      });
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _failure = '$error';
-      });
-    }
-  }
-
-  Future<void> _download() async {
-    final model = AppScope.of(context);
-    try {
-      final bytes = await model.downloadUnitLogs(widget.uuid);
-      await model.saveBytes('unit-${widget.uuid}.log', bytes);
-    } catch (error) {
-      if (!mounted) return;
-      setState(() => _failure = '$error');
-    }
-  }
-}
-
-class UnitFirmwarePage extends StatefulWidget {
-  const UnitFirmwarePage({required this.uuid, super.key});
+/// Zip, tar and tgz of the program. Every cell uses the archive mark.
+class UnitArchivesPage extends StatefulWidget {
+  const UnitArchivesPage({required this.uuid, super.key});
 
   final String uuid;
 
   @override
-  State<UnitFirmwarePage> createState() => _UnitFirmwarePageState();
+  State<UnitArchivesPage> createState() => _UnitArchivesPageState();
 }
 
-class _UnitFirmwarePageState extends State<UnitFirmwarePage> {
+class _UnitArchivesPageState extends State<UnitArchivesPage> {
   Unit? _unit;
-  List<({String name, String link})> _platforms = const [];
   String? _failure;
   var _open = false;
   String? _pending;
@@ -391,12 +149,7 @@ class _UnitFirmwarePageState extends State<UnitFirmwarePage> {
   Widget build(BuildContext context) {
     final language = AppScope.of(context).vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
-    final ids = [
-      'zip',
-      'tar',
-      'tgz',
-      for (final row in _platforms) 'platform:${row.name}',
-    ];
+    const ids = ['zip', 'tar', 'tgz'];
     final placed = cardBoard(ids, wide: wide);
     final slots = <HexSlot>[
       for (final slot in placed)
@@ -408,14 +161,12 @@ class _UnitFirmwarePageState extends State<UnitFirmwarePage> {
               )
             : HexSlot(
                 id: slot.id,
-                title: slot.id.startsWith('platform:')
-                    ? slot.id.substring(9)
-                    : slot.id,
+                title: slot.id,
                 color: unitsColor,
                 busy: _pending == slot.id,
                 q: slot.q,
                 r: slot.r,
-                icon: 'assets/icons/rocket.svg',
+                icon: 'assets/icons/archive.svg',
               ),
     ];
     appendError(
@@ -430,23 +181,10 @@ class _UnitFirmwarePageState extends State<UnitFirmwarePage> {
   }
 
   Future<void> _load() async {
-    final model = AppScope.of(context);
     try {
-      final unit = await model.readUnit(widget.uuid);
-      final platforms = unit.compilable
-          ? await model.firmwarePlatforms(
-              unit.repoUuid,
-              branch: unit.branch,
-              commit: unit.commit ?? unit.currentCommit,
-            )
-          : const [];
+      final unit = await AppScope.of(context).readUnit(widget.uuid);
       if (!mounted) return;
-      setState(() {
-        _unit = unit;
-        _platforms = [
-          for (final row in platforms) (name: row.name, link: row.link),
-        ];
-      });
+      setState(() => _unit = unit);
     } catch (error) {
       if (!mounted) return;
       setState(() => _failure = '$error');
@@ -460,14 +198,6 @@ class _UnitFirmwarePageState extends State<UnitFirmwarePage> {
     }
     if (id == 'error') {
       setState(() => _open = true);
-      return;
-    }
-    if (id.startsWith('platform:')) {
-      final name = id.substring(9);
-      for (final row in _platforms) {
-        if (row.name != name || row.link.isEmpty) continue;
-        await AppScope.of(context).openExternal(Uri.parse(row.link));
-      }
       return;
     }
     if (id != 'zip' && id != 'tar' && id != 'tgz') return;
@@ -495,20 +225,18 @@ class _UnitFirmwarePageState extends State<UnitFirmwarePage> {
   }
 }
 
-class UnitTextPage extends StatefulWidget {
-  const UnitTextPage({required this.uuid, required this.kind, super.key});
+/// Binary of a compilable unit. A tap starts the download.
+class UnitPlatformsPage extends StatefulWidget {
+  const UnitPlatformsPage({required this.uuid, super.key});
 
   final String uuid;
 
-  /// `schema` or `state`.
-  final String kind;
-
   @override
-  State<UnitTextPage> createState() => _UnitTextPageState();
+  State<UnitPlatformsPage> createState() => _UnitPlatformsPageState();
 }
 
-class _UnitTextPageState extends State<UnitTextPage> {
-  String _text = '';
+class _UnitPlatformsPageState extends State<UnitPlatformsPage> {
+  List<({String name, String link})> _platforms = const [];
   String? _failure;
   var _open = false;
   var _loading = true;
@@ -523,10 +251,130 @@ class _UnitTextPageState extends State<UnitTextPage> {
   Widget build(BuildContext context) {
     final language = AppScope.of(context).vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
-    final title = widget.kind == 'schema'
-        ? unitText(language, 'Схема', 'Schema')
-        : unitText(language, 'Хранилище', 'Storage');
-    final placed = cardBoard(const ['text'], wide: wide);
+    final ids = [for (final row in _platforms) 'platform:${row.name}'];
+    final slots = <HexSlot>[];
+    if (ids.isEmpty) {
+      final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
+      slots.add(
+        backSlot(
+          title: unitText(language, 'Назад', 'Back'),
+          q: frame.back!.$1,
+          r: frame.back!.$2,
+        ),
+      );
+      slots.add(
+        HexSlot(
+          id: 'empty',
+          title: _loading
+              ? unitText(language, 'Платформы', 'Platforms')
+              : unitText(language, 'Пусто', 'Empty'),
+          color: unitsColor,
+          busy: _loading,
+          tappable: false,
+          q: frame.cells.first.$1,
+          r: frame.cells.first.$2,
+          icon: 'assets/icons/brick.svg',
+        ),
+      );
+    } else {
+      final placed = cardBoard(ids, wide: wide);
+      for (final slot in placed) {
+        slots.add(
+          slot.id == 'back'
+              ? backSlot(
+                  title: unitText(language, 'Назад', 'Back'),
+                  q: slot.q,
+                  r: slot.r,
+                )
+              : HexSlot(
+                  id: slot.id,
+                  title: slot.id.startsWith('platform:')
+                      ? slot.id.substring(9)
+                      : slot.id,
+                  color: unitsColor,
+                  q: slot.q,
+                  r: slot.r,
+                  icon: 'assets/icons/brick.svg',
+                ),
+        );
+      }
+    }
+    appendError(
+      slots,
+      message: _failure,
+      open: _open,
+      language: language,
+      text: unitText,
+      wide: wide,
+    );
+    return HexPage(slots: slots, onTap: _tap);
+  }
+
+  Future<void> _load() async {
+    final model = AppScope.of(context);
+    try {
+      final unit = await model.readUnit(widget.uuid);
+      final platforms = unit.compilable
+          ? await model.firmwarePlatforms(
+              unit.repoUuid,
+              branch: unit.branch,
+              commit: unit.commit ?? unit.currentCommit,
+            )
+          : const [];
+      if (!mounted) return;
+      setState(() {
+        _platforms = [
+          for (final row in platforms) (name: row.name, link: row.link),
+        ];
+        _loading = false;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _failure = '$error';
+      });
+    }
+  }
+
+  Future<void> _tap(String id) async {
+    if (id == 'back') {
+      popOrHome(context);
+      return;
+    }
+    if (id == 'error') {
+      setState(() => _open = true);
+      return;
+    }
+    if (!id.startsWith('platform:')) return;
+    final name = id.substring(9);
+    for (final row in _platforms) {
+      if (row.name != name || row.link.isEmpty) continue;
+      await AppScope.of(context).openExternal(Uri.parse(row.link));
+    }
+  }
+}
+
+/// Last step before a unit is removed. Back leaves it in place.
+class UnitDeletePage extends StatefulWidget {
+  const UnitDeletePage({required this.uuid, super.key});
+
+  final String uuid;
+
+  @override
+  State<UnitDeletePage> createState() => _UnitDeletePageState();
+}
+
+class _UnitDeletePageState extends State<UnitDeletePage> {
+  String? _failure;
+  var _open = false;
+  var _busy = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final language = AppScope.of(context).vault.language;
+    final wide = hexWide(MediaQuery.sizeOf(context));
+    final placed = cardBoard(const ['confirm'], wide: wide);
     final slots = <HexSlot>[
       for (final slot in placed)
         slot.id == 'back'
@@ -536,18 +384,13 @@ class _UnitTextPageState extends State<UnitTextPage> {
                 r: slot.r,
               )
             : HexSlot(
-                id: 'text',
-                title: title,
-                color: unitsColor,
-                busy: _loading,
+                id: 'confirm',
+                title: unitText(language, 'Удалить аппарат', 'Delete unit'),
+                color: errorColor,
+                busy: _busy,
                 q: slot.q,
                 r: slot.r,
-                tappable: false,
-                body: MetricsCell(
-                  lines: [_text.isEmpty ? '—' : _text],
-                  copyText: _text,
-                  copyLabel: unitText(language, 'Скопировать', 'Copy'),
-                ),
+                icon: 'assets/icons/close.svg',
               ),
     ];
     appendError(
@@ -558,37 +401,32 @@ class _UnitTextPageState extends State<UnitTextPage> {
       text: unitText,
       wide: wide,
     );
-    return HexPage(
-      slots: slots,
-      onTap: (id) {
-        if (id == 'back') popOrHome(context);
-        if (id == 'error') setState(() => _open = true);
-      },
-    );
+    return HexPage(slots: slots, onTap: _tap);
   }
 
-  Future<void> _load() async {
-    final model = AppScope.of(context);
-    if (model.target?.signedIn != true) {
-      setState(() {
-        _loading = false;
-        _failure = unitText(model.vault.language, 'Нет входа', 'Not signed in');
-      });
+  Future<void> _tap(String id) async {
+    if (id == 'back') {
+      popOrHome(context);
       return;
     }
+    if (id == 'error') {
+      setState(() => _open = true);
+      return;
+    }
+    if (id != 'confirm' || _busy) return;
+    setState(() {
+      _busy = true;
+      _failure = null;
+      _open = false;
+    });
     try {
-      final text = widget.kind == 'schema'
-          ? await model.unitSchema(widget.uuid)
-          : await model.unitStateStorage(widget.uuid);
+      await AppScope.of(context).deleteUnit(widget.uuid);
       if (!mounted) return;
-      setState(() {
-        _text = text;
-        _loading = false;
-      });
+      context.go('/units');
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _loading = false;
+        _busy = false;
         _failure = '$error';
       });
     }
