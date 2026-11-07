@@ -20,6 +20,9 @@ class IconAtlas {
   static const cell = 96.0;
   static const _pad = 6.0;
 
+  /// Mean side of the ink box, in pixels of one cell, the same for every icon.
+  static const _inkSide = 72.0;
+
   /// Opacity, out of 255, from which a pixel counts as ink.
   static const _inkAlpha = 40;
 
@@ -167,7 +170,10 @@ class IconAtlas {
     return (left, top, right + 1, bottom + 1);
   }
 
-  /// Fits [first] again so the ink [box] fills the cell without the margin.
+  /// Fits [first] again by the ink [box]. The mean side of the box,
+  /// `sqrt(width * height)`, is brought to [_inkSide] so a wide or a tall
+  /// picture looks as big as a square one. The longer side still stays inside
+  /// the cell margin.
   static _Place _byInk(_Place first, (int, int, int, int)? box) {
     if (box == null) return first;
     final (left, top, right, bottom) = box;
@@ -176,10 +182,14 @@ class IconAtlas {
     // Where the ink sits in the picture's own units.
     final x0 = (left - first.dx) / first.scale;
     final y0 = (top - first.dy) / first.scale;
-    final scale = min(
-      (cell - _pad * 2) / (max(width, height) / first.scale),
-      first.scale * 2.5,
+    final grow = min(
+      min(
+        _inkSide / sqrt(width * height),
+        (cell - _pad * 2) / max(width, height),
+      ),
+      2.5,
     );
+    final scale = first.scale * grow;
     return _Place(
       scale,
       cell / 2 - (x0 + width / first.scale / 2) * scale,

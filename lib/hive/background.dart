@@ -152,7 +152,7 @@ class Mosaic {
       final column = _cell[i] % _columns;
       _x[i] = keptX[i] + (rng.nextDouble() - 0.5) * shake;
       _y[i] = keptY[i] + (rng.nextDouble() - 0.5) * shake;
-      _side[i] = pitch * 0.44 * (0.85 + rng.nextDouble() * 0.3);
+      _side[i] = pitch * 0.46 * (0.97 + rng.nextDouble() * 0.06);
       _turn[i] = (rng.nextDouble() * 2 - 1) * maxTurn;
       _phase[i] = rng.nextDouble() * 2 * pi;
       _speed[i] = 0.5 + rng.nextDouble() * 0.8;
