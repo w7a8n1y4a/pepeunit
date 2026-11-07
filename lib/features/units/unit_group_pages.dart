@@ -439,7 +439,7 @@ class _GroupPageState extends State<GroupPage> {
             busy: _pending == 'delete',
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/close.svg',
+            icon: 'assets/icons/trash.svg',
           ),
           _ => HexSlot(
             id: slot.id,

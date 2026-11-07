@@ -436,7 +436,7 @@ class _UnitWorkPageState extends State<UnitWorkPage> {
             color: errorColor,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/close.svg',
+            icon: 'assets/icons/trash.svg',
           ),
           _ => HexSlot(
             id: slot.id,

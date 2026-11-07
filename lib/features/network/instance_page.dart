@@ -257,7 +257,7 @@ class _InstancePageState extends State<InstancePage> {
           'Удалить',
           'Delete',
           errorColor,
-          'assets/icons/close.svg',
+          'assets/icons/trash.svg',
         );
       case 'scan':
         return _action(

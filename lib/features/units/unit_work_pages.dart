@@ -390,7 +390,7 @@ class _UnitDeletePageState extends State<UnitDeletePage> {
                 busy: _busy,
                 q: slot.q,
                 r: slot.r,
-                icon: 'assets/icons/close.svg',
+                icon: 'assets/icons/trash.svg',
               ),
     ];
     appendError(
