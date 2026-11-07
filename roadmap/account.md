@@ -1,6 +1,6 @@
 # Аккаунт и сеть
 
-Аккаунт и сеть собраны. Репозитории — [registry.md](registry.md), уведомления — [alerts.md](alerts.md). Units, Dashboards и Library — заглушки, см. [sections.md](sections.md).
+Аккаунт и сеть собраны. Репозитории — [registry.md](registry.md), уведомления — [alerts.md](alerts.md). Аппараты — [units.md](units.md), панели — [dashboards.md](dashboards.md). Library — заглушка, см. [sections.md](sections.md).
 
 ## Аккаунт
 

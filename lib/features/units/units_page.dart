@@ -19,18 +19,28 @@ import 'units_chrome.dart';
 /// Unit search. [pick] returns the chosen uuid with [pop] instead of opening
 /// the card. [outputsOnly] lists only units that have an output, and a tap
 /// opens that unit's outputs; the chosen output goes to
-/// [AppModel.finishOutputPick].
+/// [AppModel.finishPick]. [anyNode] does the same for units with a node of
+/// either direction, as a panel takes inputs and outputs alike.
 class UnitsPage extends StatefulWidget {
   const UnitsPage({
     required this.scope,
     this.pick = false,
     this.outputsOnly = false,
+    this.anyNode = false,
     super.key,
   });
 
   final int scope;
   final bool pick;
   final bool outputsOnly;
+  final bool anyNode;
+
+  /// Types of node the list is limited to, or null for plain units.
+  List<String>? get _nodeTypes {
+    if (outputsOnly) return const ['Output'];
+    if (anyNode) return const ['Input', 'Output'];
+    return null;
+  }
 
   @override
   State<UnitsPage> createState() => _UnitsPageState();
@@ -107,7 +117,11 @@ class _UnitsPageState extends State<UnitsPage> {
         scope: widget.scope,
         canZoomIn: widget.scope < scaleTickMax,
         path: widget.pick
-            ? (widget.outputsOnly ? '/units/pick?outputs=1' : '/units/pick')
+            ? (widget.outputsOnly
+                  ? '/units/pick?outputs=1'
+                  : widget.anyNode
+                  ? '/units/pick?nodes=1'
+                  : '/units/pick')
             : '/units/search',
         child: scene,
       ),
@@ -198,9 +212,10 @@ class _UnitsPageState extends State<UnitsPage> {
   Future<void> _tap(String id) async {
     if (id.startsWith('unit:')) {
       final uuid = id.substring(5);
-      if (widget.pick && widget.outputsOnly) {
-        // The output screen hands the answer over and closes this one too.
-        context.push('/units/outputs?unit=$uuid');
+      if (widget.pick && widget._nodeTypes != null) {
+        // The node screen hands the answer over and closes this one too.
+        final kind = widget.anyNode ? '&nodes=1' : '';
+        context.push('/units/outputs?unit=$uuid$kind');
       } else if (widget.pick) {
         context.pop(uuid);
       } else {
@@ -275,7 +290,7 @@ class _UnitsPageState extends State<UnitsPage> {
         offset: _offset,
         limit: limit,
         query: _query(context),
-        ioTypes: widget.outputsOnly ? const ['Output'] : null,
+        ioTypes: widget._nodeTypes,
       );
       if (!mounted || ticket != _ticket) return;
       unawaited(

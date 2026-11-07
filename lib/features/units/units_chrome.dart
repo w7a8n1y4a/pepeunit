@@ -108,6 +108,7 @@ class UnitWindow extends StatelessWidget {
     required this.onStep,
     this.order,
     this.onOrder,
+    this.orderLabel,
     super.key,
   });
 
@@ -122,6 +123,9 @@ class UnitWindow extends StatelessWidget {
   final ValueChanged<int> onStep;
   final String? order;
   final ValueChanged<String>? onOrder;
+
+  /// Names the `asc` and `desc` words. Without it they read А-Я and Я-А.
+  final String Function(String order)? orderLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -144,7 +148,10 @@ class UnitWindow extends StatelessWidget {
       return OrderWindow(
         orders: [
           for (final value in const ['asc', 'desc'])
-            (value: value, label: unitOrderLabel(language, value)),
+            (
+              value: value,
+              label: orderLabel?.call(value) ?? unitOrderLabel(language, value),
+            ),
         ],
         selected: order!,
         onOrder: onOrder!,

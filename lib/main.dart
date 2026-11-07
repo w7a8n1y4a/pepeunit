@@ -12,6 +12,10 @@ import 'features/account/account_register_page.dart';
 import 'features/account/account_settings_page.dart';
 import 'features/alerts/alert_types_page.dart';
 import 'features/alerts/alerts_page.dart';
+import 'features/dashboards/dashboard_page.dart';
+import 'features/dashboards/dashboards_chrome.dart';
+import 'features/dashboards/dashboards_page.dart';
+import 'features/dashboards/panel_pages.dart';
 import 'features/home/home_page.dart';
 import 'features/menu/placeholder_page.dart';
 import 'features/network/instance_page.dart';
@@ -44,6 +48,7 @@ import 'features/units/unit_page.dart';
 import 'features/units/unit_work_pages.dart';
 import 'features/units/units_menu_page.dart';
 import 'features/units/units_page.dart';
+import 'dashboards/dashboard.dart';
 import 'hive/hex_order.dart';
 import 'hive/hex_scene.dart';
 import 'registry/registry_view.dart';
@@ -236,6 +241,7 @@ class _PepeunitAppState extends State<PepeunitApp> {
               scope: scaleTickOf(state.uri, fallback: searchScaleTick),
               pick: true,
               outputsOnly: state.uri.queryParameters['outputs'] == '1',
+              anyNode: state.uri.queryParameters['nodes'] == '1',
             ),
           ),
           GoRoute(
@@ -251,6 +257,7 @@ class _PepeunitAppState extends State<PepeunitApp> {
               uuid: state.uri.queryParameters['unit'] ?? '',
               scope: scaleTickOf(state.uri),
               pickOutput: true,
+              anyNode: state.uri.queryParameters['nodes'] == '1',
             ),
           ),
           GoRoute(
@@ -484,6 +491,89 @@ class _PepeunitAppState extends State<PepeunitApp> {
                           path:
                               '/units/${state.pathParameters['uuid']}/io/${state.pathParameters['io']}/access',
                         ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ],
+      ),
+      GoRoute(
+        path: '/dashboards',
+        builder: (context, state) => DashboardsPage(
+          scope: scaleTickOf(state.uri, fallback: searchScaleTick),
+        ),
+        routes: [
+          GoRoute(
+            path: 'new',
+            builder: (context, state) => const DashboardCreatePage(),
+          ),
+          GoRoute(
+            path: 'type',
+            builder: (context, state) => NamePickPage(
+              title: dashText(
+                AppScope.of(context).vault.language,
+                'Тип',
+                'Type',
+              ),
+              icon: 'assets/icons/brick.svg',
+              color: dashboardsColor,
+              scope: scaleTickOf(state.uri),
+              path: '/dashboards/type',
+              viaModel: true,
+              load: () async => [
+                for (final type in panelTypes)
+                  (id: type.value, label: type.label),
+              ],
+            ),
+          ),
+          GoRoute(
+            path: ':uuid',
+            builder: (context, state) =>
+                DashboardPage(uuid: state.pathParameters['uuid']!),
+            routes: [
+              GoRoute(
+                path: 'delete',
+                builder: (context, state) =>
+                    DashboardDeletePage(uuid: state.pathParameters['uuid']!),
+              ),
+              GoRoute(
+                path: 'panels',
+                builder: (context, state) => PanelsPage(
+                  uuid: state.pathParameters['uuid']!,
+                  scope: scaleTickOf(state.uri),
+                ),
+                routes: [
+                  GoRoute(
+                    path: 'new',
+                    builder: (context, state) =>
+                        PanelCreatePage(uuid: state.pathParameters['uuid']!),
+                  ),
+                  GoRoute(
+                    path: ':pid',
+                    builder: (context, state) => PanelPage(
+                      dashboardUuid: state.pathParameters['uuid']!,
+                      uuid: state.pathParameters['pid']!,
+                    ),
+                    routes: [
+                      GoRoute(
+                        path: 'nodes',
+                        builder: (context, state) => PanelNodesPage(
+                          dashboardUuid: state.pathParameters['uuid']!,
+                          uuid: state.pathParameters['pid']!,
+                          scope: scaleTickOf(state.uri),
+                        ),
+                        routes: [
+                          GoRoute(
+                            path: 'new',
+                            builder: (context, state) => PanelNodeFormPage(
+                              panelUuid: state.pathParameters['pid']!,
+                              ioUuid: state.uri.queryParameters['io'] ?? '',
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),

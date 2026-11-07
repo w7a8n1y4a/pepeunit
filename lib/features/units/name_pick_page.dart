@@ -11,6 +11,10 @@ import '../network/network_chrome.dart';
 import 'units_chrome.dart';
 
 /// A short named list. A tap returns the id to the page that opened it.
+///
+/// With [viaModel] the id goes to [AppModel.finishPick] instead of the route
+/// result, for an opener that awaits [AppModel.beginPick]. Zooming replaces
+/// this route, and a replaced route never delivers its result.
 class NamePickPage extends StatefulWidget {
   const NamePickPage({
     required this.title,
@@ -18,6 +22,8 @@ class NamePickPage extends StatefulWidget {
     required this.path,
     required this.load,
     this.icon,
+    this.color,
+    this.viaModel = false,
     super.key,
   });
 
@@ -26,6 +32,8 @@ class NamePickPage extends StatefulWidget {
   final String path;
   final Future<List<({String id, String label})>> Function() load;
   final String? icon;
+  final Color? color;
+  final bool viaModel;
 
   @override
   State<NamePickPage> createState() => _NamePickPageState();
@@ -76,7 +84,7 @@ class _NamePickPageState extends State<NamePickPage> {
         HexSlot(
           id: 'empty',
           title: _loading ? widget.title : unitText(language, 'Пусто', 'Empty'),
-          color: unitsColor,
+          color: widget.color ?? unitsColor,
           busy: _loading,
           tappable: false,
           q: frame.cells.first.$1,
@@ -100,7 +108,7 @@ class _NamePickPageState extends State<NamePickPage> {
               id: slot.id,
               left: !forward,
               language: language,
-              color: unitsColor,
+              color: widget.color ?? unitsColor,
               q: slot.q,
               r: slot.r,
               page: board.page,
@@ -119,7 +127,7 @@ class _NamePickPageState extends State<NamePickPage> {
             HexSlot(
               id: slot.id,
               title: item?.label ?? slot.id,
-              color: unitsColor,
+              color: widget.color ?? unitsColor,
               q: slot.q,
               r: slot.r,
               icon: widget.icon,
@@ -144,7 +152,12 @@ class _NamePickPageState extends State<NamePickPage> {
         } else if (id == 'error') {
           setState(() => _open = true);
         } else if (_items.any((item) => item.id == id)) {
-          context.pop(id);
+          if (widget.viaModel) {
+            AppScope.of(context).finishPick(id);
+            popOrHome(context);
+          } else {
+            context.pop(id);
+          }
         }
       },
       frame: board == null

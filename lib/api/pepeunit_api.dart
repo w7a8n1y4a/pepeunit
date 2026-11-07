@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 import '../alerts/notice.dart';
+import '../dashboards/dashboard.dart';
 import '../instances/directory_user.dart';
 import '../instances/instance.dart';
 import '../instances/portrait.dart';
@@ -1135,6 +1136,148 @@ class PepeunitApi {
     Uint8List png,
   ) {
     return _uploadIcon(token, entityUuid, entityType, png);
+  }
+
+  Future<Dashboard> createDashboard(String token, String name) async {
+    final response = await _send(
+      'POST',
+      '/grafana/create_dashboard',
+      token: token,
+      body: {'name': name},
+    );
+    return Dashboard.fromJson(_object(response));
+  }
+
+  /// Dashboards of the signed-in user. The backend lists no one else's.
+  Future<({int count, List<Dashboard> dashboards})> dashboards({
+    required String token,
+    required int offset,
+    required int limit,
+    String search = '',
+    String order = 'desc',
+  }) async {
+    final response = await _send(
+      'GET',
+      '/grafana/get_dashboards',
+      token: token,
+      query: {
+        'offset': offset,
+        'limit': limit,
+        'order_by_create_date': order,
+        if (search.trim().isNotEmpty) 'search_string': search.trim(),
+      },
+    );
+    final page = _page(response, 'dashboards', (row) {
+      final dashboard = Dashboard.fromJson(row);
+      return dashboard.uuid.isEmpty ? null : dashboard;
+    });
+    return (count: page.count, dashboards: page.rows);
+  }
+
+  Future<Dashboard> readDashboard(String token, String uuid) async {
+    final response = await _send(
+      'GET',
+      '/grafana/get_dashboard/$uuid',
+      token: token,
+    );
+    return Dashboard.fromJson(_object(response));
+  }
+
+  /// Sends the dashboard to Grafana. The backend checks every linked node
+  /// first, so the call is given more time than a read.
+  Future<Dashboard> syncDashboard(String token, String uuid) async {
+    final response = await _send(
+      'POST',
+      '/grafana/sync_dashboard',
+      token: token,
+      query: {'uuid': uuid},
+      timeout: const Duration(seconds: 90),
+    );
+    return Dashboard.fromJson(_object(response));
+  }
+
+  Future<void> deleteDashboard(String token, String uuid) async {
+    await _send('DELETE', '/grafana/delete_dashboard/$uuid', token: token);
+  }
+
+  /// Every panel of one dashboard with its linked nodes. The backend does not
+  /// page this list.
+  Future<List<DashboardPanel>> dashboardPanels(
+    String token,
+    String uuid,
+  ) async {
+    final response = await _send(
+      'GET',
+      '/grafana/get_dashboard_panels/$uuid',
+      token: token,
+    );
+    final page = _page(response, 'panels', (row) {
+      final panel = DashboardPanel.fromJson(row);
+      return panel.uuid.isEmpty ? null : panel;
+    });
+    return page.rows;
+  }
+
+  Future<DashboardPanel> createPanel(
+    String token, {
+    required String dashboardUuid,
+    required String title,
+    required String type,
+  }) async {
+    final response = await _send(
+      'POST',
+      '/grafana/create_dashboard_panel',
+      token: token,
+      body: {'dashboard_uuid': dashboardUuid, 'title': title, 'type': type},
+    );
+    return DashboardPanel.fromJson(_object(response));
+  }
+
+  Future<void> deletePanel(String token, String uuid) async {
+    await _send('DELETE', '/grafana/delete_panel/$uuid', token: token);
+  }
+
+  Future<PanelLink> linkPanelIo(
+    String token, {
+    required String panelUuid,
+    required String ioUuid,
+    required bool lastOnly,
+    required bool asJson,
+  }) async {
+    final response = await _send(
+      'POST',
+      '/grafana/link_unit_io_to_panel',
+      token: token,
+      body: {
+        'unit_io_uuid': ioUuid,
+        'dashboard_panels_uuid': panelUuid,
+        'is_last_data': lastOnly,
+        'is_forced_to_json': asJson,
+      },
+    );
+    return PanelLink.fromJson(_object(response));
+  }
+
+  /// The route carries a `{uuid}` segment the handler never reads, so the
+  /// panel uuid fills it. The pair travels in the query.
+  Future<void> deletePanelLink(
+    String token, {
+    required String panelUuid,
+    required String ioUuid,
+  }) async {
+    await _send(
+      'DELETE',
+      '/grafana/delete_link/$panelUuid',
+      token: token,
+      query: {'unit_io_uuid': ioUuid, 'dashboard_panel_uuid': panelUuid},
+    );
+  }
+
+  /// Grafana organization of a user. It exists after the first sync.
+  Future<String?> grafanaOrgId(String token, String uuid) async {
+    final response = await _send('GET', '/users/$uuid', token: token);
+    final id = _object(response)['grafana_org_id'];
+    return id is String && id.isNotEmpty ? id : null;
   }
 
   Future<Uint8List> icon(String uuid) async {

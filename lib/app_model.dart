@@ -15,6 +15,7 @@ import 'api/icon_disk.dart';
 import 'api/icon_disk_open.dart';
 import 'api/icon_store.dart';
 import 'api/pepeunit_api.dart';
+import 'dashboards/dashboard.dart';
 import 'instances/directory_user.dart';
 import 'instances/hosted_url.dart';
 import 'instances/instance.dart';
@@ -101,6 +102,12 @@ class AppModel extends ChangeNotifier {
 
   /// Every notice of this user, read and unread. Null until the first fetch.
   int? noticeTotal;
+
+  /// How many dashboards the signed-in user owns, for the home cell. The
+  /// instance portrait carries no such number.
+  int? dashboardTotal;
+  String? _dashboardKey;
+  int _dashboardTicket = 0;
   var _noticeTicket = 0;
   var _noticeLoad = 0;
   String? _noticeKey;
@@ -592,7 +599,46 @@ class AppModel extends ChangeNotifier {
     _notifySoon();
   }
 
+  void _syncDashboardTotal() {
+    final current = target;
+    if (current == null || !current.signedIn || current.grafana == false) {
+      if (_dashboardKey == null) return;
+      _dashboardKey = null;
+      _dashboardTicket++;
+      final dirty = dashboardTotal != null;
+      dashboardTotal = null;
+      if (dirty) notifyListeners();
+      return;
+    }
+    final key = '${current.url}|${current.token}';
+    if (key == _dashboardKey) return;
+    _dashboardKey = key;
+    dashboardTotal = null;
+    final ticket = ++_dashboardTicket;
+    unawaited(_loadDashboardTotal(ticket, current));
+  }
+
+  Future<void> _loadDashboardTotal(int ticket, InstanceRecord record) async {
+    final token = record.token;
+    if (token == null || token.isEmpty) return;
+    try {
+      final page = await api(originOf(record.url))
+          .dashboards(token: token, offset: 0, limit: 1);
+      if (ticket != _dashboardTicket) return;
+      dashboardTotal = page.count;
+      notifyListeners();
+    } catch (_) {}
+  }
+
+  void _shiftDashboardTotal(int by) {
+    final total = dashboardTotal;
+    if (total == null) return;
+    dashboardTotal = total + by < 0 ? 0 : total + by;
+    notifyListeners();
+  }
+
   void _syncNoticeStream() {
+    _syncDashboardTotal();
     final current = target;
     if (current == null ||
         !current.signedIn ||
@@ -900,6 +946,91 @@ class AppModel extends ChangeNotifier {
   Future<void> unlinkGroupUnit(String uuid, String unitUuid) =>
       _api.unlinkGroupUnit(_token, uuid, unitUuid);
 
+  Future<({int count, List<Dashboard> dashboards})> listDashboards({
+    required int offset,
+    required int limit,
+    String search = '',
+    String order = 'desc',
+  }) async {
+    final page = await _api.dashboards(
+      token: _token,
+      offset: offset,
+      limit: cappedLimit(limit),
+      search: search,
+      order: order,
+    );
+    if (search.isEmpty && page.count != dashboardTotal) {
+      dashboardTotal = page.count;
+      notifyListeners();
+    }
+    return page;
+  }
+
+  Future<Dashboard> readDashboard(String uuid) =>
+      _api.readDashboard(_token, uuid);
+
+  Future<Dashboard> createDashboard(String name) async {
+    final dashboard = await _api.createDashboard(_token, name);
+    _shiftDashboardTotal(1);
+    return dashboard;
+  }
+
+  Future<Dashboard> syncDashboard(String uuid) =>
+      _api.syncDashboard(_token, uuid);
+
+  Future<void> deleteDashboard(String uuid) async {
+    await _api.deleteDashboard(_token, uuid);
+    _shiftDashboardTotal(-1);
+  }
+
+  Future<List<DashboardPanel>> dashboardPanels(String uuid) =>
+      _api.dashboardPanels(_token, uuid);
+
+  Future<DashboardPanel> createPanel({
+    required String dashboardUuid,
+    required String title,
+    required String type,
+  }) => _api.createPanel(
+    _token,
+    dashboardUuid: dashboardUuid,
+    title: title,
+    type: type,
+  );
+
+  Future<void> deletePanel(String uuid) => _api.deletePanel(_token, uuid);
+
+  Future<PanelLink> linkPanelIo({
+    required String panelUuid,
+    required String ioUuid,
+    required bool lastOnly,
+    required bool asJson,
+  }) => _api.linkPanelIo(
+    _token,
+    panelUuid: panelUuid,
+    ioUuid: ioUuid,
+    lastOnly: lastOnly,
+    asJson: asJson,
+  );
+
+  Future<void> deletePanelLink({
+    required String panelUuid,
+    required String ioUuid,
+  }) => _api.deletePanelLink(_token, panelUuid: panelUuid, ioUuid: ioUuid);
+
+  /// The dashboard in Grafana, in the signed-in user's own organization.
+  Future<Uri> dashboardUri(Dashboard dashboard) async {
+    final current = _signedTarget();
+    final user = current.userUuid;
+    final orgId = user == null || user.isEmpty
+        ? null
+        : await _api.grafanaOrgId(current.token!, user);
+    return dashboardLink(
+      originOf(current.url),
+      dashboard.url ?? '',
+      orgId: orgId,
+    );
+  }
+
   /// Direction of every IO seen so far, so a child screen takes its color
   /// before its own request returns.
   final _ioInputs = <String, bool>{};
@@ -943,28 +1074,36 @@ class AppModel extends ChangeNotifier {
   Future<UnitIo> setInputState(String uuid, String state) =>
       _api.setInputState(_token, uuid, state);
 
-  Completer<String?>? _outputPick;
+  Completer<String?>? _pick;
 
-  /// True while a screen waits for the person to choose an output.
-  bool get outputPickOpen => _outputPick != null;
+  /// True while a screen waits for the person to choose something.
+  bool get pickOpen => _pick != null;
 
-  /// Starts choosing an output for a link. The answer does not travel back
-  /// through the route result: the search and output screens replace their own
-  /// route when the scale changes, and a replaced route never delivers it.
-  /// A pick left open is closed with null when the next one starts.
-  Future<String?> beginOutputPick() {
-    _outputPick?.complete(null);
+  /// Starts a choice made on screens that the opener cannot await. The answer
+  /// does not travel back through the route result: those screens replace
+  /// their own route when the scale changes, and a replaced route never
+  /// delivers it. A pick left open is closed with null when the next one
+  /// starts.
+  Future<String?> beginPick() {
+    _pick?.complete(null);
     final pick = Completer<String?>();
-    _outputPick = pick;
+    _pick = pick;
     return pick.future;
   }
 
-  /// Hands the chosen output to the screen that began the pick.
-  void finishOutputPick(String? uuid) {
-    final pick = _outputPick;
-    _outputPick = null;
-    if (pick != null && !pick.isCompleted) pick.complete(uuid);
+  /// Hands the choice to the screen that began the pick.
+  void finishPick(String? value) {
+    final pick = _pick;
+    _pick = null;
+    if (pick != null && !pick.isCompleted) pick.complete(value);
   }
+
+  /// A pick of an output for a link, or of any node for a panel.
+  bool get outputPickOpen => pickOpen;
+
+  Future<String?> beginOutputPick() => beginPick();
+
+  void finishOutputPick(String? uuid) => finishPick(uuid);
 
   Future<void> createIoLink({
     required String outputUuid,

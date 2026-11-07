@@ -61,7 +61,10 @@ HexSlot _slot(MenuSection section, AppModel model, String language) {
   final repoCount = section.id == 'registry' ? portrait?.repos : null;
   final unitCount = section.id == 'units' ? portrait?.units : null;
   final noticeTotal = section.id == 'alerts' ? model.noticeTotal : null;
-  final counted = noticeTotal ?? repoCount ?? unitCount;
+  final dashboardCount = section.id == 'dashboards'
+      ? model.dashboardTotal
+      : null;
+  final counted = noticeTotal ?? repoCount ?? unitCount ?? dashboardCount;
   return HexSlot(
     id: section.id,
     title: signedIn && vault.login.isNotEmpty

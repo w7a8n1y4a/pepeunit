@@ -18,18 +18,21 @@ import 'unit_panels.dart';
 import 'units_chrome.dart';
 
 /// Nodes of one unit. With [pickOutput] only its outputs are listed, and a tap
-/// hands the output to [AppModel.finishOutputPick] instead of opening the node.
+/// hands the output to [AppModel.finishPick] instead of opening the node.
+/// [anyNode] keeps both directions in that pick, for a dashboard panel.
 class UnitIoListPage extends StatefulWidget {
   const UnitIoListPage({
     required this.uuid,
     required this.scope,
     this.pickOutput = false,
+    this.anyNode = false,
     super.key,
   });
 
   final String uuid;
   final int scope;
   final bool pickOutput;
+  final bool anyNode;
 
   @override
   State<UnitIoListPage> createState() => _UnitIoListPageState();
@@ -81,10 +84,14 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
           id: 'empty',
           title: _loading
               ? unitText(language, 'Входы и выходы', 'Inputs and outputs')
+              : widget.anyNode
+              ? unitText(language, 'Нет узлов', 'No nodes')
               : widget.pickOutput
               ? unitText(language, 'Нет выходов', 'No outputs')
               : unitText(language, 'Пусто', 'Empty'),
-          color: widget.pickOutput ? unitOutputColor : unitIoColor,
+          color: widget.pickOutput && !widget.anyNode
+              ? unitOutputColor
+              : unitIoColor,
           busy: _loading,
           tappable: false,
           q: frame.cells.first.$1,
@@ -126,6 +133,7 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
               canZoomIn: board.canZoomIn,
               path: widget.pickOutput
                   ? '/units/outputs?unit=${widget.uuid}'
+                        '${widget.anyNode ? '&nodes=1' : ''}'
                   : '/units/${widget.uuid}/io',
               child: scene,
             ),
@@ -146,7 +154,9 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
         id: slot.id,
         left: !forward,
         language: language,
-        color: widget.pickOutput ? unitOutputColor : unitIoColor,
+        color: widget.pickOutput && !widget.anyNode
+            ? unitOutputColor
+            : unitIoColor,
         q: slot.q,
         r: slot.r,
         page: board.page,
@@ -171,16 +181,16 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
     );
   }
 
-  /// Gives the output to the screen that asked and closes this screen and the
+  /// Gives the node to the screen that asked and closes this screen and the
   /// unit search under it. Opened without a pick, it just steps back.
   void _chooseOutput(String uuid) {
     final model = AppScope.of(context);
     final router = GoRouter.of(context);
-    if (!model.outputPickOpen) {
+    if (!model.pickOpen) {
       popOrHome(context);
       return;
     }
-    model.finishOutputPick(uuid);
+    model.finishPick(uuid);
     for (var step = 0; step < 2 && router.canPop(); step++) {
       router.pop();
     }
@@ -204,7 +214,7 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
           offset: offset,
           limit: limit,
           unitUuid: widget.uuid,
-          types: widget.pickOutput ? const ['Output'] : null,
+          types: widget.pickOutput && !widget.anyNode ? const ['Output'] : null,
         );
         ios.addAll(page.ios);
         offset += page.ios.length;
