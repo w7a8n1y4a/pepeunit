@@ -9,10 +9,12 @@ import 'package:pepeunit_client/app_model.dart';
 import 'package:pepeunit_client/app_scope.dart';
 import 'package:pepeunit_client/dashboards/dashboard.dart';
 import 'package:pepeunit_client/features/dashboards/dashboard_page.dart';
+import 'package:pepeunit_client/features/units/name_pick_page.dart';
+import 'package:pepeunit_client/hive/hex_order.dart';
 import 'package:pepeunit_client/features/dashboards/dashboards_chrome.dart';
+import 'package:pepeunit_client/features/dashboards/dashboards_menu_page.dart';
 import 'package:pepeunit_client/features/dashboards/dashboards_page.dart';
 import 'package:pepeunit_client/features/dashboards/panel_pages.dart';
-import 'package:pepeunit_client/hive/hex_order.dart';
 import 'package:pepeunit_client/instances/instance.dart';
 import 'package:pepeunit_client/units/unit.dart';
 
@@ -106,7 +108,39 @@ void main() {
     await _show(tester, api, const DashboardsPage(scope: searchScaleTick));
     expect(api.order, 'desc');
     expect(find.bySemanticsLabel('meter'), findsOneWidget);
-    expect(find.bySemanticsLabel('Создать панель'), findsOneWidget);
+    expect(find.bySemanticsLabel('Создать панель'), findsNothing);
+    expect(find.bySemanticsLabel('Добавить панель'), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the section menu holds back, add and search', (tester) async {
+    await _show(tester, _DashApi(), const DashboardsMenuPage());
+    expect(find.bySemanticsLabel('Назад'), findsOneWidget);
+    expect(find.bySemanticsLabel('Добавить панель'), findsOneWidget);
+    expect(find.bySemanticsLabel('Поиск'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('the type list pages behind its own window cell', (tester) async {
+    await _show(
+      tester,
+      _DashApi(),
+      NamePickPage(
+        title: 'Type',
+        scope: menuScaleTick,
+        path: '/dashboards/type',
+        paged: true,
+        load: () async => [
+          for (final type in panelTypes) (id: type.value, label: type.label),
+        ],
+      ),
+    );
+    expect(find.bySemanticsLabel('Назад'), findsOneWidget);
+    expect(find.bySemanticsLabel('Страница'), findsOneWidget);
+    expect(find.bySemanticsLabel('Time series'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Следующие'));
+    await tester.pumpAndSettle();
+    expect(find.bySemanticsLabel('Time series'), findsNothing);
     expect(tester.takeException(), isNull);
   });
 

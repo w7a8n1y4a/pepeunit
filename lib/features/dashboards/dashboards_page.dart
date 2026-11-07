@@ -14,7 +14,8 @@ import '../network/network_chrome.dart';
 import '../units/units_chrome.dart';
 import 'dashboards_chrome.dart';
 
-/// Search over the dashboards of the signed-in user. The backend lists no
+/// Search over the dashboards of the signed-in user, one step below the
+/// section menu. The backend lists no
 /// one else's, so there is no owner switch. Opens on scale tick 3.
 class DashboardsPage extends StatefulWidget {
   const DashboardsPage({required this.scope, super.key});
@@ -37,8 +38,8 @@ class _DashboardsPageState extends State<DashboardsPage> {
   var _open = false;
   var _loading = true;
 
-  /// Cells ahead of the cards: the filter, create and the page window.
-  static const _head = 3;
+  /// Cells ahead of the cards: the filter and the page window.
+  static const _head = 2;
 
   @override
   void initState() {
@@ -70,7 +71,7 @@ class _DashboardsPageState extends State<DashboardsPage> {
     final capacity = headPageLimit(scaleTickMax, head: _head);
     final board = headBoard(
       tick: widget.scope,
-      head: const ['query', 'create', 'window'],
+      head: const ['query', 'window'],
       ids: [for (final dashboard in _dashboards) dashboard.uuid],
       prefix: 'dashboard:',
       total: _count,
@@ -103,14 +104,6 @@ class _DashboardsPageState extends State<DashboardsPage> {
                 });
               },
             ),
-          ),
-          'create' => HexSlot(
-            id: 'create',
-            title: dashText(language, 'Создать панель', 'Create dashboard'),
-            color: addColor,
-            q: slot.q,
-            r: slot.r,
-            icon: 'assets/icons/plus.svg',
           ),
           'window' => HexSlot(
             id: 'window',
@@ -157,8 +150,6 @@ class _DashboardsPageState extends State<DashboardsPage> {
           popOrHome(context);
         } else if (id == 'error') {
           setState(() => _open = true);
-        } else if (id == 'create') {
-          context.push('/dashboards/new');
         } else if (id.startsWith('dashboard:')) {
           context.push('/dashboards/${id.substring(10)}');
         }
@@ -166,7 +157,7 @@ class _DashboardsPageState extends State<DashboardsPage> {
       frame: (scene) => ScopeFrame(
         scope: widget.scope,
         canZoomIn: board.canZoomIn,
-        path: '/dashboards',
+        path: '/dashboards/search',
         child: scene,
       ),
     );

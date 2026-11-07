@@ -115,6 +115,12 @@ class PanelLink {
   final bool lastOnly;
   final bool asJson;
 
+  /// Unit part of [name]. A unit name has no `@`, so the first one splits.
+  String get unitName {
+    final at = name.indexOf('@');
+    return at < 0 ? name : name.substring(0, at);
+  }
+
   factory PanelLink.fromJson(Map<String, Object?> json) {
     final io = json['unit_io'];
     return PanelLink(

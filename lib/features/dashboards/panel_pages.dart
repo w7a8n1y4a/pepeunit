@@ -562,8 +562,9 @@ class _PanelPageState extends State<PanelPage> {
   }
 }
 
-/// Nodes linked to one panel. «Добавить» picks a node of any unit, and a tap
-/// on a card removes the link, as on the links of an input.
+/// Nodes linked to one panel. A card names the unit above and the topic
+/// below. «Добавить» picks a node of any unit, and a tap on a card removes the
+/// link, as on the links of an input.
 class PanelNodesPage extends StatefulWidget {
   const PanelNodesPage({
     required this.dashboardUuid,
@@ -684,14 +685,17 @@ class _PanelNodesPageState extends State<PanelNodesPage> {
     }
     final link = _find(slot.id);
     final input = link?.io.input ?? true;
+    final flags = [
+      if (link != null && link.lastOnly)
+        dashText(language, 'Последнее', 'Last'),
+      if (link != null && link.asJson) 'JSON',
+    ];
     return HexSlot(
       id: slot.id,
-      title: link?.name ?? '',
+      title: link?.unitName ?? '',
+      footer: link?.io.topic,
       sideRight: link == null ? null : unitIoTypeLabel(language, link.io.type),
-      footer: link != null && link.lastOnly
-          ? dashText(language, 'Последнее', 'Last')
-          : null,
-      footerLeft: link != null && link.asJson ? 'JSON' : null,
+      sideLeft: flags.isEmpty ? null : flags.join(' · '),
       color: unitIoTone(input),
       rim: panelLinkRim(input),
       busy: link != null && link.io.uuid == _deleting,

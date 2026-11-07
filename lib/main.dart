@@ -14,6 +14,7 @@ import 'features/alerts/alert_types_page.dart';
 import 'features/alerts/alerts_page.dart';
 import 'features/dashboards/dashboard_page.dart';
 import 'features/dashboards/dashboards_chrome.dart';
+import 'features/dashboards/dashboards_menu_page.dart';
 import 'features/dashboards/dashboards_page.dart';
 import 'features/dashboards/panel_pages.dart';
 import 'features/home/home_page.dart';
@@ -502,10 +503,14 @@ class _PepeunitAppState extends State<PepeunitApp> {
       ),
       GoRoute(
         path: '/dashboards',
-        builder: (context, state) => DashboardsPage(
-          scope: scaleTickOf(state.uri, fallback: searchScaleTick),
-        ),
+        builder: (context, state) => const DashboardsMenuPage(),
         routes: [
+          GoRoute(
+            path: 'search',
+            builder: (context, state) => DashboardsPage(
+              scope: scaleTickOf(state.uri, fallback: searchScaleTick),
+            ),
+          ),
           GoRoute(
             path: 'new',
             builder: (context, state) => const DashboardCreatePage(),
@@ -523,6 +528,7 @@ class _PepeunitAppState extends State<PepeunitApp> {
               scope: scaleTickOf(state.uri),
               path: '/dashboards/type',
               viaModel: true,
+              paged: true,
               load: () async => [
                 for (final type in panelTypes)
                   (id: type.value, label: type.label),

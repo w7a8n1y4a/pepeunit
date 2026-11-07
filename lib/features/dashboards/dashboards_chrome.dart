@@ -42,6 +42,9 @@ String dashboardNameIssue(String language) => dashText(
   '4 to 20: letters, digits, _ . -',
 );
 
+/// Menu of the section: add a dashboard, then search.
+const dashboardsMenuIds = ['add', 'search'];
+
 /// Cells of one dashboard card, around Back. Opening it in Grafana needs a
 /// sync first, so that cell stays in place and is only switched off.
 const dashboardMenuIds = ['card', 'info', 'panels', 'sync', 'open', 'delete'];

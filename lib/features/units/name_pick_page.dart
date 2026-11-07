@@ -15,6 +15,10 @@ import 'units_chrome.dart';
 /// With [viaModel] the id goes to [AppModel.finishPick] instead of the route
 /// result, for an opener that awaits [AppModel.beginPick]. Zooming replaces
 /// this route, and a replaced route never delivers its result.
+///
+/// With [paged] a page window cell stands right after Back and the items
+/// follow it, so a long list shows its range and the arrows instead of
+/// leaving the person to find the zoom.
 class NamePickPage extends StatefulWidget {
   const NamePickPage({
     required this.title,
@@ -24,6 +28,7 @@ class NamePickPage extends StatefulWidget {
     this.icon,
     this.color,
     this.viaModel = false,
+    this.paged = false,
     super.key,
   });
 
@@ -34,6 +39,7 @@ class NamePickPage extends StatefulWidget {
   final String? icon;
   final Color? color;
   final bool viaModel;
+  final bool paged;
 
   @override
   State<NamePickPage> createState() => _NamePickPageState();
@@ -45,6 +51,10 @@ class _NamePickPageState extends State<NamePickPage> {
   var _open = false;
   var _loading = true;
   var _page = 0;
+  var _offset = 0;
+
+  /// Cell ahead of the items in a paged list: the page window.
+  static const _head = 1;
 
   @override
   void initState() {
@@ -55,15 +65,31 @@ class _NamePickPageState extends State<NamePickPage> {
   @override
   void didUpdateWidget(NamePickPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.scope != widget.scope) _page = 0;
+    if (oldWidget.scope == widget.scope) return;
+    _page = 0;
+    _offset = 0;
   }
 
   @override
   Widget build(BuildContext context) {
     final language = AppScope.of(context).vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
+    final limit = headPageLimit(widget.scope, head: _head);
+    final capacity = headPageLimit(scaleTickMax, head: _head);
+    final shown = widget.paged
+        ? _items.skip(_offset).take(limit).toList()
+        : _items;
     final board = _items.isEmpty
         ? null
+        : widget.paged
+        ? headBoard(
+            tick: widget.scope,
+            head: const ['window'],
+            ids: [for (final item in shown) item.id],
+            prefix: _prefix,
+            total: _items.length,
+            wide: wide,
+          )
         : tailBoard(
             tick: widget.scope,
             page: _page,
@@ -101,6 +127,24 @@ class _NamePickPageState extends State<NamePickPage> {
               r: slot.r,
             ),
           );
+        } else if (slot.id == 'window') {
+          slots.add(
+            HexSlot(
+              id: 'window',
+              title: unitText(language, 'Страница', 'Page'),
+              color: widget.color ?? unitsColor,
+              q: slot.q,
+              r: slot.r,
+              body: UnitWindow(
+                language: language,
+                offset: _offset,
+                limit: limit,
+                count: _items.length,
+                capacity: capacity,
+                onStep: (direction) => _step(direction, limit, capacity),
+              ),
+            ),
+          );
         } else if (slot.id == 'prev' || slot.id == 'next') {
           final forward = slot.id == 'next';
           slots.add(
@@ -119,8 +163,9 @@ class _NamePickPageState extends State<NamePickPage> {
             ),
           );
         } else {
+          final id = slot.id.substring(_prefix.length);
           final item = _items.cast<({String id, String label})?>().firstWhere(
-            (row) => row!.id == slot.id,
+            (row) => row!.id == id,
             orElse: () => null,
           );
           slots.add(
@@ -151,12 +196,14 @@ class _NamePickPageState extends State<NamePickPage> {
           popOrHome(context);
         } else if (id == 'error') {
           setState(() => _open = true);
-        } else if (_items.any((item) => item.id == id)) {
+        } else if (id.startsWith(_prefix) &&
+            _items.any((item) => item.id == id.substring(_prefix.length))) {
+          final picked = id.substring(_prefix.length);
           if (widget.viaModel) {
-            AppScope.of(context).finishPick(id);
+            AppScope.of(context).finishPick(picked);
             popOrHome(context);
           } else {
-            context.pop(id);
+            context.pop(picked);
           }
         }
       },
@@ -169,6 +216,20 @@ class _NamePickPageState extends State<NamePickPage> {
               child: scene,
             ),
     );
+  }
+
+  String get _prefix => widget.paged ? 'item:' : '';
+
+  void _step(int direction, int limit, int capacity) {
+    final next = pageShift(
+      direction: direction,
+      offset: _offset,
+      limit: limit,
+      count: _items.length,
+      capacity: capacity,
+    );
+    if (next == null) return;
+    setState(() => _offset = next);
   }
 
   Future<void> _load() async {

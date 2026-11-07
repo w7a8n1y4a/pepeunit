@@ -147,7 +147,7 @@ class _DashboardPageState extends State<DashboardPage> {
           enabled: dashboard != null && _pending == null,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/send.svg',
+          icon: 'assets/icons/cloud_up.svg',
         );
       case 'open':
         return HexSlot(
@@ -361,7 +361,7 @@ class _DashboardDeletePageState extends State<DashboardDeletePage> {
     try {
       await AppScope.of(context).deleteDashboard(widget.uuid);
       if (!mounted) return;
-      context.go('/dashboards');
+      context.go('/dashboards/search');
     } catch (error) {
       if (!mounted) return;
       setState(() {

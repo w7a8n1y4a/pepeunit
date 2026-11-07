@@ -35,6 +35,7 @@ const _inkFill = <String, double>{
   'assets/icons/key.svg': 0.77,
   'assets/icons/exclaim.svg': 0.77,
   'assets/icons/send.svg': 0.75,
+  'assets/icons/cloud_up.svg': 0.81,
   'assets/icons/rocket.svg': 0.70,
   'assets/icons/plus.svg': 0.69,
   'assets/icons/search.svg': 0.66,
