@@ -17,6 +17,10 @@ double cellFont(double side) => max(11, side * 0.068);
 const hexFill = Color(0xFF14161B);
 const sceneBackground = Color(0xFF1B1B1F);
 
+/// How much of the cell fill stays opaque. The rest lets the background
+/// mosaic show through.
+const hexFillOpacity = 0.70;
+
 /// The rough surface of the scene and of a cell: the palette color above is
 /// the mean, and every pixel strays from it by about [GrainTile.spread].
 final sceneGrain = GrainTile(sceneBackground, 5, seed: 11);
@@ -654,7 +658,7 @@ class HexPainter extends CustomPainter {
     final enabled = slot.enabled;
     final stroke = max(1.4, radius * 0.03);
     final grain = cellGrain.shader(ratio, slot.id.hashCode.abs());
-    final fill = Paint()..color = hexFill;
+    final fill = Paint()..color = hexFill.withValues(alpha: hexFillOpacity);
     if (grain != null) fill.shader = grain;
     canvas.drawPath(path, fill);
     final rim = slot.rim;
