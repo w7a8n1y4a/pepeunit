@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import '../locale/languages.dart';
+import 'code_format.dart';
 import 'unit.dart';
 
 /// Free, used and total flash bytes from a `statvfs` block.
@@ -195,42 +196,16 @@ List<String> flashLines(Unit unit, String language) {
 }
 
 /// Pretty text for the unit storage. JSON is indented by 4. Base64 is
-/// decoded first, and decoded JSON is indented the same way.
+/// decoded first, and decoded JSON is indented the same way. Only the storage
+/// does this: a node value stays as the backend sent it.
 String presentStorage(String raw) {
   final text = raw.trim();
   if (text.isEmpty) return '';
-  final direct = _prettyJson(text);
+  final direct = prettyJson(text);
   if (direct != null) return direct;
-  final decoded = _decodeBase64(text);
+  final decoded = decodeBase64Text(text);
   if (decoded == null) return text;
-  return _prettyJson(decoded) ?? decoded;
-}
-
-String? _prettyJson(String text) {
-  final trimmed = text.trim();
-  if (trimmed.isEmpty) return null;
-  final start = trimmed[0];
-  if (start != '{' && start != '[') return null;
-  try {
-    final value = jsonDecode(trimmed);
-    if (value is! Map && value is! List) return null;
-    return const JsonEncoder.withIndent('    ').convert(value);
-  } catch (_) {
-    return null;
-  }
-}
-
-String? _decodeBase64(String text) {
-  final compact = text.replaceAll(RegExp(r'\s+'), '');
-  if (compact.length < 16 || compact.length % 4 != 0) return null;
-  if (!RegExp(r'^[A-Za-z0-9+/]+={0,2}$').hasMatch(compact)) return null;
-  try {
-    final bytes = base64.decode(compact);
-    if (bytes.isEmpty || bytes.contains(0)) return null;
-    return utf8.decode(bytes);
-  } catch (_) {
-    return null;
-  }
+  return prettyJson(decoded) ?? decoded;
 }
 
 /// Where a JSON note points, and the note itself.
@@ -294,8 +269,7 @@ Map<String, Object?>? envObject(String raw) {
   }
 }
 
-String envText(Map<String, Object?> env) =>
-    const JsonEncoder.withIndent('    ').convert(env);
+String envText(Map<String, Object?> env) => encodeIndented(env);
 
 int _lineAt(String text, int? offset) {
   if (offset == null || offset < 0) return 1;
@@ -358,18 +332,10 @@ String _jsonHint(String language, String message) {
 
 /// The value of a node as the modal shows it. Text stays exactly as the
 /// backend sent it, base64 included. Only a JSON object or array is
-/// re-indented, with four spaces, because it is unreadable on one line.
+/// re-indented, because it is unreadable on one line.
 String ioValueShown(String? raw) {
   if (raw == null || raw.isEmpty) return '';
-  final head = raw.trimLeft();
-  if (!head.startsWith('{') && !head.startsWith('[')) return raw;
-  try {
-    final decoded = jsonDecode(raw);
-    if (decoded is Map || decoded is List) {
-      return const JsonEncoder.withIndent('    ').convert(decoded);
-    }
-  } catch (_) {}
-  return raw;
+  return prettyJson(raw) ?? raw;
 }
 
 /// Longest value the node cell writes in its middle.

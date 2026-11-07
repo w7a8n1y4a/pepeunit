@@ -229,10 +229,10 @@ class _AccessPageState extends State<AccessPage> {
 
   Future<void> _load() async {
     final model = AppScope.of(context);
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
         _loading = false;
-        _failure = unitText(model.vault.language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }

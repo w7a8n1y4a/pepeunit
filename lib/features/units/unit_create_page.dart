@@ -6,6 +6,7 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
+import '../../navigation/pick.dart';
 import '../../registry/repo.dart';
 import '../../units/unit.dart';
 import '../hex_page.dart';
@@ -27,6 +28,28 @@ class UnitUpdateDraft {
   final bool tagsOnly;
   final String? commit;
   final String? platform;
+}
+
+/// Route of the updates menu with the flags the form holds now.
+String unitUpdatesPath({
+  required String repo,
+  required String branch,
+  required bool compilable,
+  required bool auto,
+  required bool tags,
+  String? commit,
+  String? platform,
+}) {
+  final query = <String, String>{
+    'repo': repo,
+    'branch': branch,
+    'compilable': compilable ? '1' : '0',
+    'auto': auto ? '1' : '0',
+    'tags': tags ? '1' : '0',
+    if (commit != null && commit.isNotEmpty) 'commit': commit,
+    if (platform != null && platform.isNotEmpty) 'platform': platform,
+  };
+  return Uri(path: '/units/new/updates', queryParameters: query).toString();
 }
 
 /// Creates a unit. A repository may already be chosen via `repo`.
@@ -216,15 +239,17 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
         setState(() => _open = true);
       case 'repo':
         if (_loading) return;
-        final picked = await context.push<String>('/units/new/repo');
+        final picked = await openPick<String>(context, '/units/new/repo');
         if (picked == null || picked.isEmpty || !mounted) return;
         if (picked == _repo?.uuid) return;
         await _loadRepo(picked);
       case 'branch':
         final repo = _repo;
         if (!_ready || repo == null) return;
-        final picked = await context.push<String>(
+        final picked = await openPick<String>(
+          context,
           '/units/new/branch?repo=${repo.uuid}',
+          items: [for (final name in repo.branches) (id: name, label: name)],
         );
         if (picked == null || !mounted) return;
         setState(() {
@@ -234,7 +259,17 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
         });
       case 'updates':
         if (!_ready || _repo == null) return;
-        final picked = await context.push<UnitUpdateDraft>(_updatesPath());
+        final picked = await context.push<UnitUpdateDraft>(
+          unitUpdatesPath(
+            repo: _repo?.uuid ?? '',
+            branch: _branch,
+            compilable: _compilable,
+            auto: _auto,
+            tags: _compilable || _tags,
+            commit: _commit,
+            platform: _platform,
+          ),
+        );
         if (picked == null || !mounted) return;
         setState(() {
           _compilable = picked.compilable;
@@ -248,27 +283,12 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
     }
   }
 
-  String _updatesPath() {
-    final repo = _repo?.uuid ?? '';
-    final query = <String, String>{
-      'repo': repo,
-      'branch': _branch,
-      'compilable': _compilable ? '1' : '0',
-      'auto': _auto ? '1' : '0',
-      'tags': (_compilable || _tags) ? '1' : '0',
-      if (_commit != null && _commit!.isNotEmpty) 'commit': _commit!,
-      if (_platform != null && _platform!.isNotEmpty) 'platform': _platform!,
-    };
-    return Uri(path: '/units/new/updates', queryParameters: query).toString();
-  }
-
   Future<void> _loadRepo(String uuid) async {
     final model = AppScope.of(context);
-    final language = model.vault.language;
-    if (model.target?.signedIn != true || uuid.isEmpty) {
+    if (!model.signedIn || uuid.isEmpty) {
       setState(() {
         _loading = false;
-        _failure = unitText(language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }
@@ -530,7 +550,8 @@ class _UnitUpdatesPageState extends State<UnitUpdatesPage> {
         setState(() => _tags = !_tags);
       case 'commit':
         if (widget.branch.isEmpty || widget.repoUuid.isEmpty) return;
-        final picked = await context.push<String>(
+        final picked = await openPick<String>(
+          context,
           '/units/new/commit?repo=${widget.repoUuid}'
           '&branch=${Uri.encodeQueryComponent(widget.branch)}'
           '&compilable=${_compilable ? '1' : '0'}',
@@ -545,7 +566,8 @@ class _UnitUpdatesPageState extends State<UnitUpdatesPage> {
         final branch = widget.branch.isEmpty
             ? ''
             : '&branch=${Uri.encodeQueryComponent(widget.branch)}';
-        final picked = await context.push<String>(
+        final picked = await openPick<String>(
+          context,
           '/units/new/platform?repo=${widget.repoUuid}$branch$pinned',
         );
         if (picked == null || !mounted) return;

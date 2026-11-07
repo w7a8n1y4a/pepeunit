@@ -231,15 +231,3 @@ List<String> ioMenuIds({
     if (owned && private) 'access',
   ];
 }
-
-const pipeMenuIds = [
-  'editor',
-  'check',
-  'save',
-  'export',
-  'import',
-  'data',
-  'csvOut',
-  'csvIn',
-  'clear',
-];

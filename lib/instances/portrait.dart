@@ -69,9 +69,6 @@ class InstancePortrait {
   final String? testsStatus;
   final double? testsPercent;
 
-  String get iconPath =>
-      iconUuid == null ? '' : '/pepeunit/api/v1/icons/$iconUuid';
-
   InstancePortrait copyWith({
     String? iconUuid,
     bool? datapipe,

@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -11,10 +10,11 @@ import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
 import '../../units/pipe.dart';
 import '../../units/unit.dart';
-import '../alerts/notice_copy.dart';
-import '../code_highlight.dart';
+import '../code/code_highlight.dart';
+import '../code/code_modal.dart';
+import '../code/code_panel.dart';
+import '../code/code_view.dart';
 import '../hex_page.dart';
-import 'unit_panels.dart';
 import 'units_chrome.dart';
 
 /// DataPipe of one node. The whole section wears the DataPipe cell color of
@@ -99,9 +99,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
           filled: (io?.pipeYml ?? '').trim().isNotEmpty,
           onSaved: _load,
           onClose: () {
-            if (!mounted) return;
-            setState(() => _editing = false);
-            _load();
+            if (mounted) setState(() => _editing = false);
           },
         ),
       ],
@@ -343,10 +341,10 @@ class _UnitPipePageState extends State<UnitPipePage> {
 
   Future<void> _load() async {
     final model = AppScope.of(context);
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
         _loading = false;
-        _failure = unitText(model.vault.language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }
@@ -393,15 +391,12 @@ class UnitPipePanel extends StatefulWidget {
   State<UnitPipePanel> createState() => _UnitPipePanelState();
 }
 
-class _UnitPipePanelState extends State<UnitPipePanel> {
+class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
   static const _debounce = Duration(milliseconds: 500);
 
   final _text = CodeController(language: CodeLanguage.yaml);
   String _baseline = '';
-  String? _failure;
   String? _saved;
-  String? _pending;
-  var _loading = true;
   var _generation = 0;
   Timer? _timer;
 
@@ -431,72 +426,54 @@ class _UnitPipePanelState extends State<UnitPipePanel> {
   @override
   Widget build(BuildContext context) {
     final language = AppScope.of(context).vault.language;
-    final idle = !_loading && _pending == null;
+    final idle = !loading && pending == null;
     final notice = _notice(language);
-    return UnitModal(
+    return CodeModal(
       title: unitText(language, 'Редактор DataPipe', 'DataPipe editor'),
       color: unitPipeColor,
       onClose: widget.onClose,
-      barrierCloses: _clean && _pending == null,
+      barrierCloses: _clean && pending == null,
       note: notice.$1,
       noteColor: notice.$2,
       noteLines: 4,
       stackActions: true,
-      bodyHeight: (font, width) {
-        final codeFont = max(11.0, font * 0.72);
-        final layout = UnitCodeLayout(context, codeFont, width, _text.text);
-        return max(layout.total, layout.lineHeight * 4) + 8;
-      },
+      text: _text.text,
+      copy: () => _text.text,
       actions: (font) => [
-        UnitWordButton(
+        CodeWordButton(
           label: unitText(language, 'Сохранить', 'Save'),
           font: font,
           color: unitAddColor,
-          scale: 1.25,
           enabled: idle && !_flawed,
-          busy: _pending == 'save',
+          busy: pending == 'save',
           onTap: _save,
         ),
-        UnitWordButton(
+        CodeWordButton(
           label: unitText(language, 'Проверить', 'Check'),
           font: font,
           color: unitPipeColor,
-          scale: 1.25,
           enabled: idle,
-          busy: _pending == 'check',
+          busy: pending == 'check',
           onTap: _checkTap,
         ),
-        UnitWordButton(
+        CodeWordButton(
           label: unitText(language, 'Загрузить', 'Upload'),
           font: font,
-          scale: 1.25,
           enabled: idle,
-          busy: _pending == 'import',
+          busy: pending == 'import',
           onTap: _import,
         ),
-        UnitWordButton(
+        CodeWordButton(
           label: unitText(language, 'Выгрузить', 'Download'),
           font: font,
-          scale: 1.25,
           enabled: idle,
-          busy: _pending == 'export',
+          busy: pending == 'export',
           onTap: _export,
         ),
-        NoticeCopyButton(
-          text: _text.text,
-          label: unitText(language, 'Скопировать', 'Copy'),
-          extent: font * 2.2,
-        ),
-        SizedBox(width: font * 0.2),
-        NoticeCloseButton(
-          label: unitText(language, 'Закрыть', 'Close'),
-          extent: font * 2.2,
-          onTap: widget.onClose,
-        ),
       ],
-      body: (font) => UnitCodeEditor(
+      body: (_, layout) => CodeEditor(
         controller: _text,
-        fontSize: max(11.0, font * 0.72),
+        layout: layout!,
         errorLine: _syntax?.line,
         onChanged: _changed,
       ),
@@ -505,8 +482,8 @@ class _UnitPipePanelState extends State<UnitPipePanel> {
 
   /// What stands under the editor, and its color.
   (String, Color) _notice(String language) {
-    final failure = _failure;
-    if (failure != null) return (failure, errorColor);
+    final failed = failure;
+    if (failed != null) return (failed, errorColor);
     final syntax = _syntax;
     if (syntax != null) return (pipeSyntaxText(language, syntax), errorColor);
     if (_verified && _issues.isNotEmpty) {
@@ -521,45 +498,34 @@ class _UnitPipePanelState extends State<UnitPipePanel> {
   }
 
   Future<void> _load() async {
-    final model = AppScope.of(context);
-    final language = model.vault.language;
-    if (model.target?.signedIn != true) {
-      setState(() {
-        _loading = false;
-        _failure = unitText(language, 'Нет входа', 'Not signed in');
-      });
-      return;
-    }
-    try {
-      final text = widget.filled
+    final text = await ask(
+      (model) async => widget.filled
           ? utf8.decode(
               await model.pipeConfig(widget.uuid),
               allowMalformed: true,
             )
-          : pipeConfigTemplate;
-      if (!mounted) return;
-      _text.value = TextEditingValue(
-        text: text,
-        selection: TextSelection.collapsed(offset: text.length),
-      );
-      setState(() {
-        _baseline = text;
-        _loading = false;
-      });
-      await _check();
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _failure = '$error';
-      });
-    }
+          : pipeConfigTemplate,
+    );
+    if (text == null) return;
+    _put(text);
+    setState(() {
+      _baseline = text;
+      loading = false;
+    });
+    await _check();
+  }
+
+  void _put(String text) {
+    _text.value = TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
   }
 
   void _changed() {
     _timer?.cancel();
     setState(() {
-      _failure = null;
+      failure = null;
       _saved = null;
       _syntax = pipeSyntaxIssue(_text.text);
     });
@@ -578,129 +544,84 @@ class _UnitPipePanelState extends State<UnitPipePanel> {
       return false;
     }
     setState(() => _syntax = null);
-    try {
-      final issues = await AppScope.of(context)
-          .checkPipe(Uint8List.fromList(utf8.encode(text)));
-      if (!mounted || ticket != _generation) return false;
-      setState(() {
-        _issues = issues;
-        _verdictFor = text;
-      });
-      return issues.isEmpty;
-    } catch (error) {
-      if (!mounted || ticket != _generation) return false;
-      setState(() => _failure = '$error');
-      return false;
-    }
+    final issues = await ask(
+      (model) => model.checkPipe(Uint8List.fromList(utf8.encode(text))),
+    );
+    if (issues == null || ticket != _generation) return false;
+    setState(() {
+      _issues = issues;
+      _verdictFor = text;
+    });
+    return issues.isEmpty;
   }
 
   Future<void> _checkTap() async {
-    if (_pending != null) return;
+    if (pending != null) return;
     final language = AppScope.of(context).vault.language;
     setState(() {
-      _pending = 'check';
-      _failure = null;
+      pending = 'check';
+      failure = null;
       _saved = null;
     });
     final watch = Stopwatch()..start();
     final ok = await _check();
-    await unitSpinnerHold(watch);
+    await holdSpinner(watch);
     if (!mounted) return;
     setState(() {
-      _pending = null;
-      if (ok)
+      pending = null;
+      if (ok) {
         _saved = unitText(language, 'Конфиг корректен', 'The config is valid');
+      }
     });
   }
 
   Future<void> _save() async {
-    if (_pending != null || _loading || _flawed) return;
+    if (pending != null || loading || _flawed) return;
     final model = AppScope.of(context);
     final language = model.vault.language;
-    setState(() {
-      _pending = 'save';
-      _failure = null;
-      _saved = null;
-    });
-    final watch = Stopwatch()..start();
     final text = _text.text;
-    try {
+    var skipped = false;
+    _saved = null;
+    final saved = await work('save', () async {
       if (!_verified && !await _check()) {
-        if (mounted) setState(() => _pending = null);
+        skipped = true;
         return;
       }
       await model.setPipe(widget.uuid, Uint8List.fromList(utf8.encode(text)));
-      await unitSpinnerHold(watch);
-      if (!mounted) return;
-      setState(() {
-        _pending = null;
-        _baseline = text;
-        _saved = unitText(language, 'Сохранено', 'Saved');
-      });
-      widget.onSaved();
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _pending = null;
-        _failure = '$error';
-      });
-    }
+    });
+    if (!saved || skipped) return;
+    setState(() {
+      _baseline = text;
+      _saved = unitText(language, 'Сохранено', 'Saved');
+    });
+    widget.onSaved();
   }
 
   Future<void> _import() async {
-    if (_pending != null) return;
     final model = AppScope.of(context);
     final language = model.vault.language;
-    setState(() {
-      _pending = 'import';
-      _failure = null;
-    });
-    try {
+    String? text;
+    final picked = await work('import', () async {
       final file = await model.files.pick(
         dialogTitle: unitText(language, 'Конфиг DataPipe', 'DataPipe config'),
       );
-      if (!mounted) return;
-      if (file == null) {
-        setState(() => _pending = null);
-        return;
-      }
-      final text = utf8.decode(file, allowMalformed: true);
-      _text.value = TextEditingValue(
-        text: text,
-        selection: TextSelection.collapsed(offset: text.length),
-      );
-      setState(() => _pending = null);
-      _changed();
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _pending = null;
-        _failure = '$error';
-      });
-    }
+      if (file != null) text = utf8.decode(file, allowMalformed: true);
+    }, hold: false);
+    if (!picked || text == null) return;
+    _put(text!);
+    _changed();
   }
 
   Future<void> _export() async {
-    if (_pending != null) return;
     final model = AppScope.of(context);
-    setState(() {
-      _pending = 'export';
-      _failure = null;
-    });
-    try {
-      final stem = pipeFileStem(widget.topic, 'data_pipe');
-      await model.saveBytes(
+    final stem = pipeFileStem(widget.topic, 'data_pipe');
+    await work(
+      'export',
+      () => model.saveBytes(
         '$stem.yml',
         Uint8List.fromList(utf8.encode(_text.text)),
-      );
-      if (!mounted) return;
-      setState(() => _pending = null);
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _pending = null;
-        _failure = '$error';
-      });
-    }
+      ),
+      hold: false,
+    );
   }
 }

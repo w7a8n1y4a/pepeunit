@@ -1,20 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
+import '../../app_model.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
-import '../../navigation/back.dart';
+import '../../navigation/pick.dart';
 import '../../units/unit_view.dart';
 import '../hex_page.dart';
 import '../network/network_chrome.dart';
 import 'units_chrome.dart';
 
-/// A short named list. A tap returns the id to the page that opened it.
-///
-/// With [viaModel] the id goes to [AppModel.finishPick] instead of the route
-/// result, for an opener that awaits [AppModel.beginPick]. Zooming replaces
-/// this route, and a replaced route never delivers its result.
+/// A short named list. A tap gives the id to the opener through [givePick];
+/// the opener awaits it with [openPick].
 ///
 /// With [paged] a page window cell stands right after Back and the items
 /// follow it, so a long list shows its range and the arrows instead of
@@ -27,7 +24,6 @@ class NamePickPage extends StatefulWidget {
     required this.load,
     this.icon,
     this.color,
-    this.viaModel = false,
     this.paged = false,
     super.key,
   });
@@ -35,10 +31,9 @@ class NamePickPage extends StatefulWidget {
   final String title;
   final int scope;
   final String path;
-  final Future<List<({String id, String label})>> Function() load;
+  final Future<List<PickItem>> Function() load;
   final String? icon;
   final Color? color;
-  final bool viaModel;
   final bool paged;
 
   @override
@@ -46,7 +41,7 @@ class NamePickPage extends StatefulWidget {
 }
 
 class _NamePickPageState extends State<NamePickPage> {
-  List<({String id, String label})> _items = const [];
+  List<PickItem> _items = const [];
   String? _failure;
   var _open = false;
   var _loading = true;
@@ -164,7 +159,7 @@ class _NamePickPageState extends State<NamePickPage> {
           );
         } else {
           final id = slot.id.substring(_prefix.length);
-          final item = _items.cast<({String id, String label})?>().firstWhere(
+          final item = _items.cast<PickItem?>().firstWhere(
             (row) => row!.id == id,
             orElse: () => null,
           );
@@ -193,18 +188,12 @@ class _NamePickPageState extends State<NamePickPage> {
       slots: slots,
       onTap: (id) {
         if (id == 'back') {
-          popOrHome(context);
+          givePick(context, null);
         } else if (id == 'error') {
           setState(() => _open = true);
         } else if (id.startsWith(_prefix) &&
             _items.any((item) => item.id == id.substring(_prefix.length))) {
-          final picked = id.substring(_prefix.length);
-          if (widget.viaModel) {
-            AppScope.of(context).finishPick(picked);
-            popOrHome(context);
-          } else {
-            context.pop(picked);
-          }
+          givePick(context, id.substring(_prefix.length));
         }
       },
       frame: board == null
@@ -234,15 +223,15 @@ class _NamePickPageState extends State<NamePickPage> {
 
   Future<void> _load() async {
     final model = AppScope.of(context);
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
         _loading = false;
-        _failure = unitText(model.vault.language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }
     try {
-      final items = await widget.load();
+      final items = model.pickItems ?? await widget.load();
       if (!mounted) return;
       setState(() {
         _items = items;

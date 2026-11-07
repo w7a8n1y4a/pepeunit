@@ -148,7 +148,7 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Скопировать'));
     await tester.pumpAndSettle();
     expect(find.text('unit | 1'), findsOneWidget);
-    await tester.tapAt(tester.getCenter(find.byType(AlertsPage)));
+    await tester.tap(find.text('unit | 1'));
     await tester.pumpAndSettle();
     expect(find.text('unit | 1'), findsOneWidget);
     await tester.tap(find.bySemanticsLabel('Закрыть'));

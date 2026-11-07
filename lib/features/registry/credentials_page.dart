@@ -135,11 +135,10 @@ class _CredentialsPageState extends State<CredentialsPage> {
 
   Future<void> _load() async {
     final model = AppScope.of(context);
-    final language = model.vault.language;
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
         _loading = false;
-        _failure = regText(language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }

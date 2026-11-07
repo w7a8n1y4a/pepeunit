@@ -8,6 +8,7 @@ import '../../hive/hex_motion.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
+import '../../navigation/pick.dart';
 import '../../registry/repo.dart';
 import '../../units/unit.dart';
 import '../../units/unit_view.dart';
@@ -185,11 +186,11 @@ class _PanelsPageState extends State<PanelsPage> {
 
   Future<void> _load() async {
     final model = AppScope.of(context);
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
         _loading = false;
         _seen = true;
-        _failure = dashText(model.vault.language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }
@@ -319,9 +320,7 @@ class _PanelCreatePageState extends State<PanelCreatePage> {
       case 'error':
         setState(() => _open = true);
       case 'type':
-        final pick = AppScope.of(context).beginPick();
-        context.push('/dashboards/type');
-        final picked = await pick;
+        final picked = await openPick<String>(context, '/dashboards/type');
         if (picked == null || !mounted) return;
         setState(() => _type = picked);
       case 'create':
@@ -509,11 +508,11 @@ class _PanelPageState extends State<PanelPage> {
 
   Future<void> _load() async {
     final model = AppScope.of(context);
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
         _loading = false;
         _seen = true;
-        _failure = dashText(model.vault.language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }
@@ -743,9 +742,7 @@ class _PanelNodesPageState extends State<PanelNodesPage> {
   /// Search shows units that have a node. Its card opens the nodes of that
   /// unit, and the chosen node comes back here to get its two flags.
   Future<void> _add() async {
-    final pick = AppScope.of(context).beginPick();
-    context.push('/units/pick?nodes=1');
-    final node = await pick;
+    final node = await openPick<String>(context, '/units/pick?nodes=1');
     if (node == null || !mounted) return;
     context.push('$_path/new?io=$node');
   }
@@ -774,11 +771,11 @@ class _PanelNodesPageState extends State<PanelNodesPage> {
 
   Future<void> _load() async {
     final model = AppScope.of(context);
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
         _loading = false;
         _seen = true;
-        _failure = dashText(model.vault.language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }
@@ -954,10 +951,10 @@ class _PanelNodeFormPageState extends State<PanelNodeFormPage> {
 
   Future<void> _load() async {
     final model = AppScope.of(context);
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
         _loading = false;
-        _failure = dashText(model.vault.language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }

@@ -38,6 +38,9 @@ class SyncReport {
   bool get empty => reached == 0 && problems.isEmpty;
 }
 
+/// One row of a name picker: the value it answers with and its label.
+typedef PickItem = ({String id, String label});
+
 class AppModel extends ChangeNotifier {
   AppModel({
     required this.store,
@@ -140,6 +143,13 @@ class AppModel extends ChangeNotifier {
   }
 
   InstanceRecord? get target => vault.target;
+
+  /// The active instance has a signed-in person.
+  bool get signedIn => target?.signedIn == true;
+
+  /// The note a screen shows when it was opened without a sign-in.
+  String get notSignedIn =>
+      phrase(vault.language, {'ru': 'Нет входа', 'en': 'Not signed in'});
 
   static const profileCooldown = Duration(minutes: 1);
   static const resignCooldown = Duration(minutes: 1);
@@ -1043,9 +1053,6 @@ class AppModel extends ChangeNotifier {
 
   bool? ioIsInput(String uuid) => _ioInputs[uuid];
 
-  Future<bool> ioInput(String uuid) async =>
-      _ioInputs[uuid] ?? (await readUnitIo(uuid)).input;
-
   void _noteIo(UnitIo io) => _ioInputs[io.uuid] = io.input;
 
   Future<({int count, List<UnitIo> ios})> listIos({
@@ -1080,7 +1087,7 @@ class AppModel extends ChangeNotifier {
   Future<UnitIo> setInputState(String uuid, String state) =>
       _api.setInputState(_token, uuid, state);
 
-  Completer<String?>? _pick;
+  Completer<Object?>? _pick;
 
   /// True while a screen waits for the person to choose something.
   bool get pickOpen => _pick != null;
@@ -1089,27 +1096,26 @@ class AppModel extends ChangeNotifier {
   /// does not travel back through the route result: those screens replace
   /// their own route when the scale changes, and a replaced route never
   /// delivers it. A pick left open is closed with null when the next one
-  /// starts.
-  Future<String?> beginPick() {
+  /// starts. Openers go through `openPick` in `navigation/pick.dart`.
+  Future<T?> beginPick<T extends Object>({List<PickItem>? items}) {
     _pick?.complete(null);
-    final pick = Completer<String?>();
+    final pick = Completer<Object?>();
     _pick = pick;
-    return pick.future;
+    pickItems = items;
+    return pick.future.then((value) => value is T ? value : null);
   }
+
+  /// Rows the opener already holds for the open pick, so a name picker shows
+  /// them without asking the backend again. Null when the picker must ask.
+  List<PickItem>? pickItems;
 
   /// Hands the choice to the screen that began the pick.
-  void finishPick(String? value) {
+  void finishPick(Object? value) {
     final pick = _pick;
     _pick = null;
+    pickItems = null;
     if (pick != null && !pick.isCompleted) pick.complete(value);
   }
-
-  /// A pick of an output for a link, or of any node for a panel.
-  bool get outputPickOpen => pickOpen;
-
-  Future<String?> beginOutputPick() => beginPick();
-
-  void finishOutputPick(String? uuid) => finishPick(uuid);
 
   Future<void> createIoLink({
     required String outputUuid,
@@ -1567,10 +1573,6 @@ class AppModel extends ChangeNotifier {
       _applyFlags(current, updated);
     }
     notifyListeners();
-  }
-
-  Future<void> patchSetting(String key, Object? value) {
-    return patchSettings({key: value});
   }
 
   Future<void> patchSettings(Map<String, Object?> patch) async {

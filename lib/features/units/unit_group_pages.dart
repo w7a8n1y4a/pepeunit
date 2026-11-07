@@ -211,10 +211,10 @@ class _GroupsPageState extends State<GroupsPage> {
   Future<void> _load() async {
     final ticket = ++_ticket;
     final model = AppScope.of(context);
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
         _loading = false;
-        _failure = unitText(model.vault.language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }

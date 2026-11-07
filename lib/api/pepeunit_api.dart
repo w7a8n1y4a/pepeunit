@@ -136,8 +136,6 @@ class PepeunitApi {
     return portraitFromJson(json, url: '$origin$instanceCurrentPath');
   }
 
-  Future<String> currentVersion() async => (await portrait()).version;
-
   Future<({int total, List<String> items})> peerUrls({
     required int offset,
     required int limit,

@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../app_model.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
-import '../../navigation/back.dart';
+import '../../navigation/pick.dart';
 import '../../registry/repo.dart';
 import '../../units/unit.dart';
 import '../../units/unit_view.dart';
@@ -15,7 +14,7 @@ import '../network/network_chrome.dart';
 import '../slanted_choices.dart';
 import 'units_chrome.dart';
 
-/// Commit search. A tap returns the hash. A compilable unit shows tags only.
+/// Commit search. A tap gives the hash to the opener through [givePick]. A compilable unit shows tags only.
 class CommitPickPage extends StatefulWidget {
   const CommitPickPage({
     required this.repoUuid,
@@ -204,12 +203,12 @@ class _CommitPickPageState extends State<CommitPickPage> {
 
   void _tap(String id) {
     if (id.startsWith('sha:')) {
-      context.pop(id.substring(4));
+      givePick(context, id.substring(4));
       return;
     }
     switch (id) {
       case 'back':
-        popOrHome(context);
+        givePick(context, null);
       case 'error':
         setState(() => _open = true);
     }
@@ -246,13 +245,10 @@ class _CommitPickPageState extends State<CommitPickPage> {
   Future<void> _load() async {
     final ticket = ++_ticket;
     final model = AppScope.of(context);
-    final language = model.vault.language;
-    if (model.target?.signedIn != true ||
-        widget.repoUuid.isEmpty ||
-        widget.branch.isEmpty) {
+    if (!model.signedIn || widget.repoUuid.isEmpty || widget.branch.isEmpty) {
       setState(() {
         _loading = false;
-        _failure = unitText(language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }

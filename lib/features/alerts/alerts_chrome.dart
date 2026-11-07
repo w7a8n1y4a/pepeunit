@@ -8,19 +8,6 @@ Color get alertsColor => sectionById('alerts')!.color;
 String alertText(String language, String ru, String en) =>
     phrase(language, {'ru': ru, 'en': en});
 
-/// Monospace for notice tables and the test log. OpenGost has no mono face.
-const noticeMonoFamily = 'JetBrains Mono';
-
-TextStyle noticeMono(double fontSize, {Color color = const Color(0xFFFFFFFF)}) {
-  return TextStyle(
-    color: color,
-    fontFamily: noticeMonoFamily,
-    fontSize: fontSize,
-    height: 1.35,
-    decoration: TextDecoration.none,
-  );
-}
-
 String noticeReadLabel(String language, String read) {
   switch (read) {
     case 'all':

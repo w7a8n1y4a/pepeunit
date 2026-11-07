@@ -11,9 +11,9 @@ import '../hex_page.dart';
 import '../network/network_chrome.dart';
 import '../page_window.dart';
 import '../slanted_choices.dart';
+import '../code/code_modal.dart';
+import '../code/code_view.dart';
 import 'alerts_chrome.dart';
-import 'notice_log.dart';
-import 'notice_sheet.dart';
 
 class AlertsPage extends StatefulWidget {
   const AlertsPage({required this.scope, super.key});
@@ -97,29 +97,20 @@ class _AlertsPageState extends State<AlertsPage> {
     final open = _open;
     if (open == null) return scene;
     void close() => setState(() => _open = null);
-    final copyLabel = alertText(language, 'Скопировать', 'Copy');
-    final closeLabel = alertText(language, 'Закрыть', 'Close');
+    final text = open.hasLog ? open.bigText : open.tableText;
     return Stack(
       children: [
         scene,
-        if (open.hasLog)
-          NoticeLog(
-            text: open.bigText,
-            title: alertText(language, 'Результаты тестов', 'Test results'),
-            color: color,
-            copyLabel: copyLabel,
-            closeLabel: closeLabel,
-            onClose: close,
-          )
-        else
-          NoticeSheet(
-            text: open.tableText,
-            title: alertText(language, 'Уведомление', 'Notification'),
-            color: color,
-            copyLabel: copyLabel,
-            closeLabel: closeLabel,
-            onClose: close,
-          ),
+        CodeModal(
+          title: open.hasLog
+              ? alertText(language, 'Результаты тестов', 'Test results')
+              : alertText(language, 'Уведомление', 'Notification'),
+          color: color,
+          onClose: close,
+          text: text,
+          copy: () => text,
+          body: (_, layout) => CodeView(layout: layout!),
+        ),
       ],
     );
   }
@@ -290,11 +281,10 @@ class _AlertsPageState extends State<AlertsPage> {
   Future<void> _load() async {
     final ticket = ++_ticket;
     final model = AppScope.of(context);
-    final language = model.vault.language;
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
         _loading = false;
-        _failure = alertText(language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }

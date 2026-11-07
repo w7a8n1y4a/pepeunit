@@ -166,10 +166,9 @@ class _RegistryCreatePageState extends State<RegistryCreatePage> {
   Future<void> _create() async {
     if (_busy) return;
     final model = AppScope.of(context);
-    final language = model.vault.language;
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
-        _failure = regText(language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
         _open = false;
       });
       return;

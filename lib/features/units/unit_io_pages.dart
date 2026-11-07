@@ -8,6 +8,7 @@ import '../../hive/hex_motion.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
+import '../../navigation/pick.dart';
 import '../../registry/repo.dart';
 import '../../units/unit.dart';
 import '../../units/unit_read.dart';
@@ -199,10 +200,10 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
 
   Future<void> _load() async {
     final model = AppScope.of(context);
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
         _loading = false;
-        _failure = unitText(model.vault.language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }
@@ -319,10 +320,9 @@ class _UnitIoPageState extends State<UnitIoPage> {
           input: _input,
           // Only the creator may put a value into an input.
           editable: _input && owned,
+          onSent: _load,
           onClose: () {
-            if (!mounted) return;
-            setState(() => _value = false);
-            _load();
+            if (mounted) setState(() => _value = false);
           },
         ),
       ],
@@ -459,10 +459,10 @@ class _UnitIoPageState extends State<UnitIoPage> {
   Future<void> _load() async {
     if (_loading && _io != null) return;
     final model = AppScope.of(context);
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
         _loading = false;
-        _failure = unitText(model.vault.language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }
@@ -881,9 +881,7 @@ class _UnitLinksPageState extends State<UnitLinksPage> {
       if (_adding) return;
       // Search shows only units that have an output; its card opens the
       // outputs of that unit, and the chosen output comes back here.
-      final pick = AppScope.of(context).beginOutputPick();
-      context.push('/units/pick?outputs=1');
-      final output = await pick;
+      final output = await openPick<String>(context, '/units/pick?outputs=1');
       if (output == null || !mounted) return;
       setState(() {
         _adding = true;

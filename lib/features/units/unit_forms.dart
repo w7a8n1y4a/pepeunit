@@ -8,6 +8,7 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
+import '../../navigation/pick.dart';
 import '../../units/unit.dart';
 import '../file_drop.dart';
 import '../hex_page.dart';
@@ -212,7 +213,8 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
       case 'branch':
         final repo = _unit?.repoUuid ?? '';
         if (!_ready || repo.isEmpty) return;
-        final picked = await context.push<String>(
+        final picked = await openPick<String>(
+          context,
           '/units/new/branch?repo=$repo',
         );
         if (picked == null || !mounted) return;
@@ -223,7 +225,17 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
         });
       case 'updates':
         if (!_ready) return;
-        final picked = await context.push<UnitUpdateDraft>(_updatesPath());
+        final picked = await context.push<UnitUpdateDraft>(
+          unitUpdatesPath(
+            repo: _unit?.repoUuid ?? '',
+            branch: _branch,
+            compilable: _compilable,
+            auto: _auto,
+            tags: _compilable || _tags,
+            commit: _commit,
+            platform: _platform,
+          ),
+        );
         if (picked == null || !mounted) return;
         setState(() {
           _compilable = picked.compilable;
@@ -237,26 +249,12 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
     }
   }
 
-  String _updatesPath() {
-    final repo = _unit?.repoUuid ?? '';
-    final query = <String, String>{
-      'repo': repo,
-      'branch': _branch,
-      'compilable': _compilable ? '1' : '0',
-      'auto': _auto ? '1' : '0',
-      'tags': (_compilable || _tags) ? '1' : '0',
-      if (_commit != null && _commit!.isNotEmpty) 'commit': _commit!,
-      if (_platform != null && _platform!.isNotEmpty) 'platform': _platform!,
-    };
-    return Uri(path: '/units/new/updates', queryParameters: query).toString();
-  }
-
   Future<void> _load() async {
     final model = AppScope.of(context);
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
         _loading = false;
-        _failure = unitText(model.vault.language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }

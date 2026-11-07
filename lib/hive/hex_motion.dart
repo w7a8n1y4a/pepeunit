@@ -4,6 +4,30 @@ import 'dart:ui' show PointMode;
 
 import 'package:flutter/material.dart';
 
+/// Effects on the scene right now: waiting rings, press bursts, echoes. The
+/// background mosaic rests while any plays, so the effect gets every frame
+/// to itself instead of sharing it with a full-screen repaint.
+abstract final class MotionLoad {
+  static var _active = 0;
+
+  /// True while some effect plays.
+  static bool get active => _active > 0;
+}
+
+/// One owner's share of [MotionLoad]. Set it on when the owner's effect
+/// starts and off when it ends. Setting the same value twice counts once, so
+/// an owner cannot leave the background resting by mistake; always set it
+/// off in `dispose`.
+class MotionLease {
+  var _held = false;
+
+  void set(bool on) {
+    if (on == _held) return;
+    _held = on;
+    MotionLoad._active += on ? 1 : -1;
+  }
+}
+
 /// How long one press effect lasts.
 const pressDuration = Duration(milliseconds: 420);
 

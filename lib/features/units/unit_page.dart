@@ -311,12 +311,11 @@ class _UnitPageState extends State<UnitPage> {
 
   Future<void> _load() async {
     final model = AppScope.of(context);
-    final language = model.vault.language;
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
         _loading = false;
         _seen = true;
-        _failure = unitText(language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }

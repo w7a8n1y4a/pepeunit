@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show ValueListenable, ValueNotifier;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'hex_motion.dart';
 import 'icon_atlas.dart';
 
 /// Where the pictures of the background sit and how they move. The model
@@ -185,7 +186,10 @@ class Mosaic {
 /// The mosaic behind every screen. Nothing here lays out or rebuilds: a timer
 /// moves the model and the one painter draws every tile with a single atlas
 /// call. It stops while the app is in the background and when the system asks
-/// for reduced motion.
+/// for reduced motion, and it rests while a waiting ring, a press burst, or an
+/// echo plays ([MotionLoad]), so those never share a frame with it. Its own
+/// clock stands still while it rests, so the tiles go on from where they
+/// were.
 class HiveBackground extends StatefulWidget {
   const HiveBackground({super.key});
 
@@ -196,9 +200,12 @@ class HiveBackground extends StatefulWidget {
 class _HiveBackgroundState extends State<HiveBackground>
     with WidgetsBindingObserver {
   static const _frame = Duration(milliseconds: 33);
+  static const _maxStep = 0.1;
 
   final _clock = ValueNotifier<double>(0);
   final _watch = Stopwatch()..start();
+  var _last = 0.0;
+  var _time = 0.0;
   IconAtlas? _atlas;
   Mosaic? _mosaic;
   _MosaicPainter? _painter;
@@ -247,9 +254,14 @@ class _HiveBackgroundState extends State<HiveBackground>
   }
 
   void _tick() {
-    final t = _watch.elapsedMicroseconds / Duration.microsecondsPerSecond;
-    _mosaic?.advance(t);
-    _clock.value = t;
+    final now = _watch.elapsedMicroseconds / Duration.microsecondsPerSecond;
+    final passed = now - _last;
+    _last = now;
+    if (MotionLoad.active) return;
+    // A long pause is not played back: the clock moves on by one frame.
+    _time += min(passed, _maxStep);
+    _mosaic?.advance(_time);
+    _clock.value = _time;
   }
 
   @override

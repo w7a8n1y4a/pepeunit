@@ -41,11 +41,22 @@ Color codeColor(CodeKind kind) {
   }
 }
 
-/// The language [auto] stands for on this text.
+final _yamlRow = RegExp(r'''^\s*(?:#.*|-(?:\s.*)?|[\w."'-][^:]*:(?:\s.*)?)$''');
+
+/// The language [auto] stands for on this text. JSON opens with an object or
+/// an array. YAML needs a document marker, or at least two rows that are all
+/// keys, list items, or comments, so a single `note: text` line stays plain.
 CodeLanguage codeSniff(String text) {
   final head = text.trimLeft();
   if (head.startsWith('{') || head.startsWith('[')) return CodeLanguage.json;
-  return CodeLanguage.plain;
+  if (head.startsWith('---')) return CodeLanguage.yaml;
+  var rows = 0;
+  for (final line in text.split('\n')) {
+    if (line.trim().isEmpty) continue;
+    if (!_yamlRow.hasMatch(line.trimRight())) return CodeLanguage.plain;
+    if (!line.trimLeft().startsWith('#')) rows++;
+  }
+  return rows >= 2 ? CodeLanguage.yaml : CodeLanguage.plain;
 }
 
 /// One list of tokens per line, split on `\n`. The tokens of a line join

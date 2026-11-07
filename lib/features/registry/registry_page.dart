@@ -6,6 +6,7 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
+import '../../navigation/pick.dart';
 import '../../registry/registry_view.dart';
 import '../../registry/repo.dart';
 import '../hex_page.dart';
@@ -15,8 +16,8 @@ import '../page_window.dart';
 import '../slanted_choices.dart';
 import 'registry_chrome.dart';
 
-/// Repository search. [forUnit] returns the chosen repository to the unit
-/// form that opened this search.
+/// Repository search. [forUnit] gives the chosen repository to the unit form
+/// that opened this search, through [givePick].
 class RegistryPage extends StatefulWidget {
   const RegistryPage({required this.scope, this.forUnit = false, super.key});
 
@@ -171,7 +172,7 @@ class _RegistryPageState extends State<RegistryPage> {
       final uuid = id.substring(5);
       if (widget.forUnit) {
         if (context.canPop()) {
-          context.pop(uuid);
+          givePick(context, uuid);
         } else {
           context.push('/units/new?repo=$uuid');
         }
@@ -182,7 +183,7 @@ class _RegistryPageState extends State<RegistryPage> {
     }
     switch (id) {
       case 'back':
-        popOrHome(context);
+        widget.forUnit ? givePick(context, null) : popOrHome(context);
       case 'error':
         setState(() => _failureOpen = true);
     }
@@ -230,11 +231,10 @@ class _RegistryPageState extends State<RegistryPage> {
   Future<void> _load() async {
     final ticket = ++_ticket;
     final model = AppScope.of(context);
-    final language = model.vault.language;
-    if (model.target?.signedIn != true) {
+    if (!model.signedIn) {
       setState(() {
         _loading = false;
-        _failure = regText(language, 'Нет входа', 'Not signed in');
+        _failure = model.notSignedIn;
       });
       return;
     }

@@ -78,6 +78,39 @@ void main() {
     expect(lines(), findsNothing);
   });
 
+  testWidgets('the background rests while a ring or an echo plays', (
+    tester,
+  ) async {
+    HexSlot cell({required bool busy}) =>
+        HexSlot(id: 'a', title: '', color: addColor, busy: busy, q: 0, r: 0);
+    Future<void> show(HexSlot slot, {HexEcho? echo}) => tester.pumpWidget(
+      Directionality(
+        textDirection: TextDirection.ltr,
+        child: MediaQuery(
+          data: const MediaQueryData(size: Size(400, 400)),
+          child: HexScene(slots: [slot], onTap: (_) {}, echo: echo),
+        ),
+      ),
+    );
+
+    expect(MotionLoad.active, isFalse);
+    await show(cell(busy: true));
+    expect(MotionLoad.active, isTrue);
+    await show(cell(busy: false));
+    expect(MotionLoad.active, isFalse);
+    await show(cell(busy: false), echo: HexEcho(ok: true));
+    expect(MotionLoad.active, isTrue);
+    await tester.pump(const Duration(milliseconds: 100));
+    await tester.pump(echoDuration);
+    await tester.pump();
+    expect(MotionLoad.active, isFalse);
+    // Leaving the screen while the ring turns gives the frame back.
+    await show(cell(busy: true));
+    expect(MotionLoad.active, isTrue);
+    await tester.pumpWidget(const SizedBox());
+    expect(MotionLoad.active, isFalse);
+  });
+
   testWidgets('the press effect paints and ends', (tester) async {
     final controller = AnimationController(
       vsync: const TestVSync(),

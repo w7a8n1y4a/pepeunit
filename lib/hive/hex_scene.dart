@@ -310,6 +310,7 @@ class _HexSceneState extends State<HexScene>
     with SingleTickerProviderStateMixin {
   AnimationController? _clock;
   HexEcho? _echo;
+  final _lease = MotionLease();
 
   @override
   void didUpdateWidget(HexScene oldWidget) {
@@ -322,17 +323,20 @@ class _HexSceneState extends State<HexScene>
       clock = AnimationController(vsync: this, duration: echoDuration);
       clock.addStatusListener((status) {
         if (status == AnimationStatus.completed && mounted) {
+          _lease.set(false);
           setState(() => _echo = null);
         }
       });
       _clock = clock;
     }
     _echo = echo;
+    _lease.set(true);
     clock.forward(from: 0);
   }
 
   @override
   void dispose() {
+    _lease.set(false);
     _clock?.dispose();
     super.dispose();
   }
@@ -1083,6 +1087,7 @@ class _CellFrameState extends State<_CellFrame> with TickerProviderStateMixin {
   AnimationController? _burst;
   AnimationController? _spin;
   PressPainter? _press;
+  final _lease = MotionLease();
   var _hover = false;
 
   @override
@@ -1099,14 +1104,20 @@ class _CellFrameState extends State<_CellFrame> with TickerProviderStateMixin {
 
   @override
   void dispose() {
+    _lease.set(false);
     _burst?.dispose();
     _spin?.dispose();
     super.dispose();
   }
 
+  /// The cell plays an effect: the ring turns or a burst is in the air.
+  void _rest() =>
+      _lease.set(widget.slot.busy || (_burst?.isAnimating ?? false));
+
   void _spinning(bool on) {
     if (!on) {
       _spin?.stop();
+      _rest();
       return;
     }
     final spin = _spin ??= AnimationController(
@@ -1114,6 +1125,7 @@ class _CellFrameState extends State<_CellFrame> with TickerProviderStateMixin {
       duration: const Duration(milliseconds: 1100),
     );
     if (!spin.isAnimating) spin.repeat();
+    _lease.set(true);
   }
 
   void _tap() {
@@ -1133,12 +1145,15 @@ class _CellFrameState extends State<_CellFrame> with TickerProviderStateMixin {
     if (burst == null) {
       burst = AnimationController(vsync: this, duration: pressDuration);
       burst.addStatusListener((status) {
-        if (status == AnimationStatus.completed && mounted) setState(() {});
+        if (status != AnimationStatus.completed || !mounted) return;
+        _rest();
+        setState(() {});
       });
       _burst = burst;
     }
     _press = PressPainter(color: widget.slot.color, clock: burst);
     burst.forward(from: 0);
+    _lease.set(true);
     setState(() {});
   }
 

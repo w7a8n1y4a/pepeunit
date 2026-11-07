@@ -8,7 +8,7 @@ import 'package:pepeunit_client/account/vault_store.dart';
 import 'package:pepeunit_client/api/pepeunit_api.dart';
 import 'package:pepeunit_client/app_model.dart';
 import 'package:pepeunit_client/app_scope.dart';
-import 'package:pepeunit_client/features/code_highlight.dart';
+import 'package:pepeunit_client/features/code/code_highlight.dart';
 import 'package:pepeunit_client/features/units/unit_pipe_pages.dart';
 import 'package:pepeunit_client/features/units/units_chrome.dart';
 import 'package:pepeunit_client/hive/hex_scene.dart';

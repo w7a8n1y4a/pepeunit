@@ -532,7 +532,6 @@ class _PepeunitAppState extends State<PepeunitApp> {
               color: dashboardsColor,
               scope: scaleTickOf(state.uri),
               path: '/dashboards/type',
-              viaModel: true,
               paged: true,
               load: () async => [
                 for (final type in panelTypes)
@@ -652,10 +651,7 @@ class _PepeunitAppState extends State<PepeunitApp> {
         color: sceneBackground,
         child: Stack(
           fit: StackFit.expand,
-          children: [
-            if (widget.background) const HiveBackground(),
-            if (child != null) child,
-          ],
+          children: [if (widget.background) const HiveBackground(), ?child],
         ),
       ),
     );
