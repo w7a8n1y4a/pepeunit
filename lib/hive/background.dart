@@ -12,15 +12,20 @@ import 'icon_atlas.dart';
 /// Where the pictures of the background sit and how they move. The model
 /// knows nothing about rasters, so it stays cheap to test.
 ///
-/// The tiles stand on a staggered grid, each one nudged off its spot,
-/// turned by up to [maxTurn] and drawn at a different size. Neighbours show
-/// different pictures. Each tile rustles around its own angle. Some tiles are
-/// always flipping over to show another picture on the back.
+/// The tiles stand on a staggered grid turned by [tilt] from the horizontal,
+/// so no row of tiles lines up with the edge of the screen. Each tile is
+/// nudged off its spot, turned by up to [maxTurn] and drawn at a different
+/// size. Neighbours show different pictures. Each tile rustles around its own
+/// angle. Some tiles are always flipping over to show another picture on the
+/// back.
 class Mosaic {
   Mosaic(this.size, this.icons, {this.pitch = 88, int seed = 7})
     : _flips = Random(seed + 1) {
     _build(seed);
   }
+
+  /// Turn of the whole grid from the horizontal, in radians: 30°.
+  static const tilt = 30 * pi / 180;
 
   /// Largest base turn of a tile, in radians: 20°.
   static const maxTurn = 20 * pi / 180;
@@ -42,7 +47,13 @@ class Mosaic {
 
   final Random _flips;
   var count = 0;
-  var columns = 0;
+
+  /// Size of the grid before it is cut to the screen, and where each cell of
+  /// it went: a tile index, or -1 when the cell falls off the screen.
+  var _columns = 0;
+  var _rows = 0;
+  var _grid = Int32List(0);
+  late final Int32List _cell;
 
   late final Float32List _x;
   late final Float32List _y;
@@ -64,6 +75,7 @@ class Mosaic {
 
   void _build(int seed) {
     if (icons <= 0 || size.isEmpty) {
+      _cell = Int32List(0);
       _x = Float32List(0);
       _y = Float32List(0);
       _side = Float32List(0);
@@ -78,9 +90,51 @@ class Mosaic {
     }
     final rng = Random(seed);
     final rowHeight = pitch * sqrt(3) / 2;
-    columns = (size.width / pitch).ceil() + 2;
-    final rows = (size.height / rowHeight).ceil() + 2;
-    count = columns * rows;
+    final cosT = cos(tilt);
+    final sinT = sin(tilt);
+    final centerX = size.width / 2;
+    final centerY = size.height / 2;
+    // The grid is laid out around the screen center and then turned. Its
+    // extent comes from the screen corners turned back, so it still covers
+    // the screen from corner to corner.
+    final reach = pitch;
+    var uMin = double.infinity;
+    var uMax = -double.infinity;
+    var vMin = double.infinity;
+    var vMax = -double.infinity;
+    for (final dx in [-centerX - reach, centerX + reach]) {
+      for (final dy in [-centerY - reach, centerY + reach]) {
+        final u = dx * cosT + dy * sinT;
+        final v = -dx * sinT + dy * cosT;
+        uMin = min(uMin, u);
+        uMax = max(uMax, u);
+        vMin = min(vMin, v);
+        vMax = max(vMax, v);
+      }
+    }
+    _columns = ((uMax - uMin) / pitch).ceil() + 2;
+    _rows = ((vMax - vMin) / rowHeight).ceil() + 2;
+    _grid = Int32List(_columns * _rows)..fillRange(0, _columns * _rows, -1);
+    final kept = <int>[];
+    final keptX = <double>[];
+    final keptY = <double>[];
+    for (var row = 0; row < _rows; row++) {
+      for (var column = 0; column < _columns; column++) {
+        final stagger = row.isOdd ? pitch / 2 : 0.0;
+        final u = uMin + column * pitch + stagger;
+        final v = vMin + row * rowHeight;
+        final x = centerX + u * cosT - v * sinT;
+        final y = centerY + u * sinT + v * cosT;
+        if (x < -reach || x > size.width + reach) continue;
+        if (y < -reach || y > size.height + reach) continue;
+        _grid[row * _columns + column] = kept.length;
+        kept.add(row * _columns + column);
+        keptX.add(x);
+        keptY.add(y);
+      }
+    }
+    count = kept.length;
+    _cell = Int32List.fromList(kept);
     _x = Float32List(count);
     _y = Float32List(count);
     _side = Float32List(count);
@@ -92,23 +146,43 @@ class Mosaic {
     _next = Int32List(count);
     _progress = Float32List(count)..fillRange(0, count, -1);
     final deck = List<int>.generate(icons, (i) => i)..shuffle(rng);
-    for (var row = 0; row < rows; row++) {
-      for (var column = 0; column < columns; column++) {
-        final i = row * columns + column;
-        final stagger = row.isOdd ? pitch / 2 : 0.0;
-        final shake = pitch * 0.24;
-        _x[i] =
-            (column - 1) * pitch + stagger + (rng.nextDouble() - 0.5) * shake;
-        _y[i] = (row - 1) * rowHeight + (rng.nextDouble() - 0.5) * shake;
-        _side[i] = pitch * 0.44 * (0.85 + rng.nextDouble() * 0.3);
-        _turn[i] = (rng.nextDouble() * 2 - 1) * maxTurn;
-        _phase[i] = rng.nextDouble() * 2 * pi;
-        _speed[i] = 0.5 + rng.nextDouble() * 0.8;
-        _alpha[i] = 0.05 + rng.nextDouble() * 0.04;
-        // One step along a row, seven steps down a column: no tile sits
-        // beside the same picture unless the catalog is tiny.
-        _icon[i] = deck[(column + row * 7) % icons];
-      }
+    final shake = pitch * 0.24;
+    for (var i = 0; i < count; i++) {
+      final row = _cell[i] ~/ _columns;
+      final column = _cell[i] % _columns;
+      _x[i] = keptX[i] + (rng.nextDouble() - 0.5) * shake;
+      _y[i] = keptY[i] + (rng.nextDouble() - 0.5) * shake;
+      _side[i] = pitch * 0.44 * (0.85 + rng.nextDouble() * 0.3);
+      _turn[i] = (rng.nextDouble() * 2 - 1) * maxTurn;
+      _phase[i] = rng.nextDouble() * 2 * pi;
+      _speed[i] = 0.5 + rng.nextDouble() * 0.8;
+      _alpha[i] = 0.05 + rng.nextDouble() * 0.04;
+      // One step along a row, seven steps down a column: no tile sits
+      // beside the same picture unless the catalog is tiny.
+      _icon[i] = deck[(column + row * 7) % icons];
+    }
+  }
+
+  /// The tiles that touch tile [i] on the grid: up to six.
+  Iterable<int> neighbours(int i) sync* {
+    if (count == 0) return;
+    final row = _cell[i] ~/ _columns;
+    final column = _cell[i] % _columns;
+    // Odd rows are shifted half a step to the right.
+    final side = row.isOdd ? 1 : -1;
+    for (final (dr, dc) in [
+      (0, -1),
+      (0, 1),
+      (-1, 0),
+      (-1, side),
+      (1, 0),
+      (1, side),
+    ]) {
+      final r = row + dr;
+      final c = column + dc;
+      if (r < 0 || r >= _rows || c < 0 || c >= _columns) continue;
+      final j = _grid[r * _columns + c];
+      if (j >= 0) yield j;
     }
   }
 
@@ -172,8 +246,8 @@ class Mosaic {
   /// A picture that neither this tile nor the ones around it show.
   int _pick(int i) {
     final around = <int>{_icon[i]};
-    for (final j in [i - 1, i + 1, i - columns, i + columns]) {
-      if (j >= 0 && j < count) around.add(_icon[j]);
+    for (final j in neighbours(i)) {
+      around.add(_icon[j]);
     }
     var pick = _flips.nextInt(icons);
     for (var tries = 0; tries < 8 && around.contains(pick); tries++) {

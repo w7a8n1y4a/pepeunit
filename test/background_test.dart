@@ -1,5 +1,6 @@
 import 'dart:io';
-import 'dart:ui' show Size;
+import 'dart:math';
+import 'dart:ui' show Offset, Size;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pepeunit_client/hive/background.dart';
@@ -15,13 +16,50 @@ void main() {
           mosaic.angleAt(i, 12.5).abs(),
           lessThanOrEqualTo(Mosaic.maxTurn + Mosaic.rustle),
         );
-        if (i + 1 < mosaic.count && (i + 1) % mosaic.columns != 0) {
-          expect(mosaic.iconAt(i), isNot(mosaic.iconAt(i + 1)));
-        }
-        if (i + mosaic.columns < mosaic.count) {
-          expect(mosaic.iconAt(i), isNot(mosaic.iconAt(i + mosaic.columns)));
+        for (final j in mosaic.neighbours(i)) {
+          expect(mosaic.iconAt(i), isNot(mosaic.iconAt(j)));
         }
       }
+    });
+
+    test('covers every corner of the screen', () {
+      const size = Size(1200, 800);
+      final mosaic = Mosaic(size, 20);
+      for (final corner in const [
+        Offset(0, 0),
+        Offset(1200, 0),
+        Offset(0, 800),
+        Offset(1200, 800),
+      ]) {
+        var near = double.infinity;
+        for (var i = 0; i < mosaic.count; i++) {
+          near = min(
+            near,
+            (Offset(mosaic.xAt(i), mosaic.yAt(i)) - corner).distance,
+          );
+        }
+        expect(near, lessThan(mosaic.pitch));
+      }
+    });
+
+    test('stands on a grid turned 30° from the horizontal', () {
+      final mosaic = Mosaic(const Size(1200, 800), 20);
+      // A triangular grid repeats every 60°, so the turn of its rows shows
+      // as the phase of the angle between touching tiles: cos(6a) is 1 for
+      // rows along the horizontal and -1 for rows at 30°.
+      var sum = 0.0;
+      var pairs = 0;
+      for (var i = 0; i < mosaic.count; i++) {
+        for (final j in mosaic.neighbours(i)) {
+          final a = atan2(
+            mosaic.yAt(j) - mosaic.yAt(i),
+            mosaic.xAt(j) - mosaic.xAt(i),
+          );
+          sum += cos(6 * a);
+          pairs++;
+        }
+      }
+      expect(sum / pairs, lessThan(-0.3));
     });
 
     test('is the same for the same size', () {
