@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app_scope.dart';
 import '../../dashboards/dashboard.dart';
+import '../../hive/hex_motion.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
@@ -382,6 +383,7 @@ class _PanelPageState extends State<PanelPage> {
   String? _failure;
   var _open = false;
   var _loading = true;
+  HexEcho? _echo;
   var _deleting = false;
   var _current = false;
   var _seen = false;
@@ -478,6 +480,7 @@ class _PanelPageState extends State<PanelPage> {
     );
     return HexPage(
       slots: slots,
+      echo: _echo,
       onTap: (id) async {
         switch (id) {
           case 'back':
@@ -485,7 +488,7 @@ class _PanelPageState extends State<PanelPage> {
           case 'error':
             setState(() => _open = true);
           case 'card':
-            await _load();
+            await _reloadCard();
           case 'nodes':
             context.push(
               '/dashboards/${widget.dashboardUuid}/panels/${widget.uuid}/nodes',
@@ -495,6 +498,13 @@ class _PanelPageState extends State<PanelPage> {
         }
       },
     );
+  }
+
+  /// A tap on the card reads the entity again and shows how it went.
+  Future<void> _reloadCard() async {
+    await _load();
+    if (!mounted) return;
+    setState(() => _echo = HexEcho(ok: _failure == null));
   }
 
   Future<void> _load() async {

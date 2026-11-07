@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../app_model.dart';
 import '../../app_scope.dart';
 import '../../dashboards/dashboard.dart';
+import '../../hive/hex_motion.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
@@ -32,6 +33,7 @@ class _DashboardPageState extends State<DashboardPage> {
   String? _failure;
   var _open = false;
   var _loading = true;
+  HexEcho? _echo;
   var _current = false;
   var _seen = false;
 
@@ -82,7 +84,7 @@ class _DashboardPageState extends State<DashboardPage> {
       text: dashText,
       wide: wide,
     );
-    return HexPage(slots: slots, onTap: _tap);
+    return HexPage(slots: slots, onTap: _tap, echo: _echo);
   }
 
   HexSlot _slot(BoardSlot slot, String language, AppModel model) {
@@ -187,7 +189,7 @@ class _DashboardPageState extends State<DashboardPage> {
       case 'error':
         setState(() => _open = true);
       case 'card':
-        await _load();
+        await _reloadCard();
       case 'panels':
         context.push('/dashboards/${widget.uuid}/panels');
       case 'sync':
@@ -197,6 +199,13 @@ class _DashboardPageState extends State<DashboardPage> {
       case 'delete':
         context.push('/dashboards/${widget.uuid}/delete');
     }
+  }
+
+  /// A tap on the card reads the entity again and shows how it went.
+  Future<void> _reloadCard() async {
+    await _load();
+    if (!mounted) return;
+    setState(() => _echo = HexEcho(ok: _failure == null));
   }
 
   Future<void> _load() async {
@@ -259,12 +268,14 @@ class _DashboardPageState extends State<DashboardPage> {
         _dashboard = dashboard;
         _pending = null;
         _open = dashboard.syncStatus == 'Error';
+        _echo = HexEcho(ok: dashboard.syncStatus != 'Error');
       });
     } catch (error) {
       if (!mounted) return;
       setState(() {
         _pending = null;
         _failure = '$error';
+        _echo = HexEcho(ok: false);
       });
     }
   }

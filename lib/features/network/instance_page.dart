@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../account/alerts.dart';
 import '../../app_model.dart';
 import '../../app_scope.dart';
+import '../../hive/hex_motion.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../instances/portrait.dart';
@@ -27,6 +28,7 @@ class _InstancePageState extends State<InstancePage> {
   String? _failure;
   var _open = false;
   String? _pending;
+  HexEcho? _echo;
   var _moderating = false;
   Timer? _resignClock;
 
@@ -101,6 +103,7 @@ class _InstancePageState extends State<InstancePage> {
     return HexPage(
       slots: slots,
       onTap: (id) => _tap(id, language, canModerate),
+      echo: _echo,
     );
   }
 
@@ -478,12 +481,16 @@ class _InstancePageState extends State<InstancePage> {
     try {
       await action();
       if (!mounted) return;
-      setState(() => _pending = null);
+      setState(() {
+        _pending = null;
+        if (id == 'scan') _echo = HexEcho(ok: true);
+      });
     } catch (error) {
       if (!mounted) return;
       setState(() {
         _pending = null;
         _failure = '$error';
+        if (id == 'scan') _echo = HexEcho(ok: false);
       });
     }
   }

@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app_scope.dart';
+import '../../hive/hex_motion.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
@@ -22,6 +23,7 @@ class UnitCommandsPage extends StatefulWidget {
 
 class _UnitCommandsPageState extends State<UnitCommandsPage> {
   String? _pending;
+  HexEcho? _echo;
   String? _failure;
   var _open = false;
   String? _status;
@@ -67,7 +69,7 @@ class _UnitCommandsPageState extends State<UnitCommandsPage> {
       text: unitText,
       wide: wide,
     );
-    return HexPage(slots: slots, onTap: _tap);
+    return HexPage(slots: slots, onTap: _tap, echo: _echo);
   }
 
   Future<void> _tap(String id) async {
@@ -88,13 +90,17 @@ class _UnitCommandsPageState extends State<UnitCommandsPage> {
     try {
       await AppScope.of(context).sendUnitCommand(widget.uuid, id);
       if (!mounted) return;
-      setState(() => _pending = null);
+      setState(() {
+        _pending = null;
+        _echo = HexEcho(ok: true);
+      });
       if (id == 'Update') _watch();
     } catch (error) {
       if (!mounted) return;
       setState(() {
         _pending = null;
         _failure = '$error';
+        _echo = HexEcho(ok: false);
       });
     }
   }

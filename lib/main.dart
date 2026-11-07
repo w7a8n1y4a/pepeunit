@@ -53,6 +53,7 @@ import 'dashboards/dashboard.dart';
 import 'hive/background.dart';
 import 'hive/hex_order.dart';
 import 'hive/hex_scene.dart';
+import 'hive/page_transition.dart';
 import 'registry/registry_view.dart';
 
 Future<void> main() async {
@@ -615,6 +616,12 @@ class _PepeunitAppState extends State<PepeunitApp> {
       theme: ThemeData(
         brightness: Brightness.dark,
         fontFamily: 'OpenGost Type B',
+        pageTransitionsTheme: PageTransitionsTheme(
+          builders: {
+            for (final platform in TargetPlatform.values)
+              platform: InstantPageTransitions(),
+          },
+        ),
         scaffoldBackgroundColor: sceneBackground,
         colorScheme: const ColorScheme.dark(
           primary: Color(0xFFFF9800),

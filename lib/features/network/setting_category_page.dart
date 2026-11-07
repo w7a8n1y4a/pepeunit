@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import '../../account/icon_file.dart';
 import '../../app_model.dart';
 import '../../app_scope.dart';
+import '../../hive/hex_motion.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../instances/settings_catalog.dart';
@@ -34,6 +35,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
   String? _failure;
   var _open = false;
   String? _pending;
+  HexEcho? _echo;
   var _dragHot = false;
   final Map<String, String> _drafts = {};
 
@@ -91,6 +93,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     return HexPage(
       slots: slots,
       onTap: _tap,
+      echo: _echo,
       wrap: widget.categoryId == 'settings'
           ? (slot, child) {
               if (slot.id != 'icon') return child;
@@ -513,15 +516,29 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     try {
       await action();
       if (!mounted) return;
-      setState(() => _pending = null);
+      setState(() {
+        _pending = null;
+        if (_commandIds.contains(id)) _echo = HexEcho(ok: true);
+      });
     } catch (error) {
       if (!mounted) return;
       setState(() {
         _pending = null;
         _failure = '$error';
+        if (_commandIds.contains(id)) _echo = HexEcho(ok: false);
       });
     }
   }
+
+  /// Cells of the commands menu. A setting that was saved is not a command
+  /// and sends no echo.
+  static const _commandIds = {
+    'tests',
+    'scan-all',
+    'update-repos',
+    'update-units',
+    'reboot',
+  };
 
   Future<void> _pick(String language) async {
     if (_pending != null) return;

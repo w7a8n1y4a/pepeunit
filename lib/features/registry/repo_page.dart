@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 import '../../account/alerts.dart';
 import '../../app_model.dart';
 import '../../app_scope.dart';
+import '../../hive/hex_motion.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
@@ -29,6 +30,7 @@ class _RepoPageState extends State<RepoPage> {
   String? _failure;
   var _open = false;
   String? _pending;
+  HexEcho? _echo;
   var _loading = true;
   Timer? _clock;
   Timer? _poll;
@@ -81,7 +83,7 @@ class _RepoPageState extends State<RepoPage> {
       text: regText,
       wide: wide,
     );
-    return HexPage(slots: slots, onTap: _tap);
+    return HexPage(slots: slots, onTap: _tap, echo: _echo);
   }
 
   HexSlot _slot(BoardSlot slot, String language, Color color, AppModel model) {
@@ -275,12 +277,14 @@ class _RepoPageState extends State<RepoPage> {
       setState(() {
         _repo = repo;
         _pending = null;
+        _echo = HexEcho(ok: true);
       });
     } catch (error) {
       if (!mounted) return;
       setState(() {
         _pending = null;
         _failure = '$error';
+        _echo = HexEcho(ok: false);
       });
     }
   }
@@ -377,7 +381,10 @@ class _RepoPageState extends State<RepoPage> {
       if (!mounted) return;
       _stopWatch();
       _syncUntil = DateTime.now().add(const Duration(minutes: 1));
-      setState(() => _pending = null);
+      setState(() {
+        _pending = null;
+        _echo = HexEcho(ok: true);
+      });
       _clock = Timer.periodic(const Duration(seconds: 1), (_) => _tickWatch());
       _poll = Timer.periodic(const Duration(seconds: 10), (_) {
         unawaited(_pollRepo());
@@ -388,6 +395,7 @@ class _RepoPageState extends State<RepoPage> {
       setState(() {
         _pending = null;
         _failure = '$error';
+        _echo = HexEcho(ok: false);
       });
     }
   }

@@ -42,8 +42,7 @@ class IconAtlas {
     final manifest = await AssetManifest.loadFromAssetBundle(bundle);
     final assets = [
       for (final asset in manifest.listAssets())
-        if (asset.endsWith('.svg') &&
-            backgroundIconRoots.any(asset.startsWith))
+        if (asset.endsWith('.svg') && backgroundIconRoots.any(asset.startsWith))
           asset,
     ]..sort();
     final pictures = <PictureInfo>[];

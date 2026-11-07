@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app_model.dart';
 import '../../app_scope.dart';
+import '../../hive/hex_motion.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
@@ -252,6 +253,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
   String? _failure;
   var _open = false;
   var _loading = true;
+  HexEcho? _echo;
   var _value = false;
 
   bool get _input =>
@@ -303,7 +305,11 @@ class _UnitIoPageState extends State<UnitIoPage> {
       text: unitText,
       wide: wide,
     );
-    final scene = HexPage(slots: slots, onTap: (id) => _tap(id, io));
+    final scene = HexPage(
+      slots: slots,
+      onTap: (id) => _tap(id, io),
+      echo: _echo,
+    );
     if (!_value) return scene;
     return Stack(
       children: [
@@ -432,7 +438,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
       case 'error':
         setState(() => _open = true);
       case 'card':
-        await _load();
+        await _reloadCard();
       case 'value':
         setState(() => _value = true);
       case 'settings' || 'links' || 'pipe' || 'access':
@@ -440,6 +446,14 @@ class _UnitIoPageState extends State<UnitIoPage> {
         await context.push('$base/$id');
         if (mounted) await _load();
     }
+  }
+
+  /// A tap on the card reads the entity again and shows how it went.
+  Future<void> _reloadCard() async {
+    if (_loading) return;
+    await _load();
+    if (!mounted) return;
+    setState(() => _echo = HexEcho(ok: _failure == null));
   }
 
   Future<void> _load() async {
@@ -569,12 +583,7 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
     final input = _input ?? false;
     final tone = unitIoTone(_input ?? true);
     final ready = _ready;
-    final ids = [
-      'max',
-      'visibility',
-      if (input) 'rewrite',
-      'save',
-    ];
+    final ids = ['max', 'visibility', if (input) 'rewrite', 'save'];
     final placed = cardBoard(ids, wide: wide);
     final slots = <HexSlot>[
       for (final slot in placed)

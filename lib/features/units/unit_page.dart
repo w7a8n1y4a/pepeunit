@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app_model.dart';
 import '../../app_scope.dart';
+import '../../hive/hex_motion.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
@@ -32,6 +33,7 @@ class _UnitPageState extends State<UnitPage> {
   String? _failure;
   var _open = false;
   var _loading = true;
+  HexEcho? _echo;
   var _env = false;
   var _current = false;
   var _seen = false;
@@ -89,7 +91,11 @@ class _UnitPageState extends State<UnitPage> {
       text: unitText,
       wide: wide,
     );
-    final scene = HexPage(slots: slots, onTap: (id) => _tap(id, unit));
+    final scene = HexPage(
+      slots: slots,
+      onTap: (id) => _tap(id, unit),
+      echo: _echo,
+    );
     if (!_env) return scene;
     return Stack(
       children: [
@@ -222,7 +228,7 @@ class _UnitPageState extends State<UnitPage> {
       case 'error':
         setState(() => _open = true);
       case 'card':
-        await _load();
+        await _reloadCard();
       case 'info':
         context.push('/units/${widget.uuid}/info');
       case 'nodes':
@@ -294,6 +300,13 @@ class _UnitPageState extends State<UnitPage> {
     } catch (_) {
       // The border stays one color; the list screen shows the error.
     }
+  }
+
+  /// A tap on the card reads the entity again and shows how it went.
+  Future<void> _reloadCard() async {
+    await _load();
+    if (!mounted) return;
+    setState(() => _echo = HexEcho(ok: _failure == null));
   }
 
   Future<void> _load() async {

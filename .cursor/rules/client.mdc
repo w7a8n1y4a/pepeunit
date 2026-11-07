@@ -16,6 +16,7 @@ Code is the source of truth. Read these files; do not copy them into answers or 
 - scene colors — `sceneBackground`, `hexFill`, `hexMuted`, `errorColor` in `lib/hive/hex_scene.dart`
 - scale ticks — `scaleTickCells` in `lib/hive/hex_order.dart`
 - background mosaic — `HiveBackground` and `Mosaic` in `lib/hive/background.dart`, pictures in `lib/hive/icon_atlas.dart`; it sits under the router in `lib/main.dart`
+- press effects and the echo lines between cells — `lib/hive/hex_motion.dart`; instant screen change — `lib/hive/page_transition.dart`
 - plan and open questions — `roadmap/frontend-refactor.md`, and only when the task is about the plan
 
 Modules: `account/`, `instances/`, `hive/`, `features/{account,network,home,menu}`, `locale/`, `api/`. Shared screen pieces: `features/hex_page.dart` (Back, error cell), `features/file_drop.dart`, and `features/line_input.dart` (underlined field and its validation line). `popOrHome` is `navigation/back.dart`.

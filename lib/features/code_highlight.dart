@@ -64,7 +64,10 @@ List<List<CodeToken>> codeTokens(String text, CodeLanguage language) {
     case CodeLanguage.auto:
       return [
         for (final line in lines)
-          if (line.isEmpty) const <CodeToken>[] else [CodeToken(line, CodeKind.plain)],
+          if (line.isEmpty)
+            const <CodeToken>[]
+          else
+            [CodeToken(line, CodeKind.plain)],
       ];
   }
 }
@@ -128,7 +131,9 @@ List<CodeToken> _jsonLine(String line) {
       flush();
       final end = _doubleQuoteEnd(line, i);
       final key = _colonAfter(line, end);
-      out.add(CodeToken(line.substring(i, end), key ? CodeKind.key : CodeKind.string));
+      out.add(
+        CodeToken(line.substring(i, end), key ? CodeKind.key : CodeKind.string),
+      );
       i = end;
       continue;
     }
@@ -305,7 +310,8 @@ List<CodeToken> _yamlLine(String line, _YamlBlock block) {
     pos += match[0]!.length;
   }
   final rest = line.substring(pos);
-  final key = _yamlQuotedKey.matchAsPrefix(rest) ?? _yamlPlainKey.matchAsPrefix(rest);
+  final key =
+      _yamlQuotedKey.matchAsPrefix(rest) ?? _yamlPlainKey.matchAsPrefix(rest);
   var column = dashCol >= 0 ? dashCol : indent;
   if (key != null) {
     add(key[1]!, CodeKind.key);
@@ -350,7 +356,9 @@ void _yamlValue(
       return;
     }
     if (c == '"' || c == "'") {
-      final end = c == '"' ? _doubleQuoteEnd(line, i) : _singleQuoteEnd(line, i);
+      final end = c == '"'
+          ? _doubleQuoteEnd(line, i)
+          : _singleQuoteEnd(line, i);
       final key = depth > 0 && _colonAfter(line, end);
       add(line.substring(i, end), key ? CodeKind.key : CodeKind.string);
       i = end;

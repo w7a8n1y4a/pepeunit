@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../hive/hex_motion.dart';
 import '../hive/hex_order.dart';
 import '../hive/hex_scene.dart';
 import 'account/error_reader.dart';
@@ -11,6 +12,7 @@ class HexPage extends StatelessWidget {
     required this.onTap,
     this.wrap,
     this.frame,
+    this.echo,
     super.key,
   });
 
@@ -18,12 +20,15 @@ class HexPage extends StatelessWidget {
   final ValueChanged<String> onTap;
   final HexSlotWrap? wrap;
 
+  /// Result of a command or a sync. A new object plays one echo.
+  final HexEcho? echo;
+
   /// Wraps the scene after the background, for example with a zoom frame.
   final Widget Function(Widget scene)? frame;
 
   @override
   Widget build(BuildContext context) {
-    final scene = HexScene(slots: slots, onTap: onTap, wrap: wrap);
+    final scene = HexScene(slots: slots, onTap: onTap, wrap: wrap, echo: echo);
     // Transparent, but it still takes every tap and gesture in the gaps.
     return ColoredBox(
       color: const Color(0x00000000),

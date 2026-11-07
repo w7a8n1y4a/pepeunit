@@ -1005,7 +1005,12 @@ class _UnitIoValuePanelState extends State<UnitIoValuePanel> {
       bodyHeight: widget.editable
           ? (font, width) {
               final codeFont = max(11.0, font * 0.72);
-              final layout = UnitCodeLayout(context, codeFont, width, _text.text);
+              final layout = UnitCodeLayout(
+                context,
+                codeFont,
+                width,
+                _text.text,
+              );
               return max(layout.total, layout.lineHeight * 4) + 8;
             }
           : (font, _) => _linesHeight(font, _lineCount(_text.text)) + 14,
@@ -1136,8 +1141,12 @@ double _linesHeight(double font, int lines) {
 /// Row heights of the env text at a given width. A line that does not fit
 /// wraps inside its own block, so it keeps one number.
 class UnitCodeLayout {
-  UnitCodeLayout(BuildContext context, double fontSize, double width, String text)
-    : lineHeight = unitCodeLineHeight(context, fontSize) {
+  UnitCodeLayout(
+    BuildContext context,
+    double fontSize,
+    double width,
+    String text,
+  ) : lineHeight = unitCodeLineHeight(context, fontSize) {
     final style = noticeMono(fontSize);
     final strut = unitCodeStrut(fontSize);
     final scaler = MediaQuery.textScalerOf(context);

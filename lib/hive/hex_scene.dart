@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'hex_motion.dart';
 import 'icon_scale.dart';
 
 /// Text inside a cell: a choice and a value that sits with it.
@@ -284,11 +285,12 @@ String slotLabel(HexSlot slot) {
 
 typedef HexSlotWrap = Widget Function(HexSlot slot, Widget child);
 
-class HexScene extends StatelessWidget {
+class HexScene extends StatefulWidget {
   const HexScene({
     required this.slots,
     required this.onTap,
     this.wrap,
+    this.echo,
     super.key,
   });
 
@@ -296,13 +298,80 @@ class HexScene extends StatelessWidget {
   final ValueChanged<String> onTap;
   final HexSlotWrap? wrap;
 
+  /// A command or a sync that just ended. Each new object plays one echo
+  /// of lines between the cells.
+  final HexEcho? echo;
+
+  @override
+  State<HexScene> createState() => _HexSceneState();
+}
+
+class _HexSceneState extends State<HexScene>
+    with SingleTickerProviderStateMixin {
+  AnimationController? _clock;
+  HexEcho? _echo;
+
+  @override
+  void didUpdateWidget(HexScene oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final echo = widget.echo;
+    if (echo == null || identical(echo, oldWidget.echo)) return;
+    if (MediaQuery.disableAnimationsOf(context)) return;
+    var clock = _clock;
+    if (clock == null) {
+      clock = AnimationController(vsync: this, duration: echoDuration);
+      clock.addStatusListener((status) {
+        if (status == AnimationStatus.completed && mounted) {
+          setState(() => _echo = null);
+        }
+      });
+      _clock = clock;
+    }
+    _echo = echo;
+    clock.forward(from: 0);
+  }
+
+  @override
+  void dispose() {
+    _clock?.dispose();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final layout = HexLayout.fit(slots, constraints.biggest);
+        final layout = HexLayout.fit(widget.slots, constraints.biggest);
+        final echo = _echo;
+        final clock = _clock;
         return Stack(
           children: [
+            // Under the cells: the lines live in the gaps. The slot stays in
+            // the list so the cells keep their place and their state.
+            Positioned.fill(
+              child: echo == null || clock == null
+                  ? const SizedBox.shrink()
+                  : IgnorePointer(
+                      child: RepaintBoundary(
+                        child: CustomPaint(
+                          painter: EchoPainter(
+                            spots: [
+                              for (final placed in layout.placed)
+                                EchoSpot(
+                                  q: placed.slot.q,
+                                  r: placed.slot.r,
+                                  center: placed.center,
+                                  lattice:
+                                      placed.radius * HexLayout.latticeRatio,
+                                ),
+                            ],
+                            color: echo.ok ? addColor : errorColor,
+                            clock: clock,
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
             for (final placed in layout.placed)
               Positioned(
                 left: placed.center.dx - placed.radius,
@@ -433,7 +502,7 @@ class HexScene extends StatelessWidget {
       slot: slot,
       button: body == null,
       interactive: body == null && slot.tappable && slot.enabled,
-      onTap: () => onTap(slot.id),
+      onTap: () => widget.onTap(slot.id),
       child: child,
     );
     Widget tile;
@@ -453,7 +522,7 @@ class HexScene extends StatelessWidget {
         child: frame,
       );
     }
-    final wrap = this.wrap;
+    final wrap = widget.wrap;
     if (wrap != null) tile = wrap(placed.slot, tile);
     return RepaintBoundary(child: tile);
   }
@@ -504,6 +573,11 @@ class HexLayout {
   final List<PlacedHex> placed;
 
   static const _step = 96.0;
+  static const _radius = 74.0;
+
+  /// Side of a lattice hex over the radius of a drawn cell. The gaps between
+  /// cells run along the lattice edges.
+  static const latticeRatio = _step / _radius;
 
   static HexLayout fit(List<HexSlot> slots, Size size) {
     final raw = [
@@ -519,7 +593,7 @@ class HexLayout {
       maxX = max(maxX, entry.value.dx);
       maxY = max(maxY, entry.value.dy);
     }
-    const radius = 74.0;
+    const radius = _radius;
     final width = max(maxX - minX, 1) + radius * 2 + 36;
     final height = max(maxY - minY, 1) + radius * 2 + 36;
     final scale = min(size.width / width, size.height / height);
@@ -1008,6 +1082,7 @@ class _CellFrame extends StatefulWidget {
 class _CellFrameState extends State<_CellFrame> with TickerProviderStateMixin {
   AnimationController? _burst;
   AnimationController? _spin;
+  PressPainter? _press;
   var _hover = false;
 
   @override
@@ -1053,17 +1128,16 @@ class _CellFrameState extends State<_CellFrame> with TickerProviderStateMixin {
   }
 
   void _flash() {
+    if (MediaQuery.disableAnimationsOf(context)) return;
     var burst = _burst;
     if (burst == null) {
-      burst = AnimationController(
-        vsync: this,
-        duration: const Duration(milliseconds: 420),
-      );
+      burst = AnimationController(vsync: this, duration: pressDuration);
       burst.addStatusListener((status) {
         if (status == AnimationStatus.completed && mounted) setState(() {});
       });
       _burst = burst;
     }
+    _press = PressPainter(color: widget.slot.color, clock: burst);
     burst.forward(from: 0);
     setState(() {});
   }
@@ -1072,29 +1146,33 @@ class _CellFrameState extends State<_CellFrame> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final interactive = widget.interactive;
     final burst = _burst;
+    final press = _press;
     final spin = _spin;
     Widget scene = Transform.scale(
       scale: _hover && interactive ? 1.02 : 1,
       child: Stack(
         fit: StackFit.expand,
         children: [
-          CustomPaint(painter: HexPainter(widget.slot)),
-          widget.child,
+          // The border, the captions, and the picture are one layer. A press,
+          // a hover, or the waiting ring above it moves and fades without
+          // painting every glyph of the captions again.
+          RepaintBoundary(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                CustomPaint(painter: HexPainter(widget.slot)),
+                widget.child,
+              ],
+            ),
+          ),
           if (_hover && interactive)
             IgnorePointer(
               child: CustomPaint(
                 painter: _RimPainter(widget.slot.color, widget.slot.rim),
               ),
             ),
-          if (burst != null && burst.isAnimating)
-            IgnorePointer(
-              child: AnimatedBuilder(
-                animation: burst,
-                builder: (context, _) => CustomPaint(
-                  painter: _RayPainter(widget.slot.color, burst.value),
-                ),
-              ),
-            ),
+          if (burst != null && burst.isAnimating && press != null)
+            IgnorePointer(child: CustomPaint(painter: press)),
           if (widget.slot.badge != null && widget.slot.badge! > 0)
             IgnorePointer(child: _UnreadBadge(widget.slot.badge!)),
           if (widget.slot.busy && spin != null)
@@ -1256,40 +1334,6 @@ class _RimPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _RimPainter oldDelegate) =>
       oldDelegate.color != color || !listEquals(oldDelegate.rim, rim);
-}
-
-class _RayPainter extends CustomPainter {
-  const _RayPainter(this.color, this.t);
-
-  final Color color;
-  final double t;
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final alpha = (1 - t).clamp(0.0, 1.0);
-    if (alpha == 0) return;
-    final center = Offset(size.width / 2, size.height / 2);
-    final radius = size.shortestSide / 2;
-    final paint = Paint()
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = max(1.4, radius * 0.035)
-      ..color = Color.lerp(
-        color,
-        const Color(0xFFFFFFFF),
-        0.35,
-      )!.withValues(alpha: alpha);
-    for (var i = 0; i < 6; i++) {
-      final angle = pi / 3 * i - pi / 2;
-      final dir = Offset(cos(angle), sin(angle));
-      final start = center + dir * radius * (0.28 + 0.42 * t);
-      final end = center + dir * radius * (0.55 + 0.4 * t);
-      canvas.drawLine(start, end, paint);
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant _RayPainter oldDelegate) =>
-      oldDelegate.t != t || oldDelegate.color != color;
 }
 
 /// How far the center mark reaches, as a fraction of the vertex radius.

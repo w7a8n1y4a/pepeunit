@@ -78,9 +78,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
             'clear',
           ];
     final placed = cardBoard(ids, wide: wide);
-    final slots = <HexSlot>[
-      for (final slot in placed) _slot(slot, language),
-    ];
+    final slots = <HexSlot>[for (final slot in placed) _slot(slot, language)];
     appendError(
       slots,
       message: _failure,
@@ -428,8 +426,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> {
 
   bool get _clean => _text.text == _baseline;
   bool get _verified => _verdictFor == _text.text;
-  bool get _flawed =>
-      _syntax != null || (_verified && _issues.isNotEmpty);
+  bool get _flawed => _syntax != null || (_verified && _issues.isNotEmpty);
 
   @override
   Widget build(BuildContext context) {
@@ -513,7 +510,10 @@ class _UnitPipePanelState extends State<UnitPipePanel> {
     final syntax = _syntax;
     if (syntax != null) return (pipeSyntaxText(language, syntax), errorColor);
     if (_verified && _issues.isNotEmpty) {
-      return ([for (final issue in _issues) pipeIssueText(issue)].join('\n'), errorColor);
+      return (
+        [for (final issue in _issues) pipeIssueText(issue)].join('\n'),
+        errorColor,
+      );
     }
     final saved = _saved;
     if (saved != null) return (saved, addColor);
@@ -532,7 +532,10 @@ class _UnitPipePanelState extends State<UnitPipePanel> {
     }
     try {
       final text = widget.filled
-          ? utf8.decode(await model.pipeConfig(widget.uuid), allowMalformed: true)
+          ? utf8.decode(
+              await model.pipeConfig(widget.uuid),
+              allowMalformed: true,
+            )
           : pipeConfigTemplate;
       if (!mounted) return;
       _text.value = TextEditingValue(
@@ -605,7 +608,8 @@ class _UnitPipePanelState extends State<UnitPipePanel> {
     if (!mounted) return;
     setState(() {
       _pending = null;
-      if (ok) _saved = unitText(language, 'Конфиг корректен', 'The config is valid');
+      if (ok)
+        _saved = unitText(language, 'Конфиг корректен', 'The config is valid');
     });
   }
 

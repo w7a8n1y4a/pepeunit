@@ -55,6 +55,7 @@ class Mosaic {
   late final Float32List _progress;
 
   final _started = <int, double>{};
+  final _done = <int>[];
   var _nextFlip = 0.0;
 
   /// Tiles that are flipping right now.
@@ -142,18 +143,18 @@ class Mosaic {
       _begin(_nextFlip);
       _nextFlip += step;
     }
-    final done = <int>[];
+    _done.clear();
     _started.forEach((i, start) {
       final p = (t - start) / flipSeconds;
       if (p >= 1) {
         _icon[i] = _next[i];
         _progress[i] = -1;
-        done.add(i);
+        _done.add(i);
       } else {
         _progress[i] = p;
       }
     });
-    done.forEach(_started.remove);
+    _done.forEach(_started.remove);
   }
 
   void _begin(double at) {
