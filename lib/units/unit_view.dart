@@ -222,11 +222,10 @@ List<String> ioMenuIds({
 }) {
   return [
     'card',
-    'summary',
+    'value',
     if (owned) 'settings',
-    if (input) 'value',
-    if (input) 'links',
     if (owned && datapipe) 'pipe',
+    if (input) 'links',
     if (owned && private) 'access',
   ];
 }

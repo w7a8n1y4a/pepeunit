@@ -8,6 +8,7 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
+import '../../registry/repo.dart';
 import '../../units/unit.dart';
 import '../../units/unit_read.dart';
 import '../../units/unit_view.dart';
@@ -149,6 +150,9 @@ class _UnitPageState extends State<UnitPage> {
         return HexSlot(
           id: 'nodes',
           title: unitText(language, 'Входы и выходы', 'Inputs and outputs'),
+          footer: _ios == null
+              ? null
+              : pieceCount(language, _ios!.inputs + _ios!.outputs),
           color: unitIoColor,
           rim: _ioRim(),
           q: slot.q,

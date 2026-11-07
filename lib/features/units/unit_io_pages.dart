@@ -9,11 +9,12 @@ import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
 import '../../units/unit.dart';
+import '../../units/unit_read.dart';
 import '../../units/unit_view.dart';
 import '../hex_page.dart';
 import '../line_input.dart';
-import '../network/line_cell.dart';
 import '../network/network_chrome.dart';
+import 'unit_panels.dart';
 import 'units_chrome.dart';
 
 class UnitIoListPage extends StatefulWidget {
@@ -145,7 +146,7 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
     return HexSlot(
       id: slot.id,
       title: io?.topic ?? slot.id,
-      sideRight: io?.type,
+      sideRight: io == null ? null : unitIoTypeLabel(language, io.type),
       footer: io == null ? null : unitVisibilityLabel(language, io.visibility),
       color: unitIoTone(io?.input ?? true),
       q: slot.q,
@@ -207,6 +208,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
   String? _failure;
   var _open = false;
   var _loading = true;
+  var _value = false;
 
   bool get _input =>
       _io?.input ?? AppScope.of(context).ioIsInput(widget.uuid) ?? true;
@@ -251,7 +253,24 @@ class _UnitIoPageState extends State<UnitIoPage> {
       text: unitText,
       wide: wide,
     );
-    return HexPage(slots: slots, onTap: (id) => _tap(id, io));
+    final scene = HexPage(slots: slots, onTap: (id) => _tap(id, io));
+    if (!_value) return scene;
+    return Stack(
+      children: [
+        scene,
+        UnitIoValuePanel(
+          uuid: widget.uuid,
+          input: _input,
+          // Only the creator may put a value into an input.
+          editable: _input && owned,
+          onClose: () {
+            if (!mounted) return;
+            setState(() => _value = false);
+            _load();
+          },
+        ),
+      ],
+    );
   }
 
   HexSlot _slot(BoardSlot slot, String language, UnitIo? io) {
@@ -267,33 +286,15 @@ class _UnitIoPageState extends State<UnitIoPage> {
         return HexSlot(
           id: 'card',
           title: io?.topic ?? unitText(language, 'Топик', 'Topic'),
-          footer: io?.type,
+          sideRight: io == null ? null : unitIoTypeLabel(language, io.type),
+          footer: io == null
+              ? null
+              : unitVisibilityLabel(language, io.visibility),
           color: color,
           busy: _loading,
           q: slot.q,
           r: slot.r,
           icon: unitIoIcon(_input),
-        );
-      case 'summary':
-        final lines = io == null
-            ? const ['—']
-            : [
-                unitVisibilityLabel(language, io.visibility),
-                '${unitText(language, 'Связи', 'Links')} ${io.maxConnections}',
-                if (io.state != null) io.state!,
-                if (io.pipeActive)
-                  io.pipeError ??
-                      io.pipeStatus ??
-                      unitText(language, 'DataPipe', 'DataPipe'),
-              ];
-        return HexSlot(
-          id: 'summary',
-          title: unitText(language, 'Сводка', 'Summary'),
-          color: color,
-          q: slot.q,
-          r: slot.r,
-          tappable: false,
-          body: MetricsCell(lines: lines),
         );
       case 'settings':
         return _nav(
@@ -305,11 +306,25 @@ class _UnitIoPageState extends State<UnitIoPage> {
           'settings.svg',
         );
       case 'value':
-        return _nav(slot, language, color, 'Значение', 'Value', 'terminal.svg');
+        return HexSlot(
+          id: 'value',
+          title: unitText(language, 'Значение', 'Value'),
+          center: io == null ? null : ioValueGlance(io.state),
+          color: color,
+          q: slot.q,
+          r: slot.r,
+        );
       case 'links':
-        return _nav(slot, language, color, 'Связи', 'Links', 'chain.svg');
+        return _nav(slot, language, color, 'Связи', 'Links', 'links.svg');
       case 'pipe':
-        return _nav(slot, language, color, 'DataPipe', 'DataPipe', 'pipe.svg');
+        return _nav(
+          slot,
+          language,
+          unitPipeColor,
+          'DataPipe',
+          'DataPipe',
+          'pipe.svg',
+        );
       case 'access':
         return _nav(slot, language, color, 'Доступы', 'Access', 'users.svg');
       default:
@@ -350,20 +365,17 @@ class _UnitIoPageState extends State<UnitIoPage> {
         setState(() => _open = true);
       case 'card':
         await _load();
-      case 'settings':
-        context.push('$base/settings');
       case 'value':
-        context.push('$base/value');
-      case 'links':
-        context.push('$base/links');
-      case 'pipe':
-        context.push('$base/pipe');
-      case 'access':
-        context.push('$base/access');
+        setState(() => _value = true);
+      case 'settings' || 'links' || 'pipe' || 'access':
+        // The child may change the node, so the card is read again on return.
+        await context.push('$base/$id');
+        if (mounted) await _load();
     }
   }
 
   Future<void> _load() async {
+    if (_loading && _io != null) return;
     final model = AppScope.of(context);
     if (model.target?.signedIn != true) {
       setState(() {
@@ -372,6 +384,11 @@ class _UnitIoPageState extends State<UnitIoPage> {
       });
       return;
     }
+    setState(() {
+      _loading = true;
+      _failure = null;
+      _open = false;
+    });
     try {
       final io = await model.readUnitIo(widget.uuid);
       if (!mounted) return;
@@ -405,8 +422,17 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
   var _pipe = false;
   final _max = TextEditingController();
   String? _failure;
+  var _tried = false;
   var _open = false;
+  var _loading = true;
   var _busy = false;
+
+  /// The form edits a node the backend has returned. Until then a save would
+  /// guess the node's direction and send fields it does not accept.
+  bool get _ready => _io != null && !_loading;
+
+  /// Direction of the node: the loaded one, else the one seen on the way in.
+  bool? get _input => _io?.input ?? AppScope.of(context).ioIsInput(widget.uuid);
 
   @override
   void initState() {
@@ -420,15 +446,48 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
     super.dispose();
   }
 
+  String _maxIssue(String language) {
+    final text = _max.text.trim();
+    if (text.isEmpty && !_tried) return '';
+    if (unitIoMaxConnections(text) != null) return '';
+    return unitText(
+      language,
+      'От $unitIoMaxConnectionsFloor до $unitIoMaxConnectionsCeil',
+      '$unitIoMaxConnectionsFloor to $unitIoMaxConnectionsCeil',
+    );
+  }
+
+  /// The instance keeps DataPipe on unless its portrait says otherwise.
+  bool _featureOn() {
+    final model = AppScope.of(context);
+    return model.portraitOf(model.target?.url ?? '')?.datapipe != false;
+  }
+
+  /// DataPipe can be switched on only for a topic ending in `/pepeunit`. A pipe
+  /// that is already on stays, so it can be switched off.
+  bool _pipeShown(bool featureOn) {
+    if (!featureOn) return false;
+    final io = _io;
+    if (io == null) return true;
+    return unitIoPipeCapable(io.topic) || io.pipeActive;
+  }
+
   @override
   Widget build(BuildContext context) {
-    final language = AppScope.of(context).vault.language;
+    final model = AppScope.of(context);
+    final language = model.vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
-    final input = _io?.input ?? false;
-    final tone = unitIoTone(
-      _io?.input ?? AppScope.of(context).ioIsInput(widget.uuid) ?? true,
-    );
-    final ids = ['visibility', 'max', if (input) 'rewrite', 'pipe', 'save'];
+    final input = _input ?? false;
+    final tone = unitIoTone(_input ?? true);
+    final ready = _ready;
+    final featureOn = _featureOn();
+    final ids = [
+      'max',
+      'visibility',
+      if (_pipeShown(featureOn)) 'pipe',
+      if (input) 'rewrite',
+      'save',
+    ];
     final placed = cardBoard(ids, wide: wide);
     final slots = <HexSlot>[
       for (final slot in placed)
@@ -438,6 +497,27 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
             q: slot.q,
             r: slot.r,
           ),
+          'max' => HexSlot(
+            id: 'max',
+            title: unitText(language, 'Максимум связей', 'Max links'),
+            color: tone,
+            q: slot.q,
+            r: slot.r,
+            tappable: false,
+            enabled: ready,
+            body: LineInput(
+              color: tone,
+              controller: _max,
+              hint: '10',
+              issue: _maxIssue(language),
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(
+                  '$unitIoMaxConnectionsCeil'.length,
+                ),
+              ],
+            ),
+          ),
           'visibility' => HexSlot(
             id: 'visibility',
             title: unitText(language, 'Видимость', 'Visibility'),
@@ -445,7 +525,9 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
             q: slot.q,
             r: slot.r,
             tappable: false,
+            enabled: ready,
             body: ChoiceWords(
+              center: true,
               choices: [
                 for (final level in unitVisibilities)
                   (id: level, label: unitVisibilityLabel(language, level)),
@@ -454,45 +536,38 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
               onTap: (id) => setState(() => _visibility = id),
             ),
           ),
-          'max' => HexSlot(
-            id: 'max',
-            title: unitText(language, 'Связи', 'Links'),
+          'pipe' => HexSlot(
+            id: 'pipe',
+            title: 'DataPipe',
+            footer: _pipe
+                ? unitText(language, 'вкл', 'on')
+                : unitText(language, 'выкл', 'off'),
             color: tone,
+            enabled: ready,
             q: slot.q,
             r: slot.r,
-            tappable: false,
-            body: LineInput(
-              color: tone,
-              controller: _max,
-              hint: '0',
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            ),
+            icon: _pipe ? 'assets/icons/flag.svg' : 'assets/icons/close.svg',
           ),
           'rewrite' => HexSlot(
             id: 'rewrite',
-            title: _rewritable
-                ? unitText(language, 'Перезапись', 'Rewritable')
-                : unitText(language, 'Без перезаписи', 'Not rewritable'),
+            title: unitText(language, 'Перезаписываемый?', 'Rewritable?'),
+            footer: _rewritable
+                ? unitText(language, 'да', 'yes')
+                : unitText(language, 'нет', 'no'),
             color: tone,
+            enabled: ready,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/terminal.svg',
-          ),
-          'pipe' => HexSlot(
-            id: 'pipe',
-            title: _pipe
-                ? unitText(language, 'DataPipe включён', 'DataPipe on')
-                : unitText(language, 'DataPipe выключен', 'DataPipe off'),
-            color: tone,
-            q: slot.q,
-            r: slot.r,
-            icon: 'assets/icons/pipe.svg',
+            icon: _rewritable
+                ? 'assets/icons/flag.svg'
+                : 'assets/icons/close.svg',
           ),
           'save' => HexSlot(
             id: 'save',
             title: unitText(language, 'Сохранить', 'Save'),
-            color: tone,
+            color: unitAddColor,
             busy: _busy,
+            enabled: ready,
             q: slot.q,
             r: slot.r,
             icon: 'assets/icons/check.svg',
@@ -523,9 +598,9 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
           case 'error':
             setState(() => _open = true);
           case 'rewrite':
-            setState(() => _rewritable = !_rewritable);
+            if (_ready) setState(() => _rewritable = !_rewritable);
           case 'pipe':
-            setState(() => _pipe = !_pipe);
+            if (_ready) setState(() => _pipe = !_pipe);
           case 'save':
             await _save();
         }
@@ -540,121 +615,55 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
       _max.text = '${io.maxConnections}';
       setState(() {
         _io = io;
+        _loading = false;
         _visibility = io.visibility.isEmpty ? 'Private' : io.visibility;
         _rewritable = io.rewritable;
         _pipe = io.pipeActive;
       });
     } catch (error) {
       if (!mounted) return;
-      setState(() => _failure = '$error');
-    }
-  }
-
-  Future<void> _save() async {
-    if (_busy) return;
-    setState(() {
-      _busy = true;
-      _failure = null;
-    });
-    try {
-      final io = await AppScope.of(context).updateUnitIo(widget.uuid, {
-        'visibility_level': _visibility,
-        'max_connections': int.tryParse(_max.text.trim()) ?? 0,
-        'is_rewritable_input': _rewritable,
-        'is_data_pipe_active': _pipe,
-      });
-      if (!mounted) return;
       setState(() {
-        _io = io;
-        _busy = false;
-      });
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _busy = false;
+        _loading = false;
         _failure = '$error';
       });
     }
   }
-}
 
-class UnitIoValuePage extends StatefulWidget {
-  const UnitIoValuePage({required this.uuid, super.key});
-
-  final String uuid;
-
-  @override
-  State<UnitIoValuePage> createState() => _UnitIoValuePageState();
-}
-
-class _UnitIoValuePageState extends State<UnitIoValuePage> {
-  final _value = TextEditingController();
-  String? _failure;
-  var _open = false;
-  var _busy = false;
-
-  @override
-  void dispose() {
-    _value.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final language = AppScope.of(context).vault.language;
-    final wide = hexWide(MediaQuery.sizeOf(context));
-    final placed = cardBoard(const ['value'], wide: wide);
-    final slots = <HexSlot>[
-      for (final slot in placed)
-        slot.id == 'back'
-            ? backSlot(
-                title: unitText(language, 'Назад', 'Back'),
-                q: slot.q,
-                r: slot.r,
-              )
-            : HexSlot(
-                id: 'value',
-                title: unitText(language, 'Значение', 'Value'),
-                color: unitIoColor,
-                busy: _busy,
-                q: slot.q,
-                r: slot.r,
-                tappable: false,
-                body: LineInput(
-                  color: unitIoColor,
-                  controller: _value,
-                  hint: unitText(language, 'значение', 'value'),
-                  onSubmitted: (_) => _send(),
-                ),
-              ),
-    ];
-    appendError(
-      slots,
-      message: _failure,
-      open: _open,
-      language: language,
-      text: unitText,
-      wide: wide,
-    );
-    return HexPage(
-      slots: slots,
-      onTap: (id) {
-        if (id == 'back') popOrHome(context);
-        if (id == 'error') setState(() => _open = true);
-      },
-    );
-  }
-
-  Future<void> _send() async {
-    if (_busy) return;
+  Future<void> _save() async {
+    final io = _io;
+    if (_busy || !_ready || io == null) return;
+    final max = unitIoMaxConnections(_max.text);
+    if (max == null) {
+      setState(() {
+        _tried = true;
+        _failure = null;
+      });
+      return;
+    }
     setState(() {
       _busy = true;
       _failure = null;
+      _open = false;
     });
     try {
-      await AppScope.of(context).setInputState(widget.uuid, _value.text);
+      // The backend checks every field it receives. A rewritable flag is
+      // refused on an output, and a pipe flag sent again restarts the pipe,
+      // so only what the person changed, and only what the node has, is sent.
+      final featureOn = _featureOn();
+      final saved = await AppScope.of(context).updateUnitIo(widget.uuid, {
+        'visibility_level': _visibility,
+        'max_connections': max,
+        if (io.input && _rewritable != io.rewritable)
+          'is_rewritable_input': _rewritable,
+        if (_pipeShown(featureOn) && _pipe != io.pipeActive)
+          'is_data_pipe_active': _pipe,
+      });
       if (!mounted) return;
-      setState(() => _busy = false);
+      setState(() {
+        _io = saved;
+        _busy = false;
+        _tried = false;
+      });
     } catch (error) {
       if (!mounted) return;
       setState(() {

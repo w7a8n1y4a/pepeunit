@@ -100,7 +100,7 @@ class SlantedChoices extends StatelessWidget {
         final boxWidth = pin != null && limit.isFinite
             ? limit
             : laid.layout.size.width;
-        final block = _rowStack(
+        final block = _SlantedRow(
           words: laid.words,
           layout: laid.layout,
           width: boxWidth,
@@ -265,42 +265,80 @@ _LaidRow? _layRow({
   return _LaidRow(words, layout);
 }
 
-Widget _rowStack({
-  required List<_Word> words,
-  required SlantedRowLayout layout,
-  required double width,
-  required TextScaler scaler,
-  int? pin,
-}) {
-  final anchor = pin;
-  final shift = anchor != null && anchor >= 0 && anchor < layout.spots.length
-      ? width / 2 - layout.spots[anchor].box.center.dx
-      : max(0.0, (width - layout.size.width) / 2);
-  return SizedBox(
-    width: width,
-    height: layout.size.height,
-    child: Stack(
-      clipBehavior: Clip.none,
-      children: [
-        for (var i = 0; i < words.length; i++)
-          _placedWord(
-            word: words[i],
-            spot: layout.spots[i],
-            lean: layout.lean,
-            shift: shift,
-            scaler: scaler,
-          ),
-      ],
-    ),
-  );
+/// Font metrics of OpenGost Type B, in em (1700 units per em): the baseline
+/// sits 1400 below the top of the line, capitals and ascenders rise 1000,
+/// the x-height is 700, descenders fall 300.
+const _capRise = 1000 / 1700;
+const _xRise = 700 / 1700;
+const _deepFall = 300 / 1700;
+const _shallowFall = 150 / 1700;
+const _overshoot = 20 / 1700;
+
+const _deepLetters = 'gjpqyруф';
+const _shallowLetters = 'цщ';
+const _tallLowercase =
+    'bdfhiklt'
+    'бдйфё';
+final _letter = RegExp(r'\p{L}', unicode: true);
+
+/// Rise of the ink above the baseline, in em.
+double _inkRise(String label) {
+  for (final rune in label.runes) {
+    final char = String.fromCharCode(rune);
+    if (char.trim().isEmpty) continue;
+    if (char != char.toLowerCase() || _tallLowercase.contains(char)) {
+      return _capRise;
+    }
+    if (!_letter.hasMatch(char)) return _capRise;
+  }
+  return _xRise;
 }
 
-Widget _placedWord({
+/// Fall of the ink below the baseline, in em.
+double _inkFall(String label) {
+  var fall = _overshoot;
+  for (final rune in label.runes) {
+    final char = String.fromCharCode(rune).toLowerCase();
+    if (_deepLetters.contains(char)) return _deepFall;
+    if (_shallowLetters.contains(char)) fall = max(fall, _shallowFall);
+  }
+  return fall;
+}
+
+/// One word placed in the row, with the area that answers a pointer.
+class _WordShape {
+  _WordShape({required this.box, required this.local, required this.ink})
+    : matrix = (Matrix4.translationValues(box.left, box.top, 0)
+        ..multiply(local));
+
+  /// Bounds of the rotated word, in the row.
+  final Rect box;
+
+  /// Text space to the space of [box].
+  final Matrix4 local;
+
+  /// Text space to the row's space.
+  final Matrix4 matrix;
+  late final Matrix4? inverse = Matrix4.tryInvert(Matrix4.copy(matrix));
+
+  /// The letters' own extent, in text space.
+  final Rect ink;
+
+  /// Squared distance from the ink center when [point] hits the word.
+  double? hit(Offset point) {
+    final back = inverse;
+    if (back == null || !box.inflate(2).contains(point)) return null;
+    final local = MatrixUtils.transformPoint(back, point);
+    if (!ink.contains(local)) return null;
+    return (local - ink.center).distanceSquared;
+  }
+}
+
+_WordShape _shapeOf({
   required _Word word,
   required SlantedWordSpot spot,
   required double lean,
   required double shift,
-  required TextScaler scaler,
 }) {
   final box = spot.box.shift(Offset(shift, 0));
   final pivot = spot.pivot + Offset(shift, 0);
@@ -313,31 +351,156 @@ Widget _placedWord({
       0,
       1,
     );
-  final choice = word.choice;
-  return Positioned(
-    left: box.left,
-    top: box.top,
-    width: box.width,
-    height: box.height,
-    child: HoverPop(
-      child: Semantics(
-        button: true,
-        selected: choice.selected,
-        label: choice.label,
-        onTap: choice.onTap,
-        child: GestureDetector(
-          onTap: choice.onTap,
-          behavior: HitTestBehavior.deferToChild,
-          child: _SlantedGlyph(
-            label: choice.label,
-            style: word.style,
-            scaler: scaler,
-            matrix: matrix,
+  final measured = word.measured;
+  final em = measured.ink.ascent + measured.ink.descent;
+  final baseline = measured.pivotInText.dy;
+  final left = measured.pivotInText.dx + measured.ink.alongStart;
+  final right = measured.pivotInText.dx + measured.ink.alongEnd;
+  final ink = Rect.fromLTRB(
+    left,
+    baseline - _inkRise(word.choice.label) * em,
+    right,
+    baseline + _inkFall(word.choice.label) * em,
+  ).inflate(em * 0.05);
+  return _WordShape(box: box, local: matrix, ink: ink);
+}
+
+/// A row of words. One pointer answers to at most one word: the one whose
+/// letters it is over, and when two claim it, the nearer.
+class _SlantedRow extends StatefulWidget {
+  const _SlantedRow({
+    required this.words,
+    required this.layout,
+    required this.width,
+    required this.scaler,
+    this.pin,
+  });
+
+  final List<_Word> words;
+  final SlantedRowLayout layout;
+  final double width;
+  final TextScaler scaler;
+  final int? pin;
+
+  @override
+  State<_SlantedRow> createState() => _SlantedRowState();
+}
+
+class _SlantedRowState extends State<_SlantedRow> {
+  int? _hover;
+
+  int? _pick(List<_WordShape> shapes, Offset point) {
+    int? best;
+    var bestDistance = double.infinity;
+    for (var i = 0; i < shapes.length; i++) {
+      final distance = shapes[i].hit(point);
+      if (distance != null && distance < bestDistance) {
+        best = i;
+        bestDistance = distance;
+      }
+    }
+    return best;
+  }
+
+  void _setHover(int? value) {
+    if (_hover == value) return;
+    setState(() => _hover = value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final words = widget.words;
+    final layout = widget.layout;
+    final anchor = widget.pin;
+    final shift = anchor != null && anchor >= 0 && anchor < layout.spots.length
+        ? widget.width / 2 - layout.spots[anchor].box.center.dx
+        : max(0.0, (widget.width - layout.size.width) / 2);
+    final shapes = [
+      for (var i = 0; i < words.length; i++)
+        _shapeOf(
+          word: words[i],
+          spot: layout.spots[i],
+          lean: layout.lean,
+          shift: shift,
+        ),
+    ];
+    final hover = _hover != null && _hover! < words.length ? _hover : null;
+    return SizedBox(
+      width: widget.width,
+      height: layout.size.height,
+      child: _InkGate(
+        hit: (point) => _pick(shapes, point) != null,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (event) => _setHover(_pick(shapes, event.localPosition)),
+          onHover: (event) => _setHover(_pick(shapes, event.localPosition)),
+          onExit: (_) => _setHover(null),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTapUp: (details) {
+              final index = _pick(shapes, details.localPosition);
+              if (index != null) words[index].choice.onTap();
+            },
+            child: Stack(
+              clipBehavior: Clip.none,
+              children: [
+                for (var i = 0; i < words.length; i++)
+                  Positioned(
+                    left: shapes[i].box.left,
+                    top: shapes[i].box.top,
+                    width: shapes[i].box.width,
+                    height: shapes[i].box.height,
+                    child: Transform.scale(
+                      scale: hover == i ? 1.06 : 1,
+                      child: Semantics(
+                        button: true,
+                        selected: words[i].choice.selected,
+                        label: words[i].choice.label,
+                        onTap: words[i].choice.onTap,
+                        child: _SlantedGlyph(
+                          label: words[i].choice.label,
+                          style: words[i].style,
+                          scaler: widget.scaler,
+                          matrix: shapes[i].local,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
           ),
         ),
       ),
-    ),
-  );
+    );
+  }
+}
+
+/// Lets a pointer through unless [hit] says it is over a letter, so the empty
+/// parts of the row do not take hover or taps from what lies behind.
+class _InkGate extends SingleChildRenderObjectWidget {
+  const _InkGate({required this.hit, super.child});
+
+  final bool Function(Offset point) hit;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) => _RenderInkGate(hit);
+
+  @override
+  void updateRenderObject(BuildContext context, _RenderInkGate renderObject) {
+    renderObject.hit = hit;
+  }
+}
+
+class _RenderInkGate extends RenderProxyBox {
+  _RenderInkGate(this.hit);
+
+  bool Function(Offset point) hit;
+
+  @override
+  bool hitTest(BoxHitTestResult result, {required Offset position}) {
+    if (!hit(position)) return false;
+    return super.hitTest(result, position: position);
+  }
 }
 
 TextStyle _choiceStyle(SlantedChoice choice, double fontSize) {
@@ -757,21 +920,6 @@ class _SlantedGlyphBox extends RenderBox {
   @override
   void performLayout() {
     size = constraints.biggest;
-  }
-
-  @override
-  bool hitTest(BoxHitTestResult result, {required Offset position}) {
-    if (!size.contains(position)) return false;
-    final painter = _painter;
-    if (painter == null) return false;
-    final inverse = Matrix4.tryInvert(Matrix4.copy(_matrix));
-    if (inverse == null) return false;
-    final local = MatrixUtils.transformPoint(inverse, position);
-    if (!(Offset.zero & painter.size).inflate(1.5).contains(local)) {
-      return false;
-    }
-    result.add(BoxHitTestEntry(this, position));
-    return true;
   }
 
   @override

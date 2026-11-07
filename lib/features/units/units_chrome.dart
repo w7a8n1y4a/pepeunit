@@ -24,6 +24,9 @@ const unitIoColor = Color(0xFF2BD9C3);
 /// Output cells. Inputs keep [unitIoColor].
 const unitOutputColor = Color(0xFFFF7A59);
 
+/// The DataPipe cell of a node. Input and output share it.
+const unitPipeColor = Color(0xFFB5E61D);
+
 Color unitIoTone(bool input) => input ? unitIoColor : unitOutputColor;
 
 String unitIoIcon(bool input) =>

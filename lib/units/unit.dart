@@ -361,6 +361,36 @@ String unitVisibilityLabel(String language, String visibility) {
   }
 }
 
+/// Direction of a node as the backend names it: `Input` or `Output`.
+String unitIoTypeLabel(String language, String type) {
+  switch (type) {
+    case 'Input':
+      return phrase(language, {'ru': 'Вход', 'en': 'Input'});
+    case 'Output':
+      return phrase(language, {'ru': 'Выход', 'en': 'Output'});
+    default:
+      return type;
+  }
+}
+
+/// `max_connections` is an `Integer` column on the backend, and the update
+/// refuses anything under 1. There is no other bound.
+const unitIoMaxConnectionsFloor = 1;
+const unitIoMaxConnectionsCeil = 2147483647;
+
+/// The integer in [text] when it is a valid `max_connections`, else null.
+int? unitIoMaxConnections(String text) {
+  final value = int.tryParse(text.trim());
+  if (value == null) return null;
+  if (value < unitIoMaxConnectionsFloor || value > unitIoMaxConnectionsCeil) {
+    return null;
+  }
+  return value;
+}
+
+/// DataPipe is switched on only for topics the backend forwards to itself.
+bool unitIoPipeCapable(String topic) => topic.endsWith('/pepeunit');
+
 String unitCommandLabel(String language, String command) {
   switch (command) {
     case 'Update':

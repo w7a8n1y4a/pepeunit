@@ -176,8 +176,64 @@ void main() {
     final right = max(admin.right, max(user.right, active.right));
     expect(right - left, lessThanOrEqualTo(160.5));
     expect(active.top, greaterThan(admin.top));
-    await tester.tap(find.bySemanticsLabel('Admin'));
+    await tester.tap(find.bySemanticsLabel('Admin'), warnIfMissed: false);
     expect(taps, 1);
+  });
+
+  testWidgets('a tap answers only over the letters, one word at most', (
+    tester,
+  ) async {
+    final taps = <String>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 200,
+              height: 200,
+              child: SlantedChoices(
+                fontSize: 24,
+                maxWidth: 160,
+                alignment: Alignment.topLeft,
+                choices: [
+                  for (final label in ['Administrator', 'Member', 'Owner'])
+                    SlantedChoice(
+                      label: label,
+                      selected: false,
+                      onTap: () => taps.add(label),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    for (final label in ['Administrator', 'Member', 'Owner']) {
+      taps.clear();
+      await tester.tapAt(tester.getCenter(find.bySemanticsLabel(label)));
+      expect(taps, [label]);
+    }
+    final rect = tester.getRect(find.bySemanticsLabel('Administrator'));
+    var corners = 0;
+    for (final point in [rect.topLeft, rect.bottomRight]) {
+      taps.clear();
+      await tester.tapAt(
+        point + const Offset(1, 1) * (point == rect.topLeft ? 1 : -1),
+      );
+      expect(taps.length, lessThanOrEqualTo(1));
+      corners += taps.length;
+    }
+    expect(corners, lessThan(2));
+    final all = tester.getRect(find.byType(SlantedChoices));
+    for (var x = all.left; x < all.right; x += 3) {
+      for (var y = all.top; y < all.bottom; y += 3) {
+        taps.clear();
+        await tester.tapAt(Offset(x, y));
+        expect(taps.length, lessThanOrEqualTo(1));
+      }
+    }
   });
 
   testWidgets('a spanned enum lies across the search line', (tester) async {

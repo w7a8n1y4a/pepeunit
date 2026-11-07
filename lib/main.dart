@@ -457,11 +457,6 @@ class _PepeunitAppState extends State<PepeunitApp> {
                         ),
                       ),
                       GoRoute(
-                        path: 'value',
-                        builder: (context, state) =>
-                            UnitIoValuePage(uuid: state.pathParameters['io']!),
-                      ),
-                      GoRoute(
                         path: 'links',
                         builder: (context, state) => UnitLinksPage(
                           unitUuid: state.pathParameters['uuid']!,

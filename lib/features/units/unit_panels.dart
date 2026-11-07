@@ -154,6 +154,7 @@ class _WordButton extends StatelessWidget {
     required this.onTap,
     this.color = const Color(0xFFFFFFFF),
     this.enabled = true,
+    this.busy = false,
     this.scale = 1.05,
   });
 
@@ -162,6 +163,10 @@ class _WordButton extends StatelessWidget {
   final VoidCallback onTap;
   final Color color;
   final bool enabled;
+
+  /// A request started by this button is running. The label keeps its
+  /// color and a spinner stands before it.
+  final bool busy;
   final double scale;
 
   @override
@@ -177,17 +182,56 @@ class _WordButton extends StatelessWidget {
           behavior: HitTestBehavior.opaque,
           child: Padding(
             padding: EdgeInsets.symmetric(horizontal: font * 0.45),
-            child: Text(
-              label,
-              style: TextStyle(
-                color: enabled ? color : hexMuted,
-                fontFamily: 'OpenGost Type B',
-                fontSize: font * scale,
-                decoration: TextDecoration.none,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (busy) ...[
+                  _ModalSpinner(extent: font * scale * 0.8, color: color),
+                  SizedBox(width: font * 0.4),
+                ],
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: enabled || busy ? color : hexMuted,
+                    fontFamily: 'OpenGost Type B',
+                    fontSize: font * scale,
+                    decoration: TextDecoration.none,
+                  ),
+                ),
+              ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// How long a modal button keeps its spinner at least. A fast answer would
+/// otherwise end it before a frame is drawn.
+const _spinnerMin = Duration(milliseconds: 600);
+
+/// Waits out what is left of [_spinnerMin] since [watch] started.
+Future<void> _spinnerHold(Stopwatch watch) async {
+  final left = _spinnerMin - watch.elapsed;
+  if (left > Duration.zero) await Future<void>.delayed(left);
+}
+
+/// Small arc that turns while a modal button waits on its request.
+class _ModalSpinner extends StatelessWidget {
+  const _ModalSpinner({required this.extent, required this.color});
+
+  final double extent;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: extent,
+      height: extent,
+      child: CircularProgressIndicator(
+        strokeWidth: max(1.5, extent * 0.14),
+        valueColor: AlwaysStoppedAnimation<Color>(color),
       ),
     );
   }
@@ -218,9 +262,17 @@ class _DownButton extends StatelessWidget {
           child: SizedBox(
             width: extent,
             height: extent,
-            child: CustomPaint(
-              painter: _DownPainter(busy ? hexMuted : const Color(0xFFFFFFFF)),
-            ),
+            child: busy
+                ? Padding(
+                    padding: EdgeInsets.all(extent * 0.26),
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 2,
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Color(0xFFFFFFFF),
+                      ),
+                    ),
+                  )
+                : const CustomPaint(painter: _DownPainter(Color(0xFFFFFFFF))),
           ),
         ),
       ),
@@ -753,6 +805,7 @@ class _UnitEnvPanelState extends State<UnitEnvPanel> {
           color: unitAddColor,
           scale: 1.5,
           enabled: !_loading && _pending == null && syntax == null,
+          busy: _pending == 'save',
           onTap: _save,
         ),
         _WordButton(
@@ -761,6 +814,7 @@ class _UnitEnvPanelState extends State<UnitEnvPanel> {
           color: const Color(0xFFFFC107),
           scale: 1.5,
           enabled: !_loading && _pending == null,
+          busy: _pending == 'reset',
           onTap: _reset,
         ),
         NoticeCopyButton(
@@ -826,8 +880,10 @@ class _UnitEnvPanelState extends State<UnitEnvPanel> {
       _pending = 'save';
       _failure = null;
     });
+    final watch = Stopwatch()..start();
     try {
       await AppScope.of(context).setUnitEnv(widget.uuid, env);
+      await _spinnerHold(watch);
       if (!mounted) return;
       setState(() => _pending = null);
       await _load();
@@ -846,8 +902,10 @@ class _UnitEnvPanelState extends State<UnitEnvPanel> {
       _pending = 'reset';
       _failure = null;
     });
+    final watch = Stopwatch()..start();
     try {
       await AppScope.of(context).resetUnitEnv(widget.uuid);
+      await _spinnerHold(watch);
       if (!mounted) return;
       setState(() => _pending = null);
       await _load();
@@ -855,6 +913,155 @@ class _UnitEnvPanelState extends State<UnitEnvPanel> {
       if (!mounted) return;
       setState(() {
         _pending = null;
+        _failure = '$error';
+      });
+    }
+  }
+}
+
+/// Value of an input or an output, as code with line numbers. An output only
+/// reads. An input the user created may be edited and sent.
+class UnitIoValuePanel extends StatefulWidget {
+  const UnitIoValuePanel({
+    required this.uuid,
+    required this.input,
+    required this.editable,
+    required this.onClose,
+    super.key,
+  });
+
+  final String uuid;
+  final bool input;
+  final bool editable;
+  final VoidCallback onClose;
+
+  @override
+  State<UnitIoValuePanel> createState() => _UnitIoValuePanelState();
+}
+
+class _UnitIoValuePanelState extends State<UnitIoValuePanel> {
+  final _text = TextEditingController();
+  String _baseline = '';
+  String? _failure;
+  var _loading = true;
+  var _sending = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+  }
+
+  @override
+  void dispose() {
+    _text.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final language = AppScope.of(context).vault.language;
+    final color = unitIoTone(widget.input);
+    final clean = _text.text == _baseline;
+    return UnitModal(
+      title: unitText(language, 'Значение', 'Value'),
+      color: color,
+      onClose: widget.onClose,
+      barrierCloses: !widget.editable || (clean && !_sending),
+      note: _failure,
+      bodyHeight: widget.editable
+          ? (font, width) {
+              final codeFont = max(11.0, font * 0.72);
+              final layout = _EnvLayout(context, codeFont, width, _text.text);
+              return max(layout.total, layout.lineHeight * 4) + 8;
+            }
+          : (font, _) => _linesHeight(font, _lineCount(_text.text)) + 14,
+      actions: (font) => [
+        if (widget.editable)
+          _WordButton(
+            label: unitText(language, 'Отправить', 'Send'),
+            font: font,
+            color: unitAddColor,
+            scale: 1.5,
+            enabled: !_loading && !_sending,
+            busy: _sending,
+            onTap: _send,
+          ),
+        NoticeCopyButton(
+          text: _text.text,
+          label: unitText(language, 'Скопировать', 'Copy'),
+          extent: font * 2.2,
+        ),
+        SizedBox(width: font * 0.2),
+        NoticeCloseButton(
+          label: unitText(language, 'Закрыть', 'Close'),
+          extent: font * 2.2,
+          onTap: widget.onClose,
+        ),
+      ],
+      body: (font) => widget.editable
+          ? _EnvEditor(
+              controller: _text,
+              fontSize: max(11.0, font * 0.72),
+              onChanged: () => setState(() => _failure = null),
+            )
+          : _NumberedText(text: _text.text, fontSize: max(11.0, font * 0.72)),
+    );
+  }
+
+  Future<void> _load() async {
+    final model = AppScope.of(context);
+    final language = model.vault.language;
+    if (model.target?.signedIn != true) {
+      setState(() {
+        _loading = false;
+        _failure = unitText(language, 'Нет входа', 'Not signed in');
+      });
+      return;
+    }
+    try {
+      final io = await model.readUnitIo(widget.uuid);
+      if (!mounted) return;
+      final shown = ioValueShown(io.state);
+      _text.value = TextEditingValue(
+        text: shown,
+        selection: TextSelection.collapsed(offset: shown.length),
+      );
+      setState(() {
+        _baseline = shown;
+        _loading = false;
+        _failure = null;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _failure = '$error';
+      });
+    }
+  }
+
+  /// The text goes out as typed. Only the view indents JSON.
+  Future<void> _send() async {
+    if (_sending) return;
+    final sent = _text.text;
+    setState(() {
+      _sending = true;
+      _failure = null;
+    });
+    final watch = Stopwatch()..start();
+    try {
+      await AppScope.of(context).setInputState(widget.uuid, sent);
+      await _spinnerHold(watch);
+      if (!mounted) return;
+      setState(() {
+        _sending = false;
+        _baseline = sent;
+      });
+    } catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _sending = false;
         _failure = '$error';
       });
     }

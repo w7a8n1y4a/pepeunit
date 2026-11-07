@@ -355,3 +355,31 @@ String _jsonHint(String language, String message) {
   }
   return phrase(language, {'ru': 'ошибка синтаксиса', 'en': 'syntax error'});
 }
+
+/// The value of a node as the modal shows it. Text stays exactly as the
+/// backend sent it, base64 included. Only a JSON object or array is
+/// re-indented, with four spaces, because it is unreadable on one line.
+String ioValueShown(String? raw) {
+  if (raw == null || raw.isEmpty) return '';
+  final head = raw.trimLeft();
+  if (!head.startsWith('{') && !head.startsWith('[')) return raw;
+  try {
+    final decoded = jsonDecode(raw);
+    if (decoded is Map || decoded is List) {
+      return const JsonEncoder.withIndent('    ').convert(decoded);
+    }
+  } catch (_) {}
+  return raw;
+}
+
+/// Longest value the node cell writes in its middle.
+const ioValueGlanceMax = 48;
+
+/// One short line for the node cell. `-` stands for no value.
+String ioValueGlance(String? raw) {
+  final flat = (raw ?? '').replaceAll(RegExp(r'\s+'), ' ').trim();
+  if (flat.isEmpty) return '-';
+  final runes = flat.runes.toList();
+  if (runes.length <= ioValueGlanceMax) return flat;
+  return '${String.fromCharCodes(runes.take(ioValueGlanceMax))}…';
+}

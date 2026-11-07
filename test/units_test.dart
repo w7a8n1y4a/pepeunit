@@ -57,8 +57,38 @@ void main() {
     );
     expect(
       ioMenuIds(owned: false, input: true, private: false, datapipe: true),
-      ['card', 'summary', 'value', 'links'],
+      ['card', 'value', 'links'],
     );
+  });
+
+  test('the node menu has a value for both directions', () {
+    expect(
+      ioMenuIds(owned: true, input: false, private: true, datapipe: true),
+      ['card', 'value', 'settings', 'pipe', 'access'],
+    );
+    expect(
+      ioMenuIds(owned: true, input: true, private: false, datapipe: true),
+      ['card', 'value', 'settings', 'pipe', 'links'],
+    );
+    expect(
+      ioMenuIds(owned: false, input: false, private: true, datapipe: true),
+      ['card', 'value'],
+    );
+  });
+
+  test('the node value keeps text and indents only JSON', () {
+    expect(ioValueShown(null), '');
+    expect(ioValueShown('SGVsbG8gd29ybGQ='), 'SGVsbG8gd29ybGQ=');
+    expect(ioValueShown('1e3'), '1e3');
+    expect(
+      ioValueShown('{"a":1,"b":[2]}'),
+      '{\n    "a": 1,\n    "b": [\n        2\n    ]\n}',
+    );
+    expect(ioValueShown('{broken'), '{broken');
+    expect(ioValueGlance(null), '-');
+    expect(ioValueGlance('  \n '), '-');
+    expect(ioValueGlance('a\n  b'), 'a b');
+    expect(ioValueGlance('x' * 60), '${'x' * 48}…');
   });
 
   test('the units menu is Back in the center, add, search and groups', () {
