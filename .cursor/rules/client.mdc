@@ -25,7 +25,7 @@ Constraints:
 
 - Screens are pointy-top hex cells. Input changes per platform (mouse / touch); the renderer stays shared.
 - Dark theme only. Icons are SVG in `assets/icons/<category>/`, mainly white. Categories: `sections` (home menu), `actions`, `status`, `objects`, `services`. A new icon goes into one of them, and the folder is listed in `pubspec.yaml` because Flutter does not read subfolders. UI font is OpenGost.
-- The background mosaic draws every SVG under `assets/icons/` and `assets/background/<theme>/`, so a new file appears there by itself. The themed catalog is white outline SVG on a 64×64 box, drawn for the mosaic only, and a theme folder is listed in `pubspec.yaml` like the icon folders. Pages stay transparent; the scene color is set once in `main.dart`. Tests build `PepeunitApp(background: false)`.
+- The background mosaic draws every SVG under `assets/background/<theme>/` and nothing from `assets/icons/`, so a new file appears there by itself. The themed catalog is white outline SVG on a 64×64 box, drawn for the mosaic only, and a theme folder is listed in `pubspec.yaml` like the icon folders. Pages stay transparent; the scene color is set once in `main.dart`. Tests build `PepeunitApp(background: false)`.
 - Account storage is `PlatformVaultStore`. API client is hand-written: `PepeunitApi`.
 - Roles and `pu_ff_*` flags from the instance portrait limit actions and menu items.
 - Implement a roadmap item marked «план» only when the task names it. An spacing fix on home does not include the background mosaic, animations, or deep links.

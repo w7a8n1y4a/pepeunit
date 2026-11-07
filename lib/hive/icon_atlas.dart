@@ -6,8 +6,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 /// Where the background mosaic takes its pictures from: every SVG under
-/// them. The interface icons, and the themed catalog drawn for the mosaic.
-const backgroundIconRoots = ['assets/icons/', 'assets/background/'];
+/// it. Only the themed catalog drawn for the mosaic; interface icons stay out.
+const backgroundIconRoots = ['assets/background/'];
 
 /// Every icon of the background in one raster, so the whole mosaic is one
 /// draw call. Each cell holds a white mask: the shape of the icon, with the
