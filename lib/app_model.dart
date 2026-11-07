@@ -1017,17 +1017,23 @@ class AppModel extends ChangeNotifier {
     required String ioUuid,
   }) => _api.deletePanelLink(_token, panelUuid: panelUuid, ioUuid: ioUuid);
 
-  /// The dashboard in Grafana, in the signed-in user's own organization.
+  /// A one-time browser link that signs into Grafana and opens the dashboard
+  /// in the signed-in user's own organization. Ask for it right before the
+  /// launch: the backend keeps the ticket for a minute.
   Future<Uri> dashboardUri(Dashboard dashboard) async {
     final current = _signedTarget();
     final user = current.userUuid;
     final orgId = user == null || user.isEmpty
         ? null
         : await _api.grafanaOrgId(current.token!, user);
-    return dashboardLink(
+    final target = dashboardLink(
       originOf(current.url),
       dashboard.url ?? '',
       orgId: orgId,
+    );
+    return _api.grafanaLink(
+      current.token!,
+      path: target.hasQuery ? '${target.path}?${target.query}' : target.path,
     );
   }
 

@@ -1273,6 +1273,24 @@ class PepeunitApi {
     );
   }
 
+  /// A one-time link that signs the browser into Grafana and lands on [path].
+  ///
+  /// The link carries a ticket and no cookie or header, so it opens the same
+  /// way in any browser. The backend takes the ticket once, within a minute.
+  Future<Uri> grafanaLink(String token, {String? path}) async {
+    final response = await _send(
+      'POST',
+      '/grafana/login_ticket',
+      token: token,
+      body: {if (path != null && path.isNotEmpty) 'path': path},
+    );
+    final ticket = _object(response)['ticket'];
+    if (ticket is! String || ticket.isEmpty) {
+      throw ApiException(response.statusCode, response.body);
+    }
+    return _uri('/grafana/enter', {'ticket': ticket});
+  }
+
   /// Grafana organization of a user. It exists after the first sync.
   Future<String?> grafanaOrgId(String token, String uuid) async {
     final response = await _send('GET', '/users/$uuid', token: token);

@@ -1,8 +1,11 @@
+import 'dart:convert';
 import 'dart:ui' show Tristate;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
 import 'package:pepeunit_client/account/vault_store.dart';
 import 'package:pepeunit_client/api/pepeunit_api.dart';
 import 'package:pepeunit_client/app_model.dart';
@@ -63,6 +66,52 @@ void main() {
       ).queryParameters,
       {'x': '1', 'orgId': '2'},
     );
+  });
+
+  test(
+    'the Grafana link is a one-time ticket without cookie or header',
+    () async {
+      late http.Request seen;
+      final client = MockClient((request) async {
+        seen = request;
+        return http.Response('{"ticket":"abc","expires_in":60}', 201);
+      });
+      final api = PepeunitApi('https://unit.example/', client: client);
+
+      final link = await api.grafanaLink(
+        'jwt',
+        path: '/grafana/d/abc/meter?orgId=7',
+      );
+
+      expect(
+        link.toString(),
+        'https://unit.example/pepeunit/api/v1/grafana/enter?ticket=abc',
+      );
+      expect(seen.method, 'POST');
+      expect(seen.url.path, '/pepeunit/api/v1/grafana/login_ticket');
+      expect(seen.headers['x-auth-token'], 'jwt');
+      expect(seen.headers.containsKey('cookie'), isFalse);
+      expect(jsonDecode(seen.body), {'path': '/grafana/d/abc/meter?orgId=7'});
+    },
+  );
+
+  test('a dashboard opens by a ticket link on its own page', () async {
+    final api = _DashApi()..orgId = '7';
+    final model = await _model(api);
+
+    final uri = await model.dashboardUri(
+      const Dashboard(
+        uuid: 'd1',
+        name: 'meter',
+        created: '',
+        creatorUuid: 'me',
+        url: '/grafana/d/abc/meter',
+      ),
+    );
+
+    expect(uri.path, '/pepeunit/api/v1/grafana/enter');
+    expect(uri.queryParameters, {'ticket': 'ticket-1'});
+    expect(api.openedPath, '/grafana/d/abc/meter?orgId=7');
   });
 
   test('a panel counts its inputs and outputs', () {
@@ -256,6 +305,8 @@ class _DashApi extends PepeunitApi {
 
   String? order;
   String? syncError;
+  String? orgId;
+  String? openedPath;
   var synced = 0;
   ({String panel, String io, bool last, bool json})? linked;
   ({String dashboard, String title, String type})? created;
@@ -270,6 +321,18 @@ class _DashApi extends PepeunitApi {
   }) async {
     this.order = order;
     return (count: 1, dashboards: [_dashboard()]);
+  }
+
+  @override
+  Future<String?> grafanaOrgId(String token, String uuid) async => orgId;
+
+  @override
+  Future<Uri> grafanaLink(String token, {String? path}) async {
+    openedPath = path;
+    return Uri.parse(
+      'https://devunit.pepeunit.com/pepeunit/api/v1/grafana/enter'
+      '?ticket=ticket-1',
+    );
   }
 
   @override
