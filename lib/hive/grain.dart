@@ -116,11 +116,18 @@ class GrainTile {
 }
 
 /// Fills its area with a grain and puts [child] on top. Until the tile is
-/// made, it is the flat [GrainTile.base].
+/// made, it is the flat [GrainTile.base]. [opacity] below 1 lets what lies
+/// under the box show through.
 class GrainBox extends StatefulWidget {
-  const GrainBox({required this.tile, this.child, super.key});
+  const GrainBox({
+    required this.tile,
+    this.opacity = 1,
+    this.child,
+    super.key,
+  });
 
   final GrainTile tile;
+  final double opacity;
   final Widget? child;
 
   @override
@@ -146,6 +153,7 @@ class _GrainBoxState extends State<GrainBox> {
             painter: _GrainPainter(
               widget.tile,
               MediaQuery.devicePixelRatioOf(context),
+              widget.opacity,
             ),
           ),
         ),
@@ -156,20 +164,24 @@ class _GrainBoxState extends State<GrainBox> {
 }
 
 class _GrainPainter extends CustomPainter {
-  _GrainPainter(this.tile, this.ratio) : super(repaint: tile.ready);
+  _GrainPainter(this.tile, this.ratio, this.opacity)
+    : super(repaint: tile.ready);
 
   final GrainTile tile;
   final double ratio;
+  final double opacity;
 
   @override
   void paint(Canvas canvas, Size size) {
     final shader = tile.shader(ratio);
-    final paint = Paint()..color = tile.base;
+    final paint = Paint()..color = tile.base.withValues(alpha: opacity);
     if (shader != null) paint.shader = shader;
     canvas.drawRect(Offset.zero & size, paint);
   }
 
   @override
   bool shouldRepaint(covariant _GrainPainter oldDelegate) =>
-      oldDelegate.tile != tile || oldDelegate.ratio != ratio;
+      oldDelegate.tile != tile ||
+      oldDelegate.ratio != ratio ||
+      oldDelegate.opacity != opacity;
 }

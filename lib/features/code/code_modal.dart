@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../app_scope.dart';
+import '../../hive/grain.dart';
 import '../../hive/hex_scene.dart';
 import '../../hive/marks.dart';
 import '../../locale/languages.dart';
@@ -156,72 +157,78 @@ class CodeModal extends StatelessWidget {
               right: margin,
               height: height,
               child: DecoratedBox(
+                // The border is drawn over the grain, so the fill does not
+                // cover half of it.
+                position: DecorationPosition.foreground,
                 decoration: BoxDecoration(
-                  color: hexFill,
                   border: Border.all(
                     color: color,
                     width: max(1.4, font * 0.12),
                   ),
                 ),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    font,
-                    font * 0.6,
-                    font * 0.4,
-                    font,
-                  ),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: rowH,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                title,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  color: const Color(0xFFFFFFFF),
-                                  fontFamily: 'OpenGost Type B',
-                                  fontSize: font * 1.55,
-                                  decoration: TextDecoration.none,
-                                ),
-                              ),
-                            ),
-                            if (!stacked) _scrolling(tools),
-                          ],
-                        ),
-                      ),
-                      if (stacked)
+                child: GrainBox(
+                  tile: cellGrain,
+                  opacity: modalFillOpacity,
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      font,
+                      font * 0.6,
+                      font * 0.4,
+                      font,
+                    ),
+                    child: Column(
+                      children: [
                         SizedBox(
                           height: rowH,
-                          width: double.infinity,
-                          child: _scrolling(tools),
-                        ),
-                      SizedBox(height: gap),
-                      Expanded(child: body(codeFont, layout)),
-                      SizedBox(height: gap),
-                      SizedBox(
-                        height: noteH,
-                        child: Align(
-                          alignment: Alignment.topLeft,
-                          child: noteLines > 2
-                              ? SingleChildScrollView(
-                                  child: SizedBox(
-                                    width: double.infinity,
-                                    child: Text(shown, style: noteStyle),
-                                  ),
-                                )
-                              : Text(
-                                  shown,
-                                  maxLines: 2,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: Text(
+                                  title,
+                                  maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: noteStyle,
+                                  style: TextStyle(
+                                    color: const Color(0xFFFFFFFF),
+                                    fontFamily: 'OpenGost Type B',
+                                    fontSize: font * 1.55,
+                                    decoration: TextDecoration.none,
+                                  ),
                                 ),
+                              ),
+                              if (!stacked) _scrolling(tools),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                        if (stacked)
+                          SizedBox(
+                            height: rowH,
+                            width: double.infinity,
+                            child: _scrolling(tools),
+                          ),
+                        SizedBox(height: gap),
+                        Expanded(child: body(codeFont, layout)),
+                        SizedBox(height: gap),
+                        SizedBox(
+                          height: noteH,
+                          child: Align(
+                            alignment: Alignment.topLeft,
+                            child: noteLines > 2
+                                ? SingleChildScrollView(
+                                    child: SizedBox(
+                                      width: double.infinity,
+                                      child: Text(shown, style: noteStyle),
+                                    ),
+                                  )
+                                : Text(
+                                    shown,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: noteStyle,
+                                  ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ),

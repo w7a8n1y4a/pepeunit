@@ -21,6 +21,9 @@ const sceneBackground = Color(0xFF1B1B1F);
 /// mosaic show through.
 const hexFillOpacity = 0.70;
 
+/// The same for a modal panel, which carries text and so stays denser.
+const modalFillOpacity = 0.99;
+
 /// The rough surface of the scene and of a cell: the palette color above is
 /// the mean, and every pixel strays from it by about [GrainTile.spread].
 final sceneGrain = GrainTile(sceneBackground, 5, seed: 11);
