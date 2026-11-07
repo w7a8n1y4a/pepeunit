@@ -625,6 +625,7 @@ class PepeunitApi {
     String? repoUuid,
     String? inputUuid,
     bool includeIos = false,
+    List<String>? ioTypes,
   }) async {
     final pairs = <String>[
       'offset=$offset',
@@ -641,7 +642,11 @@ class PepeunitApi {
         'repo_uuid=${Uri.encodeQueryComponent(repoUuid)}',
       if (inputUuid != null && inputUuid.isNotEmpty)
         'unit_io_input_uuid=${Uri.encodeQueryComponent(inputUuid)}',
-      if (includeIos) 'is_include_output_unit_ios=true',
+      // Only units that have a node of these types are listed, and each
+      // carries those nodes.
+      for (final type in ioTypes ?? const <String>[])
+        'unit_io_type=${Uri.encodeQueryComponent(type)}',
+      if (includeIos || ioTypes != null) 'is_include_output_unit_ios=true',
     ];
     final response = await _send('GET', '/units', token: token, pairs: pairs);
     return _units(response);
@@ -962,6 +967,19 @@ class PepeunitApi {
       '/unit_ios/create_link',
       token: token,
       body: {'output_uuid': outputUuid, 'input_uuid': inputUuid},
+    );
+  }
+
+  Future<void> deleteIoLink(
+    String token, {
+    required String outputUuid,
+    required String inputUuid,
+  }) async {
+    await _send(
+      'DELETE',
+      '/unit_ios/delete_link',
+      token: token,
+      query: {'input_uuid': inputUuid, 'output_uuid': outputUuid},
     );
   }
 

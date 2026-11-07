@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app_model.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
@@ -18,11 +19,19 @@ import '../network/network_chrome.dart';
 import 'unit_panels.dart';
 import 'units_chrome.dart';
 
+/// Nodes of one unit. With [pickOutput] only its outputs are listed, and a tap
+/// hands the output to [AppModel.finishOutputPick] instead of opening the node.
 class UnitIoListPage extends StatefulWidget {
-  const UnitIoListPage({required this.uuid, required this.scope, super.key});
+  const UnitIoListPage({
+    required this.uuid,
+    required this.scope,
+    this.pickOutput = false,
+    super.key,
+  });
 
   final String uuid;
   final int scope;
+  final bool pickOutput;
 
   @override
   State<UnitIoListPage> createState() => _UnitIoListPageState();
@@ -74,8 +83,10 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
           id: 'empty',
           title: _loading
               ? unitText(language, 'Входы и выходы', 'Inputs and outputs')
+              : widget.pickOutput
+              ? unitText(language, 'Нет выходов', 'No outputs')
               : unitText(language, 'Пусто', 'Empty'),
-          color: unitIoColor,
+          color: widget.pickOutput ? unitOutputColor : unitIoColor,
           busy: _loading,
           tappable: false,
           q: frame.cells.first.$1,
@@ -103,7 +114,11 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
         } else if (id == 'error') {
           setState(() => _open = true);
         } else if (_ios.any((io) => io.uuid == id)) {
-          context.push('/units/${widget.uuid}/io/$id');
+          if (widget.pickOutput) {
+            _chooseOutput(id);
+          } else {
+            context.push('/units/${widget.uuid}/io/$id');
+          }
         }
       },
       frame: board == null
@@ -111,7 +126,9 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
           : (scene) => ScopeFrame(
               scope: widget.scope,
               canZoomIn: board.canZoomIn,
-              path: '/units/${widget.uuid}/io',
+              path: widget.pickOutput
+                  ? '/units/outputs?unit=${widget.uuid}'
+                  : '/units/${widget.uuid}/io',
               child: scene,
             ),
     );
@@ -131,7 +148,7 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
         id: slot.id,
         left: !forward,
         language: language,
-        color: unitIoColor,
+        color: widget.pickOutput ? unitOutputColor : unitIoColor,
         q: slot.q,
         r: slot.r,
         page: board.page,
@@ -156,6 +173,21 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
     );
   }
 
+  /// Gives the output to the screen that asked and closes this screen and the
+  /// unit search under it. Opened without a pick, it just steps back.
+  void _chooseOutput(String uuid) {
+    final model = AppScope.of(context);
+    final router = GoRouter.of(context);
+    if (!model.outputPickOpen) {
+      popOrHome(context);
+      return;
+    }
+    model.finishOutputPick(uuid);
+    for (var step = 0; step < 2 && router.canPop(); step++) {
+      router.pop();
+    }
+  }
+
   Future<void> _load() async {
     final model = AppScope.of(context);
     if (model.target?.signedIn != true) {
@@ -174,6 +206,7 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
           offset: offset,
           limit: limit,
           unitUuid: widget.uuid,
+          types: widget.pickOutput ? const ['Output'] : null,
         );
         ios.addAll(page.ios);
         offset += page.ios.length;
@@ -207,6 +240,7 @@ class UnitIoPage extends StatefulWidget {
 class _UnitIoPageState extends State<UnitIoPage> {
   UnitIo? _io;
   int? _access;
+  int? _links;
   String? _failure;
   var _open = false;
   var _loading = true;
@@ -317,7 +351,15 @@ class _UnitIoPageState extends State<UnitIoPage> {
           r: slot.r,
         );
       case 'links':
-        return _nav(slot, language, color, 'Связи', 'Links', 'links.svg');
+        return _nav(
+          slot,
+          language,
+          unitLinkColor,
+          'Связи',
+          'Links',
+          'links.svg',
+          footer: _links == null ? null : pieceCount(language, _links!),
+        );
       case 'pipe':
         return _nav(
           slot,
@@ -409,12 +451,27 @@ class _UnitIoPageState extends State<UnitIoPage> {
         _loading = false;
       });
       await _loadAccess(io);
+      await _loadLinks(io);
     } catch (error) {
       if (!mounted) return;
       setState(() {
         _loading = false;
         _failure = '$error';
       });
+    }
+  }
+
+  /// Outputs this input reads from. Only an input has the cell.
+  Future<void> _loadLinks(UnitIo io) async {
+    if (!io.input) {
+      if (_links != null) setState(() => _links = null);
+      return;
+    }
+    try {
+      final links = await loadUnitLinks(AppScope.of(context), widget.uuid);
+      if (mounted) setState(() => _links = links.length);
+    } catch (_) {
+      // The cell stays without a count; the links screen shows the error.
     }
   }
 
@@ -708,6 +765,33 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
   }
 }
 
+/// One link of an input: the unit it reads from and the output it reads.
+typedef UnitLink = ({Unit unit, UnitIo io});
+
+/// Every output linked to [inputUuid], with the unit that owns it.
+Future<List<UnitLink>> loadUnitLinks(AppModel model, String inputUuid) async {
+  final links = <UnitLink>[];
+  var offset = 0;
+  final limit = model.pageLimit;
+  while (true) {
+    final page = await model.listUnits(
+      offset: offset,
+      limit: limit,
+      query: UnitQuery()..owner = 'all',
+      inputUuid: inputUuid,
+      includeIos: true,
+    );
+    for (final unit in page.units) {
+      for (final io in unit.ios) {
+        links.add((unit: unit, io: io));
+      }
+    }
+    offset += page.units.length;
+    if (page.units.isEmpty || offset >= page.count) break;
+  }
+  return links;
+}
+
 class UnitLinksPage extends StatefulWidget {
   const UnitLinksPage({required this.unitUuid, required this.uuid, super.key});
 
@@ -719,10 +803,14 @@ class UnitLinksPage extends StatefulWidget {
 }
 
 class _UnitLinksPageState extends State<UnitLinksPage> {
-  List<Unit> _linked = const [];
+  List<UnitLink> _links = const [];
   String? _failure;
   var _open = false;
   var _loading = true;
+  var _adding = false;
+
+  /// Output uuid of the link being deleted.
+  String? _deleting;
 
   @override
   void initState() {
@@ -734,8 +822,9 @@ class _UnitLinksPageState extends State<UnitLinksPage> {
   Widget build(BuildContext context) {
     final language = AppScope.of(context).vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
-    final ids = ['add', for (final unit in _linked) 'unit:${unit.uuid}'];
+    final ids = ['add', for (final link in _links) 'link:${link.io.uuid}'];
     final placed = cardBoard(ids, wide: wide);
+    final mixed = Color.lerp(unitsColor, unitOutputColor, 0.5)!;
     final slots = <HexSlot>[
       for (final slot in placed)
         if (slot.id == 'back')
@@ -748,21 +837,14 @@ class _UnitLinksPageState extends State<UnitLinksPage> {
           HexSlot(
             id: 'add',
             title: unitText(language, 'Добавить', 'Add'),
-            color: unitIoColor,
-            busy: _loading,
+            color: unitLinkColor,
+            busy: _loading || _adding,
             q: slot.q,
             r: slot.r,
             icon: 'assets/icons/plus.svg',
           )
         else
-          HexSlot(
-            id: slot.id,
-            title: _name(slot.id),
-            color: unitIoColor,
-            q: slot.q,
-            r: slot.r,
-            icon: 'assets/icons/micro.svg',
-          ),
+          _linkSlot(slot, mixed),
     ];
     appendError(
       slots,
@@ -775,19 +857,28 @@ class _UnitLinksPageState extends State<UnitLinksPage> {
     return HexPage(slots: slots, onTap: _tap);
   }
 
-  String _name(String id) {
-    final uuid = id.startsWith('unit:') ? id.substring(5) : id;
-    for (final unit in _linked) {
-      if (unit.uuid == uuid) {
-        final topics = [
-          for (final io in unit.ios)
-            if (io.type == 'Output') io.topic,
-        ];
-        if (topics.isEmpty) return unit.name;
-        return '${unit.name} · ${topics.first}';
-      }
+  /// The unit name above, the output topic below, the borders of both colors.
+  HexSlot _linkSlot(BoardSlot slot, Color mixed) {
+    final link = _find(slot.id);
+    return HexSlot(
+      id: slot.id,
+      title: link?.unit.name ?? '',
+      footer: link?.io.topic,
+      color: mixed,
+      rim: unitLinkRim(),
+      busy: link != null && link.io.uuid == _deleting,
+      q: slot.q,
+      r: slot.r,
+      icon: 'assets/icons/micro.svg',
+    );
+  }
+
+  UnitLink? _find(String id) {
+    final uuid = id.startsWith('link:') ? id.substring(5) : id;
+    for (final link in _links) {
+      if (link.io.uuid == uuid) return link;
     }
-    return uuid;
+    return null;
   }
 
   Future<void> _tap(String id) async {
@@ -800,157 +891,67 @@ class _UnitLinksPageState extends State<UnitLinksPage> {
       return;
     }
     if (id == 'add') {
-      final unit = await context.push<String>('/units/pick');
-      if (unit == null || !mounted) return;
-      final output = await context.push<String>('/units/outputs?unit=$unit');
+      if (_adding) return;
+      // Search shows only units that have an output; its card opens the
+      // outputs of that unit, and the chosen output comes back here.
+      final pick = AppScope.of(context).beginOutputPick();
+      context.push('/units/pick?outputs=1');
+      final output = await pick;
       if (output == null || !mounted) return;
+      setState(() {
+        _adding = true;
+        _failure = null;
+        _open = false;
+      });
       try {
         await AppScope.of(context)
             .createIoLink(outputUuid: output, inputUuid: widget.uuid);
+        if (!mounted) return;
+        setState(() => _adding = false);
         await _load();
       } catch (error) {
         if (!mounted) return;
-        setState(() => _failure = '$error');
+        setState(() {
+          _adding = false;
+          _failure = '$error';
+        });
       }
       return;
     }
-    if (id.startsWith('unit:')) {
-      context.push('/units/${id.substring(5)}');
-    }
+    final link = _find(id);
+    if (link != null) await _delete(link);
   }
 
-  Future<void> _load() async {
-    final model = AppScope.of(context);
+  /// A tap on a link asks the backend to remove it. A refusal is shown in the
+  /// error cell and the link stays.
+  Future<void> _delete(UnitLink link) async {
+    if (_deleting != null || _adding) return;
+    setState(() {
+      _deleting = link.io.uuid;
+      _failure = null;
+      _open = false;
+    });
     try {
-      final page = await model.listUnits(
-        offset: 0,
-        limit: model.pageLimit,
-        query: UnitQuery()..owner = 'all',
-        inputUuid: widget.uuid,
-        includeIos: true,
-      );
+      await AppScope.of(context)
+          .deleteIoLink(outputUuid: link.io.uuid, inputUuid: widget.uuid);
       if (!mounted) return;
-      setState(() {
-        _linked = page.units;
-        _loading = false;
-      });
+      setState(() => _deleting = null);
+      await _load();
     } catch (error) {
       if (!mounted) return;
       setState(() {
-        _loading = false;
+        _deleting = null;
         _failure = '$error';
       });
     }
   }
-}
-
-class UnitOutputsPage extends StatefulWidget {
-  const UnitOutputsPage({required this.unitUuid, super.key});
-
-  final String unitUuid;
-
-  @override
-  State<UnitOutputsPage> createState() => _UnitOutputsPageState();
-}
-
-class _UnitOutputsPageState extends State<UnitOutputsPage> {
-  List<UnitIo> _ios = const [];
-  String? _failure;
-  var _open = false;
-  var _loading = true;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final language = AppScope.of(context).vault.language;
-    final wide = hexWide(MediaQuery.sizeOf(context));
-    final placed = cardBoard([for (final io in _ios) io.uuid], wide: wide);
-    final slots = <HexSlot>[
-      for (final slot in placed)
-        slot.id == 'back'
-            ? backSlot(
-                title: unitText(language, 'Назад', 'Back'),
-                q: slot.q,
-                r: slot.r,
-              )
-            : HexSlot(
-                id: slot.id,
-                title:
-                    _ios
-                        .cast<UnitIo?>()
-                        .firstWhere(
-                          (io) => io!.uuid == slot.id,
-                          orElse: () => null,
-                        )
-                        ?.topic ??
-                    slot.id,
-                color: unitOutputColor,
-                busy: _loading && _ios.isEmpty,
-                q: slot.q,
-                r: slot.r,
-                icon: unitIoIcon(false),
-              ),
-    ];
-    if (_ios.isEmpty && !_loading) {
-      final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
-      slots
-        ..clear()
-        ..add(
-          backSlot(
-            title: unitText(language, 'Назад', 'Back'),
-            q: frame.back!.$1,
-            r: frame.back!.$2,
-          ),
-        )
-        ..add(
-          HexSlot(
-            id: 'empty',
-            title: unitText(language, 'Нет выходов', 'No outputs'),
-            color: unitOutputColor,
-            tappable: false,
-            q: frame.cells.first.$1,
-            r: frame.cells.first.$2,
-          ),
-        );
-    }
-    appendError(
-      slots,
-      message: _failure,
-      open: _open,
-      language: language,
-      text: unitText,
-      wide: wide,
-    );
-    return HexPage(
-      slots: slots,
-      onTap: (id) {
-        if (id == 'back') {
-          popOrHome(context);
-        } else if (id == 'error') {
-          setState(() => _open = true);
-        } else if (_ios.any((io) => io.uuid == id)) {
-          context.pop(id);
-        }
-      },
-    );
-  }
 
   Future<void> _load() async {
     try {
-      final page = await AppScope.of(context).listIos(
-        offset: 0,
-        limit: AppScope.of(context).pageLimit,
-        unitUuid: widget.unitUuid,
-        types: const ['Output'],
-      );
+      final links = await loadUnitLinks(AppScope.of(context), widget.uuid);
       if (!mounted) return;
       setState(() {
-        _ios = page.ios;
+        _links = links;
         _loading = false;
       });
     } catch (error) {

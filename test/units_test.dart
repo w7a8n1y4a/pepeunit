@@ -558,6 +558,7 @@ class _UnitsApi extends PepeunitApi {
     String? repoUuid,
     String? inputUuid,
     bool includeIos = false,
+    List<String>? ioTypes,
   }) async {
     creator = creatorUuid;
     return (

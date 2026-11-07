@@ -234,6 +234,7 @@ class _PepeunitAppState extends State<PepeunitApp> {
             builder: (context, state) => UnitsPage(
               scope: scaleTickOf(state.uri, fallback: searchScaleTick),
               pick: true,
+              outputsOnly: state.uri.queryParameters['outputs'] == '1',
             ),
           ),
           GoRoute(
@@ -245,8 +246,10 @@ class _PepeunitAppState extends State<PepeunitApp> {
           ),
           GoRoute(
             path: 'outputs',
-            builder: (context, state) => UnitOutputsPage(
-              unitUuid: state.uri.queryParameters['unit'] ?? '',
+            builder: (context, state) => UnitIoListPage(
+              uuid: state.uri.queryParameters['unit'] ?? '',
+              scope: scaleTickOf(state.uri),
+              pickOutput: true,
             ),
           ),
           GoRoute(

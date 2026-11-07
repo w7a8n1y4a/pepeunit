@@ -761,6 +761,7 @@ class AppModel extends ChangeNotifier {
     String? creatorUuid,
     String? inputUuid,
     bool includeIos = false,
+    List<String>? ioTypes,
   }) {
     final current = query ?? unitQuery;
     final mine = current.owner == 'mine' ? _signedTarget().userUuid : null;
@@ -775,6 +776,7 @@ class AppModel extends ChangeNotifier {
       auto: current.autoOnly,
       inputUuid: inputUuid,
       includeIos: includeIos,
+      ioTypes: ioTypes,
     );
   }
 
@@ -941,10 +943,38 @@ class AppModel extends ChangeNotifier {
   Future<UnitIo> setInputState(String uuid, String state) =>
       _api.setInputState(_token, uuid, state);
 
+  Completer<String?>? _outputPick;
+
+  /// True while a screen waits for the person to choose an output.
+  bool get outputPickOpen => _outputPick != null;
+
+  /// Starts choosing an output for a link. The answer does not travel back
+  /// through the route result: the search and output screens replace their own
+  /// route when the scale changes, and a replaced route never delivers it.
+  /// A pick left open is closed with null when the next one starts.
+  Future<String?> beginOutputPick() {
+    _outputPick?.complete(null);
+    final pick = Completer<String?>();
+    _outputPick = pick;
+    return pick.future;
+  }
+
+  /// Hands the chosen output to the screen that began the pick.
+  void finishOutputPick(String? uuid) {
+    final pick = _outputPick;
+    _outputPick = null;
+    if (pick != null && !pick.isCompleted) pick.complete(uuid);
+  }
+
   Future<void> createIoLink({
     required String outputUuid,
     required String inputUuid,
   }) => _api.createIoLink(_token, outputUuid: outputUuid, inputUuid: inputUuid);
+
+  Future<void> deleteIoLink({
+    required String outputUuid,
+    required String inputUuid,
+  }) => _api.deleteIoLink(_token, outputUuid: outputUuid, inputUuid: inputUuid);
 
   Future<List<PipeIssue>> checkPipe(Uint8List yml) =>
       _api.checkPipe(_token, yml);

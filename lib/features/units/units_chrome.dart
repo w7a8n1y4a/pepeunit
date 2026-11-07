@@ -27,6 +27,12 @@ const unitOutputColor = Color(0xFFFF7A59);
 /// The DataPipe cell of a node. Input and output share it.
 const unitPipeColor = Color(0xFFB5E61D);
 
+/// Links of an input. The section cell and its own screen use this violet.
+const unitLinkColor = Color(0xFFE040FB);
+
+/// One link card: the unit it leads to and the output it reads, half each.
+List<Color> unitLinkRim() => rimMix([(unitsColor, 1), (unitOutputColor, 1)])!;
+
 Color unitIoTone(bool input) => input ? unitIoColor : unitOutputColor;
 
 String unitIoIcon(bool input) =>

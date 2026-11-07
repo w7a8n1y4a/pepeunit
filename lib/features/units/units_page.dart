@@ -17,12 +17,20 @@ import '../slanted_choices.dart';
 import 'units_chrome.dart';
 
 /// Unit search. [pick] returns the chosen uuid with [pop] instead of opening
-/// the card.
+/// the card. [outputsOnly] lists only units that have an output, and a tap
+/// opens that unit's outputs; the chosen output goes to
+/// [AppModel.finishOutputPick].
 class UnitsPage extends StatefulWidget {
-  const UnitsPage({required this.scope, this.pick = false, super.key});
+  const UnitsPage({
+    required this.scope,
+    this.pick = false,
+    this.outputsOnly = false,
+    super.key,
+  });
 
   final int scope;
   final bool pick;
+  final bool outputsOnly;
 
   @override
   State<UnitsPage> createState() => _UnitsPageState();
@@ -98,7 +106,9 @@ class _UnitsPageState extends State<UnitsPage> {
       frame: (scene) => ScopeFrame(
         scope: widget.scope,
         canZoomIn: widget.scope < scaleTickMax,
-        path: widget.pick ? '/units/pick' : '/units/search',
+        path: widget.pick
+            ? (widget.outputsOnly ? '/units/pick?outputs=1' : '/units/pick')
+            : '/units/search',
         child: scene,
       ),
     );
@@ -188,7 +198,10 @@ class _UnitsPageState extends State<UnitsPage> {
   Future<void> _tap(String id) async {
     if (id.startsWith('unit:')) {
       final uuid = id.substring(5);
-      if (widget.pick) {
+      if (widget.pick && widget.outputsOnly) {
+        // The output screen hands the answer over and closes this one too.
+        context.push('/units/outputs?unit=$uuid');
+      } else if (widget.pick) {
         context.pop(uuid);
       } else {
         context.push('/units/$uuid');
@@ -262,6 +275,7 @@ class _UnitsPageState extends State<UnitsPage> {
         offset: _offset,
         limit: limit,
         query: _query(context),
+        ioTypes: widget.outputsOnly ? const ['Output'] : null,
       );
       if (!mounted || ticket != _ticket) return;
       unawaited(
