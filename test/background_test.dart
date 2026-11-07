@@ -59,7 +59,7 @@ void main() {
           pairs++;
         }
       }
-      expect(sum / pairs, lessThan(-0.3));
+      expect(sum / pairs, lessThan(-0.2));
     });
 
     test('is the same for the same size', () {

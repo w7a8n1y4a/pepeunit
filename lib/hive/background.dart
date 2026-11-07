@@ -14,8 +14,8 @@ import 'icon_atlas.dart';
 ///
 /// The tiles stand on a staggered grid turned by [tilt] from the horizontal,
 /// so no row of tiles lines up with the edge of the screen. Each tile is
-/// nudged off its spot, turned by up to [maxTurn] and drawn at a different
-/// size. Neighbours show different pictures. Each tile rustles around its own
+/// nudged off its spot, bent by a slow wave, turned by up to [maxTurn] and
+/// drawn at a slightly different size. Neighbours show different pictures. Each tile rustles around its own
 /// angle. Some tiles are always flipping over to show another picture on the
 /// back.
 class Mosaic {
@@ -27,8 +27,16 @@ class Mosaic {
   /// Turn of the whole grid from the horizontal, in radians: 30°.
   static const tilt = 30 * pi / 180;
 
-  /// Largest base turn of a tile, in radians: 20°.
-  static const maxTurn = 20 * pi / 180;
+  /// Largest base turn of a tile, in radians: 40°.
+  static const maxTurn = 40 * pi / 180;
+
+  /// Random shift of a tile off its grid spot, in pitches, across its width.
+  static const shakeShare = 0.44;
+
+  /// Reach of the slow wave that bends the grid, in pitches, and the length
+  /// of one wave, in pitches.
+  static const waveShare = 0.18;
+  static const waveLength = 7.0;
 
   /// Half of the swing of the rustle, in radians.
   static const rustle = 3 * pi / 180;
@@ -146,12 +154,26 @@ class Mosaic {
     _next = Int32List(count);
     _progress = Float32List(count)..fillRange(0, count, -1);
     final deck = List<int>.generate(icons, (i) => i)..shuffle(rng);
-    final shake = pitch * 0.24;
+    final shake = pitch * shakeShare;
+    // A slow wave bends the rows and columns, so they do not read as lines.
+    final wave = 2 * pi / (pitch * waveLength);
+    final waveAmp = pitch * waveShare;
+    final phases = [for (var k = 0; k < 4; k++) rng.nextDouble() * 2 * pi];
     for (var i = 0; i < count; i++) {
       final row = _cell[i] ~/ _columns;
       final column = _cell[i] % _columns;
-      _x[i] = keptX[i] + (rng.nextDouble() - 0.5) * shake;
-      _y[i] = keptY[i] + (rng.nextDouble() - 0.5) * shake;
+      final bendX =
+          waveAmp *
+          (sin(keptY[i] * wave + phases[0]) +
+              sin((keptX[i] + keptY[i]) * wave * 0.6 + phases[1])) /
+          2;
+      final bendY =
+          waveAmp *
+          (sin(keptX[i] * wave + phases[2]) +
+              sin((keptX[i] - keptY[i]) * wave * 0.6 + phases[3])) /
+          2;
+      _x[i] = keptX[i] + bendX + (rng.nextDouble() - 0.5) * shake;
+      _y[i] = keptY[i] + bendY + (rng.nextDouble() - 0.5) * shake;
       _side[i] = pitch * 0.46 * (0.97 + rng.nextDouble() * 0.06);
       _turn[i] = (rng.nextDouble() * 2 - 1) * maxTurn;
       _phase[i] = rng.nextDouble() * 2 * pi;
