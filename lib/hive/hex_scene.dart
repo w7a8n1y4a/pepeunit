@@ -6,6 +6,7 @@ import 'package:flutter/foundation.dart' show listEquals;
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+import 'grain.dart';
 import 'hex_motion.dart';
 import 'icon_scale.dart';
 
@@ -15,6 +16,11 @@ double cellFont(double side) => max(11, side * 0.068);
 
 const hexFill = Color(0xFF14161B);
 const sceneBackground = Color(0xFF1B1B1F);
+
+/// The rough surface of the scene and of a cell: the palette color above is
+/// the mean, and every pixel strays from it by about [GrainTile.spread].
+final sceneGrain = GrainTile(sceneBackground, 5, seed: 11);
+final cellGrain = GrainTile(hexFill, 4, seed: 23);
 const hexMuted = Color(0xFFA1A1AA);
 const errorColor = Color(0xFFFF3333);
 
@@ -633,9 +639,12 @@ class _Glyph {
 }
 
 class HexPainter extends CustomPainter {
-  HexPainter(this.slot);
+  HexPainter(this.slot, {this.ratio = 1}) : super(repaint: cellGrain.ready);
 
   final HexSlot slot;
+
+  /// Device pixels per logical pixel. The grain is drawn in device pixels.
+  final double ratio;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -644,7 +653,10 @@ class HexPainter extends CustomPainter {
     final path = pointyHex(center, radius);
     final enabled = slot.enabled;
     final stroke = max(1.4, radius * 0.03);
-    canvas.drawPath(path, Paint()..color = hexFill);
+    final grain = cellGrain.shader(ratio, slot.id.hashCode.abs());
+    final fill = Paint()..color = hexFill;
+    if (grain != null) fill.shader = grain;
+    canvas.drawPath(path, fill);
     final rim = slot.rim;
     if (enabled && rim != null) {
       paintHexRim(canvas, center, radius, stroke, rim);
@@ -1045,6 +1057,8 @@ class HexPainter extends CustomPainter {
   bool shouldRepaint(covariant HexPainter oldDelegate) {
     final previous = oldDelegate.slot;
     return slot.color != previous.color ||
+        ratio != oldDelegate.ratio ||
+        slot.id != previous.id ||
         !listEquals(slot.rim, previous.rim) ||
         slot.enabled != previous.enabled ||
         slot.title != previous.title ||
@@ -1093,6 +1107,7 @@ class _CellFrameState extends State<_CellFrame> with TickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
+    cellGrain.load();
     if (widget.slot.busy) _spinning(true);
   }
 
@@ -1175,7 +1190,12 @@ class _CellFrameState extends State<_CellFrame> with TickerProviderStateMixin {
             child: Stack(
               fit: StackFit.expand,
               children: [
-                CustomPaint(painter: HexPainter(widget.slot)),
+                CustomPaint(
+                  painter: HexPainter(
+                    widget.slot,
+                    ratio: MediaQuery.devicePixelRatioOf(context),
+                  ),
+                ),
                 widget.child,
               ],
             ),

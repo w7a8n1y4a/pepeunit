@@ -51,6 +51,7 @@ import 'features/units/units_menu_page.dart';
 import 'features/units/units_page.dart';
 import 'dashboards/dashboard.dart';
 import 'hive/background.dart';
+import 'hive/grain.dart';
 import 'hive/hex_order.dart';
 import 'hive/hex_scene.dart';
 import 'hive/page_transition.dart';
@@ -647,8 +648,8 @@ class _PepeunitAppState extends State<PepeunitApp> {
       ),
       routerConfig: _router,
       // One mosaic under the router, so it stays put while screens change.
-      builder: (context, child) => ColoredBox(
-        color: sceneBackground,
+      builder: (context, child) => GrainBox(
+        tile: sceneGrain,
         child: Stack(
           fit: StackFit.expand,
           children: [if (widget.background) const HiveBackground(), ?child],
