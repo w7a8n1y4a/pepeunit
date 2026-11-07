@@ -309,7 +309,7 @@ class _QueryCellState extends State<_QueryCell> {
       controller: _controller,
       fieldKey: const ValueKey('registry-search'),
       hint: regText(language, 'Поиск', 'Search'),
-      leading: 'assets/icons/search.svg',
+      leading: 'assets/icons/actions/search.svg',
       roomyCaption: true,
       onChanged: (text) {
         AppScope.of(context).setRepoSearch(text);

@@ -47,7 +47,7 @@ class DashboardsMenuPage extends StatelessWidget {
           color: addColor,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/plus.svg',
+          icon: 'assets/icons/actions/plus.svg',
         );
       default:
         return HexSlot(
@@ -56,7 +56,7 @@ class DashboardsMenuPage extends StatelessWidget {
           color: dashboardsColor,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/search.svg',
+          icon: 'assets/icons/actions/search.svg',
         );
     }
   }

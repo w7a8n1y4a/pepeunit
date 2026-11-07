@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <g fill="none" stroke="#ffffff" stroke-width="3.3" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(32 33) rotate(-42) scale(0.66) translate(1 -9)">
+    <path d="M2 10 C2 24 9 33 22 37 L26 29 C17 26 14 19 14 10Z" fill="#000000" />
+    <path d="M-10 10 L-16 30 H-26 L-19 10Z" fill="#000000" />
+    <path d="M-4 10 C-3 16 2 17 3 12" fill="none"/>
+    <path d="M-24 -5 L-44 4 V19 H-33 L-24 12Z" fill="#000000" />
+    <path d="M-44 8 H-37" fill="none"/>
+    <rect x="-26" y="-9" width="26" height="20" rx="6" fill="#000000"/>
+    <rect x="-21" y="-1" width="14" height="7" rx="3.5" fill="#000000"/>
+    <rect x="-2" y="-9" width="21" height="17" rx="5" fill="#000000"/>
+    <path d="M5 0 V4 M9 0 V4 M13 0 V4" fill="none"/>
+    <path d="M19 -5 H38 V3 H19" fill="none" />
+    <path d="M19 -6 H38 M19 4 H38" fill="none"/>
+    <path d="M38 -9 H46 L48 -6 V5 H38Z" fill="#000000" />
+    <path d="M42 -9 V-13 H45" fill="none"/>
+    </g>
+  </g>
+</svg>

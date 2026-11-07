@@ -117,7 +117,7 @@ class _RegistryCreatePageState extends State<RegistryCreatePage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/flag.svg',
+          icon: 'assets/icons/status/flag.svg',
         );
       case 'credentials':
         return HexSlot(
@@ -127,7 +127,7 @@ class _RegistryCreatePageState extends State<RegistryCreatePage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/key.svg',
+          icon: 'assets/icons/objects/key.svg',
         );
       default:
         return HexSlot(
@@ -138,7 +138,7 @@ class _RegistryCreatePageState extends State<RegistryCreatePage> {
           enabled: _ready,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/plus.svg',
+          icon: 'assets/icons/actions/plus.svg',
         );
     }
   }

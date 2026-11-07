@@ -71,7 +71,25 @@ flutter:
   # the material Icons class.
   uses-material-design: true
   assets:
-    - assets/icons/
+    - assets/icons/actions/
+    - assets/icons/objects/
+    - assets/icons/sections/
+    - assets/icons/services/
+    - assets/icons/status/
+    - assets/background/animals/
+    - assets/background/asia/
+    - assets/background/currencies/
+    - assets/background/egypt/
+    - assets/background/elements/
+    - assets/background/math/
+    - assets/background/pepe/
+    - assets/background/physics/
+    - assets/background/plants/
+    - assets/background/pop/
+    - assets/background/religions/
+    - assets/background/slavic/
+    - assets/background/symbols/
+    - assets/background/tech/
   fonts:
     - family: OpenGost Type B
       fonts:

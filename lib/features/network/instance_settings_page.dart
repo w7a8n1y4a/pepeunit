@@ -89,7 +89,7 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/settings.svg',
+          icon: 'assets/icons/actions/settings.svg',
         );
       case 'ops':
         return HexSlot(
@@ -99,7 +99,7 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/terminal.svg',
+          icon: 'assets/icons/objects/terminal.svg',
         );
       case 'track':
         return HexSlot(
@@ -108,7 +108,7 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
           color: addColor,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/plus.svg',
+          icon: 'assets/icons/actions/plus.svg',
         );
       default:
         return HexSlot(

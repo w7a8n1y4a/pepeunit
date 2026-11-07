@@ -232,7 +232,9 @@ void main() {
       Identity(publicKey: publicKey, secretKey: Uint8List.fromList(const [9])),
     );
     final mark = keyMark(publicKey);
-    await tester.pumpWidget(AppScope(model: model, child: const PepeunitApp()));
+    await tester.pumpWidget(
+      AppScope(model: model, child: const PepeunitApp(background: false)),
+    );
     await tester.pumpAndSettle();
 
     expect(tester.getSemantics(find.bySemanticsLabel('Аккаунт')).value, mark);

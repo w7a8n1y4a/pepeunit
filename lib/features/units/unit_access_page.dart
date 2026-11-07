@@ -109,7 +109,7 @@ class _AccessPageState extends State<AccessPage> {
         busy: _loading,
         q: slot.q,
         r: slot.r,
-        icon: 'assets/icons/plus.svg',
+        icon: 'assets/icons/actions/plus.svg',
       );
     }
     if (slot.id == 'prev' || slot.id == 'next') {
@@ -173,7 +173,9 @@ class _AccessPageState extends State<AccessPage> {
       color: isUnit ? unitsColor : peopleColor,
       q: slot.q,
       r: slot.r,
-      icon: isUnit ? 'assets/icons/micro.svg' : 'assets/icons/account.svg',
+      icon: isUnit
+          ? 'assets/icons/sections/micro.svg'
+          : 'assets/icons/sections/account.svg',
     );
   }
 
@@ -309,8 +311,8 @@ class AccessKindPage extends StatelessWidget {
                   q: slot.q,
                   r: slot.r,
                   icon: slot.id == 'User'
-                      ? 'assets/icons/account.svg'
-                      : 'assets/icons/micro.svg',
+                      ? 'assets/icons/sections/account.svg'
+                      : 'assets/icons/sections/micro.svg',
                 ),
       ],
       onTap: (id) => _tap(context, id),

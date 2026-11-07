@@ -102,7 +102,7 @@ class _RepoPageState extends State<RepoPage> {
             busy: _loading || _pending == 'card',
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/repo.svg',
+            icon: 'assets/icons/objects/repo.svg',
           );
         }
         return repoMark(
@@ -148,7 +148,7 @@ class _RepoPageState extends State<RepoPage> {
           color: addColor,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/unit_add.svg',
+          icon: 'assets/icons/actions/unit_add.svg',
           enabled: model.target?.signedIn == true,
         );
       case 'sync':
@@ -164,7 +164,7 @@ class _RepoPageState extends State<RepoPage> {
           busy: _pending == 'sync',
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/reload.svg',
+          icon: 'assets/icons/actions/reload.svg',
         );
       case 'credentials':
         return HexSlot(
@@ -173,7 +173,7 @@ class _RepoPageState extends State<RepoPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/key.svg',
+          icon: 'assets/icons/objects/key.svg',
         );
       case 'branches':
         final count = repo?.branches.length;
@@ -184,7 +184,7 @@ class _RepoPageState extends State<RepoPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/repo.svg',
+          icon: 'assets/icons/objects/repo.svg',
         );
       case 'delete':
         return HexSlot(
@@ -194,7 +194,7 @@ class _RepoPageState extends State<RepoPage> {
           busy: _pending == 'delete',
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/trash.svg',
+          icon: 'assets/icons/actions/trash.svg',
         );
       default:
         return HexSlot(

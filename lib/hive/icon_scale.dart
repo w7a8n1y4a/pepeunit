@@ -19,29 +19,29 @@
 const menuInk = 0.88;
 
 const _boost = <String, double>{
-  'assets/icons/settings.svg': 1.6,
-  'assets/icons/power.svg': 1.5,
-  'assets/icons/telegram.svg': 1.2,
-  'assets/icons/sight.svg': 1.2,
+  'assets/icons/actions/settings.svg': 1.6,
+  'assets/icons/actions/power.svg': 1.5,
+  'assets/icons/services/telegram.svg': 1.2,
+  'assets/icons/status/sight.svg': 1.2,
 };
 
 const _inkFill = <String, double>{
-  'assets/icons/account.svg': 0.80,
-  'assets/icons/demote.svg': 0.81,
-  'assets/icons/terminal.svg': 0.80,
-  'assets/icons/key_load.svg': 0.80,
-  'assets/icons/icon_load.svg': 0.78,
-  'assets/icons/key_gen.svg': 0.77,
-  'assets/icons/key.svg': 0.77,
-  'assets/icons/exclaim.svg': 0.77,
-  'assets/icons/send.svg': 0.75,
-  'assets/icons/cloud_up.svg': 0.81,
-  'assets/icons/rocket.svg': 0.70,
-  'assets/icons/plus.svg': 0.69,
-  'assets/icons/search.svg': 0.66,
-  'assets/icons/check.svg': 0.62,
-  'assets/icons/ban.svg': 0.62,
-  'assets/icons/repo.svg': 0.86,
+  'assets/icons/sections/account.svg': 0.80,
+  'assets/icons/actions/demote.svg': 0.81,
+  'assets/icons/objects/terminal.svg': 0.80,
+  'assets/icons/actions/key_load.svg': 0.80,
+  'assets/icons/actions/icon_load.svg': 0.78,
+  'assets/icons/actions/key_gen.svg': 0.77,
+  'assets/icons/objects/key.svg': 0.77,
+  'assets/icons/status/exclaim.svg': 0.77,
+  'assets/icons/actions/send.svg': 0.75,
+  'assets/icons/actions/cloud_up.svg': 0.81,
+  'assets/icons/objects/rocket.svg': 0.70,
+  'assets/icons/actions/plus.svg': 0.69,
+  'assets/icons/actions/search.svg': 0.66,
+  'assets/icons/actions/check.svg': 0.62,
+  'assets/icons/actions/ban.svg': 0.62,
+  'assets/icons/objects/repo.svg': 0.86,
 };
 
 /// How far to grow [asset] inside the icon square. The same file always

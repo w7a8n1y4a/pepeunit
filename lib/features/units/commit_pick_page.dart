@@ -189,7 +189,7 @@ class _CommitPickPageState extends State<CommitPickPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/commit.svg',
+          icon: 'assets/icons/objects/commit.svg',
         );
     }
   }
@@ -326,7 +326,7 @@ class _QueryCellState extends State<_QueryCell> {
       controller: _controller,
       fieldKey: const ValueKey('commit-search'),
       hint: unitText(language, 'Хеш или тег', 'Hash or tag'),
-      leading: 'assets/icons/search.svg',
+      leading: 'assets/icons/actions/search.svg',
       roomyCaption: !widget.compilable,
       onChanged: widget.onSearch,
       caption: widget.compilable

@@ -132,7 +132,9 @@ class _UnitPipePageState extends State<UnitPipePage> {
           busy: _pending == 'flag',
           q: slot.q,
           r: slot.r,
-          icon: _on ? 'assets/icons/flag.svg' : 'assets/icons/close.svg',
+          icon: _on
+              ? 'assets/icons/status/flag.svg'
+              : 'assets/icons/actions/close.svg',
         );
       case 'editor':
         final policy = pipePolicyOfStored(_io?.pipeYml);
@@ -144,7 +146,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
           enabled: usable,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/file.svg',
+          icon: 'assets/icons/objects/file.svg',
           center: '.yml',
         );
       case 'import':
@@ -154,7 +156,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
           enabled: usable,
           ru: 'Загрузить данные',
           en: 'Upload data',
-          icon: 'upload.svg',
+          icon: 'actions/upload.svg',
         );
       case 'export':
         return _action(
@@ -163,7 +165,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
           enabled: usable,
           ru: 'Выгрузить данные',
           en: 'Download data',
-          icon: 'download.svg',
+          icon: 'actions/download.svg',
         );
       case 'clear':
         return _action(
@@ -172,7 +174,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
           enabled: usable,
           ru: 'Удалить все данные',
           en: 'Delete all data',
-          icon: 'trash.svg',
+          icon: 'actions/trash.svg',
           color: errorColor,
         );
       case 'confirm':
@@ -183,7 +185,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
           busy: _pending == 'confirm',
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/trash.svg',
+          icon: 'assets/icons/actions/trash.svg',
         );
     }
     return HexSlot(

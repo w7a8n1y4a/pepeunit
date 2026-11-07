@@ -177,7 +177,7 @@ class _InstancePageState extends State<InstancePage> {
           'Сделать избранным',
           'Make favorite',
           const Color(0xFF4CAF50),
-          'assets/icons/sight.svg',
+          'assets/icons/status/sight.svg',
         );
       case 'clear':
         return _action(
@@ -186,7 +186,7 @@ class _InstancePageState extends State<InstancePage> {
           'Разжаловать',
           'Demote',
           errorColor,
-          'assets/icons/demote.svg',
+          'assets/icons/actions/demote.svg',
         );
       case 'telegram':
         return _action(
@@ -195,7 +195,7 @@ class _InstancePageState extends State<InstancePage> {
           'Телеграм бот',
           'Telegram Bot',
           color,
-          'assets/icons/telegram.svg',
+          'assets/icons/services/telegram.svg',
         );
       case 'settings':
         return HexSlot(
@@ -205,7 +205,7 @@ class _InstancePageState extends State<InstancePage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/settings.svg',
+          icon: 'assets/icons/actions/settings.svg',
         );
       case 'users':
         return HexSlot(
@@ -214,14 +214,14 @@ class _InstancePageState extends State<InstancePage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/users.svg',
+          icon: 'assets/icons/objects/users.svg',
         );
       case 'peer':
         final trust = peer?.trust ?? '';
         final peerIcon = switch (trust) {
-          'Trust' => 'assets/icons/check.svg',
-          'Blocking' => 'assets/icons/ban.svg',
-          _ => 'assets/icons/settings.svg',
+          'Trust' => 'assets/icons/actions/check.svg',
+          'Blocking' => 'assets/icons/actions/ban.svg',
+          _ => 'assets/icons/actions/settings.svg',
         };
         return HexSlot(
           id: 'peer',
@@ -239,7 +239,7 @@ class _InstancePageState extends State<InstancePage> {
           'Доверять',
           'Trust',
           color,
-          'assets/icons/check.svg',
+          'assets/icons/actions/check.svg',
         );
       case 'block':
         return _action(
@@ -248,7 +248,7 @@ class _InstancePageState extends State<InstancePage> {
           'Блокировать',
           'Block',
           color,
-          'assets/icons/ban.svg',
+          'assets/icons/actions/ban.svg',
         );
       case 'delete':
         return _action(
@@ -257,7 +257,7 @@ class _InstancePageState extends State<InstancePage> {
           'Удалить',
           'Delete',
           errorColor,
-          'assets/icons/trash.svg',
+          'assets/icons/actions/trash.svg',
         );
       case 'scan':
         return _action(
@@ -266,7 +266,7 @@ class _InstancePageState extends State<InstancePage> {
           'Опрос',
           'Scan',
           color,
-          'assets/icons/reload.svg',
+          'assets/icons/actions/reload.svg',
         );
       default:
         return HexSlot(

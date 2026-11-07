@@ -88,7 +88,7 @@ class _MemberPageState extends State<MemberPage> {
             busy: _loading,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/account.svg',
+            icon: 'assets/icons/sections/account.svg',
             tappable: false,
           );
         }
@@ -110,7 +110,7 @@ class _MemberPageState extends State<MemberPage> {
           'Назначить админом',
           'Make admin',
           color,
-          'assets/icons/admin.svg',
+          'assets/icons/actions/admin.svg',
         );
       case 'revoke':
         return _action(
@@ -119,7 +119,7 @@ class _MemberPageState extends State<MemberPage> {
           'Снять админа',
           'Remove admin',
           errorColor,
-          'assets/icons/demote.svg',
+          'assets/icons/actions/demote.svg',
         );
       case 'block':
         return _action(
@@ -128,7 +128,7 @@ class _MemberPageState extends State<MemberPage> {
           'Заблокировать',
           'Block',
           errorColor,
-          'assets/icons/ban.svg',
+          'assets/icons/actions/ban.svg',
         );
       case 'unblock':
         return _action(
@@ -137,7 +137,7 @@ class _MemberPageState extends State<MemberPage> {
           'Разблокировать',
           'Unblock',
           color,
-          'assets/icons/check.svg',
+          'assets/icons/actions/check.svg',
         );
       default:
         return HexSlot(

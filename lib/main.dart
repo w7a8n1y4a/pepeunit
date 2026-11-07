@@ -50,6 +50,7 @@ import 'features/units/unit_work_pages.dart';
 import 'features/units/units_menu_page.dart';
 import 'features/units/units_page.dart';
 import 'dashboards/dashboard.dart';
+import 'hive/background.dart';
 import 'hive/hex_order.dart';
 import 'hive/hex_scene.dart';
 import 'registry/registry_view.dart';
@@ -66,7 +67,10 @@ Future<void> main() async {
 }
 
 class PepeunitApp extends StatefulWidget {
-  const PepeunitApp({super.key});
+  /// [background] is false in tests: the mosaic keeps a timer running.
+  const PepeunitApp({this.background = true, super.key});
+
+  final bool background;
 
   @override
   State<PepeunitApp> createState() => _PepeunitAppState();
@@ -344,7 +348,7 @@ class _PepeunitAppState extends State<PepeunitApp> {
                   final commit = state.uri.queryParameters['commit'];
                   return NamePickPage(
                     title: 'Platform',
-                    icon: 'assets/icons/brick.svg',
+                    icon: 'assets/icons/objects/brick.svg',
                     scope: scaleTickOf(state.uri),
                     path: state.uri
                         .replace(
@@ -523,7 +527,7 @@ class _PepeunitAppState extends State<PepeunitApp> {
                 'Тип',
                 'Type',
               ),
-              icon: 'assets/icons/brick.svg',
+              icon: 'assets/icons/objects/brick.svg',
               color: dashboardsColor,
               scope: scaleTickOf(state.uri),
               path: '/dashboards/type',
@@ -636,6 +640,17 @@ class _PepeunitAppState extends State<PepeunitApp> {
         ),
       ),
       routerConfig: _router,
+      // One mosaic under the router, so it stays put while screens change.
+      builder: (context, child) => ColoredBox(
+        color: sceneBackground,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            if (widget.background) const HiveBackground(),
+            if (child != null) child,
+          ],
+        ),
+      ),
     );
   }
 }

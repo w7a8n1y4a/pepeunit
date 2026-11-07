@@ -72,7 +72,7 @@ HexSlot dashboardMark({
     color: dashboardsColor,
     q: q,
     r: r,
-    icon: 'assets/icons/panel.svg',
+    icon: 'assets/icons/sections/panel.svg',
     tappable: tappable,
     busy: busy,
   );

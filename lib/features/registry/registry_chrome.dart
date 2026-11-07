@@ -50,7 +50,7 @@ HexSlot repoMark({
     color: registryColor,
     q: q,
     r: r,
-    icon: image == null ? 'assets/icons/repo.svg' : null,
+    icon: image == null ? 'assets/icons/objects/repo.svg' : null,
     image: image,
     tappable: tappable,
     busy: busy,

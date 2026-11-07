@@ -50,7 +50,7 @@ class UnitsMenuPage extends StatelessWidget {
           color: unitAddColor,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/unit_add.svg',
+          icon: 'assets/icons/actions/unit_add.svg',
         );
       case 'search':
         return HexSlot(
@@ -59,7 +59,7 @@ class UnitsMenuPage extends StatelessWidget {
           color: unitsColor,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/search.svg',
+          icon: 'assets/icons/actions/search.svg',
         );
       default:
         return HexSlot(
@@ -68,7 +68,7 @@ class UnitsMenuPage extends StatelessWidget {
           color: unitGroupsColor,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/groups.svg',
+          icon: 'assets/icons/objects/groups.svg',
         );
     }
   }

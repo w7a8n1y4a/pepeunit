@@ -92,7 +92,7 @@ class _GroupsPageState extends State<GroupsPage> {
               color: unitGroupsColor,
               controller: _search,
               hint: unitText(language, 'Поиск', 'Search'),
-              leading: 'assets/icons/search.svg',
+              leading: 'assets/icons/actions/search.svg',
               onChanged: (_) {
                 _typing.later(() {
                   if (!mounted) return;
@@ -108,7 +108,7 @@ class _GroupsPageState extends State<GroupsPage> {
             color: addColor,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/plus.svg',
+            icon: 'assets/icons/actions/plus.svg',
           ),
           'window' => HexSlot(
             id: 'window',
@@ -143,7 +143,7 @@ class _GroupsPageState extends State<GroupsPage> {
             q: slot.q,
             r: slot.r,
             icon: model.cachedIcon(_icon(slot.id)) == null
-                ? 'assets/icons/instances.svg'
+                ? 'assets/icons/sections/instances.svg'
                 : null,
             image: model.cachedIcon(_icon(slot.id)),
           ),
@@ -299,7 +299,7 @@ class _GroupCreatePageState extends State<GroupCreatePage> {
             busy: _busy,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/plus.svg',
+            icon: 'assets/icons/actions/plus.svg',
           ),
           _ => HexSlot(
             id: slot.id,
@@ -420,7 +420,7 @@ class _GroupPageState extends State<GroupPage> {
             q: slot.q,
             r: slot.r,
             icon: model.cachedIcon(_group?.iconUuid) == null
-                ? 'assets/icons/icon_load.svg'
+                ? 'assets/icons/actions/icon_load.svg'
                 : null,
             image: model.cachedIcon(_group?.iconUuid),
           ),
@@ -430,7 +430,7 @@ class _GroupPageState extends State<GroupPage> {
             color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/micro.svg',
+            icon: 'assets/icons/sections/micro.svg',
           ),
           'delete' => HexSlot(
             id: 'delete',
@@ -439,7 +439,7 @@ class _GroupPageState extends State<GroupPage> {
             busy: _pending == 'delete',
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/trash.svg',
+            icon: 'assets/icons/actions/trash.svg',
           ),
           _ => HexSlot(
             id: slot.id,
@@ -624,7 +624,7 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
             color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/plus.svg',
+            icon: 'assets/icons/actions/plus.svg',
           ),
           'window' => HexSlot(
             id: 'window',
@@ -799,7 +799,7 @@ class _MembershipPageState extends State<MembershipPage> {
             color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/micro.svg',
+            icon: 'assets/icons/sections/micro.svg',
           ),
           'unlink' => HexSlot(
             id: 'unlink',
@@ -808,7 +808,7 @@ class _MembershipPageState extends State<MembershipPage> {
             busy: _busy,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/close.svg',
+            icon: 'assets/icons/actions/close.svg',
           ),
           _ => HexSlot(
             id: slot.id,

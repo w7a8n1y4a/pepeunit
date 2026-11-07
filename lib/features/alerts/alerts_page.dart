@@ -166,7 +166,7 @@ class _AlertsPageState extends State<AlertsPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/settings.svg',
+          icon: 'assets/icons/actions/settings.svg',
         );
       default:
         final uuid = slot.id.startsWith('notice:') ? slot.id.substring(7) : '';

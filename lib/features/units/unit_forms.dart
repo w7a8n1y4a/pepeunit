@@ -111,7 +111,7 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
           enabled: ready,
           q: slot.q,
           r: slot.r,
-          icon: image == null ? 'assets/icons/icon_load.svg' : null,
+          icon: image == null ? 'assets/icons/actions/icon_load.svg' : null,
           image: image,
         );
       case 'name':
@@ -164,7 +164,7 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
           enabled: ready,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/repo.svg',
+          icon: 'assets/icons/objects/repo.svg',
         );
       case 'updates':
         return HexSlot(
@@ -176,7 +176,7 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
           enabled: ready,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/updates.svg',
+          icon: 'assets/icons/actions/updates.svg',
         );
       case 'save':
         return HexSlot(
@@ -187,7 +187,7 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
           enabled: ready,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/check.svg',
+          icon: 'assets/icons/actions/check.svg',
         );
       default:
         return HexSlot(

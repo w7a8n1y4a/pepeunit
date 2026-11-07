@@ -83,7 +83,7 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/settings.svg',
+          icon: 'assets/icons/actions/settings.svg',
         );
       case 'prev':
         return pageStepSlot(
@@ -256,7 +256,7 @@ class _LineFieldState extends State<LineField> {
       fieldKey: const ValueKey('network-search'),
       hint: widget.hint,
       issue: '',
-      leading: 'assets/icons/search.svg',
+      leading: 'assets/icons/actions/search.svg',
       onChanged: widget.onChanged,
       roomyCaption: toggle != null,
       caption: toggle == null

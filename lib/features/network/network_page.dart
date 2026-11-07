@@ -68,7 +68,7 @@ class _NetworkPageState extends State<NetworkPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/search.svg',
+          icon: 'assets/icons/actions/search.svg',
         );
       case 'idle':
         return HexSlot(
@@ -77,7 +77,7 @@ class _NetworkPageState extends State<NetworkPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/exclaim.svg',
+          icon: 'assets/icons/status/exclaim.svg',
           tappable: false,
         );
       case 'target':

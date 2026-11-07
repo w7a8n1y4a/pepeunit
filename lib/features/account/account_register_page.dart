@@ -63,7 +63,7 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
         busy: _busy,
         q: generate.$1,
         r: generate.$2,
-        icon: 'assets/icons/key_gen.svg',
+        icon: 'assets/icons/actions/key_gen.svg',
       ),
       backSlot(
         title: accountText(language, 'Назад', 'Back'),

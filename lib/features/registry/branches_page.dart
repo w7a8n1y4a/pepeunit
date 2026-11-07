@@ -90,7 +90,7 @@ class _BranchesPageState extends State<BranchesPage> {
             q: frame.cells.first.$1,
             r: frame.cells.first.$2,
             tappable: false,
-            icon: 'assets/icons/repo.svg',
+            icon: 'assets/icons/objects/repo.svg',
           ),
         );
       }
@@ -175,7 +175,7 @@ class _BranchesPageState extends State<BranchesPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/repo.svg',
+          icon: 'assets/icons/objects/repo.svg',
           tappable: false,
         );
     }

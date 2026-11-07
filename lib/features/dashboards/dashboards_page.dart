@@ -95,7 +95,7 @@ class _DashboardsPageState extends State<DashboardsPage> {
               color: dashboardsColor,
               controller: _search,
               hint: dashText(language, 'Поиск', 'Search'),
-              leading: 'assets/icons/search.svg',
+              leading: 'assets/icons/actions/search.svg',
               onChanged: (_) {
                 _typing.later(() {
                   if (!mounted) return;
@@ -297,7 +297,7 @@ class _DashboardCreatePageState extends State<DashboardCreatePage> {
             busy: _busy,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/plus.svg',
+            icon: 'assets/icons/actions/plus.svg',
           ),
           _ => HexSlot(
             id: slot.id,

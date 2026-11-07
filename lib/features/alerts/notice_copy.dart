@@ -95,7 +95,7 @@ class NoticeCloseButton extends StatelessWidget {
             width: extent,
             height: extent,
             child: SvgPicture.asset(
-              'assets/icons/close.svg',
+              'assets/icons/actions/close.svg',
               width: extent,
               height: extent,
             ),

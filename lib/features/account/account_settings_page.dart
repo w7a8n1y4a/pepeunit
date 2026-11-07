@@ -79,7 +79,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         busy: _pending == 'icon',
         q: spot[0].$1,
         r: spot[0].$2,
-        icon: png == null ? 'assets/icons/icon_load.svg' : null,
+        icon: png == null ? 'assets/icons/actions/icon_load.svg' : null,
         image: png,
       ),
       HexSlot(
@@ -109,7 +109,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         busy: waiting,
         q: spot[2].$1,
         r: spot[2].$2,
-        icon: 'assets/icons/rocket.svg',
+        icon: 'assets/icons/objects/rocket.svg',
       ),
       HexSlot(
         id: 'pull',
@@ -122,7 +122,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         busy: _pending == 'pull',
         q: spot[5].$1,
         r: spot[5].$2,
-        icon: 'assets/icons/reentry.svg',
+        icon: 'assets/icons/actions/reentry.svg',
       ),
       HexSlot(
         id: 'parameters',
@@ -138,7 +138,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
         color: color,
         q: spot[4].$1,
         r: spot[4].$2,
-        icon: 'assets/icons/notifications.svg',
+        icon: 'assets/icons/sections/notifications.svg',
       ),
     ];
     appendError(

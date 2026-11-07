@@ -92,7 +92,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         color: color,
         q: spot[0].$1,
         r: spot[0].$2,
-        icon: 'assets/icons/signin.svg',
+        icon: 'assets/icons/actions/signin.svg',
       ),
       _registration(language, color, spot[1].$1, spot[1].$2, cooling),
       backSlot(title: back, q: backAt.$1, r: backAt.$2),
@@ -118,7 +118,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         color: color,
         q: spot[0].$1,
         r: spot[0].$2,
-        icon: png == null ? 'assets/icons/account.svg' : null,
+        icon: png == null ? 'assets/icons/sections/account.svg' : null,
         image: png,
         tappable: false,
       ),
@@ -128,7 +128,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         color: color,
         q: spot[1].$1,
         r: spot[1].$2,
-        icon: 'assets/icons/settings.svg',
+        icon: 'assets/icons/actions/settings.svg',
       ),
       HexSlot(
         id: 'key',
@@ -138,7 +138,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         busy: _busy,
         q: spot[2].$1,
         r: spot[2].$2,
-        icon: 'assets/icons/key.svg',
+        icon: 'assets/icons/objects/key.svg',
       ),
       HexSlot(
         id: 'signout',
@@ -146,7 +146,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         color: color,
         q: spot[3].$1,
         r: spot[3].$2,
-        icon: 'assets/icons/signout.svg',
+        icon: 'assets/icons/actions/signout.svg',
       ),
       backSlot(title: back, q: backAt.$1, r: backAt.$2),
     ];
@@ -168,7 +168,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
       enabled: !locked,
       q: q,
       r: r,
-      icon: 'assets/icons/registration.svg',
+      icon: 'assets/icons/actions/registration.svg',
     );
   }
 

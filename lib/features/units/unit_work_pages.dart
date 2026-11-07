@@ -56,7 +56,7 @@ class _UnitCommandsPageState extends State<UnitCommandsPage> {
                 enabled: _pending == null,
                 q: slot.q,
                 r: slot.r,
-                icon: 'assets/icons/terminal.svg',
+                icon: 'assets/icons/objects/terminal.svg',
               ),
     ];
     appendError(
@@ -166,7 +166,7 @@ class _UnitArchivesPageState extends State<UnitArchivesPage> {
                 busy: _pending == slot.id,
                 q: slot.q,
                 r: slot.r,
-                icon: 'assets/icons/archive.svg',
+                icon: 'assets/icons/objects/archive.svg',
               ),
     ];
     appendError(
@@ -273,7 +273,7 @@ class _UnitPlatformsPageState extends State<UnitPlatformsPage> {
           tappable: false,
           q: frame.cells.first.$1,
           r: frame.cells.first.$2,
-          icon: 'assets/icons/brick.svg',
+          icon: 'assets/icons/objects/brick.svg',
         ),
       );
     } else {
@@ -294,7 +294,7 @@ class _UnitPlatformsPageState extends State<UnitPlatformsPage> {
                   color: unitsColor,
                   q: slot.q,
                   r: slot.r,
-                  icon: 'assets/icons/brick.svg',
+                  icon: 'assets/icons/objects/brick.svg',
                 ),
         );
       }
@@ -390,7 +390,7 @@ class _UnitDeletePageState extends State<UnitDeletePage> {
                 busy: _busy,
                 q: slot.q,
                 r: slot.r,
-                icon: 'assets/icons/trash.svg',
+                icon: 'assets/icons/actions/trash.svg',
               ),
     ];
     appendError(

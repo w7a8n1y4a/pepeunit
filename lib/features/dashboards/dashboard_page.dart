@@ -103,7 +103,7 @@ class _DashboardPageState extends State<DashboardPage> {
             busy: _loading,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/panel.svg',
+            icon: 'assets/icons/sections/panel.svg',
           );
         }
         return dashboardMark(
@@ -136,7 +136,7 @@ class _DashboardPageState extends State<DashboardPage> {
           color: dashboardsColor,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/brick.svg',
+          icon: 'assets/icons/objects/brick.svg',
         );
       case 'sync':
         return HexSlot(
@@ -147,7 +147,7 @@ class _DashboardPageState extends State<DashboardPage> {
           enabled: dashboard != null && _pending == null,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/cloud_up.svg',
+          icon: 'assets/icons/actions/cloud_up.svg',
         );
       case 'open':
         return HexSlot(
@@ -158,7 +158,7 @@ class _DashboardPageState extends State<DashboardPage> {
           enabled: dashboard?.opens == true && _pending == null,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/grafana.svg',
+          icon: 'assets/icons/services/grafana.svg',
         );
       case 'delete':
         return HexSlot(
@@ -167,7 +167,7 @@ class _DashboardPageState extends State<DashboardPage> {
           color: errorColor,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/trash.svg',
+          icon: 'assets/icons/actions/trash.svg',
         );
       default:
         return HexSlot(
@@ -329,7 +329,7 @@ class _DashboardDeletePageState extends State<DashboardDeletePage> {
                 busy: _busy,
                 q: slot.q,
                 r: slot.r,
-                icon: 'assets/icons/trash.svg',
+                icon: 'assets/icons/actions/trash.svg',
               ),
     ];
     appendError(

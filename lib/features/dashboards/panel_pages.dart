@@ -35,7 +35,7 @@ HexSlot panelMark({
     color: dashboardsColor,
     q: q,
     r: r,
-    icon: 'assets/icons/brick.svg',
+    icon: 'assets/icons/objects/brick.svg',
     tappable: tappable,
     busy: busy,
   );
@@ -146,7 +146,7 @@ class _PanelsPageState extends State<PanelsPage> {
           busy: _loading,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/plus.svg',
+          icon: 'assets/icons/actions/plus.svg',
         );
       case 'prev' || 'next':
         final forward = slot.id == 'next';
@@ -280,7 +280,7 @@ class _PanelCreatePageState extends State<PanelCreatePage> {
             color: dashboardsColor,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/brick.svg',
+            icon: 'assets/icons/objects/brick.svg',
           ),
           'create' => HexSlot(
             id: 'create',
@@ -289,7 +289,7 @@ class _PanelCreatePageState extends State<PanelCreatePage> {
             busy: _busy,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/plus.svg',
+            icon: 'assets/icons/actions/plus.svg',
           ),
           _ => HexSlot(
             id: slot.id,
@@ -423,7 +423,7 @@ class _PanelPageState extends State<PanelPage> {
                     busy: _loading,
                     q: slot.q,
                     r: slot.r,
-                    icon: 'assets/icons/brick.svg',
+                    icon: 'assets/icons/objects/brick.svg',
                   )
                 : panelMark(
                     id: 'card',
@@ -448,7 +448,7 @@ class _PanelPageState extends State<PanelPage> {
                   ]),
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/io.svg',
+            icon: 'assets/icons/objects/io.svg',
           ),
           'delete' => HexSlot(
             id: 'delete',
@@ -457,7 +457,7 @@ class _PanelPageState extends State<PanelPage> {
             busy: _deleting,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/trash.svg',
+            icon: 'assets/icons/actions/trash.svg',
           ),
           _ => HexSlot(
             id: slot.id,
@@ -666,7 +666,7 @@ class _PanelNodesPageState extends State<PanelNodesPage> {
           busy: _loading,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/plus.svg',
+          icon: 'assets/icons/actions/plus.svg',
         );
       case 'prev' || 'next':
         final forward = slot.id == 'next';
@@ -883,7 +883,7 @@ class _PanelNodeFormPageState extends State<PanelNodeFormPage> {
             enabled: ready,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/plus.svg',
+            icon: 'assets/icons/actions/plus.svg',
           ),
           _ => HexSlot(
             id: slot.id,
@@ -936,7 +936,9 @@ class _PanelNodeFormPageState extends State<PanelNodeFormPage> {
       enabled: enabled,
       q: slot.q,
       r: slot.r,
-      icon: on ? 'assets/icons/flag.svg' : 'assets/icons/close.svg',
+      icon: on
+          ? 'assets/icons/status/flag.svg'
+          : 'assets/icons/actions/close.svg',
     );
   }
 

@@ -360,7 +360,7 @@ class _QueryCellState extends State<_QueryCell> {
       controller: _controller,
       fieldKey: const ValueKey('unit-search'),
       hint: unitText(language, 'Название', 'Name'),
-      leading: 'assets/icons/search.svg',
+      leading: 'assets/icons/actions/search.svg',
       onChanged: (text) {
         if (widget.local) {
           query.text = text;

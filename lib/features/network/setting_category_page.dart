@@ -159,7 +159,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
             busy: _pending == 'tests',
             q: spots[i].$1,
             r: spots[i].$2,
-            icon: 'assets/icons/rorschach.svg',
+            icon: 'assets/icons/objects/rorschach.svg',
           ),
           'scan-all' => HexSlot(
             id: 'scan-all',
@@ -168,7 +168,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
             busy: _pending == 'scan-all',
             q: spots[i].$1,
             r: spots[i].$2,
-            icon: 'assets/icons/instances.svg',
+            icon: 'assets/icons/sections/instances.svg',
           ),
           'update-repos' => HexSlot(
             id: 'update-repos',
@@ -181,7 +181,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
             busy: _pending == 'update-repos',
             q: spots[i].$1,
             r: spots[i].$2,
-            icon: 'assets/icons/repo.svg',
+            icon: 'assets/icons/objects/repo.svg',
           ),
           'update-units' => HexSlot(
             id: 'update-units',
@@ -190,7 +190,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
             busy: _pending == 'update-units',
             q: spots[i].$1,
             r: spots[i].$2,
-            icon: 'assets/icons/micro.svg',
+            icon: 'assets/icons/sections/micro.svg',
           ),
           'reboot' => HexSlot(
             id: 'reboot',
@@ -199,7 +199,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
             busy: _pending == 'reboot',
             q: spots[i].$1,
             r: spots[i].$2,
-            icon: 'assets/icons/power.svg',
+            icon: 'assets/icons/actions/power.svg',
           ),
           _ => HexSlot(
             id: items[i],
@@ -263,7 +263,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
         busy: _pending == 'icon',
         q: q,
         r: r,
-        icon: image == null ? 'assets/icons/icon_load.svg' : null,
+        icon: image == null ? 'assets/icons/actions/icon_load.svg' : null,
         image: image,
       );
     }
@@ -370,7 +370,9 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
         busy: _pending == 'bool:${field.key}',
         q: q,
         r: r,
-        icon: on ? 'assets/icons/flag.svg' : 'assets/icons/close.svg',
+        icon: on
+            ? 'assets/icons/status/flag.svg'
+            : 'assets/icons/actions/close.svg',
       );
     }
     if (field.kind == 'enum') {

@@ -41,7 +41,7 @@ class SettingCategory {
     required this.titles,
     this.fields = const [],
     this.links = const [],
-    this.icon = 'assets/icons/settings.svg',
+    this.icon = 'assets/icons/actions/settings.svg',
     this.requires = const [],
     this.flagNeedsFields = false,
   });
@@ -114,7 +114,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'instance',
     titles: {'ru': 'Инстанс', 'en': 'Instance'},
-    icon: 'assets/icons/instance.svg',
+    icon: 'assets/icons/objects/instance.svg',
     links: [
       'instance-flags',
       'instance-basic',
@@ -129,7 +129,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'instance-flags',
     titles: {'ru': 'Флаги', 'en': 'Flags'},
-    icon: 'assets/icons/flag.svg',
+    icon: 'assets/icons/status/flag.svg',
     fields: [
       _flag('pu_ff_federation_enable', 'Федерация', 'Federation'),
       _flag('pu_ff_prometheus_enable', 'Prometheus', 'Prometheus'),
@@ -139,7 +139,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'contacts',
     titles: {'ru': 'Контакты', 'en': 'Contacts'},
-    icon: 'assets/icons/phone.svg',
+    icon: 'assets/icons/services/phone.svg',
     fields: [
       _line(
         'pu_instance_owner_email',
@@ -174,7 +174,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'users',
     titles: {'ru': 'Пользователи', 'en': 'Users'},
-    icon: 'assets/icons/account.svg',
+    icon: 'assets/icons/sections/account.svg',
     fields: [
       _whole(
         'pu_instance_user_max_count',
@@ -202,7 +202,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'instance-basic',
     titles: {'ru': 'Базовые', 'en': 'Basic'},
-    icon: 'assets/icons/settings.svg',
+    icon: 'assets/icons/actions/settings.svg',
     fields: [
       _whole(
         'pu_instance_cipher_max_length',
@@ -251,7 +251,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'registry',
     titles: {'ru': 'Репозитории', 'en': 'Repositories'},
-    icon: 'assets/icons/git.svg',
+    icon: 'assets/icons/sections/git.svg',
     fields: [
       _whole(
         'pu_instance_repo_max_size',
@@ -272,7 +272,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'units',
     titles: {'ru': 'Аппараты', 'en': 'Units'},
-    icon: 'assets/icons/micro.svg',
+    icon: 'assets/icons/sections/micro.svg',
     fields: [
       _whole(
         'pu_instance_unit_log_expiration',
@@ -293,13 +293,13 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'mqtt',
     titles: {'ru': 'MQTT', 'en': 'MQTT'},
-    icon: 'assets/icons/wifi.svg',
+    icon: 'assets/icons/services/wifi.svg',
     links: ['mqtt-basic', 'mqtt-clients'],
   ),
   SettingCategory(
     id: 'mqtt-basic',
     titles: {'ru': 'Базовые', 'en': 'Basic'},
-    icon: 'assets/icons/settings.svg',
+    icon: 'assets/icons/actions/settings.svg',
     fields: [
       _whole(
         'pu_mqtt_keepalive',
@@ -342,7 +342,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'mqtt-clients',
     titles: {'ru': 'Клиенты', 'en': 'Clients'},
-    icon: 'assets/icons/instances.svg',
+    icon: 'assets/icons/sections/instances.svg',
     fields: [
       _whole(
         'pu_mqtt_max_client_id_len',
@@ -381,14 +381,14 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'datapipe',
     titles: {'ru': 'DataPipe', 'en': 'DataPipe'},
-    icon: 'assets/icons/pipe.svg',
+    icon: 'assets/icons/objects/pipe.svg',
     fields: [_flag('pu_ff_datapipe_enable', 'DataPipe Вкл ?', 'DataPipe on?')],
     links: ['datapipe-basic', 'datapipe-link'],
   ),
   SettingCategory(
     id: 'datapipe-basic',
     titles: {'ru': 'Базовые', 'en': 'Basic'},
-    icon: 'assets/icons/settings.svg',
+    icon: 'assets/icons/actions/settings.svg',
     requires: ['pu_ff_datapipe_enable'],
     fields: [
       _whole(
@@ -436,7 +436,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'datapipe-link',
     titles: {'ru': 'Соединение', 'en': 'Connection'},
-    icon: 'assets/icons/chain.svg',
+    icon: 'assets/icons/objects/chain.svg',
     requires: ['pu_ff_datapipe_enable'],
     fields: [
       _whole(
@@ -451,7 +451,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'notifications',
     titles: {'ru': 'Уведомления', 'en': 'Notifications'},
-    icon: 'assets/icons/notifications.svg',
+    icon: 'assets/icons/sections/notifications.svg',
     fields: [
       _flag('pu_ff_notification_enable', 'Уведомления Вкл?', 'Alerts on?'),
     ],
@@ -460,7 +460,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'notifications-basic',
     titles: {'ru': 'Базовые', 'en': 'Basic'},
-    icon: 'assets/icons/settings.svg',
+    icon: 'assets/icons/actions/settings.svg',
     requires: ['pu_ff_notification_enable'],
     fields: [
       _whole(
@@ -489,7 +489,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'notifications-telegram',
     titles: {'ru': 'Телеграм бот', 'en': 'Telegram Bot'},
-    icon: 'assets/icons/telegram.svg',
+    icon: 'assets/icons/services/telegram.svg',
     requires: ['pu_ff_telegram_bot_enable', 'pu_ff_notification_enable'],
     fields: [
       _whole(
@@ -518,13 +518,13 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'telegram',
     titles: {'ru': 'Телеграм бот', 'en': 'Telegram Bot'},
-    icon: 'assets/icons/telegram.svg',
+    icon: 'assets/icons/services/telegram.svg',
     links: ['telegram-link', 'telegram-look'],
   ),
   SettingCategory(
     id: 'telegram-link',
     titles: {'ru': 'Подключение', 'en': 'Connection'},
-    icon: 'assets/icons/key.svg',
+    icon: 'assets/icons/objects/key.svg',
     flagNeedsFields: true,
     fields: [
       _flag('pu_ff_telegram_bot_enable', 'Бот Вкл ?', 'Bot on?'),
@@ -564,7 +564,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'telegram-look',
     titles: {'ru': 'Визуальные', 'en': 'Visual'},
-    icon: 'assets/icons/library.svg',
+    icon: 'assets/icons/sections/library.svg',
     requires: ['pu_ff_telegram_bot_enable'],
     fields: [
       _whole(
@@ -586,7 +586,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'logs',
     titles: {'ru': 'Логи', 'en': 'Logs'},
-    icon: 'assets/icons/library.svg',
+    icon: 'assets/icons/sections/library.svg',
     fields: [
       const SettingField(
         'pu_instance_log_format',
@@ -605,7 +605,7 @@ final settingCategories = <SettingCategory>[
   SettingCategory(
     id: 'github',
     titles: {'ru': 'GitHub', 'en': 'GitHub'},
-    icon: 'assets/icons/key.svg',
+    icon: 'assets/icons/objects/key.svg',
     fields: [
       _line(
         'pu_instance_github_token_name',

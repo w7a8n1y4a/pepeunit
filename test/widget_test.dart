@@ -63,7 +63,9 @@ void main() {
   testWidgets('home opens a section and comes back', (tester) async {
     final model = AppModel(store: MemoryVaultStore());
     await model.load();
-    await tester.pumpWidget(AppScope(model: model, child: const PepeunitApp()));
+    await tester.pumpWidget(
+      AppScope(model: model, child: const PepeunitApp(background: false)),
+    );
     await tester.pumpAndSettle();
 
     expect(find.bySemanticsLabel('Аккаунт'), findsOneWidget);
@@ -215,7 +217,9 @@ void main() {
     final files = MemoryKeyFilePort();
     final model = AppModel(store: MemoryVaultStore(), files: files);
     await model.load();
-    await tester.pumpWidget(AppScope(model: model, child: const PepeunitApp()));
+    await tester.pumpWidget(
+      AppScope(model: model, child: const PepeunitApp(background: false)),
+    );
     await tester.pumpAndSettle();
 
     await tester.tap(find.bySemanticsLabel('Аккаунт'));

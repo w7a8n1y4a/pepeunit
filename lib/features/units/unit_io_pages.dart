@@ -353,7 +353,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
           color,
           'Настройки',
           'Settings',
-          'settings.svg',
+          'actions/settings.svg',
         );
       case 'value':
         return HexSlot(
@@ -371,7 +371,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
           unitLinkColor,
           'Связи',
           'Links',
-          'links.svg',
+          'objects/links.svg',
           footer: _links == null ? null : pieceCount(language, _links!),
         );
       case 'pipe':
@@ -381,7 +381,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
           unitPipeColor,
           'DataPipe',
           'DataPipe',
-          'pipe.svg',
+          'objects/pipe.svg',
         );
       case 'access':
         return _nav(
@@ -390,7 +390,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
           accessColor,
           'Доступы',
           'Access',
-          'users.svg',
+          'objects/users.svg',
           footer: _access == null ? null : pieceCount(language, _access!),
         );
       default:
@@ -634,8 +634,8 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
             q: slot.q,
             r: slot.r,
             icon: _rewritable
-                ? 'assets/icons/flag.svg'
-                : 'assets/icons/close.svg',
+                ? 'assets/icons/status/flag.svg'
+                : 'assets/icons/actions/close.svg',
           ),
           'save' => HexSlot(
             id: 'save',
@@ -645,7 +645,7 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
             enabled: ready,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/check.svg',
+            icon: 'assets/icons/actions/check.svg',
           ),
           _ => HexSlot(
             id: slot.id,
@@ -819,7 +819,7 @@ class _UnitLinksPageState extends State<UnitLinksPage> {
             busy: _loading || _adding,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/plus.svg',
+            icon: 'assets/icons/actions/plus.svg',
           )
         else
           _linkSlot(slot, mixed),
@@ -847,7 +847,7 @@ class _UnitLinksPageState extends State<UnitLinksPage> {
       busy: link != null && link.io.uuid == _deleting,
       q: slot.q,
       r: slot.r,
-      icon: 'assets/icons/micro.svg',
+      icon: 'assets/icons/sections/micro.svg',
     );
   }
 

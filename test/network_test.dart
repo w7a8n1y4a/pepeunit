@@ -787,7 +787,9 @@ void main() {
     await model.load();
     // The signed sections need a session on the target, not only a target.
     model.target!.token = 't';
-    await tester.pumpWidget(AppScope(model: model, child: const PepeunitApp()));
+    await tester.pumpWidget(
+      AppScope(model: model, child: const PepeunitApp(background: false)),
+    );
     await tester.pumpAndSettle();
 
     expect(model.target?.url, defaultInstanceUrl);

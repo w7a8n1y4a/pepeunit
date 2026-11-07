@@ -122,7 +122,7 @@ class _UnitPageState extends State<UnitPage> {
             busy: _loading,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/micro.svg',
+            icon: 'assets/icons/sections/micro.svg',
           );
         }
         return unitMark(
@@ -161,7 +161,7 @@ class _UnitPageState extends State<UnitPage> {
           rim: _ioRim(),
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/io.svg',
+          icon: 'assets/icons/objects/io.svg',
         );
       case 'settings':
         return HexSlot(
@@ -170,7 +170,7 @@ class _UnitPageState extends State<UnitPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/settings.svg',
+          icon: 'assets/icons/actions/settings.svg',
         );
       case 'env':
         return HexSlot(
@@ -183,7 +183,7 @@ class _UnitPageState extends State<UnitPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/env.svg',
+          icon: 'assets/icons/objects/env.svg',
         );
       case 'operate':
         return HexSlot(
@@ -192,7 +192,7 @@ class _UnitPageState extends State<UnitPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/bulb.svg',
+          icon: 'assets/icons/status/bulb.svg',
         );
       case 'access':
         return HexSlot(
@@ -202,7 +202,7 @@ class _UnitPageState extends State<UnitPage> {
           q: slot.q,
           r: slot.r,
           footer: _access == null ? null : pieceCount(language, _access!),
-          icon: 'assets/icons/users.svg',
+          icon: 'assets/icons/objects/users.svg',
         );
       default:
         return HexSlot(
@@ -406,29 +406,29 @@ class _UnitWorkPageState extends State<UnitWorkPage> {
             language,
             'Команды',
             'Commands',
-            'terminal.svg',
+            'objects/terminal.svg',
           ),
-          'logs' => _cell(slot, language, 'Логи', 'Logs', 'timber.svg'),
+          'logs' => _cell(slot, language, 'Логи', 'Logs', 'objects/timber.svg'),
           'archives' => _cell(
             slot,
             language,
             'Архивы программ',
             'Program archives',
-            'archive.svg',
+            'objects/archive.svg',
           ),
           'state' => _cell(
             slot,
             language,
             'Хранилище',
             'Storage',
-            'fridge.svg',
+            'objects/fridge.svg',
           ),
           'platforms' => _cell(
             slot,
             language,
             'Платформы',
             'Platforms',
-            'brick.svg',
+            'objects/brick.svg',
           ),
           'delete' => HexSlot(
             id: 'delete',
@@ -436,7 +436,7 @@ class _UnitWorkPageState extends State<UnitWorkPage> {
             color: errorColor,
             q: slot.q,
             r: slot.r,
-            icon: 'assets/icons/trash.svg',
+            icon: 'assets/icons/actions/trash.svg',
           ),
           _ => HexSlot(
             id: slot.id,

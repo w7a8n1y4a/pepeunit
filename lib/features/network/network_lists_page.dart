@@ -69,7 +69,7 @@ class NetworkSearchSettingsPage extends StatelessWidget {
           color: addColor,
           q: at.$1,
           r: at.$2,
-          icon: 'assets/icons/plus.svg',
+          icon: 'assets/icons/actions/plus.svg',
         );
       case 'allow':
         return HexSlot(
@@ -79,7 +79,7 @@ class NetworkSearchSettingsPage extends StatelessWidget {
           color: color,
           q: at.$1,
           r: at.$2,
-          icon: 'assets/icons/check.svg',
+          icon: 'assets/icons/actions/check.svg',
         );
       case 'deny':
         return HexSlot(
@@ -89,7 +89,7 @@ class NetworkSearchSettingsPage extends StatelessWidget {
           color: color,
           q: at.$1,
           r: at.$2,
-          icon: 'assets/icons/ban.svg',
+          icon: 'assets/icons/actions/ban.svg',
         );
       default:
         return HexSlot(id: id, title: id, color: color, q: at.$1, r: at.$2);
@@ -201,7 +201,9 @@ class _NetworkListPageState extends State<NetworkListPage> {
           color: listed ? const Color(0xFFFFFFFF) : color,
           q: slot.q,
           r: slot.r,
-          icon: model.iconOf(url) == null ? 'assets/icons/instance.svg' : null,
+          icon: model.iconOf(url) == null
+              ? 'assets/icons/objects/instance.svg'
+              : null,
           image: model.iconOf(url),
         );
     }

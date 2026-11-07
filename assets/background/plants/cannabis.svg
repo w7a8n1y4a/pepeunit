@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <g fill="none" stroke="#ffffff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 44 V58"/>
+    <path d="M32 44 C27 36 28 22 32 8 C36 22 37 36 32 44Z"/>
+    <path d="M32 44 C27 36 28 22 32 8 C36 22 37 36 32 44Z" transform="rotate(30 32 44)"/>
+    <path d="M32 44 C27 36 28 22 32 8 C36 22 37 36 32 44Z" transform="rotate(-30 32 44)"/>
+    <path d="M32 44 C27 36 28 22 32 8 C36 22 37 36 32 44Z" transform="translate(32 44) rotate(62) scale(0.78) translate(-32 -44)"/>
+    <path d="M32 44 C27 36 28 22 32 8 C36 22 37 36 32 44Z" transform="translate(32 44) rotate(-62) scale(0.78) translate(-32 -44)"/>
+    <path d="M32 44 C27 36 28 22 32 8 C36 22 37 36 32 44Z" transform="translate(32 44) rotate(92) scale(0.55) translate(-32 -44)"/>
+    <path d="M32 44 C27 36 28 22 32 8 C36 22 37 36 32 44Z" transform="translate(32 44) rotate(-92) scale(0.55) translate(-32 -44)"/>
+  </g>
+</svg>

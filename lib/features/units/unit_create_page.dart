@@ -119,7 +119,7 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
           busy: _loading,
           q: slot.q,
           r: slot.r,
-          icon: image == null ? 'assets/icons/repo.svg' : null,
+          icon: image == null ? 'assets/icons/objects/repo.svg' : null,
           image: image,
         );
       case 'name':
@@ -172,7 +172,7 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
           enabled: ready,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/repo.svg',
+          icon: 'assets/icons/objects/repo.svg',
         );
       case 'updates':
         return HexSlot(
@@ -184,7 +184,7 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
           enabled: ready,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/updates.svg',
+          icon: 'assets/icons/actions/updates.svg',
         );
       case 'create':
         return HexSlot(
@@ -195,7 +195,7 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
           enabled: ready,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/unit_add.svg',
+          icon: 'assets/icons/actions/unit_add.svg',
         );
       default:
         return HexSlot(
@@ -460,7 +460,7 @@ class _UnitUpdatesPageState extends State<UnitUpdatesPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/flag.svg',
+          icon: 'assets/icons/status/flag.svg',
         );
       case 'auto':
         return HexSlot(
@@ -471,7 +471,7 @@ class _UnitUpdatesPageState extends State<UnitUpdatesPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/flag.svg',
+          icon: 'assets/icons/status/flag.svg',
         );
       case 'tags':
         return HexSlot(
@@ -481,7 +481,7 @@ class _UnitUpdatesPageState extends State<UnitUpdatesPage> {
           enabled: !_compilable,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/flag.svg',
+          icon: 'assets/icons/status/flag.svg',
         );
       case 'commit':
         return HexSlot(
@@ -491,7 +491,7 @@ class _UnitUpdatesPageState extends State<UnitUpdatesPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/commits.svg',
+          icon: 'assets/icons/objects/commits.svg',
         );
       case 'platform':
         return HexSlot(
@@ -501,7 +501,7 @@ class _UnitUpdatesPageState extends State<UnitUpdatesPage> {
           color: color,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/platform.svg',
+          icon: 'assets/icons/objects/platform.svg',
         );
       default:
         return HexSlot(

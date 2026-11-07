@@ -29,7 +29,7 @@ const menuSections = <MenuSection>[
     color: Color(0xFFFF3333),
     q: 0,
     r: 0,
-    icon: 'assets/icons/account.svg',
+    icon: 'assets/icons/sections/account.svg',
   ),
   MenuSection(
     id: 'units',
@@ -37,7 +37,7 @@ const menuSections = <MenuSection>[
     color: Color(0xFFFF0080),
     q: 1,
     r: -1,
-    icon: 'assets/icons/micro.svg',
+    icon: 'assets/icons/sections/micro.svg',
   ),
   MenuSection(
     id: 'peers',
@@ -45,7 +45,7 @@ const menuSections = <MenuSection>[
     color: Color(0xFFFF9800),
     q: 0,
     r: -1,
-    icon: 'assets/icons/instances.svg',
+    icon: 'assets/icons/sections/instances.svg',
   ),
   MenuSection(
     id: 'registry',
@@ -53,7 +53,7 @@ const menuSections = <MenuSection>[
     color: Color(0xFF7F00FF),
     q: 1,
     r: 0,
-    icon: 'assets/icons/git.svg',
+    icon: 'assets/icons/sections/git.svg',
   ),
   MenuSection(
     id: 'dashboards',
@@ -61,7 +61,7 @@ const menuSections = <MenuSection>[
     color: Color(0xFFFFFF33),
     q: -1,
     r: 0,
-    icon: 'assets/icons/panel.svg',
+    icon: 'assets/icons/sections/panel.svg',
   ),
   MenuSection(
     id: 'alerts',
@@ -69,7 +69,7 @@ const menuSections = <MenuSection>[
     color: Color(0xFF2196F3),
     q: -1,
     r: 1,
-    icon: 'assets/icons/notifications.svg',
+    icon: 'assets/icons/sections/notifications.svg',
   ),
   MenuSection(
     id: 'library',
@@ -77,7 +77,7 @@ const menuSections = <MenuSection>[
     color: Color(0xFF4CAF50),
     q: 0,
     r: 1,
-    icon: 'assets/icons/library.svg',
+    icon: 'assets/icons/sections/library.svg',
   ),
 ];
 

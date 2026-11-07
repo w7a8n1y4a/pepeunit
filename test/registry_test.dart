@@ -516,7 +516,7 @@ final _searchMark = find.byWidgetPredicate((widget) {
   if (widget is! SvgPicture) return false;
   final loader = widget.bytesLoader;
   return loader is SvgAssetLoader &&
-      loader.assetName == 'assets/icons/search.svg';
+      loader.assetName == 'assets/icons/actions/search.svg';
 });
 
 class _RepoApi extends PepeunitApi {

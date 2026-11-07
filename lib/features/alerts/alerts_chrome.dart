@@ -40,28 +40,28 @@ String noticeStatusLabel(String language, {required bool read}) {
 String noticeIcon(String type) {
   switch (type) {
     case 'InstanceDailyState':
-      return 'assets/icons/exclaim.svg';
+      return 'assets/icons/status/exclaim.svg';
     case 'UnitDailySummary':
-      return 'assets/icons/micro.svg';
+      return 'assets/icons/sections/micro.svg';
     case 'DataPipeAlert':
-      return 'assets/icons/pipe.svg';
+      return 'assets/icons/objects/pipe.svg';
     case 'IntegrationTests':
-      return 'assets/icons/rorschach.svg';
+      return 'assets/icons/objects/rorschach.svg';
     case 'ScanAllPeers':
-      return 'assets/icons/instances.svg';
+      return 'assets/icons/sections/instances.svg';
     case 'ScanPeer':
-      return 'assets/icons/instance.svg';
+      return 'assets/icons/objects/instance.svg';
     case 'UpdateAllRepos':
-      return 'assets/icons/reload.svg';
+      return 'assets/icons/actions/reload.svg';
     case 'UpdateRepo':
-      return 'assets/icons/repo.svg';
+      return 'assets/icons/objects/repo.svg';
     case 'UpdateUnitsFirmware':
-      return 'assets/icons/rocket.svg';
+      return 'assets/icons/objects/rocket.svg';
     case 'UpdateAllUnitsFirmware':
-      return 'assets/icons/send.svg';
+      return 'assets/icons/actions/send.svg';
     case 'RebootInstance':
-      return 'assets/icons/power.svg';
+      return 'assets/icons/actions/power.svg';
     default:
-      return 'assets/icons/notifications.svg';
+      return 'assets/icons/sections/notifications.svg';
   }
 }

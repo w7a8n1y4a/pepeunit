@@ -52,7 +52,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
         busy: _busy,
         q: load.$1,
         r: load.$2,
-        icon: 'assets/icons/key_load.svg',
+        icon: 'assets/icons/actions/key_load.svg',
       ),
       backSlot(
         title: accountText(language, 'Назад', 'Back'),

@@ -4,7 +4,7 @@ import '../hive/hex_order.dart';
 import '../hive/hex_scene.dart';
 import 'account/error_reader.dart';
 
-/// Scene background and the shared hex renderer.
+/// The shared hex renderer. The background is under the router.
 class HexPage extends StatelessWidget {
   const HexPage({
     required this.slots,
@@ -24,8 +24,9 @@ class HexPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scene = HexScene(slots: slots, onTap: onTap, wrap: wrap);
+    // Transparent, but it still takes every tap and gesture in the gaps.
     return ColoredBox(
-      color: sceneBackground,
+      color: const Color(0x00000000),
       child: frame == null ? scene : frame!(scene),
     );
   }
@@ -39,7 +40,7 @@ HexSlot backSlot({required String title, required int q, required int r}) {
     color: hexMuted,
     q: q,
     r: r,
-    icon: 'assets/icons/back.svg',
+    icon: 'assets/icons/actions/back.svg',
   );
 }
 
@@ -69,7 +70,7 @@ void appendError(
       titleColor: errorColor,
       q: spot.$1,
       r: spot.$2,
-      icon: 'assets/icons/error.svg',
+      icon: 'assets/icons/status/error.svg',
       body: open
           ? ErrorCell(
               message: message,

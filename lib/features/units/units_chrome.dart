@@ -35,8 +35,9 @@ List<Color> unitLinkRim() => rimMix([(unitsColor, 1), (unitOutputColor, 1)])!;
 
 Color unitIoTone(bool input) => input ? unitIoColor : unitOutputColor;
 
-String unitIoIcon(bool input) =>
-    input ? 'assets/icons/input.svg' : 'assets/icons/output.svg';
+String unitIoIcon(bool input) => input
+    ? 'assets/icons/objects/input.svg'
+    : 'assets/icons/objects/output.svg';
 
 String unitText(String language, String ru, String en) =>
     phrase(language, {'ru': ru, 'en': en});
@@ -90,7 +91,7 @@ HexSlot unitMark({
     color: color ?? unitsColor,
     q: q,
     r: r,
-    icon: image == null ? 'assets/icons/micro.svg' : null,
+    icon: image == null ? 'assets/icons/sections/micro.svg' : null,
     image: image,
     tappable: tappable,
     busy: busy,

@@ -103,7 +103,9 @@ class _AccountAlertsPageState extends State<AccountAlertsPage> {
       color: on ? color : hexMuted,
       q: q,
       r: r,
-      icon: on ? 'assets/icons/check.svg' : 'assets/icons/close.svg',
+      icon: on
+          ? 'assets/icons/actions/check.svg'
+          : 'assets/icons/actions/close.svg',
     );
   }
 
