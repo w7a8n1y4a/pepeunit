@@ -51,6 +51,8 @@ void main() {
     ]);
     expect(unitMenuIds(owned: false), ['card', 'info', 'nodes']);
     expect(unitMenuIds(owned: true), isNot(contains('access')));
+    expect(unitMenuIds(owned: true, private: true).last, 'access');
+    expect(unitMenuIds(owned: false, private: true), isNot(contains('access')));
     expect(
       ioMenuIds(owned: true, input: true, private: true, datapipe: false),
       isNot(contains('pipe')),

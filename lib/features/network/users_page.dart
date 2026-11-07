@@ -9,16 +9,20 @@ import '../../hive/hex_scene.dart';
 import '../../instances/directory_user.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
+import '../../navigation/sections.dart';
 import '../hex_page.dart';
 import '../line_input.dart';
 import '../page_window.dart';
 import '../slanted_choices.dart';
 import 'network_chrome.dart';
 
+/// User search. [pick] returns the chosen uuid with [pop] instead of opening
+/// the card, and takes the Account colors.
 class UsersPage extends StatefulWidget {
-  const UsersPage({required this.scope, super.key});
+  const UsersPage({required this.scope, this.pick = false, super.key});
 
   final int scope;
+  final bool pick;
 
   @override
   State<UsersPage> createState() => _UsersPageState();
@@ -58,7 +62,7 @@ class _UsersPageState extends State<UsersPage> {
   Widget build(BuildContext context) {
     final model = AppScope.of(context);
     final language = model.vault.language;
-    final color = networkColor;
+    final color = widget.pick ? peopleColor : networkColor;
     final wide = hexWide(MediaQuery.sizeOf(context));
     final page = model.directory;
     final users = page?.users ?? const <DirectoryUser>[];
@@ -86,7 +90,7 @@ class _UsersPageState extends State<UsersPage> {
       frame: (scene) => ScopeFrame(
         scope: widget.scope,
         canZoomIn: widget.scope < scaleTickMax,
-        path: '/peers/users',
+        path: widget.pick ? '/units/pick-user' : '/peers/users',
         child: scene,
       ),
     );
@@ -167,9 +171,13 @@ class _UsersPageState extends State<UsersPage> {
   Future<void> _tap(String id, String language) async {
     if (id.startsWith('user:')) {
       final uuid = id.substring(5);
-      context.push(
-        '/peers/users/member?uuid=${Uri.encodeQueryComponent(uuid)}',
-      );
+      if (widget.pick) {
+        context.pop(uuid);
+      } else {
+        context.push(
+          '/peers/users/member?uuid=${Uri.encodeQueryComponent(uuid)}',
+        );
+      }
       return;
     }
     switch (id) {

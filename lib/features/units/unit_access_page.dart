@@ -1,17 +1,24 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
+import '../../instances/directory_user.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
+import '../../navigation/sections.dart';
 import '../../units/unit.dart';
 import '../../units/unit_view.dart';
 import '../hex_page.dart';
-import '../line_input.dart';
 import '../network/network_chrome.dart';
 import 'units_chrome.dart';
 
+/// The agent chosen on the kind screen: `User` or `Unit`, and its uuid.
+typedef AccessPick = ({String kind, String uuid});
+
+/// Grants of one resource: a unit or a node. A tap on a grant removes it.
 class AccessPage extends StatefulWidget {
   const AccessPage({
     required this.resourceUuid,
@@ -32,11 +39,12 @@ class AccessPage extends StatefulWidget {
 
 class _AccessPageState extends State<AccessPage> {
   List<AccessGrant> _grants = const [];
+  final _units = <String, Unit>{};
+  final _users = <String, DirectoryUser>{};
   String? _failure;
   var _open = false;
   var _loading = true;
   var _page = 0;
-  bool? _input;
 
   @override
   void initState() {
@@ -52,7 +60,8 @@ class _AccessPageState extends State<AccessPage> {
 
   @override
   Widget build(BuildContext context) {
-    final language = AppScope.of(context).vault.language;
+    final model = AppScope.of(context);
+    final language = model.vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
     final board = tailBoard(
       tick: widget.scope,
@@ -85,13 +94,6 @@ class _AccessPageState extends State<AccessPage> {
   }
 
   HexSlot _slot(BoardSlot slot, String language, NetworkBoard board) {
-    final color = widget.resourceType == 'UnitIO'
-        ? unitIoTone(
-            _input ??
-                AppScope.of(context).ioIsInput(widget.resourceUuid) ??
-                true,
-          )
-        : unitsColor;
     if (slot.id == 'back') {
       return backSlot(
         title: unitText(language, 'Назад', 'Back'),
@@ -103,7 +105,7 @@ class _AccessPageState extends State<AccessPage> {
       return HexSlot(
         id: 'add',
         title: unitText(language, 'Добавить', 'Add'),
-        color: color,
+        color: accessColor,
         busy: _loading,
         q: slot.q,
         r: slot.r,
@@ -116,7 +118,7 @@ class _AccessPageState extends State<AccessPage> {
         id: slot.id,
         left: !forward,
         language: language,
-        color: color,
+        color: accessColor,
         q: slot.q,
         r: slot.r,
         page: board.page,
@@ -129,16 +131,49 @@ class _AccessPageState extends State<AccessPage> {
     for (final item in _grants) {
       if (item.uuid == slot.id) grant = item;
     }
+    return _grantCard(slot, language, grant);
+  }
+
+  /// A unit grant looks like a unit card, a user grant like a user card.
+  /// Until the agent is read, the cell shows its kind and a short uuid.
+  HexSlot _grantCard(BoardSlot slot, String language, AccessGrant? grant) {
+    final model = AppScope.of(context);
+    final isUnit = grant?.agentType == 'Unit';
+    if (grant != null) {
+      final unit = isUnit ? _units[grant.agentUuid] : null;
+      if (unit != null) {
+        return unitMark(
+          id: slot.id,
+          unit: unit,
+          language: language,
+          q: slot.q,
+          r: slot.r,
+          image: model.cachedIcon(unit.iconUuid),
+        );
+      }
+      final user = isUnit ? null : _users[grant.agentUuid];
+      if (user != null) {
+        return userMark(
+          id: slot.id,
+          user: user,
+          language: language,
+          q: slot.q,
+          r: slot.r,
+          accent: peopleColor,
+          image: model.cachedIcon(user.iconUuid),
+        );
+      }
+    }
     return HexSlot(
       id: slot.id,
-      title: grant == null ? slot.id : grant.agentType,
+      title: isUnit
+          ? unitText(language, 'Аппарат', 'Unit')
+          : unitText(language, 'Пользователь', 'User'),
       footer: grant == null ? null : shortCommit(grant.agentUuid),
-      color: color,
+      color: isUnit ? unitsColor : peopleColor,
       q: slot.q,
       r: slot.r,
-      icon: grant?.agentType == 'Unit'
-          ? 'assets/icons/micro.svg'
-          : 'assets/icons/account.svg',
+      icon: isUnit ? 'assets/icons/micro.svg' : 'assets/icons/account.svg',
     );
   }
 
@@ -152,23 +187,27 @@ class _AccessPageState extends State<AccessPage> {
       return;
     }
     if (id == 'add') {
-      final kind = await context.push<String>('/units/access/kind');
-      if (kind == null || !mounted) return;
-      final agent = kind == 'Unit'
-          ? await context.push<String>('/units/pick')
-          : await context.push<String>('/units/pick-user');
-      if (agent == null || !mounted) return;
+      final picked = await context.push<AccessPick>('/units/access/kind');
+      if (picked == null || !mounted) return;
+      setState(() {
+        _loading = true;
+        _failure = null;
+        _open = false;
+      });
       try {
         await AppScope.of(context).createAccess(
-          agentUuid: agent,
-          agentType: kind,
+          agentUuid: picked.uuid,
+          agentType: picked.kind,
           resourceUuid: widget.resourceUuid,
           resourceType: widget.resourceType,
         );
         await _load();
       } catch (error) {
         if (!mounted) return;
-        setState(() => _failure = '$error');
+        setState(() {
+          _loading = false;
+          _failure = '$error';
+        });
       }
       return;
     }
@@ -196,9 +235,6 @@ class _AccessPageState extends State<AccessPage> {
       return;
     }
     try {
-      if (widget.resourceType == 'UnitIO') {
-        _input = await model.ioInput(widget.resourceUuid);
-      }
       final page = await model.accessGrants(
         resourceUuid: widget.resourceUuid,
         resourceType: widget.resourceType,
@@ -211,6 +247,9 @@ class _AccessPageState extends State<AccessPage> {
         _loading = false;
         _failure = null;
       });
+      for (final grant in page.grants) {
+        unawaited(_describe(grant));
+      }
     } catch (error) {
       if (!mounted) return;
       setState(() {
@@ -219,8 +258,31 @@ class _AccessPageState extends State<AccessPage> {
       });
     }
   }
+
+  /// Reads the agent of one grant for its card. A refusal leaves the plain
+  /// cell; the grant stays removable.
+  Future<void> _describe(AccessGrant grant) async {
+    final model = AppScope.of(context);
+    try {
+      if (grant.agentType == 'Unit') {
+        if (_units.containsKey(grant.agentUuid)) return;
+        final unit = await model.readUnit(grant.agentUuid);
+        if (!mounted) return;
+        setState(() => _units[grant.agentUuid] = unit);
+      } else {
+        if (_users.containsKey(grant.agentUuid)) return;
+        final user = await model.readMember(grant.agentUuid);
+        if (!mounted) return;
+        setState(() => _users[grant.agentUuid] = user);
+      }
+    } catch (_) {
+      // The cell keeps the kind and the short uuid.
+    }
+  }
 }
 
+/// Chooses who gets access. A tap opens that agent's search; the chosen
+/// agent goes back to the grant list.
 class AccessKindPage extends StatelessWidget {
   const AccessKindPage({super.key});
 
@@ -243,7 +305,7 @@ class AccessKindPage extends StatelessWidget {
                   title: slot.id == 'User'
                       ? unitText(language, 'Пользователь', 'User')
                       : unitText(language, 'Аппарат', 'Unit'),
-                  color: unitsColor,
+                  color: slot.id == 'User' ? peopleColor : unitsColor,
                   q: slot.q,
                   r: slot.r,
                   icon: slot.id == 'User'
@@ -251,136 +313,25 @@ class AccessKindPage extends StatelessWidget {
                       : 'assets/icons/micro.svg',
                 ),
       ],
-      onTap: (id) {
-        if (id == 'back') {
-          popOrHome(context);
-        } else if (id == 'User' || id == 'Unit') {
-          context.pop(id);
-        }
-      },
-    );
-  }
-}
-
-class UserPickPage extends StatefulWidget {
-  const UserPickPage({super.key});
-
-  @override
-  State<UserPickPage> createState() => _UserPickPageState();
-}
-
-class _UserPickPageState extends State<UserPickPage> {
-  final _search = TextEditingController();
-  List<({String uuid, String login})> _users = const [];
-  String? _failure;
-  var _open = false;
-  var _loading = false;
-
-  @override
-  void dispose() {
-    _search.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final language = AppScope.of(context).vault.language;
-    final wide = hexWide(MediaQuery.sizeOf(context));
-    final placed = cardBoard([
-      'query',
-      for (final user in _users) user.uuid,
-    ], wide: wide);
-    final slots = <HexSlot>[
-      for (final slot in placed)
-        if (slot.id == 'back')
-          backSlot(
-            title: unitText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          )
-        else if (slot.id == 'query')
-          HexSlot(
-            id: 'query',
-            title: unitText(language, 'Поиск', 'Search'),
-            color: unitsColor,
-            busy: _loading,
-            q: slot.q,
-            r: slot.r,
-            body: LineInput(
-              color: unitsColor,
-              controller: _search,
-              hint: unitText(language, 'логин', 'login'),
-              leading: 'assets/icons/search.svg',
-              onSubmitted: (_) => _load(),
-            ),
-          )
-        else
-          HexSlot(
-            id: slot.id,
-            title: _users
-                .firstWhere(
-                  (user) => user.uuid == slot.id,
-                  orElse: () => (uuid: slot.id, login: slot.id),
-                )
-                .login,
-            color: unitsColor,
-            q: slot.q,
-            r: slot.r,
-            icon: 'assets/icons/account.svg',
-          ),
-    ];
-    appendError(
-      slots,
-      message: _failure,
-      open: _open,
-      language: language,
-      text: unitText,
-      wide: wide,
-    );
-    return HexPage(
-      slots: slots,
-      onTap: (id) {
-        if (id == 'back') {
-          popOrHome(context);
-        } else if (id == 'error') {
-          setState(() => _open = true);
-        } else if (_users.any((user) => user.uuid == id)) {
-          context.pop(id);
-        }
-      },
+      onTap: (id) => _tap(context, id),
     );
   }
 
-  Future<void> _load() async {
-    final model = AppScope.of(context);
-    final previous = model.userQuery.text;
-    model.setUserSearch(_search.text.trim());
-    setState(() {
-      _loading = true;
-      _failure = null;
-    });
-    try {
-      final page = await model.loadDirectory(
-        offset: 0,
-        limit: model.cappedLimit(16),
-      );
-      if (!mounted || !page) return;
-      final users = model.directory?.users ?? const [];
-      setState(() {
-        _users = [
-          for (final user in users)
-            (uuid: user.uuid, login: user.login ?? user.uuid),
-        ];
-        _loading = false;
-      });
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _loading = false;
-        _failure = '$error';
-      });
-    } finally {
-      model.setUserSearch(previous);
+  Future<void> _tap(BuildContext context, String id) async {
+    if (id == 'back') {
+      popOrHome(context);
+      return;
+    }
+    if (id != 'User' && id != 'Unit') return;
+    final uuid = await context.push<String>(
+      id == 'User' ? '/units/pick-user' : '/units/pick',
+    );
+    if (uuid == null || !context.mounted) return;
+    final AccessPick picked = (kind: id, uuid: uuid);
+    if (context.canPop()) {
+      context.pop(picked);
+    } else {
+      popOrHome(context);
     }
   }
 }

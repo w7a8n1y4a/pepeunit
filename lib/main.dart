@@ -238,7 +238,10 @@ class _PepeunitAppState extends State<PepeunitApp> {
           ),
           GoRoute(
             path: 'pick-user',
-            builder: (context, state) => const UserPickPage(),
+            builder: (context, state) => UsersPage(
+              scope: scaleTickOf(state.uri, fallback: searchScaleTick),
+              pick: true,
+            ),
           ),
           GoRoute(
             path: 'outputs',

@@ -28,6 +28,7 @@ class UnitPage extends StatefulWidget {
 class _UnitPageState extends State<UnitPage> {
   Unit? _unit;
   ({int inputs, int outputs})? _ios;
+  int? _access;
   String? _failure;
   var _open = false;
   var _loading = true;
@@ -73,7 +74,10 @@ class _UnitPageState extends State<UnitPage> {
     final wide = hexWide(MediaQuery.sizeOf(context));
     final unit = _unit;
     final owned = unitOwnedBy(unit?.creatorUuid ?? '', model.target?.userUuid);
-    final placed = cardBoard(unitMenuIds(owned: owned), wide: wide);
+    final placed = cardBoard(
+      unitMenuIds(owned: owned, private: unit?.visibility == 'Private'),
+      wide: wide,
+    );
     final slots = <HexSlot>[
       for (final slot in placed) _slot(slot, language, model, unit),
     ];
@@ -190,6 +194,16 @@ class _UnitPageState extends State<UnitPage> {
           r: slot.r,
           icon: 'assets/icons/bulb.svg',
         );
+      case 'access':
+        return HexSlot(
+          id: 'access',
+          title: unitText(language, 'Доступы', 'Access'),
+          color: accessColor,
+          q: slot.q,
+          r: slot.r,
+          footer: _access == null ? null : pieceCount(language, _access!),
+          icon: 'assets/icons/users.svg',
+        );
       default:
         return HexSlot(
           id: slot.id,
@@ -219,6 +233,8 @@ class _UnitPageState extends State<UnitPage> {
         setState(() => _env = true);
       case 'operate':
         context.push('/units/${widget.uuid}/work');
+      case 'access':
+        context.push('/units/${widget.uuid}/access');
     }
   }
 
@@ -231,6 +247,27 @@ class _UnitPageState extends State<UnitPage> {
       (unitIoColor, counts.inputs),
       (unitOutputColor, counts.outputs),
     ]);
+  }
+
+  /// Users and units together. Only the creator of a private unit sees the cell.
+  Future<void> _loadAccess(Unit unit) async {
+    final model = AppScope.of(context);
+    if (unit.visibility != 'Private' ||
+        !unitOwnedBy(unit.creatorUuid, model.target?.userUuid)) {
+      if (_access != null) setState(() => _access = null);
+      return;
+    }
+    try {
+      final page = await model.accessGrants(
+        resourceUuid: widget.uuid,
+        resourceType: 'Unit',
+        offset: 0,
+        limit: 1,
+      );
+      if (mounted) setState(() => _access = page.count);
+    } catch (_) {
+      // The cell stays without a count; the access screen shows the error.
+    }
   }
 
   Future<void> _loadIos() async {
@@ -285,6 +322,7 @@ class _UnitPageState extends State<UnitPage> {
       });
       _watch(unit);
       unawaited(_loadIos());
+      unawaited(_loadAccess(unit));
     } catch (error) {
       if (!mounted) return;
       setState(() {

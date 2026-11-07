@@ -8,6 +8,7 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
+import '../../registry/repo.dart';
 import '../../units/unit.dart';
 import '../../units/unit_read.dart';
 import '../../units/unit_view.dart';
@@ -205,6 +206,7 @@ class UnitIoPage extends StatefulWidget {
 
 class _UnitIoPageState extends State<UnitIoPage> {
   UnitIo? _io;
+  int? _access;
   String? _failure;
   var _open = false;
   var _loading = true;
@@ -326,7 +328,15 @@ class _UnitIoPageState extends State<UnitIoPage> {
           'pipe.svg',
         );
       case 'access':
-        return _nav(slot, language, color, 'Доступы', 'Access', 'users.svg');
+        return _nav(
+          slot,
+          language,
+          accessColor,
+          'Доступы',
+          'Access',
+          'users.svg',
+          footer: _access == null ? null : pieceCount(language, _access!),
+        );
       default:
         return HexSlot(
           id: slot.id,
@@ -344,11 +354,13 @@ class _UnitIoPageState extends State<UnitIoPage> {
     Color color,
     String ru,
     String en,
-    String icon,
-  ) {
+    String icon, {
+    String? footer,
+  }) {
     return HexSlot(
       id: slot.id,
       title: unitText(language, ru, en),
+      footer: footer,
       color: color,
       q: slot.q,
       r: slot.r,
@@ -396,12 +408,34 @@ class _UnitIoPageState extends State<UnitIoPage> {
         _io = io;
         _loading = false;
       });
+      await _loadAccess(io);
     } catch (error) {
       if (!mounted) return;
       setState(() {
         _loading = false;
         _failure = '$error';
       });
+    }
+  }
+
+  /// Users and units together. Only the creator of a private node sees the cell.
+  Future<void> _loadAccess(UnitIo io) async {
+    final model = AppScope.of(context);
+    if (io.visibility != 'Private' ||
+        !unitOwnedBy(io.creatorUuid, model.target?.userUuid)) {
+      if (_access != null) setState(() => _access = null);
+      return;
+    }
+    try {
+      final page = await model.accessGrants(
+        resourceUuid: widget.uuid,
+        resourceType: 'UnitIO',
+        offset: 0,
+        limit: 1,
+      );
+      if (mounted) setState(() => _access = page.count);
+    } catch (_) {
+      // The cell stays without a count; the access screen shows the error.
     }
   }
 }

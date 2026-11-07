@@ -20,6 +20,10 @@ const errorColor = Color(0xFFFF3333);
 /// Cells that add something. Green reads as «add».
 const addColor = Color(0xFF00C853);
 
+/// Access grants: the «Access» cell of a unit or a node, and the cells of the
+/// grant screens that belong to no section. One indigo on the whole client.
+const accessColor = Color(0xFF5C6BFF);
+
 const _mutedFilter = ColorFilter.matrix(<double>[
   0.33,
   0.33,

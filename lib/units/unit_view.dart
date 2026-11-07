@@ -200,8 +200,9 @@ NetworkBoard tailBoard({
 }
 
 /// Creator sees the card, the info, settings, device control, the nodes and
-/// the environment. A guest sees the card, the info and the nodes.
-List<String> unitMenuIds({required bool owned}) {
+/// the environment, and for a private unit the access grants. A guest sees
+/// the card, the info and the nodes.
+List<String> unitMenuIds({required bool owned, bool private = false}) {
   return [
     'card',
     'info',
@@ -209,6 +210,7 @@ List<String> unitMenuIds({required bool owned}) {
     if (owned) 'operate',
     'nodes',
     if (owned) 'env',
+    if (owned && private) 'access',
   ];
 }
 
