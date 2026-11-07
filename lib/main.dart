@@ -39,6 +39,7 @@ import 'features/units/unit_forms.dart';
 import 'features/units/unit_group_pages.dart';
 import 'features/units/unit_info_page.dart';
 import 'features/units/unit_io_pages.dart';
+import 'features/units/unit_pipe_pages.dart';
 import 'features/units/unit_page.dart';
 import 'features/units/unit_work_pages.dart';
 import 'features/units/units_menu_page.dart';

@@ -11,6 +11,7 @@ import '../../units/unit.dart';
 import '../../units/unit_read.dart';
 import '../alerts/alerts_chrome.dart';
 import '../alerts/notice_copy.dart';
+import '../code_highlight.dart';
 import 'units_chrome.dart';
 
 /// Framed panel used for logs, storage and the environment editor.
@@ -22,8 +23,11 @@ class UnitModal extends StatelessWidget {
     required this.actions,
     required this.body,
     this.note,
+    this.noteColor = errorColor,
+    this.noteLines = 2,
     this.bodyHeight,
     this.barrierCloses = true,
+    this.stackActions = false,
     super.key,
   });
 
@@ -37,7 +41,15 @@ class UnitModal extends StatelessWidget {
   /// the text fits, and stops at the screen when it does not.
   final double Function(double font, double width)? bodyHeight;
   final String? note;
+  final Color noteColor;
+
+  /// Lines the note keeps in view. A longer note scrolls.
+  final int noteLines;
   final bool barrierCloses;
+
+  /// Many actions: on a narrow screen they take a row under the title, so
+  /// the title keeps its place.
+  final bool stackActions;
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +61,16 @@ class UnitModal extends StatelessWidget {
         final shown = note?.trim() ?? '';
         final rowH = font * 2.35;
         final gap = font * 0.35;
-        final errorH = font * 2.5;
-        final chrome = font * 0.6 + rowH + gap + gap + errorH + font;
+        final errorH = font * 1.25 * noteLines;
+        final noteStyle = TextStyle(
+          color: noteColor,
+          fontFamily: 'OpenGost Type B',
+          fontSize: font,
+          decoration: TextDecoration.none,
+        );
+        final stacked = stackActions && size.width < 640;
+        final chrome =
+            font * 0.6 + rowH * (stacked ? 2 : 1) + gap + gap + errorH + font;
         final maxH = max(chrome + font * 4, size.height - margin * 2);
         final wanted =
             bodyHeight?.call(font, size.width - margin * 2 - font * 1.4) ??
@@ -108,13 +128,23 @@ class UnitModal extends StatelessWidget {
                                 ),
                               ),
                             ),
-                            SingleChildScrollView(
-                              scrollDirection: Axis.horizontal,
-                              child: Row(children: actions(font)),
-                            ),
+                            if (!stacked)
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(children: actions(font)),
+                              ),
                           ],
                         ),
                       ),
+                      if (stacked)
+                        SizedBox(
+                          height: rowH,
+                          width: double.infinity,
+                          child: SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(children: actions(font)),
+                          ),
+                        ),
                       SizedBox(height: gap),
                       Expanded(child: body(font)),
                       SizedBox(height: gap),
@@ -122,17 +152,19 @@ class UnitModal extends StatelessWidget {
                         height: errorH,
                         child: Align(
                           alignment: Alignment.topLeft,
-                          child: Text(
-                            shown,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              color: errorColor,
-                              fontFamily: 'OpenGost Type B',
-                              fontSize: font,
-                              decoration: TextDecoration.none,
-                            ),
-                          ),
+                          child: noteLines > 2
+                              ? SingleChildScrollView(
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    child: Text(shown, style: noteStyle),
+                                  ),
+                                )
+                              : Text(
+                                  shown,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: noteStyle,
+                                ),
                         ),
                       ),
                     ],
@@ -147,8 +179,8 @@ class UnitModal extends StatelessWidget {
   }
 }
 
-class _WordButton extends StatelessWidget {
-  const _WordButton({
+class UnitWordButton extends StatelessWidget {
+  const UnitWordButton({
     required this.label,
     required this.font,
     required this.onTap,
@@ -156,6 +188,7 @@ class _WordButton extends StatelessWidget {
     this.enabled = true,
     this.busy = false,
     this.scale = 1.05,
+    super.key,
   });
 
   final String label;
@@ -212,7 +245,7 @@ class _WordButton extends StatelessWidget {
 const _spinnerMin = Duration(milliseconds: 600);
 
 /// Waits out what is left of [_spinnerMin] since [watch] started.
-Future<void> _spinnerHold(Stopwatch watch) async {
+Future<void> unitSpinnerHold(Stopwatch watch) async {
   final left = _spinnerMin - watch.elapsed;
   if (left > Duration.zero) await Future<void>.delayed(left);
 }
@@ -760,7 +793,7 @@ class UnitEnvPanel extends StatefulWidget {
 }
 
 class _UnitEnvPanelState extends State<UnitEnvPanel> {
-  final _text = TextEditingController();
+  final _text = CodeController(language: CodeLanguage.json);
   String _baseline = '';
   String? _failure;
   var _loading = true;
@@ -795,11 +828,11 @@ class _UnitEnvPanelState extends State<UnitEnvPanel> {
       note: syntax?.text ?? _failure,
       bodyHeight: (font, width) {
         final codeFont = max(11.0, font * 0.72);
-        final layout = _EnvLayout(context, codeFont, width, _text.text);
+        final layout = UnitCodeLayout(context, codeFont, width, _text.text);
         return max(layout.total, layout.lineHeight * 4) + 8;
       },
       actions: (font) => [
-        _WordButton(
+        UnitWordButton(
           label: unitText(language, 'Сохранить', 'Save'),
           font: font,
           color: unitAddColor,
@@ -808,7 +841,7 @@ class _UnitEnvPanelState extends State<UnitEnvPanel> {
           busy: _pending == 'save',
           onTap: _save,
         ),
-        _WordButton(
+        UnitWordButton(
           label: unitText(language, 'Сброс', 'Reset'),
           font: font,
           color: const Color(0xFFFFC107),
@@ -829,7 +862,7 @@ class _UnitEnvPanelState extends State<UnitEnvPanel> {
           onTap: widget.onClose,
         ),
       ],
-      body: (font) => _EnvEditor(
+      body: (font) => UnitCodeEditor(
         controller: _text,
         fontSize: max(11.0, font * 0.72),
         errorLine: syntax?.line,
@@ -883,7 +916,7 @@ class _UnitEnvPanelState extends State<UnitEnvPanel> {
     final watch = Stopwatch()..start();
     try {
       await AppScope.of(context).setUnitEnv(widget.uuid, env);
-      await _spinnerHold(watch);
+      await unitSpinnerHold(watch);
       if (!mounted) return;
       setState(() => _pending = null);
       await _load();
@@ -905,7 +938,7 @@ class _UnitEnvPanelState extends State<UnitEnvPanel> {
     final watch = Stopwatch()..start();
     try {
       await AppScope.of(context).resetUnitEnv(widget.uuid);
-      await _spinnerHold(watch);
+      await unitSpinnerHold(watch);
       if (!mounted) return;
       setState(() => _pending = null);
       await _load();
@@ -940,7 +973,7 @@ class UnitIoValuePanel extends StatefulWidget {
 }
 
 class _UnitIoValuePanelState extends State<UnitIoValuePanel> {
-  final _text = TextEditingController();
+  final _text = CodeController();
   String _baseline = '';
   String? _failure;
   var _loading = true;
@@ -972,13 +1005,13 @@ class _UnitIoValuePanelState extends State<UnitIoValuePanel> {
       bodyHeight: widget.editable
           ? (font, width) {
               final codeFont = max(11.0, font * 0.72);
-              final layout = _EnvLayout(context, codeFont, width, _text.text);
+              final layout = UnitCodeLayout(context, codeFont, width, _text.text);
               return max(layout.total, layout.lineHeight * 4) + 8;
             }
           : (font, _) => _linesHeight(font, _lineCount(_text.text)) + 14,
       actions: (font) => [
         if (widget.editable)
-          _WordButton(
+          UnitWordButton(
             label: unitText(language, 'Отправить', 'Send'),
             font: font,
             color: unitAddColor,
@@ -1000,7 +1033,7 @@ class _UnitIoValuePanelState extends State<UnitIoValuePanel> {
         ),
       ],
       body: (font) => widget.editable
-          ? _EnvEditor(
+          ? UnitCodeEditor(
               controller: _text,
               fontSize: max(11.0, font * 0.72),
               onChanged: () => setState(() => _failure = null),
@@ -1052,7 +1085,7 @@ class _UnitIoValuePanelState extends State<UnitIoValuePanel> {
     final watch = Stopwatch()..start();
     try {
       await AppScope.of(context).setInputState(widget.uuid, sent);
-      await _spinnerHold(watch);
+      await unitSpinnerHold(watch);
       if (!mounted) return;
       setState(() {
         _sending = false;
@@ -1073,7 +1106,7 @@ int _lineCount(String text) {
   return '\n'.allMatches(text).length + 1;
 }
 
-StrutStyle _codeStrut(double fontSize) {
+StrutStyle unitCodeStrut(double fontSize) {
   return StrutStyle(
     fontFamily: noticeMonoFamily,
     fontSize: fontSize,
@@ -1083,12 +1116,12 @@ StrutStyle _codeStrut(double fontSize) {
 }
 
 /// One code row, measured the same way the field lays lines out.
-double _codeLineHeight(BuildContext context, double fontSize) {
+double unitCodeLineHeight(BuildContext context, double fontSize) {
   final painter = TextPainter(
     text: TextSpan(text: '0', style: noticeMono(fontSize)),
     textDirection: TextDirection.ltr,
     textScaler: MediaQuery.textScalerOf(context),
-    strutStyle: _codeStrut(fontSize),
+    strutStyle: unitCodeStrut(fontSize),
   )..layout(maxWidth: double.infinity);
   final height = painter.preferredLineHeight;
   painter.dispose();
@@ -1102,11 +1135,11 @@ double _linesHeight(double font, int lines) {
 
 /// Row heights of the env text at a given width. A line that does not fit
 /// wraps inside its own block, so it keeps one number.
-class _EnvLayout {
-  _EnvLayout(BuildContext context, double fontSize, double width, String text)
-    : lineHeight = _codeLineHeight(context, fontSize) {
+class UnitCodeLayout {
+  UnitCodeLayout(BuildContext context, double fontSize, double width, String text)
+    : lineHeight = unitCodeLineHeight(context, fontSize) {
     final style = noticeMono(fontSize);
-    final strut = _codeStrut(fontSize);
+    final strut = unitCodeStrut(fontSize);
     final scaler = MediaQuery.textScalerOf(context);
     final lines = text.split('\n');
     final digits = lines.length.toString().length;
@@ -1139,12 +1172,13 @@ class _EnvLayout {
   double get total => heights.fold(0.0, (sum, h) => sum + h);
 }
 
-class _EnvEditor extends StatefulWidget {
-  const _EnvEditor({
+class UnitCodeEditor extends StatefulWidget {
+  const UnitCodeEditor({
     required this.controller,
     required this.fontSize,
     required this.onChanged,
     this.errorLine,
+    super.key,
   });
 
   final TextEditingController controller;
@@ -1153,10 +1187,10 @@ class _EnvEditor extends StatefulWidget {
   final VoidCallback onChanged;
 
   @override
-  State<_EnvEditor> createState() => _EnvEditorState();
+  State<UnitCodeEditor> createState() => _UnitCodeEditorState();
 }
 
-class _EnvEditorState extends State<_EnvEditor> {
+class _UnitCodeEditorState extends State<UnitCodeEditor> {
   final _scroll = ScrollController();
 
   @override
@@ -1168,12 +1202,12 @@ class _EnvEditorState extends State<_EnvEditor> {
   @override
   Widget build(BuildContext context) {
     final style = noticeMono(widget.fontSize);
-    final strut = _codeStrut(widget.fontSize);
+    final strut = unitCodeStrut(widget.fontSize);
     return Material(
       type: MaterialType.transparency,
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final layout = _EnvLayout(
+          final layout = UnitCodeLayout(
             context,
             widget.fontSize,
             constraints.maxWidth,
@@ -1223,6 +1257,10 @@ class _EnvEditorState extends State<_EnvEditor> {
                         key: const ValueKey('unit-env'),
                         controller: widget.controller,
                         maxLines: null,
+                        autocorrect: false,
+                        enableSuggestions: false,
+                        smartDashesType: SmartDashesType.disabled,
+                        smartQuotesType: SmartQuotesType.disabled,
                         style: style,
                         strutStyle: strut,
                         cursorColor: const Color(0xFFFFFFFF),
@@ -1269,6 +1307,7 @@ class _NumberedTextState extends State<_NumberedText> {
   @override
   Widget build(BuildContext context) {
     final lines = widget.text.isEmpty ? const [''] : widget.text.split('\n');
+    final colored = codeTokens(widget.text, CodeLanguage.auto);
     final style = noticeMono(widget.fontSize);
     final numberStyle = style.copyWith(color: hexMuted);
     final sample = TextPainter(
@@ -1354,10 +1393,16 @@ class _NumberedTextState extends State<_NumberedText> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            for (final line in lines)
+                            for (final tokens in colored)
                               SizedBox(
                                 height: lineHeight,
-                                child: Text(line, style: style, maxLines: 1),
+                                child: Text.rich(
+                                  TextSpan(
+                                    style: style,
+                                    children: codeLineSpans(tokens, style),
+                                  ),
+                                  maxLines: 1,
+                                ),
                               ),
                           ],
                         ),

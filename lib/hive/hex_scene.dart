@@ -345,13 +345,42 @@ class HexScene extends StatelessWidget {
       );
     } else if (icon != null) {
       final scale = iconScaleOf(icon);
-      child = Center(
-        child: SvgPicture.asset(
-          icon,
-          width: placed.radius * 0.72 * scale,
-          height: placed.radius * 0.72 * scale,
-        ),
+      final picture = SvgPicture.asset(
+        icon,
+        width: placed.radius * 0.72 * scale,
+        height: placed.radius * 0.72 * scale,
       );
+      final caption = placed.slot.center;
+      if (caption == null || caption.isEmpty) {
+        child = Center(child: picture);
+      } else {
+        // A short caption sits on the lower half of the picture, like the
+        // extension on a file icon.
+        child = Stack(
+          alignment: Alignment.center,
+          children: [
+            picture,
+            IgnorePointer(
+              child: Transform.translate(
+                offset: Offset(0, placed.radius * 0.18),
+                child: ExcludeSemantics(
+                  child: Text(
+                    caption,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: placed.slot.centerColor,
+                      fontFamily: 'JetBrains Mono',
+                      fontSize: placed.radius * 0.13,
+                      height: 1,
+                      decoration: TextDecoration.none,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
+        );
+      }
     } else {
       final center = placed.slot.center;
       if (center != null && center.isNotEmpty) {

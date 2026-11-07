@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -267,8 +265,14 @@ class _UnitIoPageState extends State<UnitIoPage> {
     final wide = hexWide(MediaQuery.sizeOf(context));
     final io = _io;
     final owned = unitOwnedBy(io?.creatorUuid ?? '', model.target?.userUuid);
-    final datapipe =
+    // The instance keeps DataPipe on unless its portrait says otherwise. A
+    // node can have the pipe only on a topic ending in `/pepeunit`, or when
+    // it already has one.
+    final featureOn =
         model.portraitOf(model.target?.url ?? '')?.datapipe != false;
+    final datapipe =
+        featureOn &&
+        (io == null || unitIoPipeCapable(io.topic) || io.pipeActive);
     final placed = cardBoard(
       ioMenuIds(
         owned: owned,
@@ -510,7 +514,6 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
   UnitIo? _io;
   String _visibility = 'Private';
   var _rewritable = false;
-  var _pipe = false;
   final _max = TextEditingController();
   String? _failure;
   var _tried = false;
@@ -548,21 +551,6 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
     );
   }
 
-  /// The instance keeps DataPipe on unless its portrait says otherwise.
-  bool _featureOn() {
-    final model = AppScope.of(context);
-    return model.portraitOf(model.target?.url ?? '')?.datapipe != false;
-  }
-
-  /// DataPipe can be switched on only for a topic ending in `/pepeunit`. A pipe
-  /// that is already on stays, so it can be switched off.
-  bool _pipeShown(bool featureOn) {
-    if (!featureOn) return false;
-    final io = _io;
-    if (io == null) return true;
-    return unitIoPipeCapable(io.topic) || io.pipeActive;
-  }
-
   @override
   Widget build(BuildContext context) {
     final model = AppScope.of(context);
@@ -571,11 +559,9 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
     final input = _input ?? false;
     final tone = unitIoTone(_input ?? true);
     final ready = _ready;
-    final featureOn = _featureOn();
     final ids = [
       'max',
       'visibility',
-      if (_pipeShown(featureOn)) 'pipe',
       if (input) 'rewrite',
       'save',
     ];
@@ -626,18 +612,6 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
               selected: (id) => _visibility == id,
               onTap: (id) => setState(() => _visibility = id),
             ),
-          ),
-          'pipe' => HexSlot(
-            id: 'pipe',
-            title: 'DataPipe',
-            footer: _pipe
-                ? unitText(language, 'вкл', 'on')
-                : unitText(language, 'выкл', 'off'),
-            color: tone,
-            enabled: ready,
-            q: slot.q,
-            r: slot.r,
-            icon: _pipe ? 'assets/icons/flag.svg' : 'assets/icons/close.svg',
           ),
           'rewrite' => HexSlot(
             id: 'rewrite',
@@ -690,8 +664,6 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
             setState(() => _open = true);
           case 'rewrite':
             if (_ready) setState(() => _rewritable = !_rewritable);
-          case 'pipe':
-            if (_ready) setState(() => _pipe = !_pipe);
           case 'save':
             await _save();
         }
@@ -709,7 +681,6 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
         _loading = false;
         _visibility = io.visibility.isEmpty ? 'Private' : io.visibility;
         _rewritable = io.rewritable;
-        _pipe = io.pipeActive;
       });
     } catch (error) {
       if (!mounted) return;
@@ -738,16 +709,13 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
     });
     try {
       // The backend checks every field it receives. A rewritable flag is
-      // refused on an output, and a pipe flag sent again restarts the pipe,
-      // so only what the person changed, and only what the node has, is sent.
-      final featureOn = _featureOn();
+      // refused on an output, so only what the node has is sent, and only
+      // when the person changed it.
       final saved = await AppScope.of(context).updateUnitIo(widget.uuid, {
         'visibility_level': _visibility,
         'max_connections': max,
         if (io.input && _rewritable != io.rewritable)
           'is_rewritable_input': _rewritable,
-        if (_pipeShown(featureOn) && _pipe != io.pipeActive)
-          'is_data_pipe_active': _pipe,
       });
       if (!mounted) return;
       setState(() {
@@ -964,217 +932,6 @@ class _UnitLinksPageState extends State<UnitLinksPage> {
   }
 }
 
-class UnitPipePage extends StatefulWidget {
-  const UnitPipePage({required this.uuid, super.key});
-
-  final String uuid;
-
-  @override
-  State<UnitPipePage> createState() => _UnitPipePageState();
-}
-
-class _UnitPipePageState extends State<UnitPipePage> {
-  final _editor = TextEditingController();
-  String? _failure;
-  String? _note;
-  var _open = false;
-  String? _pending;
-  bool? _input;
-
-  Color get _tone =>
-      unitIoTone(_input ?? AppScope.of(context).ioIsInput(widget.uuid) ?? true);
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
-  }
-
-  @override
-  void dispose() {
-    _editor.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final language = AppScope.of(context).vault.language;
-    final wide = hexWide(MediaQuery.sizeOf(context));
-    final placed = cardBoard(pipeMenuIds, wide: wide);
-    final slots = <HexSlot>[for (final slot in placed) _slot(slot, language)];
-    appendError(
-      slots,
-      message: _failure,
-      open: _open,
-      language: language,
-      text: unitText,
-      wide: wide,
-    );
-    return HexPage(slots: slots, onTap: _tap);
-  }
-
-  HexSlot _slot(BoardSlot slot, String language) {
-    if (slot.id == 'back') {
-      return backSlot(
-        title: unitText(language, 'Назад', 'Back'),
-        q: slot.q,
-        r: slot.r,
-      );
-    }
-    if (slot.id == 'editor') {
-      return HexSlot(
-        id: 'editor',
-        title: 'YAML',
-        footer: _note,
-        color: _tone,
-        busy: _pending == 'load',
-        q: slot.q,
-        r: slot.r,
-        tappable: false,
-        body: Material(
-          type: MaterialType.transparency,
-          child: TextField(
-            controller: _editor,
-            maxLines: null,
-            cursorColor: _tone,
-            style: const TextStyle(
-              color: Color(0xFFFFFFFF),
-              fontFamily: 'JetBrains Mono',
-              fontSize: 12,
-              decoration: TextDecoration.none,
-            ),
-          ),
-        ),
-      );
-    }
-    final labels = {
-      'check': unitText(language, 'Проверить', 'Check'),
-      'save': unitText(language, 'Записать', 'Save'),
-      'export': unitText(language, 'Скачать', 'Download'),
-      'import': unitText(language, 'Загрузить', 'Upload'),
-      'data': unitText(language, 'Данные', 'Data'),
-      'csvOut': unitText(language, 'CSV скачать', 'CSV out'),
-      'csvIn': unitText(language, 'CSV загрузить', 'CSV in'),
-      'clear': unitText(language, 'Очистить', 'Clear'),
-    };
-    return HexSlot(
-      id: slot.id,
-      title: labels[slot.id] ?? slot.id,
-      color: slot.id == 'clear' ? errorColor : _tone,
-      busy: _pending == slot.id,
-      q: slot.q,
-      r: slot.r,
-      icon: slot.id == 'clear'
-          ? 'assets/icons/close.svg'
-          : 'assets/icons/pipe.svg',
-    );
-  }
-
-  Future<void> _tap(String id) async {
-    final model = AppScope.of(context);
-    if (id == 'back') {
-      popOrHome(context);
-      return;
-    }
-    if (id == 'error') {
-      setState(() => _open = true);
-      return;
-    }
-    if (id == 'data') {
-      context.push('/units/pipe/${widget.uuid}/data');
-      return;
-    }
-    setState(() {
-      _pending = id;
-      _failure = null;
-      _note = null;
-    });
-    try {
-      final bytes = Uint8List.fromList(utf8.encode(_editor.text));
-      switch (id) {
-        case 'check':
-          final issues = await model.checkPipe(bytes);
-          if (!mounted) return;
-          setState(() {
-            _pending = null;
-            if (issues.isEmpty) {
-              _note = unitText(model.vault.language, 'Чисто', 'Clear');
-            } else {
-              _failure = [
-                for (final issue in issues) '${issue.stage}: ${issue.message}',
-              ].join('\n');
-            }
-          });
-        case 'save':
-          await model.setPipe(widget.uuid, bytes);
-          if (!mounted) return;
-          setState(() => _pending = null);
-        case 'export':
-          final file = await model.pipeConfig(widget.uuid);
-          await model.saveBytes('pipe.yml', file);
-          if (!mounted) return;
-          setState(() => _pending = null);
-        case 'import':
-          final file = await model.files.pick();
-          if (file == null || !mounted) {
-            setState(() => _pending = null);
-            return;
-          }
-          setState(() {
-            _editor.text = utf8.decode(file);
-            _pending = null;
-          });
-        case 'csvOut':
-          final file = await model.pipeCsv(widget.uuid);
-          await model.saveBytes('pipe.csv', file);
-          if (!mounted) return;
-          setState(() => _pending = null);
-        case 'csvIn':
-          final file = await model.files.pick();
-          if (file == null || !mounted) {
-            setState(() => _pending = null);
-            return;
-          }
-          await model.uploadPipeCsv(widget.uuid, file);
-          if (!mounted) return;
-          setState(() => _pending = null);
-        case 'clear':
-          await model.deletePipeData(widget.uuid);
-          if (!mounted) return;
-          setState(() => _pending = null);
-        default:
-          setState(() => _pending = null);
-      }
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _pending = null;
-        _failure = '$error';
-      });
-    }
-  }
-
-  Future<void> _load() async {
-    setState(() => _pending = 'load');
-    try {
-      final model = AppScope.of(context);
-      _input = await model.ioInput(widget.uuid);
-      final bytes = await model.pipeConfig(widget.uuid);
-      if (!mounted) return;
-      setState(() {
-        _editor.text = utf8.decode(bytes);
-        _pending = null;
-      });
-    } catch (error) {
-      if (!mounted) return;
-      setState(() {
-        _pending = null;
-        _failure = '$error';
-      });
-    }
-  }
-}
-
 class UnitPipeDataPage extends StatefulWidget {
   const UnitPipeDataPage({required this.uuid, required this.scope, super.key});
 
@@ -1193,10 +950,8 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
   String? _failure;
   var _open = false;
   var _loading = true;
-  bool? _input;
 
-  Color get _tone =>
-      unitIoTone(_input ?? AppScope.of(context).ioIsInput(widget.uuid) ?? true);
+  Color get _tone => unitPipeColor;
 
   @override
   void initState() {
@@ -1325,8 +1080,6 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
       _failure = null;
     });
     try {
-      _input = await AppScope.of(context).ioInput(widget.uuid);
-      if (!mounted) return;
       final page = await AppScope.of(context).pipeData(
         uuid: widget.uuid,
         type: _type,
