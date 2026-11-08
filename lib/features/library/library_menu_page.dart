@@ -108,7 +108,9 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
           case 'presentation':
             context.push('/library/presentation');
           case 'docs':
-            context.push('/library/docs');
+            // `go`, not `push`: the screen then moves between articles by
+            // `go` too, and keeps its trail, because both name one page.
+            context.go('/library/docs');
           case 'tools':
             context.push('/library/tools');
           case 'about':

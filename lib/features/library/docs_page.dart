@@ -1,17 +1,48 @@
 import 'dart:math';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app_scope.dart';
+import '../../hive/grain.dart';
 import '../../hive/hex_scene.dart';
 import '../../library/library.dart';
 import '../code/code_modal.dart';
 import 'doc_reader.dart';
 import 'library_menu_page.dart';
+import 'md_view.dart';
 
-String docsAddress({String? doc}) {
-  return Uri(path: '/library/docs', queryParameters: {'doc': ?doc}).toString();
+/// The address of the documentation at an article, and at a heading of it.
+String docsAddress({String? doc, String? anchor}) {
+  return Uri(
+    path: '/library/docs',
+    queryParameters: {
+      'doc': ?doc,
+      'anchor': ?((anchor ?? '').isEmpty ? null : anchor),
+    },
+  ).toString();
+}
+
+/// The address a person can send: with the host of the page on the web, with
+/// the host of the instance the client works with elsewhere, and without a
+/// host when there is none.
+String docsLink({required String doc, String? anchor, String? instance}) {
+  final path = docsAddress(doc: doc, anchor: anchor);
+  Uri? base;
+  if (kIsWeb) {
+    base = Uri.base;
+  } else if (instance != null) {
+    base = Uri.tryParse(instance);
+  }
+  if (base == null || !base.hasScheme || base.host.isEmpty) return path;
+  return Uri(
+    scheme: base.scheme,
+    host: base.host,
+    port: base.hasPort ? base.port : null,
+  ).resolve(path).toString();
 }
 
 /// The three stages of the screen, the way VitePress lays out a page. The
@@ -38,16 +69,26 @@ const _blockFonts = 74.2;
 ///   rendered. Its scroll bar stands at the right edge of the screen. The
 ///   bar above it holds Back (after links and rows led from one article to
 ///   another) and the close mark.
-/// - The article opens at `?doc=<path>`, or at the first row of the tree.
+/// - The article opens at `?doc=<path>`, or at the first row of the tree;
+///   `&anchor=<heading>` scrolls it to a heading. The address follows the
+///   article that is open, so the page can be sent or reloaded. The title of
+///   the article and every heading of level two to four have a mark that
+///   copies that address.
 class DocsPage extends StatefulWidget {
-  const DocsPage({this.doc, super.key});
+  const DocsPage({this.doc, this.anchor, super.key});
 
   /// Path of the article to open first.
   final String? doc;
 
+  /// Heading of that article to scroll to.
+  final String? anchor;
+
   @override
   State<DocsPage> createState() => _DocsPageState();
 }
+
+String? _clean(String? anchor) =>
+    anchor == null || anchor.isEmpty ? null : anchor;
 
 class _DocsPageState extends State<DocsPage> {
   DocsTree? _tree;
@@ -67,10 +108,21 @@ class _DocsPageState extends State<DocsPage> {
   void didUpdateWidget(DocsPage oldWidget) {
     super.didUpdateWidget(oldWidget);
     final tree = _tree;
+    final reader = _reader;
     final doc = widget.doc;
-    if (tree == null || doc == null || doc == oldWidget.doc) return;
+    if (tree == null || reader == null || doc == null) return;
+    if (doc == oldWidget.doc && widget.anchor == oldWidget.anchor) return;
     final article = tree.article(doc);
-    if (article != null) _reader?.show(article);
+    if (article == null) return;
+    final anchor = _clean(widget.anchor);
+    if (article.path == reader.page.path) {
+      // The address of the article that is open: only a heading may differ.
+      if (anchor != null && anchor != _clean(reader.page.anchor)) {
+        reader.controller.jump(anchor);
+      }
+      return;
+    }
+    reader.show(article, anchor: anchor);
   }
 
   Future<void> _load() async {
@@ -79,13 +131,16 @@ class _DocsPageState extends State<DocsPage> {
       final tree = await Library.instance.docs(language);
       if (!mounted) return;
       final wanted = widget.doc;
-      final first =
-          (wanted == null ? null : tree.article(wanted)) ?? tree.first;
+      final asked = wanted == null ? null : tree.article(wanted);
+      final first = asked ?? tree.first;
       setState(() {
         _tree = tree;
         if (first != null) {
           _reader = DocReader(
-            first: DocPage.of(first),
+            first: DocPage.of(
+              first,
+              anchor: asked == null ? null : _clean(widget.anchor),
+            ),
             docs: tree,
             onChange: _changed,
           );
@@ -100,13 +155,31 @@ class _DocsPageState extends State<DocsPage> {
         unfold(tree.sidebar);
         _reveal();
       });
+      // The first article of the tree stands at an address with no `doc`.
+      // The web page learns which one it is, without a new history entry.
+      if (kIsWeb && asked == null && first != null) {
+        SystemNavigator.routeInformationUpdated(
+          uri: Uri.parse(docsAddress(doc: first.path)),
+          replace: true,
+        );
+      }
     } catch (error) {
       if (!mounted) return;
       setState(() => _failure = '$error');
     }
   }
 
-  void _changed() => setState(_reveal);
+  /// The trail moved: the sidebar follows, and so does the address.
+  void _changed() {
+    setState(_reveal);
+    final page = _reader?.page;
+    final path = page?.path;
+    if (page == null || path == null) return;
+    if (path == widget.doc && _clean(page.anchor) == _clean(widget.anchor)) {
+      return;
+    }
+    GoRouter.of(context).go(docsAddress(doc: path, anchor: page.anchor));
+  }
 
   /// Unfolds the groups of the article that is open and brings its row into
   /// view.
@@ -142,6 +215,11 @@ class _DocsPageState extends State<DocsPage> {
     String word(String ru) => libText(language, ru);
     final reader = _reader;
     final tree = _tree;
+    String linkTo(String? anchor) => docsLink(
+      doc: reader?.page.path ?? '',
+      anchor: anchor,
+      instance: model.vault.target?.url,
+    );
     return Material(
       type: MaterialType.transparency,
       child: LayoutBuilder(
@@ -149,9 +227,13 @@ class _DocsPageState extends State<DocsPage> {
           final size = constraints.biggest;
           final font = max(12.0, size.shortestSide * 0.018);
           final codeFont = max(11.0, font * 0.72);
-          final headerH = font * 3.55;
           final wide = size.width >= _wideDocs;
-          final side = min(font * 15.5, size.width * (wide ? 0.4 : 0.84));
+          // A narrow screen is a touch screen: the bar, its marks and the
+          // rows of the sidebar are drawn for a finger, not a pointer.
+          final menuFont = wide ? font : max(font * 1.35, 17.0);
+          final headerH = wide ? font * 3.55 : max(font * 3.55, 52.0);
+          final mark = wide ? font * 2.2 : max(font * 2.2, 40.0);
+          final side = min(menuFont * 15.5, size.width * (wide ? 0.4 : 0.86));
           // What the screen has over the block, on the left of the sidebar.
           final gap = size.width >= _centeredDocs
               ? max(0.0, (size.width - font * _blockFonts) / 2)
@@ -172,10 +254,10 @@ class _DocsPageState extends State<DocsPage> {
             if (tree == null) return const SizedBox.shrink();
             return ListView(
               padding: EdgeInsets.fromLTRB(
-                font * 0.6,
-                font * 0.5,
-                font * 0.3,
-                font * 0.8,
+                menuFont * 0.6,
+                menuFont * 0.5,
+                menuFont * 0.3,
+                menuFont * 0.8,
               ),
               children: [
                 for (final row in _rows(tree.sidebar))
@@ -183,7 +265,8 @@ class _DocsPageState extends State<DocsPage> {
                     key: keyOf(row.node),
                     node: row.node,
                     depth: row.depth,
-                    font: font,
+                    font: menuFont,
+                    minHeight: wide ? 0 : 44 / 1.5,
                     open: _open.contains(row.node.id),
                     selected:
                         row.node.path != null &&
@@ -199,13 +282,13 @@ class _DocsPageState extends State<DocsPage> {
               if (reader != null && reader.canBack)
                 _BackMark(
                   label: word('Назад'),
-                  extent: font * 2.2,
+                  extent: mark,
                   onTap: reader.back,
                 ),
               SizedBox(width: font * 0.2),
               CodeCloseMark(
                 label: libErrorText(language, 'Закрыть', 'Close'),
-                extent: font * 2.2,
+                extent: mark,
                 onTap: () => closeLibrary(context, '/library'),
               ),
             ],
@@ -243,15 +326,33 @@ class _DocsPageState extends State<DocsPage> {
                         if (!wide)
                           _MenuMark(
                             label: word('Разделы'),
-                            extent: font * 2.2,
+                            extent: mark,
                             onTap: () => setState(() => _menu = !_menu),
                           ),
+                        if (reader?.page.path != null)
+                          CopyLinkMark(
+                            link: () => linkTo(null),
+                            label: libErrorText(
+                              language,
+                              'Скопировать ссылку',
+                              'Copy link',
+                            ),
+                            width: mark,
+                            height: mark,
+                          ),
+                        SizedBox(width: font * 0.3),
+                        // The title is text a person may select and copy.
                         Expanded(
-                          child: Text(
-                            reader?.page.title ?? '',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: _style(font * 1.55, const Color(0xFFFFFFFF)),
+                          child: SelectionArea(
+                            child: Text(
+                              reader?.page.title ?? '',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: _style(
+                                font * 1.55,
+                                const Color(0xFFFFFFFF),
+                              ),
+                            ),
                           ),
                         ),
                         SingleChildScrollView(
@@ -268,15 +369,19 @@ class _DocsPageState extends State<DocsPage> {
 
           // The text starts at the top, however short it is. The view takes
           // the whole width, so its scroll bar stands at the screen edge; it
-          // centers the column of the text itself.
+          // keeps room on both sides of the column and leans the column
+          // toward the middle of the screen itself.
           final article = Padding(
-            padding: EdgeInsets.only(left: font, top: font * 0.6),
+            padding: EdgeInsets.only(top: font * 0.6),
             child: reader != null
                 ? DocBody(
                     reader: reader,
                     raw: false,
                     codeFont: codeFont,
                     accent: libraryColor,
+                    linkOf: (slug) => linkTo(slug),
+                    sides: max(font * 1.2, 16.0),
+                    lead: wide ? gap + side + 1 : 0,
                   )
                 : Center(
                     child: _failure != null
@@ -340,8 +445,10 @@ class _DocsPageState extends State<DocsPage> {
                           child: Row(
                             children: [
                               Expanded(
-                                child: ColoredBox(
-                                  color: sceneBackground,
+                                // The scene itself, grain included, but opaque:
+                                // the article must not show through.
+                                child: GrainBox(
+                                  tile: sceneGrain,
                                   child: sidebar(),
                                 ),
                               ),
@@ -389,6 +496,7 @@ class _SideRow extends StatefulWidget {
     required this.node,
     required this.depth,
     required this.font,
+    required this.minHeight,
     required this.open,
     required this.selected,
     required this.onTap,
@@ -398,6 +506,9 @@ class _SideRow extends StatefulWidget {
   final DocNode node;
   final int depth;
   final double font;
+
+  /// The least height of the row: a finger needs more than a pointer.
+  final double minHeight;
   final bool open;
   final bool selected;
   final VoidCallback onTap;
@@ -431,6 +542,8 @@ class _SideRowState extends State<_SideRow> {
           onTap: widget.onTap,
           child: Container(
             color: _hover ? const Color(0x14FFFFFF) : null,
+            constraints: BoxConstraints(minHeight: widget.minHeight),
+            alignment: Alignment.centerLeft,
             padding: EdgeInsets.only(
               left: font * 0.3 + widget.depth * font * 0.9,
               top: font * 0.2,

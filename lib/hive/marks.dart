@@ -38,6 +38,45 @@ class ChevronMarkPainter extends CustomPainter {
       oldDelegate.left != left || oldDelegate.color != color;
 }
 
+/// Two links of a chain on a slant: the mark that copies an address.
+class LinkMarkPainter extends CustomPainter {
+  const LinkMarkPainter(this.color);
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final s = size.shortestSide;
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = s * 0.1
+      ..strokeCap = StrokeCap.round
+      ..color = color;
+    final radius = Radius.circular(s * 0.14);
+    canvas.save();
+    canvas.translate(size.width / 2, size.height / 2);
+    canvas.rotate(-pi / 4);
+    for (final shift in [-s * 0.17, s * 0.17]) {
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromCenter(
+            center: Offset(shift, 0),
+            width: s * 0.58,
+            height: s * 0.28,
+          ),
+          radius,
+        ),
+        paint,
+      );
+    }
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant LinkMarkPainter oldDelegate) =>
+      oldDelegate.color != color;
+}
+
 /// Two overlapping sheets. The error cell and the summary cell share this mark.
 class CopyMarkPainter extends CustomPainter {
   const CopyMarkPainter(this.color);

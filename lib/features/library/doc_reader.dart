@@ -9,6 +9,18 @@ import '../code/code_highlight.dart';
 import '../code/code_view.dart';
 import 'md_view.dart';
 
+class _Read {
+  const _Read(this.title, this.doc);
+
+  final String title;
+  final MdDoc doc;
+}
+
+final _reads = Expando<_Read>();
+
+/// Size of the running text, from the size of code on the same screen.
+double docFontOf(double codeFont) => max(13.0, codeFont * 1.2);
+
 /// One text the reader has shown.
 class DocPage {
   DocPage._(this.title, this.source, this.path, this.anchor, this.doc);
@@ -31,12 +43,23 @@ class DocPage {
     );
   }
 
-  factory DocPage.of(DocArticle article, {String? anchor}) => DocPage(
-    title: article.title,
-    source: article.source,
-    path: article.path,
-    anchor: anchor,
-  );
+  /// An article of the tree. The text is parsed once, the first time it is
+  /// shown; every later visit reuses it.
+  factory DocPage.of(DocArticle article, {String? anchor}) {
+    var read = _reads[article];
+    if (read == null) {
+      final doc = parseMarkdown(article.source);
+      read = _Read(doc.title ?? article.title, doc.withoutTitle());
+      _reads[article] = read;
+    }
+    return DocPage._(
+      read.title,
+      article.source,
+      article.path,
+      anchor,
+      read.doc,
+    );
+  }
 
   final String title;
   final String source;
@@ -122,6 +145,9 @@ class DocBody extends StatelessWidget {
     required this.raw,
     required this.codeFont,
     required this.accent,
+    this.linkOf,
+    this.sides = 0,
+    this.lead = 0,
     super.key,
   });
 
@@ -129,6 +155,15 @@ class DocBody extends StatelessWidget {
   final bool raw;
   final double codeFont;
   final Color accent;
+
+  /// See [MdView.linkOf].
+  final String Function(String slug)? linkOf;
+
+  /// See [MdView.sides].
+  final double sides;
+
+  /// See [MdView.lead].
+  final double lead;
 
   @override
   Widget build(BuildContext context) {
@@ -150,12 +185,15 @@ class DocBody extends StatelessWidget {
       // A new text starts at its top with its own scroll state.
       key: ValueKey(page),
       doc: page.doc,
-      font: max(13.0, codeFont * 1.2),
+      font: docFontOf(codeFont),
       accent: accent,
       canOpen: reader.canOpen,
       onOpen: reader.open,
       controller: reader.controller,
       anchor: page.anchor,
+      linkOf: linkOf,
+      sides: sides,
+      lead: lead,
     );
   }
 }

@@ -343,9 +343,9 @@ class Library {
             (key.endsWith('.md') || key.endsWith('/$sidebarFile')))
           key,
     ];
-    for (final key in keys) {
-      await text(key);
-    }
+    // All at once: on the web every text is a request of its own, and one
+    // after another they made the first open of the documentation slow.
+    await Future.wait([for (final key in keys) text(key)]);
     return _trees[language] = DocsTree.build(
       keys: keys,
       language: language,

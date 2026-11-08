@@ -5,6 +5,7 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 import 'package:pepeunit_client/account/key_file_port.dart';
@@ -400,6 +401,96 @@ void main() {
       await openDocs(tester, const Size(420, 800));
       expect(find.text('Развёртывание'), findsNothing);
       expect(tester.getTopRight(find.byType(MdView)).dx, 420);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: the address follows the open article', (
+      tester,
+    ) async {
+      await start(tester);
+      await tester.tap(find.bySemanticsLabel('Библиотека'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Документация'));
+      await settle(tester);
+      String? doc() => GoRouterState.of(
+        tester.element(find.byType(DocsPage)),
+      ).uri.queryParameters['doc'];
+      await tester.tap(find.text('Docker'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Установка Docker и Compose'));
+      await settle(tester);
+      expect(doc(), 'deployment/docker/install-docker');
+      // Back keeps the screen and moves the address with it.
+      await tester.tap(find.bySemanticsLabel('Назад'));
+      await settle(tester);
+      expect(doc(), isNot('deployment/docker/install-docker'));
+      expect(find.byType(DocsPage), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: the title and the headings copy their address', (
+      tester,
+    ) async {
+      String? copied;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            copied = (call.arguments as Map)['text'] as String?;
+          }
+          return null;
+        },
+      );
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        ),
+      );
+      await start(tester);
+      await tester.tap(find.bySemanticsLabel('Библиотека'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Документация'));
+      await settle(tester);
+      await tester.tap(find.text('Конфигурации Nginx'));
+      await settle(tester);
+      final marks = find.byType(CopyLinkMark);
+      // The first mark is the one of the title, the rest are headings.
+      expect(marks.evaluate().length, greaterThan(1));
+      await tester.tap(marks.first);
+      await tester.pump();
+      expect(copied, contains('/library/docs?doc='));
+      expect(copied, isNot(contains('anchor')));
+      await tester.pump(const Duration(seconds: 1));
+      await tester.ensureVisible(marks.at(1));
+      await tester.pump();
+      await tester.tap(marks.at(1));
+      await tester.pump();
+      expect(copied, contains('anchor='));
+      await tester.pump(const Duration(seconds: 1));
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: on a phone the text has room and rows are big', (
+      tester,
+    ) async {
+      await start(tester);
+      tester.view.physicalSize = const Size(420, 800);
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Библиотека'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Документация'));
+      await settle(tester);
+      final inText = find.descendant(
+        of: find.byType(MdView),
+        matching: find.byType(RichText),
+      );
+      expect(tester.getTopLeft(inText.first).dx, greaterThanOrEqualTo(16));
+      expect(tester.getTopRight(inText.first).dx, lessThanOrEqualTo(420 - 16));
+      await tester.tap(find.bySemanticsLabel('Разделы'));
+      await tester.pumpAndSettle();
+      final row = tester.widget<Text>(find.text('Конфигурации Nginx'));
+      expect(row.style!.fontSize, greaterThanOrEqualTo(15));
       expect(tester.takeException(), isNull);
     });
 
@@ -949,8 +1040,8 @@ void main() {
             'https://www.youtube.com/watch?v=r1CpkXD_MJY\n',
       );
       expect(find.text('python'), findsOneWidget);
-      expect(find.text('1'), findsOneWidget);
-      expect(find.text('2'), findsOneWidget);
+      // The numbers are one text, a line each.
+      expect(find.text('1\n2'), findsOneWidget);
       await tester.tap(find.bySemanticsLabel('Смотреть видео'));
       expect(opened?.id, 'r1CpkXD_MJY');
     });

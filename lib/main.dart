@@ -677,8 +677,10 @@ class _PepeunitAppState extends State<PepeunitApp> {
           ),
           GoRoute(
             path: 'docs',
-            builder: (context, state) =>
-                DocsPage(doc: state.uri.queryParameters['doc']),
+            builder: (context, state) => DocsPage(
+              doc: state.uri.queryParameters['doc'],
+              anchor: state.uri.queryParameters['anchor'],
+            ),
           ),
         ],
       ),

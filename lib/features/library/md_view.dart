@@ -3,6 +3,7 @@ import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show RenderSliverMultiBoxAdaptor;
 import 'package:flutter/services.dart';
 
 import '../../hive/bevel.dart';
@@ -70,6 +71,9 @@ class MdView extends StatefulWidget {
     required this.onOpen,
     this.controller,
     this.anchor,
+    this.linkOf,
+    this.sides = 0,
+    this.lead = 0,
     super.key,
   });
 
@@ -83,15 +87,33 @@ class MdView extends StatefulWidget {
   /// Heading the view scrolls to once it is drawn.
   final String? anchor;
 
+  /// The address of the heading with this anchor. With it, a heading of level
+  /// two to four has a mark in front of it that copies the address. Without
+  /// it the headings carry no mark.
+  final String Function(String slug)? linkOf;
+
+  /// Empty room on the left and on the right of the column.
+  final double sides;
+
+  /// How far the left edge of the view stands from the left edge of the
+  /// screen. A wide screen has the sidebar there. The column leans toward the
+  /// center of the screen by as much as the width allows.
+  final double lead;
+
   @override
   State<MdView> createState() => _MdViewState();
 }
 
 class _MdViewState extends State<MdView> {
   final _scroll = ScrollController();
+  final _list = GlobalKey();
   final _keys = <String, GlobalKey>{};
+
+  /// Index in the list of the block that holds each heading.
+  final _at = <String, int>{};
   final _recognizers = <GestureRecognizer>[];
   List<Widget> _blocks = const [];
+  var _ticket = 0;
 
   @override
   void initState() {
@@ -110,7 +132,8 @@ class _MdViewState extends State<MdView> {
     }
     if (oldWidget.doc != widget.doc ||
         oldWidget.font != widget.font ||
-        oldWidget.accent != widget.accent) {
+        oldWidget.accent != widget.accent ||
+        (oldWidget.linkOf == null) != (widget.linkOf == null)) {
       _build();
       if (oldWidget.doc != widget.doc) {
         if (_scroll.hasClients) _scroll.jumpTo(0);
@@ -141,29 +164,68 @@ class _MdViewState extends State<MdView> {
     });
   }
 
-  /// A heading by its anchor. Links write the same anchor in different ways
-  /// (`env-json`, `envjson`, `фаиловои`), so a miss falls back to
-  /// [anchorKey].
-  GlobalKey? _find(String slug) {
-    final exact = _keys[slug];
-    if (exact != null) return exact;
+  /// A heading by its anchor, as the text spells it. Links write the same
+  /// anchor in different ways (`env-json`, `envjson`, `фаиловои`), so a miss
+  /// falls back to [anchorKey].
+  String? _slugOf(String slug) {
+    if (_keys.containsKey(slug)) return slug;
     final plain = anchorKey(slug);
-    for (final entry in _keys.entries) {
-      if (anchorKey(entry.key) == plain) return entry.value;
+    for (final key in _keys.keys) {
+      if (anchorKey(key) == plain) return key;
     }
     return null;
   }
 
   bool _jump(String slug) {
-    final context = _find(slug)?.currentContext;
-    if (context == null) return false;
-    Scrollable.ensureVisible(context, alignment: 0.02);
+    final found = _slugOf(slug);
+    if (found == null) return false;
+    _reach(found);
     return true;
+  }
+
+  /// Scrolls to a heading. The list builds only the blocks near the window,
+  /// so a heading far away has no widget yet: the view moves toward its
+  /// block, a window at a time, until the heading is built.
+  Future<void> _reach(String slug) async {
+    final ticket = ++_ticket;
+    final index = _at[slug] ?? 0;
+    for (var step = 0; step < 40; step++) {
+      if (!mounted || ticket != _ticket || !_scroll.hasClients) return;
+      final heading = _keys[slug]?.currentContext;
+      if (heading != null && heading.mounted) {
+        Scrollable.ensureVisible(heading, alignment: 0.02);
+        return;
+      }
+      final position = _scroll.position;
+      final list = _list.currentContext?.findRenderObject();
+      if (list is! RenderSliverMultiBoxAdaptor) return;
+      final first = list.firstChild;
+      final last = list.lastChild;
+      if (first == null || last == null) return;
+      final window = position.viewportDimension * 0.8;
+      final guess =
+          position.maxScrollExtent * index / max(1, _blocks.length - 1);
+      double target;
+      if (list.indexOf(first) > index) {
+        target = min(guess, position.pixels - window);
+      } else if (list.indexOf(last) < index) {
+        target = max(guess, position.pixels + window);
+      } else {
+        // Inside the built blocks, yet no widget: a closed notice holds it.
+        return;
+      }
+      position.jumpTo(
+        max(position.minScrollExtent, min(position.maxScrollExtent, target)),
+      );
+      await WidgetsBinding.instance.endOfFrame;
+    }
   }
 
   void _build() {
     _disposeRecognizers();
     _keys.clear();
+    _at.clear();
+    final linkOf = widget.linkOf;
     final builder = _Blocks(
       font: widget.font,
       accent: widget.accent,
@@ -171,42 +233,76 @@ class _MdViewState extends State<MdView> {
       onOpen: widget.onOpen,
       keys: _keys,
       recognizers: _recognizers,
+      linkOf: linkOf == null ? null : (slug) => widget.linkOf?.call(slug) ?? '',
     );
-    _blocks = [for (final block in widget.doc.blocks) builder.block(block)];
+    final blocks = <Widget>[];
+    for (final block in widget.doc.blocks) {
+      final before = _keys.length;
+      blocks.add(builder.row(block));
+      for (final slug in _keys.keys.skip(before)) {
+        _at[slug] = blocks.length - 1;
+      }
+    }
+    _blocks = blocks;
   }
 
   @override
   Widget build(BuildContext context) {
     final font = widget.font;
-    return CodeScrollbar(
-      controller: _scroll,
-      child: SelectionArea(
-        child: SingleChildScrollView(
-          controller: _scroll,
-          padding: EdgeInsets.only(
-            right: codeBarRoom,
-            top: font * 0.3,
-            bottom: font * 1.5,
+    final column = font * (mdWidth + (widget.linkOf == null ? 0 : mdGutter));
+    final sides = widget.sides;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // The column leans toward the middle of the screen: the view stands
+        // [MdView.lead] from its left edge, so the right side takes that much
+        // more room, as far as the column still fits.
+        final shift = max(
+          0.0,
+          min(
+            widget.lead - codeBarRoom,
+            constraints.maxWidth - 2 * sides - codeBarRoom - column,
           ),
-          // The column is centered. Every block, text or not, has the same
-          // width, so the left and right edges line up down the page.
-          child: Align(
-            alignment: Alignment.topCenter,
-            child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: font * mdWidth),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  for (var i = 0; i < _blocks.length; i++) ...[
-                    if (i > 0) SizedBox(height: _gap(i)),
-                    _blocks[i],
-                  ],
-                ],
-              ),
+        );
+        return CodeScrollbar(
+          controller: _scroll,
+          child: SelectionArea(
+            child: CustomScrollView(
+              controller: _scroll,
+              slivers: [
+                SliverPadding(
+                  padding: EdgeInsets.fromLTRB(
+                    sides,
+                    font * 0.3,
+                    sides + shift + codeBarRoom,
+                    font * 1.5,
+                  ),
+                  // Blocks are built when they come near the window, not all
+                  // at once, so a long article opens at once. The column is
+                  // centered; every block, text or not, has the same width,
+                  // so the left and right edges line up down the page.
+                  sliver: SliverList.builder(
+                    key: _list,
+                    itemCount: _blocks.length,
+                    itemBuilder: (context, i) => Padding(
+                      padding: EdgeInsets.only(top: i > 0 ? _gap(i) : 0),
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: column),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: _blocks[i],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 
@@ -223,6 +319,10 @@ class _MdViewState extends State<MdView> {
 /// Width of the reading column, in font sizes, shared by text, notices, code,
 /// tables, and pictures. A line of text holds about ninety characters.
 const mdWidth = 48.0;
+
+/// Room in front of the column for the copy-link mark of a heading, in font
+/// sizes. It is there only while the view has [MdView.linkOf].
+const mdGutter = 1.8;
 
 const _ink = Color(0xFFFFFFFF);
 
@@ -244,6 +344,7 @@ class _Blocks {
     required this.onOpen,
     required this.keys,
     required this.recognizers,
+    this.linkOf,
   });
 
   final double font;
@@ -252,8 +353,26 @@ class _Blocks {
   final void Function(String url) onOpen;
   final Map<String, GlobalKey> keys;
   final List<GestureRecognizer> recognizers;
+  final String Function(String slug)? linkOf;
 
   double get code => font * 0.82;
+
+  double get gutter => linkOf == null ? 0 : font * mdGutter;
+
+  /// A block of the document's own list. Under a heading with a copy mark
+  /// the mark stands in the gutter; every other block leaves the gutter empty,
+  /// so the text lines up.
+  Widget row(MdBlock block) {
+    final built = this.block(block, top: true);
+    if (gutter == 0 || _marked(block)) return built;
+    return Padding(padding: EdgeInsets.only(left: gutter), child: built);
+  }
+
+  bool _marked(MdBlock block) =>
+      linkOf != null &&
+      block is MdHeading &&
+      block.level >= 2 &&
+      block.level <= 4;
 
   /// True while the spans of a link are built.
   var _inLink = false;
@@ -266,11 +385,11 @@ class _Blocks {
     decoration: TextDecoration.none,
   );
 
-  Widget block(MdBlock block, {TextStyle? style}) {
+  Widget block(MdBlock block, {TextStyle? style, bool top = false}) {
     final base = style ?? body;
     switch (block) {
       case MdHeading():
-        return _heading(block);
+        return _heading(block, marked: top && _marked(block));
       case MdParagraph():
         return Text.rich(
           TextSpan(children: spans(block.inlines, base)),
@@ -315,7 +434,7 @@ class _Blocks {
     }
   }
 
-  Widget _heading(MdHeading heading) {
+  Widget _heading(MdHeading heading, {required bool marked}) {
     const scale = [2.0, 1.55, 1.25, 1.1, 1.0, 0.95];
     final key = keys.putIfAbsent(heading.slug, GlobalKey.new);
     final level = heading.level;
@@ -355,6 +474,21 @@ class _Blocks {
         );
       default:
         content = text;
+    }
+    final link = linkOf;
+    if (marked && link != null) {
+      // The mark stands in the gutter, level with the first line.
+      content = Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          CopyLinkMark(
+            link: () => link(heading.slug),
+            width: gutter,
+            height: size * 1.25,
+          ),
+          Expanded(child: content),
+        ],
+      );
     }
     return KeyedSubtree(key: key, child: content);
   }
@@ -691,6 +825,69 @@ class _Fade extends StatelessWidget {
   }
 }
 
+/// The mark that copies an address: two links of a chain. A tap puts [link]
+/// on the clipboard and the mark turns green for a moment. It is not part of
+/// a selection.
+class CopyLinkMark extends StatefulWidget {
+  const CopyLinkMark({
+    required this.link,
+    required this.width,
+    required this.height,
+    this.label = 'Скопировать ссылку',
+    super.key,
+  });
+
+  final String Function() link;
+  final double width;
+  final double height;
+  final String label;
+
+  @override
+  State<CopyLinkMark> createState() => _CopyLinkMarkState();
+}
+
+class _CopyLinkMarkState extends State<CopyLinkMark> {
+  var _copied = false;
+
+  Future<void> _copy() async {
+    await Clipboard.setData(ClipboardData(text: widget.link()));
+    if (!mounted) return;
+    setState(() => _copied = true);
+    await Future<void>.delayed(const Duration(milliseconds: 900));
+    if (mounted) setState(() => _copied = false);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final extent = min(widget.width, widget.height) * 0.8;
+    return SelectionContainer.disabled(
+      child: Semantics(
+        button: true,
+        label: widget.label,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: _copy,
+          child: HoverPop(
+            child: SizedBox(
+              width: widget.width,
+              height: widget.height,
+              child: Center(
+                child: SizedBox(
+                  width: extent,
+                  height: extent,
+                  child: CustomPaint(
+                    painter: LinkMarkPainter(_copied ? addColor : hexMuted),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// A pointy-top hexagon, the mark of the cells, used as a bullet and a
 /// heading sign.
 class _HexMark extends StatelessWidget {
@@ -799,7 +996,12 @@ class _AdmonitionState extends State<_Admonition> {
     );
     return _Plate(
       border: widget.color,
-      fill: widget.color.withValues(alpha: 0.13),
+      // The tint over the scene color, 85% opaque: the mosaic shows faintly
+      // through, the text stays readable.
+      fill: Color.alphaBlend(
+        widget.color.withValues(alpha: 0.16),
+        sceneBackground,
+      ).withValues(alpha: 0.85),
       font: font,
       child: Padding(
         padding: EdgeInsets.fromLTRB(
@@ -875,6 +1077,12 @@ class _CodeBlockState extends State<_CodeBlock> {
   final _scroll = ScrollController();
   var _copied = false;
 
+  /// The colors of the lines are read once, not on every frame of the mark.
+  late final List<List<CodeToken>> _tokens = codeTokens(
+    widget.code,
+    codeLanguageOfFence(widget.language),
+  );
+
   @override
   void dispose() {
     _scroll.dispose();
@@ -892,12 +1100,8 @@ class _CodeBlockState extends State<_CodeBlock> {
   @override
   Widget build(BuildContext context) {
     final font = widget.font;
-    final language = codeLanguageOfFence(widget.language);
     final lines = widget.code.split('\n');
-    final tokens = codeTokens(
-      widget.code,
-      language == CodeLanguage.plain ? CodeLanguage.plain : language,
-    );
+    final tokens = _tokens;
     final style = codeMono(font);
     final strut = codeStrut(font);
     final gutter = font * 0.62 * '${lines.length}'.length + font * 1.2;
@@ -959,43 +1163,45 @@ class _CodeBlockState extends State<_CodeBlock> {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // The numbers and the lines are one text each, not one
+                  // widget per line: every row has the height of the strut,
+                  // so they stay level.
                   SelectionContainer.disabled(
                     child: SizedBox(
                       width: gutter,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          for (var i = 0; i < lines.length; i++)
-                            Padding(
-                              padding: EdgeInsets.only(right: font * 0.7),
-                              child: Text(
-                                '${i + 1}',
-                                strutStyle: strut,
-                                style: codeMono(font, color: hexMuted),
-                              ),
-                            ),
-                        ],
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: Padding(
+                          padding: EdgeInsets.only(right: font * 0.7),
+                          child: Text(
+                            [for (var i = 0; i < lines.length; i++) '${i + 1}']
+                                .join('\n'),
+                            textAlign: TextAlign.right,
+                            strutStyle: strut,
+                            style: codeMono(font, color: hexMuted),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                   Padding(
                     padding: EdgeInsets.only(right: font),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        for (var i = 0; i < lines.length; i++)
-                          Text.rich(
-                            TextSpan(
-                              style: style,
-                              children: codeLineSpans(
-                                i < tokens.length ? tokens[i] : const [],
-                                style,
-                              ),
+                    child: Text.rich(
+                      TextSpan(
+                        style: style,
+                        children: [
+                          for (var i = 0; i < lines.length; i++) ...[
+                            ...codeLineSpans(
+                              i < tokens.length ? tokens[i] : const [],
+                              style,
                             ),
-                            strutStyle: strut,
-                            softWrap: false,
-                          ),
-                      ],
+                            if (i < lines.length - 1)
+                              const TextSpan(text: '\n'),
+                          ],
+                        ],
+                      ),
+                      strutStyle: strut,
+                      softWrap: false,
                     ),
                   ),
                 ],
