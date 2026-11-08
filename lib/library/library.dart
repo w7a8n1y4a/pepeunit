@@ -16,13 +16,14 @@ import 'markdown.dart';
 ///   article that no row links to has no place in the tree, but a link in a
 ///   text still opens it. An article takes the title of its panel from its
 ///   first `# ` heading.
-/// - Tips: `assets/library/tips/<language>/<screen>.<cell>.md`
+/// - Tips: `tooltip/<language>/<screen>.<cell>.md`
 /// - Everything else (presentation, about): `assets/library/<language>/`.
 ///
 /// A text that has no translation falls back to Russian, and so does the
 /// sidebar.
 const docsRoot = 'docs';
 const libraryRoot = 'assets/library';
+const tipRoot = 'tooltip';
 const fallbackLanguage = 'ru';
 const sidebarFile = 'sidebar.json';
 
@@ -354,11 +355,15 @@ class Library {
   }
 
   /// Key of the tip file for [screen] and [cell], or null when there is none.
-  /// A shared tip, `common.<cell>`, serves every screen.
+  /// A shared tip, `common.<cell>`, serves every screen. A dynamic id such as
+  /// `unit:<uuid>` takes the tip of its type, `unit`.
   String? tipKey(String language, String screen, String cell) {
+    final separator = cell.indexOf(':');
+    final name = separator < 0 ? cell : cell.substring(0, separator);
+    if (!tipCellOk(name)) return null;
     for (final lang in {language, fallbackLanguage}) {
-      for (final name in ['$screen.$cell', 'common.$cell']) {
-        final key = '$libraryRoot/tips/$lang/$name.md';
+      for (final file in ['$screen.$name', 'common.$name']) {
+        final key = '$tipRoot/$lang/$file.md';
         if (has(key)) return key;
       }
     }
@@ -377,6 +382,5 @@ String tipScreenOf(String routePattern) {
   return cleaned.isEmpty ? 'home' : cleaned;
 }
 
-/// Cell ids that name something typed by a person or sent by the backend
-/// have no tip. Only plain words do.
+/// A tip file name is a plain word. Dynamic values are removed by [Library.tipKey].
 bool tipCellOk(String id) => RegExp(r'^[a-z0-9_-]+$').hasMatch(id);

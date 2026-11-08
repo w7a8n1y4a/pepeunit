@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 
 import '../../hive/bevel.dart';
 import '../../hive/hex_scene.dart';
+import '../../hive/hint.dart';
 import '../../hive/marks.dart';
 import '../../instances/link.dart';
 import '../../library/doc_search.dart';
@@ -467,7 +468,9 @@ class _Blocks {
     var from = 0;
     for (final range in ranges) {
       if (range.start > from) {
-        out.add(TextSpan(text: text.substring(from, range.start), style: style));
+        out.add(
+          TextSpan(text: text.substring(from, range.start), style: style),
+        );
       }
       final mine = matchAt.length == current;
       if (mine) _hit = true;
@@ -510,7 +513,10 @@ class _Blocks {
   Widget row(MdBlock block) {
     final built = this.block(block, top: true);
     if (gutter == 0 || _marked(block)) return built;
-    return Padding(padding: EdgeInsets.only(left: gutter), child: built);
+    return Padding(
+      padding: EdgeInsets.only(left: gutter),
+      child: built,
+    );
   }
 
   bool _marked(MdBlock block) =>
@@ -1034,23 +1040,28 @@ class _CopyLinkMarkState extends State<CopyLinkMark> {
   @override
   Widget build(BuildContext context) {
     final extent = min(widget.width, widget.height) * 0.8;
-    return SelectionContainer.disabled(
-      child: Semantics(
-        button: true,
-        label: widget.label,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: _copy,
-          child: HoverPop(
-            child: SizedBox(
-              width: widget.width,
-              height: widget.height,
-              child: Center(
-                child: SizedBox(
-                  width: extent,
-                  height: extent,
-                  child: CustomPaint(
-                    painter: LinkMarkPainter(_copied ? addColor : hexMuted),
+    return HintTarget(
+      id: 'button-copy-link',
+      title: widget.label,
+      color: hexMuted,
+      child: SelectionContainer.disabled(
+        child: Semantics(
+          button: true,
+          label: widget.label,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: _copy,
+            child: HoverPop(
+              child: SizedBox(
+                width: widget.width,
+                height: widget.height,
+                child: Center(
+                  child: SizedBox(
+                    width: extent,
+                    height: extent,
+                    child: CustomPaint(
+                      painter: LinkMarkPainter(_copied ? addColor : hexMuted),
+                    ),
                   ),
                 ),
               ),
@@ -1188,19 +1199,24 @@ class _AdmonitionState extends State<_Admonition> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             if (widget.folded)
-              GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => setState(() => _open = !_open),
-                child: MouseRegion(
-                  cursor: SystemMouseCursors.click,
-                  child: Row(
-                    children: [
-                      Text(
-                        _open ? '▾ ' : '▸ ',
-                        style: TextStyle(color: widget.color, fontSize: font),
-                      ),
-                      Expanded(child: title),
-                    ],
+              HintTarget(
+                id: 'doc-details',
+                title: widget.title,
+                color: widget.color,
+                child: GestureDetector(
+                  behavior: HitTestBehavior.opaque,
+                  onTap: () => setState(() => _open = !_open),
+                  child: MouseRegion(
+                    cursor: SystemMouseCursors.click,
+                    child: Row(
+                      children: [
+                        Text(
+                          _open ? '▾ ' : '▸ ',
+                          style: TextStyle(color: widget.color, fontSize: font),
+                        ),
+                        Expanded(child: title),
+                      ],
+                    ),
                   ),
                 ),
               )
@@ -1301,20 +1317,27 @@ class _CodeBlockState extends State<_CodeBlock> {
                     ),
                   ),
                 ),
-                Semantics(
-                  button: true,
-                  label: 'Скопировать',
-                  child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onTap: _copy,
-                    child: HoverPop(
-                      child: SizedBox(
-                        width: extent,
-                        height: extent,
-                        child: Padding(
-                          padding: EdgeInsets.all(extent * 0.2),
-                          child: CustomPaint(
-                            painter: CopyMarkPainter(_copied ? addColor : _ink),
+                HintTarget(
+                  id: 'button-copy',
+                  title: 'Скопировать',
+                  color: widget.accent,
+                  child: Semantics(
+                    button: true,
+                    label: 'Скопировать',
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onTap: _copy,
+                      child: HoverPop(
+                        child: SizedBox(
+                          width: extent,
+                          height: extent,
+                          child: Padding(
+                            padding: EdgeInsets.all(extent * 0.2),
+                            child: CustomPaint(
+                              painter: CopyMarkPainter(
+                                _copied ? addColor : _ink,
+                              ),
+                            ),
                           ),
                         ),
                       ),
@@ -1473,35 +1496,40 @@ class _Zoomable extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      cursor: SystemMouseCursors.zoomIn,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => showGeneralDialog<void>(
-          context: context,
-          barrierDismissible: true,
-          barrierLabel: 'Закрыть',
-          barrierColor: const Color(0xE6000000),
-          pageBuilder: (dialog, _, _) => Material(
-            type: MaterialType.transparency,
-            child: GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => Navigator.of(dialog).pop(),
-              child: InteractiveViewer(
-                maxScale: 8,
-                child: Center(
-                  child: Image.network(
-                    url,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stack) =>
-                        _Missing(label: alt, font: font),
+    return HintTarget(
+      id: 'doc-image',
+      title: alt,
+      color: hexMuted,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.zoomIn,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => showGeneralDialog<void>(
+            context: context,
+            barrierDismissible: true,
+            barrierLabel: 'Закрыть',
+            barrierColor: const Color(0xE6000000),
+            pageBuilder: (dialog, _, _) => Material(
+              type: MaterialType.transparency,
+              child: GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => Navigator.of(dialog).pop(),
+                child: InteractiveViewer(
+                  maxScale: 8,
+                  child: Center(
+                    child: Image.network(
+                      url,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stack) =>
+                          _Missing(label: alt, font: font),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
+          child: child,
         ),
-        child: child,
       ),
     );
   }
@@ -1559,43 +1587,48 @@ class _Video extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: 'Смотреть видео',
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => _openVideo(video),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxWidth: max(240, font * 36)),
-            child: AspectRatio(
-              aspectRatio: 16 / 9,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.network(
-                    video.preview,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stack) =>
-                        const ColoredBox(color: Color(0xFF14161B)),
-                  ),
-                  const ColoredBox(color: Color(0x55000000)),
-                  Center(
-                    child: DecoratedBox(
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: accent, width: 3),
-                        color: const Color(0x99000000),
-                      ),
-                      child: SizedBox(
-                        width: font * 3.6,
-                        height: font * 3.6,
-                        child: CustomPaint(painter: _PlayPainter(accent)),
+    return HintTarget(
+      id: 'doc-video',
+      title: 'Смотреть видео',
+      color: accent,
+      child: Semantics(
+        button: true,
+        label: 'Смотреть видео',
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => _openVideo(video),
+            child: ConstrainedBox(
+              constraints: BoxConstraints(maxWidth: max(240, font * 36)),
+              child: AspectRatio(
+                aspectRatio: 16 / 9,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Image.network(
+                      video.preview,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stack) =>
+                          const ColoredBox(color: Color(0xFF14161B)),
+                    ),
+                    const ColoredBox(color: Color(0x55000000)),
+                    Center(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: accent, width: 3),
+                          color: const Color(0x99000000),
+                        ),
+                        child: SizedBox(
+                          width: font * 3.6,
+                          height: font * 3.6,
+                          child: CustomPaint(painter: _PlayPainter(accent)),
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

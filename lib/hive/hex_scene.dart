@@ -91,6 +91,7 @@ class HexSlot {
     this.enabled = true,
     this.busy = false,
     this.rim,
+    this.hint,
   });
 
   final String id;
@@ -152,6 +153,9 @@ class HexSlot {
   /// runs clockwise. Null keeps the border in [color]. A disabled cell stays
   /// muted.
   final List<Color>? rim;
+
+  /// Stable tip id when [id] contains a value chosen by the user or backend.
+  final String? hint;
 }
 
 const hexRimSideParts = 8;
@@ -1237,15 +1241,16 @@ class _CellFrameState extends State<_CellFrame> with TickerProviderStateMixin {
         ],
       ),
     );
-    if (!widget.button) return scene;
-    final detector = GestureDetector(
-      behavior: HitTestBehavior.opaque,
-      onTap: interactive ? _tap : null,
-      child: scene,
-    );
     final slot = widget.slot;
+    final detector = widget.button
+        ? GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: interactive ? _tap : null,
+            child: scene,
+          )
+        : scene;
     return HintTarget(
-      id: slot.id,
+      id: slot.hint ?? slot.id,
       title: slot.title,
       color: slot.color,
       child: interactive ? _hoverable(detector) : detector,

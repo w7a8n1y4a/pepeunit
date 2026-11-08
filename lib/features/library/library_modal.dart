@@ -93,7 +93,12 @@ class _LibraryModalState extends State<LibraryModal> {
       rows: 100000,
       actions: (font) => [
         if (_reader.canBack)
-          CodeWordButton(label: word('Назад'), font: font, onTap: _reader.back),
+          CodeWordButton(
+            label: word('Назад'),
+            font: font,
+            onTap: _reader.back,
+            hint: 'button-doc-back',
+          ),
         ...?widget.actions?.call(font),
         CodeChip(
           label: word('Рендер'),
@@ -101,6 +106,7 @@ class _LibraryModalState extends State<LibraryModal> {
           font: font,
           color: widget.color,
           onTap: () => model.setLibraryRaw(false),
+          hint: 'button-render',
         ),
         CodeChip(
           label: word('Исходник'),
@@ -108,6 +114,7 @@ class _LibraryModalState extends State<LibraryModal> {
           font: font,
           color: widget.color,
           onTap: () => model.setLibraryRaw(true),
+          hint: 'button-source',
         ),
       ],
       body: (codeFont, _) => DocBody(

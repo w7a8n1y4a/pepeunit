@@ -21,7 +21,7 @@ import 'features/home/home_page.dart';
 import 'features/library/about_page.dart';
 import 'features/library/docs_page.dart';
 import 'features/library/library_menu_page.dart';
-import 'features/library/library_modal.dart';
+import 'features/library/tip_modal.dart';
 import 'features/library/support_page.dart';
 import 'features/library/tools_page.dart';
 import 'features/menu/placeholder_page.dart';
@@ -698,14 +698,24 @@ class _PepeunitAppState extends State<PepeunitApp> {
     super.dispose();
   }
 
+  /// The route pattern of the screen the cell [context] stands on. The
+  /// router's own `fullPath` skips a screen opened by `push`, so it names
+  /// the screen below; the state of the cell's own route does not. A cell
+  /// outside any route, such as one in a dialog, falls back to the router.
+  String _screenPath(BuildContext context) {
+    try {
+      return GoRouterState.of(context).fullPath ?? '';
+    } catch (_) {
+      return _router.routerDelegate.currentConfiguration.fullPath;
+    }
+  }
+
   /// The tip file of a cell on the screen that is open now, or null.
   String? _tipKey(BuildContext context, String id) {
     final library = Library.instance;
-    if (!library.ready || !tipCellOk(id)) return null;
+    if (!library.ready) return null;
     final language = AppScope.of(context).vault.language;
-    final screen = tipScreenOf(
-      _router.routerDelegate.currentConfiguration.fullPath,
-    );
+    final screen = tipScreenOf(_screenPath(context));
     return library.tipKey(language, screen, id);
   }
 
@@ -729,7 +739,7 @@ class _PepeunitAppState extends State<PepeunitApp> {
       barrierColor: const Color(0x00000000),
       pageBuilder: (dialog, _, _) => Material(
         type: MaterialType.transparency,
-        child: LibraryModal(
+        child: TipModal(
           title: title,
           color: color,
           source: text,

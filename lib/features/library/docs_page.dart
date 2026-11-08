@@ -10,6 +10,7 @@ import '../../app_scope.dart';
 import '../../hive/bevel.dart';
 import '../../hive/grain.dart';
 import '../../hive/hex_scene.dart';
+import '../../hive/hint.dart';
 import '../../library/doc_search.dart';
 import '../../library/library.dart';
 import '../../library/markdown.dart';
@@ -369,7 +370,10 @@ class _DocsPageState extends State<DocsPage> {
           // What the screen has over the block, on the left of the sidebar.
           final outlined = size.width >= _centeredDocs;
           final gap = outlined
-              ? max(0.0, (size.width - font * (_blockFonts + _outlineFonts)) / 2)
+              ? max(
+                  0.0,
+                  (size.width - font * (_blockFonts + _outlineFonts)) / 2,
+                )
               : 0.0;
           // The outline panel: its room at the right end of the block. The
           // scroll bar of the text keeps the last strip of the screen.
@@ -822,46 +826,51 @@ class _SideRowState extends State<_SideRow> {
         : node.isGroup
         ? const Color(0xFFFFFFFF)
         : hexMuted;
-    return Semantics(
-      button: true,
-      selected: widget.selected,
-      label: node.text,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hover = true),
-        onExit: (_) => setState(() => _hover = false),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: widget.onTap,
-          child: Container(
-            color: _hover ? const Color(0x14FFFFFF) : null,
-            constraints: BoxConstraints(minHeight: widget.minHeight),
-            alignment: Alignment.centerLeft,
-            padding: EdgeInsets.only(
-              left: font * 0.3 + widget.depth * font * 0.9,
-              top: font * 0.2,
-              bottom: font * 0.2,
-              right: font * 0.3,
-            ),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: font * 0.9,
-                  height: font * 1.125,
-                  child: node.isGroup
-                      ? CustomPaint(
-                          painter: _ChevronPainter(color, widget.open),
-                        )
-                      : null,
-                ),
-                Expanded(
-                  child: Text(
-                    node.text,
-                    style: _style(font * 0.9, color, height: 1.25),
+    return HintTarget(
+      id: node.isGroup ? 'doc-group' : 'doc-article',
+      title: node.text,
+      color: color,
+      child: Semantics(
+        button: true,
+        selected: widget.selected,
+        label: node.text,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hover = true),
+          onExit: (_) => setState(() => _hover = false),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.onTap,
+            child: Container(
+              color: _hover ? const Color(0x14FFFFFF) : null,
+              constraints: BoxConstraints(minHeight: widget.minHeight),
+              alignment: Alignment.centerLeft,
+              padding: EdgeInsets.only(
+                left: font * 0.3 + widget.depth * font * 0.9,
+                top: font * 0.2,
+                bottom: font * 0.2,
+                right: font * 0.3,
+              ),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  SizedBox(
+                    width: font * 0.9,
+                    height: font * 1.125,
+                    child: node.isGroup
+                        ? CustomPaint(
+                            painter: _ChevronPainter(color, widget.open),
+                          )
+                        : null,
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: Text(
+                      node.text,
+                      style: _style(font * 0.9, color, height: 1.25),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -894,34 +903,39 @@ class _OutlineRowState extends State<_OutlineRow> {
   Widget build(BuildContext context) {
     final font = widget.font;
     final heading = widget.heading;
-    return Semantics(
-      button: true,
-      label: heading.text,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hover = true),
-        onExit: (_) => setState(() => _hover = false),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: widget.onTap,
-          child: Container(
-            color: _hover ? const Color(0x14FFFFFF) : null,
-            padding: EdgeInsets.only(
-              left: font * 0.3 + (heading.level - 2) * font * 0.9,
-              top: font * 0.2,
-              bottom: font * 0.2,
-              right: font * 0.3,
-            ),
-            child: Text(
-              heading.text,
-              style: _style(
-                font * 0.9,
-                _hover
-                    ? libraryColor
-                    : heading.level == 2
-                    ? const Color(0xFFFFFFFF)
-                    : hexMuted,
-                height: 1.25,
+    return HintTarget(
+      id: 'doc-heading',
+      title: heading.text,
+      color: libraryColor,
+      child: Semantics(
+        button: true,
+        label: heading.text,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hover = true),
+          onExit: (_) => setState(() => _hover = false),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.onTap,
+            child: Container(
+              color: _hover ? const Color(0x14FFFFFF) : null,
+              padding: EdgeInsets.only(
+                left: font * 0.3 + (heading.level - 2) * font * 0.9,
+                top: font * 0.2,
+                bottom: font * 0.2,
+                right: font * 0.3,
+              ),
+              child: Text(
+                heading.text,
+                style: _style(
+                  font * 0.9,
+                  _hover
+                      ? libraryColor
+                      : heading.level == 2
+                      ? const Color(0xFFFFFFFF)
+                      : hexMuted,
+                  height: 1.25,
+                ),
               ),
             ),
           ),
@@ -993,42 +1007,47 @@ class _SearchPillState extends State<_SearchPill> {
   Widget build(BuildContext context) {
     final font = widget.font;
     final color = _hover ? libraryColor : const Color(0x55FFFFFF);
-    return Semantics(
-      button: true,
-      label: widget.label,
-      excludeSemantics: true,
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onEnter: (_) => setState(() => _hover = true),
-        onExit: (_) => setState(() => _hover = false),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: widget.onTap,
-          child: BevelFrame(
-            color: color,
-            radius: font * 0.6,
-            width: 1.2,
-            child: Container(
-              height: font * 2.4,
-              padding: EdgeInsets.symmetric(horizontal: font * 0.8),
-              child: Row(
-                children: [
-                  SvgPicture.asset(
-                    'assets/icons/actions/search.svg',
-                    width: font * 1.15,
-                    height: font * 1.15,
-                  ),
-                  SizedBox(width: font * 0.6),
-                  Expanded(
-                    child: Text(
-                      widget.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: _style(font * 0.95, hexMuted),
+    return HintTarget(
+      id: 'doc-search',
+      title: widget.label,
+      color: libraryColor,
+      child: Semantics(
+        button: true,
+        label: widget.label,
+        excludeSemantics: true,
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onEnter: (_) => setState(() => _hover = true),
+          onExit: (_) => setState(() => _hover = false),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: widget.onTap,
+            child: BevelFrame(
+              color: color,
+              radius: font * 0.6,
+              width: 1.2,
+              child: Container(
+                height: font * 2.4,
+                padding: EdgeInsets.symmetric(horizontal: font * 0.8),
+                child: Row(
+                  children: [
+                    SvgPicture.asset(
+                      'assets/icons/actions/search.svg',
+                      width: font * 1.15,
+                      height: font * 1.15,
                     ),
-                  ),
-                  Text(widget.hint, style: _style(font * 0.8, hexMuted)),
-                ],
+                    SizedBox(width: font * 0.6),
+                    Expanded(
+                      child: Text(
+                        widget.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: _style(font * 0.95, hexMuted),
+                      ),
+                    ),
+                    Text(widget.hint, style: _style(font * 0.8, hexMuted)),
+                  ],
+                ),
               ),
             ),
           ),
@@ -1054,17 +1073,18 @@ class _IconMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: HoverPop(
-          child: SvgPicture.asset(
-            asset,
-            width: extent,
-            height: extent,
+    return HintTarget(
+      id: asset.endsWith('/search.svg') ? 'doc-search' : 'doc-back',
+      title: label,
+      color: libraryColor,
+      child: Semantics(
+        button: true,
+        label: label,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: HoverPop(
+            child: SvgPicture.asset(asset, width: extent, height: extent),
           ),
         ),
       ),
@@ -1086,17 +1106,22 @@ class _MenuMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: HoverPop(
-          child: SizedBox(
-            width: extent,
-            height: extent,
-            child: const CustomPaint(painter: _MenuPainter()),
+    return HintTarget(
+      id: 'doc-menu',
+      title: label,
+      color: libraryColor,
+      child: Semantics(
+        button: true,
+        label: label,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: HoverPop(
+            child: SizedBox(
+              width: extent,
+              height: extent,
+              child: const CustomPaint(painter: _MenuPainter()),
+            ),
           ),
         ),
       ),

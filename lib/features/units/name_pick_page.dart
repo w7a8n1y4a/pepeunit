@@ -166,6 +166,7 @@ class _NamePickPageState extends State<NamePickPage> {
           slots.add(
             HexSlot(
               id: slot.id,
+              hint: 'item',
               title: item?.label ?? slot.id,
               color: widget.color ?? unitsColor,
               q: slot.q,

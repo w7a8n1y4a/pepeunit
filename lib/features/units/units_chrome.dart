@@ -80,11 +80,13 @@ HexSlot unitMark({
   bool tappable = true,
   bool busy = false,
   Color? color,
+  String? hint,
 }) {
   final commit = shortCommit(unit.currentCommit ?? unit.commit);
   final corner = commit.isEmpty ? unit.branch : commit;
   return HexSlot(
     id: id,
+    hint: hint,
     title: unit.name,
     footer: unitVisibilityLabel(language, unit.visibility),
     footerLeft: corner.isEmpty ? null : corner,

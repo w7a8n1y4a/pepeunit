@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../hive/hex_scene.dart';
+import '../../hive/hint.dart';
 import '../../hive/marks.dart';
 
 /// The error message, drawn inside its own cell. The rest of the menu stays put.
@@ -68,21 +69,26 @@ class _ErrorCellState extends State<ErrorCell> {
                   ),
                 ),
               ),
-              Semantics(
-                button: true,
-                label: widget.copyLabel,
-                child: GestureDetector(
-                  onTap: _copy,
-                  behavior: HitTestBehavior.opaque,
-                  child: HoverPop(
-                    child: SizedBox(
-                      width: side * 0.18,
-                      height: side * 0.16,
-                      child: CustomPaint(
-                        painter: CopyMarkPainter(
-                          _copied
-                              ? const Color(0xFF4CAF50)
-                              : const Color(0xFFFFFFFF),
+              HintTarget(
+                id: 'button-copy',
+                title: widget.copyLabel,
+                color: errorColor,
+                child: Semantics(
+                  button: true,
+                  label: widget.copyLabel,
+                  child: GestureDetector(
+                    onTap: _copy,
+                    behavior: HitTestBehavior.opaque,
+                    child: HoverPop(
+                      child: SizedBox(
+                        width: side * 0.18,
+                        height: side * 0.16,
+                        child: CustomPaint(
+                          painter: CopyMarkPainter(
+                            _copied
+                                ? const Color(0xFF4CAF50)
+                                : const Color(0xFFFFFFFF),
+                          ),
                         ),
                       ),
                     ),

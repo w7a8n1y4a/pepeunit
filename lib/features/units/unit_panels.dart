@@ -82,6 +82,7 @@ class _UnitLogPanelState extends State<UnitLogPanel> with CodePanelState {
             font: font,
             color: logLevelColor(level),
             onTap: () => _toggle(level),
+            hint: 'button-log-level',
           ),
         SizedBox(width: font * 0.3),
       ],
@@ -324,6 +325,7 @@ class _UnitEnvPanelState extends State<UnitEnvPanel> with CodePanelState {
           enabled: !loading && pending == null && syntax == null,
           busy: pending == 'save',
           onTap: _save,
+          hint: 'button-env-save',
         ),
         CodeWordButton(
           label: unitText(language, 'Сброс', 'Reset'),
@@ -332,6 +334,7 @@ class _UnitEnvPanelState extends State<UnitEnvPanel> with CodePanelState {
           enabled: !loading && pending == null,
           busy: pending == 'reset',
           onTap: _reset,
+          hint: 'button-env-reset',
         ),
       ],
       body: (_, layout) => CodeEditor(
@@ -439,6 +442,7 @@ class _UnitIoValuePanelState extends State<UnitIoValuePanel>
                 enabled: !loading && pending == null,
                 busy: pending == 'send',
                 onTap: _send,
+                hint: 'button-value-send',
               ),
             ]
           : null,

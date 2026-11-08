@@ -51,6 +51,7 @@ class _UnitCommandsPageState extends State<UnitCommandsPage> {
               )
             : HexSlot(
                 id: slot.id,
+                hint: slot.id.toLowerCase(),
                 title: unitCommandLabel(language, slot.id),
                 footer: slot.id == 'Update' ? _status : null,
                 color: unitsColor,

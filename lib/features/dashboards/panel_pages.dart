@@ -31,6 +31,7 @@ HexSlot panelMark({
 }) {
   return HexSlot(
     id: id,
+    hint: id == 'card' ? null : 'panel',
     title: panel.title,
     footer: panelTypeLabel(panel.type),
     sideRight: pieceCount(language, panel.links.length),
@@ -177,6 +178,7 @@ class _PanelsPageState extends State<PanelsPage> {
     }
     return HexSlot(
       id: slot.id,
+      hint: 'panel',
       title: '',
       color: dashboardsColor,
       q: slot.q,

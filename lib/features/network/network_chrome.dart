@@ -119,10 +119,12 @@ HexSlot userMark({
   Uint8List? image,
   bool tappable = true,
   bool busy = false,
+  String? hint,
 }) {
   final login = user.login ?? '';
   return HexSlot(
     id: id,
+    hint: hint,
     title: login,
     footer: keyMarkFromBase64(user.publicKey),
     sideRight: roleLabel(language, user.role),

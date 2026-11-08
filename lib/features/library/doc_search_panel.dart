@@ -7,6 +7,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../../hive/bevel.dart';
 import '../../hive/grain.dart';
 import '../../hive/hex_scene.dart';
+import '../../hive/hint.dart';
 import '../../library/doc_search.dart';
 import '../code/code_modal.dart';
 import 'library_menu_page.dart';
@@ -360,58 +361,63 @@ class _HitRow extends StatelessWidget {
       );
     }
     final text = section.text;
-    return Semantics(
-      button: true,
-      selected: lit,
-      label: parts.join(', '),
-      child: MouseRegion(
-        cursor: SystemMouseCursors.click,
-        onHover: (_) => onHover(),
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: onTap,
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              horizontal: font * 0.6,
-              vertical: font * 0.15,
-            ),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: lit ? const Color(0x14FFFFFF) : null,
-                border: Border.all(
-                  color: lit ? libraryColor : const Color(0x00000000),
-                ),
+    return HintTarget(
+      id: 'doc-result',
+      title: parts.join(' › '),
+      color: libraryColor,
+      child: Semantics(
+        button: true,
+        selected: lit,
+        label: parts.join(', '),
+        child: MouseRegion(
+          cursor: SystemMouseCursors.click,
+          onHover: (_) => onHover(),
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: onTap,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: font * 0.6,
+                vertical: font * 0.15,
               ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: font * 0.7,
-                  vertical: font * 0.35,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: lit ? const Color(0x14FFFFFF) : null,
+                  border: Border.all(
+                    color: lit ? libraryColor : const Color(0x00000000),
+                  ),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text.rich(
-                      TextSpan(children: spans),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (text.isNotEmpty) ...[
-                      SizedBox(height: font * 0.25),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: font * 0.7,
+                    vertical: font * 0.35,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
                       Text.rich(
-                        TextSpan(
-                          children: _marked(
-                            excerptOf(text, terms),
-                            terms,
-                            _style(font * 0.88, hexMuted, height: 1.25),
-                            libraryColor,
-                          ),
-                        ),
-                        maxLines: 2,
+                        TextSpan(children: spans),
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      if (text.isNotEmpty) ...[
+                        SizedBox(height: font * 0.25),
+                        Text.rich(
+                          TextSpan(
+                            children: _marked(
+                              excerptOf(text, terms),
+                              terms,
+                              _style(font * 0.88, hexMuted, height: 1.25),
+                              libraryColor,
+                            ),
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
                     ],
-                  ],
+                  ),
                 ),
               ),
             ),

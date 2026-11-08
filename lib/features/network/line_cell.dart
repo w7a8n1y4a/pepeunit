@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../hive/hex_scene.dart';
+import '../../hive/hint.dart';
 import '../../hive/marks.dart';
 import '../line_input.dart';
 
@@ -173,20 +174,25 @@ class _MetricsCellState extends State<MetricsCell> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       if (allPages.length > 1)
-                        Semantics(
-                          button: true,
-                          label: widget.prevLabel ?? 'Previous',
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () => _step(-1, allPages.length),
-                            child: HoverPop(
-                              child: SizedBox(
-                                width: side * 0.15,
-                                height: side * 0.15,
-                                child: const CustomPaint(
-                                  painter: ChevronMarkPainter(
-                                    left: true,
-                                    color: Color(0xFFFFFFFF),
+                        HintTarget(
+                          id: 'summary-previous',
+                          title: widget.prevLabel ?? 'Previous',
+                          color: hexMuted,
+                          child: Semantics(
+                            button: true,
+                            label: widget.prevLabel ?? 'Previous',
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => _step(-1, allPages.length),
+                              child: HoverPop(
+                                child: SizedBox(
+                                  width: side * 0.15,
+                                  height: side * 0.15,
+                                  child: const CustomPaint(
+                                    painter: ChevronMarkPainter(
+                                      left: true,
+                                      color: Color(0xFFFFFFFF),
+                                    ),
                                   ),
                                 ),
                               ),
@@ -198,21 +204,26 @@ class _MetricsCellState extends State<MetricsCell> {
                           padding: EdgeInsets.symmetric(
                             horizontal: side * 0.03,
                           ),
-                          child: Semantics(
-                            button: true,
-                            label: widget.copyLabel ?? 'Copy URL',
-                            child: GestureDetector(
-                              behavior: HitTestBehavior.opaque,
-                              onTap: _copy,
-                              child: HoverPop(
-                                child: SizedBox(
-                                  width: side * 0.14,
-                                  height: side * 0.13,
-                                  child: CustomPaint(
-                                    painter: CopyMarkPainter(
-                                      _copied
-                                          ? const Color(0xFF4CAF50)
-                                          : const Color(0xFFFFFFFF),
+                          child: HintTarget(
+                            id: 'button-copy',
+                            title: widget.copyLabel ?? 'Copy URL',
+                            color: hexMuted,
+                            child: Semantics(
+                              button: true,
+                              label: widget.copyLabel ?? 'Copy URL',
+                              child: GestureDetector(
+                                behavior: HitTestBehavior.opaque,
+                                onTap: _copy,
+                                child: HoverPop(
+                                  child: SizedBox(
+                                    width: side * 0.14,
+                                    height: side * 0.13,
+                                    child: CustomPaint(
+                                      painter: CopyMarkPainter(
+                                        _copied
+                                            ? const Color(0xFF4CAF50)
+                                            : const Color(0xFFFFFFFF),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -221,20 +232,25 @@ class _MetricsCellState extends State<MetricsCell> {
                           ),
                         ),
                       if (allPages.length > 1)
-                        Semantics(
-                          button: true,
-                          label: widget.nextLabel ?? 'Next',
-                          child: GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () => _step(1, allPages.length),
-                            child: HoverPop(
-                              child: SizedBox(
-                                width: side * 0.15,
-                                height: side * 0.15,
-                                child: const CustomPaint(
-                                  painter: ChevronMarkPainter(
-                                    left: false,
-                                    color: Color(0xFFFFFFFF),
+                        HintTarget(
+                          id: 'summary-next',
+                          title: widget.nextLabel ?? 'Next',
+                          color: hexMuted,
+                          child: Semantics(
+                            button: true,
+                            label: widget.nextLabel ?? 'Next',
+                            child: GestureDetector(
+                              behavior: HitTestBehavior.opaque,
+                              onTap: () => _step(1, allPages.length),
+                              child: HoverPop(
+                                child: SizedBox(
+                                  width: side * 0.15,
+                                  height: side * 0.15,
+                                  child: const CustomPaint(
+                                    painter: ChevronMarkPainter(
+                                      left: false,
+                                      color: Color(0xFFFFFFFF),
+                                    ),
                                   ),
                                 ),
                               ),

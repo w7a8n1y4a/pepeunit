@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../account/alerts.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
+import '../../hive/hint.dart';
 import '../../hive/marks.dart';
 import '../../locale/languages.dart';
 
@@ -142,20 +143,25 @@ class _Step extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: HoverPop(
-          child: SizedBox(
-            width: extent,
-            height: extent,
-            child: CustomPaint(
-              painter: ChevronMarkPainter(
-                left: left,
-                color: const Color(0xFFFFFFFF),
+    return HintTarget(
+      id: left ? 'time-previous' : 'time-next',
+      title: label,
+      color: const Color(0xFFFFFFFF),
+      child: Semantics(
+        button: true,
+        label: label,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: HoverPop(
+            child: SizedBox(
+              width: extent,
+              height: extent,
+              child: CustomPaint(
+                painter: ChevronMarkPainter(
+                  left: left,
+                  color: const Color(0xFFFFFFFF),
+                ),
               ),
             ),
           ),

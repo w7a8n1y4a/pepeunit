@@ -173,6 +173,7 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
     }
     return HexSlot(
       id: slot.id,
+      hint: 'io',
       title: io?.topic ?? slot.id,
       sideRight: io == null ? null : unitIoTypeLabel(language, io.type),
       footer: io == null ? null : unitVisibilityLabel(language, io.visibility),

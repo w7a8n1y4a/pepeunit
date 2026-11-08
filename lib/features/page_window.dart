@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../hive/hex_scene.dart';
+import '../hive/hint.dart';
 import '../hive/marks.dart';
 
 /// Previous and next arrows with the `start-end of count` label between them.
@@ -65,20 +66,25 @@ class PageWindow extends StatelessWidget {
     required VoidCallback onTap,
   }) {
     final color = enabled ? const Color(0xFFFFFFFF) : hexMuted;
-    return Semantics(
-      button: true,
-      enabled: enabled,
-      label: label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: enabled ? onTap : null,
-        child: HoverPop(
-          enabled: enabled,
-          child: SizedBox(
-            width: chevronExtent,
-            height: chevronExtent,
-            child: CustomPaint(
-              painter: ChevronMarkPainter(left: left, color: color),
+    return HintTarget(
+      id: left ? 'page-previous' : 'page-next',
+      title: label,
+      color: color,
+      child: Semantics(
+        button: true,
+        enabled: enabled,
+        label: label,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: enabled ? onTap : null,
+          child: HoverPop(
+            enabled: enabled,
+            child: SizedBox(
+              width: chevronExtent,
+              height: chevronExtent,
+              child: CustomPaint(
+                painter: ChevronMarkPainter(left: left, color: color),
+              ),
             ),
           ),
         ),
@@ -168,21 +174,26 @@ class OrderWindow extends StatelessWidget {
 
   Widget _word(({String value, String label}) order, TextStyle style) {
     final on = selected == order.value;
-    return Semantics(
-      button: true,
-      selected: on,
-      label: order.label,
-      excludeSemantics: true,
-      onTap: () => onOrder(order.value),
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
+    return HintTarget(
+      id: 'order-${order.value}',
+      title: order.label,
+      color: const Color(0xFFFFFFFF),
+      child: Semantics(
+        button: true,
+        selected: on,
+        label: order.label,
+        excludeSemantics: true,
         onTap: () => onOrder(order.value),
-        child: HoverPop(
-          child: Center(
-            child: Text(
-              order.label,
-              style: style.copyWith(
-                color: on ? const Color(0xFFFFFFFF) : hexMuted,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => onOrder(order.value),
+          child: HoverPop(
+            child: Center(
+              child: Text(
+                order.label,
+                style: style.copyWith(
+                  color: on ? const Color(0xFFFFFFFF) : hexMuted,
+                ),
               ),
             ),
           ),

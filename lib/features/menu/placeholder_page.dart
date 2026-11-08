@@ -31,6 +31,7 @@ class PlaceholderPage extends StatelessWidget {
       slots: [
         HexSlot(
           id: sectionId,
+          hint: 'section',
           title: title,
           color: section?.color ?? hexMuted,
           q: at[0].$1,

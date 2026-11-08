@@ -171,6 +171,7 @@ class _BranchesPageState extends State<BranchesPage> {
         final name = slot.url ?? '';
         return HexSlot(
           id: slot.id,
+          hint: 'branch',
           title: tailText(name, 24),
           color: color,
           q: slot.q,

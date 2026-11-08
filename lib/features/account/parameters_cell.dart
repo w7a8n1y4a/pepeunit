@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
+import '../../hive/hint.dart';
 import '../../hive/marks.dart';
 import '../../locale/languages.dart';
 import '../../locale/time_zones.dart';
@@ -121,25 +122,30 @@ class _LanguageChoice extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      selected: selected ? true : null,
-      label: name,
-      excludeSemantics: true,
-      onTap: onTap,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
+    return HintTarget(
+      id: 'language-choice',
+      title: name,
+      color: const Color(0xFFFFFFFF),
+      child: Semantics(
+        button: true,
+        selected: selected ? true : null,
+        label: name,
+        excludeSemantics: true,
         onTap: onTap,
-        child: HoverPop(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 2),
-            child: Text(
-              name,
-              textAlign: TextAlign.center,
-              style: style.copyWith(
-                color: selected
-                    ? const Color(0xFFFFFFFF)
-                    : const Color(0xFFA1A1AA),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: HoverPop(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 2),
+              child: Text(
+                name,
+                textAlign: TextAlign.center,
+                style: style.copyWith(
+                  color: selected
+                      ? const Color(0xFFFFFFFF)
+                      : const Color(0xFFA1A1AA),
+                ),
               ),
             ),
           ),
@@ -164,20 +170,25 @@ class _ZoneStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: HoverPop(
-          child: SizedBox(
-            width: extent,
-            height: extent,
-            child: CustomPaint(
-              painter: ChevronMarkPainter(
-                left: left,
-                color: const Color(0xFFFFFFFF),
+    return HintTarget(
+      id: left ? 'zone-previous' : 'zone-next',
+      title: label,
+      color: const Color(0xFFFFFFFF),
+      child: Semantics(
+        button: true,
+        label: label,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: HoverPop(
+            child: SizedBox(
+              width: extent,
+              height: extent,
+              child: CustomPaint(
+                painter: ChevronMarkPainter(
+                  left: left,
+                  color: const Color(0xFFFFFFFF),
+                ),
               ),
             ),
           ),

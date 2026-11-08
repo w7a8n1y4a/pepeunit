@@ -161,6 +161,7 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
                 font: font,
                 enabled: at > 0,
                 onTap: () => setState(() => _slide = at - 1),
+                hint: 'button-presentation-prev',
               ),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: font * 0.3),
@@ -174,6 +175,7 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
                 font: font,
                 enabled: at < last,
                 onTap: () => setState(() => _slide = at + 1),
+                hint: 'button-presentation-next',
               ),
             ],
           ),

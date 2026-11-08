@@ -17,6 +17,7 @@ import 'package:pepeunit_client/features/library/doc_find_bar.dart';
 import 'package:pepeunit_client/features/library/doc_search_panel.dart';
 import 'package:pepeunit_client/features/library/docs_page.dart';
 import 'package:pepeunit_client/features/library/library_modal.dart';
+import 'package:pepeunit_client/features/library/tip_modal.dart';
 import 'package:pepeunit_client/hive/bevel.dart';
 import 'package:pepeunit_client/features/library/md_view.dart';
 import 'package:pepeunit_client/library/library.dart';
@@ -141,12 +142,17 @@ void main() {
 
   test('a tip is found by screen and cell, a shared one and Russian serve', () {
     final library = Library.fromTexts({
-      'assets/library/tips/ru/home.people.md': 'a',
-      'assets/library/tips/ru/common.back.md': 'b',
+      'tooltip/ru/home.people.md': 'a',
+      'tooltip/ru/common.back.md': 'b',
+      'tooltip/ru/units.search.unit.md': 'c',
     });
     expect(library.tipKey('ru', 'home', 'people'), endsWith('home.people.md'));
     expect(library.tipKey('ru', 'units', 'back'), endsWith('common.back.md'));
     expect(library.tipKey('en', 'home', 'people'), contains('/ru/'));
+    expect(
+      library.tipKey('ru', 'units.search', 'unit:3f'),
+      endsWith('units.search.unit.md'),
+    );
     expect(library.tipKey('ru', 'home', 'nothing'), isNull);
   });
 
@@ -264,17 +270,47 @@ void main() {
       },
     );
 
+    test('every Russian tip is bundled and not empty', () async {
+      final files = Directory('tooltip/ru')
+          .listSync()
+          .whereType<File>()
+          .where((file) => file.path.endsWith('.md'))
+          .toList();
+      expect(files.length, greaterThan(300));
+      for (final file in files) {
+        final key = file.path.replaceAll('\\', '/');
+        expect(library.has(key), isTrue, reason: key);
+        expect((await library.text(key)).trim(), isNotEmpty, reason: key);
+      }
+    });
+
+    test('every link of a tip leads to an article of the bundle', () async {
+      final tree = await library.docs('ru');
+      final link = RegExp(r'\]\(([^)\s]*)\)');
+      final broken = <String>[];
+      for (final file in Directory('tooltip/ru').listSync().whereType<File>()) {
+        final text = file.readAsStringSync();
+        for (final match in link.allMatches(text)) {
+          final url = match.group(1)!;
+          if (url.startsWith('http')) continue;
+          if (resolveDocLink(url, tree: tree)?.article == null) {
+            broken.add('${file.path}: $url');
+          }
+        }
+      }
+      expect(broken, isEmpty);
+    });
+
     test('the presentation has no slides yet', () async {
       expect(await library.presentation('ru'), isEmpty);
     });
   });
 
   group('screens', () {
-    // Tips live in the bundle only when someone writes them, so the tip tests
-    // bring their own.
+    // Controlled texts keep these gesture tests independent of the copy.
     final tips = {
-      'assets/library/tips/ru/home.library.md': 'Подсказка библиотеки.',
-      'assets/library/tips/ru/common.back.md': 'Подсказка возврата.',
+      'tooltip/ru/home.library.md': 'Подсказка библиотеки.',
+      'tooltip/ru/common.back.md': 'Подсказка возврата.',
     };
 
     Future<AppModel> start(
@@ -844,13 +880,39 @@ void main() {
       await middle.down(cell);
       await middle.up();
       await settle(tester);
-      expect(find.byType(LibraryModal), findsOneWidget);
+      expect(find.byType(TipModal), findsOneWidget);
       expect(find.textContaining('Подсказка библиотеки'), findsOneWidget);
       await tester.tap(find.bySemanticsLabel('Закрыть'));
       await settle(tester);
-      expect(find.byType(LibraryModal), findsNothing);
+      expect(find.byType(TipModal), findsNothing);
       // Still the home screen: the click did not open the section.
       expect(find.bySemanticsLabel('Аккаунт'), findsOneWidget);
+    });
+
+    testWidgets('a tip is a small card with no source switch', (tester) async {
+      await start(tester, withTips: tips);
+      await tester.longPress(find.bySemanticsLabel('Библиотека'));
+      await settle(tester);
+      final card = tester.getSize(find.byType(TipModal));
+      final frame = tester.getSize(find.descendant(
+        of: find.byType(TipModal),
+        matching: find.byType(BevelFrame),
+      ));
+      final extent = tester
+          .state<ScrollableState>(find.descendant(
+            of: find.byType(TipModal),
+            matching: find.byType(Scrollable),
+          ).first)
+          .position
+          .maxScrollExtent;
+      // The card is as tall as the text: nothing to scroll.
+      expect(extent, 0);
+      expect(frame.height, lessThan(card.height * 0.6));
+      expect(frame.width, lessThan(card.width));
+      expect(find.bySemanticsLabel('Исходник'), findsNothing);
+      expect(find.bySemanticsLabel('Рендер'), findsNothing);
+      expect(find.bySemanticsLabel('Скопировать'), findsNothing);
+      expect(find.bySemanticsLabel('Закрыть'), findsOneWidget);
     });
 
     testWidgets('a cursor resting on a cell opens nothing', (tester) async {
@@ -863,7 +925,7 @@ void main() {
       await mouse.moveTo(cell + const Offset(2, 2));
       await tester.pump(const Duration(seconds: 3));
       await settle(tester);
-      expect(find.byType(LibraryModal), findsNothing);
+      expect(find.byType(TipModal), findsNothing);
       await mouse.removePointer();
     });
 
@@ -877,7 +939,7 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       await mouse.up();
       await settle(tester);
-      expect(find.byType(LibraryModal), findsOneWidget);
+      expect(find.byType(TipModal), findsOneWidget);
       await tester.tap(find.bySemanticsLabel('Закрыть'));
       await settle(tester);
       expect(find.bySemanticsLabel('Аккаунт'), findsOneWidget);
@@ -889,7 +951,7 @@ void main() {
       await start(tester, withTips: tips);
       await tester.longPress(find.bySemanticsLabel('Библиотека'));
       await settle(tester);
-      expect(find.byType(LibraryModal), findsOneWidget);
+      expect(find.byType(TipModal), findsOneWidget);
       await tester.tap(find.bySemanticsLabel('Закрыть'));
       await settle(tester);
       expect(find.bySemanticsLabel('Аккаунт'), findsOneWidget);
@@ -911,6 +973,32 @@ void main() {
       expect(find.textContaining('Подсказка возврата'), findsOneWidget);
     });
 
+    testWidgets('a tip is found for a screen that was opened by a push', (
+      tester,
+    ) async {
+      await start(
+        tester,
+        withTips: {
+          ...tips,
+          'tooltip/ru/library.docs.md': 'Подсказка документации.',
+          'tooltip/ru/library.about.version.md': 'Подсказка версии.',
+        },
+      );
+      await tester.tap(find.bySemanticsLabel('Библиотека'));
+      await tester.pumpAndSettle();
+      await tester.longPress(find.bySemanticsLabel('Документация'));
+      await settle(tester);
+      expect(find.textContaining('Подсказка документации'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Закрыть'));
+      await settle(tester);
+      // One level deeper, still by push.
+      await tester.tap(find.bySemanticsLabel('О приложении'));
+      await tester.pumpAndSettle();
+      await tester.longPress(find.bySemanticsLabel('Версия клиента'));
+      await settle(tester);
+      expect(find.textContaining('Подсказка версии'), findsOneWidget);
+    });
+
     testWidgets('a cell with no tip does nothing on a click of the wheel', (
       tester,
     ) async {
@@ -923,7 +1011,7 @@ void main() {
       await middle.down(cell);
       await middle.up();
       await settle(tester);
-      expect(find.byType(LibraryModal), findsNothing);
+      expect(find.byType(TipModal), findsNothing);
     });
   });
 

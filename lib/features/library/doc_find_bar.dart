@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../../hive/bevel.dart';
 import '../../hive/grain.dart';
 import '../../hive/hex_scene.dart';
+import '../../hive/hint.dart';
 import '../code/code_modal.dart';
 import 'library_menu_page.dart';
 
@@ -176,22 +177,27 @@ class _StepMark extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      enabled: enabled,
-      label: label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: enabled ? onTap : null,
-        child: HoverPop(
-          enabled: enabled,
-          child: SizedBox(
-            width: extent,
-            height: extent,
-            child: CustomPaint(
-              painter: _StepPainter(
-                up: up,
-                color: enabled ? const Color(0xFFFFFFFF) : hexMuted,
+    return HintTarget(
+      id: up ? 'find-previous' : 'find-next',
+      title: label,
+      color: libraryColor,
+      child: Semantics(
+        button: true,
+        enabled: enabled,
+        label: label,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: enabled ? onTap : null,
+          child: HoverPop(
+            enabled: enabled,
+            child: SizedBox(
+              width: extent,
+              height: extent,
+              child: CustomPaint(
+                painter: _StepPainter(
+                  up: up,
+                  color: enabled ? const Color(0xFFFFFFFF) : hexMuted,
+                ),
               ),
             ),
           ),

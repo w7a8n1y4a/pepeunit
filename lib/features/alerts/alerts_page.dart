@@ -5,6 +5,7 @@ import '../../alerts/notice.dart';
 import '../../app_model.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
+import '../../hive/hint.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
 import '../hex_page.dart';
@@ -376,24 +377,29 @@ class _FilterCell extends StatelessWidget {
                 ),
               ),
               SizedBox(height: side * 0.06),
-              Semantics(
-                button: true,
-                label: alertText(language, 'Прочитать все', 'Read all'),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.opaque,
-                  onTap: onReadAll,
-                  child: HoverPop(
-                    child: SizedBox(
-                      width: rule,
-                      height: readAllSize * 1.08,
-                      child: FittedBox(
-                        fit: BoxFit.scaleDown,
-                        child: Text(
-                          alertText(language, 'Прочитать все', 'Read all'),
-                          key: const ValueKey('notice-read-all'),
-                          style: style.copyWith(
-                            color: color,
-                            fontSize: readAllSize,
+              HintTarget(
+                id: 'button-read-all',
+                title: alertText(language, 'Прочитать все', 'Read all'),
+                color: color,
+                child: Semantics(
+                  button: true,
+                  label: alertText(language, 'Прочитать все', 'Read all'),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: onReadAll,
+                    child: HoverPop(
+                      child: SizedBox(
+                        width: rule,
+                        height: readAllSize * 1.08,
+                        child: FittedBox(
+                          fit: BoxFit.scaleDown,
+                          child: Text(
+                            alertText(language, 'Прочитать все', 'Read all'),
+                            key: const ValueKey('notice-read-all'),
+                            style: style.copyWith(
+                              color: color,
+                              fontSize: readAllSize,
+                            ),
                           ),
                         ),
                       ),

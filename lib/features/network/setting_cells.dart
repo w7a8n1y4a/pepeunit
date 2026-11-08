@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../hive/hex_scene.dart';
+import '../../hive/hint.dart';
 import '../../instances/settings_catalog.dart';
 import '../line_input.dart';
 import 'network_chrome.dart';
@@ -37,31 +38,36 @@ class EnumSettingCell extends StatelessWidget {
             children: [
               for (final option in field.options)
                 Flexible(
-                  child: Semantics(
-                    button: true,
-                    selected: option == current,
-                    label: option,
-                    excludeSemantics: true,
-                    onTap: () => onSelect(option),
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
+                  child: HintTarget(
+                    id: 'setting-choice',
+                    title: option,
+                    color: hexMuted,
+                    child: Semantics(
+                      button: true,
+                      selected: option == current,
+                      label: option,
+                      excludeSemantics: true,
                       onTap: () => onSelect(option),
-                      child: HoverPop(
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 2),
-                          child: FittedBox(
-                            fit: BoxFit.scaleDown,
-                            child: Text(
-                              option,
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                color: option == current
-                                    ? const Color(0xFFFFFFFF)
-                                    : hexMuted,
-                                fontFamily: 'OpenGost Type B',
-                                fontSize: font,
-                                height: 1.1,
-                                decoration: TextDecoration.none,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () => onSelect(option),
+                        child: HoverPop(
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 2),
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                option,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  color: option == current
+                                      ? const Color(0xFFFFFFFF)
+                                      : hexMuted,
+                                  fontFamily: 'OpenGost Type B',
+                                  fontSize: font,
+                                  height: 1.1,
+                                  decoration: TextDecoration.none,
+                                ),
                               ),
                             ),
                           ),
@@ -170,23 +176,28 @@ class _ValueSettingCellState extends State<ValueSettingCell> {
         final font = band.isFinite
             ? min(max(10.0, band * 0.36), band * 0.72)
             : 14.0;
-        return Semantics(
-          button: true,
-          label: netText(widget.language, 'Сохранить', 'Save'),
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: _submit,
-            child: HoverPop(
-              child: Align(
-                alignment: Alignment.center,
-                child: Text(
-                  'OK',
-                  style: TextStyle(
-                    color: widget.color,
-                    fontFamily: 'OpenGost Type B',
-                    fontSize: font,
-                    height: 1,
-                    decoration: TextDecoration.none,
+        return HintTarget(
+          id: 'button-setting-save',
+          title: netText(widget.language, 'Сохранить', 'Save'),
+          color: widget.color,
+          child: Semantics(
+            button: true,
+            label: netText(widget.language, 'Сохранить', 'Save'),
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: _submit,
+              child: HoverPop(
+                child: Align(
+                  alignment: Alignment.center,
+                  child: Text(
+                    'OK',
+                    style: TextStyle(
+                      color: widget.color,
+                      fontFamily: 'OpenGost Type B',
+                      fontSize: font,
+                      height: 1,
+                      decoration: TextDecoration.none,
+                    ),
                   ),
                 ),
               ),

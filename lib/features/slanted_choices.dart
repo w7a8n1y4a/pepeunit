@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
 import '../hive/hex_scene.dart';
+import '../hive/hint.dart';
 
 /// Shallowest lean of a search enum, rising to the right.
 const _leanFloor = 20 * pi / 180;
@@ -23,11 +24,13 @@ class SlantedChoice {
     required this.label,
     required this.selected,
     required this.onTap,
+    this.hint = 'choice',
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final String hint;
 }
 
 /// One search enum under the line.
@@ -452,16 +455,21 @@ class _SlantedRowState extends State<_SlantedRow> {
                     height: shapes[i].box.height,
                     child: Transform.scale(
                       scale: hover == i ? 1.06 : 1,
-                      child: Semantics(
-                        button: true,
-                        selected: words[i].choice.selected,
-                        label: words[i].choice.label,
-                        onTap: words[i].choice.onTap,
-                        child: _SlantedGlyph(
+                      child: HintTarget(
+                        id: words[i].choice.hint,
+                        title: words[i].choice.label,
+                        color: words[i].style.color ?? hexMuted,
+                        child: Semantics(
+                          button: true,
+                          selected: words[i].choice.selected,
                           label: words[i].choice.label,
-                          style: words[i].style,
-                          scaler: widget.scaler,
-                          matrix: shapes[i].local,
+                          onTap: words[i].choice.onTap,
+                          child: _SlantedGlyph(
+                            label: words[i].choice.label,
+                            style: words[i].style,
+                            scaler: widget.scaler,
+                            matrix: shapes[i].local,
+                          ),
                         ),
                       ),
                     ),

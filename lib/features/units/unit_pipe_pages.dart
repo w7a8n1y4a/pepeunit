@@ -447,6 +447,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
           enabled: idle && !_flawed,
           busy: pending == 'save',
           onTap: _save,
+          hint: 'button-pipe-save',
         ),
         CodeWordButton(
           label: unitText(language, 'Проверить', 'Check'),
@@ -455,6 +456,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
           enabled: idle,
           busy: pending == 'check',
           onTap: _checkTap,
+          hint: 'button-pipe-check',
         ),
         CodeWordButton(
           label: unitText(language, 'Загрузить', 'Upload'),
@@ -462,6 +464,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
           enabled: idle,
           busy: pending == 'import',
           onTap: _import,
+          hint: 'button-pipe-import',
         ),
         CodeWordButton(
           label: unitText(language, 'Выгрузить', 'Download'),
@@ -469,6 +472,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
           enabled: idle,
           busy: pending == 'export',
           onTap: _export,
+          hint: 'button-pipe-export',
         ),
       ],
       body: (_, layout) => CodeEditor(

@@ -144,6 +144,7 @@ class _AccessPageState extends State<AccessPage> {
       if (unit != null) {
         return unitMark(
           id: slot.id,
+          hint: 'grant',
           unit: unit,
           language: language,
           q: slot.q,
@@ -155,6 +156,7 @@ class _AccessPageState extends State<AccessPage> {
       if (user != null) {
         return userMark(
           id: slot.id,
+          hint: 'grant',
           user: user,
           language: language,
           q: slot.q,
@@ -166,6 +168,7 @@ class _AccessPageState extends State<AccessPage> {
     }
     return HexSlot(
       id: slot.id,
+      hint: 'grant',
       title: isUnit
           ? unitText(language, 'Аппарат', 'Unit')
           : unitText(language, 'Пользователь', 'User'),
@@ -304,6 +307,7 @@ class AccessKindPage extends StatelessWidget {
                 )
               : HexSlot(
                   id: slot.id,
+                  hint: slot.id == 'User' ? 'user' : 'unit',
                   title: slot.id == 'User'
                       ? unitText(language, 'Пользователь', 'User')
                       : unitText(language, 'Аппарат', 'Unit'),

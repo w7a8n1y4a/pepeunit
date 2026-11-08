@@ -9,6 +9,7 @@ import '../../app_scope.dart';
 import '../../hive/bevel.dart';
 import '../../hive/grain.dart';
 import '../../hive/hex_scene.dart';
+import '../../hive/hint.dart';
 import '../../hive/marks.dart';
 import '../../locale/languages.dart';
 import 'code_view.dart';
@@ -248,6 +249,7 @@ class CodeWordButton extends StatelessWidget {
     required this.label,
     required this.font,
     required this.onTap,
+    required this.hint,
     this.color = const Color(0xFFFFFFFF),
     this.enabled = true,
     this.busy = false,
@@ -257,47 +259,53 @@ class CodeWordButton extends StatelessWidget {
   final String label;
   final double font;
   final VoidCallback onTap;
+  final String hint;
   final Color color;
   final bool enabled;
   final bool busy;
 
   @override
   Widget build(BuildContext context) {
-    return HoverPop(
-      enabled: enabled,
-      child: Semantics(
-        button: true,
+    return HintTarget(
+      id: hint,
+      title: label,
+      color: color,
+      child: HoverPop(
         enabled: enabled,
-        label: label,
-        child: GestureDetector(
-          onTap: enabled ? onTap : null,
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: font * 0.45),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (busy) ...[
-                  SizedBox(
-                    width: font * scale * 0.8,
-                    height: font * scale * 0.8,
-                    child: CircularProgressIndicator(
-                      strokeWidth: max(1.5, font * scale * 0.8 * 0.14),
-                      valueColor: AlwaysStoppedAnimation<Color>(color),
+        child: Semantics(
+          button: true,
+          enabled: enabled,
+          label: label,
+          child: GestureDetector(
+            onTap: enabled ? onTap : null,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: font * 0.45),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (busy) ...[
+                    SizedBox(
+                      width: font * scale * 0.8,
+                      height: font * scale * 0.8,
+                      child: CircularProgressIndicator(
+                        strokeWidth: max(1.5, font * scale * 0.8 * 0.14),
+                        valueColor: AlwaysStoppedAnimation<Color>(color),
+                      ),
+                    ),
+                    SizedBox(width: font * 0.4),
+                  ],
+                  Text(
+                    label,
+                    style: TextStyle(
+                      color: enabled || busy ? color : hexMuted,
+                      fontFamily: 'OpenGost Type B',
+                      fontSize: font * scale,
+                      decoration: TextDecoration.none,
                     ),
                   ),
-                  SizedBox(width: font * 0.4),
                 ],
-                Text(
-                  label,
-                  style: TextStyle(
-                    color: enabled || busy ? color : hexMuted,
-                    fontFamily: 'OpenGost Type B',
-                    fontSize: font * scale,
-                    decoration: TextDecoration.none,
-                  ),
-                ),
-              ],
+              ),
             ),
           ),
         ),
@@ -314,6 +322,7 @@ class CodeChip extends StatelessWidget {
     required this.font,
     required this.color,
     required this.onTap,
+    required this.hint,
     super.key,
   });
 
@@ -322,22 +331,28 @@ class CodeChip extends StatelessWidget {
   final double font;
   final Color color;
   final VoidCallback onTap;
+  final String hint;
 
   @override
   Widget build(BuildContext context) {
-    return HoverPop(
-      child: Semantics(
-        button: true,
-        selected: on,
-        label: label,
-        child: GestureDetector(
-          onTap: onTap,
-          behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: EdgeInsets.symmetric(horizontal: font * 0.35),
-            child: Text(
-              label,
-              style: codeMono(font * 0.95, color: on ? color : hexMuted),
+    return HintTarget(
+      id: hint,
+      title: label,
+      color: color,
+      child: HoverPop(
+        child: Semantics(
+          button: true,
+          selected: on,
+          label: label,
+          child: GestureDetector(
+            onTap: onTap,
+            behavior: HitTestBehavior.opaque,
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: font * 0.35),
+              child: Text(
+                label,
+                style: codeMono(font * 0.95, color: on ? color : hexMuted),
+              ),
             ),
           ),
         ),
@@ -362,24 +377,31 @@ class _Mark extends StatelessWidget {
     required this.label,
     required this.extent,
     required this.onTap,
+    required this.hint,
     required this.child,
   });
 
   final String label;
   final double extent;
   final VoidCallback? onTap;
+  final String hint;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: label,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: HoverPop(
-          child: SizedBox(width: extent, height: extent, child: child),
+    return HintTarget(
+      id: hint,
+      title: label,
+      color: const Color(0xFFFFFFFF),
+      child: Semantics(
+        button: true,
+        label: label,
+        child: GestureDetector(
+          onTap: onTap,
+          behavior: HitTestBehavior.opaque,
+          child: HoverPop(
+            child: SizedBox(width: extent, height: extent, child: child),
+          ),
         ),
       ),
     );
@@ -405,6 +427,7 @@ class CodeCloseMark extends StatelessWidget {
       label: label,
       extent: extent,
       onTap: onTap,
+      hint: 'button-close',
       child: SvgPicture.asset(
         'assets/icons/actions/close.svg',
         width: extent,
@@ -457,6 +480,7 @@ class _CopyMarkState extends State<_CopyMark> {
       label: widget.label,
       extent: widget.extent,
       onTap: _copy,
+      hint: 'button-copy',
       child: CustomPaint(
         painter: CopyMarkPainter(
           _copied ? const Color(0xFF4CAF50) : const Color(0xFFFFFFFF),
@@ -486,6 +510,7 @@ class _DownloadMark extends StatelessWidget {
       label: label,
       extent: extent,
       onTap: busy ? null : onTap,
+      hint: 'button-download',
       child: busy
           ? Padding(
               padding: EdgeInsets.all(extent * 0.26),
