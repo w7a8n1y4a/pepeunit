@@ -40,9 +40,6 @@ Color admonitionColor(MdAdmonitionKind kind) {
   }
 }
 
-String _plainSlug(String slug) =>
-    slug.replaceAll(RegExp(r'[^\p{L}\p{N}]', unicode: true), '');
-
 /// Lets the owner of a [MdView] scroll it to a heading.
 class MdController {
   _MdViewState? _state;
@@ -145,13 +142,14 @@ class _MdViewState extends State<MdView> {
   }
 
   /// A heading by its anchor. Links write the same anchor in different ways
-  /// (`env-json`, `envjson`), so a miss falls back to the letters alone.
+  /// (`env-json`, `envjson`, `фаиловои`), so a miss falls back to
+  /// [anchorKey].
   GlobalKey? _find(String slug) {
     final exact = _keys[slug];
     if (exact != null) return exact;
-    final plain = _plainSlug(slug);
+    final plain = anchorKey(slug);
     for (final entry in _keys.entries) {
-      if (_plainSlug(entry.key) == plain) return entry.value;
+      if (anchorKey(entry.key) == plain) return entry.value;
     }
     return null;
   }
@@ -483,6 +481,28 @@ class _Blocks {
     );
   }
 
+  /// [spans] with [recognizer] on every span that holds words.
+  List<InlineSpan> _tappable(
+    List<InlineSpan> spans,
+    GestureRecognizer recognizer,
+  ) {
+    return [
+      for (final span in spans)
+        if (span is TextSpan)
+          TextSpan(
+            text: span.text,
+            style: span.style,
+            recognizer: span.recognizer ?? recognizer,
+            mouseCursor: SystemMouseCursors.click,
+            children: span.children == null
+                ? null
+                : _tappable(span.children!, recognizer),
+          )
+        else
+          span,
+    ];
+  }
+
   /// Inline spans over [style]. A live link keeps its recognizer in
   /// [recognizers].
   List<InlineSpan> spans(List<MdInline> inlines, TextStyle style) {
@@ -559,9 +579,9 @@ class _Blocks {
                 decoration: TextDecoration.underline,
                 decorationColor: accent,
               ),
-              recognizer: recognizer,
-              mouseCursor: SystemMouseCursors.click,
-              children: inner,
+              // A tap is read by the innermost span under the finger, so the
+              // recognizer sits on the words, not on the wrapper.
+              children: _tappable(inner, recognizer),
             ),
           );
       }

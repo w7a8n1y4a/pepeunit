@@ -76,7 +76,6 @@ flutter:
     - assets/icons/sections/
     - assets/icons/services/
     - assets/icons/status/
-    - docs/ru/_tree.json
     - docs/ru/deployment/
     - docs/ru/deployment/dependencies/
     - docs/ru/deployment/docker/

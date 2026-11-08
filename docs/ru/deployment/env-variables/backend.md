@@ -82,7 +82,7 @@
 
 :::info
 Для тестирования [Backend](/deployment/dependencies/backend) также выделены переменные:
-- [Переменные интеграционного тестирования](/development-pepeunit/tests/integration-test#запуск)
+- [Переменные интеграционного тестирования](/development-pepeunit/tests/integration-test#переменные-интеграционного-тестирования)
 - [Переменные нагрузочного тестирования MQTT](/development-pepeunit/tests/load-test#тестирование-mqtt)
 - [Переменные нагрузочного тестирования REST и GQL](/development-pepeunit/tests/load-test#тестирование-rest-и-gql)
 :::

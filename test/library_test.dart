@@ -27,22 +27,23 @@ DocsTree _tree(Map<String, String> files) {
 }
 
 void main() {
-  test('the tree is the folders: names and order come from _tree.json', () {
+  test('the tree is the folders: a folder is named by its directory', () {
     final tree = _tree({
-      'docs/ru/_tree.json': '{"b": "Бэ", "a": "Аз", "a/deep": "Глубоко"}',
+      'docs/ru/b/three.md': '# Третья\n',
       'docs/ru/a/one.md': '# Первая\n',
       'docs/ru/a/deep/two.md': '# Вторая\n',
-      'docs/ru/b/three.md': '# Третья\n',
-      'docs/ru/c/four.md': '# Четвёртая\n',
+      'docs/ru/env-variables/four.md': '# Четвёртая\n',
       'docs/ru/top.md': '# Верхняя\n',
       'docs/ru/a/no-title.md': 'просто текст',
     });
-    // Listed folders stand in the file order, an unlisted one after them
-    // under its own name.
-    expect([for (final f in tree.root.folders) f.title], ['Бэ', 'Аз', 'c']);
+    // Folders stand by directory name, shown as words.
+    expect(
+      [for (final f in tree.root.folders) f.title],
+      ['A', 'B', 'Env variables'],
+    );
     expect(tree.root.articles.single.title, 'Верхняя');
     final a = tree.folder('a')!;
-    expect(a.folders.single.title, 'Глубоко');
+    expect(a.folders.single.title, 'Deep');
     expect([for (final x in a.articles) x.title], ['no-title', 'Первая']);
     expect(tree.article('a/deep/two')!.title, 'Вторая');
   });
@@ -112,7 +113,7 @@ void main() {
       final tree = await library.docs('ru');
       expect(
         [for (final f in tree.root.folders) f.title],
-        ['Развёртывание', 'Разработчик Unit', 'Устройство Pepeunit'],
+        ['Deployment', 'Developer', 'Development pepeunit'],
       );
       expect(tree.root.articles, isEmpty);
       expect(tree.article('definitions'), isNull);
@@ -122,6 +123,51 @@ void main() {
         expect(article.path, isNot(startsWith('user/')));
       }
     });
+
+    test(
+      'every article opens with its title and its links lead somewhere',
+      () async {
+        final tree = await library.docs('ru');
+        final docs = {
+          for (final article in tree.articles)
+            article.path: parseMarkdown(article.source),
+        };
+        final link = RegExp(r'\]\(([^)\s]*)\)');
+        final broken = <String>[];
+        for (final article in tree.articles) {
+          final doc = docs[article.path]!;
+          final first = doc.blocks.first;
+          if (first is! MdHeading || first.level != 1) {
+            broken.add('${article.path}: no title first');
+          }
+          for (final match in link.allMatches(article.source)) {
+            final url = match.group(1)!;
+            if (url.startsWith('http') || url.startsWith('mailto:')) continue;
+            // Pictures wait for the schemas to be brought up to date.
+            if (url.startsWith('/schemas/')) continue;
+            final hash = url.indexOf('#');
+            var target = hash < 0 ? url : url.substring(0, hash);
+            if (target.startsWith('/')) target = target.substring(1);
+            if (target.isEmpty) target = article.path;
+            final to = docs[target];
+            if (to == null) {
+              // The user guide is not in the bundle: its links stay plain.
+              if (!target.startsWith('user/')) {
+                broken.add('${article.path}: $url');
+              }
+              continue;
+            }
+            if (hash >= 0) {
+              final key = anchorKey(url.substring(hash + 1));
+              if (!to.headings.any((h) => anchorKey(h.slug) == key)) {
+                broken.add('${article.path}: $url');
+              }
+            }
+          }
+        }
+        expect(broken, isEmpty);
+      },
+    );
 
     test('the presentation has no slides yet', () async {
       expect(await library.presentation('ru'), isEmpty);
@@ -191,9 +237,9 @@ void main() {
       await tester.tap(find.bySemanticsLabel('Документация'));
       await settle(tester);
       expect(find.bySemanticsLabel('Концепция'), findsNothing);
-      expect(find.bySemanticsLabel('Устройство Pepeunit'), findsOneWidget);
+      expect(find.bySemanticsLabel('Development pepeunit'), findsOneWidget);
       expect(find.bySemanticsLabel('Поддержка проекта'), findsNothing);
-      await tester.tap(find.bySemanticsLabel('Разработчик Unit'));
+      await tester.tap(find.bySemanticsLabel('Developer'));
       await settle(tester);
       await tester.tap(find.bySemanticsLabel('Алгоритм создания Unit'));
       await settle(tester);
@@ -478,6 +524,7 @@ void main() {
       WidgetTester tester, {
       required String source,
       DocsTree? docs,
+      String? path,
     }) async {
       tester.view.physicalSize = const Size(1000, 800);
       tester.view.devicePixelRatio = 1;
@@ -495,6 +542,7 @@ void main() {
                 color: Colors.green,
                 source: source,
                 docs: docs,
+                path: path,
                 onClose: () {},
               ),
             ),
@@ -577,17 +625,86 @@ void main() {
       expect(find.text('Старт'), findsWidgets);
     });
 
-    testWidgets('contents jumps to a heading', (tester) async {
+    testWidgets('the first heading is the title and is drawn once', (
+      tester,
+    ) async {
+      await open(tester, source: '# Из текста\n\nАбзац.\n\n## Раздел\n');
+      // The frame shows the title of the text, not the one it was given, and
+      // the text does not repeat it.
+      expect(find.text('Из текста'), findsOneWidget);
+      expect(find.text('Статья'), findsNothing);
+      expect(find.text('Абзац.'), findsOneWidget);
+      expect(find.text('Раздел'), findsOneWidget);
+    });
+
+    testWidgets('a text with no heading keeps the given title', (tester) async {
+      await open(tester, source: 'Просто абзац.\n');
+      expect(find.text('Статья'), findsOneWidget);
+    });
+
+    testWidgets('a link finds a heading the old site spelled with и for й', (
+      tester,
+    ) async {
+      final filler = [for (var i = 0; i < 60; i++) 'Строка $i\n'].join('\n');
+      final tree = _tree({
+        'docs/ru/a/two.md':
+            '# Вторая\n\n$filler\n## Файловой структуры\n\n$filler\n',
+      });
+      await open(
+        tester,
+        source: '# Старт\n\n[туда](/a/two#фаиловои-структуры)\n',
+        docs: tree,
+      );
+      TapGestureRecognizer? found;
+      void walk(InlineSpan span) {
+        if (span is TextSpan) {
+          if (span.recognizer is TapGestureRecognizer &&
+              span.toPlainText() == 'туда') {
+            found = span.recognizer as TapGestureRecognizer;
+          }
+          span.children?.forEach(walk);
+        }
+      }
+
+      for (final rich in tester.widgetList<RichText>(find.byType(RichText))) {
+        walk(rich.text);
+      }
+      found!.onTap!();
+      await tester.pumpAndSettle();
+      // The text is longer than the view; the section is brought to its top.
+      expect(
+        tester.getTopLeft(find.text('Файловой структуры')).dy,
+        lessThan(300),
+      );
+    });
+
+    testWidgets('a tap on a link to a heading of the same text scrolls to it', (
+      tester,
+    ) async {
+      final filler = [for (var i = 0; i < 60; i++) 'Строка $i\n'].join('\n');
+      final source =
+          '# Статья\n\n:::tip\n1. [Один](/a/one#первыи-раздел)\n:::\n\n'
+          '$filler\n## Первый раздел\n\n$filler\n';
+      final tree = _tree({'docs/ru/a/one.md': source});
+      await open(tester, source: source, docs: tree, path: 'a/one');
+      // The link is the first word of its line, so its corner is on it.
+      await tester.tapAt(
+        tester.getTopLeft(find.text('Один', findRichText: true)) +
+            const Offset(6, 6),
+      );
+      await tester.pumpAndSettle();
+      // Same text, so no second page and no Back; the heading is at the top.
+      expect(find.text('Назад'), findsNothing);
+      expect(tester.getTopLeft(find.text('Первый раздел')).dy, lessThan(300));
+    });
+
+    testWidgets('a long text has no contents word', (tester) async {
       final filler = [for (var i = 0; i < 60; i++) 'Строка $i\n'].join('\n');
       await open(
         tester,
         source: '# Один\n\n$filler\n## Два\n\n$filler\n## Три\n\nхвост\n',
       );
-      await tester.tap(find.text('Оглавление'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.text('Три').last);
-      await tester.pumpAndSettle();
-      expect(find.text('хвост'), findsOneWidget);
+      expect(find.text('Оглавление'), findsNothing);
     });
 
     testWidgets('a table wider than the view scrolls sideways', (tester) async {

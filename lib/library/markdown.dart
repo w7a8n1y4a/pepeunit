@@ -190,6 +190,20 @@ class MdDoc {
     }
     return null;
   }
+
+  /// The document without its first level one heading, when that heading
+  /// stands on its own in the text. A frame that shows [title] itself does
+  /// not draw it a second time.
+  MdDoc withoutTitle() {
+    final at = blocks.indexWhere(
+      (block) => block is MdHeading && block.level == 1,
+    );
+    if (at < 0) return this;
+    return MdDoc(
+      blocks: [...blocks.sublist(0, at), ...blocks.sublist(at + 1)],
+      meta: meta,
+    );
+  }
 }
 
 /// Front matter and the text after it.
@@ -612,6 +626,25 @@ String slugOf(String text) {
     } else if (char == ' ' || char == '-') {
       dash = true;
     }
+  }
+  return out.toString();
+}
+
+/// The letters of an anchor and nothing else. The old documentation site
+/// wrote anchors without the breve and the diaeresis (`фаиловои`, `еще`) and
+/// links kept that spelling, so `й` and `и`, `ё` and `е` count the same here.
+/// Two anchors that differ only in dashes, underscores, or those pairs point
+/// at one heading.
+String anchorKey(String anchor) {
+  final out = StringBuffer();
+  for (final rune in anchor.toLowerCase().runes) {
+    final char = String.fromCharCode(rune);
+    if (!RegExp(r'[\p{L}\p{N}]', unicode: true).hasMatch(char)) continue;
+    out.write(switch (char) {
+      'й' => 'и',
+      'ё' => 'е',
+      _ => char,
+    });
   }
   return out.toString();
 }

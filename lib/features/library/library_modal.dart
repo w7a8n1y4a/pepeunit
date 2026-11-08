@@ -3,7 +3,6 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
-import '../../hive/hex_scene.dart';
 import '../../instances/link.dart';
 import '../../library/library.dart';
 import '../../library/markdown.dart';
@@ -18,9 +17,10 @@ import 'md_view.dart';
 ///
 /// - A switch on the bar picks Render or Source. The pick is stored with the
 ///   person's parameters, so the next text opens the same way.
+/// - The title of the panel is the first `# ` heading of the text, drawn once.
+///   A text with no such heading takes [title].
 /// - Links inside the text open in place. Back on the bar goes to the text
 ///   before, and the close mark leaves the Library.
-/// - With three or more headings a Contents word opens the list of them.
 class LibraryModal extends StatefulWidget {
   const LibraryModal({
     required this.title,
@@ -34,7 +34,7 @@ class LibraryModal extends StatefulWidget {
     super.key,
   });
 
-  /// Title of the first text. A text opened by a link brings its own.
+  /// Title of a text that has no `# ` heading of its own.
   final String title;
   final Color color;
   final String source;
@@ -58,20 +58,38 @@ class LibraryModal extends StatefulWidget {
 }
 
 class _Page {
-  _Page({required this.title, required this.source, this.path, this.anchor})
-    : doc = parseMarkdown(source);
+  _Page._(this.title, this.source, this.path, this.anchor, this.doc);
+
+  /// The first `# ` heading of [source] is the title of the panel and is not
+  /// drawn again in the text. [title] is for a text that has none.
+  factory _Page({
+    required String title,
+    required String source,
+    String? path,
+    String? anchor,
+  }) {
+    final doc = parseMarkdown(source);
+    return _Page._(
+      doc.title ?? title,
+      source,
+      path,
+      anchor,
+      doc.withoutTitle(),
+    );
+  }
 
   final String title;
   final String source;
   final String? path;
   final String? anchor;
+
+  /// The text as drawn: without its title.
   final MdDoc doc;
 }
 
 class _LibraryModalState extends State<LibraryModal> {
   final _controller = MdController();
   late List<_Page> _trail = [_first()];
-  var _contents = false;
 
   _Page _first() => _Page(
     title: widget.title,
@@ -87,7 +105,6 @@ class _LibraryModalState extends State<LibraryModal> {
         oldWidget.title != widget.title ||
         oldWidget.path != widget.path) {
       _trail = [_first()];
-      _contents = false;
     }
   }
 
@@ -157,12 +174,16 @@ class _LibraryModalState extends State<LibraryModal> {
       return;
     }
     final article = link.article;
-    if (article == null) {
-      _controller.jump(link.anchor!);
+    // A heading of the text that is open: scroll to it, no new page.
+    final anchor = link.anchor;
+    if (anchor != null &&
+        anchor.isNotEmpty &&
+        (article == null || article.path == _page.path)) {
+      _controller.jump(anchor);
       return;
     }
+    if (article == null) return;
     setState(() {
-      _contents = false;
       _trail = [
         ..._trail,
         _Page(
@@ -178,7 +199,6 @@ class _LibraryModalState extends State<LibraryModal> {
   void _back() {
     if (_trail.length < 2) return;
     setState(() {
-      _contents = false;
       _trail = _trail.sublist(0, _trail.length - 1);
     });
   }
@@ -189,9 +209,6 @@ class _LibraryModalState extends State<LibraryModal> {
     final language = model.vault.language;
     final raw = model.vault.libraryRaw;
     final page = _page;
-    final headings = page.doc.headings
-        .where((heading) => heading.level <= 4)
-        .toList();
     String word(String ru) => phrase(language, {'ru': ru});
     return CodeModal(
       title: page.title,
@@ -202,13 +219,6 @@ class _LibraryModalState extends State<LibraryModal> {
       actions: (font) => [
         if (_trail.length > 1)
           CodeWordButton(label: word('Назад'), font: font, onTap: _back),
-        if (!raw && headings.length >= 3)
-          CodeWordButton(
-            label: word('Оглавление'),
-            font: font,
-            color: _contents ? widget.color : const Color(0xFFFFFFFF),
-            onTap: () => setState(() => _contents = !_contents),
-          ),
         ...?widget.actions?.call(font),
         CodeChip(
           label: word('Рендер'),
@@ -239,92 +249,18 @@ class _LibraryModalState extends State<LibraryModal> {
             },
           );
         }
-        return Stack(
-          children: [
-            Positioned.fill(
-              child: MdView(
-                // A new text starts at its top with its own scroll state.
-                key: ValueKey(page),
-                doc: page.doc,
-                font: max(13.0, codeFont * 1.2),
-                accent: widget.color,
-                canOpen: _canOpen,
-                onOpen: _open,
-                controller: _controller,
-                anchor: page.anchor,
-              ),
-            ),
-            if (_contents)
-              Positioned.fill(
-                child: _Contents(
-                  headings: headings,
-                  font: max(13.0, codeFont * 1.2),
-                  color: widget.color,
-                  onPick: (slug) {
-                    setState(() => _contents = false);
-                    WidgetsBinding.instance.addPostFrameCallback(
-                      (_) => _controller.jump(slug),
-                    );
-                  },
-                ),
-              ),
-          ],
+        return MdView(
+          // A new text starts at its top with its own scroll state.
+          key: ValueKey(page),
+          doc: page.doc,
+          font: max(13.0, codeFont * 1.2),
+          accent: widget.color,
+          canOpen: _canOpen,
+          onOpen: _open,
+          controller: _controller,
+          anchor: page.anchor,
         );
       },
-    );
-  }
-}
-
-class _Contents extends StatelessWidget {
-  const _Contents({
-    required this.headings,
-    required this.font,
-    required this.color,
-    required this.onPick,
-  });
-
-  final List<MdHeading> headings;
-  final double font;
-  final Color color;
-  final ValueChanged<String> onPick;
-
-  @override
-  Widget build(BuildContext context) {
-    final top = headings.isEmpty
-        ? 1
-        : headings.map((heading) => heading.level).reduce(min);
-    return ColoredBox(
-      color: const Color(0xFF14161B),
-      child: ListView(
-        padding: EdgeInsets.only(right: codeBarRoom, bottom: font),
-        children: [
-          for (final heading in headings)
-            GestureDetector(
-              behavior: HitTestBehavior.opaque,
-              onTap: () => onPick(heading.slug),
-              child: HoverPop(
-                child: Padding(
-                  padding: EdgeInsets.only(
-                    left: (heading.level - top) * font * 1.1,
-                    top: font * 0.3,
-                    bottom: font * 0.3,
-                  ),
-                  child: Text(
-                    heading.text,
-                    style: TextStyle(
-                      color: heading.level == top
-                          ? const Color(0xFFFFFFFF)
-                          : hexMuted,
-                      fontFamily: 'OpenGost Type B',
-                      fontSize: font,
-                      decoration: TextDecoration.none,
-                    ),
-                  ),
-                ),
-              ),
-            ),
-        ],
-      ),
     );
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -9,11 +7,10 @@ import 'markdown.dart';
 ///
 /// - Documentation: `docs/<language>/**.md`. These are the folders of the
 ///   documentation sources, so the tree is the folders and nothing else
-///   lists an article. The names and the order of folders are one static
-///   file, `docs/<language>/_tree.json`: folder path to title, in the order
-///   the folders stand. A folder it does not list keeps its own name and
-///   comes after the listed ones. An article takes its name from its first
-///   `# ` heading.
+///   lists an article. An article takes its name from its first `# `
+///   heading. A folder shows its directory name as words. Folders stand in
+///   the order of their directory names, articles in the order of their
+///   titles.
 /// - Tips: `assets/library/tips/<language>/<screen>.<cell>.md`
 /// - Everything else (presentation, about): `assets/library/<language>/`.
 ///
@@ -21,7 +18,6 @@ import 'markdown.dart';
 const docsRoot = 'docs';
 const libraryRoot = 'assets/library';
 const fallbackLanguage = 'ru';
-const _treeFile = '_tree.json';
 
 class DocArticle {
   const DocArticle({
@@ -39,17 +35,27 @@ class DocArticle {
 }
 
 class DocFolder {
-  DocFolder({required this.path, required this.title, this.order = 100});
+  DocFolder({required this.path, required this.title});
 
   /// Path inside the tree: empty for the root.
   final String path;
   String title;
-  int order;
+
+  /// Directory name, the key folders are sorted by.
+  String get name => path.split('/').last;
+
   final List<DocFolder> folders = [];
   final List<DocArticle> articles = [];
 
   /// Everything one level down, folders first.
   int get count => folders.length + articles.length;
+}
+
+/// A directory name as words: `env-variables` is `Env variables`.
+String _spoken(String name) {
+  final words = name.replaceAll(RegExp(r'[-_]+'), ' ').trim();
+  if (words.isEmpty) return name;
+  return words[0].toUpperCase() + words.substring(1);
 }
 
 class DocsTree {
@@ -73,21 +79,12 @@ class DocsTree {
     required String Function(String key) read,
   }) {
     final byPath = <String, String>{};
-    // Folder path to title; the place in the map is the place in the tree.
-    final names = <String, String>{};
     for (final lang in {fallbackLanguage, language}) {
       final prefix = '$docsRoot/$lang/';
       for (final key in keys) {
         if (!key.startsWith(prefix)) continue;
         final path = key.substring(prefix.length);
-        if (path == _treeFile) {
-          final decoded = jsonDecode(read(key));
-          if (decoded is Map) {
-            for (final entry in decoded.entries) {
-              names['${entry.key}'] = '${entry.value}';
-            }
-          }
-        } else if (path.endsWith('.md')) {
+        if (path.endsWith('.md')) {
           byPath[path.substring(0, path.length - 3)] = key;
         }
       }
@@ -103,12 +100,7 @@ class DocsTree {
       final slash = path.lastIndexOf('/');
       final parent = folderAt(slash < 0 ? '' : path.substring(0, slash));
       final name = slash < 0 ? path : path.substring(slash + 1);
-      final made = DocFolder(path: path, title: name);
-      final title = names[path];
-      if (title != null && title.trim().isNotEmpty) {
-        made.title = title.trim();
-        made.order = names.keys.toList().indexOf(path);
-      }
+      final made = DocFolder(path: path, title: _spoken(name));
       folders[path] = made;
       parent.folders.add(made);
       return made;
@@ -129,10 +121,7 @@ class DocsTree {
       parent.articles.add(article);
     }
     void sort(DocFolder folder) {
-      folder.folders.sort((a, b) {
-        final byOrder = a.order.compareTo(b.order);
-        return byOrder != 0 ? byOrder : a.title.compareTo(b.title);
-      });
+      folder.folders.sort((a, b) => a.name.compareTo(b.name));
       folder.articles.sort((a, b) => a.title.compareTo(b.title));
       for (final child in folder.folders) {
         sort(child);
@@ -227,9 +216,7 @@ class Library {
     if (cached != null) return cached;
     final keys = [
       for (final key in _keys!)
-        if (key.startsWith('$docsRoot/') &&
-            (key.endsWith('.md') || key.endsWith('/$_treeFile')))
-          key,
+        if (key.startsWith('$docsRoot/') && key.endsWith('.md')) key,
     ];
     for (final key in keys) {
       await text(key);
