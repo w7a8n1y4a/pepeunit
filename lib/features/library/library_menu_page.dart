@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
@@ -34,11 +33,10 @@ void closeLibrary(BuildContext context, String home) {
 }
 
 /// What the Library menu shows on top of itself.
-enum LibraryOpen { none, presentation, about }
+enum LibraryOpen { none, presentation }
 
-/// The first screen of the Library: presentation, documentation, about. The
-/// presentation and the about text are panels over this screen, so closing
-/// them returns to it.
+/// The first screen of the Library: presentation, documentation, tools, about.
+/// The presentation is a panel over this screen, so closing it returns here.
 class LibraryMenuPage extends StatefulWidget {
   const LibraryMenuPage({this.open = LibraryOpen.none, super.key});
 
@@ -51,7 +49,6 @@ class LibraryMenuPage extends StatefulWidget {
 class _LibraryMenuPageState extends State<LibraryMenuPage> {
   DocsTree? _tree;
   List<String> _slides = const [];
-  String? _about;
   var _slide = 0;
   String? _failure;
   var _failureOpen = false;
@@ -72,30 +69,14 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
       final slides = widget.open == LibraryOpen.presentation
           ? await library.presentation(language)
           : const <String>[];
-      String? about;
-      if (widget.open == LibraryOpen.about) {
-        final text = await library.page(language, 'about') ?? '';
-        about = text.replaceAll('{version}', await _version());
-      }
       if (!mounted) return;
       setState(() {
         _tree = tree;
         _slides = slides;
-        _about = about;
       });
     } catch (error) {
       if (!mounted) return;
       setState(() => _failure = '$error');
-    }
-  }
-
-  /// The client version. A platform that cannot tell it must not close the
-  /// About text.
-  Future<String> _version() async {
-    try {
-      return (await PackageInfo.fromPlatform()).version;
-    } catch (_) {
-      return '';
     }
   }
 
@@ -147,19 +128,6 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
     switch (widget.open) {
       case LibraryOpen.none:
         return null;
-      case LibraryOpen.about:
-        final text = _about;
-        if (text == null) return null;
-        return Material(
-          type: MaterialType.transparency,
-          child: LibraryModal(
-            title: libText(language, 'О приложении'),
-            color: libraryColor,
-            source: text,
-            docs: _tree,
-            onClose: close,
-          ),
-        );
       case LibraryOpen.presentation:
         // No slides yet: the panel opens empty. Slides come back as files in
         // `assets/library/<language>/presentation/`.

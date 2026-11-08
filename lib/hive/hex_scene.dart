@@ -85,6 +85,7 @@ class HexSlot {
     this.body,
     this.center,
     this.centerColor = const Color(0xFFFFFFFF),
+    this.centerScale = 1.0,
     this.badge,
     this.tappable = true,
     this.enabled = true,
@@ -132,6 +133,7 @@ class HexSlot {
   /// Text in the middle of the cell. The cell stays a button.
   final String? center;
   final Color centerColor;
+  final double centerScale;
 
   /// Unread count drawn on the upper-right vertex. Zero and null stay hidden.
   final int? badge;
@@ -494,7 +496,7 @@ class _HexSceneState extends State<HexScene>
                       style: TextStyle(
                         color: placed.slot.centerColor,
                         fontFamily: 'OpenGost Type B',
-                        fontSize: radius * 0.13,
+                        fontSize: radius * 0.13 * placed.slot.centerScale,
                         height: 1.15,
                         decoration: TextDecoration.none,
                       ),

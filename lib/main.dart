@@ -18,6 +18,7 @@ import 'features/dashboards/dashboards_menu_page.dart';
 import 'features/dashboards/dashboards_page.dart';
 import 'features/dashboards/panel_pages.dart';
 import 'features/home/home_page.dart';
+import 'features/library/about_page.dart';
 import 'features/library/docs_page.dart';
 import 'features/library/library_menu_page.dart';
 import 'features/library/library_modal.dart';
@@ -653,8 +654,17 @@ class _PepeunitAppState extends State<PepeunitApp> {
           ),
           GoRoute(
             path: 'about',
-            builder: (context, state) =>
-                const LibraryMenuPage(open: LibraryOpen.about),
+            builder: (context, state) => const AboutPage(),
+            routes: [
+              GoRoute(
+                path: 'apps',
+                builder: (context, state) => const NativeAppsPage(),
+              ),
+              GoRoute(
+                path: 'social',
+                builder: (context, state) => const SocialLinksPage(),
+              ),
+            ],
           ),
           GoRoute(
             path: 'tools',

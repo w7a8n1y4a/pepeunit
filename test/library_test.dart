@@ -2,11 +2,12 @@ import 'dart:io';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pepeunit_client/account/vault_store.dart';
 import 'package:pepeunit_client/app_model.dart';
 import 'package:pepeunit_client/app_scope.dart';
+import 'package:pepeunit_client/client_version.dart';
 import 'package:pepeunit_client/features/library/library_modal.dart';
 import 'package:pepeunit_client/hive/bevel.dart';
 import 'package:pepeunit_client/features/library/md_view.dart';
@@ -208,23 +209,61 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('Library: the about cell opens a panel', (tester) async {
-      PackageInfo.setMockInitialValues(
-        appName: 'pepeunit',
-        packageName: 'pepeunit',
-        version: '1.2.3',
-        buildNumber: '1',
-        buildSignature: '',
+    testWidgets('Library: about has the version, platforms and social links', (
+      tester,
+    ) async {
+      final launches = <MethodCall>[];
+      const channel = MethodChannel('plugins.flutter.io/url_launcher');
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (
+        call,
+      ) async {
+        launches.add(call);
+        return true;
+      });
+      addTearDown(
+        () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          channel,
+          null,
+        ),
       );
       await start(tester);
       await tester.tap(find.bySemanticsLabel('Библиотека'));
       await tester.pumpAndSettle();
       await tester.tap(find.bySemanticsLabel('О приложении'));
-      await settle(tester);
-      expect(find.byType(LibraryModal), findsOneWidget);
-      await tester.tap(find.bySemanticsLabel('Закрыть'));
-      await settle(tester);
+      await tester.pumpAndSettle();
       expect(find.byType(LibraryModal), findsNothing);
+      expect(find.text(clientVersion), findsOneWidget);
+      expect(find.bySemanticsLabel('Нативные приложения'), findsOneWidget);
+      expect(find.bySemanticsLabel('Соцсети'), findsOneWidget);
+
+      await tester.tap(find.bySemanticsLabel('Нативные приложения'));
+      await tester.pumpAndSettle();
+      for (final label in ['Android', 'iOS', 'Linux', 'macOS', 'Windows']) {
+        final cell = tester.widget<Semantics>(find.bySemanticsLabel(label));
+        expect(cell.properties.enabled, isFalse, reason: label);
+      }
+      await tester.tap(find.bySemanticsLabel('Назад'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.bySemanticsLabel('Соцсети'));
+      await tester.pumpAndSettle();
+      const urls = {
+        'GitLab': 'https://git.pepemoss.com/pepe/pepeunit/pepeunit',
+        'GitHub': 'https://github.com/w7a8n1y4a/pepeunit',
+        'Discord': 'https://discord.gg/bTAF2mxzuN',
+        'Telegram': 'https://t.me/pepeunit',
+        'YouTube': 'https://www.youtube.com/@pepeunit',
+      };
+      for (final link in urls.entries) {
+        await tester.tap(find.bySemanticsLabel(link.key));
+        await tester.pump();
+      }
+      expect([
+        for (final call in launches) call.arguments['url'],
+      ], urls.values.toList());
+      await tester.tap(find.bySemanticsLabel('Назад'));
+      await tester.pumpAndSettle();
+      expect(find.bySemanticsLabel('Соцсети'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

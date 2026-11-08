@@ -25,6 +25,7 @@ Constraints:
 
 - Screens are pointy-top hex cells. Input changes per platform (mouse / touch); the renderer stays shared.
 - Dark theme only. Icons are SVG in `assets/icons/<category>/`, mainly white. Categories: `sections` (home menu), `actions`, `status`, `objects`, `services`. A new icon goes into one of them, and the folder is listed in `pubspec.yaml` because Flutter does not read subfolders. UI font is OpenGost.
+- Every SVG asset must either be created specifically for this project, including generated artwork, or be third-party artwork under a verified MIT license. This applies to commercial use and the sale of any part of the app. For third-party assets, record the source, author, license, and modifications, and preserve the required copyright and license notices. Never copy, trace, or derive an SVG from artwork with an unknown or non-MIT license.
 - The background mosaic draws every SVG under `assets/background/<theme>/` and nothing from `assets/icons/`, so a new file appears there by itself. The themed catalog is white outline SVG on a 64×64 box, drawn for the mosaic only, and a theme folder is listed in `pubspec.yaml` like the icon folders. Pages stay transparent; the scene color is set once in `main.dart`. Tests build `PepeunitApp(background: false)`.
 - Account storage is `PlatformVaultStore`. API client is hand-written: `PepeunitApi`.
 - Roles and `pu_ff_*` flags from the instance portrait limit actions and menu items.

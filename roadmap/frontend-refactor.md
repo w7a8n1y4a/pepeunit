@@ -101,8 +101,13 @@ Raw md:
 
 1. Назад
 2. Карточка с версией клиента
-3. Нативные приложение. И при открытии там соты: Android Ios Linux MacOS Win. При нажатии на них либо переходы в маркеты либо начало скачивания
-4. Соцсети. При нажатии внутри ссылки отдельными сотами на gitlab, github, discord, tg и yt
+3. Нативные приложение. И при открытии там соты: Android Ios Linux MacOS Win. При нажатии на них либо переходы в маркеты либо начало скачивания. Пока пусть будут не активны
+4. Соцсети. При нажатии внутри ссылки отдельными сотами на gitlab, github, discord, tg и yt. Иконки не забудь добавить
+    - https://www.youtube.com/@pepeunit
+    - https://t.me/pepeunit
+    - https://discord.gg/bTAF2mxzuN
+    - https://git.pepemoss.com/pepe/pepeunit/pepeunit
+    - https://github.com/w7a8n1y4a/pepeunit
 
 ### Особые участки
 
