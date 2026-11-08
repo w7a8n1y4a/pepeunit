@@ -181,7 +181,12 @@ void main() {
       await start(tester);
       await tester.tap(find.bySemanticsLabel('Библиотека'));
       await tester.pumpAndSettle();
-      for (final label in ['Презентация', 'Документация', 'О приложении']) {
+      for (final label in [
+        'Презентация',
+        'Документация',
+        'Инструменты',
+        'О приложении',
+      ]) {
         expect(find.bySemanticsLabel(label), findsOneWidget);
       }
       await tester.tap(find.bySemanticsLabel('Документация'));
@@ -220,6 +225,32 @@ void main() {
       await tester.tap(find.bySemanticsLabel('Закрыть'));
       await settle(tester);
       expect(find.byType(LibraryModal), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: tools hold the generator and two places', (
+      tester,
+    ) async {
+      await start(tester);
+      await tester.tap(find.bySemanticsLabel('Библиотека'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Инструменты'));
+      await tester.pumpAndSettle();
+      for (final label in [
+        'Генератор README',
+        'Дерево',
+        'Поиск пути',
+        'Назад',
+      ]) {
+        expect(find.bySemanticsLabel(label), findsOneWidget);
+      }
+      // Without a sign-in the generator says so and opens no file dialog.
+      await tester.tap(find.bySemanticsLabel('Генератор README'));
+      await tester.pumpAndSettle();
+      expect(find.bySemanticsLabel('Ошибка'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Назад'));
+      await tester.pumpAndSettle();
+      expect(find.bySemanticsLabel('Инструменты'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

@@ -920,6 +920,9 @@ class AppModel extends ChangeNotifier {
   Future<Uint8List> unitFirmware(String uuid, String kind) =>
       _api.unitFirmware(_token, uuid, kind);
 
+  Future<String> readmeFromToml(Uint8List toml) =>
+      _api.convertTomlToMd(_token, toml);
+
   Future<Uint8List> downloadUnitLogs(String uuid) =>
       _api.downloadUnitLogs(_token, uuid);
 

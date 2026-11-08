@@ -734,6 +734,22 @@ class PepeunitApi {
     return response.bodyBytes;
   }
 
+  /// README.md text made by the backend from the bytes of a pepeunit.toml.
+  Future<String> convertTomlToMd(String token, Uint8List toml) async {
+    final request = http.MultipartRequest(
+      'POST',
+      _uri('/units/convert_toml_to_md'),
+    );
+    request.headers['x-auth-token'] = token;
+    request.files.add(
+      http.MultipartFile.fromBytes('file', toml, filename: 'pepeunit.toml'),
+    );
+    final streamed = await _client.send(request).timeout(_timeout);
+    final response = await http.Response.fromStream(streamed);
+    _ensureBytes(response);
+    return utf8.decode(response.bodyBytes);
+  }
+
   Future<String> unitStateStorage(String token, String uuid) async {
     final response = await _send(
       'GET',

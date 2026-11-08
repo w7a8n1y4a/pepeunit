@@ -106,6 +106,7 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
     final board = cardBoard(const [
       'presentation',
       'docs',
+      'tools',
       'about',
     ], wide: wide);
     final slots = [for (final slot in board) _slot(slot, language)];
@@ -127,6 +128,8 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
             context.push('/library/presentation');
           case 'docs':
             context.push('/library/docs');
+          case 'tools':
+            context.push('/library/tools');
           case 'about':
             context.push('/library/about');
           case 'error':
@@ -233,6 +236,15 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/objects/file.svg',
+        );
+      case 'tools':
+        return HexSlot(
+          id: 'tools',
+          title: libText(language, 'Инструменты'),
+          color: libraryColor,
+          q: slot.q,
+          r: slot.r,
+          icon: 'assets/icons/actions/settings.svg',
         );
       default:
         return HexSlot(

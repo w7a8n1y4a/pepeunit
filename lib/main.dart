@@ -21,6 +21,7 @@ import 'features/home/home_page.dart';
 import 'features/library/docs_page.dart';
 import 'features/library/library_menu_page.dart';
 import 'features/library/library_modal.dart';
+import 'features/library/tools_page.dart';
 import 'features/menu/placeholder_page.dart';
 import 'features/network/instance_page.dart';
 import 'features/network/instance_settings_page.dart';
@@ -654,6 +655,10 @@ class _PepeunitAppState extends State<PepeunitApp> {
             path: 'about',
             builder: (context, state) =>
                 const LibraryMenuPage(open: LibraryOpen.about),
+          ),
+          GoRoute(
+            path: 'tools',
+            builder: (context, state) => const ToolsPage(),
           ),
           GoRoute(
             path: 'docs',
