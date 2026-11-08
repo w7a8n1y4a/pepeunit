@@ -148,6 +148,7 @@ class DocBody extends StatelessWidget {
     this.linkOf,
     this.sides = 0,
     this.lead = 0,
+    this.trail = 0,
     super.key,
   });
 
@@ -164,6 +165,9 @@ class DocBody extends StatelessWidget {
 
   /// See [MdView.lead].
   final double lead;
+
+  /// See [MdView.trail].
+  final double trail;
 
   @override
   Widget build(BuildContext context) {
@@ -194,6 +198,7 @@ class DocBody extends StatelessWidget {
       linkOf: linkOf,
       sides: sides,
       lead: lead,
+      trail: trail,
     );
   }
 }

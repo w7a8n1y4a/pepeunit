@@ -390,8 +390,22 @@ void main() {
     ) async {
       await openDocs(tester, const Size(1920, 1080));
       final row = find.text('Развёртывание').first;
-      expect(tester.getTopLeft(row).dx, greaterThan(200));
+      expect(tester.getTopLeft(row).dx, greaterThan(100));
       expect(tester.getTopRight(find.byType(MdView)).dx, 1920);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: a large screen has the outline of the text', (
+      tester,
+    ) async {
+      await openDocs(tester, const Size(1920, 1080));
+      expect(find.text('На этой странице'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: a smaller screen has no outline', (tester) async {
+      await openDocs(tester, const Size(1200, 800));
+      expect(find.text('На этой странице'), findsNothing);
       expect(tester.takeException(), isNull);
     });
 

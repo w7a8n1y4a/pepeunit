@@ -10,7 +10,9 @@ import '../../app_scope.dart';
 import '../../hive/grain.dart';
 import '../../hive/hex_scene.dart';
 import '../../library/library.dart';
+import '../../library/markdown.dart';
 import '../code/code_modal.dart';
+import '../code/code_view.dart';
 import 'doc_reader.dart';
 import 'library_menu_page.dart';
 import 'md_view.dart';
@@ -55,9 +57,15 @@ String docsLink({required String doc, String? anchor, String? instance}) {
 ///   [_blockFonts] font sizes, centered on the screen. The sidebar grows
 ///   to the left by what the screen has over the block, so the two stay
 ///   near each other. On a 1920 px screen the block is 1440 px.
+/// - From [_centeredDocs] the outline of the article stands at the right end
+///   of the block, behind a line of its own: the headings of level two to
+///   four, nested, each scrolling the text to itself. It is [_outlineFonts]
+///   font sizes wide and the block grows by as much, so the text keeps its
+///   room.
 const _wideDocs = 960.0;
 const _centeredDocs = 1440.0;
 const _blockFonts = 74.2;
+const _outlineFonts = 13.5;
 
 /// The documentation: a modal over the whole screen, with no frame and no
 /// fill of its own, so the scene and the mosaic show behind it. A tree of
@@ -235,9 +243,14 @@ class _DocsPageState extends State<DocsPage> {
           final mark = wide ? font * 2.2 : max(font * 2.2, 40.0);
           final side = min(menuFont * 15.5, size.width * (wide ? 0.4 : 0.86));
           // What the screen has over the block, on the left of the sidebar.
-          final gap = size.width >= _centeredDocs
-              ? max(0.0, (size.width - font * _blockFonts) / 2)
+          final outlined = size.width >= _centeredDocs;
+          final gap = outlined
+              ? max(0.0, (size.width - font * (_blockFonts + _outlineFonts)) / 2)
               : 0.0;
+          // The outline panel: its room at the right end of the block. The
+          // scroll bar of the text keeps the last strip of the screen.
+          final outlineWidth = outlined ? gap + font * _outlineFonts : 0.0;
+          final outlineRoom = outlined ? outlineWidth + codeBarRoom : 0.0;
           final line = const Color(0x33FFFFFF);
           final vline = Container(width: 1, color: line);
 
@@ -272,6 +285,30 @@ class _DocsPageState extends State<DocsPage> {
                         row.node.path != null &&
                         row.node.path == reader?.page.path,
                     onTap: () => _tapRow(row.node),
+                  ),
+              ],
+            );
+          }
+
+          Widget outline() {
+            final headings = [
+              for (final heading in reader?.page.doc.headings ?? <MdHeading>[])
+                if (heading.level >= 2 && heading.level <= 4) heading,
+            ];
+            return ListView(
+              padding: EdgeInsets.fromLTRB(
+                font * 0.8,
+                font * 0.5,
+                gap + font * 0.5,
+                font * 0.8,
+              ),
+              children: [
+                for (final heading in headings)
+                  _OutlineRow(
+                    key: ValueKey('${reader?.page.path}#${heading.slug}'),
+                    heading: heading,
+                    font: font,
+                    onTap: () => reader?.controller.jump(heading.slug),
                   ),
               ],
             );
@@ -363,6 +400,31 @@ class _DocsPageState extends State<DocsPage> {
                     ),
                   ),
                 ),
+                if (outlined) ...[
+                  vline,
+                  SizedBox(
+                    width: outlineRoom,
+                    child: Padding(
+                      padding: EdgeInsets.only(
+                        left: font * 0.8,
+                        right: gap + codeBarRoom,
+                      ),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          libErrorText(
+                            language,
+                            'На этой странице',
+                            'On this page',
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: _style(font * 1.2, const Color(0xFFFFFFFF)),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ],
             ),
           );
@@ -382,6 +444,7 @@ class _DocsPageState extends State<DocsPage> {
                     linkOf: (slug) => linkTo(slug),
                     sides: max(font * 1.2, 16.0),
                     lead: wide ? gap + side + 1 : 0,
+                    trail: outlineRoom,
                   )
                 : Center(
                     child: _failure != null
@@ -429,6 +492,19 @@ class _DocsPageState extends State<DocsPage> {
                           Expanded(child: article),
                         ],
                       ),
+                      if (outlined)
+                        Positioned(
+                          top: 0,
+                          bottom: 0,
+                          right: codeBarRoom,
+                          width: outlineWidth,
+                          child: Row(
+                            children: [
+                              vline,
+                              Expanded(child: outline()),
+                            ],
+                          ),
+                        ),
                       if (!wide && _menu) ...[
                         Positioned.fill(
                           child: GestureDetector(
@@ -569,6 +645,67 @@ class _SideRowState extends State<_SideRow> {
                   ),
                 ),
               ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A heading in the outline, indented by its level under the first one.
+class _OutlineRow extends StatefulWidget {
+  const _OutlineRow({
+    required this.heading,
+    required this.font,
+    required this.onTap,
+    super.key,
+  });
+
+  final MdHeading heading;
+  final double font;
+  final VoidCallback onTap;
+
+  @override
+  State<_OutlineRow> createState() => _OutlineRowState();
+}
+
+class _OutlineRowState extends State<_OutlineRow> {
+  var _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final font = widget.font;
+    final heading = widget.heading;
+    return Semantics(
+      button: true,
+      label: heading.text,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          child: Container(
+            color: _hover ? const Color(0x14FFFFFF) : null,
+            padding: EdgeInsets.only(
+              left: font * 0.3 + (heading.level - 2) * font * 0.9,
+              top: font * 0.2,
+              bottom: font * 0.2,
+              right: font * 0.3,
+            ),
+            child: Text(
+              heading.text,
+              style: _style(
+                font * 0.9,
+                _hover
+                    ? libraryColor
+                    : heading.level == 2
+                    ? const Color(0xFFFFFFFF)
+                    : hexMuted,
+                height: 1.25,
+              ),
             ),
           ),
         ),

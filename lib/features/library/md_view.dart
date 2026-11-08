@@ -74,6 +74,7 @@ class MdView extends StatefulWidget {
     this.linkOf,
     this.sides = 0,
     this.lead = 0,
+    this.trail = 0,
     super.key,
   });
 
@@ -99,6 +100,11 @@ class MdView extends StatefulWidget {
   /// screen. A wide screen has the sidebar there. The column leans toward the
   /// center of the screen by as much as the width allows.
   final double lead;
+
+  /// How much of the right edge another panel covers. The column stays clear
+  /// of it, and its scroll bar is still at the edge of the view, so the panel
+  /// leaves the last [codeBarRoom] free.
+  final double trail;
 
   @override
   State<MdView> createState() => _MdViewState();
@@ -256,13 +262,16 @@ class _MdViewState extends State<MdView> {
         // The column leans toward the middle of the screen: the view stands
         // [MdView.lead] from its left edge, so the right side takes that much
         // more room, as far as the column still fits.
-        final shift = max(
+        final reserved = max(codeBarRoom, widget.trail);
+        final delta = widget.lead - reserved;
+        final room = max(
           0.0,
-          min(
-            widget.lead - codeBarRoom,
-            constraints.maxWidth - 2 * sides - codeBarRoom - column,
-          ),
+          constraints.maxWidth - 2 * sides - reserved - column,
         );
+        // Toward the left when the right side holds the more.
+        final shift = min(delta.abs(), room);
+        final left = delta < 0 ? shift : 0.0;
+        final right = delta < 0 ? 0.0 : shift;
         return CodeScrollbar(
           controller: _scroll,
           child: SelectionArea(
@@ -271,9 +280,9 @@ class _MdViewState extends State<MdView> {
               slivers: [
                 SliverPadding(
                   padding: EdgeInsets.fromLTRB(
-                    sides,
+                    sides + left,
                     font * 0.3,
-                    sides + shift + codeBarRoom,
+                    sides + right + reserved,
                     font * 1.5,
                   ),
                   // Blocks are built when they come near the window, not all
@@ -377,6 +386,12 @@ class _Blocks {
   /// True while the spans of a link are built.
   var _inLink = false;
 
+  /// The color of the block being built when it has its own, a `:::` block.
+  Color? _tint;
+
+  /// The color a code span is marked with: the block's, or the section's.
+  Color get tint => _tint ?? accent;
+
   TextStyle get body => TextStyle(
     color: _bodyInk,
     fontFamily: _bodyFamily,
@@ -416,12 +431,17 @@ class _Blocks {
           ],
         );
       case MdAdmonition():
+        final outer = _tint;
+        final color = admonitionColor(block.kind);
+        _tint = color;
+        final built = [for (final child in block.blocks) this.block(child)];
+        _tint = outer;
         return _Admonition(
           font: font,
-          color: admonitionColor(block.kind),
+          color: color,
           title: block.title,
           folded: block.kind == MdAdmonitionKind.details,
-          children: [for (final inner in block.blocks) this.block(inner)],
+          children: built,
         );
       case MdTable():
         return _table(block);
@@ -636,19 +656,31 @@ class _Blocks {
         case MdBreak():
           out.add(const TextSpan(text: '\n'));
         case MdCodeSpan():
+          // The words keep the font and the size of the text around them.
+          final size = style.fontSize ?? font;
+          // The pad is a no-break space of the same font (0.353 of the size
+          // in OpenGost), narrowed to a fifth of a letter, so the mark reaches
+          // past the first and the last letter and has the same height as the
+          // words.
+          final pad = TextSpan(
+            text: '\u00A0',
+            style: TextStyle(letterSpacing: -size * 0.153),
+          );
           out.add(
             TextSpan(
-              text: inline.code,
               style: TextStyle(
-                fontFamily: codeMonoFamily,
-                fontSize: (style.fontSize ?? font) * 0.88,
-                color: _ink,
-                backgroundColor: accent.withValues(alpha: 0.2),
+                color: _inLink ? _ink : Color.lerp(_ink, tint, 0.22),
+                // A flat box has sharp corners and stops on the last pixel.
+                // A blurred one is soft at the edge and round at the corners.
+                background: Paint()
+                  ..color = tint.withValues(alpha: 0.15)
+                  ..maskFilter = MaskFilter.blur(BlurStyle.normal, size * 0.1),
                 // In a link the words are drawn by the shadow of the link,
                 // which a code span does not take.
                 shadows: _inLink ? const [] : null,
                 decoration: _inLink ? TextDecoration.none : null,
               ),
+              children: [pad, TextSpan(text: inline.code), pad],
             ),
           );
         case MdMarked():
