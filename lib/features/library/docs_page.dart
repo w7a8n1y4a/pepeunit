@@ -7,13 +7,17 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app_scope.dart';
+import '../../hive/bevel.dart';
 import '../../hive/grain.dart';
 import '../../hive/hex_scene.dart';
+import '../../library/doc_search.dart';
 import '../../library/library.dart';
 import '../../library/markdown.dart';
 import '../code/code_modal.dart';
 import '../code/code_view.dart';
+import 'doc_find_bar.dart';
 import 'doc_reader.dart';
+import 'doc_search_panel.dart';
 import 'library_menu_page.dart';
 import 'md_view.dart';
 
@@ -82,6 +86,14 @@ const _outlineFonts = 13.5;
 ///   article that is open, so the page can be sent or reloaded. The title of
 ///   the article and every heading of level two to four have a mark that
 ///   copies that address.
+/// - The search stands at the top of the sidebar (a mark on the bar on a
+///   narrow screen). It, Ctrl+K (Cmd+K) and `/` open a panel over the page
+///   that finds the words of a query in every article and leads to the
+///   article and the heading ([DocSearchPanel]).
+/// - Ctrl+F (Cmd+F) finds in the open article ([DocFindBar], a strip under
+///   the bar, so it covers no text): the matches
+///   are marked in the text and the view scrolls to the current one. The
+///   browser's own find does not see the text, which is drawn on a canvas.
 class DocsPage extends StatefulWidget {
   const DocsPage({this.doc, this.anchor, super.key});
 
@@ -104,7 +116,22 @@ class _DocsPageState extends State<DocsPage> {
   String? _failure;
   final _open = <String>{};
   final _selected = GlobalKey();
+  final _page = FocusNode(debugLabel: 'docs');
   var _menu = false;
+  var _searching = false;
+  final _findField = TextEditingController();
+  final _findFocus = FocusNode(debugLabel: 'find');
+  var _finding = false;
+  var _findAt = 0;
+  var _findCount = 0;
+
+  @override
+  void dispose() {
+    _page.dispose();
+    _findField.dispose();
+    _findFocus.dispose();
+    super.dispose();
+  }
 
   @override
   void initState() {
@@ -202,6 +229,103 @@ class _DocsPageState extends State<DocsPage> {
     });
   }
 
+  void _openSearch() {
+    if (_tree == null || _searching) return;
+    setState(() {
+      _searching = true;
+      _menu = false;
+    });
+  }
+
+  void _closeSearch() {
+    if (!_searching) return;
+    setState(() => _searching = false);
+    _page.requestFocus();
+  }
+
+  void _openFind() {
+    if (_reader == null || _searching) return;
+    if (_finding) {
+      _findFocus.requestFocus();
+      _findField.selection = TextSelection(
+        baseOffset: 0,
+        extentOffset: _findField.text.length,
+      );
+      return;
+    }
+    setState(() => _finding = true);
+    // `autofocus` does not take the focus from the page that already holds
+    // it, so the field asks for it once it is built: the person types at
+    // once, with no click.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted && _finding) _findFocus.requestFocus();
+    });
+  }
+
+  void _closeFind() {
+    if (!_finding) return;
+    _findField.clear();
+    setState(() {
+      _finding = false;
+      _findAt = 0;
+      _findCount = 0;
+    });
+    _page.requestFocus();
+  }
+
+  void _findTyped(String _) => setState(() => _findAt = 0);
+
+  void _findStep(int step) {
+    if (_findCount == 0) return;
+    setState(() => _findAt = (_findAt + step) % _findCount);
+  }
+
+  /// The text counted its matches.
+  void _findCounted(int count) {
+    if (!mounted || count == _findCount) return;
+    setState(() {
+      _findCount = count;
+      if (_findAt >= count) _findAt = 0;
+    });
+  }
+
+  /// A hit was chosen: the article it stands in opens as the next text, or
+  /// the open one scrolls to the heading.
+  void _pick(DocSection section) {
+    final reader = _reader;
+    _closeSearch();
+    if (reader == null) return;
+    final anchor = section.anchor;
+    if (section.article.path == reader.page.path) {
+      if (anchor != null) reader.controller.jump(anchor);
+      return;
+    }
+    reader.show(section.article, anchor: anchor);
+  }
+
+  /// Ctrl+K and Cmd+K, and `/` with no modifier, as on VitePress; Ctrl+F and
+  /// Cmd+F, for the find in the article.
+  KeyEventResult _key(FocusNode node, KeyEvent event) {
+    if (event is! KeyDownEvent || _searching || _tree == null) {
+      return KeyEventResult.ignored;
+    }
+    final keyboard = HardwareKeyboard.instance;
+    final command = keyboard.isControlPressed || keyboard.isMetaPressed;
+    final key = event.logicalKey;
+    if (command && key == LogicalKeyboardKey.keyF) {
+      _openFind();
+      return KeyEventResult.handled;
+    }
+    final asked = command
+        ? key == LogicalKeyboardKey.keyK
+        : key == LogicalKeyboardKey.slash &&
+              !keyboard.isAltPressed &&
+              !keyboard.isShiftPressed;
+    if (!asked) return KeyEventResult.ignored;
+    _openSearch();
+    return KeyEventResult.handled;
+  }
+
   void _tapRow(DocNode node) {
     setState(() {
       if (node.isGroup) {
@@ -254,7 +378,7 @@ class _DocsPageState extends State<DocsPage> {
           final line = const Color(0x33FFFFFF);
           final vline = Container(width: 1, color: line);
 
-          Widget sidebar() {
+          Widget sidebar({required bool pill}) {
             // A path can stand twice in the file; one row takes the key.
             var keyed = false;
             Key? keyOf(DocNode node) {
@@ -265,7 +389,7 @@ class _DocsPageState extends State<DocsPage> {
             }
 
             if (tree == null) return const SizedBox.shrink();
-            return ListView(
+            final rows = ListView(
               padding: EdgeInsets.fromLTRB(
                 menuFont * 0.6,
                 menuFont * 0.5,
@@ -286,6 +410,27 @@ class _DocsPageState extends State<DocsPage> {
                         row.node.path == reader?.page.path,
                     onTap: () => _tapRow(row.node),
                   ),
+              ],
+            );
+            if (!pill) return rows;
+            // The search stands over the tree and does not scroll with it.
+            return Column(
+              children: [
+                Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    menuFont * 0.6,
+                    menuFont * 0.7,
+                    menuFont * 0.6,
+                    menuFont * 0.2,
+                  ),
+                  child: _SearchPill(
+                    label: libErrorText(language, 'Поиск', 'Search'),
+                    hint: _searchKeys(),
+                    font: menuFont,
+                    onTap: _openSearch,
+                  ),
+                ),
+                Expanded(child: rows),
               ],
             );
           }
@@ -317,7 +462,8 @@ class _DocsPageState extends State<DocsPage> {
           final tools = Row(
             children: [
               if (reader != null && reader.canBack)
-                _BackMark(
+                _IconMark(
+                  asset: 'assets/icons/actions/back.svg',
                   label: word('Назад'),
                   extent: mark,
                   onTap: reader.back,
@@ -365,6 +511,13 @@ class _DocsPageState extends State<DocsPage> {
                             label: word('Разделы'),
                             extent: mark,
                             onTap: () => setState(() => _menu = !_menu),
+                          ),
+                        if (!wide && tree != null)
+                          _IconMark(
+                            asset: 'assets/icons/actions/search.svg',
+                            label: libErrorText(language, 'Поиск', 'Search'),
+                            extent: mark,
+                            onTap: _openSearch,
                           ),
                         if (reader?.page.path != null)
                           CopyLinkMark(
@@ -442,6 +595,10 @@ class _DocsPageState extends State<DocsPage> {
                     codeFont: codeFont,
                     accent: libraryColor,
                     linkOf: (slug) => linkTo(slug),
+                    find: _finding && _findField.text.isNotEmpty
+                        ? MdFind(_findField.text, _findAt)
+                        : null,
+                    onFound: _findCounted,
                     sides: max(font * 1.2, 16.0),
                     lead: wide ? gap + side + 1 : 0,
                     trail: outlineRoom,
@@ -469,11 +626,41 @@ class _DocsPageState extends State<DocsPage> {
 
           // No frame and no fill: the scene under the router, its grain and
           // the mosaic, is the background, as on every other screen.
-          return SafeArea(
+          final page = SafeArea(
             child: Column(
               children: [
                 header,
                 Container(height: 1, color: line),
+                // The find has a strip of its own: the text stands under it,
+                // not behind it.
+                if (_finding) ...[
+                  Padding(
+                    padding: EdgeInsets.fromLTRB(
+                      (wide ? gap + side + 1 : 0) + font,
+                      font * 0.5,
+                      font,
+                      font * 0.5,
+                    ),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: font * 34),
+                        child: DocFindBar(
+                          controller: _findField,
+                          focusNode: _findFocus,
+                          language: language,
+                          font: font,
+                          count: _findCount,
+                          current: _findAt,
+                          onChanged: _findTyped,
+                          onStep: _findStep,
+                          onClose: _closeFind,
+                        ),
+                      ),
+                    ),
+                  ),
+                  Container(height: 1, color: line),
+                ],
                 Expanded(
                   child: Stack(
                     children: [
@@ -484,7 +671,7 @@ class _DocsPageState extends State<DocsPage> {
                               width: gap + side,
                               child: Padding(
                                 padding: EdgeInsets.only(left: gap),
-                                child: sidebar(),
+                                child: sidebar(pill: true),
                               ),
                             ),
                             vline,
@@ -525,7 +712,7 @@ class _DocsPageState extends State<DocsPage> {
                                 // the article must not show through.
                                 child: GrainBox(
                                   tile: sceneGrain,
-                                  child: sidebar(),
+                                  child: sidebar(pill: false),
                                 ),
                               ),
                               vline,
@@ -539,9 +726,39 @@ class _DocsPageState extends State<DocsPage> {
               ],
             ),
           );
+          final searchTree = tree;
+          // The keys reach the page while nothing else holds the focus.
+          return Focus(
+            focusNode: _page,
+            autofocus: true,
+            onKeyEvent: _key,
+            child: Stack(
+              children: [
+                Positioned.fill(child: page),
+                if (_searching && searchTree != null)
+                  Positioned.fill(
+                    child: DocSearchPanel(
+                      index: DocSearchIndex.of(searchTree),
+                      language: language,
+                      font: menuFont,
+                      onOpen: _pick,
+                      onClose: _closeSearch,
+                    ),
+                  ),
+              ],
+            ),
+          );
         },
       ),
     );
+  }
+
+  /// How the person is told to open the search: the key of the platform.
+  String _searchKeys() {
+    final apple =
+        defaultTargetPlatform == TargetPlatform.macOS ||
+        defaultTargetPlatform == TargetPlatform.iOS;
+    return apple ? 'Cmd K' : 'Ctrl K';
   }
 
   /// The rows the sidebar shows: a folded group hides what is under it.
@@ -750,14 +967,87 @@ class _ChevronPainter extends CustomPainter {
       oldDelegate.color != color || oldDelegate.open != open;
 }
 
-/// Back: the picture of the Back cell, on the bar.
-class _BackMark extends StatelessWidget {
-  const _BackMark({
+/// The search of the documentation, as a field that is not one: the mark, the
+/// word, and the keys that open it, in a cut frame over the sidebar.
+class _SearchPill extends StatefulWidget {
+  const _SearchPill({
+    required this.label,
+    required this.hint,
+    required this.font,
+    required this.onTap,
+  });
+
+  final String label;
+  final String hint;
+  final double font;
+  final VoidCallback onTap;
+
+  @override
+  State<_SearchPill> createState() => _SearchPillState();
+}
+
+class _SearchPillState extends State<_SearchPill> {
+  var _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final font = widget.font;
+    final color = _hover ? libraryColor : const Color(0x55FFFFFF);
+    return Semantics(
+      button: true,
+      label: widget.label,
+      excludeSemantics: true,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          child: BevelFrame(
+            color: color,
+            radius: font * 0.6,
+            width: 1.2,
+            child: Container(
+              height: font * 2.4,
+              padding: EdgeInsets.symmetric(horizontal: font * 0.8),
+              child: Row(
+                children: [
+                  SvgPicture.asset(
+                    'assets/icons/actions/search.svg',
+                    width: font * 1.15,
+                    height: font * 1.15,
+                  ),
+                  SizedBox(width: font * 0.6),
+                  Expanded(
+                    child: Text(
+                      widget.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: _style(font * 0.95, hexMuted),
+                    ),
+                  ),
+                  Text(widget.hint, style: _style(font * 0.8, hexMuted)),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A mark of the bar drawn from an icon: Back, search.
+class _IconMark extends StatelessWidget {
+  const _IconMark({
+    required this.asset,
     required this.label,
     required this.extent,
     required this.onTap,
   });
 
+  final String asset;
   final String label;
   final double extent;
   final VoidCallback onTap;
@@ -772,7 +1062,7 @@ class _BackMark extends StatelessWidget {
         onTap: onTap,
         child: HoverPop(
           child: SvgPicture.asset(
-            'assets/icons/actions/back.svg',
+            asset,
             width: extent,
             height: extent,
           ),

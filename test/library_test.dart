@@ -13,6 +13,8 @@ import 'package:pepeunit_client/account/vault_store.dart';
 import 'package:pepeunit_client/app_model.dart';
 import 'package:pepeunit_client/app_scope.dart';
 import 'package:pepeunit_client/client_version.dart';
+import 'package:pepeunit_client/features/library/doc_find_bar.dart';
+import 'package:pepeunit_client/features/library/doc_search_panel.dart';
 import 'package:pepeunit_client/features/library/docs_page.dart';
 import 'package:pepeunit_client/features/library/library_modal.dart';
 import 'package:pepeunit_client/hive/bevel.dart';
@@ -415,6 +417,100 @@ void main() {
       await openDocs(tester, const Size(420, 800));
       expect(find.text('Развёртывание'), findsNothing);
       expect(tester.getTopRight(find.byType(MdView)).dx, 420);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: search leads to the article that has the words', (
+      tester,
+    ) async {
+      await openDocs(tester, const Size(1200, 800));
+      expect(find.byType(DocSearchPanel), findsNothing);
+      await tester.tap(find.bySemanticsLabel('Поиск'));
+      await tester.pumpAndSettle();
+      expect(find.byType(DocSearchPanel), findsOneWidget);
+      expect(find.text('Введите слова из статьи'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), 'zzzqqq');
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Ничего не найдено'), findsOneWidget);
+      // Escape closes it, Ctrl+K opens it again.
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.byType(DocSearchPanel), findsNothing);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyK);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+      expect(find.byType(DocSearchPanel), findsOneWidget);
+      // The field has the focus already: typing needs no click.
+      expect(tester.testTextInput.isVisible, isTrue);
+      await tester.enterText(find.byType(TextField), 'установка docker');
+      await tester.pumpAndSettle();
+      final row = find.bySemanticsLabel(RegExp('Установка Docker'));
+      expect(row, findsWidgets);
+      // Down and Up move the lit hit, Enter opens it.
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowDown);
+      await tester.sendKeyEvent(LogicalKeyboardKey.arrowUp);
+      await tester.testTextInput.receiveAction(TextInputAction.search);
+      await settle(tester);
+      expect(find.byType(DocSearchPanel), findsNothing);
+      expect(find.bySemanticsLabel('Назад'), findsOneWidget);
+      expect(find.text('Установка Docker и Compose'), findsWidgets);
+      String? doc() => GoRouterState.of(
+        tester.element(find.byType(DocsPage)),
+      ).uri.queryParameters['doc'];
+      expect(doc(), isNotNull);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: Ctrl+F finds in the open article', (tester) async {
+      await openDocs(tester, const Size(1200, 800));
+      expect(find.byType(DocFindBar), findsNothing);
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.controlLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.keyF);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.controlLeft);
+      await tester.pumpAndSettle();
+      expect(find.byType(DocFindBar), findsOneWidget);
+      // The field has the focus already: typing needs no click.
+      expect(tester.testTextInput.isVisible, isTrue);
+      tester.testTextInput.enterText('backend');
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'backend');
+      await tester.pumpAndSettle();
+      final counter = find.textContaining(RegExp(r'^\d+/\d+$'));
+      expect(counter, findsOneWidget);
+      String shown() => (tester.widget(counter) as Text).data!;
+      expect(shown(), startsWith('1/'));
+      final total = int.parse(shown().split('/').last);
+      expect(total, greaterThan(1));
+      // Enter steps to the next match, Shift+Enter to the one before.
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+      expect(shown(), '2/$total');
+      await tester.sendKeyDownEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.sendKeyEvent(LogicalKeyboardKey.enter);
+      await tester.sendKeyUpEvent(LogicalKeyboardKey.shiftLeft);
+      await tester.pumpAndSettle();
+      expect(shown(), '1/$total');
+      await tester.enterText(find.byType(TextField), 'zzzqqq');
+      await tester.pumpAndSettle();
+      expect(find.text('0/0'), findsOneWidget);
+      await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+      await tester.pumpAndSettle();
+      expect(find.byType(DocFindBar), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: search on a phone opens from the bar', (
+      tester,
+    ) async {
+      await openDocs(tester, const Size(420, 800));
+      await tester.tap(find.bySemanticsLabel('Поиск'));
+      await tester.pumpAndSettle();
+      await tester.enterText(find.byType(TextField), 'docker');
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel(RegExp('Docker')).first);
+      await settle(tester);
+      expect(find.byType(DocSearchPanel), findsNothing);
       expect(tester.takeException(), isNull);
     });
 
@@ -1008,6 +1104,41 @@ void main() {
       // Same text, so no second page and no Back; the heading is at the top.
       expect(find.text('Назад'), findsNothing);
       expect(tester.getTopLeft(find.text('Первый раздел')).dy, lessThan(300));
+    });
+
+    testWidgets('a find counts the matches and scrolls to the current', (
+      tester,
+    ) async {
+      final filler = [for (var i = 0; i < 80; i++) 'Строка $i\n'].join('\n');
+      var count = -1;
+      final doc = parseMarkdown('$filler\n## Конец\n\nредкое слово и Редкое.\n');
+      Widget view(MdFind? find) => MaterialApp(
+        home: Scaffold(
+          body: MdView(
+            doc: doc,
+            font: 16,
+            accent: const Color(0xFF00BCD4),
+            canOpen: (_) => false,
+            onOpen: (_) {},
+            find: find,
+            onFound: (n) => count = n,
+          ),
+        ),
+      );
+      await tester.pumpWidget(view(null));
+      await tester.pumpAndSettle();
+      expect(count, 0);
+      expect(find.textContaining('редкое', findRichText: true), findsNothing);
+      // Two matches at the very end: the view comes down to the first.
+      await tester.pumpWidget(view(const MdFind('редкое', 0)));
+      await tester.pumpAndSettle();
+      expect(count, 2);
+      expect(find.textContaining('слово', findRichText: true), findsOneWidget);
+      expect(tester.takeException(), isNull);
+      // No match, no count.
+      await tester.pumpWidget(view(const MdFind('нету', 0)));
+      await tester.pumpAndSettle();
+      expect(count, 0);
     });
 
     testWidgets('a long text has no contents word', (tester) async {

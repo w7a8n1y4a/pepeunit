@@ -10,6 +10,7 @@ import '../../hive/bevel.dart';
 import '../../hive/hex_scene.dart';
 import '../../hive/marks.dart';
 import '../../instances/link.dart';
+import '../../library/doc_search.dart';
 import '../../library/markdown.dart';
 import '../code/code_highlight.dart';
 import '../code/code_syntax.dart';
@@ -39,6 +40,24 @@ Color admonitionColor(MdAdmonitionKind kind) {
     case MdAdmonitionKind.details:
       return hexMuted;
   }
+}
+
+/// A find in the open text: the words typed and the match that is current.
+/// The view marks every match and scrolls to the current one.
+class MdFind {
+  const MdFind(this.query, this.current);
+
+  final String query;
+
+  /// Place of the current match among all of them, from zero.
+  final int current;
+
+  @override
+  bool operator ==(Object other) =>
+      other is MdFind && other.query == query && other.current == current;
+
+  @override
+  int get hashCode => Object.hash(query, current);
 }
 
 /// Lets the owner of a [MdView] scroll it to a heading.
@@ -72,6 +91,8 @@ class MdView extends StatefulWidget {
     this.controller,
     this.anchor,
     this.linkOf,
+    this.find,
+    this.onFound,
     this.sides = 0,
     this.lead = 0,
     this.trail = 0,
@@ -92,6 +113,14 @@ class MdView extends StatefulWidget {
   /// two to four has a mark in front of it that copies the address. Without
   /// it the headings carry no mark.
   final String Function(String slug)? linkOf;
+
+  /// The words to mark in the text. The page cannot be searched by the
+  /// browser: the web build draws it on a canvas, so the text has its own
+  /// find. Code blocks and the titles of `:::` blocks are not searched.
+  final MdFind? find;
+
+  /// Called with how many matches [find] has in the text, after it changed.
+  final void Function(int count)? onFound;
 
   /// Empty room on the left and on the right of the column.
   final double sides;
@@ -114,6 +143,13 @@ class _MdViewState extends State<MdView> {
   final _scroll = ScrollController();
   final _list = GlobalKey();
   final _keys = <String, GlobalKey>{};
+
+  /// The text that holds the current match of [MdView.find].
+  final _matchKey = GlobalKey();
+
+  /// Index in the list of the block that holds each match.
+  var _matchAt = const <int>[];
+  int? _reported;
 
   /// Index in the list of the block that holds each heading.
   final _at = <String, int>{};
@@ -139,11 +175,14 @@ class _MdViewState extends State<MdView> {
     if (oldWidget.doc != widget.doc ||
         oldWidget.font != widget.font ||
         oldWidget.accent != widget.accent ||
+        oldWidget.find != widget.find ||
         (oldWidget.linkOf == null) != (widget.linkOf == null)) {
       _build();
       if (oldWidget.doc != widget.doc) {
         if (_scroll.hasClients) _scroll.jumpTo(0);
         _jumpLater(widget.anchor);
+      } else if (oldWidget.find != widget.find) {
+        _goToMatch();
       }
     }
   }
@@ -192,14 +231,37 @@ class _MdViewState extends State<MdView> {
   /// Scrolls to a heading. The list builds only the blocks near the window,
   /// so a heading far away has no widget yet: the view moves toward its
   /// block, a window at a time, until the heading is built.
-  Future<void> _reach(String slug) async {
+  Future<void> _reach(String slug) => _reachAt(
+    _at[slug] ?? 0,
+    () => _keys[slug]?.currentContext,
+    alignment: 0.02,
+  );
+
+  /// The current match of the find comes into view, a third of the way down.
+  void _goToMatch() {
+    final find = widget.find;
+    if (find == null || find.query.isEmpty) return;
+    if (find.current < 0 || find.current >= _matchAt.length) return;
+    _reachAt(
+      _matchAt[find.current],
+      () => _matchKey.currentContext,
+      alignment: 0.3,
+    );
+  }
+
+  /// Scrolls to the block at [index] until [widgetOf] has a widget, then to
+  /// that widget.
+  Future<void> _reachAt(
+    int index,
+    BuildContext? Function() widgetOf, {
+    required double alignment,
+  }) async {
     final ticket = ++_ticket;
-    final index = _at[slug] ?? 0;
     for (var step = 0; step < 40; step++) {
       if (!mounted || ticket != _ticket || !_scroll.hasClients) return;
-      final heading = _keys[slug]?.currentContext;
+      final heading = widgetOf();
       if (heading != null && heading.mounted) {
-        Scrollable.ensureVisible(heading, alignment: 0.02);
+        Scrollable.ensureVisible(heading, alignment: alignment);
         return;
       }
       final position = _scroll.position;
@@ -240,16 +302,31 @@ class _MdViewState extends State<MdView> {
       keys: _keys,
       recognizers: _recognizers,
       linkOf: linkOf == null ? null : (slug) => widget.linkOf?.call(slug) ?? '',
+      find: widget.find,
+      matchKey: _matchKey,
     );
     final blocks = <Widget>[];
     for (final block in widget.doc.blocks) {
       final before = _keys.length;
+      builder.at = blocks.length;
       blocks.add(builder.row(block));
       for (final slug in _keys.keys.skip(before)) {
         _at[slug] = blocks.length - 1;
       }
     }
     _blocks = blocks;
+    _matchAt = builder.matchAt;
+    _report(builder.matchAt.length);
+  }
+
+  /// Tells the owner how many matches the find has, once the frame is done:
+  /// the owner redraws itself in answer.
+  void _report(int count) {
+    if (_reported == count) return;
+    _reported = count;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.onFound?.call(count);
+    });
   }
 
   @override
@@ -354,6 +431,8 @@ class _Blocks {
     required this.keys,
     required this.recognizers,
     this.linkOf,
+    this.find,
+    this.matchKey,
   });
 
   final double font;
@@ -363,6 +442,63 @@ class _Blocks {
   final Map<String, GlobalKey> keys;
   final List<GestureRecognizer> recognizers;
   final String Function(String slug)? linkOf;
+  final MdFind? find;
+  final GlobalKey? matchKey;
+
+  /// Index of the top-level block being built, and the block of every match
+  /// found so far, in the order the text reads.
+  var at = 0;
+  final matchAt = <int>[];
+
+  /// The words of [find], as [foldText] makes them. Empty: nothing to mark.
+  late final _needle = foldText(find?.query ?? '');
+
+  /// True once the current match has been drawn into the spans being built:
+  /// the text that holds it takes [matchKey].
+  var _hit = false;
+
+  /// The spans for a piece of text: the text itself, or pieces of it with
+  /// the matches marked. The current match is stronger than the others.
+  List<InlineSpan> _lit(String text, [TextStyle? style]) {
+    final ranges = findRanges(text, _needle);
+    if (ranges.isEmpty) return [TextSpan(text: text, style: style)];
+    final current = find?.current ?? -1;
+    final out = <InlineSpan>[];
+    var from = 0;
+    for (final range in ranges) {
+      if (range.start > from) {
+        out.add(TextSpan(text: text.substring(from, range.start), style: style));
+      }
+      final mine = matchAt.length == current;
+      if (mine) _hit = true;
+      matchAt.add(at);
+      out.add(
+        TextSpan(
+          text: text.substring(range.start, range.end),
+          style: (style ?? const TextStyle()).merge(
+            TextStyle(
+              background: Paint()
+                ..color = accent.withValues(alpha: mine ? 0.75 : 0.3),
+              color: mine ? const Color(0xFF000000) : null,
+            ),
+          ),
+        ),
+      );
+      from = range.end;
+    }
+    if (from < text.length) {
+      out.add(TextSpan(text: text.substring(from), style: style));
+    }
+    return out;
+  }
+
+  /// [text] with the key of the current match, when the spans just built
+  /// hold it.
+  Widget _found(Widget text) {
+    if (!_hit) return text;
+    _hit = false;
+    return KeyedSubtree(key: matchKey, child: text);
+  }
 
   double get code => font * 0.82;
 
@@ -406,9 +542,11 @@ class _Blocks {
       case MdHeading():
         return _heading(block, marked: top && _marked(block));
       case MdParagraph():
-        return Text.rich(
-          TextSpan(children: spans(block.inlines, base)),
-          style: base,
+        return _found(
+          Text.rich(
+            TextSpan(children: spans(block.inlines, base)),
+            style: base,
+          ),
         );
       case MdListBlock():
         return _list(block, base);
@@ -464,9 +602,11 @@ class _Blocks {
       height: 1.25,
       color: level == 1 || level == 3 ? accent : _ink,
     );
-    final text = Text.rich(
-      TextSpan(children: spans(heading.inlines, style)),
-      style: style,
+    final text = _found(
+      Text.rich(
+        TextSpan(children: spans(heading.inlines, style)),
+        style: style,
+      ),
     );
     Widget content;
     switch (level) {
@@ -579,14 +719,16 @@ class _Blocks {
             horizontal: font * 0.8,
             vertical: font * 0.55,
           ),
-          child: Text.rich(
-            TextSpan(children: spans(inlines, style)),
-            style: style,
-            textAlign: switch (align) {
-              MdAlign.left => TextAlign.left,
-              MdAlign.center => TextAlign.center,
-              MdAlign.right => TextAlign.right,
-            },
+          child: _found(
+            Text.rich(
+              TextSpan(children: spans(inlines, style)),
+              style: style,
+              textAlign: switch (align) {
+                MdAlign.left => TextAlign.left,
+                MdAlign.center => TextAlign.center,
+                MdAlign.right => TextAlign.right,
+              },
+            ),
           ),
         ),
       );
@@ -652,7 +794,7 @@ class _Blocks {
     for (final inline in inlines) {
       switch (inline) {
         case MdText():
-          out.add(TextSpan(text: inline.text));
+          out.addAll(_lit(inline.text));
         case MdBreak():
           out.add(const TextSpan(text: '\n'));
         case MdCodeSpan():
@@ -680,7 +822,7 @@ class _Blocks {
                 shadows: _inLink ? const [] : null,
                 decoration: _inLink ? TextDecoration.none : null,
               ),
-              children: [pad, TextSpan(text: inline.code), pad],
+              children: [pad, ..._lit(inline.code), pad],
             ),
           );
         case MdMarked():
@@ -716,8 +858,8 @@ class _Blocks {
         case MdInlineImage():
           out.add(
             TextSpan(
-              text: inline.alt.isEmpty ? inline.url : inline.alt,
               style: _inLink ? null : TextStyle(color: accent),
+              children: _lit(inline.alt.isEmpty ? inline.url : inline.alt),
             ),
           );
         case MdLink():

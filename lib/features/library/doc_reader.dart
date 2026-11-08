@@ -146,6 +146,8 @@ class DocBody extends StatelessWidget {
     required this.codeFont,
     required this.accent,
     this.linkOf,
+    this.find,
+    this.onFound,
     this.sides = 0,
     this.lead = 0,
     this.trail = 0,
@@ -159,6 +161,12 @@ class DocBody extends StatelessWidget {
 
   /// See [MdView.linkOf].
   final String Function(String slug)? linkOf;
+
+  /// See [MdView.find].
+  final MdFind? find;
+
+  /// See [MdView.onFound].
+  final void Function(int count)? onFound;
 
   /// See [MdView.sides].
   final double sides;
@@ -196,6 +204,8 @@ class DocBody extends StatelessWidget {
       controller: reader.controller,
       anchor: page.anchor,
       linkOf: linkOf,
+      find: find,
+      onFound: onFound,
       sides: sides,
       lead: lead,
       trail: trail,
