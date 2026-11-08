@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -29,12 +31,15 @@ class PlatformVaultStore implements VaultStore {
 
   static const _key = 'pepeunit.vault';
 
+  /// A keystore that never answers must not hold the start of the app.
+  static const _secureWait = Duration(seconds: 4);
+
   final FlutterSecureStorage _secure;
 
   @override
   Future<Vault> read() async {
     try {
-      final raw = await _secure.read(key: _key);
+      final raw = await _secure.read(key: _key).timeout(_secureWait);
       if (raw != null && raw.isNotEmpty) return Vault.decode(raw);
     } catch (_) {}
     final prefs = await SharedPreferences.getInstance();
@@ -47,7 +52,7 @@ class PlatformVaultStore implements VaultStore {
   Future<void> write(Vault vault) async {
     final raw = vault.encode();
     try {
-      await _secure.write(key: _key, value: raw);
+      await _secure.write(key: _key, value: raw).timeout(_secureWait);
     } catch (_) {}
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_key, raw);

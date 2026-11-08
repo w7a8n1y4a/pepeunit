@@ -68,10 +68,51 @@ Future<void> main() async {
   GoRouter.optionURLReflectsImperativeAPIs = true;
   usePathUrlStrategy();
   WidgetsFlutterBinding.ensureInitialized();
-  final model = AppModel(store: PlatformVaultStore());
-  await model.load();
-  await Library.instance.load();
-  runApp(AppScope(model: model, child: const PepeunitApp()));
+  var step = 'start';
+  try {
+    final model = AppModel(store: PlatformVaultStore());
+    step = 'account storage';
+    await model
+        .load(waitForNetwork: false)
+        .timeout(const Duration(seconds: 15));
+    step = 'library';
+    await Library.instance.load().timeout(const Duration(seconds: 15));
+    runApp(AppScope(model: model, child: const PepeunitApp()));
+  } catch (error, stack) {
+    // A screen with the cause is better than a splash that never ends.
+    runApp(_BootFailure(step: step, error: error, stack: stack));
+  }
+}
+
+class _BootFailure extends StatelessWidget {
+  const _BootFailure({
+    required this.step,
+    required this.error,
+    required this.stack,
+  });
+
+  final String step;
+  final Object error;
+  final StackTrace stack;
+
+  @override
+  Widget build(BuildContext context) {
+    return Directionality(
+      textDirection: TextDirection.ltr,
+      child: ColoredBox(
+        color: sceneBackground,
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            child: DefaultTextStyle(
+              style: const TextStyle(color: Color(0xFFFFFFFF), fontSize: 14),
+              child: Text('Start failed at: $step\n\n$error\n\n$stack'),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 class PepeunitApp extends StatefulWidget {

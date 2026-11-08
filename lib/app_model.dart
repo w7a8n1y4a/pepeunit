@@ -231,7 +231,10 @@ class AppModel extends ChangeNotifier {
     return urls;
   }
 
-  Future<void> load({String? hostedUrl}) async {
+  /// With [waitForNetwork] false the first screen opens at once and the
+  /// instance refresh runs behind it, so a slow or unreachable instance
+  /// does not hold the start.
+  Future<void> load({String? hostedUrl, bool waitForNetwork = true}) async {
     vault = await store.read();
     final hosted = hostedUrl ?? await this.hostedUrl();
     final chosen = _canonicalOrNull(hosted);
@@ -245,7 +248,8 @@ class AppModel extends ChangeNotifier {
     }
     ready = true;
     if (vault.target != null) {
-      await refreshTarget();
+      final refresh = refreshTarget();
+      if (waitForNetwork) await refresh;
     } else {
       notifyListeners();
     }
