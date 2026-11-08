@@ -188,30 +188,18 @@ class _MdViewState extends State<MdView> {
             top: font * 0.3,
             bottom: font * 1.5,
           ),
-          // The column is centered; a line of text stops at a readable width
-          // while code, tables, and pictures may run wider.
+          // The column is centered. Every block, text or not, has the same
+          // width, so the left and right edges line up down the page.
           child: Align(
             alignment: Alignment.topCenter,
             child: ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: font * mdWideWidth),
+              constraints: BoxConstraints(maxWidth: font * mdWidth),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   for (var i = 0; i < _blocks.length; i++) ...[
                     if (i > 0) SizedBox(height: _gap(i)),
-                    Align(
-                      alignment: Alignment.centerLeft,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxWidth:
-                              font *
-                              (_isWide(widget.doc.blocks[i])
-                                  ? mdWideWidth
-                                  : mdTextWidth),
-                        ),
-                        child: _blocks[i],
-                      ),
-                    ),
+                    _blocks[i],
                   ],
                 ],
               ),
@@ -232,16 +220,9 @@ class _MdViewState extends State<MdView> {
   }
 }
 
-/// Widths of the reading column, in font sizes. A line of text holds about
-/// seventy characters; wide blocks have room for a table or a config.
-const mdTextWidth = 36.0;
-const mdWideWidth = 58.0;
-
-bool _isWide(MdBlock block) =>
-    block is MdCodeBlock ||
-    block is MdTable ||
-    block is MdImage ||
-    block is MdVideo;
+/// Width of the reading column, in font sizes, shared by text, notices, code,
+/// tables, and pictures. A line of text holds about ninety characters.
+const mdWidth = 48.0;
 
 const _ink = Color(0xFFFFFFFF);
 
