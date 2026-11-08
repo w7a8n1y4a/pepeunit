@@ -1,5 +1,7 @@
 .git
-docs
+docs/*
+!docs/ru
+docs/ru/index.md
 node_modules
 .dart_tool
 build
