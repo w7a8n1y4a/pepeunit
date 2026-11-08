@@ -296,6 +296,12 @@ class AppModel extends ChangeNotifier {
     return _commit();
   }
 
+  Future<void> setLibraryRaw(bool value) {
+    if (vault.libraryRaw == value) return Future<void>.value();
+    vault.libraryRaw = value;
+    return _commit();
+  }
+
   Future<void> setTimeZone(int minutes) {
     final stored = minutes.toString();
     if (vault.timeZone == stored) return Future<void>.value();

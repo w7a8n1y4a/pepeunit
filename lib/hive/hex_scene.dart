@@ -8,6 +8,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 
 import 'grain.dart';
 import 'hex_motion.dart';
+import 'hint.dart';
 import 'icon_scale.dart';
 
 /// Text inside a cell: a choice and a value that sits with it.
@@ -1240,7 +1241,16 @@ class _CellFrameState extends State<_CellFrame> with TickerProviderStateMixin {
       onTap: interactive ? _tap : null,
       child: scene,
     );
-    if (!interactive) return detector;
+    final slot = widget.slot;
+    return HintTarget(
+      id: slot.id,
+      title: slot.title,
+      color: slot.color,
+      child: interactive ? _hoverable(detector) : detector,
+    );
+  }
+
+  Widget _hoverable(Widget detector) {
     return MouseRegion(
       cursor: SystemMouseCursors.click,
       // onEnter also fires when a new menu is built under a still cursor.

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../app_scope.dart';
+import '../../hive/bevel.dart';
 import '../../hive/grain.dart';
 import '../../hive/hex_scene.dart';
 import '../../hive/marks.dart';
@@ -156,16 +157,10 @@ class CodeModal extends StatelessWidget {
               top: margin,
               right: margin,
               height: height,
-              child: DecoratedBox(
-                // The border is drawn over the grain, so the fill does not
-                // cover half of it.
-                position: DecorationPosition.foreground,
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: color,
-                    width: max(1.4, font * 0.12),
-                  ),
-                ),
+              child: BevelFrame(
+                color: color,
+                width: max(1.4, font * 0.12),
+                radius: font,
                 child: GrainBox(
                   tile: cellGrain,
                   opacity: modalFillOpacity,

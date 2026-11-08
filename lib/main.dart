@@ -18,6 +18,9 @@ import 'features/dashboards/dashboards_menu_page.dart';
 import 'features/dashboards/dashboards_page.dart';
 import 'features/dashboards/panel_pages.dart';
 import 'features/home/home_page.dart';
+import 'features/library/docs_page.dart';
+import 'features/library/library_menu_page.dart';
+import 'features/library/library_modal.dart';
 import 'features/menu/placeholder_page.dart';
 import 'features/network/instance_page.dart';
 import 'features/network/instance_settings_page.dart';
@@ -53,8 +56,10 @@ import 'dashboards/dashboard.dart';
 import 'hive/background.dart';
 import 'hive/grain.dart';
 import 'hive/hex_order.dart';
+import 'hive/hint.dart';
 import 'hive/hex_scene.dart';
 import 'hive/page_transition.dart';
+import 'library/library.dart';
 import 'registry/registry_view.dart';
 
 Future<void> main() async {
@@ -65,6 +70,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final model = AppModel(store: PlatformVaultStore());
   await model.load();
+  await Library.instance.load();
   runApp(AppScope(model: model, child: const PepeunitApp()));
 }
 
@@ -595,6 +601,30 @@ class _PepeunitAppState extends State<PepeunitApp> {
         ],
       ),
       GoRoute(
+        path: '/library',
+        builder: (context, state) => const LibraryMenuPage(),
+        routes: [
+          GoRoute(
+            path: 'presentation',
+            builder: (context, state) =>
+                const LibraryMenuPage(open: LibraryOpen.presentation),
+          ),
+          GoRoute(
+            path: 'about',
+            builder: (context, state) =>
+                const LibraryMenuPage(open: LibraryOpen.about),
+          ),
+          GoRoute(
+            path: 'docs',
+            builder: (context, state) => DocsPage(
+              dir: state.uri.queryParameters['dir'] ?? '',
+              doc: state.uri.queryParameters['doc'],
+              scope: scaleTickOf(state.uri),
+            ),
+          ),
+        ],
+      ),
+      GoRoute(
         path: '/:section',
         builder: (context, state) =>
             PlaceholderPage(sectionId: state.pathParameters['section']!),
@@ -606,6 +636,48 @@ class _PepeunitAppState extends State<PepeunitApp> {
   void dispose() {
     _router.dispose();
     super.dispose();
+  }
+
+  /// The tip file of a cell on the screen that is open now, or null.
+  String? _tipKey(BuildContext context, String id) {
+    final library = Library.instance;
+    if (!library.ready || !tipCellOk(id)) return null;
+    final language = AppScope.of(context).vault.language;
+    final screen = tipScreenOf(
+      _router.routerDelegate.currentConfiguration.fullPath,
+    );
+    return library.tipKey(language, screen, id);
+  }
+
+  Future<void> _openTip(
+    BuildContext context,
+    String id,
+    String title,
+    Color color,
+  ) async {
+    final key = _tipKey(context, id);
+    if (key == null) return;
+    final language = AppScope.of(context).vault.language;
+    final library = Library.instance;
+    final text = await library.text(key);
+    final tree = await library.docs(language);
+    if (!context.mounted) return;
+    await showGeneralDialog<void>(
+      context: context,
+      barrierDismissible: true,
+      barrierLabel: 'Закрыть подсказку',
+      barrierColor: const Color(0x00000000),
+      pageBuilder: (dialog, _, _) => Material(
+        type: MaterialType.transparency,
+        child: LibraryModal(
+          title: title,
+          color: color,
+          source: text,
+          docs: tree,
+          onClose: () => Navigator.of(dialog).pop(),
+        ),
+      ),
+    );
   }
 
   @override
@@ -648,11 +720,15 @@ class _PepeunitAppState extends State<PepeunitApp> {
       ),
       routerConfig: _router,
       // One mosaic under the router, so it stays put while screens change.
-      builder: (context, child) => GrainBox(
-        tile: sceneGrain,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [if (widget.background) const HiveBackground(), ?child],
+      builder: (context, child) => HintHost(
+        has: (cell, id) => _tipKey(cell, id) != null,
+        open: _openTip,
+        child: GrainBox(
+          tile: sceneGrain,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [if (widget.background) const HiveBackground(), ?child],
+          ),
         ),
       ),
     );

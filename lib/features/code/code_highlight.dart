@@ -1,11 +1,25 @@
 import 'package:flutter/material.dart';
 
-/// Syntax the client colors. Everything that shows or edits JSON or YAML
-/// goes through here, so one palette serves every code panel.
+import 'code_syntax.dart';
+
+/// Syntax the client colors. Everything that shows or edits code goes
+/// through here, so one palette serves every code panel. JSON and YAML are
+/// edited too; the rest (`code_syntax.dart`) is only read, in the Library.
 enum CodeLanguage {
   plain,
   json,
   yaml,
+  markdown,
+  python,
+  go,
+  rust,
+  c,
+  javascript,
+  shell,
+  nginx,
+  toml,
+  sql,
+  dockerfile,
 
   /// JSON when the text opens with an object or an array, else plain.
   auto,
@@ -71,6 +85,8 @@ List<List<CodeToken>> codeTokens(String text, CodeLanguage language) {
     case CodeLanguage.yaml:
       final block = _YamlBlock();
       return [for (final line in lines) _yamlLine(line, block)];
+    case CodeLanguage.markdown:
+      return markdownTokens(lines);
     case CodeLanguage.plain:
     case CodeLanguage.auto:
       return [
@@ -80,6 +96,8 @@ List<List<CodeToken>> codeTokens(String text, CodeLanguage language) {
           else
             [CodeToken(line, CodeKind.plain)],
       ];
+    default:
+      return syntaxTokens(lines, resolved);
   }
 }
 

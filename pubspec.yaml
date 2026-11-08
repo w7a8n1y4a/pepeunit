@@ -48,6 +48,7 @@ dependencies:
   desktop_drop: ^0.8.0
   url_launcher: ^6.3.2
   yaml: ^3.1.3
+  package_info_plus: ^10.2.2
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +77,21 @@ flutter:
     - assets/icons/sections/
     - assets/icons/services/
     - assets/icons/status/
+    - docs/ru/_tree.json
+    - docs/ru/support.md
+    - docs/ru/definitions.md
+    - docs/ru/conception/
+    - docs/ru/deployment/
+    - docs/ru/deployment/dependencies/
+    - docs/ru/deployment/docker/
+    - docs/ru/deployment/env-variables/
+    - docs/ru/developer/
+    - docs/ru/developer/files/
+    - docs/ru/developer/libraries/
+    - docs/ru/developer/mqtt/
+    - docs/ru/development-pepeunit/
+    - docs/ru/development-pepeunit/mechanics/
+    - docs/ru/development-pepeunit/tests/
     - assets/background/animals/
     - assets/background/asia/
     - assets/background/currencies/

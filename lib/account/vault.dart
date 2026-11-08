@@ -16,6 +16,7 @@ class Vault {
     this.registeredAt,
     this.language = 'ru',
     this.timeZone = '0',
+    this.libraryRaw = false,
     List<String>? allow,
     List<String>? deny,
     List<String>? pinned,
@@ -38,6 +39,9 @@ class Vault {
   int? registeredAt;
   String language;
   String timeZone;
+
+  /// Library texts open as source, not rendered.
+  bool libraryRaw;
 
   /// Empty means every discovered instance is admitted.
   final List<String> allow;
@@ -99,6 +103,7 @@ class Vault {
       registeredAt: registeredAt,
       language: language,
       timeZone: timeZone,
+      libraryRaw: libraryRaw,
       allow: [...allow],
       deny: [...deny],
       pinned: [...pinned],
@@ -119,6 +124,7 @@ class Vault {
       'registeredAt': registeredAt,
       'language': language,
       'timeZone': timeZone,
+      'libraryRaw': libraryRaw,
       'allow': allow,
       'deny': deny,
       'pinned': pinned,
@@ -141,6 +147,7 @@ class Vault {
       registeredAt: json['registeredAt'] as int?,
       language: _language(json['language'] as String?),
       timeZone: _timeZone(json['timeZone'] as String?),
+      libraryRaw: json['libraryRaw'] == true,
       allow: _urls(json['allow']),
       deny: _urls(json['deny']),
       pinned: _urls(json['pinned']),
