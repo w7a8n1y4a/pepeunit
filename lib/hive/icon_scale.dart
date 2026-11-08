@@ -26,7 +26,9 @@ const _boost = <String, double>{
 };
 
 const _inkFill = <String, double>{
-  'assets/icons/services/tools.svg': 0.80,
+  'assets/icons/services/tools.svg': 0.78,
+  'assets/icons/services/github.svg': 0.81,
+  'assets/icons/services/discord.svg': 0.84,
   'assets/icons/services/bitcoin.svg': 0.77,
   'assets/icons/sections/account.svg': 0.80,
   'assets/icons/actions/demote.svg': 0.81,
