@@ -48,9 +48,11 @@ class AppModel extends ChangeNotifier {
     PepeunitApi Function(String origin)? api,
     Future<String?> Function()? hostedUrl,
     Future<IconDisk?> Function()? iconDisk,
+    http.Client? client,
     this.openLink,
   }) : files = files ?? PlatformKeyFilePort(),
        hostedUrl = hostedUrl ?? readHostedInstanceUrl,
+       _apiClient = client ?? http.Client(),
        _icons = IconStore(openDisk: iconDisk ?? openIconDisk) {
     this.api = api ?? _cachedApi;
   }
@@ -68,7 +70,7 @@ class AppModel extends ChangeNotifier {
 
   /// One HTTP client is shared by every origin the model talks to, so a
   /// page or an icon does not open a fresh pool and handshake per call.
-  final http.Client _apiClient = http.Client();
+  final http.Client _apiClient;
   final Map<String, PepeunitApi> _apiCache = {};
 
   PepeunitApi _cachedApi(String origin) {
@@ -916,6 +918,17 @@ class AppModel extends ChangeNotifier {
 
   Future<bool> saveBytes(String fileName, Uint8List bytes) =>
       files.save(fileName: fileName, bytes: bytes);
+
+  Future<Uint8List> downloadFile(Uri uri) async {
+    final response = await _apiClient.get(uri);
+    if (response.statusCode != 200) {
+      throw http.ClientException(
+        'Download failed: ${response.statusCode}',
+        uri,
+      );
+    }
+    return response.bodyBytes;
+  }
 
   Future<Uint8List> unitFirmware(String uuid, String kind) =>
       _api.unitFirmware(_token, uuid, kind);

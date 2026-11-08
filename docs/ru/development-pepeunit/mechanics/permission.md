@@ -9,21 +9,21 @@ Cистема доступов работает только для сущнос
 :::
 
 :::danger
-Доступ до `Private` [RepositoryRegisty](/definitions#repositoryregistry) осуществляется на основе [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория) и игнорирует систему ниже.
+Доступ до `Private` RepositoryRegisty осуществляется на основе Кредов доступа и игнорирует систему ниже.
 :::
 
 ## Создание доступа
 
-1. Перейдите в меню сущности [Repo](/definitions#repo), [Unit](/definitions#unit) или [UnitNode](/definitions#unitnode)
+1. Перейдите в меню сущности Repo, Unit или UnitNode
 1. Нажмите на кнопку `Permission`
 1. Вы попадёте в меню, где указаны агенты, которые могут взаимодействовать с данной сущностью
 1. Чтобы добавить нового агента, нажмите `Pick Agent`
-1. Выберите тип агента [User](/development-pepeunit/mechanics/roles#user) или [Unit](/definitions#unit)
+1. Выберите тип агента [User](/development-pepeunit/mechanics/roles#user) или Unit
 1. Найдите нужного вам агента и нажмите `add` напротив него
 
 ## Удаление доступа
 
-1. Перейдите в меню сущности [Repo](/definitions#repo), [Unit](/definitions#unit) или [UnitNode](/definitions#unitnode)
+1. Перейдите в меню сущности Repo, Unit или UnitNode
 1. Нажмите на кнопку `Permission`
 1. Вы попадёте в меню где указаны агенты, которые могут взаимодействовать с данной сущностью
 1. Чтобы удалить агента, нажмите `delete`

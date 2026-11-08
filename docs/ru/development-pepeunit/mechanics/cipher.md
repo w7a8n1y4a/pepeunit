@@ -1,6 +1,6 @@
 # Шифрование
 
-[Pepeunit](/conception/overview) использует шифрование `AES256` с `12 байтовым` инициирующим вектором и `32 байтовым` ключом - схема шифрования `GCM`
+Pepeunit использует шифрование `AES256` с `12 байтовым` инициирующим вектором и `32 байтовым` ключом - схема шифрования `GCM`
 
 ```python
 import os
@@ -47,12 +47,12 @@ def aes_gcm_decode(data: str, key: str = settings.pu_encrypt_key) -> str:
     return aesgcm.decrypt(nonce, cipher, None).decode("utf-8")
 ```
 
-::: tip Какие данные шифрует [Pepeunit](/conception/overview)?
+::: tip Какие данные шифрует Pepeunit?
 Все конфиденциальные данные, а именно:
 1. Динамическая соль, использующаяся для хэширования пароля [Пользователя](/development-pepeunit/mechanics/roles#user)
-1. Авторизационные данные, отвестветвенные за доступ к `Private` [RepositoryRegisty](/definitions#repositoryregistry)
-1. Файлы окружений - [env.json](/definitions#env-json) от [Unit](/definitions#unit)
-1. [Хранилище внутреннего состояния](/developer/state-storage-unit) [Unit](/definitions#unit)
+1. Авторизационные данные, отвестветвенные за доступ к `Private` RepositoryRegisty
+1. Файлы окружений - env.json от Unit
+1. [Хранилище внутреннего состояния](/developer/state-storage-unit) Unit
 :::
 
 :::warning Ограничение размера шифруемых объектов
@@ -60,9 +60,9 @@ def aes_gcm_decode(data: str, key: str = settings.pu_encrypt_key) -> str:
 :::
 
 :::danger
-[Администратор](/development-pepeunit/mechanics/roles#admin), имеющий доступ к [Backend ENV](/deployment/env-variables/backend) инстанса [Pepeunit](/conception/overview), имеет возможность расшифровать данные хранящиеся в шифрованном виде на его инстансе.
+[Администратор](/development-pepeunit/mechanics/roles#admin), имеющий доступ к [Backend ENV](/deployment/env-variables/backend) инстанса Pepeunit, имеет возможность расшифровать данные хранящиеся в шифрованном виде на его инстансе.
 
-Поэтому пользуйтесь только инстансами [Pepeunit](/conception/overview), [Администраторам](/development-pepeunit/mechanics/roles#admin) которых вы доверяете.
+Поэтому пользуйтесь только инстансами Pepeunit, [Администраторам](/development-pepeunit/mechanics/roles#admin) которых вы доверяете.
 
 Шифрованная информация не передаётся между инстансами и хранится на инстансе создания сущности, остальные инстансы получают ограниченное представление о первичной сущности.
 :::

@@ -1,13 +1,13 @@
 # EMQX
 
-[EMQX MQTT Broker](https://docs.emqx.com/en/emqx/latest/) - серверное приложение, которое координирует сообщения между издателями и подписчиками [MQTT](/definitions#mqtt) протокола. Брокер обеспечивает взаимодействие через порт `1883` между [Unit](/definitions#unit) и [Backend](/deployment/dependencies/backend). Его можно назвать `рельсой данных`, на которую завязано основное взаимодействие. [Подробнее о переменных окружения](/deployment/env-variables/emqx)
+[EMQX MQTT Broker](https://docs.emqx.com/en/emqx/latest/) - серверное приложение, которое координирует сообщения между издателями и подписчиками MQTT протокола. Брокер обеспечивает взаимодействие через порт `1883` между Unit и [Backend](/deployment/dependencies/backend). Его можно назвать `рельсой данных`, на которую завязано основное взаимодействие. [Подробнее о переменных окружения](/deployment/env-variables/emqx)
 
-Используется [Unit](/definitions#unit), [Backend](/deployment/dependencies/backend) и [DataPipe](/deployment/dependencies/datapipe) для организации взаимодействия:
+Используется Unit, [Backend](/deployment/dependencies/backend) и [DataPipe](/deployment/dependencies/datapipe) для организации взаимодействия:
 
 Сущность | Операции
 -- | --
-[Unit](/definitions#unit) | Публикуют/подписываются на конкретные [MQTT](/definitions#mqtt) топики с паттернами `example.com/+/pepeunit` и `example.com/+/+/+/pepeunit`
-[Backend](/deployment/dependencies/backend) | Публикует/подписывается на все [MQTT](/definitions#mqtt) топики с паттерном `example.com/+/+/+/pepeunit` и имеет возможность по запросу [Пользователя](/development-pepeunit/mechanics/roles#user) отправлять данные в `Input` топики c паттерном  `example.com/+/pepeunit`
+Unit | Публикуют/подписываются на конкретные MQTT топики с паттернами `example.com/+/pepeunit` и `example.com/+/+/+/pepeunit`
+[Backend](/deployment/dependencies/backend) | Публикует/подписывается на все MQTT топики с паттерном `example.com/+/+/+/pepeunit` и имеет возможность по запросу [Пользователя](/development-pepeunit/mechanics/roles#user) отправлять данные в `Input` топики c паттерном  `example.com/+/pepeunit`
 [DataPipe](/deployment/dependencies/datapipe) | Подписан на все топики с паттерном `example.com/+/pepeunit`
 
 :::info

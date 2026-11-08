@@ -3,39 +3,39 @@
 ## Роли
 
 ::: tip Какую функцию несут роли `Пользователей` в системе?
-Роль `Пользователя` влияет на его возможности при использовании инстанса [Pepeunit](/conception/overview), а также на взаимодействие с [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo), [Unit](/definitions#unit), [UnitNode](/definitions#unitnode), [Instance](/definitions#instance) и [Notification](/definitions#notification)
+Роль `Пользователя` влияет на его возможности при использовании инстанса Pepeunit, а также на взаимодействие с RepositoryRegisty, Repo, Unit, UnitNode, Instance и Notification
 :::
 
 ### Unit Developer
 
-`Разработчик Unit` - создатель [Git](/definitions#git) репозиториев [GitLab](/definitions#gitlab) или [GitHub](/definitions#github). Используя для своих целей [RepositoryRegisty](/definitions#repositoryregistry), опосредованно взаимодействует с [Pepeunit](/conception/overview) при помощи своего кода, который эксплуатируется `Пользователями` в качестве [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo) и [Unit](/definitions#unit)
+`Разработчик Unit` - создатель Git репозиториев GitLab или GitHub. Используя для своих целей RepositoryRegisty, опосредованно взаимодействует с Pepeunit при помощи своего кода, который эксплуатируется `Пользователями` в качестве RepositoryRegisty, Repo и Unit
 
 :::tip Возможности `Разработчика Unit`
-- Имеет возможность вносить изменения в [Git](/definitions#git) репозитории [GitLab](/definitions#gitlab) или [GitHub](/definitions#github)
+- Имеет возможность вносить изменения в Git репозитории GitLab или GitHub
 :::
 
 ### User
 
-`Пользователь` - человек, зарегистрированный в инстансе [Pepeunit](/conception/overview).
+`Пользователь` - человек, зарегистрированный в инстансе Pepeunit.
 
 ::: tip Возможности обычного `Пользователя`
-- Имеет доступ к созданию [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo), [Unit](/definitions#unit) и [UnitNode](/definitions#unitnode)
-- Имеет возможность видеть все записи [RepositoryRegisty](/definitions#repositoryregistry), включая приватные
-- Не имеет возможности создать [Repo](/definitions#repo) на основе приватного [RepositoryRegisty](/definitions#repositoryregistry), если не укажет [Креды доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория)
+- Имеет доступ к созданию RepositoryRegisty, Repo, Unit и UnitNode
+- Имеет возможность видеть все записи RepositoryRegisty, включая приватные
+- Не имеет возможности создать Repo на основе приватного RepositoryRegisty, если не укажет Креды доступа
 - Имеет доступ к сущностям, чей [уровень видимости](/development-pepeunit/mechanics/visibility) `Public`, `Internal` или `Private`, с предоставленным [доступом](/development-pepeunit/mechanics/permission)
-- Может просматривать список известных [Instance](/definitions#instance) и свои [уведомления](/user/notification/notifications)
+- Может просматривать список известных Instance и свои уведомления
 :::
 
 ### Admin
 
-`Администратор` - владелец, выполняющий функции модератора. Имеет полномочия полного управления инстансом [Pepeunit](/conception/overview).
+`Администратор` - владелец, выполняющий функции модератора. Имеет полномочия полного управления инстансом Pepeunit.
 
 :::tip Возможности `Администратора`
 - Блокирование `Пользователей` при нарушении условий использования инстанса
-- Видимость всех сущностей [RepositoryRegisty](/definitions#repositoryregistry), [Repo](/definitions#repo), [Unit](/definitions#unit) и [UnitNode](/definitions#unitnode), возможности взаимодействия сводятся к аналогичным при предоставлении [видимости](/development-pepeunit/mechanics/visibility)
-- Не может получить информацию о [зашифрованных](/development-pepeunit/mechanics/cipher) данных напрямую через [Pepeunit](/conception/overview), но имеет техническую возможность дешифровать любую [шифрованную](/development-pepeunit/mechanics/cipher) информацию инстанса
-- [Добавление](/user/instance/add-instance) внешних [Instance](/definitions#instance), перевод их в `Trust` или `Blocking`, принудительный опрос одного инстанса или всех сразу
-- [Глобальные команды](/user/notification/notifications#итоги-команд) на узле `Domain` и разбор их лога в [уведомлениях](/user/notification/notifications): интеграционные тесты, сканирование известных инстансов, обновление всех [RepositoryRegistry](/definitions#repositoryregistry) и массовое обновление прошивок [Unit](/definitions#unit)
+- Видимость всех сущностей RepositoryRegisty, Repo, Unit и UnitNode, возможности взаимодействия сводятся к аналогичным при предоставлении [видимости](/development-pepeunit/mechanics/visibility)
+- Не может получить информацию о [зашифрованных](/development-pepeunit/mechanics/cipher) данных напрямую через Pepeunit, но имеет техническую возможность дешифровать любую [шифрованную](/development-pepeunit/mechanics/cipher) информацию инстанса
+- Добавление внешних Instance, перевод их в `Trust` или `Blocking`, принудительный опрос одного инстанса или всех сразу
+- Глобальные команды на узле `Domain` и разбор их лога в уведомлениях: интеграционные тесты, сканирование известных инстансов, обновление всех RepositoryRegistry и массовое обновление прошивок Unit
 :::
 
 ### Bot
@@ -43,7 +43,7 @@
 Внешний агент - обычный `Пользователь` интернета или любая программа, не прошедшая стадию авторизации.
 
 ::: tip Возможности внешнего агента
-- Может видеть все публичные записи из [RepositoryRegisty](/definitions#repositoryregistry)
+- Может видеть все публичные записи из RepositoryRegisty
 - Может взаимодействовать только с сущностями, у которых [уровень видимости](/development-pepeunit/mechanics/visibility) соответствует `Public`
-- Может читать публичное состояние инстанса `GET /pepeunit/api/v1/instances/current` и списки известных [Instance](/definitions#instance)
+- Может читать публичное состояние инстанса `GET /pepeunit/api/v1/instances/current` и списки известных Instance
 :::

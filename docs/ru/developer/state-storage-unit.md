@@ -1,24 +1,24 @@
 # Хранилище состояний Unit
 
-Позволяет [Unit](/definitions#unit) хранить текстовые данные напрямую в [Pepeunit](/conception/overview). Данное хранилище отлично подойдёт для хранения следующих категорий данных:
-1. Последнее состояние [Unit](/definitions#unit)
+Позволяет Unit хранить текстовые данные напрямую в Pepeunit. Данное хранилище отлично подойдёт для хранения следующих категорий данных:
+1. Последнее состояние Unit
 1. Кэширование информации ввода [Пользователя](/development-pepeunit/mechanics/roles#user)
 1. Большие по меркам микроконтроллеров данные
 
 :::tip
-Хранилище состояний [Unit](/definitions#unit) - долговременная память, которую [Unit](/definitions#unit) может использовать в любой момент времени.
+Хранилище состояний Unit - долговременная память, которую Unit может использовать в любой момент времени.
 :::
 
 :::danger
-Размер данного хранилища ограничен размером [шифруемых объектов](/development-pepeunit/mechanics/cipher) на инстансе [Pepeunit](/conception/overview).
+Размер данного хранилища ограничен размером [шифруемых объектов](/development-pepeunit/mechanics/cipher) на инстансе Pepeunit.
 :::
 
 ## Отправка данных в хранилище
 
 Для установки значения нужно выполнить алгоритм:
-1. Вычислить `uuid` [Unit](/definitions#unit) на основе `jwt` токена `PU_AUTH_TOKEN` из [env.json](/definitions#env-json)
+1. Вычислить `uuid` Unit на основе `jwt` токена `PU_AUTH_TOKEN` из env.json
 1. Преобразовать ваше значение или структуру данных в строку
-1. Выполнить запрос. Переменные `PU_HTTP_TYPE` и `PU_DOMAIN` доступны внутри [env.json](/definitions#env-json):
+1. Выполнить запрос. Переменные `PU_HTTP_TYPE` и `PU_DOMAIN` доступны внутри env.json:
     ```bash
     curl -X 'POST' \
     'PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/set_state_storage/{Unit.uuid}' \
@@ -36,7 +36,7 @@
 ## Получение данных из хранилища
 
 Для получения значения нужно выполнить алгоритм:
-1. Вычислить `uuid` [Unit](/definitions#unit) на основе `jwt` токена `PU_AUTH_TOKEN` из [env.json](/definitions#env-json)
-1. Выполнить запрос. Переменные `PU_HTTP_TYPE` и `PU_DOMAIN` доступны внутри [env.json](/definitions#env-json):
+1. Вычислить `uuid` Unit на основе `jwt` токена `PU_AUTH_TOKEN` из env.json
+1. Выполнить запрос. Переменные `PU_HTTP_TYPE` и `PU_DOMAIN` доступны внутри env.json:
     - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/get_state_storage/{Unit.uuid}`
-1. Преобразовать строку полученную в результате ответа [Pepeunit](/conception/overview) в вашу структуру данных или значение
+1. Преобразовать строку полученную в результате ответа Pepeunit в вашу структуру данных или значение

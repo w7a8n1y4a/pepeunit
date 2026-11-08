@@ -22,6 +22,7 @@ import 'features/library/about_page.dart';
 import 'features/library/docs_page.dart';
 import 'features/library/library_menu_page.dart';
 import 'features/library/library_modal.dart';
+import 'features/library/support_page.dart';
 import 'features/library/tools_page.dart';
 import 'features/menu/placeholder_page.dart';
 import 'features/network/instance_page.dart';
@@ -663,6 +664,10 @@ class _PepeunitAppState extends State<PepeunitApp> {
               GoRoute(
                 path: 'social',
                 builder: (context, state) => const SocialLinksPage(),
+              ),
+              GoRoute(
+                path: 'support',
+                builder: (context, state) => const SupportPage(),
               ),
             ],
           ),

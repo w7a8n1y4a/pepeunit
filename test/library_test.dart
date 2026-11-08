@@ -4,6 +4,9 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:pepeunit_client/account/key_file_port.dart';
 import 'package:pepeunit_client/account/vault_store.dart';
 import 'package:pepeunit_client/app_model.dart';
 import 'package:pepeunit_client/app_scope.dart';
@@ -100,37 +103,25 @@ void main() {
         }
         expect(pubspec, contains('- $path/'), reason: path);
       }
-      expect(pubspec, contains('docs/ru/definitions.md'));
+      expect(pubspec, isNot(contains('docs/ru/definitions.md')));
+      expect(pubspec, isNot(contains('docs/ru/conception/')));
       expect(pubspec, isNot(contains('docs/ru/index.md')));
     });
 
-    test(
-      'the tree has the four parts, no user guide, and the glossary unlisted',
-      () async {
-        final tree = await library.docs('ru');
-        expect(
-          [for (final f in tree.root.folders) f.title],
-          [
-            'Концепция',
-            'Развёртывание',
-            'Разработчик Unit',
-            'Устройство Pepeunit',
-          ],
-        );
-        expect(tree.root.articles.single.title, 'Поддержка проекта');
-        // The glossary is reached by links and is not listed in the tree.
-        expect(tree.article('definitions'), isNotNull);
-        expect(
-          tree.root.articles.map((article) => article.path),
-          isNot(contains('definitions')),
-        );
-        expect(tree.article('conception/overview'), isNotNull);
-        expect(tree.article('development-pepeunit/maps'), isNotNull);
-        for (final article in tree.articles) {
-          expect(article.path, isNot(startsWith('user/')));
-        }
-      },
-    );
+    test('the tree has the three parts and no user guide', () async {
+      final tree = await library.docs('ru');
+      expect(
+        [for (final f in tree.root.folders) f.title],
+        ['Развёртывание', 'Разработчик Unit', 'Устройство Pepeunit'],
+      );
+      expect(tree.root.articles, isEmpty);
+      expect(tree.article('definitions'), isNull);
+      expect(tree.article('conception/overview'), isNull);
+      expect(tree.article('development-pepeunit/maps'), isNotNull);
+      for (final article in tree.articles) {
+        expect(article.path, isNot(startsWith('user/')));
+      }
+    });
 
     test('the presentation has no slides yet', () async {
       expect(await library.presentation('ru'), isEmpty);
@@ -148,6 +139,8 @@ void main() {
     Future<AppModel> start(
       WidgetTester tester, {
       Map<String, String>? withTips,
+      KeyFilePort? files,
+      http.Client? client,
     }) async {
       if (withTips != null) {
         final real = Library.instance;
@@ -159,7 +152,11 @@ void main() {
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
       await tester.runAsync(Library.instance.load);
-      final model = AppModel(store: MemoryVaultStore());
+      final model = AppModel(
+        store: MemoryVaultStore(),
+        files: files,
+        client: client,
+      );
       await model.load();
       await tester.pumpWidget(
         AppScope(model: model, child: const PepeunitApp(background: false)),
@@ -190,14 +187,15 @@ void main() {
       ]) {
         expect(find.bySemanticsLabel(label), findsOneWidget);
       }
+      expect(find.text('.md'), findsOneWidget);
       await tester.tap(find.bySemanticsLabel('Документация'));
       await settle(tester);
-      expect(find.bySemanticsLabel('Концепция'), findsOneWidget);
+      expect(find.bySemanticsLabel('Концепция'), findsNothing);
       expect(find.bySemanticsLabel('Устройство Pepeunit'), findsOneWidget);
-      expect(find.bySemanticsLabel('Поддержка проекта'), findsOneWidget);
-      await tester.tap(find.bySemanticsLabel('Концепция'));
+      expect(find.bySemanticsLabel('Поддержка проекта'), findsNothing);
+      await tester.tap(find.bySemanticsLabel('Разработчик Unit'));
       await settle(tester);
-      await tester.tap(find.bySemanticsLabel('Pepeunit'));
+      await tester.tap(find.bySemanticsLabel('Алгоритм создания Unit'));
       await settle(tester);
       expect(find.byType(LibraryModal), findsOneWidget);
       expect(find.byType(MdView), findsOneWidget);
@@ -205,7 +203,7 @@ void main() {
       await tester.tap(find.bySemanticsLabel('Закрыть'));
       await settle(tester);
       expect(find.byType(LibraryModal), findsNothing);
-      expect(find.bySemanticsLabel('Pepeunit'), findsOneWidget);
+      expect(find.bySemanticsLabel('Алгоритм создания Unit'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -235,6 +233,7 @@ void main() {
       expect(find.text(clientVersion), findsOneWidget);
       expect(find.bySemanticsLabel('Нативные приложения'), findsOneWidget);
       expect(find.bySemanticsLabel('Соцсети'), findsOneWidget);
+      expect(find.bySemanticsLabel('Поддержать проект'), findsOneWidget);
 
       await tester.tap(find.bySemanticsLabel('Нативные приложения'));
       await tester.pumpAndSettle();
@@ -266,6 +265,76 @@ void main() {
       expect(find.bySemanticsLabel('Соцсети'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
+
+    testWidgets(
+      'Library: support copies addresses, shows rules and saves CSV',
+      (tester) async {
+        const bitcoin = 'bc1q537kletr80tg9s3cc47920cd5qcef0dwly08qr';
+        const ethereum = '0xF7BF1e2C10c562679A88DB8DC73b67cc8469Ca19';
+        final files = MemoryKeyFilePort();
+        late http.Request reportRequest;
+        final client = MockClient((request) async {
+          reportRequest = request;
+          return http.Response.bytes([0, 1, 2], 200);
+        });
+        String? copied;
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          (call) async {
+            if (call.method == 'Clipboard.setData') {
+              copied = (call.arguments as Map)['text'] as String?;
+            }
+            return null;
+          },
+        );
+        addTearDown(
+          () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            SystemChannels.platform,
+            null,
+          ),
+        );
+        await start(tester, files: files, client: client);
+        await tester.tap(find.bySemanticsLabel('Библиотека'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.bySemanticsLabel('О приложении'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.bySemanticsLabel('Поддержать проект'));
+        await tester.pumpAndSettle();
+
+        expect(find.text(bitcoin), findsOneWidget);
+        expect(find.text(ethereum), findsOneWidget);
+        expect(find.text('.csv'), findsOneWidget);
+        await tester.tap(find.bySemanticsLabel('Скопировать').first);
+        await tester.pump();
+        expect(copied, bitcoin);
+        await tester.tap(find.bySemanticsLabel('Скопировать').last);
+        await tester.pump();
+        expect(copied, ethereum);
+
+        await tester.tap(find.bySemanticsLabel('Правила расходов'));
+        await tester.pumpAndSettle();
+        expect(find.byType(LibraryModal), findsOneWidget);
+        expect(
+          find.textContaining(
+            'Монеты будут расходоваться на улучшение проекта',
+          ),
+          findsOneWidget,
+        );
+        await tester.tap(find.bySemanticsLabel('Закрыть'));
+        await tester.pumpAndSettle();
+        expect(find.byType(LibraryModal), findsNothing);
+
+        await tester.tap(find.bySemanticsLabel('Скачать Отчётность'));
+        await tester.pumpAndSettle();
+        expect(
+          reportRequest.url.toString(),
+          'https://minio.pepemoss.com/public-data/csv/detail.csv',
+        );
+        expect(files.savedName, 'detail.csv');
+        expect(files.saved, [0, 1, 2]);
+        expect(tester.takeException(), isNull);
+      },
+    );
 
     testWidgets('Library: tools hold the generator and two places', (
       tester,
@@ -470,8 +539,7 @@ void main() {
       });
       await open(
         tester,
-        source:
-            '# Старт\n\n[первая](/a/one) и [определение](/definitions#unit)\n',
+        source: '# Старт\n\n[первая](/a/one) и [определение](/missing#unit)\n',
         docs: tree,
       );
       TapGestureRecognizer? linkOf(String label) {

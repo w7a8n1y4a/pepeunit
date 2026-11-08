@@ -3,42 +3,42 @@
 [Ccылки на репозитории библиотек](/development-pepeunit/maps#библиотеки)
 
 :::info
-Каждая из библиотек является клиентским [Framework](/definitions#framework) для работы с [Pepeunit](/conception/overview)
+Каждая из библиотек является клиентским Framework для работы с Pepeunit
 
-Цель [Framework](/definitions#framework) - облегчить разработку новых [Unit](/definitions#unit), обеспечив работу базового функционала для интеграции с [Pepeunit](/conception/overview), а также предоставить инструменты управления циклом выполнения
+Цель Framework - облегчить разработку новых Unit, обеспечив работу базового функционала для интеграции с Pepeunit, а также предоставить инструменты управления циклом выполнения
 :::
 
 ## Набор возможностей
 
-1. Встроенный [MQTT](/definitions#mqtt) клиент:
-    - массовая подписка на топики на основе [schema.json](/definitions#schema-json) 
-    - отправка данных в топики массово на основе [schema.json](/definitions#schema-json)
-1. Встроенный [REST](/definitions#rest) клиент:
+1. Встроенный MQTT клиент:
+    - массовая подписка на топики на основе schema.json
+    - отправка данных в топики массово на основе schema.json
+1. Встроенный REST клиент:
     - загрузка архива обновлений
-    - загрузка [env.json](/definitions#env-json)
-    - загрузка [schema.json](/definitions#schema-json)
+    - загрузка env.json
+    - загрузка schema.json
     - установка состояния [storage](/developer/state-storage-unit)
     - получение состояния [storage](/developer/state-storage-unit)
-    - получение списка [Unit](/definitions#unit) при помощи списка [UnitNode](/definitions#unitnode).uuid
-    - получение `Input` [UnitNode](/definitions#unitnode) при помощи `Output` [UnitNode](/definitions#unitnode)
+    - получение списка Unit при помощи списка UnitNode.uuid
+    - получение `Input` UnitNode при помощи `Output` UnitNode
 1. Приём и корректная обработка [cтандартных MQTT команд Pepeunit](/developer/mqtt/default-mqtt-command)
 1. Отправки и генерации [состояния Unit](/developer/mqtt/state-mqtt-send)
-1. Функционал для работы с [schema.json](/definitions#schema-json):
+1. Функционал для работы с schema.json:
     - Динамическое обновление
     - Поиск по всем `4` типам топиков
-    - Поиск топиков по [UnitNode](/definitions#unitnode).uuid или по полному названию конкретных топиков
-1. Функционал для работы с [env.json](/definitions#env-json):
+    - Поиск топиков по UnitNode.uuid или по полному названию конкретных топиков
+1. Функционал для работы с env.json:
     - Динамическое обновление
-    - Получение [Unit](/definitions#unit).uuid из токена
+    - Получение Unit.uuid из токена
     - Получение любой переменной, как атрибута класса
 1. Функционал для работы с логами:
     - Поддержка `5` типов логов: `debug`, `info`, `warning`, `error`, `critical`
-    - Поддержка отправки логов по [MQTT](/definitions#mqtt)
+    - Поддержка отправки логов по MQTT
     - Поддержка сохранения логов в файл [log.json](#logjson)
     - Возможность обнуления логов
-1. Установка кастомного `handler` для обновления [Unit](/definitions#unit)
-1. Установка `handler` для `Input` сообщений [MQTT](/definitions#mqtt)
-1. Установка `handler` для `Output` сообщений [MQTT](/definitions#mqtt)
+1. Установка кастомного `handler` для обновления Unit
+1. Установка `handler` для `Input` сообщений MQTT
+1. Установка `handler` для `Output` сообщений MQTT
 1. Возможность выбрать несколько типов обновлений
 1. Шифрование `aes-gcm-256` поддерживающее `16/24/32` байтовый ключ, работает только при ручном использовании
 1. Функционал для работы с главным циклом приложения:
@@ -49,7 +49,7 @@
 ## log.json
 
 :::info
-'Чёрный ящик' [Unit](/definitions#unit) - позволяет хранить последние `N` логов, независимо от состояния сети. 
+'Чёрный ящик' Unit - позволяет хранить последние `N` логов, независимо от состояния сети.
 :::
 
 Логи хранятся в формате `ndjson`, где каждая новая строка, отделённая `\n`, это новый словарь:

@@ -6,7 +6,7 @@
 - [loki](/deployment/dependencies/loki)
 - [promtail](/deployment/dependencies/promtail)
 
-Эти `4` контейнера вместе с [Grafana](/deployment/dependencies/grafana) позволяют создать набор `Grafana Dashboards` о состоянии инстанса [Pepeunit](/conception/overview).
+Эти `4` контейнера вместе с [Grafana](/deployment/dependencies/grafana) позволяют создать набор `Grafana Dashboards` о состоянии инстанса Pepeunit.
 
 ## Grafana Dashboards
 
@@ -26,5 +26,5 @@
 1. Установить переменную окружения [EMQX_PROMETHEUS__METRICS__ENABLED](/deployment/env-variables/emqx) как `false`
 1. Установить переменную окружения [PU_FF_PROMETHEUS_ENABLE](/deployment/env-variables/backend) как `False`
 1. Удалить из репозитория развёртывания `json Dashboards` в директории `data/grafana/dashboards` все файлы с расширением `.json`
-1. Перезапустить [Pepeunit](/conception/overview) при помощи [команд docker compose](/deployment/docker/commands)
+1. Перезапустить Pepeunit при помощи [команд docker compose](/deployment/docker/commands)
 :::

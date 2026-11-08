@@ -7,11 +7,11 @@
 Уровень видимости | Состояние
 -- | --
 `Public` | Предоставляет [доступ](/development-pepeunit/mechanics/permission) всем
-`Internal` | Предоставляет [доступ](/development-pepeunit/mechanics/permission) до сущности только авторизованным [Пользователям](/development-pepeunit/mechanics/roles#user) инстанса или всем [Unit](/definitions#unit) находящимся в инстансе
+`Internal` | Предоставляет [доступ](/development-pepeunit/mechanics/permission) до сущности только авторизованным [Пользователям](/development-pepeunit/mechanics/roles#user) инстанса или всем Unit находящимся в инстансе
 `Private` | Предоставляет [доступ](/development-pepeunit/mechanics/permission) до сущности только создателю и агентам, которых укажет создатель. Работает в пределах инстанса
 
 :::danger
-Сущность [RepositoryRegisty](/definitions#repositoryregistry) уникальная и имеет только два типа, `Public` и `Private`. Предоставление доступа к `Private` сущности отличается и завязано на ввод [Пользователями](/development-pepeunit/mechanics/roles#user) [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория).
+Сущность RepositoryRegisty уникальная и имеет только два типа, `Public` и `Private`. Предоставление доступа к `Private` сущности отличается и завязано на ввод [Пользователями](/development-pepeunit/mechanics/roles#user) Кредов доступа.
 
 Создатель не может сам предоставить доступ, это связано с `бизнес-логикой` работы этой сущности
 :::
@@ -21,39 +21,39 @@
 Создатель имеет `абсолютно полный доступ` по управлению своими cущностями.
 
 ### RepositoryRegistry
-- Изменение своих [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория)
+- Изменение своих Кредов доступа
 - Просмотр размера репозитория
-- Создание [Repo](/definitions#repo) на основе [RepositoryRegisty](/definitions#repositoryregistry)
-- Обновление [Git](/definitions#git) репозитория внутри [Pepeunit](/conception/overview)
-- Удаление [RepositoryRegisty](/definitions#repositoryregistry), если у него нет связанных [Repo](/definitions#repo)
+- Создание Repo на основе RepositoryRegisty
+- Обновление Git репозитория внутри Pepeunit
+- Удаление RepositoryRegisty, если у него нет связанных Repo
 
 ### Repo
 
-- Просмотр распределения [Unit](/definitions#unit) по версиям
-- Создание [Unit](/definitions#unit) на основе [Repo](/definitions#repo)
-- Обновление всех связанных [Unit](/definitions#unit)
-- Настройки [Repo](/definitions#repo)
+- Просмотр распределения Unit по версиям
+- Создание Unit на основе Repo
+- Обновление всех связанных Unit
+- Настройки Repo
 - Выдача [доступов](/development-pepeunit/mechanics/permission)
-- Удаление [Repo](/definitions#repo), если у него нет связанных [Unit](/definitions#repo)
+- Удаление Repo, если у него нет связанных Unit
 
 ### Unit
 
-- Просмотр информации о текущей версии [Unit](/definitions#unit)
-- Просмотр информации о состоянии [Unit](/definitions#unit)
-- Установка [env.json](/definitions#env-json)
+- Просмотр информации о текущей версии Unit
+- Просмотр информации о состоянии Unit
+- Установка env.json
 - Скачивание `Firmware` и скомпилированных пакетов
-- Команды обновления по [MQTT](/definitions#mqtt): `Firmware`, `Schema` и `Env`
-- Команда перезапуска по [MQTT](/definitions#mqtt): `Reset`
-- Настройки [Unit](/definitions#unit)
+- Команды обновления по MQTT: `Firmware`, `Schema` и `Env`
+- Команда перезапуска по MQTT: `Reset`
+- Настройки Unit
 - Выдача [доступов](/development-pepeunit/mechanics/permission)
-- Удаление [Unit](/definitions#unit)
+- Удаление Unit
 
 ### UnitNode
 
 - Просмотр состояния
-- Установка значений с отправкой в `Input` через [MQTT](/definitions#mqtt)
+- Установка значений с отправкой в `Input` через MQTT
 - Создание связей для `Input`
-- Настройки [UnitNode](/definitions#unitnode)
+- Настройки UnitNode
 - Выдача [доступов](/development-pepeunit/mechanics/permission)
 - Все аспекты управления [DataPipe](/deployment/dependencies/datapipe)
 
@@ -62,23 +62,23 @@
 Агенты имеют ограниченный [доступ](/development-pepeunit/mechanics/permission) до чужих сущностей, которые они видят с помощью `системы видимости`:
 
 ### RepositoryRegistry
-- Изменение своих [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория)
-- Просмотр размера репозитория. Доступно для `Private` и `Public` репозиториев не зависимо от [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория)
-- Создание [Repo](/definitions#repo) на основе [RepositoryRegisty](/definitions#repositoryregistry). Для `Public` доступно всем, для `Private` доступно только в случае, если у [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория) статус `Valid`
-- Обновление [Git](/definitions#git) репозитория внутри [Pepeunit](/conception/overview). Для `Public` доступно всем, для `Private` доступно только в случае, если у [Кредов доступа](/user/git-repository/create-repository-registry#доступ-до-закрытого-репозитория) статус `Valid`
+- Изменение своих Кредов доступа
+- Просмотр размера репозитория. Доступно для `Private` и `Public` репозиториев не зависимо от Кредов доступа
+- Создание Repo на основе RepositoryRegisty. Для `Public` доступно всем, для `Private` доступно только в случае, если у Кредов доступа статус `Valid`
+- Обновление Git репозитория внутри Pepeunit. Для `Public` доступно всем, для `Private` доступно только в случае, если у Кредов доступа статус `Valid`
 
 ### Repo
 
-- Просмотр распределения [Unit](/definitions#unit) по версиям
-- Создание [Unit](/definitions#unit) на основе [Repo](/definitions#repo)
+- Просмотр распределения Unit по версиям
+- Создание Unit на основе Repo
 
 ### Unit
 
-- Просмотр информации о текущей версии [Unit](/definitions#unit)
-- Просмотр информации о состоянии [Unit](/definitions#unit)
+- Просмотр информации о текущей версии Unit
+- Просмотр информации о состоянии Unit
 
 ### UnitNode
 
 - Просмотр состояния
-- Установка значений с отправкой в `Input` через [MQTT](/definitions#mqtt)
+- Установка значений с отправкой в `Input` через MQTT
 - Создание связей для `Input`

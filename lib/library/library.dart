@@ -23,10 +23,6 @@ const libraryRoot = 'assets/library';
 const fallbackLanguage = 'ru';
 const _treeFile = '_tree.json';
 
-/// Articles that links reach but the tree does not list. The glossary is the
-/// target of every link to a term until the tips take the terms over.
-const unlistedArticles = {'definitions'};
-
 class DocArticle {
   const DocArticle({
     required this.path,
@@ -130,7 +126,7 @@ class DocsTree {
         source: source,
       );
       articles[path] = article;
-      if (!unlistedArticles.contains(path)) parent.articles.add(article);
+      parent.articles.add(article);
     }
     void sort(DocFolder folder) {
       folder.folders.sort((a, b) {
@@ -143,7 +139,7 @@ class DocsTree {
       }
     }
 
-    // A folder whose articles are all held back has nothing to show.
+    // A folder without articles has nothing to show.
     bool prune(DocFolder folder) {
       folder.folders.removeWhere((child) {
         final empty = !prune(child);

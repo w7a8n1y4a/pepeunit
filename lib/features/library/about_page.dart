@@ -17,7 +17,12 @@ class AboutPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final language = AppScope.of(context).vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
-    final board = cardBoard(const ['version', 'apps', 'social'], wide: wide);
+    final board = cardBoard(const [
+      'version',
+      'apps',
+      'social',
+      'support',
+    ], wide: wide);
     return HexPage(
       slots: [
         for (final slot in board)
@@ -45,13 +50,21 @@ class AboutPage extends StatelessWidget {
               r: slot.r,
               icon: 'assets/icons/objects/platform.svg',
             ),
-            _ => HexSlot(
+            'social' => HexSlot(
               id: 'social',
               title: libText(language, 'Соцсети'),
               color: libraryColor,
               q: slot.q,
               r: slot.r,
               icon: 'assets/icons/objects/links.svg',
+            ),
+            _ => HexSlot(
+              id: 'support',
+              title: libText(language, 'Поддержать проект'),
+              color: libraryColor,
+              q: slot.q,
+              r: slot.r,
+              icon: 'assets/icons/services/bitcoin.svg',
             ),
           },
       ],
@@ -63,6 +76,8 @@ class AboutPage extends StatelessWidget {
             context.push('/library/about/apps');
           case 'social':
             context.push('/library/about/social');
+          case 'support':
+            context.push('/library/about/support');
         }
       },
     );

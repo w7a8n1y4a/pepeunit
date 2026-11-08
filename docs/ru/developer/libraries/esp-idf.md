@@ -1,14 +1,14 @@
 # ESP-IDF
 
 :::info
-[Компилируемый](/definitions#compilable) и имеет полную функциональность [Pepeunit Framework](/developer/libraries/framework)
+Компилируемый и имеет полную функциональность [Pepeunit Framework](/developer/libraries/framework)
 :::
 
-Компонент [ESP-IDF](/definitions#esp-idf) `5.4+` для интеграции [Unit](/definitions#unit) с [Pepeunit](/conception/overview). Публичный API сосредоточен в `pu_client.h`.
+Компонент ESP-IDF `5.4+` для интеграции Unit с Pepeunit. Публичный API сосредоточен в `pu_client.h`.
 
 ## Установка
 
-Добавьте репозиторий в проект [ESP-IDF](/definitions#esp-idf) как компонент:
+Добавьте репозиторий в проект ESP-IDF как компонент:
 
 ```cmake
 cmake_minimum_required(VERSION 3.16)
@@ -17,7 +17,7 @@ include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(my_pepeunit_device)
 ```
 
-Либо положите библиотеку в каталог `components/` приложения. Требуется [ESP-IDF](/definitions#esp-idf) `>=5.4`.
+Либо положите библиотеку в каталог `components/` приложения. Требуется ESP-IDF `>=5.4`.
 
 Приложение должно предоставить:
 
@@ -180,11 +180,11 @@ void app_main(void)
 }
 ```
 
-Чтобы воспользоваться примером, создайте [Unit](/definitions#unit) на основе репозитория [universal_test_unit](https://git.pepemoss.com/pepe/pepeunit/units/universal_test_unit) на любом инстансе. Полученные `env.json` и `schema.json` нужно загрузить в `NVS` устройства, как это делает `examples/basic`.
+Чтобы воспользоваться примером, создайте Unit на основе репозитория [universal_test_unit](https://git.pepemoss.com/pepe/pepeunit/units/universal_test_unit) на любом инстансе. Полученные `env.json` и `schema.json` нужно загрузить в `NVS` устройства, как это делает `examples/basic`.
 
 ## Важные особенности
 
-1. Библиотека требует [ESP-IDF](/definitions#esp-idf) `>=5.4` и рассчитана на семейство `ESP32`
+1. Библиотека требует ESP-IDF `>=5.4` и рассчитана на семейство `ESP32`
 1. MQTT всегда работает по `mqtt://host:port` без TLS
 1. Для HTTP по умолчанию используется `HTTPS`. Обычный `HTTP` или отключение проверки сертификата требуют одновременно `CONFIG_PU_ALLOW_INSECURE_TRANSPORT=y` и соответствующего runtime-флага
 1. `env.json`, `schema.json` и журнал `log.json` хранятся в `NVS`, а не вшиваются в прошивку

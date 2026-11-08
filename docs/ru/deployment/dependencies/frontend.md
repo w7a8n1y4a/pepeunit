@@ -7,8 +7,8 @@
 ## Frontend-сервис 
 
 `Fronend-сервис` - доступное для скачивания открытым способом приложение, предназначенное для обеспечения взаимодействия [Пользователей](/development-pepeunit/mechanics/roles#user) c [Backend](/deployment/dependencies/backend) средствами визуального интерфейса. Взаимодействует с [Backend](/deployment/dependencies/backend) при помощи:
-- [REST](/definitions#rest)
-- [GQL](/definitions#gql)
+- REST
+- GQL
 
 :::info
 [Подробнее о переменных окружения](/deployment/env-variables/frontend)

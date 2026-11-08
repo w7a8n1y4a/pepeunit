@@ -1,7 +1,7 @@
 # Структура сообщений в MQTT топиках
 
 :::info
-Сообщения через [MQTT](/definitions#mqtt) топики передаются в текстовом формате.
+Сообщения через MQTT топики передаются в текстовом формате.
 :::
 
 :::danger
@@ -9,7 +9,7 @@
 :::
 
 :::warning
-Размер передаваемого [Unit](/definitions#unit) сообщения через [EMQX](/deployment/dependencies/emqx) ограничен переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables/backend).
+Размер передаваемого Unit сообщения через [EMQX](/deployment/dependencies/emqx) ограничен переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables/backend).
 :::
 
 ## DataPipe

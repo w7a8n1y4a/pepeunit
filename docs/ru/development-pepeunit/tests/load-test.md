@@ -15,21 +15,21 @@ make test-load-mqtt
 uv run python -m tests.load.load_test_mqtt
 ```
 
-Позволяет создать синтетическую нагрузку в виде [Unit](/definitions#unit), отправляющих [MQTT](/definitions#mqtt) сообщения. Дополнительные [ENV переменные Backend](/deployment/env-variables/backend) позволяют настроить нагрузку:
+Позволяет создать синтетическую нагрузку в виде Unit, отправляющих MQTT сообщения. Дополнительные [ENV переменные Backend](/deployment/env-variables/backend) позволяют настроить нагрузку:
 
 Переменная | По умолчанию | Значения | Что делает
 -- | -- | -- | --
 `PU_TEST_LOAD_MQTT_DURATION` | `120` | `1`–`3600` | Время выполнения теста в секундах
-`PU_TEST_LOAD_MQTT_UNIT_COUNT` | `100` | `1`–`1024` | Число [Unit](/definitions#unit), которые будут выполнять запросы
-`PU_TEST_LOAD_MQTT_RPS` | `200` | `1`–`1024` | Нагрузка, которую будет создавать каждый [Unit](/definitions#unit)
+`PU_TEST_LOAD_MQTT_UNIT_COUNT` | `100` | `1`–`1024` | Число Unit, которые будут выполнять запросы
+`PU_TEST_LOAD_MQTT_RPS` | `200` | `1`–`1024` | Нагрузка, которую будет создавать каждый Unit
 `PU_TEST_LOAD_MQTT_VALUE_TYPE` | `Text` | `Text` / `Number` | Тип отправляемых значений
 `PU_TEST_LOAD_MQTT_DUPLICATE_COUNT` | `10` | `1`–`32` | Число повторяющихся сообщений подряд
-`PU_TEST_LOAD_MQTT_MESSAGE_SIZE` | `15` | `1`–`512` | Размер [MQTT](/definitions#mqtt) сообщений в символах
+`PU_TEST_LOAD_MQTT_MESSAGE_SIZE` | `15` | `1`–`512` | Размер MQTT сообщений в символах
 `PU_TEST_LOAD_MQTT_POLICY_TYPE` | `TimeWindow` | `LastValue` / `NRecords` / `TimeWindow` / `Aggregation` | Тип политики [DataPipe](/deployment/dependencies/datapipe) для обработки всех сообщений в тесте
 `PU_TEST_LOAD_MQTT_WORKERS` | `10` | `1`–`128` | Число процессов `multiprocessing`, создающих нагрузку
 
 :::danger
-[Backend](/deployment/dependencies/backend) использует всегда только `1` воркер `Gunicorn` для обработки [MQTT](/definitions#mqtt) сообщений. Он способен обработать `~4000 rps` сообщений из системных топиков `domain.com/+/+/+/pepeunit`. Для топиков [DataPipe](/deployment/dependencies/datapipe) c паттерном `domain.com/+/pepeunit` количество сообщений может составлять `~25000 rps`.
+[Backend](/deployment/dependencies/backend) использует всегда только `1` воркер `Gunicorn` для обработки MQTT сообщений. Он способен обработать `~4000 rps` сообщений из системных топиков `domain.com/+/+/+/pepeunit`. Для топиков [DataPipe](/deployment/dependencies/datapipe) c паттерном `domain.com/+/pepeunit` количество сообщений может составлять `~25000 rps`.
 :::
 
 ## Тестирование REST и GQL
@@ -43,7 +43,7 @@ make test-load-rest
 uv run locust -f tests/load/locustfile.py
 ```
 
-Позволяет создать синтетическую нагрузку на публичные ручки [Instance](/definitions#instance). Дополнительные [ENV переменные Backend](/deployment/env-variables/backend):
+Позволяет создать синтетическую нагрузку на публичные ручки Instance. Дополнительные [ENV переменные Backend](/deployment/env-variables/backend):
 
 Переменная | По умолчанию | Значения | Что делает
 -- | -- | -- | --
@@ -66,7 +66,7 @@ uv run locust -f tests/load/locustfile.py
 :::
 
 :::danger
-[REST](/definitions#rest) и [GQL](/definitions#gql) запросы обрабатываются многопоточно, увеличение числа воркеров почти линейно увеличивает число обрабатываемых запросов в единицу времени. `4` воркера `Gunicorn` выдерживают `~400rps` без перезагрузок. Процентили в миллисекундах:
+REST и GQL запросы обрабатываются многопоточно, увеличение числа воркеров почти линейно увеличивает число обрабатываемых запросов в единицу времени. `4` воркера `Gunicorn` выдерживают `~400rps` без перезагрузок. Процентили в миллисекундах:
 ```
 Type     Name                                    50%    66%    75%    80%    90%    95%    98%    99%  99.9% 99.99%   100% # reqs
 --------|------------------------------------|--------|------|------|------|------|------|------|------|------|------|------|------

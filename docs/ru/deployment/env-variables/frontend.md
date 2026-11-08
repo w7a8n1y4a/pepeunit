@@ -12,4 +12,4 @@
 -- | -- | --
 `VITE_INSTANCE_NAME` | `example.com` | Используется для генерации ссылок между разными `Node` основного графа
 `VITE_SELF_URI` | `https://example.com/` | Используется для тегов `og:url` и `og:image` в `index.html`
-`VITE_BACKEND_URI` | `https://example.com/pepeunit/graphql` | Используется для отправки [GQL](/definitions#gql) запросов к [Backend](/deployment/dependencies/backend)
+`VITE_BACKEND_URI` | `https://example.com/pepeunit/graphql` | Используется для отправки GQL запросов к [Backend](/deployment/dependencies/backend)

@@ -204,6 +204,7 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
           q: slot.q,
           r: slot.r,
           icon: 'assets/icons/objects/file.svg',
+          center: '.md',
         );
       case 'tools':
         return HexSlot(
@@ -212,7 +213,7 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
           color: libraryColor,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/actions/settings.svg',
+          icon: 'assets/icons/services/tools.svg',
         );
       default:
         return HexSlot(

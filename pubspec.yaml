@@ -77,9 +77,6 @@ flutter:
     - assets/icons/services/
     - assets/icons/status/
     - docs/ru/_tree.json
-    - docs/ru/support.md
-    - docs/ru/definitions.md
-    - docs/ru/conception/
     - docs/ru/deployment/
     - docs/ru/deployment/dependencies/
     - docs/ru/deployment/docker/

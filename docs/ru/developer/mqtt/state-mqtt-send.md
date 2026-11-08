@@ -1,22 +1,22 @@
 # Стандартные MQTT топики состояния
 
 :::warning
-Поддерживаемые топики состояний должны быть отражены в [schema_example.json](/definitions#schema-example-json) в разделе `output_base_topic`.
+Поддерживаемые топики состояний должны быть отражены в schema_example.json в разделе `output_base_topic`.
 
-[Unit](/definitions#unit) должен отправлять форматированные данные в топики, которые указаны. [Pepeunit](/conception/overview) обязуется обработать их по единому паттерну, описанному в данном разделе.
+Unit должен отправлять форматированные данные в топики, которые указаны. Pepeunit обязуется обработать их по единому паттерну, описанному в данном разделе.
 :::
 
-Всего в [Pepeunit](/conception/overview) есть два топика отвечающий за отправку состояния:
+Всего в Pepeunit есть два топика отвечающий за отправку состояния:
 1. `state/pepeunit` - `output_base_topic`
 1. `log/pepeunit` `output_base_topic`
 
 ## state/pepeunit - output_base_topic
 
-:::info Когда [Unit](/definitions#unit) отправляет данные в этот топик?
-1. Каждые `PU_STATE_SEND_INTERVAL` секунд указанные в [env.json](/definitions#env-json).
+:::info Когда Unit отправляет данные в этот топик?
+1. Каждые `PU_STATE_SEND_INTERVAL` секунд указанные в env.json.
 :::
 
-Данные отправляемые [Unit](/definitions#unit), преобразуются на стороне [Pepeunit](/conception/overview) в отображение состояния в меню [Unit](/definitions#unit). Также данное состояние можно получить через [REST](/definitions#rest) и [GQL](/definitions#gql).
+Данные отправляемые Unit, преобразуются на стороне Pepeunit в отображение состояния в меню Unit. Также данное состояние можно получить через REST и GQL.
 
 ### Формат сообщений в топик `state/pepeunit`
 
@@ -53,34 +53,34 @@
         f_namemax,  # maximum filename length
     ]
     ```
-- `pu_commit_version` - ключ `PU_COMMIT_VERSION` из [env.json](/definitions#env-json) файла [Unit](/definitions#unit). Данный ключ используется в [системе обновлений](/development-pepeunit/mechanics/update-system) [Pepeunit](/conception/overview), для отслеживания текущей версии [Unit](/definitions#unit).
+- `pu_commit_version` - ключ `PU_COMMIT_VERSION` из env.json файла Unit. Данный ключ используется в [системе обновлений](/development-pepeunit/mechanics/update-system) Pepeunit, для отслеживания текущей версии Unit.
 
 :::danger
-Для корректной работы статусов обновлений у [Unit](/definitions#unit), требуется отправлять `pu_commit_version`
+Для корректной работы статусов обновлений у Unit, требуется отправлять `pu_commit_version`
 :::
 
 :::warning
-Размер передаваемого [Unit](/definitions#unit) состояния ограничен количеством символов указанных в переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables/backend).
+Размер передаваемого Unit состояния ограничен количеством символов указанных в переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables/backend).
 :::
 
 :::info
-[Pepeunit](/conception/overview) не обязывает отправлять все ключи указанные в примере, можно отправить например только два ключа `millis` и `pu_commit_version`
+Pepeunit не обязывает отправлять все ключи указанные в примере, можно отправить например только два ключа `millis` и `pu_commit_version`
 :::
 
 ### Алгоритм отправки
 
 1. Каждые `STATE_SEND_INTERVAL` секунд опросить состояние системы
 1. Отформатировать данные для отправки в `json` формате
-1. Отправить данные в топик `state/pepeunit` из `output_base_topic`, указанный в [schema.json](/definitions#schema-json)
+1. Отправить данные в топик `state/pepeunit` из `output_base_topic`, указанный в schema.json
 
 ## log/pepeunit - output_base_topic
 
-:::info Когда [Unit](/definitions#unit) отправляет данные в этот топик?
-1. Если [Unit](/definitions#unit) сам считает нужным отправить лог или набор логов для отображения [Пользователю](/development-pepeunit/mechanics/roles#user)
+:::info Когда Unit отправляет данные в этот топик?
+1. Если Unit сам считает нужным отправить лог или набор логов для отображения [Пользователю](/development-pepeunit/mechanics/roles#user)
 2. В случае получения команды в топике `log_sync/pepeunit`, [подробнее](/developer/mqtt/default-mqtt-command#формат-сообщения-в-топик-log-sync-pepeunit)
 :::
 
-Данные, отправляемые [Unit](/definitions#unit), преобразуются на стороне [Pepeunit](/conception/overview) в меню логов [Unit](/definitions#unit). Также данные логи можно получить через [REST](/definitions#rest) и [GQL](/definitions#gql).
+Данные, отправляемые Unit, преобразуются на стороне Pepeunit в меню логов Unit. Также данные логи можно получить через REST и GQL.
 
 ### Формат сообщений в топик `log/pepeunit`
 
@@ -139,15 +139,15 @@
     ]
     ```
 
-Разберём каждый ключ и логику обработки на стороне [Pepeunit](/conception/overview):
+Разберём каждый ключ и логику обработки на стороне Pepeunit:
 - `level` - указывает уровень логирования и может принимать следующие значения: `Debug, Info, Warning, Error, Critical`
 - `text` - содержание лога в текстовом формате, желательно укладывать в `256` символов для корректного отображения в [Frontend](/deployment/dependencies/frontend)
-- `create_datetime` - необязательный ключ, указывающий временную метку для [Pepeunit](/conception/overview). Именно данная метка отображается [Пользователю](/development-pepeunit/mechanics/roles#user), в случае отсутствия [Pepeunit](/conception/overview) действует по следующим алгоритмам:
-    1. Если сообщение содержит один лог и данный ключ отсутствует, берётся время когда [Pepeunit](/conception/overview) получил сообщение.
-    2. Если отправлено множество логов и данный ключ отсутствует, [Pepeunit](/conception/overview) берёт текущее время для самого первого элемента листа и добавляет по 1 секунде для каждого последующего элемента c целью сохранить порядок логов полученный от [Unit](/definitions#unit).
+- `create_datetime` - необязательный ключ, указывающий временную метку для Pepeunit. Именно данная метка отображается [Пользователю](/development-pepeunit/mechanics/roles#user), в случае отсутствия Pepeunit действует по следующим алгоритмам:
+    1. Если сообщение содержит один лог и данный ключ отсутствует, берётся время когда Pepeunit получил сообщение.
+    2. Если отправлено множество логов и данный ключ отсутствует, Pepeunit берёт текущее время для самого первого элемента листа и добавляет по 1 секунде для каждого последующего элемента c целью сохранить порядок логов полученный от Unit.
 
 :::warning
-Размер передаваемого [Unit](/definitions#unit) сообщения через [EMQX](/deployment/dependencies/emqx) ограничен переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables/backend).
+Размер передаваемого Unit сообщения через [EMQX](/deployment/dependencies/emqx) ограничен переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables/backend).
 
 По умолчанию, время жизни логов ограничено `86400` секундами ~ `1 день`. За это отвечает переменная `PU_UNIT_LOG_EXPIRATION` из [Backend ENV](/deployment/env-variables/backend).
 :::
@@ -155,4 +155,4 @@
 ### Алгоритм отправки
 
 1. Отформатировать данные для отправки в `json` формате
-1. Отправить данные в топик `log/pepeunit` из `output_base_topic`, указанный в [schema.json](/definitions#schema-json)
+1. Отправить данные в топик `log/pepeunit` из `output_base_topic`, указанный в schema.json

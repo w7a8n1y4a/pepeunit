@@ -3,7 +3,7 @@
 [Ccылки на репозитории](/development-pepeunit/maps#библиотеки)
 
 :::info
-[Компилируемый](/definitions#compilable) и имеет полную функциональность [Pepeunit Framework](/developer/libraries/framework)
+Компилируемый и имеет полную функциональность [Pepeunit Framework](/developer/libraries/framework)
 :::
 
 ## Пример

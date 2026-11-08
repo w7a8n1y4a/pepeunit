@@ -1,9 +1,9 @@
 # DataPipe
 
 :::info Как найти DataPipe?
-1. Найдите интересующий вас [Unit](/definitions#unit) визуально или через вкладку поиска
-1. Нажмите `ПКМ` по [Unit](/definitions#unit), если [UnitNode](/definitions#unitnode) ещё не отобразились
-1. Выберите `ЛКМ` `Input` или `Output` [UnitNode](/definitions#unitnode)
+1. Найдите интересующий вас Unit визуально или через вкладку поиска
+1. Нажмите `ПКМ` по Unit, если UnitNode ещё не отобразились
+1. Выберите `ЛКМ` `Input` или `Output` UnitNode
 1. Кликните жёлткую кнопку [DataPipe](/deployment/dependencies/datapipe)
 :::
 
@@ -14,12 +14,12 @@
 `Import CSV Data` | Позволяет загрузить данные с вашего локальной устройства в [DataPipe](/deployment/dependencies/datapipe)
 `Export CSV Data` | Позволяет скачать все накопленные данные в формате `CSV`, если данных нет - выдаст ошибку
 `Set Config` | Позволяет отправить на сервер новый конвейер
-`Del Saved Pipe Data` | Позволяет удалить все данные, которые получились в результате работы конвейера, для данного [UnitNode](/definitions#unitnode)
+`Del Saved Pipe Data` | Позволяет удалить все данные, которые получились в результате работы конвейера, для данного UnitNode
 
 Особенности редактора:
-1. Редактор выводит базовые ошибки синтаксиса [YML](/definitions#yml)
+1. Редактор выводит базовые ошибки синтаксиса YML
 1. Редактор умеет выводить `бизнес-ошибки`, если формат не соответствует структуре ожидаемой сервером
-1. При попытке отправки неверного [YML](/definitions#yml) конфига, так же будет выведена ошибка
+1. При попытке отправки неверного YML конфига, так же будет выведена ошибка
 
 ## Значение параметров
 
@@ -43,12 +43,12 @@
 
 Название параметра | Возможные значения | Обязательный? | Комментарий
 -- | -- | -- | --
-`type_input_value` | `Text` или `Number` | Да | Тип обрабатываемых данных. `Number` это `float64` из [Golang](/definitions#golang)
+`type_input_value` | `Text` или `Number` | Да | Тип обрабатываемых данных. `Number` это `float64` из Golang
 `type_value_filtering` | `WhiteList` и `BlackList` | Нет | Тип фильтрации значений 
 `filtering_values` | Список только числовых или только текстовых значений | Обязателен в случае, если есть `type_value_filtering` | Проверка завязана на тип из `type_input_value`
 `type_value_threshold` | `Min`, `Max` или `Range` | Нет | Тип фильтрации диапазонов числовых значений
-`threshold_min` | `float64` из [Golang](/definitions#golang) | Обязателен, если есть `type_value_threshold` с типами `Min` и `Range` | Работает только с `type_input_value` = `Number`
-`threshold_max` | `float64` из [Golang](/definitions#golang) | Обязателен, если есть `type_value_threshold` с типами `Max` и `Range` | Работает только с `type_input_value` = `Number`
+`threshold_min` | `float64` из Golang | Обязателен, если есть `type_value_threshold` с типами `Min` и `Range` | Работает только с `type_input_value` = `Number`
+`threshold_max` | `float64` из Golang | Обязателен, если есть `type_value_threshold` с типами `Max` и `Range` | Работает только с `type_input_value` = `Number`
 `max_rate` | `0 <= max_rate <= 86400` только целые | Да | Определят, через сколько секунд будет обработано следующее сообщение. `0` без ограничения
 `last_unique_check` | `true`, `false` | Да | Если `true`, то пропустит только если новое значение отличается от предыдущего. По умолчанию `false`
 `max_size` | `0 <= max_size <= MQTT_MAX_PAYLOAD_SIZE * 1024` | Да | Максимальный размер сообщения, если размер превысит - сообщение будет пропущено
@@ -60,7 +60,7 @@
 Для `type_input_value` = `Number`:
 Название параметра | Возможные значения | Обязательный? | Комментарий
 -- | -- | -- | --
-`multiplication_ratio` | `float64` из [Golang](/definitions#golang) | Нет | На это число можно умножить заданное значение - линейное преобразование
+`multiplication_ratio` | `float64` из Golang | Нет | На это число можно умножить заданное значение - линейное преобразование
 `round_decimal_point` | `0 <= round_decimal_point <= 7` | Нет | Сколько чисел после запятой останется?
 
 Для `type_input_value` = `Text`:
@@ -80,13 +80,13 @@
 
 ## alerts
 
-Необязательный этап. [DataPipe](/deployment/dependencies/datapipe) проверяет значение, которое уже прошло `filters` и `transformations`, и пишет [уведомление](/user/notification/notifications#datapipe-alert) создателю [Unit](/definitions#unit). Условие совпадает с этапом `filters`: уведомление уходит на значение, которое такой же фильтр пропустил бы.
+Необязательный этап. [DataPipe](/deployment/dependencies/datapipe) проверяет значение, которое уже прошло `filters` и `transformations`, и пишет уведомление создателю Unit. Условие совпадает с этапом `filters`: уведомление уходит на значение, которое такой же фильтр пропустил бы.
 
 `WhiteList` срабатывает, когда значение есть в `filtering_values`. `BlackList` срабатывает, когда значения в списке нет. `Min` срабатывает при значении больше либо равном `threshold_min`, `Max` при значении меньше либо равном `threshold_max`, `Range` когда значение внутри обеих границ. Если заданы и список, и порог, значение должно пройти оба правила. Если не заданы ни `type_value_filtering`, ни `type_value_threshold`, уведомление создаётся на любое значение: достаточно `is_enabled`.
 
-`max_rate` и `last_unique_check` из `filters` решают, какие значения вообще дойдут до этой проверки. Первое уведомление уходит после `consecutive_count` совпадений подряд. Пока значение остаётся совпадением, следующее уведомление того же [UnitNode](/definitions#unitnode) приходит не чаще чем раз в `max_frequency` секунд. Значение, которое не совпало с правилом, сбрасывает счётчик `consecutive_count`.
+`max_rate` и `last_unique_check` из `filters` решают, какие значения вообще дойдут до этой проверки. Первое уведомление уходит после `consecutive_count` совпадений подряд. Пока значение остаётся совпадением, следующее уведомление того же UnitNode приходит не чаще чем раз в `max_frequency` секунд. Значение, которое не совпало с правилом, сбрасывает счётчик `consecutive_count`.
 
-Этап работает при включённом `PU_FF_NOTIFICATION_ENABLE` у [Backend](/deployment/dependencies/backend) и [DataPipe](/deployment/dependencies/datapipe). Выключенный `Data pipe alerts` в [настройках уведомлений](/user/notification/notifications#настройки) оставляет запись в списке и правило в конвейере, живое обновление страницы и [Telegram](/definitions#telegram) для этого типа прекращаются.
+Этап работает при включённом `PU_FF_NOTIFICATION_ENABLE` у [Backend](/deployment/dependencies/backend) и [DataPipe](/deployment/dependencies/datapipe). Выключенный `Data pipe alerts` в настройках уведомлений оставляет запись в списке и правило в конвейере, живое обновление страницы и Telegram для этого типа прекращаются.
 
 Название параметра | Возможные значения | Обязательный? | Комментарий
 -- | -- | -- | --
@@ -97,4 +97,4 @@
 `threshold_min` | Целое | Обязателен для `Min` и `Range` | Для `Range` меньше `threshold_max`
 `threshold_max` | Целое | Обязателен для `Max` и `Range` | Для `Range` больше `threshold_min`
 `consecutive_count` | Целое `1`–`1024`, по умолчанию `1` | Нет | Сколько совпадений подряд нужно до первого уведомления
-`max_frequency` | Целое `10`–`86400`, по умолчанию `10` | Нет | Минимум секунд между двумя уведомлениями одного [UnitNode](/definitions#unitnode)
+`max_frequency` | Целое `10`–`86400`, по умолчанию `10` | Нет | Минимум секунд между двумя уведомлениями одного UnitNode

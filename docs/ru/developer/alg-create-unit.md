@@ -17,15 +17,15 @@
 
 ## Проработка идеи Unit
 
-Перед началом разработки [Unit](/definitions#unit) ответьте себе на следующие вопросы:
-1. Какую основную задачу будет решать [Unit](/definitions#unit) ?
-1. Какие физические элементы будут у [Unit](/definitions#unit) ?
-1. Какие данные [Unit](/definitions#unit) будет публиковать ?
-1. Какое управляющее воздействие будет допускать [Unit](/definitions#unit) ?
-1. На каком языке будет написан [Unit](/definitions#unit) ?
+Перед началом разработки Unit ответьте себе на следующие вопросы:
+1. Какую основную задачу будет решать Unit ?
+1. Какие физические элементы будут у Unit ?
+1. Какие данные Unit будет публиковать ?
+1. Какое управляющее воздействие будет допускать Unit ?
+1. На каком языке будет написан Unit ?
 
 :::info Например
-1. [Unit](/definitions#unit) будет регулировать температуру при помощи вентилятора
+1. Unit будет регулировать температуру при помощи вентилятора
 1. Понадобятся: `esp32`, `4pin` вентилятор, температурный датчик `ds18b20`
 1. Будет публиковаться: скважность `PWM` сигнала управления вентилятором и температура на датчике
 1. Будет команда: включение на `N` секунд с заданной скоростью вращения
@@ -34,21 +34,21 @@
 
 ## Создание репозитория Git
 
-Выберите инстанс [GitLab](/definitions#gitlab) или [GitHub](/definitions#github):
+Выберите инстанс GitLab или GitHub:
 1. Создайте пустой репозиторий
 1. Склонируйте его на свою `ЭВМ`
 
 ## Создание базовой файловой структуры
 
 :::tip
-Создайте в корне [Git](/definitions#git) репозитория следующие пустые файлы:
+Создайте в корне Git репозитория следующие пустые файлы:
 :::
 
-- [.gitignore](/definitions#gitignore)
-- [.pepeignore](/definitions#pepeignore)
-- [schema_example.json](/definitions#schema-example-json)
-- [env_example.json](/definitions#env-example-json)
-- [LICENSE](/definitions#license)
+- .gitignore
+- .pepeignore
+- schema_example.json
+- env_example.json
+- LICENSE
 
 ### .gitignore
 
@@ -103,11 +103,11 @@ readme.md
 }
 ```
 
-Для соответствия проработанной идее [Unit](/definitions#unit), к стандартным топикам `input_base_topic` и `output_base_topic` потребуются добавить ещё два типа топиков: `input_topic` и `output_topic`
+Для соответствия проработанной идее Unit, к стандартным топикам `input_base_topic` и `output_base_topic` потребуются добавить ещё два типа топиков: `input_topic` и `output_topic`
 
 Тип топика | Топик разработчика | Назначение
 -- | -- | --
-`input_topic` | `set_fan_state/pepeunit` | [Unit](/definitions#unit) подпишется на него и будет получать управляющие команды
+`input_topic` | `set_fan_state/pepeunit` | Unit подпишется на него и будет получать управляющие команды
 `output_topic` | `current_fan_speed_percentage/pepeunit` | Будет использоваться для публикации скважности `PWM`
 `output_topic` | `current_temp/pepeunit` | Будет использоваться для публикации данных с датчика температуры `ds18b20`
 
@@ -146,7 +146,7 @@ readme.md
 ```
 
 :::danger
-Все переменные в [env_example.json](/definitions#env-example-json) должны быть обезличены
+Все переменные в env_example.json должны быть обезличены
 :::
 
 Нужно продумать, за что будут отвечать переменные [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer):
@@ -164,9 +164,9 @@ readme.md
 `TEMP_MAX` | Позволит настраивать температуру, начиная с которой скорость будет `DUTY_MAX`
 
 :::warning
-Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в [env_example.json](/definitions#env-example-json) и актуализируйте [pepeunit.toml](/definitions#pepeunit-toml) и [readme.md](/definitions#readme-md).
+Переменные могут поменяться в процессе разработки - это абсолютно нормально. Добавьте или удалите переменные в env_example.json и актуализируйте pepeunit.toml и readme.md.
 
-[Pepeunit](/conception/overview) отобразит новые переменные [Пользователям](/development-pepeunit/mechanics/roles#user) для ввода, когда они изменят [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit).
+Pepeunit отобразит новые переменные [Пользователям](/development-pepeunit/mechanics/roles#user) для ввода, когда они изменят [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit).
 :::
 
 
@@ -174,26 +174,26 @@ readme.md
 
 После заполнения минимально нужных файлов, пора их закоммитить:
 1. Переходим в консоль директории вашего проекта
-1. `git add .` - добавляем все файлы в кандидаты на [коммит](/definitions#git-commit)
-1. `git commit -m "feat(init): initial files"` - [коммитим](/definitions#git-commit) изменения
-1. `git push` - отправляем изменения в ваш удалённый хостинг [GitLab](/definitions#gitlab) или [GitHub](/definitions#github)
+1. `git add .` - добавляем все файлы в кандидаты на коммит
+1. `git commit -m "feat(init): initial files"` - коммитим изменения
+1. `git push` - отправляем изменения в ваш удалённый хостинг GitLab или GitHub
 
 ## Создание тестового Unit в Pepeunit
 
-Чтобы продолжить разработку [Unit](/definitions#unit), нужно взаимодействовать с [Pepeunit](/conception/overview) через [MQTT](/definitions#mqtt), а также получить [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json). Выбирите подходящий инстанс [Pepeunit](/conception/overview), которому вы доверяете. Выполните следующие шаги:
-1. [Создайте RepositoryRegistry](/user/git-repository/create-repository-registry#создание-repositoryregistry)
-1. [Создайте Repo](/user/git-repository/create-repo)
-1. [Создайте Unit](/user/unit/create-unit-pepeunit)
-1. Настройте [Unit](/definitions#unit) для [обновлений в ручную](/user/unit/create-unit-pepeunit#блок-автообновлении), чтобы чётко контролировать [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
-1. [Заполните env у Unit](/user/unit/create-physic-unit#настроика-окружения)
-1. Скачайте [Архив](/developer/files/struct-archive-update) с [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json)
+Чтобы продолжить разработку Unit, нужно взаимодействовать с Pepeunit через MQTT, а также получить env.json и schema.json. Выбирите подходящий инстанс Pepeunit, которому вы доверяете. Выполните следующие шаги:
+1. Создайте RepositoryRegistry
+1. Создайте Repo
+1. Создайте Unit
+1. Настройте Unit для обновлений в ручную, чтобы чётко контролировать [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit)
+1. Заполните env у Unit
+1. Скачайте [Архив](/developer/files/struct-archive-update) с env.json и schema.json
 
-Полученные файлы [env.json](/definitions#env-json) и [schema.json](/definitions#schema-json) нужно будет поместить в каталог вашего локального [Git](/definitions#git) репозитория. Данные файлы будут содержать данные для подключения к [Pepeunit](/conception/overview), а также топики для публикации.
+Полученные файлы env.json и schema.json нужно будет поместить в каталог вашего локального Git репозитория. Данные файлы будут содержать данные для подключения к Pepeunit, а также топики для публикации.
 
 :::info
-В процессе разработки можно заходить в тестовый [Unit](/definitions#unit) и видеть:
-- какие данные [Unit](/definitions#unit) отправляет в `Output` [UnitNode](/definitions#unitnode) через систему [DataPipe](/deployment/dependencies/datapipe)
-- создавать для [Unit](/definitions#unit) управляющее воздействие через `Input` [UnitNode](/definitions#unitnode)
+В процессе разработки можно заходить в тестовый Unit и видеть:
+- какие данные Unit отправляет в `Output` UnitNode через систему [DataPipe](/deployment/dependencies/datapipe)
+- создавать для Unit управляющее воздействие через `Input` UnitNode
 :::
 
 ## Наполнение Unit программным функционалом
@@ -202,53 +202,53 @@ readme.md
 Не существует универсального алгоритма разработки Программного обеспечения. Разрабатывайте так, как удобно именно вам. Однако рекомендуем стараться следовать стандартным правилам частоты кода.
 :::
 
-Когда у [Unit](/definitions#unit) в локальном репозитории есть обратная связь с [Pepeunit](/conception/overview), попробуйте следовать следующему алгоритму:
+Когда у Unit в локальном репозитории есть обратная связь с Pepeunit, попробуйте следовать следующему алгоритму:
 1. Протестировать, что клиентские библиотеки ([Micropython](/developer/libraries/micropython), [ESP-IDF](/developer/libraries/esp-idf), [Golang](/developer/libraries/golang) и [Python](/developer/libraries/python)) корректно [отправляют данные](/developer/mqtt/default-mqtt-command) и получают [стандартные команды](/developer/mqtt/default-mqtt-command)
 1. Получите данные от ваших физических датчиков, попробуйте вывести значения напрямую в консоль, без сетевых усложнений, чтобы понять что данные действительно поступают
-1. Попробуйте отправить свои данные в `output_topic`, указанные в [schema_example.json](/definitions#schema-example-json)
-1. Получите команды из `input_topic` и обработайте их так, как задумано в концепции вашего [Unit](/definitions#unit)
-1. Внедрите переменные окружения из [env_example.json](/definitions#env-example-json) для удалённой настройки вашего [Unit](/definitions#unit)
+1. Попробуйте отправить свои данные в `output_topic`, указанные в schema_example.json
+1. Получите команды из `input_topic` и обработайте их так, как задумано в концепции вашего Unit
+1. Внедрите переменные окружения из env_example.json для удалённой настройки вашего Unit
 
-После этих шагов вы получите рабочий [Unit](/definitions#unit), которой нужно протестировать в различных режимах работы.
+После этих шагов вы получите рабочий Unit, которой нужно протестировать в различных режимах работы.
 
 :::warning
-В процессе разработки можно делать множество [коммитов](/definitions#git-commit) с рабочим и не рабочим функционалом, создавать [ветки](/definitions#git-branch) и делать всё, что позволяет [Git](/definitions#git). Однако настенет момент, когда вы поймёте, что всё работает корректно, и доработки больше не требуются. В этот случае можно двигаться дальше.
+В процессе разработки можно делать множество коммитов с рабочим и не рабочим функционалом, создавать ветки и делать всё, что позволяет Git. Однако настенет момент, когда вы поймёте, что всё работает корректно, и доработки больше не требуются. В этот случае можно двигаться дальше.
 :::
 
 ## Создание pepeunit.toml и readme.md
 
 :::info
-[Pepeunit](/conception/overview) расчитывает на машиночитаемое описание [Unit](/definitions#unit) в файле [pepeunit.toml](/definitions#pepeunit-toml).
+Pepeunit расчитывает на машиночитаемое описание Unit в файле pepeunit.toml.
 :::
 
-Чтобы добавить описание для [Unit](/definitions#unit), нужно:
+Чтобы добавить описание для Unit, нужно:
 
-1. Создать в корне репозитория [Unit](/definitions#unit) файл [pepeunit.toml](/definitions#pepeunit-toml)
-1. Сгенерировать [readme.md](/definitions#readme-md) на основе [pepeunit.toml](/definitions#pepeunit-toml)
-1. Поместить сгенерированный [readme.md](/definitions#readme-md) в корень репозитория. Писать [readme.md](/definitions#readme-md) в ручную не требуется
+1. Создать в корне репозитория Unit файл pepeunit.toml
+1. Сгенерировать readme.md на основе pepeunit.toml
+1. Поместить сгенерированный readme.md в корень репозитория. Писать readme.md в ручную не требуется
 
 :::danger
-У всех [Unit](/definitions#unit) должна быть документация, чтобы [Пользователи](/development-pepeunit/mechanics/roles#user) могли ими пользоваться.
+У всех Unit должна быть документация, чтобы [Пользователи](/development-pepeunit/mechanics/roles#user) могли ими пользоваться.
 :::
 
 ## Присвоение Тега
 
-[readme.md](/definitions#readme-md) и [pepeunit.toml](/definitions#pepeunit-toml) заполнены, функционал готов, всё работает корректно. Время присвоить [Тег](/definitions#git-tag) для последнего [коммита](/definitions#git-commit) в репозитории:
+readme.md и pepeunit.toml заполнены, функционал готов, всё работает корректно. Время присвоить Тег для последнего коммита в репозитории:
 
 1. Перейдите в консоль в директории вашего проекта
 1. Выполните команду `git tag 1.0.0`
 1. Выполните команду отправки во внешний репозиторий `git push --tags`
 
-:::info Есть ли ограничение на формат [Тега](/definitions#git-tag) ?
-Нет, [Тег](/definitions#git-tag) может иметь любую структуру.
+:::info Есть ли ограничение на формат Тега ?
+Нет, Тег может иметь любую структуру.
 :::
 
 :::info
-[Pepeunit](/conception/overview) например использует везде: `major.minor.fix`:
+Pepeunit например использует везде: `major.minor.fix`:
 :::
 
 :::danger
-[Тег](/definitions#git-tag) будет сигнализировать [Пользователям](/development-pepeunit/mechanics/roles#user), что всё готово к эксплуатации и протестировано [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer).
+Тег будет сигнализировать [Пользователям](/development-pepeunit/mechanics/roles#user), что всё готово к эксплуатации и протестировано [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer).
 
-[Пользователи](/development-pepeunit/mechanics/roles#user) будут ожидать, что выбрав последний [Тег](/definitions#git-tag), получат самую рабочую, самую актуальную версию [Unit](/definitions#unit).
+[Пользователи](/development-pepeunit/mechanics/roles#user) будут ожидать, что выбрав последний Тег, получат самую рабочую, самую актуальную версию Unit.
 :::
