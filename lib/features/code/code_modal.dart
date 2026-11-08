@@ -135,7 +135,7 @@ class CodeModal extends StatelessWidget {
               extent: font * 2.2,
             ),
             SizedBox(width: font * 0.2),
-            _CloseMark(
+            CodeCloseMark(
               label: phrase(language, {'ru': 'Закрыть', 'en': 'Close'}),
               extent: font * 2.2,
               onTap: onClose,
@@ -386,11 +386,13 @@ class _Mark extends StatelessWidget {
   }
 }
 
-class _CloseMark extends StatelessWidget {
-  const _CloseMark({
+/// The close mark of a panel bar.
+class CodeCloseMark extends StatelessWidget {
+  const CodeCloseMark({
     required this.label,
     required this.extent,
     required this.onTap,
+    super.key,
   });
 
   final String label;

@@ -230,6 +230,10 @@ const _ink = Color(0xFFFFFFFF);
 const _bodyInk = Color(0xFFE6E6EB);
 const _bodyFamily = 'OpenGost Type B';
 
+/// How far under the baseline a link's underline stands, in font sizes. The
+/// descenders of OpenGost end at 0.18.
+const _underlineDrop = 0.2;
+
 /// Turns blocks into widgets. One builder serves one build of a document;
 /// the links it makes are kept in [recognizers] for the view to release.
 class _Blocks {
@@ -250,6 +254,9 @@ class _Blocks {
   final List<GestureRecognizer> recognizers;
 
   double get code => font * 0.82;
+
+  /// True while the spans of a link are built.
+  var _inLink = false;
 
   TextStyle get body => TextStyle(
     color: _bodyInk,
@@ -503,6 +510,10 @@ class _Blocks {
                 fontSize: (style.fontSize ?? font) * 0.88,
                 color: _ink,
                 backgroundColor: accent.withValues(alpha: 0.2),
+                // In a link the words are drawn by the shadow of the link,
+                // which a code span does not take.
+                shadows: _inLink ? const [] : null,
+                decoration: _inLink ? TextDecoration.none : null,
               ),
             ),
           );
@@ -512,9 +523,9 @@ class _Blocks {
             case MdMark.bold:
               out.add(
                 TextSpan(
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.w700,
-                    color: _ink,
+                    color: _inLink ? null : _ink,
                   ),
                   children: inner,
                 ),
@@ -540,11 +551,14 @@ class _Blocks {
           out.add(
             TextSpan(
               text: inline.alt.isEmpty ? inline.url : inline.alt,
-              style: TextStyle(color: accent),
+              style: _inLink ? null : TextStyle(color: accent),
             ),
           );
         case MdLink():
+          final wasInLink = _inLink;
+          _inLink = true;
           final inner = spans(inline.children, style);
+          _inLink = wasInLink;
           if (!canOpen(inline.url)) {
             // A term the client has no page for is plain text, not a dead link.
             out.add(TextSpan(children: inner));
@@ -555,8 +569,21 @@ class _Blocks {
           recognizers.add(recognizer);
           out.add(
             TextSpan(
+              // OpenGost puts its underline on the baseline, through the
+              // letters. The words are drawn as their own shadow, lifted by
+              // the drop, and the line stays where the font puts it: under
+              // the descenders.
               style: TextStyle(
-                color: accent,
+                color: const Color(0x00000000),
+                shadows: [
+                  Shadow(
+                    color: accent,
+                    offset: Offset(
+                      0,
+                      -(style.fontSize ?? font) * _underlineDrop,
+                    ),
+                  ),
+                ],
                 decoration: TextDecoration.underline,
                 decorationColor: accent,
               ),

@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 
@@ -5,19 +7,24 @@ import 'markdown.dart';
 
 /// Where the Library texts live in the app bundle.
 ///
-/// - Documentation: `docs/<language>/**.md`. These are the folders of the
-///   documentation sources, so the tree is the folders and nothing else
-///   lists an article. An article takes its name from its first `# `
-///   heading. A folder shows its directory name as words. Folders stand in
-///   the order of their directory names, articles in the order of their
-///   titles.
+/// - Documentation: `docs/<language>/**.md`, and next to them
+///   `docs/<language>/sidebar.json`. The articles are the files. The sidebar
+///   is that one JSON file, in the shape of a VitePress sidebar: a list of
+///   `{ "text", "link", "collapsed", "items" }`. It binds a file to its place
+///   and its name in the tree. A link is the path of an article without
+///   `.md`. A link to a file that is not in the bundle is left out. An
+///   article that no row links to has no place in the tree, but a link in a
+///   text still opens it. An article takes the title of its panel from its
+///   first `# ` heading.
 /// - Tips: `assets/library/tips/<language>/<screen>.<cell>.md`
 /// - Everything else (presentation, about): `assets/library/<language>/`.
 ///
-/// A text that has no translation falls back to Russian.
+/// A text that has no translation falls back to Russian, and so does the
+/// sidebar.
 const docsRoot = 'docs';
 const libraryRoot = 'assets/library';
 const fallbackLanguage = 'ru';
+const sidebarFile = 'sidebar.json';
 
 class DocArticle {
   const DocArticle({
@@ -34,42 +41,188 @@ class DocArticle {
   String get name => path.split('/').last;
 }
 
-class DocFolder {
-  DocFolder({required this.path, required this.title});
+/// One row of the sidebar: an article ([path]), a group ([items]), or a
+/// group whose name is an article too.
+class DocNode {
+  const DocNode({
+    required this.id,
+    required this.text,
+    required this.items,
+    this.path,
+    this.collapsed = false,
+  });
 
-  /// Path inside the tree: empty for the root.
-  final String path;
-  String title;
+  /// Place in the file: `2.0.1` is the second row, its first row, its
+  /// second row. It does not change when a row is left out.
+  final String id;
+  final String text;
+  final String? path;
+  final bool collapsed;
+  final List<DocNode> items;
 
-  /// Directory name, the key folders are sorted by.
-  String get name => path.split('/').last;
-
-  final List<DocFolder> folders = [];
-  final List<DocArticle> articles = [];
-
-  /// Everything one level down, folders first.
-  int get count => folders.length + articles.length;
+  bool get isGroup => items.isNotEmpty;
 }
 
-/// A directory name as words: `env-variables` is `Env variables`.
-String _spoken(String name) {
-  final words = name.replaceAll(RegExp(r'[-_]+'), ' ').trim();
-  if (words.isEmpty) return name;
-  return words[0].toUpperCase() + words.substring(1);
+/// A link to an article as a path of the tree: `/a/b.md` and `a/b/` are
+/// `a/b`.
+String docPathOf(String link) {
+  var path = link;
+  if (path.startsWith('/')) path = path.substring(1);
+  if (path.endsWith('.md')) path = path.substring(0, path.length - 3);
+  if (path.endsWith('.html')) path = path.substring(0, path.length - 5);
+  if (path.endsWith('/')) path = path.substring(0, path.length - 1);
+  return path;
+}
+
+/// Reads `sidebar.json`. [exists] says whether an article is in the bundle.
+/// A file that is not a list of rows with a `text` is a mistake of the
+/// author, not something to hide, so it throws a [FormatException].
+List<DocNode> parseSidebar(String json, bool Function(String path) exists) {
+  final Object? data;
+  try {
+    data = jsonDecode(json);
+  } on FormatException catch (error) {
+    throw FormatException('$sidebarFile: ${error.message}');
+  }
+  if (data is! List) {
+    throw const FormatException('$sidebarFile: a list of rows is expected');
+  }
+  List<DocNode> read(List<Object?> rows, String prefix) {
+    final nodes = <DocNode>[];
+    for (var i = 0; i < rows.length; i++) {
+      final row = rows[i];
+      final id = prefix.isEmpty ? '$i' : '$prefix.$i';
+      if (row is! Map) {
+        throw FormatException('$sidebarFile: row $id is not an object');
+      }
+      final text = row['text'];
+      if (text is! String || text.trim().isEmpty) {
+        throw FormatException('$sidebarFile: row $id has no text');
+      }
+      final link = row['link'];
+      String? path;
+      if (link is String) {
+        final found = docPathOf(link);
+        if (exists(found)) path = found;
+      }
+      final children = row['items'];
+      final items = children is List ? read(children, id) : const <DocNode>[];
+      // A row with no article and nothing under it has nothing to show.
+      if (path == null && items.isEmpty) continue;
+      nodes.add(
+        DocNode(
+          id: id,
+          text: text.trim(),
+          path: path,
+          collapsed: row['collapsed'] == true,
+          items: items,
+        ),
+      );
+    }
+    return nodes;
+  }
+
+  return read(data, '');
+}
+
+/// Where a link inside a text leads.
+class DocLink {
+  const DocLink({this.article, this.anchor, this.outside});
+
+  /// The article the link points at. Null for a heading of the text the link
+  /// stands in, or an outside address.
+  final DocArticle? article;
+
+  /// Heading in lower case, as the text spells it after `#`.
+  final String? anchor;
+  final Uri? outside;
+}
+
+/// Where [url], found in the text at [from], leads. Null for a link the
+/// client cannot follow: an article that is not in [tree], or a bare `#`.
+/// Without a [tree] only outside addresses and headings of the same text
+/// work.
+DocLink? resolveDocLink(String url, {DocsTree? tree, String? from}) {
+  if (url.startsWith('http://') ||
+      url.startsWith('https://') ||
+      url.startsWith('mailto:')) {
+    return DocLink(outside: Uri.tryParse(url));
+  }
+  final hash = url.indexOf('#');
+  String? anchor;
+  if (hash >= 0) {
+    var raw = url.substring(hash + 1);
+    try {
+      raw = Uri.decodeComponent(raw);
+    } catch (_) {}
+    anchor = raw.toLowerCase();
+  }
+  final target = hash < 0 ? url : url.substring(0, hash);
+  if (target.isEmpty) {
+    return anchor == null || anchor.isEmpty ? null : DocLink(anchor: anchor);
+  }
+  if (tree == null) return null;
+  var path = target;
+  if (!path.startsWith('/')) {
+    final slash = (from ?? '').lastIndexOf('/');
+    final parts = [if (slash > 0) ...from!.substring(0, slash).split('/')];
+    for (final part in target.split('/')) {
+      if (part == '..') {
+        if (parts.isNotEmpty) parts.removeLast();
+      } else if (part != '.' && part.isNotEmpty) {
+        parts.add(part);
+      }
+    }
+    path = parts.join('/');
+  }
+  final article = tree.article(docPathOf(path));
+  if (article == null) return null;
+  return DocLink(article: article, anchor: anchor);
 }
 
 class DocsTree {
-  DocsTree._(this.root, this._articles, this._folders);
+  DocsTree._(this.sidebar, this._articles);
 
-  final DocFolder root;
+  /// The rows of the sidebar, as the file lists them.
+  final List<DocNode> sidebar;
   final Map<String, DocArticle> _articles;
-  final Map<String, DocFolder> _folders;
 
   DocArticle? article(String path) => _articles[path];
 
-  DocFolder? folder(String path) => path.isEmpty ? root : _folders[path];
-
+  /// Every article of the bundle, the ones the sidebar leaves out too.
   Iterable<DocArticle> get articles => _articles.values;
+
+  /// The first article of the sidebar, the one the documentation opens at.
+  /// Without a sidebar, the first article by path.
+  DocArticle? get first {
+    String? find(List<DocNode> nodes) {
+      for (final node in nodes) {
+        final found = node.path ?? find(node.items);
+        if (found != null) return found;
+      }
+      return null;
+    }
+
+    final path = find(sidebar);
+    if (path != null) return _articles[path];
+    if (_articles.isEmpty) return null;
+    return _articles[(_articles.keys.toList()..sort()).first];
+  }
+
+  /// Ids of the groups that hold the article at [path], outermost first.
+  /// Empty when the sidebar does not list it.
+  List<String> groupsOf(String path) {
+    List<String>? walk(List<DocNode> nodes, List<String> above) {
+      for (final node in nodes) {
+        if (node.path == path) return above;
+        final inside = walk(node.items, [...above, node.id]);
+        if (inside != null) return inside;
+      }
+      return null;
+    }
+
+    return walk(sidebar, const []) ?? const [];
+  }
 
   /// Builds the tree of [language] from the bundle keys and their texts.
   /// Paths that exist only in Russian are kept, with the Russian text.
@@ -89,58 +242,28 @@ class DocsTree {
         }
       }
     }
-    final root = DocFolder(path: '', title: '');
-    final folders = <String, DocFolder>{};
     final articles = <String, DocArticle>{};
-
-    DocFolder folderAt(String path) {
-      if (path.isEmpty) return root;
-      final known = folders[path];
-      if (known != null) return known;
-      final slash = path.lastIndexOf('/');
-      final parent = folderAt(slash < 0 ? '' : path.substring(0, slash));
-      final name = slash < 0 ? path : path.substring(slash + 1);
-      final made = DocFolder(path: path, title: _spoken(name));
-      folders[path] = made;
-      parent.folders.add(made);
-      return made;
-    }
-
     for (final entry in byPath.entries) {
-      final path = entry.key;
       final source = read(entry.value);
-      final slash = path.lastIndexOf('/');
-      final parent = folderAt(slash < 0 ? '' : path.substring(0, slash));
-      final name = slash < 0 ? path : path.substring(slash + 1);
-      final article = DocArticle(
-        path: path,
-        title: markdownTitle(source) ?? name,
+      articles[entry.key] = DocArticle(
+        path: entry.key,
+        title: markdownTitle(source) ?? entry.key.split('/').last,
         source: source,
       );
-      articles[path] = article;
-      parent.articles.add(article);
     }
-    void sort(DocFolder folder) {
-      folder.folders.sort((a, b) => a.name.compareTo(b.name));
-      folder.articles.sort((a, b) => a.title.compareTo(b.title));
-      for (final child in folder.folders) {
-        sort(child);
+    final keySet = keys.toSet();
+    String? sidebarKey;
+    for (final lang in [language, fallbackLanguage]) {
+      final key = '$docsRoot/$lang/$sidebarFile';
+      if (keySet.contains(key)) {
+        sidebarKey = key;
+        break;
       }
     }
-
-    // A folder without articles has nothing to show.
-    bool prune(DocFolder folder) {
-      folder.folders.removeWhere((child) {
-        final empty = !prune(child);
-        if (empty) folders.remove(child.path);
-        return empty;
-      });
-      return folder.count > 0;
-    }
-
-    prune(root);
-    sort(root);
-    return DocsTree._(root, articles, folders);
+    final sidebar = sidebarKey == null
+        ? const <DocNode>[]
+        : parseSidebar(read(sidebarKey), articles.containsKey);
+    return DocsTree._(sidebar, articles);
   }
 }
 
@@ -216,7 +339,9 @@ class Library {
     if (cached != null) return cached;
     final keys = [
       for (final key in _keys!)
-        if (key.startsWith('$docsRoot/') && key.endsWith('.md')) key,
+        if (key.startsWith('$docsRoot/') &&
+            (key.endsWith('.md') || key.endsWith('/$sidebarFile')))
+          key,
     ];
     for (final key in keys) {
       await text(key);

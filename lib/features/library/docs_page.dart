@@ -1,40 +1,48 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
-import '../../instances/network_view.dart';
 import '../../library/library.dart';
-import '../../navigation/back.dart';
-import '../../registry/repo.dart';
-import '../hex_page.dart';
-import '../network/network_chrome.dart';
-import '../../units/unit_view.dart';
+import '../code/code_modal.dart';
+import 'doc_reader.dart';
 import 'library_menu_page.dart';
-import 'library_modal.dart';
 
-String docsAddress({String dir = '', String? doc, int? scope}) {
-  return Uri(
-    path: '/library/docs',
-    queryParameters: {
-      if (dir.isNotEmpty) 'dir': dir,
-      'doc': ?doc,
-      if (scope != null && scope != menuScaleTick) 'scope': '$scope',
-    },
-  ).toString();
+String docsAddress({String? doc}) {
+  return Uri(path: '/library/docs', queryParameters: {'doc': ?doc}).toString();
 }
 
-/// One folder of the documentation tree: a cell for each folder and each
-/// article in it. The tree comes from the documentation files, nothing in
-/// the client lists them. An article opens in a panel over the folder.
+/// The three stages of the screen, the way VitePress lays out a page. The
+/// widths are logical pixels.
+///
+/// - From [_wideDocs] the sidebar stands at the left edge and the text takes
+///   the rest, centered in it. Below it the sidebar is not drawn beside the
+///   text: a mark on the bar opens it over the text.
+/// - From [_centeredDocs] the sidebar and the text are one block as wide as
+///   [_blockFonts] font sizes, centered on the screen. The sidebar grows
+///   to the left by what the screen has over the block, so the two stay
+///   near each other. On a 1920 px screen the block is 1440 px.
+const _wideDocs = 960.0;
+const _centeredDocs = 1440.0;
+const _blockFonts = 74.2;
+
+/// The documentation: a modal over the whole screen, with no frame and no
+/// fill of its own, so the scene and the mosaic show behind it. A tree of
+/// articles on the left and the open article in the middle.
+///
+/// - The tree is `sidebar.json` of the language, see [DocsTree]. A row opens
+///   its article; a group folds and unfolds.
+/// - The article is drawn as every Library text is ([DocBody]), always
+///   rendered. Its scroll bar stands at the right edge of the screen. The
+///   bar above it holds Back (after links and rows led from one article to
+///   another) and the close mark.
+/// - The article opens at `?doc=<path>`, or at the first row of the tree.
 class DocsPage extends StatefulWidget {
-  const DocsPage({required this.dir, required this.scope, this.doc, super.key});
+  const DocsPage({this.doc, super.key});
 
-  /// Path of the folder in the tree. Empty is the root.
-  final String dir;
-  final int scope;
-
-  /// Path of the article that is open.
+  /// Path of the article to open first.
   final String? doc;
 
   @override
@@ -43,9 +51,11 @@ class DocsPage extends StatefulWidget {
 
 class _DocsPageState extends State<DocsPage> {
   DocsTree? _tree;
+  DocReader? _reader;
   String? _failure;
-  var _failureOpen = false;
-  var _page = 0;
+  final _open = <String>{};
+  final _selected = GlobalKey();
+  var _menu = false;
 
   @override
   void initState() {
@@ -56,9 +66,11 @@ class _DocsPageState extends State<DocsPage> {
   @override
   void didUpdateWidget(DocsPage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.scope != widget.scope || oldWidget.dir != widget.dir) {
-      _page = 0;
-    }
+    final tree = _tree;
+    final doc = widget.doc;
+    if (tree == null || doc == null || doc == oldWidget.doc) return;
+    final article = tree.article(doc);
+    if (article != null) _reader?.show(article);
   }
 
   Future<void> _load() async {
@@ -66,159 +78,511 @@ class _DocsPageState extends State<DocsPage> {
     try {
       final tree = await Library.instance.docs(language);
       if (!mounted) return;
-      setState(() => _tree = tree);
+      final wanted = widget.doc;
+      final first =
+          (wanted == null ? null : tree.article(wanted)) ?? tree.first;
+      setState(() {
+        _tree = tree;
+        if (first != null) {
+          _reader = DocReader(
+            first: DocPage.of(first),
+            docs: tree,
+            onChange: _changed,
+          );
+        }
+        void unfold(List<DocNode> nodes) {
+          for (final node in nodes) {
+            if (!node.collapsed) _open.add(node.id);
+            unfold(node.items);
+          }
+        }
+
+        unfold(tree.sidebar);
+        _reveal();
+      });
     } catch (error) {
       if (!mounted) return;
       setState(() => _failure = '$error');
     }
   }
 
+  void _changed() => setState(_reveal);
+
+  /// Unfolds the groups of the article that is open and brings its row into
+  /// view.
+  void _reveal() {
+    final path = _reader?.page.path;
+    if (path == null) return;
+    _open.addAll(_tree!.groupsOf(path));
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final row = _selected.currentContext;
+      if (row == null) return;
+      Scrollable.ensureVisible(row, alignment: 0.5);
+    });
+  }
+
+  void _tapRow(DocNode node) {
+    setState(() {
+      if (node.isGroup) {
+        if (!_open.remove(node.id) || node.path != null) _open.add(node.id);
+      }
+    });
+    final path = node.path;
+    if (path != null) {
+      final article = _tree!.article(path);
+      if (article != null) _reader!.show(article);
+      if (_menu) setState(() => _menu = false);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final language = AppScope.of(context).vault.language;
-    final wide = hexWide(MediaQuery.sizeOf(context));
+    final model = AppScope.of(context);
+    final language = model.vault.language;
+    String word(String ru) => libText(language, ru);
+    final reader = _reader;
     final tree = _tree;
-    final folder = tree?.folder(widget.dir);
-    final ids = [
-      if (folder != null) ...[
-        for (final child in folder.folders) 'dir:${child.path}',
-        for (final article in folder.articles) 'doc:${article.path}',
-      ],
-    ];
-    final board = ids.isEmpty
-        ? null
-        : tailBoard(tick: widget.scope, page: _page, ids: ids, wide: wide);
-    final slots = <HexSlot>[];
-    if (board == null) {
-      final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
-      slots.add(
-        backSlot(
-          title: libText(language, 'Назад'),
-          q: frame.back!.$1,
-          r: frame.back!.$2,
-        ),
-      );
-      slots.add(
-        HexSlot(
-          id: 'empty',
-          title: tree == null && _failure == null
-              ? libText(language, 'Документация')
-              : libText(language, 'Пусто'),
-          color: libraryColor,
-          busy: tree == null && _failure == null,
-          tappable: false,
-          q: frame.cells.first.$1,
-          r: frame.cells.first.$2,
-        ),
-      );
-    } else {
-      for (final slot in board.slots) {
-        slots.add(_slot(slot, board, tree!, language));
+    return Material(
+      type: MaterialType.transparency,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final size = constraints.biggest;
+          final font = max(12.0, size.shortestSide * 0.018);
+          final codeFont = max(11.0, font * 0.72);
+          final headerH = font * 3.55;
+          final wide = size.width >= _wideDocs;
+          final side = min(font * 15.5, size.width * (wide ? 0.4 : 0.84));
+          // What the screen has over the block, on the left of the sidebar.
+          final gap = size.width >= _centeredDocs
+              ? max(0.0, (size.width - font * _blockFonts) / 2)
+              : 0.0;
+          final line = const Color(0x33FFFFFF);
+          final vline = Container(width: 1, color: line);
+
+          Widget sidebar() {
+            // A path can stand twice in the file; one row takes the key.
+            var keyed = false;
+            Key? keyOf(DocNode node) {
+              if (keyed || node.path == null) return null;
+              if (node.path != reader?.page.path) return null;
+              keyed = true;
+              return _selected;
+            }
+
+            if (tree == null) return const SizedBox.shrink();
+            return ListView(
+              padding: EdgeInsets.fromLTRB(
+                font * 0.6,
+                font * 0.5,
+                font * 0.3,
+                font * 0.8,
+              ),
+              children: [
+                for (final row in _rows(tree.sidebar))
+                  _SideRow(
+                    key: keyOf(row.node),
+                    node: row.node,
+                    depth: row.depth,
+                    font: font,
+                    open: _open.contains(row.node.id),
+                    selected:
+                        row.node.path != null &&
+                        row.node.path == reader?.page.path,
+                    onTap: () => _tapRow(row.node),
+                  ),
+              ],
+            );
+          }
+
+          final tools = Row(
+            children: [
+              if (reader != null && reader.canBack)
+                _BackMark(
+                  label: word('Назад'),
+                  extent: font * 2.2,
+                  onTap: reader.back,
+                ),
+              SizedBox(width: font * 0.2),
+              CodeCloseMark(
+                label: libErrorText(language, 'Закрыть', 'Close'),
+                extent: font * 2.2,
+                onTap: () => closeLibrary(context, '/library'),
+              ),
+            ],
+          );
+
+          // The bar: the name of the section above the sidebar, the title of
+          // the article and the tools above the text. One line under it.
+          final header = SizedBox(
+            height: headerH,
+            child: Row(
+              children: [
+                if (wide) ...[
+                  SizedBox(
+                    width: gap + side,
+                    child: Padding(
+                      padding: EdgeInsets.only(left: gap + font, right: font),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text(
+                          word('Документация'),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: _style(font * 1.55, const Color(0xFFFFFFFF)),
+                        ),
+                      ),
+                    ),
+                  ),
+                  vline,
+                ],
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.fromLTRB(font, 0, font * 0.4, 0),
+                    child: Row(
+                      children: [
+                        if (!wide)
+                          _MenuMark(
+                            label: word('Разделы'),
+                            extent: font * 2.2,
+                            onTap: () => setState(() => _menu = !_menu),
+                          ),
+                        Expanded(
+                          child: Text(
+                            reader?.page.title ?? '',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: _style(font * 1.55, const Color(0xFFFFFFFF)),
+                          ),
+                        ),
+                        SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: tools,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+
+          // The text starts at the top, however short it is. The view takes
+          // the whole width, so its scroll bar stands at the screen edge; it
+          // centers the column of the text itself.
+          final article = Padding(
+            padding: EdgeInsets.only(left: font, top: font * 0.6),
+            child: reader != null
+                ? DocBody(
+                    reader: reader,
+                    raw: false,
+                    codeFont: codeFont,
+                    accent: libraryColor,
+                  )
+                : Center(
+                    child: _failure != null
+                        ? Text(
+                            _failure!,
+                            textAlign: TextAlign.center,
+                            style: _style(font * 1.1, errorColor),
+                          )
+                        : tree == null
+                        ? CircularProgressIndicator(
+                            strokeWidth: 2,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              libraryColor,
+                            ),
+                          )
+                        : Text(
+                            word('Пусто'),
+                            style: _style(font * 1.1, hexMuted),
+                          ),
+                  ),
+          );
+
+          // No frame and no fill: the scene under the router, its grain and
+          // the mosaic, is the background, as on every other screen.
+          return SafeArea(
+            child: Column(
+              children: [
+                header,
+                Container(height: 1, color: line),
+                Expanded(
+                  child: Stack(
+                    children: [
+                      Row(
+                        children: [
+                          if (wide) ...[
+                            SizedBox(
+                              width: gap + side,
+                              child: Padding(
+                                padding: EdgeInsets.only(left: gap),
+                                child: sidebar(),
+                              ),
+                            ),
+                            vline,
+                          ],
+                          Expanded(child: article),
+                        ],
+                      ),
+                      if (!wide && _menu) ...[
+                        Positioned.fill(
+                          child: GestureDetector(
+                            behavior: HitTestBehavior.opaque,
+                            onTap: () => setState(() => _menu = false),
+                            child: const ColoredBox(color: Color(0x99000000)),
+                          ),
+                        ),
+                        Positioned(
+                          left: 0,
+                          top: 0,
+                          bottom: 0,
+                          width: side,
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: ColoredBox(
+                                  color: sceneBackground,
+                                  child: sidebar(),
+                                ),
+                              ),
+                              vline,
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  /// The rows the sidebar shows: a folded group hides what is under it.
+  Iterable<({DocNode node, int depth})> _rows(
+    List<DocNode> nodes, [
+    int depth = 0,
+  ]) sync* {
+    for (final node in nodes) {
+      yield (node: node, depth: depth);
+      if (node.isGroup && _open.contains(node.id)) {
+        yield* _rows(node.items, depth + 1);
       }
     }
-    appendError(
-      slots,
-      message: _failure,
-      open: _failureOpen,
-      language: language,
-      text: libErrorText,
-      wide: wide,
-    );
-    final scene = HexPage(
-      slots: slots,
-      onTap: (id) => _tap(id),
-      frame: board == null
-          ? null
-          : (child) => ScopeFrame(
-              scope: widget.scope,
-              canZoomIn: board.canZoomIn,
-              path: docsAddress(dir: widget.dir),
-              child: child,
+  }
+}
+
+TextStyle _style(double size, Color color, {double? height}) => TextStyle(
+  color: color,
+  fontFamily: 'OpenGost Type B',
+  fontSize: size,
+  height: height,
+  decoration: TextDecoration.none,
+);
+
+/// A row of the sidebar. The article that is open is in the library color.
+class _SideRow extends StatefulWidget {
+  const _SideRow({
+    required this.node,
+    required this.depth,
+    required this.font,
+    required this.open,
+    required this.selected,
+    required this.onTap,
+    super.key,
+  });
+
+  final DocNode node;
+  final int depth;
+  final double font;
+  final bool open;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  State<_SideRow> createState() => _SideRowState();
+}
+
+class _SideRowState extends State<_SideRow> {
+  var _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final font = widget.font;
+    final node = widget.node;
+    final color = widget.selected
+        ? libraryColor
+        : node.isGroup
+        ? const Color(0xFFFFFFFF)
+        : hexMuted;
+    return Semantics(
+      button: true,
+      selected: widget.selected,
+      label: node.text,
+      child: MouseRegion(
+        cursor: SystemMouseCursors.click,
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: widget.onTap,
+          child: Container(
+            color: _hover ? const Color(0x14FFFFFF) : null,
+            padding: EdgeInsets.only(
+              left: font * 0.3 + widget.depth * font * 0.9,
+              top: font * 0.2,
+              bottom: font * 0.2,
+              right: font * 0.3,
             ),
-    );
-    final article = tree == null || widget.doc == null
-        ? null
-        : tree.article(widget.doc!);
-    if (article == null) return scene;
-    return Stack(
-      children: [
-        scene,
-        Material(
-          type: MaterialType.transparency,
-          child: LibraryModal(
-            title: article.title,
-            color: libraryColor,
-            source: article.source,
-            path: article.path,
-            docs: tree,
-            onClose: () => closeLibrary(
-              context,
-              docsAddress(dir: widget.dir, scope: widget.scope),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: font * 0.9,
+                  height: font * 1.125,
+                  child: node.isGroup
+                      ? CustomPaint(
+                          painter: _ChevronPainter(color, widget.open),
+                        )
+                      : null,
+                ),
+                Expanded(
+                  child: Text(
+                    node.text,
+                    style: _style(font * 0.9, color, height: 1.25),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
-      ],
+      ),
     );
   }
+}
 
-  HexSlot _slot(
-    BoardSlot slot,
-    NetworkBoard board,
-    DocsTree tree,
-    String language,
-  ) {
-    if (slot.id == 'back') {
-      return backSlot(title: libText(language, 'Назад'), q: slot.q, r: slot.r);
+class _ChevronPainter extends CustomPainter {
+  const _ChevronPainter(this.color, this.open);
+
+  final Color color;
+  final bool open;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = max(1.3, size.width * 0.12)
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+    final c = Offset(size.width * 0.42, size.height * 0.5);
+    final a = size.width * 0.2;
+    final path = Path();
+    if (open) {
+      path
+        ..moveTo(c.dx - a, c.dy - a * 0.5)
+        ..lineTo(c.dx, c.dy + a * 0.7)
+        ..lineTo(c.dx + a, c.dy - a * 0.5);
+    } else {
+      path
+        ..moveTo(c.dx - a * 0.5, c.dy - a)
+        ..lineTo(c.dx + a * 0.7, c.dy)
+        ..lineTo(c.dx - a * 0.5, c.dy + a);
     }
-    if (slot.id == 'prev' || slot.id == 'next') {
-      final forward = slot.id == 'next';
-      return pageStepSlot(
-        id: slot.id,
-        left: !forward,
-        language: language,
-        color: libraryColor,
-        q: slot.q,
-        r: slot.r,
-        page: board.page,
-        pages: board.pages,
-        enabled: forward ? board.page < board.pages - 1 : board.page > 0,
-        onTap: () => setState(() => _page = board.page + (forward ? 1 : -1)),
-      );
-    }
-    if (slot.id.startsWith('dir:')) {
-      final folder = tree.folder(slot.id.substring(4));
-      return HexSlot(
-        id: slot.id,
-        title: folder?.title ?? slot.id,
-        footer: folder == null ? null : pieceCount(language, folder.count),
-        color: libraryColor,
-        q: slot.q,
-        r: slot.r,
-        icon: 'assets/icons/sections/library.svg',
-      );
-    }
-    final article = tree.article(slot.id.substring(4));
-    return HexSlot(
-      id: slot.id,
-      title: article?.title ?? slot.id,
-      color: libraryColor,
-      q: slot.q,
-      r: slot.r,
-      icon: 'assets/icons/objects/file.svg',
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _ChevronPainter oldDelegate) =>
+      oldDelegate.color != color || oldDelegate.open != open;
+}
+
+/// Back: the picture of the Back cell, on the bar.
+class _BackMark extends StatelessWidget {
+  const _BackMark({
+    required this.label,
+    required this.extent,
+    required this.onTap,
+  });
+
+  final String label;
+  final double extent;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: HoverPop(
+          child: SvgPicture.asset(
+            'assets/icons/actions/back.svg',
+            width: extent,
+            height: extent,
+          ),
+        ),
+      ),
     );
   }
+}
 
-  void _tap(String id) {
-    if (id == 'back') {
-      popOrHome(context);
-    } else if (id == 'error') {
-      setState(() => _failureOpen = true);
-    } else if (id.startsWith('dir:')) {
-      context.push(docsAddress(dir: id.substring(4)));
-    } else if (id.startsWith('doc:')) {
-      context.push(
-        docsAddress(dir: widget.dir, doc: id.substring(4), scope: widget.scope),
+/// The mark that opens the sidebar on a narrow screen: three lines.
+class _MenuMark extends StatelessWidget {
+  const _MenuMark({
+    required this.label,
+    required this.extent,
+    required this.onTap,
+  });
+
+  final String label;
+  final double extent;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: label,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: HoverPop(
+          child: SizedBox(
+            width: extent,
+            height: extent,
+            child: const CustomPaint(painter: _MenuPainter()),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MenuPainter extends CustomPainter {
+  const _MenuPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = const Color(0xFFFFFFFF)
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.width * 0.08
+      ..strokeCap = StrokeCap.round;
+    for (final y in [0.3, 0.5, 0.7]) {
+      canvas.drawLine(
+        Offset(size.width * 0.22, size.height * y),
+        Offset(size.width * 0.78, size.height * y),
+        paint,
       );
     }
   }
+
+  @override
+  bool shouldRepaint(covariant _MenuPainter oldDelegate) => false;
 }

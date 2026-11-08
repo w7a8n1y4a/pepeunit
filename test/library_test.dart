@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/gestures.dart';
@@ -11,6 +12,7 @@ import 'package:pepeunit_client/account/vault_store.dart';
 import 'package:pepeunit_client/app_model.dart';
 import 'package:pepeunit_client/app_scope.dart';
 import 'package:pepeunit_client/client_version.dart';
+import 'package:pepeunit_client/features/library/docs_page.dart';
 import 'package:pepeunit_client/features/library/library_modal.dart';
 import 'package:pepeunit_client/hive/bevel.dart';
 import 'package:pepeunit_client/features/library/md_view.dart';
@@ -27,25 +29,76 @@ DocsTree _tree(Map<String, String> files) {
 }
 
 void main() {
-  test('the tree is the folders: a folder is named by its directory', () {
+  test('the sidebar binds files to names, a missing file is left out', () {
     final tree = _tree({
-      'docs/ru/b/three.md': '# Третья\n',
       'docs/ru/a/one.md': '# Первая\n',
       'docs/ru/a/deep/two.md': '# Вторая\n',
-      'docs/ru/env-variables/four.md': '# Четвёртая\n',
       'docs/ru/top.md': '# Верхняя\n',
-      'docs/ru/a/no-title.md': 'просто текст',
+      'docs/ru/lonely.md': '# Одинокая\n',
+      'docs/ru/sidebar.json': '''[
+        { "text": "Раздел", "items": [
+          { "text": "Один", "link": "/a/one" },
+          { "text": "Папка", "collapsed": true, "items": [
+            { "text": "Два", "link": "/a/deep/two.md" },
+            { "text": "Нет такой", "link": "/a/missing" }
+          ] },
+          { "text": "Пустая", "items": [ { "text": "Нет", "link": "/none" } ] }
+        ] },
+        { "text": "Верх", "link": "/top" }
+      ]''',
     });
-    // Folders stand by directory name, shown as words.
-    expect(
-      [for (final f in tree.root.folders) f.title],
-      ['A', 'B', 'Env variables'],
-    );
-    expect(tree.root.articles.single.title, 'Верхняя');
-    final a = tree.folder('a')!;
-    expect(a.folders.single.title, 'Deep');
-    expect([for (final x in a.articles) x.title], ['no-title', 'Первая']);
+    final root = tree.sidebar;
+    expect([for (final n in root) n.text], ['Раздел', 'Верх']);
+    expect(root[1].path, 'top');
+    expect(root[1].isGroup, isFalse);
+    final group = root[0];
+    expect([for (final n in group.items) n.text], ['Один', 'Папка']);
+    expect(group.items[0].path, 'a/one');
+    final folder = group.items[1];
+    expect(folder.collapsed, isTrue);
+    expect([for (final n in folder.items) n.text], ['Два']);
+    expect(folder.items.single.path, 'a/deep/two');
+    // A row keeps its place in the file when another is left out.
+    expect(folder.id, '0.1');
+    expect(folder.items.single.id, '0.1.0');
+    expect(tree.first!.path, 'a/one');
+    expect(tree.groupsOf('a/deep/two'), ['0', '0.1']);
+    expect(tree.groupsOf('top'), isEmpty);
+    // The title of an article is its heading, not its row.
     expect(tree.article('a/deep/two')!.title, 'Вторая');
+    // A file no row links to is not in the tree, a link still reaches it.
+    expect(tree.groupsOf('lonely'), isEmpty);
+    expect(tree.article('lonely'), isNotNull);
+    expect(resolveDocLink('/lonely', tree: tree)!.article!.path, 'lonely');
+  });
+
+  test('a sidebar that is not a list of named rows is an error', () {
+    bool all(String _) => true;
+    expect(() => parseSidebar('{}', all), throwsFormatException);
+    expect(() => parseSidebar('[1]', all), throwsFormatException);
+    expect(() => parseSidebar('[{"link": "/a"}]', all), throwsFormatException);
+    expect(() => parseSidebar('[', all), throwsFormatException);
+    expect(parseSidebar('[]', all), isEmpty);
+  });
+
+  test('a link finds its article from where the text stands', () {
+    final tree = _tree({
+      'docs/ru/a/one.md': '# Первая\n',
+      'docs/ru/a/two.md': '# Вторая\n',
+      'docs/ru/b/three.md': '# Третья\n',
+    });
+    String? at(String url, [String? from]) =>
+        resolveDocLink(url, tree: tree, from: from)?.article?.path;
+    expect(at('/b/three'), 'b/three');
+    expect(at('/b/three.md'), 'b/three');
+    expect(at('/b/three/'), 'b/three');
+    expect(at('two', 'a/one'), 'a/two');
+    expect(at('../b/three', 'a/one'), 'b/three');
+    expect(at('/missing'), isNull);
+    expect(resolveDocLink('#Часть')!.anchor, 'часть');
+    expect(resolveDocLink('#'), isNull);
+    expect(resolveDocLink('https://x.y')!.outside, Uri.parse('https://x.y'));
+    expect(resolveDocLink('/b/three#раздел', tree: tree)!.anchor, 'раздел');
   });
 
   test('another language falls back to Russian path by path', () {
@@ -53,6 +106,8 @@ void main() {
       'docs/ru/a.md': '# Русская\n',
       'docs/ru/b.md': '# Вторая\n',
       'docs/en/a.md': '# English\n',
+      'docs/ru/sidebar.json':
+          '[{"text": "А", "link": "/a"}, {"text": "Б", "link": "/b"}]',
     };
     final tree = DocsTree.build(
       keys: files.keys,
@@ -61,6 +116,15 @@ void main() {
     );
     expect(tree.article('a')!.title, 'English');
     expect(tree.article('b')!.title, 'Вторая');
+    // No English sidebar: the Russian one serves.
+    expect([for (final n in tree.sidebar) n.text], ['А', 'Б']);
+    files['docs/en/sidebar.json'] = '[{"text": "B", "link": "/b"}]';
+    final own = DocsTree.build(
+      keys: files.keys,
+      language: 'en',
+      read: (key) => files[key]!,
+    );
+    expect([for (final n in own.sidebar) n.text], ['B']);
   });
 
   test('a tip belongs to a screen by its route pattern', () {
@@ -104,25 +168,53 @@ void main() {
         }
         expect(pubspec, contains('- $path/'), reason: path);
       }
+      expect(pubspec, contains('- docs/ru/sidebar.json'));
       expect(pubspec, isNot(contains('docs/ru/definitions.md')));
       expect(pubspec, isNot(contains('docs/ru/conception/')));
       expect(pubspec, isNot(contains('docs/ru/index.md')));
     });
 
-    test('the tree has the three parts and no user guide', () async {
-      final tree = await library.docs('ru');
-      expect(
-        [for (final f in tree.root.folders) f.title],
-        ['Deployment', 'Developer', 'Development pepeunit'],
-      );
-      expect(tree.root.articles, isEmpty);
-      expect(tree.article('definitions'), isNull);
-      expect(tree.article('conception/overview'), isNull);
-      expect(tree.article('development-pepeunit/maps'), isNotNull);
-      for (final article in tree.articles) {
-        expect(article.path, isNot(startsWith('user/')));
-      }
-    });
+    test(
+      'the sidebar lists every bundled article once, and only them',
+      () async {
+        final tree = await library.docs('ru');
+        expect(
+          [for (final n in tree.sidebar) n.text],
+          ['Развёртывание', 'Разработчику Unit', 'Разработчику Pepeunit'],
+        );
+        expect(tree.article('definitions'), isNull);
+        expect(tree.article('conception/overview'), isNull);
+        expect(tree.article('development-pepeunit/maps'), isNotNull);
+        for (final article in tree.articles) {
+          expect(article.path, isNot(startsWith('user/')));
+        }
+        // The file is read as written: a mistyped link would be left out of
+        // the tree without a word, so every link is checked against the files.
+        final listed = <String>[];
+        void walk(Object? rows) {
+          for (final row in rows as List) {
+            final link = (row as Map)['link'] as String?;
+            if (link != null) {
+              listed.add(docPathOf(link));
+              expect(
+                File('docs/ru/${docPathOf(link)}.md').existsSync(),
+                isTrue,
+                reason: link,
+              );
+            }
+            if (row['items'] != null) walk(row['items']);
+          }
+        }
+
+        walk(jsonDecode(File('docs/ru/sidebar.json').readAsStringSync()));
+        expect(listed.toSet().length, listed.length, reason: 'a link twice');
+        expect(
+          tree.articles.map((a) => a.path).toSet(),
+          listed.toSet(),
+          reason: 'an article has no row, or a row has no article',
+        );
+      },
+    );
 
     test(
       'every article opens with its title and its links lead somewhere',
@@ -219,7 +311,7 @@ void main() {
       await tester.pumpAndSettle();
     }
 
-    testWidgets('Library: menu, documentation tree, an article', (
+    testWidgets('Library: documentation is a full screen with a sidebar', (
       tester,
     ) async {
       await start(tester);
@@ -236,20 +328,135 @@ void main() {
       expect(find.text('.md'), findsOneWidget);
       await tester.tap(find.bySemanticsLabel('Документация'));
       await settle(tester);
-      expect(find.bySemanticsLabel('Концепция'), findsNothing);
-      expect(find.bySemanticsLabel('Development pepeunit'), findsOneWidget);
-      expect(find.bySemanticsLabel('Поддержка проекта'), findsNothing);
-      await tester.tap(find.bySemanticsLabel('Developer'));
-      await settle(tester);
-      await tester.tap(find.bySemanticsLabel('Алгоритм создания Unit'));
-      await settle(tester);
-      expect(find.byType(LibraryModal), findsOneWidget);
+      // No cells: the sidebar, the first article, the bar.
+      expect(find.byType(DocsPage), findsOneWidget);
       expect(find.byType(MdView), findsOneWidget);
-      // Close returns to the folder.
+      expect(find.text('Конфигурации Nginx'), findsOneWidget);
+      expect(find.text('Развёртывание'), findsWidgets);
+      // The article is always rendered: there is no switch to its source.
+      expect(find.text('Рендер'), findsNothing);
+      expect(find.text('Исходник'), findsNothing);
+      expect(find.bySemanticsLabel('Закрыть'), findsOneWidget);
+      expect(find.bySemanticsLabel('Назад'), findsNothing);
+      // Groups the file leaves folded are folded.
+      expect(find.text('Docker'), findsOneWidget);
+      expect(find.text('Установка Docker и Compose'), findsNothing);
+      await tester.tap(find.text('Docker'));
+      await tester.pumpAndSettle();
+      expect(find.text('Установка Docker и Compose'), findsOneWidget);
+      await tester.tap(find.text('Установка Docker и Compose'));
+      await settle(tester);
+      expect(find.text('Установка Docker и Compose'), findsWidgets);
+      // Back is the picture of the Back cell, not a word.
+      expect(find.text('Назад'), findsNothing);
+      expect(find.bySemanticsLabel('Назад'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Назад'));
+      await tester.pumpAndSettle();
+      expect(find.bySemanticsLabel('Назад'), findsNothing);
+      // Close returns to the Library menu.
       await tester.tap(find.bySemanticsLabel('Закрыть'));
       await settle(tester);
-      expect(find.byType(LibraryModal), findsNothing);
-      expect(find.bySemanticsLabel('Алгоритм создания Unit'), findsOneWidget);
+      expect(find.byType(DocsPage), findsNothing);
+      expect(find.bySemanticsLabel('Документация'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    Future<void> openDocs(WidgetTester tester, Size size) async {
+      await start(tester);
+      tester.view.physicalSize = size;
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Библиотека'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Документация'));
+      await settle(tester);
+    }
+
+    // The layout has three stages, the way VitePress has: half of a 16:9
+    // screen, a large one, a phone.
+    testWidgets('Library: half a screen has the sidebar at the left edge', (
+      tester,
+    ) async {
+      await openDocs(tester, const Size(960, 540));
+      final row = find.text('Развёртывание').first;
+      expect(tester.getTopLeft(row).dx, lessThan(40));
+      // The scroll bar of the text is at the right edge of the screen.
+      expect(tester.getTopRight(find.byType(MdView)).dx, 960);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: a large screen centers the sidebar and the text', (
+      tester,
+    ) async {
+      await openDocs(tester, const Size(1920, 1080));
+      final row = find.text('Развёртывание').first;
+      expect(tester.getTopLeft(row).dx, greaterThan(200));
+      expect(tester.getTopRight(find.byType(MdView)).dx, 1920);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: a phone has the text alone, the sidebar is a mark', (
+      tester,
+    ) async {
+      await openDocs(tester, const Size(420, 800));
+      expect(find.text('Развёртывание'), findsNothing);
+      expect(tester.getTopRight(find.byType(MdView)).dx, 420);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: a link in an article leads to its row', (
+      tester,
+    ) async {
+      await start(tester);
+      await tester.tap(find.bySemanticsLabel('Библиотека'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Документация'));
+      await settle(tester);
+      // "Grafana Мониторинг" links to Prometheus, which sits in a folded
+      // group: following the link unfolds it.
+      await tester.tap(find.text('Мониторинг'));
+      await settle(tester);
+      expect(find.text('Зависимости'), findsOneWidget);
+      expect(find.text('PostgreSQL'), findsNothing);
+      TapGestureRecognizer? link;
+      void walk(InlineSpan span) {
+        if (span is TextSpan) {
+          if (span.recognizer is TapGestureRecognizer &&
+              span.toPlainText() == 'Prometheus') {
+            link = span.recognizer as TapGestureRecognizer;
+          }
+          span.children?.forEach(walk);
+        }
+      }
+
+      for (final rich in tester.widgetList<RichText>(find.byType(RichText))) {
+        walk(rich.text);
+      }
+      link!.onTap!();
+      await tester.pumpAndSettle();
+      expect(find.text('PostgreSQL'), findsOneWidget);
+      expect(find.bySemanticsLabel('Назад'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: on a narrow screen the sidebar opens over the text', (
+      tester,
+    ) async {
+      await start(tester);
+      tester.view.physicalSize = const Size(500, 800);
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Библиотека'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Документация'));
+      await settle(tester);
+      expect(find.text('Конфигурации Nginx'), findsNothing);
+      await tester.tap(find.bySemanticsLabel('Разделы'));
+      await tester.pumpAndSettle();
+      expect(find.text('Конфигурации Nginx'), findsOneWidget);
+      await tester.tap(find.text('Мониторинг'));
+      await settle(tester);
+      // A pick closes the sidebar again.
+      expect(find.text('Конфигурации Nginx'), findsNothing);
+      expect(find.bySemanticsLabel('Назад'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
