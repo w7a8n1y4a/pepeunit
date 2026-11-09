@@ -9,10 +9,19 @@ import '../../hive/hint.dart';
 import '../../hive/marks.dart';
 
 /// The error message, drawn inside its own cell. The rest of the menu stays put.
+///
+/// [detail] is the raw text of the failure behind the message: the status and
+/// the body. It is not drawn, and the copy button adds it for a bug report.
 class ErrorCell extends StatefulWidget {
-  const ErrorCell({required this.message, required this.copyLabel, super.key});
+  const ErrorCell({
+    required this.message,
+    required this.copyLabel,
+    this.detail,
+    super.key,
+  });
 
   final String message;
+  final String? detail;
   final String copyLabel;
 
   @override
@@ -30,7 +39,11 @@ class _ErrorCellState extends State<ErrorCell> {
   }
 
   Future<void> _copy() async {
-    await Clipboard.setData(ClipboardData(text: widget.message));
+    final detail = widget.detail;
+    final text = detail == null
+        ? widget.message
+        : '${widget.message}\n\n$detail';
+    await Clipboard.setData(ClipboardData(text: text));
     if (!mounted) return;
     setState(() => _copied = true);
     _copiedReset?.cancel();

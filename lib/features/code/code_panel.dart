@@ -2,6 +2,7 @@ import 'package:flutter/widgets.dart';
 
 import '../../app_model.dart';
 import '../../app_scope.dart';
+import '../../locale/failure.dart';
 import 'code_modal.dart';
 
 /// What every panel over a [CodeModal] does the same way: read once, run a
@@ -37,7 +38,7 @@ mixin CodePanelState<T extends StatefulWidget> on State<T> {
       if (mounted) {
         setState(() {
           loading = false;
-          failure = '$error';
+          failure = describeFailure('$error', model.vault.language);
         });
       }
       return null;
@@ -68,7 +69,10 @@ mixin CodePanelState<T extends StatefulWidget> on State<T> {
       if (!mounted) return false;
       setState(() {
         pending = null;
-        failure = '$error';
+        failure = describeFailure(
+          '$error',
+          AppScope.of(context).vault.language,
+        );
       });
       return false;
     }

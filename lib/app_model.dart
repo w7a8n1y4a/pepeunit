@@ -23,6 +23,7 @@ import 'instances/link.dart';
 import 'instances/network_view.dart';
 import 'instances/portrait.dart';
 import 'instances/session.dart';
+import 'locale/failure.dart';
 import 'locale/languages.dart';
 import 'registry/registry_view.dart';
 import 'registry/repo.dart';
@@ -1321,6 +1322,19 @@ class AppModel extends ChangeNotifier {
     await _commit();
   }
 
+  /// Reads the code names the backend lists, once per run. A failure is
+  /// ignored: an error with a code then gets the general line of its status.
+  Future<void> _learnErrorCodes(PepeunitApi client) async {
+    if (ErrorCatalog.loaded) return;
+    try {
+      ErrorCatalog.learn(await client.errorCodes());
+    } catch (_) {}
+  }
+
+  /// One line of a sync report: the host, then what went wrong in words.
+  String _problem(String host, Object error) =>
+      '$host: ${describeFailure('$error', vault.language)}';
+
   Future<void> refreshTarget() async {
     final current = vault.target;
     if (current == null) return;
@@ -1330,6 +1344,7 @@ class AppModel extends ChangeNotifier {
     notifyListeners();
     try {
       final client = api(originOf(current.url));
+      unawaited(_learnErrorCodes(client));
       final portrait = await client.portrait();
       if (ticket != _ticket) return;
       final effective = targetSettings == null
@@ -1434,7 +1449,7 @@ class AppModel extends ChangeNotifier {
         try {
           await job;
         } catch (error) {
-          problems.add('$host: $error');
+          problems.add(_problem(host, error));
         }
       }
 
@@ -1446,7 +1461,7 @@ class AppModel extends ChangeNotifier {
       await _commit();
       return SyncReport(problems.isEmpty ? 1 : 0, problems);
     } catch (error) {
-      return SyncReport(0, ['$host: $error']);
+      return SyncReport(0, [_problem(host, error)]);
     }
   }
 
@@ -1479,7 +1494,7 @@ class AppModel extends ChangeNotifier {
           );
           if (pngSize(bytes) != null) png = bytes;
         } catch (error) {
-          problems.add('$host: $error');
+          problems.add(_problem(host, error));
         }
       }
 
@@ -1489,7 +1504,7 @@ class AppModel extends ChangeNotifier {
             await client.notificationSettings(token),
           );
         } catch (error) {
-          problems.add('$host: $error');
+          problems.add(_problem(host, error));
         }
       }
 
@@ -1502,7 +1517,7 @@ class AppModel extends ChangeNotifier {
       await _commit();
       return SyncReport(problems.isEmpty ? 1 : 0, problems);
     } catch (error) {
-      return SyncReport(0, ['$host: $error']);
+      return SyncReport(0, [_problem(host, error)]);
     }
   }
 

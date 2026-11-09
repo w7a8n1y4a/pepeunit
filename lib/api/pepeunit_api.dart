@@ -15,13 +15,22 @@ import 'backend_version.dart';
 class ApiException implements Exception {
   ApiException(this.status, this.body);
 
+  /// A failure the client found itself. [text] is already a sentence for the
+  /// user, so it carries no status.
+  ApiException.local(String text) : status = 0, body = text;
+
   final int status;
   final String body;
 
   bool get missingUser => status == 404 || body.contains('does not exist');
 
+  /// `HTTP <status> <body>`, which `describeFailure` turns into a message by
+  /// the backend code in the body. A local failure is its own text.
   @override
-  String toString() => body.isEmpty ? 'HTTP $status' : body;
+  String toString() {
+    if (status == 0) return body;
+    return body.isEmpty ? 'HTTP $status' : 'HTTP $status $body';
+  }
 }
 
 class PepeunitApi {
@@ -128,12 +137,18 @@ class PepeunitApi {
     final json = _object(response);
     final version = json['version'] as String? ?? '';
     if (version.isNotEmpty && !backendCompatible(version)) {
-      throw ApiException(
-        response.statusCode,
-        'Бекенд $version вне окна >= 1.5.0 < 1.6.0',
+      throw ApiException.local(
+        'Версия сервера $version не подходит этому клиенту: нужна '
+        '>= 1.5.0 и < 1.6.0. Обновите клиент или выберите другой инстанс.',
       );
     }
     return portraitFromJson(json, url: '$origin$instanceCurrentPath');
+  }
+
+  /// Error code names with their numbers. Public, like the portrait.
+  Future<Map<String, Object?>> errorCodes() async {
+    final response = await _send('GET', '/error_codes', json: false);
+    return _object(response);
   }
 
   Future<({int total, List<String> items})> peerUrls({
@@ -1380,9 +1395,9 @@ class PepeunitApi {
   void _ensureOk(http.Response response) {
     if (response.statusCode >= 200 && response.statusCode < 300) {
       if (response.body.trimLeft().startsWith('<')) {
-        throw ApiException(
-          response.statusCode,
-          'Сервер вернул страницу, а не JSON',
+        throw ApiException.local(
+          'Адрес не похож на сервер Pepeunit: вместо данных пришла '
+          'веб-страница. Проверьте адрес инстанса и настройки прокси.',
         );
       }
       return;

@@ -34,7 +34,8 @@ DataPipe в модалке редактора:
 
 ## Вывод ошибок
 
-- на основе error_codes ручки, к коду привязывается текст ошибки на нужном языке
+- Тексты ошибок на en: добавить ключ `en` в `errorTexts` (`lib/locale/error_texts.dart`) и общие строки в `lib/locale/failure.dart`
+- Строки проверки DataPipe (`PipeIssue`, `pipeIssueText`) пока показывают сырой текст бекенда, их можно переводить по `error_code`
 
 ## Чек перед релизом
 

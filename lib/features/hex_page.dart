@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../hive/hex_motion.dart';
 import '../hive/hex_order.dart';
 import '../hive/hex_scene.dart';
+import '../locale/failure.dart';
 import 'account/error_reader.dart';
 
 /// The shared hex renderer. The background is under the router.
@@ -65,6 +66,7 @@ void appendError(
   required bool wide,
 }) {
   if (message == null) return;
+  final shown = describeFailure(message, language);
   final taken = [for (final slot in slots) (slot.q, slot.r)];
   final spot = _errorSpot(taken, wide: wide);
   slots.add(
@@ -78,7 +80,8 @@ void appendError(
       icon: 'assets/icons/status/error.svg',
       body: open
           ? ErrorCell(
-              message: message,
+              message: shown,
+              detail: shown == message ? null : message,
               copyLabel: text(language, 'Скопировать', 'Copy'),
             )
           : null,
