@@ -357,8 +357,9 @@ void main() {
       await tester.tap(find.bySemanticsLabel('Библиотека'));
       await tester.pumpAndSettle();
       for (final label in [
-        'Презентация',
         'Документация',
+        'Дерево 6 путей',
+        'Презентация',
         'Инструменты',
         'О приложении',
       ]) {
@@ -826,7 +827,7 @@ void main() {
       },
     );
 
-    testWidgets('Library: tools hold the generator and two places', (
+    testWidgets('Library: tools hold the generator', (
       tester,
     ) async {
       await start(tester);
@@ -834,14 +835,11 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.bySemanticsLabel('Инструменты'));
       await tester.pumpAndSettle();
-      for (final label in [
-        'Генератор README',
-        'Дерево',
-        'Поиск пути',
-        'Назад',
-      ]) {
+      for (final label in ['Генератор README', 'Назад']) {
         expect(find.bySemanticsLabel(label), findsOneWidget);
       }
+      expect(find.bySemanticsLabel('Дерево 6 путей'), findsNothing);
+      expect(find.bySemanticsLabel('Поиск пути'), findsNothing);
       // Without a sign-in the generator says so and opens no file dialog.
       await tester.tap(find.bySemanticsLabel('Генератор README'));
       await tester.pumpAndSettle();

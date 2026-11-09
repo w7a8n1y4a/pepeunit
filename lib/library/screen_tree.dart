@@ -1275,12 +1275,18 @@ const screenTree = <ScreenNode>[
     'README generator',
     need: ScreenNeed.signedIn,
   ),
-  ScreenNode('/library/tools/tree', ScreenKind.list, 'Дерево', 'Tree'),
   ScreenNode(
     '/library/docs',
     ScreenKind.text,
     'Документация',
     'Documentation',
+    open: true,
+  ),
+  ScreenNode(
+    '/library/tree',
+    ScreenKind.list,
+    'Дерево 6 путей',
+    'Tree of 6 paths',
     open: true,
   ),
 ];

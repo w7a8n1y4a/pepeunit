@@ -21,9 +21,18 @@ const _innerHex = 13.0;
 const _leafHex = 10.0;
 const _cellHex = 8.0;
 
-/// Names stay this tall on the screen, whatever the zoom, in pixels.
-const _nameBig = 14.0;
-const _nameSmall = 12.0;
+/// Names are drawn on the picture, in its own units, so they grow and shrink
+/// with the zoom like the hexagons. A leaf is as tall as the room two
+/// neighbours leave each other on the outer ring.
+const _nameBig = 20.0;
+const _nameInner = 13.0;
+const _nameLeaf = 10.0;
+
+/// A name shorter than this many pixels on the screen is not drawn: it could
+/// not be read. A picked row and its way are never smaller than
+/// [_namePicked].
+const _nameLeast = 6.5;
+const _namePicked = 10.0;
 
 /// Which rows the picture shows at full strength.
 enum TreeShow { all, yes, no }
@@ -118,7 +127,8 @@ class ScreenTreeMap extends StatefulWidget {
   /// Addresses of the rows this session may use.
   final Set<String> available;
   final TreeShow show;
-  final ValueChanged<ScreenNode> onSelect;
+  /// A tap on a row picks it; a tap on nothing picks null.
+  final ValueChanged<ScreenNode?> onSelect;
 
   @override
   State<ScreenTreeMap> createState() => ScreenTreeMapState();
@@ -127,13 +137,32 @@ class ScreenTreeMap extends StatefulWidget {
 class ScreenTreeMapState extends State<ScreenTreeMap> {
   final controller = TransformationController();
   late final List<TreeSpot> _spots = radialTree(widget.map);
-  final _names = <(Rect, String)>[];
+  final _names = <_Label>[];
   var _points = const <String, Offset>{};
   var _canvas = Size.zero;
   var _size = Size.zero;
 
   /// Shows the whole tree again.
   void fit() => controller.value = treeFit(_size);
+
+  /// Brings the row at [path] to the middle of the viewport, zoomed in until
+  /// its neighbours are told apart, and never farther out than it was.
+  void focus(String path) {
+    final at = _points[path];
+    if (at == null || _size.isEmpty) return;
+    final zoom = max(
+      controller.value.getMaxScaleOnAxis(),
+      treeFitScale(_size) * 5,
+    );
+    final dx = _size.width / 2 - at.dx * zoom;
+    final dy = _size.height / 2 - at.dy * zoom;
+    controller.value = Matrix4(
+      zoom, 0, 0, 0, //
+      0, zoom, 0, 0, //
+      0, 0, zoom, 0, //
+      dx, dy, 0, 1,
+    );
+  }
 
   /// The spots on a canvas of this shape: the outer ring is an oval on a
   /// screen that is not square.
@@ -160,9 +189,9 @@ class ScreenTreeMapState extends State<ScreenTreeMap> {
   }
 
   void _tap(Offset at) {
-    for (final (rect, path) in _names) {
-      if (rect.contains(at)) {
-        widget.onSelect(widget.map.node(path)!);
+    for (final label in _names) {
+      if (label.contains(at)) {
+        widget.onSelect(widget.map.node(label.path)!);
         return;
       }
     }
@@ -178,7 +207,7 @@ class ScreenTreeMapState extends State<ScreenTreeMap> {
         bestGap = gap;
       }
     }
-    if (best != null) widget.onSelect(best.node);
+    widget.onSelect(best?.node);
   }
 
   bool _faded(String path) => _fadedIn(widget.show, widget.available, path);
@@ -248,6 +277,61 @@ bool _fadedIn(TreeShow show, Set<String> available, String path) {
   }
 }
 
+/// A name on the picture: a box of half sides [hw] and [hh] around [at],
+/// turned by [angle] radians.
+class _Label {
+  _Label(this.path, this.at, this.angle, this.hw, this.hh)
+    : _cos = cos(angle),
+      _sin = sin(angle);
+
+  final String path;
+  final Offset at;
+  final double angle;
+  final double hw;
+  final double hh;
+  final double _cos;
+  final double _sin;
+
+  /// [point] in the frame of the box: along the text and across it.
+  Offset _local(Offset point) {
+    final d = point - at;
+    return Offset(d.dx * _cos + d.dy * _sin, -d.dx * _sin + d.dy * _cos);
+  }
+
+  bool contains(Offset point) {
+    final local = _local(point);
+    return local.dx.abs() <= hw && local.dy.abs() <= hh;
+  }
+
+  /// How far [point] is from the box, zero inside.
+  double near(Offset point) {
+    final local = _local(point);
+    final dx = max(local.dx.abs() - hw, 0.0);
+    final dy = max(local.dy.abs() - hh, 0.0);
+    return sqrt(dx * dx + dy * dy);
+  }
+
+  /// Whether two boxes share an area: no axis of either box parts them.
+  bool overlaps(_Label other) {
+    final d = other.at - at;
+    for (final box in [this, other]) {
+      for (final axis in [
+        Offset(box._cos, box._sin),
+        Offset(-box._sin, box._cos),
+      ]) {
+        final reach = _radiusOn(axis) + other._radiusOn(axis);
+        if ((d.dx * axis.dx + d.dy * axis.dy).abs() > reach) return false;
+      }
+    }
+    return true;
+  }
+
+  /// Half the width of the box when seen along the unit [axis].
+  double _radiusOn(Offset axis) =>
+      hw * (axis.dx * _cos + axis.dy * _sin).abs() +
+      hh * (-axis.dx * _sin + axis.dy * _cos).abs();
+}
+
 class _TreePainter extends CustomPainter {
   _TreePainter({
     required this.spots,
@@ -261,7 +345,11 @@ class _TreePainter extends CustomPainter {
     required this.fit,
     required this.viewport,
     required this.names,
-  }) : super(repaint: controller);
+  }) : route = {
+         if (selected != null)
+           for (final node in map.trail(selected)) node.path,
+       },
+       super(repaint: controller);
 
   final List<TreeSpot> spots;
   final Map<String, Offset> points;
@@ -274,8 +362,11 @@ class _TreePainter extends CustomPainter {
   final double fit;
   final Size viewport;
 
+  /// The way from the home screen to the picked row.
+  final Set<String> route;
+
   /// Where the names were drawn, for the tap to find.
-  final List<(Rect, String)> names;
+  final List<_Label> names;
 
   static const _base = 40.0;
   static final _text = <String, TextPainter>{};
@@ -336,6 +427,18 @@ class _TreePainter extends CustomPainter {
       ).withValues(alpha: 0.5 * strength);
       canvas.drawLine(points[parent]!, points[spot.node.path]!, edge);
     }
+    if (route.length > 1) {
+      final way = Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 5
+        ..strokeCap = StrokeCap.round
+        ..color = const Color(0xFFFFFFFF);
+      for (final path in route) {
+        final parent = map.parentPath(path);
+        if (parent == null) continue;
+        canvas.drawLine(points[parent]!, points[path]!, way);
+      }
+    }
     for (final spot in spots) {
       final node = spot.node;
       final center = points[node.path]!;
@@ -365,9 +468,15 @@ class _TreePainter extends CustomPainter {
     _paintNames(canvas, matrix, zoom);
   }
 
-  /// Names, horizontal, at the size of the text on the screen. The rows nearer
-  /// the middle are named first, and a name that would lie on another name or
-  /// on a hexagon is left for a deeper zoom.
+  /// Names along the radius, in the units of the picture, so they grow and
+  /// shrink with the zoom like the hexagons. A name starts at its hexagon and
+  /// runs outward, away from the home screen, and turns over on the left half
+  /// so it is never upside down. Parallel names of neighbours on a ring stand
+  /// side by side, so far more of them fit than of horizontal ones. The rows
+  /// nearer the middle are named first; a name too small to read, or one that
+  /// would lie on another name or on a hexagon, waits for a deeper zoom. The
+  /// picked row and its way are always named. The home screen is named below
+  /// itself, level.
   void _paintNames(Canvas canvas, Matrix4 matrix, double zoom) {
     names.clear();
     final inverse = Matrix4.copy(matrix);
@@ -375,7 +484,7 @@ class _TreePainter extends CustomPainter {
     final seen = MatrixUtils.transformRect(
       inverse,
       Offset.zero & viewport,
-    ).inflate(60 / zoom);
+    ).inflate(max(60 / zoom, 160));
     final inView = [
       for (final spot in spots)
         if (seen.contains(points[spot.node.path]!) &&
@@ -387,64 +496,88 @@ class _TreePainter extends CustomPainter {
     ];
     final order = [...inView]
       ..sort((a, b) {
-        final pickedA = a.node.path == selected ? 0 : 1;
-        final pickedB = b.node.path == selected ? 0 : 1;
+        int rank(TreeSpot spot) => spot.node.path == selected
+            ? 0
+            : route.contains(spot.node.path)
+            ? 1
+            : 2;
+        final pickedA = rank(a);
+        final pickedB = rank(b);
         if (pickedA != pickedB) return pickedA - pickedB;
         return a.depth - b.depth;
       });
-    final middle = points[screenRoot]!.dx;
-    final placed = <Rect>[];
-    final gap = 4 / zoom;
+    final middle = points[screenRoot]!;
+    final placed = <_Label>[];
+    const gap = 5.0;
     for (final spot in order) {
       final node = spot.node;
       final center = points[node.path]!;
       final radius = _hexOf(spot);
-      final px = spot.depth <= 1 ? _nameBig : _nameSmall;
+      final base = spot.depth <= 1
+          ? _nameBig
+          : spot.isLeaf
+          ? _nameLeaf
+          : _nameInner;
+      final strong = node.path == selected || route.contains(node.path);
+      // A name too small to read waits for a deeper zoom, except the way.
+      if (!strong && base * zoom < _nameLeast) continue;
+      final units = strong ? max(base, _namePicked / zoom) : base;
       final text = _name(
         node.title(language),
         available.contains(node.path)
             ? const Color(0xFFFFFFFF)
             : const Color(0xFFA1A1AA),
       );
-      final k = px / zoom / _base;
+      final k = units / _base;
       final width = text.width * k;
       final height = text.height * k;
-      final right = spot.depth == 0 || center.dx >= middle;
-      final left = spot.depth == 0
-          ? center.dx - width / 2
-          : right
-          ? center.dx + radius + gap
-          : center.dx - radius - gap - width;
-      final top = spot.depth == 0
-          ? center.dy + radius + gap
-          : center.dy - height / 2;
-      final rect = Rect.fromLTWH(left, top, width, height);
-      final room = rect.inflate(gap / 2);
+      final Offset at;
+      final double angle;
+      if (spot.depth == 0) {
+        at = center + Offset(0, radius + gap + height / 2);
+        angle = 0;
+      } else {
+        // The way out is the line from the middle through the row, so an oval
+        // picture keeps its names on its rays.
+        final out = center - middle;
+        final ray = out.distance == 0 ? 0.0 : atan2(out.dy, out.dx);
+        final reach = radius + gap + width / 2;
+        at = center + Offset(cos(ray), sin(ray)) * reach;
+        angle = ray;
+      }
+      final label = _Label(
+        node.path,
+        at,
+        angle,
+        width / 2 + gap / 2,
+        height / 2 + gap / 2,
+      );
       var free = true;
       for (final other in placed) {
-        if (room.overlaps(other)) {
+        if (label.overlaps(other)) {
           free = false;
           break;
         }
       }
       if (free) {
-        for (final (at, size) in circles) {
-          if (at == center) continue;
-          final nearX = at.dx.clamp(room.left, room.right);
-          final nearY = at.dy.clamp(room.top, room.bottom);
-          if ((Offset(nearX, nearY) - at).distance < size) {
+        for (final (circle, size) in circles) {
+          if (circle == center) continue;
+          if (label.near(circle) < size) {
             free = false;
             break;
           }
         }
       }
       if (!free) continue;
-      placed.add(rect);
-      names.add((rect, node.path));
+      placed.add(label);
+      names.add(label);
+      // Text reads left to right: a name on the left half turns over.
+      final flip = cos(angle) < 0;
       canvas.save();
-      canvas.translate(rect.left, rect.top);
+      canvas.translate(at.dx, at.dy);
+      canvas.rotate(flip ? angle + pi : angle);
       canvas.scale(k);
-      text.paint(canvas, Offset.zero);
+      text.paint(canvas, Offset(-text.width / 2, -text.height / 2));
       canvas.restore();
     }
   }

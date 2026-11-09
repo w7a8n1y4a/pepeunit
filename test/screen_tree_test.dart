@@ -14,8 +14,10 @@ import 'package:pepeunit_client/navigation/sections.dart';
 import 'package:pepeunit_client/features/library/tip_modal.dart';
 import 'package:pepeunit_client/features/library/tree_map.dart';
 import 'package:pepeunit_client/features/library/tree_page.dart';
+import 'package:pepeunit_client/features/library/tree_search.dart';
 import 'package:pepeunit_client/library/tree_layout.dart';
 import 'package:pepeunit_client/library/library.dart';
+import 'package:pepeunit_client/library/screen_search.dart';
 import 'package:pepeunit_client/library/screen_tree.dart';
 import 'package:pepeunit_client/main.dart';
 
@@ -134,6 +136,7 @@ void main() {
           '/library/about',
           '/library/tools',
           '/library/docs',
+          '/library/tree',
         ],
       );
     });
@@ -341,11 +344,90 @@ void main() {
     });
   });
 
+  group('the path search', () {
+    List<String> find(String query, {int limit = 200, String language = 'ru'}) =>
+        [
+          for (final node in searchScreens(
+            screenMap,
+            query,
+            limit: limit,
+            language: language,
+          ))
+            node.path,
+        ];
+
+    test('an empty query finds nothing', () {
+      expect(find(''), isEmpty);
+      expect(find('   '), isEmpty);
+      expect(find('нет-такого-экрана'), isEmpty);
+    });
+
+    test('a name in either language finds its row', () {
+      expect(find('документация').first, '/library/docs');
+      expect(find('Documentation').first, '/library/docs');
+      expect(find('дерево 6').first, '/library/tree');
+      expect(find('Peer search').first, '/peers/search');
+    });
+
+    test('the address finds a row too', () {
+      expect(find('/peers/tune'), contains('/peers/tune'));
+      expect(find(':uuid/io/:io/pipe'), contains('/units/:uuid/io/:io/pipe'));
+    });
+
+    test('every word must meet, and a cell takes the names of its screen', () {
+      expect(find('новый аппарат создать'), contains('/units/new#create'));
+      expect(find('новый аппарат zzz'), isEmpty);
+    });
+
+    test('the nearest row to the home screen comes first', () {
+      final rows = find('аппарат');
+      expect(rows.first, '/units');
+      final depths = [
+        for (final path in rows) screenMap.trail(path).length,
+      ];
+      expect([...depths]..sort(), depths);
+      expect(find('аппарат', limit: 3).length, 3);
+    });
+
+    test('rows at one distance go alphabetically in the language', () {
+      final map = ScreenMap(const [
+        ScreenNode('/', ScreenKind.menu, 'Главная', 'Home', open: true),
+        ScreenNode('/b', ScreenKind.menu, 'Тест б', 'Test z'),
+        ScreenNode('/a', ScreenKind.menu, 'Тест а', 'Test y'),
+        ScreenNode('/a/c', ScreenKind.form, 'Тест в', 'Test e'),
+        ScreenNode('/a#k', ScreenKind.cell, 'Тест г', 'Test d'),
+      ]);
+      expect(
+        [for (final node in searchScreens(map, 'тест')) node.path],
+        ['/a', '/b', '/a/c', '/a#k'],
+      );
+      expect(
+        [
+          for (final node in searchScreens(map, 'test', language: 'en'))
+            node.path,
+        ],
+        ['/a', '/b', '/a#k', '/a/c'],
+      );
+    });
+
+    test('the way to a row is the names of its trail', () {
+      expect(
+        screenRouteText('ru', screenMap, '/library/tree'),
+        'Главная › Библиотека › Дерево 6 путей',
+      );
+      expect(
+        screenRouteText('en', screenMap, '/library/docs'),
+        'Home › Library › Documentation',
+      );
+      expect(screenRouteText('ru', screenMap, '/nowhere'), isEmpty);
+    });
+  });
+
   group('the page of the tree', () {
     test('the address keeps the picked row', () {
-      expect(treeLocation('/'), '/library/tools/tree');
+      expect(treeLocation('/'), '/library/tree');
       final location = Uri.parse(treeLocation('/units/:uuid/io'));
-      expect(location.path, '/library/tools/tree');
+      expect(location.path, '/library/tree');
       expect(location.queryParameters, {'node': '/units/:uuid/io'});
       final cell = Uri.parse(treeLocation('/units/new#create'));
       expect(cell.queryParameters, {'node': '/units/new#create'});
@@ -360,6 +442,10 @@ void main() {
       );
       expect(screen, startsWith('`/units/:uuid/io/:io`'));
       expect(screen, contains('Вид: Меню'));
+      expect(
+        screen,
+        contains('Путь: Главная › Аппараты › Аппарат › Входы и выходы › Вход'),
+      );
       expect(screen, contains('Доступ: нет, нужен вход'));
       expect(screen, contains('Открывается только через родителя'));
       final cell = treeCardText(
@@ -397,9 +483,7 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.bySemanticsLabel('Библиотека'));
       await tester.pumpAndSettle();
-      await tester.tap(find.bySemanticsLabel('Инструменты'));
-      await tester.pumpAndSettle();
-      await tester.tap(find.bySemanticsLabel('Дерево'));
+      await tester.tap(find.bySemanticsLabel('Дерево 6 путей'));
       await tester.pumpAndSettle();
     }
 
@@ -428,11 +512,57 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(TipModal), findsNothing);
 
-      // Close leaves the tree for the tools.
+      // Close leaves the tree for the Library.
       await tester.tap(find.bySemanticsLabel('Закрыть'));
       await tester.pumpAndSettle();
       expect(find.byType(TreePage), findsNothing);
-      expect(find.bySemanticsLabel('Генератор README'), findsOneWidget);
+      expect(find.bySemanticsLabel('Дерево 6 путей'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('the search modal picks a row, shows its way, no card', (
+      tester,
+    ) async {
+      await open(tester);
+      final state = tester.state<ScreenTreeMapState>(
+        find.byType(ScreenTreeMap),
+      );
+      final far = state.controller.value.getMaxScaleOnAxis();
+      expect(find.byType(TreeSearchPanel), findsNothing);
+      await tester.tap(find.bySemanticsLabel('Поиск пути'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TreeSearchPanel), findsOneWidget);
+      await tester.enterText(find.byType(TextField), 'документация');
+      await tester.pumpAndSettle();
+      final row = find.bySemanticsLabel('Документация');
+      expect(row, findsOneWidget);
+      expect(find.text('Главная › Библиотека › Документация'), findsOneWidget);
+      await tester.tap(row);
+      await tester.pumpAndSettle();
+      // The modal is closed, the card is not opened, the way is named.
+      expect(find.byType(TreeSearchPanel), findsNothing);
+      expect(find.byType(TipModal), findsNothing);
+      expect(find.text('Главная › Библиотека › Документация'), findsOneWidget);
+      expect(
+        state.controller.value.getMaxScaleOnAxis(),
+        greaterThan(far * 4.9),
+      );
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('the search modal says when nothing answers, and closes', (
+      tester,
+    ) async {
+      await open(tester);
+      await tester.tap(find.bySemanticsLabel('Поиск пути'));
+      await tester.pumpAndSettle();
+      expect(find.text('Введите название соты или адрес'), findsOneWidget);
+      await tester.enterText(find.byType(TextField), 'zzzzzz');
+      await tester.pumpAndSettle();
+      expect(find.textContaining('Ничего не найдено'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Закрыть поиск'));
+      await tester.pumpAndSettle();
+      expect(find.byType(TreeSearchPanel), findsNothing);
       expect(tester.takeException(), isNull);
     });
 

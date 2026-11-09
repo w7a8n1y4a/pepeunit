@@ -12,6 +12,7 @@ import '../code/code_modal.dart';
 import '../code/code_view.dart';
 import '../hex_page.dart';
 import 'library_modal.dart';
+import 'tree_page.dart';
 
 Color get libraryColor => sectionById('library')!.color;
 
@@ -35,7 +36,8 @@ void closeLibrary(BuildContext context, String home) {
 /// What the Library menu shows on top of itself.
 enum LibraryOpen { none, presentation }
 
-/// The first screen of the Library: presentation, documentation, tools, about.
+/// The first screen of the Library: documentation, the tree of 6 paths,
+/// presentation, tools, about.
 /// The presentation is a panel over this screen, so closing it returns here.
 class LibraryMenuPage extends StatefulWidget {
   const LibraryMenuPage({this.open = LibraryOpen.none, super.key});
@@ -85,8 +87,9 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
     final language = AppScope.of(context).vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
     final board = cardBoard(const [
-      'presentation',
       'docs',
+      'tree',
+      'presentation',
       'tools',
       'about',
     ], wide: wide);
@@ -111,6 +114,8 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
             // `go`, not `push`: the screen then moves between articles by
             // `go` too, and keeps its trail, because both name one page.
             context.go('/library/docs');
+          case 'tree':
+            context.push(treePath);
           case 'tools':
             context.push('/library/tools');
           case 'about':
@@ -209,6 +214,15 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
           r: slot.r,
           icon: 'assets/icons/objects/file.svg',
           center: '.md',
+        );
+      case 'tree':
+        return HexSlot(
+          id: 'tree',
+          title: libText(language, 'Дерево 6 путей'),
+          color: libraryColor,
+          q: slot.q,
+          r: slot.r,
+          icon: 'assets/icons/objects/tree.svg',
         );
       case 'tools':
         return HexSlot(

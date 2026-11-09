@@ -13,10 +13,8 @@ import '../../navigation/back.dart';
 import '../file_drop.dart';
 import '../hex_page.dart';
 import 'library_menu_page.dart';
-import 'tree_page.dart';
 
-/// The tools of the Library: the README.md generator, the tree of screens,
-/// and a cell that only holds a place for the path search.
+/// The tools of the Library: the README.md generator.
 class ToolsPage extends StatefulWidget {
   const ToolsPage({super.key});
 
@@ -35,7 +33,7 @@ class _ToolsPageState extends State<ToolsPage> {
   Widget build(BuildContext context) {
     final language = AppScope.of(context).vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
-    final board = cardBoard(const ['readme', 'tree', 'route'], wide: wide);
+    final board = cardBoard(const ['readme'], wide: wide);
     final slots = [for (final slot in board) _slot(slot, language)];
     appendError(
       slots,
@@ -70,7 +68,7 @@ class _ToolsPageState extends State<ToolsPage> {
           q: slot.q,
           r: slot.r,
         );
-      case 'readme':
+      default:
         return HexSlot(
           id: 'readme',
           title: libText(language, 'Генератор README'),
@@ -80,26 +78,6 @@ class _ToolsPageState extends State<ToolsPage> {
           r: slot.r,
           icon: 'assets/icons/objects/file.svg',
           center: '.md',
-        );
-      case 'tree':
-        return HexSlot(
-          id: 'tree',
-          title: libText(language, 'Дерево'),
-          color: libraryColor,
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/objects/tree.svg',
-        );
-      default:
-        return HexSlot(
-          id: 'route',
-          title: libText(language, 'Поиск пути'),
-          footer: libText(language, 'Скоро'),
-          color: libraryColor,
-          enabled: false,
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/actions/search.svg',
         );
     }
   }
@@ -112,8 +90,6 @@ class _ToolsPageState extends State<ToolsPage> {
         setState(() => _failureOpen = true);
       case 'readme':
         await _pick(language);
-      case 'tree':
-        context.push(treePath);
     }
   }
 

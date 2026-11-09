@@ -6,14 +6,16 @@ import 'package:go_router/go_router.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
+import '../../library/screen_search.dart';
 import '../../library/screen_tree.dart';
 import '../../locale/languages.dart';
 import '../code/code_modal.dart';
 import 'library_menu_page.dart';
 import 'tip_modal.dart';
 import 'tree_map.dart';
+import 'tree_search.dart';
 
-const treePath = '/library/tools/tree';
+const treePath = '/library/tree';
 
 /// Address of the tree with [node] picked. The home screen is the default and
 /// stays out of the query.
@@ -90,6 +92,12 @@ String treeCardText(
     '',
     '- ${_t(language, 'Вид', 'Kind')}: ${screenKindLabel(language, node.kind)}',
   ];
+  if (node.path != screenRoot) {
+    lines.add(
+      '- ${_t(language, 'Путь', 'Path')}: '
+      '${screenRouteText(language, map, node.path)}',
+    );
+  }
   if (node.isCell) {
     final screen = map.node(node.screenPath);
     if (screen != null) {
@@ -119,11 +127,13 @@ String treeCardText(
   return lines.join('\n');
 }
 
-/// The tree of every screen and cell of the client on one full screen: the
-/// round map (`ScreenTreeMap`), a switch of what it shows (all, available,
-/// closed), Fit and Close on top. A tap on a row opens its small card; the
-/// card offers Open for a screen that really opens. `?node=` opens the page
-/// with a row already picked.
+/// The tree of 6 paths: every screen and cell of the client on one full
+/// screen: the round map (`ScreenTreeMap`), a switch of what it shows (all,
+/// available, closed) at the bottom right, the path search, Fit and Close on
+/// top. A picked row, by a tap or by the search, wears the way from the home
+/// screen drawn white. A tap on a row opens its small card; the card offers Open for
+/// a screen that really opens. `?node=` opens the page with a row already
+/// picked.
 class TreePage extends StatefulWidget {
   const TreePage({required this.node, super.key});
 
@@ -139,9 +149,26 @@ class _TreePageState extends State<TreePage> {
   late ScreenNode? _picked = widget.node == screenRoot
       ? null
       : screenMap.node(widget.node);
+
+  /// The row whose small card is open. Closing the card keeps the pick.
+  late ScreenNode? _card = _picked;
+
+  /// Whether the modal of the path search is open.
+  var _searching = false;
   var _show = TreeShow.all;
   String? _openedFor;
   var _available = <String>{};
+
+  /// A row chosen in the search: the modal closes, the map moves to the row
+  /// and draws the way to it, and the card of the row stays closed.
+  void _found(ScreenNode node) {
+    setState(() {
+      _picked = node;
+      _card = null;
+      _searching = false;
+    });
+    _mapKey.currentState?.focus(node.path);
+  }
 
   Set<String> _reach() {
     final model = AppScope.of(context);
@@ -170,7 +197,8 @@ class _TreePageState extends State<TreePage> {
   Widget build(BuildContext context) {
     final language = AppScope.of(context).vault.language;
     final available = _reach();
-    final card = _picked;
+    final card = _card;
+    final picked = _picked;
     final size = MediaQuery.sizeOf(context);
     final font = max(12.0, size.shortestSide * 0.018);
     final total = screenMap.nodes.length;
@@ -195,10 +223,13 @@ class _TreePageState extends State<TreePage> {
               key: _mapKey,
               map: screenMap,
               language: language,
-              selected: card?.path,
+              selected: picked?.path,
               available: available,
               show: _show,
-              onSelect: (node) => setState(() => _picked = node),
+              onSelect: (node) => setState(() {
+                _picked = node;
+                _card = node;
+              }),
             ),
           ),
           Positioned(
@@ -208,27 +239,19 @@ class _TreePageState extends State<TreePage> {
             child: Row(
               children: [
                 Expanded(
-                  child: Wrap(
-                    children: [
-                      chip(
-                        TreeShow.all,
-                        _t(language, 'Все', 'All'),
-                        total,
-                        'button-tree-show-all',
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: font * 16),
+                      child: TreeSearchPill(
+                        label: _t(language, 'Поиск пути', 'Path search'),
+                        font: font,
+                        onTap: () => setState(() {
+                          _card = null;
+                          _searching = true;
+                        }),
                       ),
-                      chip(
-                        TreeShow.yes,
-                        _t(language, 'Доступные', 'Available'),
-                        yes,
-                        'button-tree-show-yes',
-                      ),
-                      chip(
-                        TreeShow.no,
-                        _t(language, 'Недоступные', 'Closed'),
-                        total - yes,
-                        'button-tree-show-no',
-                      ),
-                    ],
+                    ),
                   ),
                 ),
                 CodeWordButton(
@@ -240,7 +263,7 @@ class _TreePageState extends State<TreePage> {
                 CodeCloseMark(
                   label: _t(language, 'Закрыть', 'Close'),
                   extent: font * 2.2,
-                  onTap: () => closeLibrary(context, '/library/tools'),
+                  onTap: () => closeLibrary(context, '/library'),
                 ),
               ],
             ),
@@ -249,25 +272,71 @@ class _TreePageState extends State<TreePage> {
             left: font,
             right: font,
             bottom: font * 0.7,
-            child: IgnorePointer(
-              child: Text(
-                _t(
-                  language,
-                  'Заливка: открывается по адресу. Малая сота: кнопка или поле экрана. Тусклая: закрыта для этой сессии.',
-                  'Filled: opens from its address. Small: a button or a field of a screen. Dim: closed for this session.',
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Wrap(
+                  alignment: WrapAlignment.end,
+                  children: [
+                    chip(
+                      TreeShow.all,
+                      _t(language, 'Все', 'All'),
+                      total,
+                      'button-tree-show-all',
+                    ),
+                    chip(
+                      TreeShow.yes,
+                      _t(language, 'Доступные', 'Available'),
+                      yes,
+                      'button-tree-show-yes',
+                    ),
+                    chip(
+                      TreeShow.no,
+                      _t(language, 'Недоступные', 'Closed'),
+                      total - yes,
+                      'button-tree-show-no',
+                    ),
+                  ],
                 ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  color: hexMuted,
-                  fontFamily: 'OpenGost Type B',
-                  fontSize: font * 0.85,
-                  decoration: TextDecoration.none,
+                SizedBox(height: font * 0.3),
+                SizedBox(
+                  width: double.infinity,
+                  child: IgnorePointer(
+                    child: Text(
+                      picked != null && picked.path != screenRoot
+                          ? screenRouteText(language, screenMap, picked.path)
+                          : _t(
+                              language,
+                              'Заливка: открывается по адресу. Малая сота: кнопка или поле экрана. Тусклая: закрыта для этой сессии.',
+                              'Filled: opens from its address. Small: a button or a field of a screen. Dim: closed for this session.',
+                            ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        color: hexMuted,
+                        fontFamily: 'OpenGost Type B',
+                        fontSize: font * 0.85,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ),
                 ),
-              ),
+              ],
             ),
           ),
           if (card != null) _cardPanel(card, language, available),
+          if (_searching)
+            Positioned.fill(
+              child: TreeSearchPanel(
+                map: screenMap,
+                language: language,
+                font: font,
+                available: available,
+                onPick: _found,
+                onClose: () => setState(() => _searching = false),
+              ),
+            ),
         ],
       ),
     );
@@ -280,7 +349,7 @@ class _TreePageState extends State<TreePage> {
       title: card.title(language),
       color: treeColorOf(card, map),
       source: treeCardText(language, card, map, available: yes),
-      onClose: () => setState(() => _picked = null),
+      onClose: () => setState(() => _card = null),
       actions: (font) => [
         if (!card.isCell && card.open && yes && card.path != treePath)
           CodeWordButton(

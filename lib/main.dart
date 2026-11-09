@@ -675,13 +675,11 @@ class _PepeunitAppState extends State<PepeunitApp> {
           GoRoute(
             path: 'tools',
             builder: (context, state) => const ToolsPage(),
-            routes: [
-              GoRoute(
-                path: 'tree',
-                builder: (context, state) =>
-                    TreePage(node: state.uri.queryParameters['node'] ?? '/'),
-              ),
-            ],
+          ),
+          GoRoute(
+            path: 'tree',
+            builder: (context, state) =>
+                TreePage(node: state.uri.queryParameters['node'] ?? '/'),
           ),
           GoRoute(
             path: 'docs',
