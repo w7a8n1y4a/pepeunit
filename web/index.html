@@ -29,6 +29,15 @@
       font-display: block;
     }
 
+    /* A long press is the tip gesture. Without this, a phone browser takes
+       it for a text selection or a context menu and cancels the touch. */
+    html, body, flt-glass-pane {
+      -webkit-touch-callout: none;
+      -webkit-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+
     html, body {
       margin: 0;
       height: 100%;
@@ -136,6 +145,13 @@
       </text>
     </svg>
   </div>
+  <script>
+    document.addEventListener('contextmenu', function (event) {
+      if (event.pointerType === 'touch' || event.sourceCapabilities && event.sourceCapabilities.firesTouchEvents) {
+        event.preventDefault();
+      }
+    });
+  </script>
   <script>
     (function () {
       var boot = document.getElementById('boot');

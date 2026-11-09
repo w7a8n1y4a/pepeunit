@@ -10,16 +10,19 @@ import 'package:flutter/widgets.dart';
 /// each channel, so the grain stays gray with a faint tint. The mean of the
 /// tile is [base], so the surface keeps the color the palette gives it.
 ///
-/// One small tile is made in code, once, and tiled. [texel] physical pixels
-/// make one grain, on every screen density and on every scale tick.
+/// One small tile is made in code, once, and tiled. [texelFor] physical pixels
+/// make one grain: one on a plain screen, more on a dense one, where a single
+/// pixel is too fine to see. It does not change with the scale tick.
 class GrainTile {
   GrainTile(this.base, this.spread, {this.seed = 11});
 
   /// Side of the tile, in texels.
   static const side = 256;
 
-  /// Physical pixels in one grain. 1 is the finest, 2 makes pairs.
-  static const texel = 1;
+  /// Physical pixels in one grain at screen density [ratio]. A phone packs
+  /// three or more pixels into one logical pixel, and a grain of one pixel
+  /// melts into flat color there, so a grain grows with the density.
+  static int texelFor(double ratio) => max(1, (ratio * 0.6).round());
 
   /// The color the grain averages to.
   final Color base;
@@ -80,7 +83,7 @@ class GrainTile {
   final _shaders = <int, ui.Shader>{};
   var _shaderRatio = 0.0;
 
-  /// A shader that tiles the grain, [texel] physical pixels per texel. [shift]
+  /// A shader that tiles the grain, [texelFor] physical pixels per texel. [shift]
   /// picks one of [shifts] places of the tile, so two surfaces do not show
   /// the same grain in the same place. Null until the tile is made.
   ///
@@ -96,7 +99,7 @@ class GrainTile {
     }
     final step = shift % shifts;
     return _shaders.putIfAbsent(step, () {
-      final scale = texel / ratio;
+      final scale = texelFor(ratio) / ratio;
       final dx = step * 37 % side * scale;
       final dy = step * 91 % side * scale;
       return ui.ImageShader(

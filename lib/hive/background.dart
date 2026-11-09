@@ -19,10 +19,22 @@ import 'icon_atlas.dart';
 /// angle. Some tiles are always flipping over to show another picture on the
 /// back.
 class Mosaic {
-  Mosaic(this.size, this.icons, {this.pitch = 88, int seed = 7})
-    : _flips = Random(seed + 1) {
+  Mosaic(this.size, this.icons, {double? pitch, int seed = 7})
+    : pitch = pitch ?? pitchFor(size),
+      _flips = Random(seed + 1) {
     _build(seed);
   }
+
+  /// Distance between tiles on a wide screen and on a phone, where the
+  /// pictures sit closer so the small screen does not look empty.
+  static const widePitch = 88.0;
+  static const phonePitch = 62.0;
+
+  /// A screen with a short side under this is a phone.
+  static const phoneSide = 600.0;
+
+  static double pitchFor(Size size) =>
+      size.shortestSide < phoneSide ? phonePitch : widePitch;
 
   /// Turn of the whole grid from the horizontal, in radians: 30°.
   static const tilt = 30 * pi / 180;

@@ -1,4 +1,5 @@
 import 'package:flutter/gestures.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
 /// The tip service of the app. It sits once above the router and knows two
@@ -57,9 +58,15 @@ class HintTarget extends StatefulWidget {
 }
 
 class _HintTargetState extends State<HintTarget> {
-  void _open() {
+  /// How long a finger rests before the tip opens: shorter than the system
+  /// 500 ms, which feels like nothing happens on a phone.
+  static const _hold = Duration(milliseconds: 380);
+
+  void _open({bool held = false}) {
     final host = HintHost.maybeOf(context);
     if (host == null || !host.has(context, widget.id)) return;
+    // A short buzz tells the finger that the hold was taken. Desktop has none.
+    if (held) HapticFeedback.mediumImpact();
     host.open(context, widget.id, widget.title, widget.color);
   }
 
@@ -73,8 +80,8 @@ class _HintTargetState extends State<HintTarget> {
         // Any pointer: a finger, a pen, or the primary button of a mouse.
         LongPressGestureRecognizer:
             GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-              LongPressGestureRecognizer.new,
-              (recognizer) => recognizer.onLongPress = _open,
+              () => LongPressGestureRecognizer(duration: _hold),
+              (recognizer) => recognizer.onLongPress = () => _open(held: true),
             ),
       },
       child: Listener(

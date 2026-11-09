@@ -559,8 +559,10 @@ class _DocsPageState extends State<DocsPage> {
                 ),
                 if (outlined) ...[
                   vline,
+                  // The line takes one pixel of the room, so it stands on
+                  // the same pixel as the line of the outline below it.
                   SizedBox(
-                    width: outlineRoom,
+                    width: outlineRoom - 1,
                     child: Padding(
                       padding: EdgeInsets.only(
                         left: font * 0.8,
