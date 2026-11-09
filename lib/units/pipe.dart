@@ -18,6 +18,96 @@ processing_policy:
   policy_type: LastValue
 ''';
 
+/// Example configs the editor hands to the clipboard: one per policy and one
+/// with the `alerts` block. They are the ones of the DataPipe examples article
+/// (`docs/<lang>/user/datapipe/example.md`); keep both in step.
+const pipeExamples = <String, String>{
+  'LastValue': '''active_period:
+  type: Permanent
+filters:
+  type_input_value: Text
+  max_rate: 5
+  last_unique_check: false
+  max_size: 100
+processing_policy:
+  policy_type: LastValue
+''',
+  'NRecords': '''active_period:
+  type: FromDate
+  start: '2023-11-15T00:00:00+00:00'
+filters:
+  type_input_value: Text
+  type_value_filtering: WhiteList
+  filtering_values:
+  - Alarm
+  - Error
+  - Warning
+  max_rate: 0
+  last_unique_check: true
+  max_size: 100
+processing_policy:
+  policy_type: NRecords
+  n_records_count: 512
+''',
+  'TimeWindow': '''active_period:
+  type: ToDate
+  end: '2025-11-15T00:00:00+00:00'
+filters:
+  type_input_value: Number
+  type_value_threshold: Range
+  threshold_min: 0
+  threshold_max: 100
+  max_rate: 60
+  last_unique_check: false
+  max_size: 50
+transformations:
+  round_decimal_point: 2
+processing_policy:
+  policy_type: TimeWindow
+  time_window_size: 86400
+''',
+  'Aggregation': '''active_period:
+  type: DateRange
+  start: '2023-11-15T00:00:00+00:00'
+  end: '2200-11-15T00:00:00+00:00'
+filters:
+  type_input_value: Number
+  type_value_filtering: BlackList
+  filtering_values:
+  - -127.00
+  - 85.00
+  type_value_threshold: Range
+  threshold_min: -50
+  threshold_max: 120
+  max_rate: 0
+  last_unique_check: true
+  max_size: 100
+transformations:
+  round_decimal_point: 2
+processing_policy:
+  policy_type: Aggregation
+  time_window_size: 900
+  aggregation_functions: Avg
+''',
+  'Alerts': '''active_period:
+  type: Permanent
+filters:
+  type_input_value: Number
+  max_rate: 0
+  last_unique_check: false
+  max_size: 50
+processing_policy:
+  policy_type: LastValue
+alerts:
+  is_enabled: true
+  type_value_threshold: Range
+  threshold_min: 18
+  threshold_max: 26
+  consecutive_count: 3
+  max_frequency: 60
+''',
+};
+
 /// `processing_policy.policy_type` of the config the backend stores. The
 /// backend keeps it as JSON. Null when there is no config or it has no known
 /// policy.

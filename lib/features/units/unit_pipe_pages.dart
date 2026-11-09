@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
@@ -439,6 +439,22 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
       stackActions: true,
       text: _text.text,
       copy: () => _text.text,
+      strip: (font) => [
+        Text(
+          unitText(language, 'Примеры в буфер:', 'Examples to clipboard:'),
+          style: codeMono(font * 0.95, color: hexMuted),
+        ),
+        SizedBox(width: font * 0.3),
+        for (final name in pipeExamples.keys)
+          CodeChip(
+            label: name,
+            on: true,
+            font: font,
+            color: unitPipeColor,
+            onTap: () => _copyExample(name),
+            hint: 'button-pipe-example-${name.toLowerCase()}',
+          ),
+      ],
       actions: (font) => [
         CodeWordButton(
           label: unitText(language, 'Сохранить', 'Save'),
@@ -599,6 +615,23 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
       _saved = unitText(language, 'Сохранено', 'Saved');
     });
     widget.onSaved();
+  }
+
+  /// Puts the example [name] on the clipboard. The editor text stays.
+  Future<void> _copyExample(String name) async {
+    final text = pipeExamples[name];
+    if (text == null) return;
+    await Clipboard.setData(ClipboardData(text: text));
+    if (!mounted) return;
+    final language = AppScope.of(context).vault.language;
+    setState(() {
+      failure = null;
+      _saved = unitText(
+        language,
+        'Пример $name скопирован в буфер обмена',
+        'Example $name copied to the clipboard',
+      );
+    });
   }
 
   Future<void> _import() async {

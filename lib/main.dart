@@ -24,6 +24,7 @@ import 'features/library/library_menu_page.dart';
 import 'features/library/tip_modal.dart';
 import 'features/library/support_page.dart';
 import 'features/library/tools_page.dart';
+import 'features/library/tree_page.dart';
 import 'features/menu/placeholder_page.dart';
 import 'features/network/instance_page.dart';
 import 'features/network/instance_settings_page.dart';
@@ -674,6 +675,13 @@ class _PepeunitAppState extends State<PepeunitApp> {
           GoRoute(
             path: 'tools',
             builder: (context, state) => const ToolsPage(),
+            routes: [
+              GoRoute(
+                path: 'tree',
+                builder: (context, state) =>
+                    TreePage(node: state.uri.queryParameters['node'] ?? '/'),
+              ),
+            ],
           ),
           GoRoute(
             path: 'docs',

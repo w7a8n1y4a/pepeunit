@@ -28,6 +28,7 @@ class TipModal extends StatefulWidget {
     required this.source,
     required this.onClose,
     this.docs,
+    this.actions,
     super.key,
   });
 
@@ -40,6 +41,10 @@ class TipModal extends StatefulWidget {
 
   /// Where links to articles lead. Without it only outside links work.
   final DocsTree? docs;
+
+  /// Word buttons between the title and the close mark, for a card that
+  /// offers an action. A tip has none.
+  final List<Widget> Function(double font)? actions;
 
   @override
   State<TipModal> createState() => _TipModalState();
@@ -166,6 +171,7 @@ class _TipModalState extends State<TipModal> {
                                     onTap: _reader.back,
                                     hint: 'button-doc-back',
                                   ),
+                                ...?widget.actions?.call(font),
                                 CodeCloseMark(
                                   label: phrase(language, {
                                     'ru': 'Закрыть',

@@ -34,6 +34,7 @@ class CodeModal extends StatelessWidget {
     this.text,
     this.rows,
     this.actions,
+    this.strip,
     this.onDownload,
     this.downloading = false,
     this.note,
@@ -64,6 +65,10 @@ class CodeModal extends StatelessWidget {
 
   /// Words and chips before the marks, such as Save or a level filter.
   final List<Widget> Function(double font)? actions;
+
+  /// A row of its own under the bar, for quick inserts such as examples. It
+  /// scrolls sideways. Hidden when null.
+  final List<Widget> Function(double font)? strip;
 
   /// The download mark. Hidden when null.
   final VoidCallback? onDownload;
@@ -99,8 +104,15 @@ class CodeModal extends StatelessWidget {
           decoration: TextDecoration.none,
         );
         final stacked = stackActions && size.width < 640;
+        final stripH = strip == null ? 0.0 : rowH * 0.8;
         final chrome =
-            font * 0.6 + rowH * (stacked ? 2 : 1) + gap + gap + noteH + font;
+            font * 0.6 +
+            rowH * (stacked ? 2 : 1) +
+            stripH +
+            gap +
+            gap +
+            noteH +
+            font;
         final maxH = max(chrome + font * 4, size.height - margin * 2);
         final bodyWidth = size.width - margin * 2 - font * 1.4;
         final layout = text == null
@@ -200,6 +212,12 @@ class CodeModal extends StatelessWidget {
                             height: rowH,
                             width: double.infinity,
                             child: _scrolling(tools),
+                          ),
+                        if (strip != null)
+                          SizedBox(
+                            height: stripH,
+                            width: double.infinity,
+                            child: _scrolling(Row(children: strip!(font))),
                           ),
                         SizedBox(height: gap),
                         Expanded(child: body(codeFont, layout)),

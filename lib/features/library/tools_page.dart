@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../app_scope.dart';
 import '../../hive/hex_motion.dart';
@@ -12,9 +13,10 @@ import '../../navigation/back.dart';
 import '../file_drop.dart';
 import '../hex_page.dart';
 import 'library_menu_page.dart';
+import 'tree_page.dart';
 
-/// The tools of the Library: the README.md generator, and two cells that
-/// only hold a place for the tree of screens and the path search.
+/// The tools of the Library: the README.md generator, the tree of screens,
+/// and a cell that only holds a place for the path search.
 class ToolsPage extends StatefulWidget {
   const ToolsPage({super.key});
 
@@ -83,12 +85,10 @@ class _ToolsPageState extends State<ToolsPage> {
         return HexSlot(
           id: 'tree',
           title: libText(language, 'Дерево'),
-          footer: libText(language, 'Скоро'),
           color: libraryColor,
-          enabled: false,
           q: slot.q,
           r: slot.r,
-          icon: 'assets/icons/objects/links.svg',
+          icon: 'assets/icons/objects/tree.svg',
         );
       default:
         return HexSlot(
@@ -112,6 +112,8 @@ class _ToolsPageState extends State<ToolsPage> {
         setState(() => _failureOpen = true);
       case 'readme':
         await _pick(language);
+      case 'tree':
+        context.push(treePath);
     }
   }
 
