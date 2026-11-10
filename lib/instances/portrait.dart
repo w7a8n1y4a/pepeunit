@@ -25,6 +25,8 @@ class InstancePortrait {
     this.latitude,
     this.longitude,
     this.pagination = 100,
+    this.mqttMaxPayloadKb,
+    this.panelNodeLimit,
     this.mqttHost,
     this.mqttPort,
     this.mqttSecure,
@@ -60,6 +62,12 @@ class InstancePortrait {
   final double? latitude;
   final double? longitude;
   final int pagination;
+
+  /// `pu_mqtt_max_payload_size`, in kilobytes: the largest message a node takes.
+  final int? mqttMaxPayloadKb;
+
+  /// `pu_datapipe_limit_unit_io_per_one_panel`: nodes one dashboard panel holds.
+  final int? panelNodeLimit;
   final String? mqttHost;
   final int? mqttPort;
   final bool? mqttSecure;
@@ -83,6 +91,8 @@ class InstancePortrait {
     double? latitude,
     double? longitude,
     int? pagination,
+    int? mqttMaxPayloadKb,
+    int? panelNodeLimit,
   }) {
     return InstancePortrait(
       url: url,
@@ -110,6 +120,8 @@ class InstancePortrait {
       latitude: latitude ?? this.latitude,
       longitude: longitude ?? this.longitude,
       pagination: pagination ?? this.pagination,
+      mqttMaxPayloadKb: mqttMaxPayloadKb ?? this.mqttMaxPayloadKb,
+      panelNodeLimit: panelNodeLimit ?? this.panelNodeLimit,
       mqttHost: mqttHost,
       mqttPort: mqttPort,
       mqttSecure: mqttSecure,
@@ -143,6 +155,11 @@ class InstancePortrait {
           : longitude,
       pagination:
           _int(settings['pu_instance_max_pagination_size']) ?? pagination,
+      mqttMaxPayloadKb:
+          _int(settings['pu_mqtt_max_payload_size']) ?? mqttMaxPayloadKb,
+      panelNodeLimit:
+          _int(settings['pu_datapipe_limit_unit_io_per_one_panel']) ??
+          panelNodeLimit,
     );
   }
 }
@@ -211,6 +228,8 @@ InstancePortrait portraitFromJson(
     latitude: _double(json['latitude']),
     longitude: _double(json['longitude']),
     pagination: _int(pagination) ?? 100,
+    mqttMaxPayloadKb: _int(settings['pu_mqtt_max_payload_size']),
+    panelNodeLimit: _int(settings['pu_datapipe_limit_unit_io_per_one_panel']),
     mqttHost: settings['pu_mqtt_host'] as String?,
     mqttPort: _int(settings['pu_mqtt_port']),
     mqttSecure: settings['pu_mqtt_secure'] as bool?,

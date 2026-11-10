@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
+import '../../locale/failure.dart';
 import '../../registry/repo.dart';
 import '../../units/code_format.dart';
 import '../../units/unit.dart';
@@ -475,7 +476,22 @@ class _UnitIoValuePanelState extends State<UnitIoValuePanel>
   Future<void> _send() async {
     final model = AppScope.of(context);
     final sent = _text.text;
-    if (await work('send', () => model.setInputState(widget.uuid, sent))) {
+    final ok = await work('send', () async {
+      // The broker drops a message over `pu_mqtt_max_payload_size`; say so
+      // before the request instead of after it.
+      final limit = model.payloadLimitBytes;
+      final size = utf8.encode(sent).length;
+      if (limit != null && size > limit) {
+        throw LocalFailure(
+          'Значение занимает $size Б, а инстанс принимает не больше '
+              '$limit Б (${limit ~/ 1024} КБ).',
+          'The value is $size B, but the instance takes at most '
+              '$limit B (${limit ~/ 1024} KB).',
+        );
+      }
+      await model.setInputState(widget.uuid, sent);
+    });
+    if (ok) {
       setState(() => _baseline = sent);
       widget.onSent?.call();
     }

@@ -166,22 +166,26 @@ DateTime? _utc(String raw) {
 int noticePageLimit(int tick) =>
     scaleTickCells(tick.clamp(scaleTickMin, scaleTickMax)) - 3;
 
-bool noticeCanPageBack({required int offset, required int count}) =>
-    pageCanBack(
-      offset: offset,
-      count: count,
-      capacity: noticePageLimit(scaleTickMax),
-    );
+bool noticeCanPageBack({
+  required int offset,
+  required int count,
+  int? cap,
+}) => pageCanBack(
+  offset: offset,
+  count: count,
+  capacity: capacityUnder(noticePageLimit(scaleTickMax), cap),
+);
 
 bool noticeCanPageForward({
   required int offset,
   required int limit,
   required int count,
+  int? cap,
 }) => pageCanForward(
   offset: offset,
   limit: limit,
   count: count,
-  capacity: noticePageLimit(scaleTickMax),
+  capacity: capacityUnder(noticePageLimit(scaleTickMax), cap),
 );
 
 /// Back, filter, type menu, then notice cards. The tick caps the disk.

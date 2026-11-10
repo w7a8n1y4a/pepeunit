@@ -64,7 +64,8 @@ class _UnitsPageState extends State<UnitsPage> {
       AppScope.of(context)
           .cappedLimit(headPageLimit(widget.scope, head: unitsHead));
 
-  int _capacity() => headPageLimit(scaleTickMax, head: unitsHead);
+  int _capacity() => AppScope.of(context)
+      .pageCapacity(headPageLimit(scaleTickMax, head: unitsHead));
 
   @override
   void initState() {

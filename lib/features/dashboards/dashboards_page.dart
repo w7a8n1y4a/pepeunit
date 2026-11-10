@@ -68,7 +68,9 @@ class _DashboardsPageState extends State<DashboardsPage> {
     final language = model.vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
     final limit = model.cappedLimit(headPageLimit(widget.scope, head: _head));
-    final capacity = headPageLimit(scaleTickMax, head: _head);
+    final capacity = model.pageCapacity(
+      headPageLimit(scaleTickMax, head: _head),
+    );
     final board = headBoard(
       tick: widget.scope,
       head: const ['query', 'window'],

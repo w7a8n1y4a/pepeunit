@@ -606,6 +606,72 @@ void main() {
     expect(seen, [0, 2]);
   });
 
+  test('a small page size keeps the arrows and caps what the screen fits', () {
+    // The last scale tick fits 16 cards, but the instance gives 5 per page.
+    expect(capacityUnder(16, null), 16);
+    expect(capacityUnder(16, 100), 16);
+    expect(capacityUnder(16, 5), 5);
+    expect(capacityUnder(16, 0), 16);
+    expect(userCanPageForward(offset: 0, limit: 5, count: 10), isFalse);
+    expect(userCanPageForward(offset: 0, limit: 5, count: 10, cap: 5), isTrue);
+    expect(userCanPageBack(offset: 5, count: 10), isFalse);
+    expect(userCanPageBack(offset: 5, count: 10, cap: 5), isTrue);
+    expect(
+      pageShift(
+        direction: 1,
+        offset: 0,
+        limit: 5,
+        count: 10,
+        capacity: capacityUnder(16, 5),
+      ),
+      5,
+    );
+  });
+
+  test('the portrait carries the limits the client checks before asking', () {
+    final portrait = portraitFromJson({
+      'settings': {
+        'pu_instance_max_pagination_size': 25,
+        'pu_mqtt_max_payload_size': 64,
+        'pu_datapipe_limit_unit_io_per_one_panel': 6,
+      },
+    }, url: _unit);
+    expect(portrait.pagination, 25);
+    expect(portrait.mqttMaxPayloadKb, 64);
+    expect(portrait.panelNodeLimit, 6);
+    final changed = portrait.applySettings({
+      'pu_mqtt_max_payload_size': 128,
+      'pu_datapipe_limit_unit_io_per_one_panel': 8,
+    });
+    expect(changed.mqttMaxPayloadKb, 128);
+    expect(changed.panelNodeLimit, 8);
+    expect(changed.pagination, 25);
+    expect(portraitFromJson(const {}, url: _unit).mqttMaxPayloadKb, isNull);
+  });
+
+  test('the model reads page size, payload and panel limits of the target', () {
+    final model = AppModel(
+      store: MemoryVaultStore(),
+      api: (origin) => _DirectoryApi(origin),
+      hostedUrl: () async => null,
+    );
+    expect(model.pageLimit, 100);
+    expect(model.payloadLimitBytes, isNull);
+    expect(model.panelNodeLimit, isNull);
+    model.vault.instances.add(InstanceRecord(url: _unit, active: true));
+    model.portraits[_unit] = InstancePortrait(
+      url: _unit,
+      pagination: 5,
+      mqttMaxPayloadKb: 2,
+      panelNodeLimit: 3,
+    );
+    expect(model.pageLimit, 5);
+    expect(model.pageCapacity(16), 5);
+    expect(model.pageCapacity(3), 3);
+    expect(model.payloadLimitBytes, 2048);
+    expect(model.panelNodeLimit, 3);
+  });
+
   test('a loopback target yields to the hosted instance', () async {
     final store = MemoryVaultStore();
     store.vault = Vault.fromJson({

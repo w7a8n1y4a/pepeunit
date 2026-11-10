@@ -320,8 +320,8 @@ final settingCategories = <SettingCategory>[
         'pu_mqtt_max_payload_size',
         1,
         4096,
-        ru: 'Payload (Б)',
-        en: 'Payload size (B)',
+        ru: 'Payload (КБ)',
+        en: 'Payload size (KB)',
       ),
       _whole(
         'pu_mqtt_max_topic_alias',

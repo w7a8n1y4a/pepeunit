@@ -192,21 +192,32 @@ String userWindowText({
 }) =>
     pageWindowText(offset: offset, limit: limit, count: count, ofWord: ofWord);
 
-bool userCanPageBack({required int offset, required int count}) => pageCanBack(
+/// What a screen shows at most: [fits] cells, or the instance page size
+/// [cap] when that is smaller. Arrows must not wait for a list the page size
+/// already cuts.
+int capacityUnder(int fits, int? cap) =>
+    cap == null || cap < 1 || fits < cap ? fits : cap;
+
+bool userCanPageBack({
+  required int offset,
+  required int count,
+  int? cap,
+}) => pageCanBack(
   offset: offset,
   count: count,
-  capacity: userPageLimit(scaleTickMax),
+  capacity: capacityUnder(userPageLimit(scaleTickMax), cap),
 );
 
 bool userCanPageForward({
   required int offset,
   required int limit,
   required int count,
+  int? cap,
 }) => pageCanForward(
   offset: offset,
   limit: limit,
   count: count,
-  capacity: userPageLimit(scaleTickMax),
+  capacity: capacityUnder(userPageLimit(scaleTickMax), cap),
 );
 
 /// Back, two filter cells, then user cards. The tick caps the disk.

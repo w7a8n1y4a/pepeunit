@@ -122,7 +122,7 @@ class _GroupsPageState extends State<GroupsPage> {
               offset: _offset,
               limit: limit,
               count: _count,
-              capacity: headPageLimit(scaleTickMax, head: 3),
+              capacity: model.pageCapacity(headPageLimit(scaleTickMax, head: 3)),
               order: _order,
               onOrder: (value) {
                 if (value == _order) return;
@@ -201,7 +201,8 @@ class _GroupsPageState extends State<GroupsPage> {
       offset: _offset,
       limit: limit,
       count: _count,
-      capacity: headPageLimit(scaleTickMax, head: 3),
+      capacity: AppScope.of(context)
+          .pageCapacity(headPageLimit(scaleTickMax, head: 3)),
     );
     if (next == null) return;
     setState(() => _offset = next);
@@ -638,14 +639,14 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
               offset: _offset,
               limit: limit,
               count: _count,
-              capacity: headPageLimit(scaleTickMax),
+              capacity: model.pageCapacity(headPageLimit(scaleTickMax)),
               onStep: (direction) {
                 final next = pageShift(
                   direction: direction,
                   offset: _offset,
                   limit: limit,
                   count: _count,
-                  capacity: headPageLimit(scaleTickMax),
+                  capacity: model.pageCapacity(headPageLimit(scaleTickMax)),
                 );
                 if (next == null) return;
                 setState(() => _offset = next);

@@ -220,7 +220,7 @@ class _UsersPageState extends State<UsersPage> {
       offset: _offset,
       limit: limit,
       count: count,
-      capacity: userPageLimit(scaleTickMax),
+      capacity: model.pageCapacity(userPageLimit(scaleTickMax)),
     );
     if (next == null) return;
     setState(() => _offset = next);
@@ -475,11 +475,16 @@ class MemberWindowCell extends StatelessWidget {
       selected: order,
       onOrder: onOrder,
       range: range,
-      canBack: userCanPageBack(offset: offset, count: count),
+      canBack: userCanPageBack(
+        offset: offset,
+        count: count,
+        cap: model.pageLimit,
+      ),
       canForward: userCanPageForward(
         offset: offset,
         limit: limit,
         count: count,
+        cap: model.pageLimit,
       ),
       previousLabel: netText(language, 'Предыдущие', 'Previous'),
       nextLabel: netText(language, 'Следующие', 'Next'),

@@ -50,7 +50,8 @@ class _CommitPickPageState extends State<CommitPickPage> {
   int _limit(AppModel model) =>
       model.cappedLimit(headPageLimit(widget.scope, head: _head));
 
-  int _capacity() => headPageLimit(scaleTickMax, head: _head);
+  int _capacity() => AppScope.of(context)
+      .pageCapacity(headPageLimit(scaleTickMax, head: _head));
 
   String get _path =>
       '/units/new/commit?repo=${widget.repoUuid}'

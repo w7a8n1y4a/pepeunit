@@ -7,6 +7,7 @@ import '../../dashboards/dashboard.dart';
 import '../../hive/hex_motion.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
+import '../../locale/failure.dart';
 import '../../navigation/back.dart';
 import '../../navigation/pick.dart';
 import '../../registry/repo.dart';
@@ -744,6 +745,21 @@ class _PanelNodesPageState extends State<PanelNodesPage> {
   /// Search shows units that have a node. Its card opens the nodes of that
   /// unit, and the chosen node comes back here to get its two flags.
   Future<void> _add() async {
+    // `pu_datapipe_limit_unit_io_per_one_panel`: the backend refuses the
+    // link after the pick, so the pick is not worth opening.
+    final limit = AppScope.of(context).panelNodeLimit;
+    if (limit != null && _links.length >= limit) {
+      setState(() {
+        _failure = LocalFailure(
+          'Предел инстанса — узлов на панель: $limit. '
+              'Удалите узел, чтобы добавить другой.',
+          'The instance limit is $limit nodes per panel. '
+              'Remove a node to add another.',
+        ).toString();
+        _open = true;
+      });
+      return;
+    }
     final node = await openPick<String>(context, '/units/pick?nodes=1');
     if (node == null || !mounted) return;
     context.push('$_path/new?io=$node');

@@ -197,6 +197,29 @@ class AppModel extends ChangeNotifier {
     return asked;
   }
 
+  /// Rows one screen can show at most, the cells that fit at the last scale
+  /// tick or [pageLimit], whichever is smaller. Page arrows wait for a list
+  /// longer than this, so a small page size never hides rows behind them.
+  int pageCapacity(int fits) => cappedLimit(fits);
+
+  /// The largest message a node takes, in bytes, from
+  /// `pu_mqtt_max_payload_size` of the favorite instance. Null when unknown.
+  int? get payloadLimitBytes {
+    final url = target?.url;
+    final kb = url == null ? null : portraitOf(url)?.mqttMaxPayloadKb;
+    if (kb == null || kb < 1) return null;
+    return kb * 1024;
+  }
+
+  /// Nodes one panel holds, from `pu_datapipe_limit_unit_io_per_one_panel` of
+  /// the favorite instance. Null when unknown.
+  int? get panelNodeLimit {
+    final url = target?.url;
+    final size = url == null ? null : portraitOf(url)?.panelNodeLimit;
+    if (size == null || size < 1) return null;
+    return size;
+  }
+
   Uint8List? cachedIcon(String? uuid) {
     final url = target?.url;
     if (url == null || uuid == null || uuid.isEmpty) return null;

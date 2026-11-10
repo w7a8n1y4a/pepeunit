@@ -272,7 +272,7 @@ class _AlertsPageState extends State<AlertsPage> {
       offset: _offset,
       limit: limit,
       count: count,
-      capacity: noticePageLimit(scaleTickMax),
+      capacity: model.pageCapacity(noticePageLimit(scaleTickMax)),
     );
     if (next == null) return;
     setState(() => _offset = next);
@@ -340,11 +340,16 @@ class _FilterCell extends StatelessWidget {
       count: count,
       ofWord: alertText(language, 'из', 'of'),
     );
-    final back = noticeCanPageBack(offset: offset, count: count);
+    final back = noticeCanPageBack(
+      offset: offset,
+      count: count,
+      cap: model.pageLimit,
+    );
     final forward = noticeCanPageForward(
       offset: offset,
       limit: limit,
       count: count,
+      cap: model.pageLimit,
     );
     return LayoutBuilder(
       builder: (context, constraints) {

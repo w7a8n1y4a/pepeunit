@@ -221,7 +221,7 @@ class _RegistryPageState extends State<RegistryPage> {
       offset: _offset,
       limit: limit,
       count: count,
-      capacity: repoPageLimit(scaleTickMax),
+      capacity: model.pageCapacity(repoPageLimit(scaleTickMax)),
     );
     if (next == null) return;
     setState(() => _offset = next);
@@ -386,11 +386,16 @@ class _WindowCell extends StatelessWidget {
       selected: order,
       onOrder: onOrder,
       range: range,
-      canBack: repoCanPageBack(offset: offset, count: count),
+      canBack: repoCanPageBack(
+        offset: offset,
+        count: count,
+        cap: model.pageLimit,
+      ),
       canForward: repoCanPageForward(
         offset: offset,
         limit: limit,
         count: count,
+        cap: model.pageLimit,
       ),
       previousLabel: regText(language, 'Предыдущие', 'Previous'),
       nextLabel: regText(language, 'Следующие', 'Next'),

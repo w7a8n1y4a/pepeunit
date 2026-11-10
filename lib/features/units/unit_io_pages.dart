@@ -1031,14 +1031,16 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
               offset: _offset,
               limit: limit,
               count: _count,
-              capacity: headPageLimit(scaleTickMax),
+              capacity: AppScope.of(context)
+                  .pageCapacity(headPageLimit(scaleTickMax)),
               onStep: (direction) {
                 final next = pageShift(
                   direction: direction,
                   offset: _offset,
                   limit: limit,
                   count: _count,
-                  capacity: headPageLimit(scaleTickMax),
+                  capacity: AppScope.of(context)
+                      .pageCapacity(headPageLimit(scaleTickMax)),
                 );
                 if (next == null) return;
                 setState(() => _offset = next);

@@ -47,21 +47,26 @@ String repoWindowText({
 }) =>
     pageWindowText(offset: offset, limit: limit, count: count, ofWord: ofWord);
 
-bool repoCanPageBack({required int offset, required int count}) => pageCanBack(
+bool repoCanPageBack({
+  required int offset,
+  required int count,
+  int? cap,
+}) => pageCanBack(
   offset: offset,
   count: count,
-  capacity: repoPageLimit(scaleTickMax),
+  capacity: capacityUnder(repoPageLimit(scaleTickMax), cap),
 );
 
 bool repoCanPageForward({
   required int offset,
   required int limit,
   required int count,
+  int? cap,
 }) => pageCanForward(
   offset: offset,
   limit: limit,
   count: count,
-  capacity: repoPageLimit(scaleTickMax),
+  capacity: capacityUnder(repoPageLimit(scaleTickMax), cap),
 );
 
 /// Back, filter, page window, then repo cards. The tick caps the disk.
