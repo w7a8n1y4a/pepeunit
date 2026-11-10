@@ -51,7 +51,7 @@ processing_policy:
 ''',
   'TimeWindow': '''active_period:
   type: ToDate
-  end: '2025-11-15T00:00:00+00:00'
+  end: '2030-11-15T00:00:00+00:00'
 filters:
   type_input_value: Number
   type_value_threshold: Range

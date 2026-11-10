@@ -78,6 +78,9 @@ flutter:
     - assets/icons/status/
     - tooltip/ru/
     - docs/ru/sidebar.json
+    - docs/ru/user/
+    - docs/ru/user/datapipe/
+    - docs/ru/user/unit/
     - docs/ru/deployment/
     - docs/ru/deployment/dependencies/
     - docs/ru/deployment/docker/

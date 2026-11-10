@@ -171,10 +171,6 @@ void main() {
       for (final entity in root.listSync(recursive: true)) {
         if (entity is! Directory) continue;
         final path = entity.path;
-        if (path.startsWith('docs/ru/user')) {
-          expect(pubspec, isNot(contains('- $path/')), reason: path);
-          continue;
-        }
         expect(pubspec, contains('- $path/'), reason: path);
       }
       expect(pubspec, contains('- docs/ru/sidebar.json'));
@@ -189,14 +185,17 @@ void main() {
         final tree = await library.docs('ru');
         expect(
           [for (final n in tree.sidebar) n.text],
-          ['Развёртывание', 'Разработчику Unit', 'Разработчику Pepeunit'],
+          [
+            'Пользователю',
+            'Развёртывание',
+            'Разработчику Unit',
+            'Разработчику Pepeunit',
+          ],
         );
         expect(tree.article('definitions'), isNull);
         expect(tree.article('conception/overview'), isNull);
         expect(tree.article('development-pepeunit/maps'), isNotNull);
-        for (final article in tree.articles) {
-          expect(article.path, isNot(startsWith('user/')));
-        }
+        expect(tree.article('user/start'), isNotNull);
         // The file is read as written: a mistyped link would be left out of
         // the tree without a word, so every link is checked against the files.
         final listed = <String>[];
@@ -252,10 +251,7 @@ void main() {
             if (target.isEmpty) target = article.path;
             final to = docs[target];
             if (to == null) {
-              // The user guide is not in the bundle: its links stay plain.
-              if (!target.startsWith('user/')) {
-                broken.add('${article.path}: $url');
-              }
+              broken.add('${article.path}: $url');
               continue;
             }
             if (hash >= 0) {
@@ -510,9 +506,9 @@ void main() {
       expect(find.byType(DocFindBar), findsOneWidget);
       // The field has the focus already: typing needs no click.
       expect(tester.testTextInput.isVisible, isTrue);
-      tester.testTextInput.enterText('backend');
+      tester.testTextInput.enterText('инстанс');
       await tester.pumpAndSettle();
-      await tester.enterText(find.byType(TextField), 'backend');
+      await tester.enterText(find.byType(TextField), 'инстанс');
       await tester.pumpAndSettle();
       final counter = find.textContaining(RegExp(r'^\d+/\d+$'));
       expect(counter, findsOneWidget);

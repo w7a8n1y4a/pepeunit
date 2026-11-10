@@ -50,6 +50,39 @@
     ]
   },
   {
+    "text": "Пользователю",
+    "collapsed": false,
+    "items": [
+      { "text": "Начало работы", "link": "/user/start" },
+      { "text": "Аккаунт", "link": "/user/account" },
+      { "text": "Сеть", "link": "/user/network" },
+      { "text": "Репозитории", "link": "/user/repo" },
+      {
+        "text": "Unit",
+        "collapsed": true,
+        "items": [
+          { "text": "Создание Unit", "link": "/user/unit/create-unit" },
+          { "text": "Запуск Unit на устройстве", "link": "/user/unit/create-physic-unit" },
+          { "text": "Управление Unit", "link": "/user/unit/manage" },
+          { "text": "Входы и выходы", "link": "/user/unit/io" },
+          { "text": "Группы Unit", "link": "/user/unit/groups" }
+        ]
+      },
+      {
+        "text": "DataPipe",
+        "collapsed": true,
+        "items": [
+          { "text": "Настройка конвейера", "link": "/user/datapipe/datapipe" },
+          { "text": "Примеры", "link": "/user/datapipe/example" },
+          { "text": "Импорт данных", "link": "/user/datapipe/import" }
+        ]
+      },
+      { "text": "Панели", "link": "/user/dashboards" },
+      { "text": "Уведомления", "link": "/user/alerts" },
+      { "text": "Библиотека", "link": "/user/library" }
+    ]
+  },
+  {
     "text": "Разработчику Unit",
     "collapsed": false,
     "items": [

@@ -1,10 +1,16 @@
 # Импорт данных в DataPipe
 
-В модальном окне [DataPipe](/deployment/dependencies/datapipe) есть кнопка - `Import CSV Data` - позволяющая загрузить правильно отформатированный `CSV` файл в [DataPipe](/deployment/dependencies/datapipe).
+`UnitIO` → `DataPipe` → `Загрузить данные`: выберите `CSV` файл с записями. Обратно данные забирает `Выгрузить данные`: клиент сохраняет `zip` с `CSV`. У политики `LastValue` ни загрузки, ни выгрузки нет.
 
-При этом все данные пройдут проверки, указанные в YML конфигурации. Важным условие является отсортированность по `create_datetime` и `end_window_datetime` в `asc` - первая запись старше чем последняя.
+Каждая строка проходит проверки из [YML конфигурации](/user/datapipe/datapipe), а при первой же ошибке загрузка останавливается, в сообщении указан номер строки. Правила:
 
-Далее примеры файлов для разных `policy_type`, с минимальным набором полей для импорта:
+- Строки отсортированы по `create_datetime` от старых к новым
+- `create_datetime` попадает в `active_period`, значение проходит `filters`. `max_rate` и `last_unique_check` проверяются для `NRecords` и `TimeWindow`
+- `NRecords`: строк не больше `n_records_count`
+- `TimeWindow`: `create_datetime` не из будущего и не старше `time_window_size` от текущего момента
+- `Aggregation`: поля окна без секунд, `end_window_datetime` - `start_window_datetime` равно `time_window_size`, расстояние между концами соседних окон кратно `time_window_size`, а `create_datetime` отличается от `end_window_datetime` меньше чем на `60` секунд
+
+Дата и время в формате ISO 8601. Без часового пояса считается `UTC`. Ниже файлы с минимальным набором полей для каждого `policy_type`. Даты в них примерные: замените их на свои, особенно для `TimeWindow`.
 
 ## NRecords
 
@@ -43,6 +49,8 @@ state,create_datetime
 ```
 
 ## Aggregation
+
+Окна по `1` минуте, то есть `time_window_size: 60`.
 
 ```csv
 state,create_datetime,start_window_datetime,end_window_datetime
