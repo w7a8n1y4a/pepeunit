@@ -35,6 +35,7 @@ class CodeModal extends StatelessWidget {
     this.rows,
     this.actions,
     this.strip,
+    this.footer,
     this.onDownload,
     this.downloading = false,
     this.note,
@@ -69,6 +70,10 @@ class CodeModal extends StatelessWidget {
   /// A row of its own under the bar, for quick inserts such as examples. It
   /// scrolls sideways. Hidden when null.
   final List<Widget> Function(double font)? strip;
+
+  /// A row of its own under the body, above the note, for the one action the
+  /// text asks for, such as Update. Hidden when null.
+  final List<Widget> Function(double font)? footer;
 
   /// The download mark. Hidden when null.
   final VoidCallback? onDownload;
@@ -105,10 +110,12 @@ class CodeModal extends StatelessWidget {
         );
         final stacked = stackActions && size.width < 640;
         final stripH = strip == null ? 0.0 : rowH * 0.8;
+        final footerH = footer == null ? 0.0 : rowH;
         final chrome =
             font * 0.6 +
             rowH * (stacked ? 2 : 1) +
             stripH +
+            footerH +
             gap +
             gap +
             noteH +
@@ -222,6 +229,12 @@ class CodeModal extends StatelessWidget {
                         SizedBox(height: gap),
                         Expanded(child: body(codeFont, layout)),
                         SizedBox(height: gap),
+                        if (footer != null)
+                          SizedBox(
+                            height: rowH,
+                            width: double.infinity,
+                            child: _scrolling(Row(children: footer!(font))),
+                          ),
                         SizedBox(
                           height: noteH,
                           child: Align(

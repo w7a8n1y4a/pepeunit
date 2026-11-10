@@ -15,6 +15,7 @@ import 'api/icon_disk.dart';
 import 'api/icon_disk_open.dart';
 import 'api/icon_store.dart';
 import 'api/pepeunit_api.dart';
+import 'client_version.dart';
 import 'dashboards/dashboard.dart';
 import 'instances/directory_user.dart';
 import 'instances/hosted_url.dart';
@@ -23,6 +24,7 @@ import 'instances/link.dart';
 import 'instances/network_view.dart';
 import 'instances/portrait.dart';
 import 'instances/session.dart';
+import 'library/updates.dart';
 import 'locale/failure.dart';
 import 'locale/languages.dart';
 import 'registry/registry_view.dart';
@@ -930,6 +932,13 @@ class AppModel extends ChangeNotifier {
     }
     return response.bodyBytes;
   }
+
+  /// Check updates of the Library: the newest release against this client.
+  Future<UpdateCheck> checkUpdates() => checkForUpdate(
+    client: _apiClient,
+    current: clientVersion,
+    platform: nativePlatform(),
+  );
 
   Future<Uint8List> unitFirmware(String uuid, String kind) =>
       _api.unitFirmware(_token, uuid, kind);

@@ -492,9 +492,10 @@ void main() {
       expect(find.byType(DocSearchPanel), findsNothing);
       expect(find.bySemanticsLabel('Назад'), findsOneWidget);
       expect(find.text('Установка Docker и Compose'), findsWidgets);
-      String? doc() => GoRouterState.of(
-        tester.element(find.byType(DocsPage)),
-      ).uri.queryParameters['doc'];
+      String? doc() =>
+          GoRouterState.of(tester.element(find.byType(DocsPage)))
+              .uri
+              .queryParameters['doc'];
       expect(doc(), isNotNull);
       expect(tester.takeException(), isNull);
     });
@@ -559,9 +560,10 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.bySemanticsLabel('Документация'));
       await settle(tester);
-      String? doc() => GoRouterState.of(
-        tester.element(find.byType(DocsPage)),
-      ).uri.queryParameters['doc'];
+      String? doc() =>
+          GoRouterState.of(tester.element(find.byType(DocsPage)))
+              .uri
+              .queryParameters['doc'];
       await tester.tap(find.text('Docker'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('Установка Docker и Compose'));
@@ -722,16 +724,33 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(LibraryModal), findsNothing);
       expect(find.text(clientVersion), findsOneWidget);
+      expect(find.bySemanticsLabel('Проверить обновления'), findsOneWidget);
       expect(find.bySemanticsLabel('Нативные приложения'), findsOneWidget);
       expect(find.bySemanticsLabel('Соцсети'), findsOneWidget);
       expect(find.bySemanticsLabel('Поддержать проект'), findsOneWidget);
 
       await tester.tap(find.bySemanticsLabel('Нативные приложения'));
       await tester.pumpAndSettle();
-      for (final label in ['Android', 'iOS', 'Linux', 'macOS', 'Windows']) {
-        final cell = tester.widget<Semantics>(find.bySemanticsLabel(label));
-        expect(cell.properties.enabled, isFalse, reason: label);
+      const apps = {
+        'Android': 'pepeunit-$clientVersion-android.apk',
+        'iOS': 'pepeunit-$clientVersion-ios.ipa',
+        'Linux': 'pepeunit-$clientVersion-linux.AppImage',
+        'macOS': 'pepeunit-$clientVersion-macos.dmg',
+        'Windows': 'pepeunit-$clientVersion-windows.exe',
+      };
+      for (final app in apps.entries) {
+        await tester.tap(find.bySemanticsLabel(app.key));
+        await tester.pump();
       }
+      expect(
+        [for (final call in launches) call.arguments['url']],
+        [
+          for (final file in apps.values)
+            'https://github.com/w7a8n1y4a/pepeunit/releases/download/'
+                '$clientVersion/$file',
+        ],
+      );
+      launches.clear();
       await tester.tap(find.bySemanticsLabel('Назад'));
       await tester.pumpAndSettle();
 
@@ -754,6 +773,106 @@ void main() {
       await tester.tap(find.bySemanticsLabel('Назад'));
       await tester.pumpAndSettle();
       expect(find.bySemanticsLabel('Соцсети'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: check updates shows the notes and downloads', (
+      tester,
+    ) async {
+      final files = MemoryKeyFilePort();
+      final requests = <String>[];
+      final client = MockClient((request) async {
+        final url = request.url.toString();
+        requests.add(url);
+        if (url.startsWith('https://api.github.com/')) {
+          return http.Response(
+            jsonEncode([
+              {
+                'tag_name': '9.9.9',
+                'assets': [
+                  {
+                    'name': 'UPGRADE.md',
+                    'browser_download_url': 'https://dl.test/UPGRADE.md',
+                  },
+                  {
+                    'name': 'pepeunit-9.9.9-android.apk',
+                    'browser_download_url': 'https://dl.test/9.9.9.apk',
+                  },
+                ],
+              },
+            ]),
+            200,
+          );
+        }
+        if (url == 'https://dl.test/UPGRADE.md') {
+          return http.Response.bytes(
+            utf8.encode('# Новое\n\nДобавили чудо.'),
+            200,
+          );
+        }
+        return http.Response.bytes([7, 7], 200);
+      });
+      await start(tester, files: files, client: client);
+      await tester.tap(find.bySemanticsLabel('Библиотека'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('О приложении'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Проверить обновления'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(LibraryModal), findsOneWidget);
+      expect(find.textContaining('Добавили чудо'), findsOneWidget);
+      await tester.tap(find.text('Обновиться до 9.9.9'));
+      await tester.pumpAndSettle();
+      expect(requests.last, 'https://dl.test/9.9.9.apk');
+      expect(files.savedName, 'pepeunit-9.9.9-android.apk');
+      expect(files.saved, [7, 7]);
+      await tester.tap(find.bySemanticsLabel('Закрыть'));
+      await tester.pumpAndSettle();
+      expect(find.byType(LibraryModal), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: check updates says when the client is current', (
+      tester,
+    ) async {
+      final client = MockClient((request) async {
+        return http.Response(
+          jsonEncode([
+            {'tag_name': clientVersion, 'assets': []},
+          ]),
+          200,
+        );
+      });
+      await start(tester, client: client);
+      await tester.tap(find.bySemanticsLabel('Библиотека'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('О приложении'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Проверить обновления'));
+      await tester.pumpAndSettle();
+      expect(find.byType(LibraryModal), findsOneWidget);
+      expect(
+        find.textContaining('Установлена последняя версия'),
+        findsOneWidget,
+      );
+      expect(find.text('Обновиться до $clientVersion'), findsNothing);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('Library: check updates shows an error when no host answers', (
+      tester,
+    ) async {
+      final client = MockClient((request) async => http.Response('no', 500));
+      await start(tester, client: client);
+      await tester.tap(find.bySemanticsLabel('Библиотека'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('О приложении'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.bySemanticsLabel('Проверить обновления'));
+      await tester.pumpAndSettle();
+      expect(find.byType(LibraryModal), findsNothing);
+      expect(find.bySemanticsLabel('Ошибка'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 
@@ -827,9 +946,7 @@ void main() {
       },
     );
 
-    testWidgets('Library: tools hold the generator', (
-      tester,
-    ) async {
+    testWidgets('Library: tools hold the generator', (tester) async {
       await start(tester);
       await tester.tap(find.bySemanticsLabel('Библиотека'));
       await tester.pumpAndSettle();
@@ -892,15 +1009,21 @@ void main() {
       await tester.longPress(find.bySemanticsLabel('Библиотека'));
       await settle(tester);
       final card = tester.getSize(find.byType(TipModal));
-      final frame = tester.getSize(find.descendant(
-        of: find.byType(TipModal),
-        matching: find.byType(BevelFrame),
-      ));
+      final frame = tester.getSize(
+        find.descendant(
+          of: find.byType(TipModal),
+          matching: find.byType(BevelFrame),
+        ),
+      );
       final extent = tester
-          .state<ScrollableState>(find.descendant(
-            of: find.byType(TipModal),
-            matching: find.byType(Scrollable),
-          ).first)
+          .state<ScrollableState>(
+            find
+                .descendant(
+                  of: find.byType(TipModal),
+                  matching: find.byType(Scrollable),
+                )
+                .first,
+          )
           .position
           .maxScrollExtent;
       // The card is as tall as the text: nothing to scroll.
@@ -1197,7 +1320,9 @@ void main() {
     ) async {
       final filler = [for (var i = 0; i < 80; i++) 'Строка $i\n'].join('\n');
       var count = -1;
-      final doc = parseMarkdown('$filler\n## Конец\n\nредкое слово и Редкое.\n');
+      final doc = parseMarkdown(
+        '$filler\n## Конец\n\nредкое слово и Редкое.\n',
+      );
       Widget view(MdFind? find) => MaterialApp(
         home: Scaffold(
           body: MdView(

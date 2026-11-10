@@ -1172,6 +1172,12 @@ const screenTree = <ScreenNode>[
     'Client version',
   ),
   ScreenNode(
+    '/library/about#updates',
+    ScreenKind.cell,
+    'Проверить обновления',
+    'Check updates',
+  ),
+  ScreenNode(
     '/library/about/apps',
     ScreenKind.list,
     'Приложения',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app_scope.dart';
+import '../../hive/hex_scene.dart';
 import '../../library/library.dart';
 import '../../locale/languages.dart';
 import '../code/code_modal.dart';
@@ -27,6 +28,9 @@ class LibraryModal extends StatefulWidget {
     this.docs,
     this.anchor,
     this.actions,
+    this.footer,
+    this.note,
+    this.noteColor = errorColor,
     super.key,
   });
 
@@ -48,6 +52,13 @@ class LibraryModal extends StatefulWidget {
 
   /// Words before the switch, such as the presentation pager.
   final List<Widget> Function(double font)? actions;
+
+  /// One action under the text, such as Update.
+  final List<Widget> Function(double font)? footer;
+
+  /// A line under the text, like the outcome of the footer action.
+  final String? note;
+  final Color noteColor;
 
   @override
   State<LibraryModal> createState() => _LibraryModalState();
@@ -90,6 +101,9 @@ class _LibraryModalState extends State<LibraryModal> {
       color: widget.color,
       onClose: widget.onClose,
       copy: () => page.source,
+      footer: widget.footer,
+      note: widget.note,
+      noteColor: widget.noteColor,
       rows: 100000,
       actions: (font) => [
         if (_reader.canBack)
