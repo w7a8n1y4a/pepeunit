@@ -4,7 +4,7 @@
     <img align="center" src="https://pepeunit.com/pepeunit-og.jpg"  width="640" height="320">
 </div>
 
-**Демо** - [https://pepeunit.com](https://pepeunit.com)
+**Демо** - [pepeunit.com](https://pepeunit.com)
 
 **Pepeunit** - открытая платформа для управления устройствами и программами (`Unit`) из Git репозиториев. Код `Unit` берётся из `GitLab` или `GitHub`, обновляется на устройстве удалённо, а сам `Unit` общается с другими через MQTT.
 
