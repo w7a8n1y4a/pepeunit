@@ -5,7 +5,7 @@
 /// A line is short and says why it happened. To add a language, append one
 /// more outer key. A missing line falls back to Russian, then to the generic
 /// text of the status (see `describeFailure`).
-const errorTexts = <String, Map<String, String>>{'ru': _ru};
+const errorTexts = <String, Map<String, String>>{'ru': _ru, 'en': _en};
 
 const _ru = <String, String>{
   // Access
@@ -407,4 +407,437 @@ const _ru = <String, String>{
   'USER_VERIFICATION_CODE_NOT_FOUND':
       'Код подтверждения не найден: он устарел или уже использован.',
   'USER_UUID_INVALID': 'Идентификатор пользователя записан неверно.',
+};
+
+const _en = <String, String>{
+  // Access
+  'ACCESS_TOKEN_EXPIRED':
+      'The session has expired. Sign in to the instance again.',
+  'ACCESS_TOKEN_INVALID':
+      'The server did not accept the sign-in token. Sign in to the instance '
+      'again.',
+  'ACCESS_AGENT_BLOCKED_OR_NOT_FOUND':
+      'The account is blocked or deleted on this instance.',
+  'ACCESS_USER_BLOCKED': 'The user is blocked by the instance owner.',
+  'ACCESS_USER_NOT_FOUND': 'User not found.',
+  'ACCESS_UNIT_NOT_FOUND': 'Unit not found.',
+  'ACCESS_INVALID_AGENT_TYPE':
+      'The server could not tell who sent the request.',
+  'ACCESS_UNKNOWN_AGENT_TYPE':
+      'The server could not tell who sent the request.',
+  'ACCESS_AGENT_TYPE_NOT_ALLOWED':
+      'This action is not available for this type of access: it is for '
+      'users only or for units only.',
+  'ACCESS_ROLE_NOT_ALLOWED':
+      'This action needs a different role. Contact the instance owner.',
+  'ACCESS_NOT_CREATOR': 'Only the creator of an object can change it.',
+  'ACCESS_UNIT_REQUEST_DENIED':
+      'The unit has no access to this data. Grant access in the unit '
+      'settings.',
+  'ACCESS_UNIT_INPUT_DENIED':
+      'The unit cannot write to this input: it is not rewritable.',
+  'ACCESS_VISIBILITY_LEVEL_NOT_ALLOWED':
+      'This visibility level is not allowed here.',
+  'ACCESS_PRIVATE_REPO': 'A private repository is not allowed here.',
+  'ACCESS_PRIVATE_VISIBILITY':
+      'The private visibility level is not allowed here.',
+  'ACCESS_REPO_ONLY': 'The action applies to a repository only.',
+  'ACCESS_REPO_USERS_ONLY':
+      'Repository operations are available to users only, not to units.',
+  'ACCESS_REPO_NO_CREDENTIALS':
+      'The repository has no credentials. Add an access token for it.',
+  'ACCESS_NO_PLATFORM_CREDENTIALS':
+      'You have no Git platform token. Add one in your credentials.',
+  'ACCESS_PLATFORM_CREDENTIALS_STATUS':
+      'The Git platform token does not fit: it is not verified or has an '
+      'error.',
+  'ACCESS_NOTIFICATION_NOT_ALLOWED':
+      'No access to this notification: it belongs to another user.',
+  'ACCESS_ICON_OWNER_ONLY': 'Only its owner can change this icon.',
+  'ACCESS_DOCKED_UNIT_ONLY':
+      'Available only to the unit that the topic belongs to.',
+  'ACCESS_TOPIC_DESTINATION_INVALID': 'This topic type does not exist.',
+  'ACCESS_CHALLENGE_INVALID': 'Sign-in failed: the key check is corrupted.',
+  'ACCESS_CHALLENGE_DOMAIN_MISMATCH':
+      'Sign-in failed: the check was issued for another instance address.',
+  'ACCESS_CHALLENGE_USED_OR_EXPIRED':
+      'Sign-in failed: the key check was already used or has expired. Sign '
+      'in again.',
+  'ACCESS_CHALLENGE_EXPIRED': 'The key check has expired. Sign in again.',
+  'ACCESS_SIGNATURE_MISMATCH':
+      'The signature does not match: the key in the client differs from the '
+      'key of the account.',
+
+  // Cipher
+  'CIPHER_CONTENT_TOO_LONG': 'The text to encrypt is longer than allowed.',
+  'CIPHER_ENV_JSON_INVALID':
+      'The environment variables cannot be read as JSON.',
+
+  // Dashboard
+  'DASHBOARD_NOT_FOUND': 'Dashboard not found.',
+  'DASHBOARD_PANEL_NOT_FOUND': 'Panel not found.',
+  'PANELS_UNIT_IOS_NOT_FOUND': 'The node is not connected to this panel.',
+  'DASHBOARD_UUID_INVALID': 'The dashboard identifier is written incorrectly.',
+
+  // DataPipe
+  'DATAPIPE_BULK_CREATE_LAST_VALUE_UNAVAILABLE':
+      'Many records cannot be uploaded at once for the "last value" type.',
+  'DATAPIPE_NO_DATA': 'There is no data for this period.',
+  'DATAPIPE_TOPIC_SUFFIX':
+      'DataPipe can be enabled only for a topic that ends with /pepeunit.',
+  'DATAPIPE_NOT_ACTIVE': 'DataPipe is off. Turn it on first.',
+  'DATAPIPE_NOT_FILLED': 'The DataPipe config is empty. Fill it in first.',
+  'DATAPIPE_LAST_VALUE_UNSUPPORTED':
+      'The "last value" type does not fit this action.',
+  'DATAPIPE_IS_NONE': 'This node has no DataPipe.',
+  'DATAPIPE_CONFIG_INVALID': 'The DataPipe config did not pass validation.',
+  'DATAPIPE_CONFIG_JSON_INVALID': 'The DataPipe config cannot be read as YAML.',
+  'DATAPIPE_ACTIVE_FROM_DATE_START': 'The "from date" period needs a start.',
+  'DATAPIPE_ACTIVE_TO_DATE_END': 'The "to date" period needs an end.',
+  'DATAPIPE_ACTIVE_RANGE_BOUNDS':
+      'The "date range" period needs both a start and an end.',
+  'DATAPIPE_ACTIVE_RANGE_ORDER': 'The period must start before it ends.',
+  'DATAPIPE_FILTER_VALUES_NUMBER':
+      'For a numeric input the filter values must be numbers.',
+  'DATAPIPE_FILTER_VALUES_TEXT':
+      'For a text input the filter values must be strings.',
+  'DATAPIPE_THRESHOLD_MIN_REQUIRED':
+      'The "minimum" threshold needs a lower bound.',
+  'DATAPIPE_THRESHOLD_MAX_REQUIRED':
+      'The "maximum" threshold needs an upper bound.',
+  'DATAPIPE_THRESHOLD_RANGE_REQUIRED':
+      'The "range" threshold needs both bounds: lower and upper.',
+  'DATAPIPE_THRESHOLD_RANGE_ORDER':
+      'The lower bound of the threshold must be less than the upper one.',
+  'DATAPIPE_MAX_SIZE': 'The maximum record size is larger than allowed.',
+  'DATAPIPE_N_RECORDS_REQUIRED':
+      'The "N records" policy needs the number of records.',
+  'DATAPIPE_N_RECORDS_RANGE': 'The number of records must be from 1 to 1024.',
+  'DATAPIPE_TIME_WINDOW_REQUIRED': 'The size of the time window is required.',
+  'DATAPIPE_TIME_WINDOW_INVALID':
+      'There is no such window size. Pick one from the list.',
+  'DATAPIPE_AGGREGATION_FUNCTIONS_REQUIRED':
+      'Aggregation needs at least one function.',
+  'DATAPIPE_FILTERING_VALUES_REQUIRED': 'The chosen filtering needs values.',
+  'DATAPIPE_THRESHOLD_NOT_FOR_TEXT':
+      'A threshold does not apply to a text input, only to numbers.',
+  'DATAPIPE_CSV_WINDOW_DATETIME':
+      'In the CSV the record time is outside the allowed window.',
+  'DATAPIPE_CSV_N_RECORDS_LIMIT':
+      'The CSV has more records than the config allows.',
+  'DATAPIPE_CSV_WINDOW_SECONDS':
+      'In the CSV the window bounds must have no seconds.',
+  'DATAPIPE_CSV_WINDOW_ORDER': 'In the CSV the window ends before it starts.',
+  'DATAPIPE_CSV_WINDOW_MIN_DELTA':
+      'In the CSV the record time is too far from the end of the window.',
+  'DATAPIPE_CSV_WINDOW_SIZE_MISMATCH':
+      'In the CSV the window length differs from the window size in the '
+      'config.',
+  'DATAPIPE_CSV_PREVIOUS_WINDOW_SIZE':
+      'In the CSV the windows are not consecutive: there is a gap or an '
+      'overlap.',
+  'DATAPIPE_CSV_MAX_RATE':
+      'In the CSV the records come more often than the config allows.',
+  'DATAPIPE_CSV_LAST_UNIQUE':
+      'In the CSV a value repeats the previous one, and the config skips '
+      'repeats.',
+  'DATAPIPE_CSV_MAX_SIZE': 'In the CSV a value is longer than allowed.',
+  'DATAPIPE_CSV_NOT_MONOTONIC': 'In the CSV the record times do not increase.',
+  'DATAPIPE_CSV_BEFORE_ACTIVE_START':
+      'In the CSV a record is before the start of the DataPipe period.',
+  'DATAPIPE_CSV_AFTER_ACTIVE_END':
+      'In the CSV a record is after the end of the DataPipe period.',
+  'DATAPIPE_CSV_OUTSIDE_ACTIVE_RANGE':
+      'In the CSV a record is outside the DataPipe period.',
+  'DATAPIPE_CSV_NOT_IN_WHITELIST':
+      'In the CSV a value is not in the whitelist of the config.',
+  'DATAPIPE_CSV_IN_BLACKLIST':
+      'In the CSV a value is in the blacklist of the config.',
+  'DATAPIPE_CSV_BELOW_THRESHOLD':
+      'In the CSV a value is below the lower threshold.',
+  'DATAPIPE_CSV_ABOVE_THRESHOLD':
+      'In the CSV a value is above the upper threshold.',
+  'DATAPIPE_CSV_OUTSIDE_THRESHOLD':
+      'In the CSV a value is outside the thresholds of the config.',
+  'DATAPIPE_CSV_STATE_NOT_TEXT': 'In the CSV the value must be text.',
+  'DATAPIPE_CSV_STATE_NOT_NUMBER': 'In the CSV the value must be a number.',
+  'DATAPIPE_CSV_DATETIME_INVALID':
+      'In the CSV a date is written incorrectly. The ISO format is needed, '
+      'for example 2026-01-31T12:00:00.',
+  'DATAPIPE_RELATIVE_TIME_INVALID':
+      'There is no such relative interval. Pick one from the list.',
+
+  // Feature flag
+  'FEATURE_DISABLED': 'The instance owner turned this feature off.',
+
+  // Git platform
+  'GIT_PLATFORM_TIMEOUT':
+      'The Git platform did not answer in time. Try again later.',
+  'GIT_PLATFORM_REQUEST_FAILED':
+      'The request to the Git platform failed. Check the repository address '
+      'and try again later.',
+  'GIT_PLATFORM_INVALID_CREDENTIALS':
+      'The Git platform did not accept the token. It is wrong or has '
+      'expired.',
+  'GIT_PLATFORM_RATE_LIMIT':
+      'The Git platform limited the number of requests. Wait and try again.',
+
+  // Git repository
+  'GIT_REPO_VERSION_MISSING':
+      'The repository has no version tags, so a version cannot be chosen.',
+  'GIT_REPO_COMMIT_WITHOUT_TAG':
+      'This commit has no tag. Choose a commit with a tag.',
+  'GIT_REPO_COMMIT_NOT_FOUND': 'There is no such commit in the repository.',
+  'GIT_REPO_SCHEMA_UNRESOLVED_KEYS':
+      'schema.json still has keys with no description of inputs or outputs.',
+  'GIT_REPO_SCHEMA_VALUE_TYPE':
+      'In schema.json the topic values must be lists only.',
+  'GIT_REPO_TOPIC_CHARS':
+      'In schema.json a topic has forbidden characters. Latin letters, '
+      'digits and / _ - are allowed.',
+  'GIT_REPO_TOPIC_TOO_LONG': 'In schema.json a topic name is too long.',
+  'GIT_REPO_ENV_UNRESOLVED':
+      'env.json still has variables without a value. Fill them in.',
+  'GIT_REPO_BRANCH_NOT_FOUND': 'There is no such branch in the repository.',
+  'GIT_REPO_COMMIT_NOT_IN_BRANCH': 'This commit is not in the chosen branch.',
+  'GIT_REPO_TAG_NO_PLATFORMS':
+      'The chosen tag has no built platforms. Choose another tag.',
+  'GIT_REPO_PLATFORM_NOT_FOUND':
+      'This tag has no such platform. Choose from the available ones.',
+  'GIT_REPO_NOT_EXIST':
+      'The repository is not downloaded to the server. Start a sync.',
+  'GIT_REPO_INVALID_URL_OR_CREDENTIALS':
+      'The repository address or the token is wrong, or the token has no '
+      'access.',
+  'GIT_REPO_FILE_NOT_FOUND': 'This commit does not have the needed file.',
+  'GIT_REPO_TOO_LARGE': 'The repository is larger than the allowed size.',
+  'GIT_REPO_SCHEMA_JSON_INVALID':
+      'schema.json in the repository cannot be read.',
+  'GIT_REPO_ENV_EXAMPLE_JSON_INVALID':
+      'env_example.json in the repository cannot be read.',
+  'GIT_REPO_ENV_JSON_INVALID': 'env.json cannot be read as JSON.',
+  'GIT_REPO_COMMIT_MISSING': 'The commit is not found in the repository.',
+
+  // Grafana
+  'GRAFANA_NAME_INVALID':
+      'The name must be 4 to 20 characters: Latin letters, digits and _ - .',
+  'GRAFANA_TITLE_INVALID':
+      'The title must be 4 to 20 characters: Latin letters, digits and '
+      '_ - .',
+  'GRAFANA_UNIT_IO_NOT_UNIQUE': 'This node is already on the panel.',
+  'GRAFANA_PANEL_UNIT_IO_LIMIT': 'A panel cannot hold more nodes.',
+  'GRAFANA_RETRIES_EXHAUSTED':
+      'Grafana does not answer. The attempts ran out, try again later.',
+  'GRAFANA_VALUE_NOT_SUPPORTED': 'Grafana cannot show this value.',
+  'GRAFANA_DATA_TYPE_NOT_SUPPORTED':
+      'This data type cannot be shown on a panel.',
+  'GRAFANA_DASHBOARD_HAS_NO_PANELS':
+      'The dashboard has no panels. Add at least one first.',
+  'GRAFANA_NO_ACTIVE_DATAPIPE':
+      'The node has no active DataPipe, and the panel needs it.',
+  'GRAFANA_INVALID_DATAPIPE_YML':
+      'The node has an invalid DataPipe config, the panel cannot read it.',
+  'GRAFANA_NAME_NOT_UNIQUE': 'A dashboard with this name already exists.',
+  'GRAFANA_TITLE_NOT_UNIQUE': 'A dashboard with this title already exists.',
+
+  // Icon
+  'ICON_TOO_LARGE': 'The picture is larger than 128 KB.',
+  'ICON_NOT_PNG': 'A PNG file is needed.',
+  'ICON_WRONG_SIZE': 'The picture must be 192×192 pixels.',
+  'ICON_TARGET_UNSUPPORTED': 'An icon cannot be set for this object.',
+  'ICON_NOT_FOUND': 'Icon not found.',
+
+  // Instance
+  'INSTANCE_CACHE_NOT_INITIALIZED':
+      'The instance is still starting. Wait a little and try again.',
+  'INSTANCE_INTEGRATION_TESTS_FAILED':
+      'The instance check failed. See the server logs for details.',
+  'INSTANCE_SETTINGS_NOT_FOUND': 'Setting not found.',
+  'INSTANCE_SETTINGS_INVALID': 'The setting value did not pass validation.',
+  'INSTANCE_SETTINGS_EMAIL_INVALID':
+      'The owner email is written incorrectly. Enter an address or leave it '
+      'empty.',
+  'INSTANCE_SETTINGS_TELEGRAM_TOKEN_INVALID':
+      'The Telegram bot token must look like 123456:ABC-def or be empty.',
+  'INSTANCE_SETTINGS_COUNT_RATE_INVALID':
+      'The limit is written as 20/s or 20/m: a number per second or per '
+      'minute.',
+  'INSTANCE_SETTINGS_BYTES_RATE_INVALID':
+      'The limit is written as 1MB/s: a size per second.',
+  'INSTANCE_SETTINGS_GRAFANA_CREDENTIALS':
+      'Grafana cannot be turned on: the server has no login and password of '
+      'its administrator.',
+  'INSTANCE_SETTINGS_GITHUB_TOKEN_PAIR':
+      'The GitHub name and token go together: fill in both fields or clear '
+      'both.',
+
+  // Link
+  'LINK_NOT_FOUND': 'Link not found.',
+  'LINK_EXISTS': 'These nodes are already linked.',
+
+  // MQTT
+  'MQTT_RATE_LIMIT': 'Values are sent too often. Increase the interval.',
+  'MQTT_PAYLOAD_TOO_LARGE': 'The message is larger than allowed.',
+  'MQTT_TOPIC_DOMAIN':
+      'The topic belongs to another domain, not to this instance.',
+  'MQTT_STATE_NO_COMMIT': 'The unit state has no firmware version.',
+  'MQTT_PUBLISH_LOOP_NOT_INITIALIZED':
+      'MQTT on the server is not running yet. Try again later.',
+  'MQTT_PUBLISH_DISCONNECTED':
+      'The server lost the connection to the MQTT broker. Try again later.',
+  'MQTT_PUBLISH_TIMEOUT':
+      'The MQTT broker did not answer in time: it is busy or stopped.',
+  'MQTT_PUBLISH_FAILED': 'The message could not be sent to MQTT.',
+  'MQTT_SESSION_INVALID':
+      'The MQTT session of the server is corrupted. Tell the instance owner.',
+  'MQTT_UNIT_TOPIC_ONLY': 'Topic exchange is available to units only.',
+  'MQTT_TOPIC_STRUCT': 'The topic is built incorrectly: 2 or 3 parts expected.',
+  'MQTT_HARDWARE_STATE_INVALID': 'The device state cannot be read as JSON.',
+  'MQTT_UNIT_LOG_INVALID': 'The device log cannot be read as JSON.',
+
+  // Notification
+  'NOTIFICATION_NOT_FOUND': 'Notification not found.',
+  'NOTIFICATION_TIME_INVALID': 'The delivery time is written as HH:MM in UTC.',
+
+  // Operation task
+  'OPERATION_TASK_COOLDOWN':
+      'This action was done recently. Wait and try again.',
+  'OPERATION_TASK_NOT_FOUND': 'Task not found.',
+
+  // Pagination
+  'PAGINATION_OFFSET': 'The list offset cannot be negative.',
+  'PAGINATION_LIMIT_NEGATIVE': 'The page size cannot be negative.',
+  'PAGINATION_LIMIT_TOO_LARGE':
+      'The page size is larger than the instance allows.',
+
+  // Peer
+  'PEER_NOT_FOUND': 'Peer not found.',
+  'PEER_URL_EXISTS': 'This peer is already added.',
+  'PEER_URL_SCHEME': 'The peer address must start with http or https.',
+  'PEER_URL_HOST': 'The peer address has no host.',
+  'PEER_URL_QUERY': 'The peer address must have no parameters after ? and #.',
+  'PEER_URL_CREDENTIALS': 'The peer address must have no login and password.',
+  'PEER_URL_ENDPOINT':
+      'The peer address must lead to /instances/current of its server.',
+  'PEER_TRUST_STATUS_INVALID': 'A peer can only be trusted or blocked.',
+  'PEER_COLLECTION_TRUST':
+      'Data is collected from trusted peers only. Trust this one first.',
+  'PEER_COLLECTION_FAILED': 'Data could not be collected from the peer.',
+  'PEER_RESPONSE_TOO_LARGE': 'The peer answer is larger than allowed.',
+
+  // Permission
+  'PERMISSION_AGENT_TYPE_INVALID': 'This access type does not exist.',
+  'PERMISSION_RESOURCE_TYPE_INVALID': 'This resource type does not exist.',
+  'PERMISSION_EXISTS': 'This access is already granted.',
+  'PERMISSION_SELF_ACCESS':
+      'The access of a resource to itself cannot be removed.',
+  'PERMISSION_CREATOR_ACCESS':
+      'The access of the creator to their resource cannot be removed.',
+  'PERMISSION_UNIT_CHILD_IO':
+      'The access of a unit to its own nodes cannot be removed.',
+  'PERMISSION_NOT_FOUND': 'Access not found.',
+  'PERMISSION_AGENT_UUID_INVALID':
+      'The identifier of the access recipient is wrong.',
+  'PERMISSION_RESOURCE_UUID_INVALID': 'The resource identifier is wrong.',
+
+  // Readme
+  'README_FIELD_TOO_LONG': 'A field in the repository description is too long.',
+  'README_FIELD_TOO_MANY_ITEMS':
+      'A field in the repository description has too many items.',
+  'README_TOML_TOO_LARGE':
+      'The repository description is larger than 10,000 characters.',
+  'README_TOML_INVALID': 'The repository description has a TOML syntax error.',
+
+  // Repo
+  'REPO_URL_EXISTS': 'A repository with this address is already added.',
+  'REPO_IS_PUBLIC': 'The repository is public: it needs no token.',
+  'REPO_PLATFORM_UNSUPPORTED':
+      'This Git platform is not supported. Choose from the list.',
+  'REPO_SYNC_FAILED':
+      'The sync failed. Check the repository address and token.',
+  'REPO_URL_INVALID':
+      'The repository address is wrong. It must end with .git and start '
+      'with http or https.',
+  'REPO_CREDENTIALS_INVALID': 'The repository token did not fit.',
+  'REPO_PUBLIC': 'The repository is public: it needs no token.',
+  'REPO_CREDENTIALS_MISSING': 'The repository has no token. Add one.',
+  'REPO_NO_VALID_CREDENTIALS':
+      'No token fit the repository. Check their expiry and permissions.',
+  'REPO_SYNC_TOO_SOON': 'A sync was done recently. Wait and try again.',
+  'REPO_USER_NO_CREDENTIALS': 'You have no token for this repository.',
+  'REPO_CREDENTIALS_ERROR':
+      'The token does not work: the check ended with an error. Check its '
+      'permissions.',
+  'REPO_CREDENTIALS_NOT_VERIFIED':
+      'The token is not verified yet. Verify it and try again.',
+  'REPO_NOT_FOUND': 'Repository not found.',
+  'REPO_HAS_UNITS': 'The repository has linked units. Delete them first.',
+  'REPO_RELEASES_MISSING':
+      'The repository has no releases. Create a release with a tag and try '
+      'again.',
+  'REPO_RELEASES_JSON_INVALID': 'The list of releases cannot be read as JSON.',
+  'REPO_CREDENTIALS_JSON_INVALID': 'The credentials cannot be read as JSON.',
+  'REPO_PRIVATE_REPO_JSON_INVALID':
+      'The private repository data cannot be read as JSON.',
+  'REPO_UUID_INVALID': 'The repository identifier is written incorrectly.',
+
+  // Unit
+  'UNIT_NOT_FOUND': 'Unit not found.',
+  'UNIT_NAME_INVALID':
+      'The name must be 4 to 20 characters: Latin letters, digits and _ - .',
+  'UNIT_AUTOUPDATE_TAGS_ONLY':
+      'A compiled unit updates automatically only to tags.',
+  'UNIT_MANUAL_UPDATE_BRANCH_COMMIT':
+      'A manual update needs a branch and a commit.',
+  'UNIT_WBITS_INVALID': 'There is no such compression value (wbits).',
+  'UNIT_LEVEL_INVALID': 'There is no such compression level.',
+  'UNIT_VISIBILITY_PARENT_BELOW_CHILD':
+      'A parent cannot be more closed than its nested objects. Open the '
+      'nested ones first or make the parent less closed.',
+  'UNIT_NAME_NOT_UNIQUE': 'A unit with this name already exists.',
+  'UNIT_UUID_INVALID': 'The unit identifier is written incorrectly.',
+
+  // Unit group
+  'UNIT_GROUP_NOT_FOUND': 'Group not found.',
+  'UNIT_GROUP_NAME_INVALID':
+      'The name must be 4 to 20 characters: Latin letters, digits and _ - .',
+  'UNIT_GROUP_UNIT_ALREADY_IN_GROUP': 'The unit is already in this group.',
+  'UNIT_GROUP_COUNT_LIMIT': 'The limit of groups on the instance is reached.',
+  'UNIT_GROUP_LINK_NOT_FOUND': 'The unit is not in this group.',
+  'UNIT_GROUP_NAME_NOT_UNIQUE': 'A group with this name already exists.',
+  'UNIT_GROUP_UUID_INVALID': 'The group identifier is written incorrectly.',
+
+  // Unit IO
+  'UNIT_IO_NOT_FOUND': 'Node not found.',
+  'UNIT_IO_MAX_CONNECTIONS': 'The allowed number of links must be at least 1.',
+  'UNIT_IO_INPUT_CONNECTION_LIMIT':
+      'The input already has the maximum of links. Raise the limit or '
+      'remove one.',
+  'UNIT_IO_OUTPUT_CONNECTION_LIMIT':
+      'The output already has the maximum of links. Raise the limit or '
+      'remove one.',
+  'UNIT_IO_NOT_INPUT': 'This node is not an input.',
+  'UNIT_IO_NOT_OUTPUT': 'This node is not an output.',
+  'UNIT_IO_STATE_JSON_INVALID': 'The node value cannot be read as JSON.',
+  'UNIT_IO_UUID_INVALID': 'The node identifier is written incorrectly.',
+  'UNIT_IO_INPUT_UUID_INVALID': 'The input identifier is written incorrectly.',
+  'UNIT_IO_OUTPUT_UUID_INVALID':
+      'The output identifier is written incorrectly.',
+
+  // User
+  'USER_NOT_FOUND': 'User not found.',
+  'USER_LOGIN_INVALID':
+      'The login must be 4 to 20 characters: Latin letters, digits and _ - .',
+  'USER_TELEGRAM_ALREADY_LINKED':
+      'This Telegram is already linked to an account.',
+  'USER_PUBLIC_KEY_NOT_UNIQUE':
+      'A user with this key already exists. Sign in instead of registering.',
+  'USER_COUNT_LIMIT': 'The limit of users on the instance is reached.',
+  'USER_PUBLIC_KEY_INVALID': 'The public key is written incorrectly.',
+  'USER_PUBLIC_KEY_HASH_INVALID':
+      'The hash of the public key is written incorrectly.',
+  'USER_VERIFICATION_CODE_NOT_FOUND':
+      'The verification code is not found: it has expired or was already '
+      'used.',
+  'USER_UUID_INVALID': 'The user identifier is written incorrectly.',
 };

@@ -54,11 +54,64 @@ void main() {
     expect(text, isNot(contains('{')));
   });
 
-  test('a language with no lines reads Russian', () {
+  test('English has the line of the code', () {
     expect(
       describeFailure('HTTP 422 ${_body(920100)}', 'en', names: _names),
+      errorTexts['en']!['UNIT_NOT_FOUND'],
+    );
+  });
+
+  test('a language with no lines reads Russian', () {
+    expect(
+      describeFailure('HTTP 422 ${_body(920100)}', 'de', names: _names),
       errorTexts['ru']!['UNIT_NOT_FOUND'],
     );
+  });
+
+  test('general lines come in both languages', () {
+    for (final status in [
+      200,
+      401,
+      403,
+      404,
+      408,
+      413,
+      422,
+      429,
+      503,
+      500,
+      418,
+    ]) {
+      final ru = describeFailure(ApiException(status, '').toString(), 'ru');
+      final en = describeFailure(ApiException(status, '').toString(), 'en');
+      expect(en, isNot(ru), reason: '$status');
+      expect(en, isNot(matches(RegExp(r'[А-Яа-яЁё]'))), reason: '$status');
+    }
+    final en = describeFailure(
+      'HTTP 422 ${_body(999999)}',
+      'en',
+      names: _names,
+    );
+    expect(en, contains('(code 999999)'));
+    expect(describeFailure('Failed to fetch', 'en'), contains('No connection'));
+    expect(
+      describeFailure('TimeoutException after 0:00:20', 'en'),
+      contains('did not answer'),
+    );
+    expect(
+      describeFailure('FormatException: Unexpected character', 'en'),
+      contains('could not be read'),
+    );
+  });
+
+  test('a local failure is read in the language of the screen', () {
+    const failure = LocalFailure('Нет входа', 'No sign-in');
+    expect(describeFailure('$failure', 'ru'), 'Нет входа');
+    expect(describeFailure('$failure', 'en'), 'No sign-in');
+    final api = ApiException.local('Нет связи', 'Offline');
+    expect(describeFailure('$api', 'en'), 'Offline');
+    expect(LocalFailure.plain('$failure'), 'Нет входа');
+    expect(LocalFailure.plain('plain'), 'plain');
   });
 
   test('a failure without a code gets a general line by status', () {
@@ -112,8 +165,6 @@ void main() {
   test('a sentence for the user stays as it is', () {
     const own = 'Нет входа';
     expect(describeFailure(own, 'ru'), own);
-    final local = ApiException.local('Версия сервера 1.6.0 не подходит');
-    expect(describeFailure('$local', 'ru'), '$local');
     expect(
       describeFailure('host.example: Нет связи с сервером.', 'ru'),
       'host.example: Нет связи с сервером.',
@@ -127,6 +178,17 @@ void main() {
       expect(entry.value.trim(), isNotEmpty, reason: entry.key);
       expect(entry.value.length, lessThan(160), reason: entry.key);
       expect(entry.value, isNot(contains('{')), reason: entry.key);
+    }
+  });
+
+  test('every Russian line has an English one', () {
+    expect(errorTexts['en']!.keys.toSet(), errorTexts['ru']!.keys.toSet());
+    final cyrillic = RegExp(r'[А-Яа-яЁё]');
+    for (final entry in errorTexts['en']!.entries) {
+      expect(entry.value.trim(), isNotEmpty, reason: entry.key);
+      expect(entry.value.length, lessThan(160), reason: entry.key);
+      expect(entry.value, isNot(contains('{')), reason: entry.key);
+      expect(cyrillic.hasMatch(entry.value), isFalse, reason: entry.key);
     }
   });
 

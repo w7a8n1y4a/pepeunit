@@ -81,7 +81,9 @@ void appendError(
       body: open
           ? ErrorCell(
               message: shown,
-              detail: shown == message ? null : message,
+              detail: shown == message || LocalFailure.read(message) != null
+                  ? null
+                  : message,
               copyLabel: text(language, 'Скопировать', 'Copy'),
             )
           : null,

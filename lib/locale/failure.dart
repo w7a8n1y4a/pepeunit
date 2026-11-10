@@ -29,16 +29,46 @@ class ErrorCatalog {
   static void forget() => _names = <int, String>{};
 }
 
+/// A failure the client found itself, written for both languages.
+///
+/// Screens keep `'$error'`, so the text travels as a string: [toString] joins
+/// the lines behind a mark and [describeFailure] picks the language again.
+/// The copy button shows [plain] instead of the mark.
+class LocalFailure implements Exception {
+  const LocalFailure(this.ru, this.en);
+
+  final String ru;
+  final String en;
+
+  @override
+  String toString() => '$_localMark$ru$_localSplit$en';
+
+  /// The lines of a [toString] text, or null for any other text.
+  static Map<String, String>? read(String text) {
+    if (!text.startsWith(_localMark)) return null;
+    final parts = text.substring(_localMark.length).split(_localSplit);
+    return {'ru': parts.first, if (parts.length > 1) 'en': parts[1]};
+  }
+
+  /// The Russian line of a [toString] text, the text itself otherwise.
+  static String plain(String text) => read(text)?['ru'] ?? text;
+}
+
+const _localMark = '\u0001';
+const _localSplit = '\u0002';
+
 /// The text a person reads in place of an error.
 ///
 /// [raw] is what the screen kept of the failure: `ApiException.toString()`
 /// (`HTTP <status> <body>`) or the text of any other exception. A backend
 /// code gets its own line from [errorTexts]. A failure without a known code
 /// gets a general line for its status, or for a lost connection, a timeout,
-/// or a broken answer. Anything else is already a sentence written for the
-/// user and stays as it is.
+/// or a broken answer. A [LocalFailure] gets the line of the language. Anything
+/// else is already a sentence written for the user and stays as it is.
 String describeFailure(String raw, String language, {Map<int, String>? names}) {
   final text = raw.trim();
+  final local = LocalFailure.read(text);
+  if (local != null) return phrase(language, local);
   final reply = _httpReply.firstMatch(text);
   if (reply != null) {
     final status = int.parse(reply.group(1)!);
@@ -53,6 +83,9 @@ String describeFailure(String raw, String language, {Map<int, String>? names}) {
       'ru':
           'Сервер не ответил вовремя. Он перегружен или недоступен, '
           'повторите позже.',
+      'en':
+          'The server did not answer in time. It is overloaded or '
+          'unavailable, try again later.',
     });
   }
   if (_offline.hasMatch(text)) {
@@ -60,6 +93,9 @@ String describeFailure(String raw, String language, {Map<int, String>? names}) {
       'ru':
           'Нет связи с сервером. Проверьте интернет и адрес инстанса, '
           'возможно, сервер сейчас выключен.',
+      'en':
+          'No connection to the server. Check the internet and the instance '
+          'address, the server may be down.',
     });
   }
   if (_technical.hasMatch(text)) {
@@ -67,6 +103,9 @@ String describeFailure(String raw, String language, {Map<int, String>? names}) {
       'ru':
           'Не удалось разобрать ответ сервера. Возможно, версия инстанса не '
           'подходит этому клиенту: обновите клиент или инстанс.',
+      'en':
+          'The server answer could not be read. The instance version may not '
+          'fit this client: update the client or the instance.',
     });
   }
   return raw;
@@ -132,8 +171,49 @@ int? _codeOf(String body) {
 }
 
 String _byStatus(int status, String language, int? code) {
-  final line = phrase(language, {'ru': _statusLine(status)});
-  return code == null ? line : '$line (код $code)';
+  final line = phrase(language, {
+    'ru': _statusLine(status),
+    'en': _statusLineEn(status),
+  });
+  if (code == null) return line;
+  return language == 'en' ? '$line (code $code)' : '$line (код $code)';
+}
+
+String _statusLineEn(int status) {
+  if (status >= 200 && status < 300) {
+    return 'The server answered not as the client expects. Check the '
+        'instance address, its version may not fit the client.';
+  }
+  switch (status) {
+    case 401:
+      return 'The server did not accept the sign-in: the session has expired '
+          'or the key did not fit. Sign in again.';
+    case 403:
+      return 'You have no rights for this action on this instance.';
+    case 404:
+      return 'The server did not find what was asked. The instance version '
+          'may not fit this client.';
+    case 408:
+      return 'The server did not wait for the request. Check the connection '
+          'and try again.';
+    case 413:
+      return 'The request is too large for the server.';
+    case 422:
+      return 'The server did not accept the data: the values did not pass '
+          'validation. Check the filled fields.';
+    case 429:
+      return 'Too many requests. Wait a little and try again.';
+    case 502:
+    case 503:
+    case 504:
+      return 'The server is temporarily unavailable: it is restarting or '
+          'overloaded. Try again later.';
+  }
+  if (status >= 500) {
+    return 'An error occurred on the server. Try again later, and if it '
+        'does not pass, tell the instance owner.';
+  }
+  return 'The server rejected the request. Check the data and try again.';
 }
 
 String _statusLine(int status) {

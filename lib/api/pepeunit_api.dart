@@ -8,6 +8,7 @@ import '../dashboards/dashboard.dart';
 import '../instances/directory_user.dart';
 import '../instances/instance.dart';
 import '../instances/portrait.dart';
+import '../locale/failure.dart';
 import '../registry/repo.dart';
 import '../units/unit.dart';
 import 'backend_version.dart';
@@ -15,9 +16,11 @@ import 'backend_version.dart';
 class ApiException implements Exception {
   ApiException(this.status, this.body);
 
-  /// A failure the client found itself. [text] is already a sentence for the
-  /// user, so it carries no status.
-  ApiException.local(String text) : status = 0, body = text;
+  /// A failure the client found itself. The lines are already sentences for
+  /// the user in each language, so it carries no status.
+  ApiException.local(String ru, String en)
+    : status = 0,
+      body = LocalFailure(ru, en).toString();
 
   final int status;
   final String body;
@@ -139,7 +142,10 @@ class PepeunitApi {
     if (version.isNotEmpty && !backendCompatible(version)) {
       throw ApiException.local(
         'Версия сервера $version не подходит этому клиенту: нужна '
-        '>= 1.5.0 и < 1.6.0. Обновите клиент или выберите другой инстанс.',
+            '>= 1.5.0 и < 1.6.0. Обновите клиент или выберите другой инстанс.',
+        'The server version $version does not fit this client: '
+            '>= 1.5.0 and < 1.6.0 is needed. Update the client or choose '
+            'another instance.',
       );
     }
     return portraitFromJson(json, url: '$origin$instanceCurrentPath');
@@ -1397,7 +1403,10 @@ class PepeunitApi {
       if (response.body.trimLeft().startsWith('<')) {
         throw ApiException.local(
           'Адрес не похож на сервер Pepeunit: вместо данных пришла '
-          'веб-страница. Проверьте адрес инстанса и настройки прокси.',
+              'веб-страница. Проверьте адрес инстанса и настройки прокси.',
+          'The address does not look like a Pepeunit server: a web page came '
+              'instead of data. Check the instance address and the proxy '
+              'settings.',
         );
       }
       return;
@@ -1409,14 +1418,17 @@ class PepeunitApi {
 String jwtUuid(String token) {
   final parts = token.split('.');
   if (parts.length < 2) {
-    throw const FormatException('Токен без полезной нагрузки');
+    throw const LocalFailure(
+      'Токен без полезной нагрузки',
+      'The token has no payload',
+    );
   }
   final payload = jsonDecode(
     utf8.decode(base64Url.decode(base64Url.normalize(parts[1]))),
   ) as Map<String, Object?>;
   final uuid = payload['uuid'] as String?;
   if (uuid == null || uuid.isEmpty) {
-    throw const FormatException('В токене нет uuid');
+    throw const LocalFailure('В токене нет uuid', 'The token has no uuid');
   }
   return uuid;
 }

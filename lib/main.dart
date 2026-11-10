@@ -54,6 +54,7 @@ import 'features/units/unit_io_pages.dart';
 import 'features/units/unit_pipe_pages.dart';
 import 'features/units/unit_page.dart';
 import 'features/units/unit_work_pages.dart';
+import 'features/units/units_chrome.dart';
 import 'features/units/units_menu_page.dart';
 import 'features/units/units_page.dart';
 import 'dashboards/dashboard.dart';
@@ -348,7 +349,11 @@ class _PepeunitAppState extends State<PepeunitApp> {
                 builder: (context, state) {
                   final repo = state.uri.queryParameters['repo'] ?? '';
                   return NamePickPage(
-                    title: 'Branch',
+                    title: unitText(
+                      AppScope.of(context).vault.language,
+                      'Ветка',
+                      'Branch',
+                    ),
                     scope: scaleTickOf(state.uri),
                     path: '/units/new/branch?repo=$repo',
                     load: () async {
@@ -401,7 +406,11 @@ class _PepeunitAppState extends State<PepeunitApp> {
                   final branch = state.uri.queryParameters['branch'];
                   final commit = state.uri.queryParameters['commit'];
                   return NamePickPage(
-                    title: 'Platform',
+                    title: unitText(
+                      AppScope.of(context).vault.language,
+                      'Платформа',
+                      'Platform',
+                    ),
                     icon: 'assets/icons/objects/brick.svg',
                     scope: scaleTickOf(state.uri),
                     path: state.uri

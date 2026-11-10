@@ -1,3 +1,5 @@
+import '../locale/failure.dart';
+
 class InstanceRecord {
   InstanceRecord({
     required this.url,
@@ -79,21 +81,33 @@ const instanceSettingsUuid = '00000000-0000-4000-8000-000000000001';
 String canonicalInstanceUrl(String raw) {
   final trimmed = raw.trim();
   if (trimmed.isEmpty) {
-    throw const FormatException('Пустой адрес инстанса');
+    throw const LocalFailure(
+      'Пустой адрес инстанса',
+      'The instance address is empty',
+    );
   }
   final withScheme = trimmed.contains('://') ? trimmed : 'https://$trimmed';
   final uri = Uri.parse(withScheme);
   if (uri.scheme != 'http' && uri.scheme != 'https') {
-    throw const FormatException('Адрес должен начинаться с http или https');
+    throw const LocalFailure(
+      'Адрес должен начинаться с http или https',
+      'The address must start with http or https',
+    );
   }
   if (uri.host.isEmpty) {
-    throw const FormatException('В адресе нет хоста');
+    throw const LocalFailure('В адресе нет хоста', 'The address has no host');
   }
   if (uri.userInfo.isNotEmpty) {
-    throw const FormatException('В адресе не должно быть логина');
+    throw const LocalFailure(
+      'В адресе не должно быть логина',
+      'The address must have no login',
+    );
   }
   if (uri.query.isNotEmpty || uri.fragment.isNotEmpty) {
-    throw const FormatException('В адресе не должно быть параметров');
+    throw const LocalFailure(
+      'В адресе не должно быть параметров',
+      'The address must have no parameters',
+    );
   }
   var path = uri.path;
   if (path.length > 1 && path.endsWith('/')) {
@@ -102,7 +116,10 @@ String canonicalInstanceUrl(String raw) {
   if (path.isEmpty || path == '/') {
     path = instanceCurrentPath;
   } else if (!path.endsWith('/instances/current')) {
-    throw const FormatException('Нужна ссылка /instances/current');
+    throw const LocalFailure(
+      'Нужна ссылка /instances/current',
+      'The /instances/current link is needed',
+    );
   }
   return Uri(
     scheme: uri.scheme,

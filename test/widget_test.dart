@@ -14,6 +14,7 @@ import 'package:pepeunit_client/api/backend_version.dart';
 import 'package:pepeunit_client/app_model.dart';
 import 'package:pepeunit_client/app_scope.dart';
 import 'package:pepeunit_client/instances/instance.dart';
+import 'package:pepeunit_client/locale/failure.dart';
 import 'package:pepeunit_client/main.dart';
 import 'package:pqcrypto/pqcrypto.dart';
 
@@ -56,7 +57,7 @@ void main() {
     );
     expect(
       () => canonicalInstanceUrl('https://devunit.pepeunit.com/pepeunit/docs'),
-      throwsFormatException,
+      throwsA(isA<LocalFailure>()),
     );
   });
 
