@@ -1,13 +1,13 @@
 # schema.json
 
-:::warning Какое функциональное назначение у schema.json?
-Данный файл - это контракт между конкретным экземпляром Unit и Pepeunit:
-1. Unit гарантирует, что он подпишется на все стандартные топики, указанные в `input_base_topic`, и все UnitNode, указанные в `input_topic`
-1. Unit гарантирует, что он будет публиковать данные в стандартные топики из `output_base_topic`, и во все UnitNode, указанные в `output_topic`
-1. Pepeunit гарантирует, что будет [отправлять корректные форматы данных](/developer/mqtt/default-mqtt-command) в `input_base_topic`, и что подпишется на все топики в `output_base_topic`
-1. Pepeunit гарантирует, что будет производить авторизацию для публикации и подписки на все без исключения топики, адресованные на инстанс [EMQX](/deployment/dependencies/emqx), используемый [Backend](/deployment/dependencies/backend)
-1. Pepeunit гарантирует, что будет подписан на все топики, соответствующие паттерну `unit.example.com/+/+/+/pepeunit`
-1. Pepeunit гарантирует, что подпишется на все топики с паттерном `unit.example.com/+/pepeunit`, у которых включен механизм [DataPipe](/deployment/dependencies/datapipe)
+:::warning Для чего нужен schema.json?
+Это контракт между конкретным Unit и Pepeunit:
+1. Unit подпишется на все стандартные топики из input_base_topic и на все UnitIO из input_topic
+1. Unit будет публиковать в стандартные топики из output_base_topic и во все UnitIO из output_topic
+1. Pepeunit будет [отправлять данные в нужном формате](/developer/mqtt/default-mqtt-command) в input_base_topic и читать все топики из output_base_topic
+1. Pepeunit будет проверять права Unit на подписку и публикацию в [EMQX](/deployment/dependencies/emqx) для любых топиков инстанса
+1. Backend подписан на все топики состояния и логов, они подходят под шаблон example.com/+/+/+/pepeunit
+1. [DataPipe](/deployment/dependencies/datapipe) подписан на топики example.com/+/pepeunit тех UnitIO, у которых он включён
 :::
 
 ## Структура
@@ -41,7 +41,7 @@
     },
     "input_topic": {
         "set_fan_state/pepeunit": [
-            "example.com/2d98b4ba-c935-4379-8e1a-520e76018c17/pepeunit"
+            "example.com/2d98b4ba-c935-4379-8e1a-520e76018c17/pepeunit",
             "example.com/c0b107a7-9ae0-44ed-bc76-db5ff2af8887"
         ]
     },
@@ -56,60 +56,62 @@
 }
 ```
 
-Топики можно разделить на две категории: стандартные и топики [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer):
-- `input_base_topic` и `output_base_topic` - стандартные топики
-- `input_topic` и `output_topic` - топики [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer)
+Pepeunit берёт имена топиков из [schema_example.json](/developer/files/struct-schema-example-json) и для каждого подставляет адреса в EMQX. Топики делятся на стандартные и топики [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer):
+- input_base_topic и output_base_topic: стандартные
+- input_topic и output_topic: Разработчика
 
-## Стандарнтые топики
+## Стандартные топики
 
 :::info
-1. Всегда состоят из `5` основных элементов
-1. Каждому наименованию топика в schema_example.json соответствует только один топик из [EMQX](/deployment/dependencies/emqx):
+1. Всегда состоят из пяти частей
+1. Каждому имени из schema_example.json соответствует ровно один топик в [EMQX](/deployment/dependencies/emqx)
 
-Структура топиков в [EMQX](/deployment/dependencies/emqx):
+Структура топика:
 
 ```txt
-Доменное имя инстанса / тип топика / Unit.uuid / назначение / pepeunit
+Домен инстанса / тип топика / Unit.uuid / назначение / pepeunit
 ```
 :::
 
-Предназначены для корректной работы механизма [стандартных MQTT команд](/developer/mqtt/default-mqtt-command) и [стандартных MQTT топиков состояния](/developer/mqtt/default-mqtt-command)
+Нужны для работы [стандартных MQTT команд](/developer/mqtt/default-mqtt-command) и [стандартных MQTT топиков состояния](/developer/mqtt/state-mqtt-send).
+
+Стандартный топик доступен только самому Unit: другие Unit к нему не подключатся.
 
 ## Топики Разработчика
 
 :::info
-1. Могут состоять из `2` или `3` элементов (c и без постфикса `/pepeunit` на конце)
-1. Для топиков без постфикса `/pepeunit` (состоящих из `2` элементов) нельзя настроить [DataPipe](/deployment/dependencies/datapipe)
+1. Состоят из двух или трёх частей: с постфиксом /pepeunit на конце или без него
+1. Для топиков без постфикса нельзя настроить [DataPipe](/deployment/dependencies/datapipe)
 
-Структура топиков в [EMQX](/deployment/dependencies/emqx):
+Структура топика:
 ```txt
-Доменное имя инстанса / UnitNode.uuid
-Доменное имя инстанса / UnitNode.uuid / pepeunit
+Домен инстанса / UnitIO.uuid
+Домен инстанса / UnitIO.uuid / pepeunit
 ```
 
-Каждый топик с такой структурой соответствует одному UnitNode
+Каждый такой топик соответствует одному UnitIO.
 :::
 
-Подробнее об `output_topic`:
-- Предназначен, чтобы Unit мог отправлять данные в [EMQX](/deployment/dependencies/emqx)
-- Каждому `output_topic` из schema_example.json соответствует только один топик из [EMQX](/deployment/dependencies/emqx)
-- Unit имеет эксклюзивное право на публикацию в данные топики, ни один другой Unit опубликовать данные в них не сможет
+Подробнее об output_topic:
+- Через него Unit отправляет данные в [EMQX](/deployment/dependencies/emqx)
+- Каждому имени output_topic соответствует ровно один топик
+- Публикует в него сам Unit, а читать его могут те, кому позволяет [видимость](/development-pepeunit/mechanics/visibility) UnitIO
 
-Подробнее об `input_topic`:
-- Предназначен, чтобы Unit мог принимать сообщения сразу от нескольких Unit
-- Каждому `input_topic` из schema_example.json может соответствовать несколько топиков из [EMQX](/deployment/dependencies/emqx)
-- Система связей `Output->Input` позволяет Unit подписываться не только на свой `Input` UnitNode, а также получить значения из `Output` UnitNode других Unit внутри одного `input_topic`
+Подробнее об input_topic:
+- Через него Unit получает сообщения сразу от нескольких Unit
+- Каждому имени input_topic может соответствовать несколько топиков
+- Связи Output->Input позволяют подписать Input не только на свой топик, но и на Output UnitIO других Unit, всё внутри одного input_topic
 
-Схематический пример создания связи между двумя Unit
+Схема связи двух Unit:
 ![img](/schemas/edge_schema.svg)
 
-:::warning Почему существуют только связи `Output->Input`?
-В парадигме протокола MQTT в топик информацию публикует издатель, а получить информацию из топика могут подписчики. Если перенести эту логику на Pepeunit, можно сделать следующие выводы:
+:::warning Почему связи только Output->Input?
+В MQTT в топик пишет издатель, а читают подписчики. Для Pepeunit это значит:
 
-- `Output` - топик, в который Unit может отправить данные (Unit издатель для этого топика)
-- `Input` - набор топиков, из которых Unit может получить данные (Unit подписчик для этих топиков)
+- Output: топик, в который Unit пишет данные (Unit издатель)
+- Input: набор топиков, из которых Unit читает данные (Unit подписчик)
 
-Таким образом, когда создаётся связь `Output->Input`, мы говорим Unit, у которого есть `Input`, дополнительно подписаться этим `Input` на `Output` другого Unit. Т.е. Unit может получать в `Input` информацию от нескольких `Output` других Unit.
+Связь Output->Input даёт Unit с Input дополнительную подписку на Output другого Unit. Так в один Input приходят данные из нескольких Output.
 
-Если бы существовала возможность создавать связи `Input->Output`, то это означало бы, что `Input` одного Unit инициирует или влияет на `Output` другого Unit.
+Связь Input->Output означала бы, что Input одного Unit влияет на Output другого, а это противоречит схеме издатель-подписчик.
 :::

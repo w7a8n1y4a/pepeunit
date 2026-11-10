@@ -1,17 +1,17 @@
 # schema_example.json
 
-:::warning Какое функциональное назначение у schema_example.json?
-Данный файл - это контракт между [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) и Pepeunit:
-1. [Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) гарантирует, что он реализует в функционале Unit, работу указанных в schema_example.json стандартных топиков Pepeunit: `input_base_topic` и `output_base_topic`
-1. [Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) гарантирует работу `input_topic` и `output_topic` в соответствии описанием, которое он составил в Readme
-1. Pepeunit гарантирует корректное взаимодействие со стандартными топиками `input_base_topic` и `output_base_topic`
-1. Pepeunit гарантирует, что будет поддерживать актуальный набор UnitNode в соответствии с `input_topic` и `output_topic`, указанных разработчиком в schema_example.json, для каждой версии Unit.
+:::warning Для чего нужен schema_example.json?
+Это контракт между [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) и Pepeunit:
+1. Разработчик гарантирует, что Unit работает со стандартными топиками из input_base_topic и output_base_topic, которые он указал
+1. Разработчик гарантирует, что input_topic и output_topic работают так, как описано в его readme
+1. Pepeunit гарантирует корректную работу со стандартными топиками
+1. Pepeunit гарантирует, что UnitIO у Unit всегда соответствуют input_topic и output_topic из schema_example.json для выбранной версии
 :::
 
 ## Структура
 
 ```json
-{   
+{
     "input_base_topic": [
         "update/pepeunit",
         "env_update/pepeunit",
@@ -33,21 +33,35 @@
 }
 ```
 
-Всего в schema_example.json есть `4` типа топиков:
+В файле всегда четыре ключа, и значение каждого - список. Список может быть пустым. Если ключа нет или значение не список, Unit не создастся.
 
-Топик | Описание | Подробности
--- | -- | -- 
-`input_base_topic` | Топики стандартных MQTT команд, которые Unit может выполнить | [Стандартные MQTT команды](/developer/mqtt/default-mqtt-command)
-`output_base_topic` | Топики стандартной публикации данных, в которые Unit может публиковать данные | [Стандартные MQTT топики состояния](/developer/mqtt/state-mqtt-send)
-`input_topic` | `Input` топики [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer). Pepeunit использует их как шаблон для создания `Input` UnitNode | [Топики разработчика](/developer/files/struct-schema-json#топики-разработчика)
-`output_topic` | `Output` топики [Разработчика Unit](/development-pepeunit/mechanics/roles#unit-developer). Pepeunit использует их как шаблон для создания `Output` UnitNode | [Топики разработчика](/developer/files/struct-schema-json#топики-разработчика)
+Ключ | Что в нём | Подробности
+-- | -- | --
+input_base_topic | Стандартные команды, которые Unit готов выполнять | [Стандартные MQTT команды](/developer/mqtt/default-mqtt-command)
+output_base_topic | Стандартные топики, в которые Unit публикует состояние и логи | [Стандартные MQTT топики состояния](/developer/mqtt/state-mqtt-send)
+input_topic | Input топики Разработчика. По каждому Pepeunit создаёт Input UnitIO | [Топики Разработчика](/developer/files/struct-schema-json#топики-разработчика)
+output_topic | Output топики Разработчика. По каждому Pepeunit создаёт Output UnitIO | [Топики Разработчика](/developer/files/struct-schema-json#топики-разработчика)
 
 :::info
-При использовании клиентских библиотек [Micropython](/developer/libraries/micropython), [ESP-IDF](/developer/libraries/esp-idf), [Golang](/developer/libraries/golang) и [Python](/developer/libraries/python), можно указывать все топики из `input_base_topic` и `output_base_topic`, они будут корректно работать.
+Название топика может содержать латинские буквы, цифры и символы / _ -
+:::
 
-Если вы сами реализуете взаимодействие с Pepeunit без библиотек, то можно оставить только те топики, которые нужны для реализации Unit.
+:::info
+С клиентскими библиотеками ([Micropython](/developer/libraries/micropython), [ESP-IDF](/developer/libraries/esp-idf), [Golang](/developer/libraries/golang), [Python](/developer/libraries/python)) можно указать все стандартные топики, они заработают сами.
+
+Если вы пишете взаимодействие с Pepeunit без библиотек, оставьте только нужные.
 :::
 
 :::warning
-При создании Unit или изменении его версии, Pepeunit автоматически создаёт и удаляет недостающие `Input` и `Output` UnitNode в соответствии с schema_example.json.
+Backend отправляет стандартную команду, только если её топик указан в input_base_topic. Без update/pepeunit Unit не получит команду обновления.
 :::
+
+:::warning
+При создании Unit и при смене его версии Pepeunit создаёт недостающие и удаляет лишние Input и Output UnitIO, чтобы они совпали с файлом.
+:::
+
+## Постфикс /pepeunit
+
+У топика Разработчика может быть постфикс /pepeunit на конце, как в примере. Он нужен, если данные должны обрабатываться [DataPipe](/deployment/dependencies/datapipe): он читает только такие топики. Для них же при создании автоматически включается политика LastValue, если это не отключено в [настройках инстанса](/deployment/instance-settings#datapipe) (pu_datapipe_default_last_value_enable).
+
+Без постфикса DataPipe для UnitIO настроить нельзя, в остальном такой топик работает так же.

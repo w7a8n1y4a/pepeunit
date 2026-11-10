@@ -1,25 +1,27 @@
 # env.json
 
-:::warning Какое функциональное назначение у env.json?
-Данный файл - это четырёхсторонний контракт между Unit, Pepeunit, [Пользователем](/development-pepeunit/mechanics/roles#user) и [Администратором](/development-pepeunit/mechanics/roles#admin) инстанса Pepeunit:
-1. Unit гарантирует всем сторонам, что будет использовать для соответствующих значений из env_example.json значения из env.json
-1. Pepeunit гарантирует всем сторонам, что при первой установке переменных окружения в env.json сгенерирует стандартные переменные
-1. Pepeunit гарантирует всем сторонам, что Unit сможет пройти авторизацию для топиков и соединений в [EMQX](/deployment/dependencies/emqx), авторизацию [Backend](/deployment/dependencies/backend) с использованием `PU_AUTH_TOKEN`
-1. Pepeunit гарантирует всем сторонам, возможность изменения env.json
-1. Pepeunit гарантирует всем сторонам, что env.json будет храниться в [шифрованном виде](/development-pepeunit/mechanics/cipher)
-1. Pepeunit гарантирует всем сторонам, что доступ до env.json будет предоставлен только создателю Unit
-1. [Aдминистратор](/development-pepeunit/mechanics/roles#admin) гарантирует всем сторонам, что env.json ни в каком виде не будет передан тем кто не явялется стороной данного контракта.
+:::warning Для чего нужен env.json?
+Это контракт четырёх сторон: Unit, Pepeunit, [Пользователя](/development-pepeunit/mechanics/roles#user) и владельца инстанса:
+1. Unit берёт для значений из env_example.json данные из env.json
+1. Pepeunit заполняет стандартные переменные, когда env.json создаётся впервые
+1. Pepeunit обеспечивает Unit авторизацию в [EMQX](/deployment/dependencies/emqx) и [Backend](/deployment/dependencies/backend) по токену PU_AUTH_TOKEN
+1. Pepeunit позволяет менять env.json
+1. Pepeunit хранит env.json в [шифрованном виде](/development-pepeunit/mechanics/cipher)
+1. Pepeunit отдаёт env.json только создателю Unit и самому Unit
+1. Владелец инстанса не передаёт env.json никому, кроме сторон этого контракта
 :::
 
-Файлы окружения, такие как env.json или [Backend ENV](/deployment/env-variables/backend), представляют собой механизм индивидуализации общего кода под конкретное устройство или экземпляр приложения.
+Файлы окружения, такие как env.json или [переменные Backend](/deployment/env-variables/backend), подгоняют общий код под конкретное устройство или экземпляр приложения.
 
-::: danger
-Используйте только доверенные инстансы Pepeunit. Следите, чтобы [Администратор](/development-pepeunit/mechanics/roles#admin) инстанса Pepeunit выполнял свои контрактные обязательства, связанные с env.json.
+:::danger
+Используйте только доверенные инстансы Pepeunit: владелец инстанса технически может расшифровать env.json.
 :::
 
-:::info Какие основные свойства можно выделить у env.json?
-1. env.json файл секретен, его нельзя передавать кому-либо
-1. env.json файл позволяет удобно конфигурировать и обновлять состояние Unit без полного обновления файлов программы
-1. env.json файл позволяет Unit знать, какому инстансу Pepeunit он принадлежит
-1. env.json файл, при помощи переменной `PU_AUTH_TOKEN`, позволяет Pepeunit производить авторизацию для конкретных Unit
+:::info Основные свойства env.json
+1. Он секретен, его нельзя никому передавать
+1. С ним можно настраивать Unit и менять его состояние без полного обновления программы
+1. Он сообщает Unit, какому инстансу тот принадлежит
+1. Токен PU_AUTH_TOKEN из него позволяет Pepeunit узнавать конкретный Unit
 :::
+
+Где править env.json в клиенте: `Аппараты` → Unit → `Переменные окружения`.

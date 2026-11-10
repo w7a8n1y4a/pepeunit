@@ -1,16 +1,17 @@
 # Структура сообщений в MQTT топиках
 
 :::info
-Сообщения через MQTT топики передаются в текстовом формате.
+Сообщения в MQTT топиках передаются как текст.
 :::
 
 :::danger
-[Разработчики Unit](/development-pepeunit/mechanics/roles#unit-developer) всегда могут применить дополнительное шифрование поверх текстовых данных, которое сочтут нужным. Например алгоритм `aes-gcm-256` на основе `PU_ENCRYPT_KEY` встроен в [клиентские библиотеки](/developer/libraries/framework).
+[Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) может дополнительно шифровать текст, как считает нужным. Например, алгоритм aes-gcm-256 на основе PU_ENCRYPT_KEY встроен в [клиентские библиотеки](/developer/libraries/framework).
 :::
 
 :::warning
-Размер передаваемого Unit сообщения через [EMQX](/deployment/dependencies/emqx) ограничен переменной окружения `PU_MQTT_MAX_PAYLOAD_SIZE` из [Backend ENV](/deployment/env-variables/backend).
+Размер сообщения, которое Unit отправляет через [EMQX](/deployment/dependencies/emqx), ограничен настройкой инстанса pu_mqtt_max_payload_size, по умолчанию 256 КБ, см. [настройки инстанса](/deployment/instance-settings#mqtt).
 :::
 
 ## DataPipe
-Для простых сообщений с текстом и числами можно организовать обработку через [DataPipe](/deployment/dependencies/datapipe).
+
+Простые сообщения с текстом и числами можно обрабатывать через [DataPipe](/deployment/dependencies/datapipe): фильтровать, преобразовывать, хранить и получать по ним уведомления. Подробнее в [руководстве пользователя](/user/datapipe/datapipe).

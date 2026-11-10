@@ -19,14 +19,14 @@
     - загрузка schema.json
     - установка состояния [storage](/developer/state-storage-unit)
     - получение состояния [storage](/developer/state-storage-unit)
-    - получение списка Unit при помощи списка UnitNode.uuid
-    - получение `Input` UnitNode при помощи `Output` UnitNode
+    - получение списка Unit при помощи списка UnitIO.uuid
+    - получение `Input` UnitIO при помощи `Output` UnitIO
 1. Приём и корректная обработка [cтандартных MQTT команд Pepeunit](/developer/mqtt/default-mqtt-command)
 1. Отправки и генерации [состояния Unit](/developer/mqtt/state-mqtt-send)
 1. Функционал для работы с schema.json:
     - Динамическое обновление
     - Поиск по всем `4` типам топиков
-    - Поиск топиков по UnitNode.uuid или по полному названию конкретных топиков
+    - Поиск топиков по UnitIO.uuid или по полному названию конкретных топиков
 1. Функционал для работы с env.json:
     - Динамическое обновление
     - Получение Unit.uuid из токена

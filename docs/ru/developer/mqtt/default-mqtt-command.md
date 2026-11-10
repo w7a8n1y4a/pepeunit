@@ -1,32 +1,34 @@
 # Стандартные MQTT команды Pepeunit
 
 :::warning
-Команды, которые поддерживает Unit, должны быть отражены в schema_example.json в разделе `input_base_topic`.
+Команды, которые поддерживает Unit, должны быть указаны в schema_example.json в разделе input_base_topic. Backend шлёт команду только в топик, который там есть.
 
-Unit должен быть подписан на эти топики, при получении сообщения Unit должны следовать единому паттерну поведения, описанному в данном разделе.
+Unit должен быть подписан на эти топики и при получении сообщения вести себя так, как описано ниже.
 :::
 
-Всего в Pepeunit есть пять команд - топиков:
-1. `UPDATE` - `update/pepeunit`
-1. `SCHEMA_UPDATE` - `schema_update/pepeunit`
-1. `ENV_UPDATE` - `env_update/pepeunit`
-1. `LOG_SYNC` - `log_sync/pepeunit`
-1. `RESET` - `reset/pepeunit`
+В Pepeunit пять команд, у каждой свой топик:
+1. UPDATE: update/pepeunit
+1. SCHEMA_UPDATE: schema_update/pepeunit
+1. ENV_UPDATE: env_update/pepeunit
+1. LOG_SYNC: log_sync/pepeunit
+1. RESET: reset/pepeunit
+
+Во всех запросах ниже PU_HTTP_TYPE, PU_DOMAIN и PU_AUTH_TOKEN берутся из env.json. Токен передаётся в заголовке x-auth-token.
 
 ## UPDATE - update/pepeunit
 
-:::info Когда вызывается данная команда?
-1. Если происходит ручное обновление Unit
-1. Если происходит автоматическое обновление Unit
-1. Если команда была вызвана через отдельную кнопку в меню Unit
-1. Если команда была вызвана через REST или GQL
+:::info Когда вызывается эта команда?
+1. При ручном обновлении Unit
+1. При автоматическом обновлении Unit: после смены настроек Unit, раз в час по расписанию и по запросу администратора, сразу для всех Unit
+1. По кнопке в клиенте: `Аппараты` → Unit → `Управление аппаратом` → `Команды`
+1. Через REST
 :::
 
-Данная команда отправляет Unit запрос на обновление, Unit в ответ должен выполнить опредлённый алгоритм действий, приводящий к изменению текущей версии программного кода на новый.
+Команда просит Unit обновиться: Unit выполняет алгоритм ниже и переходит на новую версию программы.
 
-### Формат сообщения в топик `update/pepeunit`
+### Формат сообщения в топик update/pepeunit
 :::danger
-Формат сообщения для Компилируемых и Интерпретируемых Repo отличается:
+Формат сообщения для компилируемых и интерпретируемых Unit разный.
 :::
 
 Компилируемые:
@@ -50,47 +52,46 @@ Unit должен быть подписан на эти топики, при п�
 
 ### Алгоритм действий Unit
 :::danger
-Алгоритм Unit различается для Компилируемых и Интерпретируемых Repo
+Алгоритм для компилируемых и интерпретируемых Unit разный.
 :::
 
 Компилируемые:
 
-1. Сверить версию `PU_COMMIT_VERSION` с текущей версией `PU_COMMIT_VERSION` из env.json, если совпали - обновление прерывается, если не совпали - Unit начинает процесс обновления
-1. Вычислить `uuid` Unit на основе `jwt` токена `PU_AUTH_TOKEN` из env.json
-1. Скачать архив `tgz`, `tar` или `zip` с env.json и schema.json при помощи REST. Переменные `PU_HTTP_TYPE` и `PU_DOMAIN` доступны внутри env.json:
-    - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/firmware/tgz/{Unit.uuid}?wbits=9&level=9` 
-        - Доступные `wbits` - `(от -15 до -8) (от 9 до 16) (от 25 до 32)`
-        - Доступные `level` - `(от -1 до 10)`
+1. Сравнить PU_COMMIT_VERSION из сообщения с PU_COMMIT_VERSION из env.json. Если совпали, обновление прекращается
+1. Получить uuid Unit из токена PU_AUTH_TOKEN из env.json
+1. Скачать архив tgz, tar или zip с env.json и schema.json:
+    - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/firmware/tgz/{Unit.uuid}?wbits=9&level=9`
+        - wbits: от -15 до -9, от 9 до 15 или от 25 до 31, по умолчанию 9
+        - level: от -1 до 9, по умолчанию 9
     - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/firmware/tar/{Unit.uuid}`
     - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/firmware/zip/{Unit.uuid}`
-1. Распаковать из архива файлы env.json и schema.json
-1. Скачать новую скомпилированную часть по ссылке из `COMPILED_FIRMWARE_LINK` - [подробнее о предварительной компиляции](/developer/release-assets)
-1. Запустить новую скомпилированную часть c прекращением работы старой
+1. Распаковать env.json и schema.json
+1. Скачать новую программу по ссылке COMPILED_FIRMWARE_LINK, [подробнее о компиляции](/developer/release-assets)
+1. Запустить новую программу и остановить старую
 
 Интерпретируемые:
 
-1. Сверить версию `PU_COMMIT_VERSION` с текущей версией `COMMIT_VERSION` из env.json, если совпали - обновление прерывается, если не совпали - Unit начинает процесс обновления
-1. Вычислить `uuid` Unit на основе `jwt` токена `PU_AUTH_TOKEN` из env.json
-1. Скачать архив `tgz`, `tar` или `zip` с обновлением при помощи REST. Переменные `PU_HTTP_TYPE` и `PU_DOMAIN` доступны внутри env.json:
-    - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/firmware/tgz/{Unit.uuid}?wbits=9&level=9` 
-        - Доступные `wbits` - `(от -15 до -8) (от 9 до 16) (от 25 до 32)`
-        - Доступные `level` - `(от -1 до 10)`
-    - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/firmware/tar/{Unit.uuid}`
-    - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/firmware/zip/{Unit.uuid}`
-1. Распаковать из архива все файлы в отдельную директорию или область памяти
-1. Заменить текущую версию программы на файлы из новой директории или области памяти
+1. Сравнить PU_COMMIT_VERSION из сообщения с PU_COMMIT_VERSION из env.json. Если совпали, обновление прекращается
+1. Получить uuid Unit из токена PU_AUTH_TOKEN из env.json
+1. Скачать архив tgz, tar или zip с обновлением, адреса те же, что у компилируемых выше
+1. Распаковать все файлы в отдельную папку или область памяти
+1. Заменить текущую программу файлами из новой папки
 1. Перезапустить Unit
+
+:::info
+Pepeunit считает обновление выполненным, когда Unit присылает в [состоянии](/developer/mqtt/state-mqtt-send) нужный pu_commit_version. Если этого не случилось за два интервала PU_STATE_SEND_INTERVAL, обновление помечается ошибкой.
+:::
 
 ## SCHEMA_UPDATE - schema_update/pepeunit
 
-:::info Когда вызывается данная команда?
-1. Если команда была вызвана через отдельную кнопку в меню Unit
-1. Если команда была вызвана через REST или GQL
+:::info Когда вызывается эта команда?
+1. По кнопке в клиенте: `Аппараты` → Unit → `Управление аппаратом` → `Команды`
+1. Через REST
 :::
 
-Данная команда отправляет Unit запрос на обновление schema.json, Unit в ответ должен выполнить определённый алгоритм действий, приводящий к изменению текущей версии schema.json, на новую.
+Команда просит Unit обновить schema.json.
 
-### Формат сообщения в топик `schema_update/pepeunit`
+### Формат сообщения в топик schema_update/pepeunit
 
 ```json
 {
@@ -100,20 +101,19 @@ Unit должен быть подписан на эти топики, при п�
 
 ### Алгоритм действий Unit
 
-1. Скачать новую версию файла schema.json через REST. Переменные `PU_HTTP_TYPE` и `PU_DOMAIN` доступны внутри env.json:
-    - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/get_current_schema/{Unit.uuid}`
-1. Установить новое состояние для schema.json у Unit
+1. Скачать новый schema.json: `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/get_current_schema/{Unit.uuid}`
+1. Заменить им текущий schema.json
 
 ## ENV_UPDATE - env_update/pepeunit
 
-:::info Когда вызывается данная команда?
-1. Если команда была вызвана через отдельную кнопку в меню Unit
-1. Если команда была вызвана через REST или GQL
+:::info Когда вызывается эта команда?
+1. По кнопке в клиенте: `Аппараты` → Unit → `Управление аппаратом` → `Команды`
+1. Через REST
 :::
 
-Данная команда отправляет Unit запрос на обновление env.json, Unit в ответ должен выполнить опредлённый алгоритм действий, приводящий к изменению текущей версии env.json, на новую.
+Команда просит Unit обновить env.json.
 
-### Формат сообщения в топик `env_update/pepeunit`
+### Формат сообщения в топик env_update/pepeunit
 
 ```json
 {
@@ -123,20 +123,19 @@ Unit должен быть подписан на эти топики, при п�
 
 ### Алгоритм действий Unit
 
-1. Скачать новую версию файла env.json через REST. Переменные `PU_HTTP_TYPE` и `PU_DOMAIN` доступны внутри существующего env.json:
-    - `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/env/{Unit.uuid}`
-1. Установить новое состояние для env.json у Unit
+1. Скачать новый env.json: `PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/env/{Unit.uuid}`
+1. Заменить им текущий env.json
 
 ## LOG_SYNC - log_sync/pepeunit
 
-:::info Когда вызывается данная команда?
-1. Если команда была вызвана через отдельную кнопку в меню Unit
-1. Если команда была вызвана через REST или GQL
+:::info Когда вызывается эта команда?
+1. По кнопке в клиенте: `Аппараты` → Unit → `Управление аппаратом` → `Команды`
+1. Через REST
 :::
 
-Данная команда отправляет Unit запрос на синхронизацию всех логов, которые есть в распоряжении Unit локально. При этом Pepeunit принудительно удаляет все логи из [ClickHouse](/deployment/dependencies/clickhouse). Unit в ответ должен собрать все существующие логи и отправить их через MQTT в Pepeunit.
+Команда просит Unit отправить все логи, которые есть у него локально. Перед этим Pepeunit удаляет логи этого Unit из [ClickHouse](/deployment/dependencies/clickhouse). Unit собирает все свои логи и отправляет их по MQTT.
 
-### Формат сообщения в топик `log_sync/pepeunit`
+### Формат сообщения в топик log_sync/pepeunit
 
 ```json
 {
@@ -146,23 +145,23 @@ Unit должен быть подписан на эти топики, при п�
 
 ### Алгоритм действий Unit
 
-1. Подготовить логи в нужном формате - [подробнее в разделе с топиком `log/pepeunit`](/developer/mqtt/state-mqtt-send#log-pepeunit-output-base-topic)
-1. Отправить подготовленные логи в топик `log/pepeunit` из раздела `output_base_topic`
+1. Подготовить логи в нужном формате: [формат описан в разделе топика log/pepeunit](/developer/mqtt/state-mqtt-send#log-pepeunit-output-base-topic)
+1. Отправить их в топик log/pepeunit из output_base_topic
 
 :::info
-Данная команда создана с целью упрощения отладки и контроля за Unit. Т.к. не все ошибки можно получить через MQTT сразу же в момент их возникновения.
+Команда нужна для отладки: не все ошибки удаётся получить по MQTT в момент, когда они случились.
 :::
 
 ## RESET - reset/pepeunit
 
-:::info Когда вызывается данная команда?
-1. Если команда была вызвана через отдельную кнопку в меню Unit
-1. Если команда была вызвана через REST или GQL
+:::info Когда вызывается эта команда?
+1. По кнопке в клиенте: `Аппараты` → Unit → `Управление аппаратом` → `Команды`
+1. Через REST
 :::
 
-Данная команда отправляет Unit запрос на перезапуск. При получении сообщения в этом топике устройство или программа перезапускается.
+Команда просит Unit перезапуститься.
 
-### Формат сообщения в топик `reset/pepeunit`
+### Формат сообщения в топик reset/pepeunit
 
 ```json
 {
@@ -173,3 +172,13 @@ Unit должен быть подписан на эти топики, при п�
 ### Алгоритм действий Unit
 
 1. Перезапустить устройство или программу
+
+## Отправка команды через REST
+
+Любую из команд можно отправить запросом. Название команды: Update, SchemaUpdate, EnvUpdate, LogSync или Reset.
+
+```bash
+curl -X 'POST' \
+'PU_HTTP_TYPE://PU_DOMAIN/pepeunit/api/v1/units/send_command_to_input_base_topic/{Unit.uuid}?command=Update' \
+-H 'x-auth-token: PU_AUTH_TOKEN'
+```

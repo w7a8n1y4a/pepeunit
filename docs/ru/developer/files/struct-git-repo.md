@@ -1,19 +1,14 @@
 # Структура GIT репозитория
 
 :::danger
+Pepeunit хранит копию каждого Repo на инстансе, поэтому размер ограничен. По умолчанию это 50 МБ, владелец инстанса меняет предел настройкой pu_instance_repo_max_size, см. [настройки инстанса](/deployment/instance-settings#репозитории). Если Repo больше, синхронизация закончится ошибкой.
 
-У Pepeunit строгие требования к размеру репозиториев - это связано с хранением репозиториев на стороне инстансов Pepeunit.
+Не храните в репозитории картинки и бинарные файлы.
 
-Cтандартное ограничение `50МБ`, но [Администраторы](/development-pepeunit/mechanics/roles#admin) инстансов могут увеличить данный лимит установив значение `PU_MAX_EXTERNAL_REPO_SIZE` в [Backend ENV](/deployment/env-variables/backend).
-
-Для выполнения такого строгого требования не рекомендуется хранить в репозиториях картинки и бинарные файлы.
-
-Для микроконтроллеров в Pepeunit есть система очистки репозитория перед генерацией архива с программой. Данный алгоритм удаляет определённые файлы и директории. Подробнее об этой механике можно узнать в разделе [структура архивов с обновлениями](/developer/files/struct-archive-update).
+Для микроконтроллеров перед сборкой архива репозиторий очищается по правилам .pepeignore, подробнее в [структуре архивов с обновлениями](/developer/files/struct-archive-update).
 :::
 
 ## Набор файлов в репозитории Unit
-
-Файлы которые Pepeunit ожидает увидеть в репозитории Unit:
 
 ```bash
 $> tree -a -L 2
@@ -29,10 +24,14 @@ $> tree -a -L 2
 └── schema_example.json
 ```
 
-- schema_example.json
-- env_example.json
-- pepeunit.toml
-- readme.md
-- .gitignore
-- .pepeignore
-- LICENSE
+Файл | Нужен ли | Зачем
+-- | -- | --
+[schema_example.json](/developer/files/struct-schema-example-json) | Обязателен | Топики Unit
+[env_example.json](/developer/files/struct-env-example-json) | Обязателен | Переменные окружения Unit
+[pepeunit.toml](/developer/files/struct-pepeunit-toml) | Желателен | Машиночитаемое описание Unit
+[readme.md](/developer/files/struct-readme) | Желателен | Документация для Пользователей, генерируется из pepeunit.toml
+[.gitignore](/developer/files/struct-gitignore) | Желателен | Не даёт опубликовать env.json и schema.json
+[.pepeignore](/developer/files/struct-pepeignore) | Для интерпретируемых Unit | Что не попадёт на устройство
+LICENSE | Желателен | Лицензия проекта
+
+Без schema_example.json или env_example.json Unit создать нельзя.

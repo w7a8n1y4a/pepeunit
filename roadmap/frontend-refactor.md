@@ -11,6 +11,7 @@
 - перевод документации
 - перевод tooltips
 - перевод ошибок - `en` в `errorTexts` (`lib/locale/error_texts.dart`) и общие строки в `lib/locale/failure.dart`
+- readme у всех репозиториев надо пройтись, и поправить, особенно ссылки на доку в deploy
 
 ### Презентация
 

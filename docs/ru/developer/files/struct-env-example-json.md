@@ -1,25 +1,27 @@
 # env_example.json
 
-:::warning Какое функциональное назначение у env_example.json?
-Данный файл - это контракт между [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) и Pepeunit:
-1. [Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) гарантирует, что он реализует в функционале Unit все или часть стандартных переменных Pepeunit, позволяющих взаимодействовать с Pepeunit
-1. Pepeunit гарантирует возможность [Пользователей](/development-pepeunit/mechanics/roles#user) установить переменные указанные [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer)
-1. Pepeunit гарантирует, что автоматически установит стандартные переменные указанные в файле при первом сохранении `env` со стороны [Пользователя](/development-pepeunit/mechanics/roles#user).
+:::warning Для чего нужен env_example.json?
+Это контракт между [Разработчиком Unit](/development-pepeunit/mechanics/roles#unit-developer) и Pepeunit:
+1. Разработчик гарантирует, что Unit использует все или часть стандартных переменных Pepeunit для связи с ним
+1. Pepeunit гарантирует, что [Пользователи](/development-pepeunit/mechanics/roles#user) смогут задать переменные, которые указал Разработчик
+1. Pepeunit гарантирует, что сам заполнит стандартные переменные, когда [Пользователь](/development-pepeunit/mechanics/roles#user) впервые сохранит env
 :::
 
-### Структура
+## Структура
+
 ```json
-{   
-    "WIFI_SSID": "ssid",
-    "WIFI_PASS": "password",
-    "PWM_FAN_PIN": 0,
-    "DS18B20_PIN_NUM": 4,
+{
+    "PIN_FAN": 0,
+    "PIN_FAN_PWM_FREQUENCY": 10000,
+    "PIN_DS18B20": 4,
     "REGULATOR_OPERATING_RANGE": 1000,
-    "PUBLISH_SEND_INTERVAL": 1,
-    "TEMP_MIN": 30,
-    "TEMP_MAX": 60,
-    "DUTY_MIN": 8192,
-    "DUTY_MAX": 65535,
+    "REGULATOR_TEMP_MIN": 30,
+    "REGULATOR_TEMP_MAX": 60,
+    "REGULATOR_DUTY_MIN": 8192,
+    "REGULATOR_DUTY_MAX": 65535,
+    "PUBLISH_SEND_INTERVAL": 1000,
+    "PUC_WIFI_SSID": "ssid",
+    "PUC_WIFI_PASS": "password",
     "PU_DOMAIN": "unit.example.com",
     "PU_HTTP_TYPE": "https",
     "PU_APP_PREFIX": "/pepeunit",
@@ -37,38 +39,46 @@
 }
 ```
 
-Переменные можно разделить на две категории: `стандартные переменные` и `переменные окружения разработчика`
+Переменные делятся на стандартные (с префиксом PU_) и переменные Разработчика.
 
-### Стандартные переменные Pepeunit
-
-Pepeunit резервирует следующий набор переменных окружения Unit:
-
-Переменная | Генерируемое значение в `env.json` | Зачем нужна?
--- | -- | --
-`PU_DOMAIN` | `PU_DOMAIN` из [Backend ENV](/deployment/env-variables/backend) | Доменное имя или `ip` адрес инстанса Pepeunit
-`PU_HTTP_TYPE` | `PU_SECURE` из [Backend ENV](/deployment/env-variables/backend) | Тип соединения `https/http` с доменным именем или `ip` адресом [Backend](/deployment/dependencies/backend) в формате `https/http`
-`PU_APP_PREFIX` | `PU_APP_PREFIX` из [Backend ENV](/deployment/env-variables/backend) | Префикс [Backend](/deployment/dependencies/backend)
-`PU_API_ACTUAL_PREFIX` | `PU_API_V1_PREFIX` из [Backend ENV](/deployment/env-variables/backend) | Префикс актуальной версии API для [Backend](/deployment/dependencies/backend). Полностью соответствует последней версии API
-`PU_MQTT_HOST` | `PU_MQTT_HOST` из [Backend ENV](/deployment/env-variables/backend) | Доменное имя или `ip` - адрес инстанса [EMQX](/deployment/dependencies/emqx)
-`PU_MQTT_PORT` | `PU_MQTT_PORT` из [Backend ENV](/deployment/env-variables/backend) | Порт для взаимодействия с [EMQX](/deployment/dependencies/emqx), по умолчанию `1883`
-`PU_MQTT_PING_INTERVAL` | `20` | Частота MQTT пинга в секундах, `20` секунд для всех
-`PU_MQTT_KEEPALIVE` | `60` | Время жизни MQTT соединени в секундах
-`PU_AUTH_TOKEN` | `jwt` токен | Вечный токен доступа Unit к инстансу Pepeunit. Данный токен позволяет пройти авторизацию на подписку и публикацию у топиков [EMQX](/deployment/dependencies/emqx), устанавливается [Backend](/deployment/dependencies/backend) автоматически.
-`PU_SECRET_KEY` | `32 байтовый ключ` в формате `base64` | Уникальный для каждого Unit. Удобно использовать для подписи или генерации `jwt`. Устанавливается [Backend](/deployment/dependencies/backend) автоматически
-`PU_ENCRYPT_KEY` | `32 байтовый ключ` в формате `base64` | Уникальный для каждого Unit. Удобно использовать для шифрования методом `aes-gcm-256`. Устанавливается [Backend](/deployment/dependencies/backend) автоматически
-`PU_STATE_SEND_INTERVAL` | `PU_STATE_SEND_INTERVAL` из [Backend ENV](/deployment/env-variables/backend) | Частота отправки состояния в [стандартный топик состояния](/developer/mqtt/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit)
-`PU_MIN_LOG_LEVEL` | `Debug` | Минимальный уровень лога, который будет отправляться по MQTT и сохраняться в файл [log.json](/developer/libraries/framework#log-json). Если установить например `Warning`, то `Debug` и `Info` отправляться не будут
-`PU_MAX_LOG_LENGTH` | `64` | Максимальное число строк в файле [log.json](/developer/libraries/framework#log-json), удаляются строки из начала файла, сохраняются в конец.
-`PU_COMMIT_VERSION` | `Hash` коммита | Отображает текущую [таргет версию](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) Unit. Имеет уникальный функционал, её нельзя изменить вручную в меню изменения env.json, она будет игнорироваться при сохранении
-
-### Переменные окружения Разработчика Unit
-
-[Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) может создавать любые переменные окружения, которые отличаются по названию от стандартных. При этом значения, указанные в переменных, будут отображаться как значения по умолчанию в интерфейсе [Пользователей](/development-pepeunit/mechanics/roles#user).
-
-:::danger
-Так как [Пользователь](/development-pepeunit/mechanics/roles#user) в итоге будет заполнять переменные вручную, всегда нужно заполнить pepeunit.toml и readme.md, чтобы [Пользователь](/development-pepeunit/mechanics/roles#user) мог понять, за что отвечает каждая переменная
+:::info
+Стандартные переменные можно не указывать в файле: Pepeunit добавит их в env.json сам. Но с ними проще разрабатывать, например запускать Unit на компьютере без инстанса. Значения здесь только образец.
 :::
 
+## Стандартные переменные Pepeunit
+
+Pepeunit резервирует эти переменные. Значения в env.json создаёт [Backend](/deployment/dependencies/backend):
+
+Переменная | Значение в env.json | Зачем нужна
+-- | -- | --
+PU_DOMAIN | PU_DOMAIN из [переменных Backend](/deployment/env-variables/backend) | Домен или ip инстанса
+PU_HTTP_TYPE | https, если PU_SECURE равна True, иначе http | Тип соединения с [Backend](/deployment/dependencies/backend)
+PU_APP_PREFIX | PU_APP_PREFIX из [переменных Backend](/deployment/env-variables/backend) | Префикс [Backend](/deployment/dependencies/backend)
+PU_API_ACTUAL_PREFIX | PU_API_V1_PREFIX из [переменных Backend](/deployment/env-variables/backend) | Префикс актуальной версии API
+PU_MQTT_HOST | PU_MQTT_HOST из [переменных Backend](/deployment/env-variables/backend) | Домен или ip [EMQX](/deployment/dependencies/emqx)
+PU_MQTT_PORT | PU_MQTT_PORT из [переменных Backend](/deployment/env-variables/backend) | Порт [EMQX](/deployment/dependencies/emqx), по умолчанию 1883
+PU_MQTT_PING_INTERVAL | 20 | Как часто Unit шлёт MQTT пинг, в секундах
+PU_MQTT_KEEPALIVE | pu_mqtt_keepalive из [настроек инстанса](/deployment/instance-settings#mqtt), по умолчанию 60 | Сколько секунд MQTT соединение считается живым
+PU_AUTH_TOKEN | jwt токен | Бессрочный токен Unit. По нему Unit проходит авторизацию в [Backend](/deployment/dependencies/backend) и в [EMQX](/deployment/dependencies/emqx)
+PU_SECRET_KEY | 32 байта в base64 | Уникален для каждого Unit. Удобен для подписи или генерации jwt
+PU_ENCRYPT_KEY | 32 байта в base64 | Уникален для каждого Unit. Удобен для шифрования aes-gcm-256
+PU_STATE_SEND_INTERVAL | pu_instance_unit_state_send_interval из [настроек инстанса](/deployment/instance-settings#unit), по умолчанию 60 | Как часто Unit шлёт [состояние](/developer/mqtt/state-mqtt-send#формат-сообщении-в-топик-state-pepeunit), в секундах
+PU_MIN_LOG_LEVEL | Debug | Наименьший уровень лога, который уходит по MQTT и пишется в [log.json](/developer/libraries/framework#log-json). Если указать Warning, то Debug и Info не отправятся
+PU_MAX_LOG_LENGTH | 64 | Сколько строк хранит [log.json](/developer/libraries/framework#log-json). Старые строки удаляются
+PU_COMMIT_VERSION | Хэш коммита | Текущая [таргет версия](/development-pepeunit/mechanics/update-system#алгоритм-вычисления-текущеи-версии-unit) Unit. Вручную её не поменять: при сохранении значение игнорируется
+
+:::warning
+Состояние Unit принимается не чаще, чем раз в PU_STATE_SEND_INTERVAL, подробнее в [стандартных топиках состояния](/developer/mqtt/state-mqtt-send#state-pepeunit-output-base-topic).
+:::
+
+## Переменные Разработчика
+
+[Разработчик Unit](/development-pepeunit/mechanics/roles#unit-developer) может добавить любые переменные, названия которых не совпадают со стандартными. Их значения из файла станут значениями по умолчанию в интерфейсе [Пользователя](/development-pepeunit/mechanics/roles#user).
+
 :::danger
-Заполнение env.json [Пользователем](/development-pepeunit/mechanics/roles#user) происходит на основе: [Механизма генерации ENV](/development-pepeunit/mechanics/alg-env)
+Пользователь заполняет переменные вручную, поэтому опишите каждую в pepeunit.toml и readme.md.
+:::
+
+:::info
+Как собирается итоговый env.json, описывает [механизм генерации ENV](/development-pepeunit/mechanics/alg-env).
 :::
