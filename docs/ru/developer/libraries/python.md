@@ -1,10 +1,8 @@
 # Python
 
-[Ccылки на репозитории](/development-pepeunit/maps#библиотеки)
+[Ссылки на репозитории](/development-pepeunit/maps#библиотеки)
 
-:::info
-Интерпретируемый и имеет полную функциональность [Pepeunit Framework](/developer/libraries/framework)
-:::
+Интерпретируемый, имеет полную функциональность [Pepeunit Framework](/developer/libraries/framework).
 
 ## Пример
 

@@ -1,10 +1,6 @@
 # Сущности Pepeunit
 
-Имена сущностей одинаковы в [Backend](/deployment/dependencies/backend), клиенте и документации. Тип сущности пишется с заглавной буквы, как в коде: `Repo`, `Unit`, `UnitIO`.
-
-:::tip Зачем знать сущности?
-[Роль](/development-pepeunit/mechanics/roles), [видимость](/development-pepeunit/mechanics/visibility) и [доступ](/development-pepeunit/mechanics/permission) всегда относятся к конкретной сущности. Названия ниже встречаются во всех разделах для разработчиков Pepeunit.
-:::
+Имена сущностей одинаковы в [Backend](/deployment/dependencies/backend), клиенте и документации. Тип сущности пишется с заглавной буквы, как в коде: `Repo`, `Unit`, `UnitIO`. [Роль](/development-pepeunit/mechanics/roles), [видимость](/development-pepeunit/mechanics/visibility) и [доступ](/development-pepeunit/mechanics/permission) всегда относятся к конкретной сущности.
 
 ## Основные сущности
 
@@ -13,7 +9,7 @@
 `User` | Аккаунт инстанса: пара ключей, [роль](/development-pepeunit/mechanics/roles) и статус `Active` или `Blocked` | Сам человек при регистрации | Любой вошедший `User`
 `Repo` | Git репозиторий на `GitLab` или `GitHub`, копия которого хранится на инстансе | `User` или [Peer](/development-pepeunit/mechanics/federation) | `User` видит все `Repo`, [Bot](/development-pepeunit/mechanics/roles#bot) только публичные
 `Unit` | Устройство или программа, созданная из `Repo`. У него своя версия, окружение и токен | `User` | [Уровень видимости](/development-pepeunit/mechanics/visibility)
-`UnitIO` | Вход (`Input`) или выход (`Output`) `Unit`: один топик из `schema_example.json` | Pepeunit, при создании и обновлении `Unit` | [Уровень видимости](/development-pepeunit/mechanics/visibility)
+`UnitIO` | Вход (`Input`) или выход (`Output`) `Unit`: один топик из `schema_example.json` | Pepeunit, при создании и обновлении `Unit` | Уровень видимости
 `Link` | Связь выхода одного `UnitIO` с входом другого | `User`, который видит оба `UnitIO` | Вместе со своим `Unit`
 `UnitGroup` | Группа `Unit` для удобства. Не влияет на доступ | `User` | Только создатель
 `Permission` | Запись о том, что агент (`User` или `Unit`) может видеть `Unit` или `UnitIO` с уровнем `Private` | Pepeunit и создатель ресурса | Создатель ресурса
@@ -49,7 +45,6 @@ User ─┬─ Repo ── Unit ── UnitIO ── Link ── UnitIO
 
 - `is_public_repository` делит `Repo` на публичные и приватные. Уровня видимости, как у `Unit`, у `Repo` нет
 - Приватный `Repo` виден в списке любому `User`, но работать с ним (синхронизировать, создавать `Unit`) можно только со своими `Креды доступа` к платформе. Креды хранятся [шифрованными](/development-pepeunit/mechanics/cipher) отдельно для каждого `User`, у них статус `Valid`, `NotVerified` или `Error`. Работать можно, только если статус `Valid`
-- `Bot` видит только публичные `Repo`
 - Статус синхронизации с Git: `Updated`, `Processing` или `Error`
 - Размер копии на диске ограничен настройкой `pu_instance_repo_max_size`, а частота синхронизации настройкой `pu_instance_repo_min_interval_sync`
 

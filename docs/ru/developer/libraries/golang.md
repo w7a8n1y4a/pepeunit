@@ -1,10 +1,8 @@
 # Golang
 
-[Ccылки на репозитории](/development-pepeunit/maps#библиотеки)
+[Ссылки на репозитории](/development-pepeunit/maps#библиотеки)
 
-:::info
-Компилируемый и имеет полную функциональность [Pepeunit Framework](/developer/libraries/framework)
-:::
+Компилируемый, имеет полную функциональность [Pepeunit Framework](/developer/libraries/framework).
 
 ## Пример
 

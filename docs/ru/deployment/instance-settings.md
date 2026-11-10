@@ -22,11 +22,7 @@
 Лимиты, сроки, размеры и таймауты `pu_instance_*` | Сразу
 Telegram Bot, [Prometheus](/deployment/dependencies/prometheus), лимиты [EMQX](/deployment/dependencies/emqx), логи | После перезапуска сервера
 
-Перезапуск сервера: `Сеть` → избранный инстанс → `Настройки` → `Перезапуск`. Перезапускается только сервер внутри контейнера `backend`, на несколько секунд он становится недоступен. Когда всё готово, `Owner` получит уведомление.
-
-:::warning
-Если после изменения поведение не поменялось, перезапустите сервер.
-:::
+Перезапуск сервера: `Сеть` → избранный инстанс → `Настройки` → `Перезапуск`. Перезапускается только сервер внутри контейнера `backend`, на несколько секунд он становится недоступен. Когда всё готово, `Owner` получит уведомление. Если после изменения поведение не поменялось, перезапустите сервер.
 
 ## Флаги
 
@@ -37,11 +33,9 @@ pu_ff_prometheus_enable | True | Метрики [Backend](/deployment/dependenci
 pu_ff_grafana_integration_enable | True | Связь с [Grafana](/deployment/dependencies/grafana): вход и панели [Пользователей](/development-pepeunit/mechanics/roles#user). Не включится, пока пусты `PU_GRAFANA_ADMIN_USER` или `PU_GRAFANA_ADMIN_PASSWORD`
 pu_ff_datapipe_enable | True | [DataPipe](/deployment/dependencies/datapipe) и его настройки в клиенте
 pu_ff_notification_enable | True | Уведомления
-pu_ff_telegram_bot_enable | False | Telegram Bot. Включается, когда заполнены поля подключения
+pu_ff_telegram_bot_enable | False | Telegram Bot. Пока [поля подключения](#telegram-bot) не заполнены, включить бота нельзя
 
 ## Инстанс
-
-Эта группа состоит из нескольких экранов.
 
 ### Базовые
 
@@ -95,7 +89,7 @@ pu_instance_github_token_pat | пусто | Токен `GitHub` только д�
 
 ## MQTT
 
-Ограничения, которые [Backend](/deployment/dependencies/backend) устанавливает в [EMQX](/deployment/dependencies/emqx) при старте, подробнее в [Как Backend настраивает EMQX](/deployment/dependencies/emqx#как-backend-настраивает-emqx). Изменения вступают в силу после перезапуска сервера.
+Ограничения, которые [Backend](/deployment/dependencies/backend) устанавливает в [EMQX](/deployment/dependencies/emqx) при старте, подробнее в [Как Backend настраивает EMQX](/deployment/dependencies/emqx#как-backend-настраивает-emqx).
 
 Настройка | По умолчанию | Диапазон | Назначение
 -- | -- | -- | --
@@ -113,7 +107,7 @@ pu_mqtt_max_client_connection_rate | 20/s | - | Лимит новых подкл
 
 ## DataPipe
 
-Доступна при включённом `pu_ff_datapipe_enable`. Изменения подхватываются без перезапуска, подробнее в [DataPipe](/deployment/dependencies/datapipe#настройка).
+Доступна при включённом `pu_ff_datapipe_enable`. Как работает [DataPipe](/deployment/dependencies/datapipe).
 
 Настройка | По умолчанию | Диапазон | Назначение
 -- | -- | -- | --
@@ -145,8 +139,6 @@ pu_notification_telegram_user_interval_seconds | 2 | 1..60 | Минимальн�
 
 ## Telegram Bot
 
-Пока поля подключения не заполнены, включить бота нельзя. Изменения вступают в силу после перезапуска сервера.
-
 Настройка | По умолчанию | Назначение
 -- | -- | --
 pu_telegram_token | пусто | Токен бота от `@BotFather`, вида `123456:ABC-def`
@@ -163,8 +155,6 @@ pu_telegram_items_per_page | 7 | Записей на странице списк
 -- | -- | -- | --
 pu_instance_log_format | json | json, plain | Формат логов [Backend](/deployment/dependencies/backend) и [DataPipe](/deployment/dependencies/datapipe)
 pu_instance_log_min_level | INFO | DEBUG, INFO, WARNING, ERROR, CRITICAL | Наименьший уровень записываемых сообщений
-
-Изменения вступают в силу после перезапуска сервера.
 
 :::warning
 Ежедневная сводка ошибок для [Администраторов](/development-pepeunit/mechanics/roles#admin) и панель `Backend Aggregated Logs` в [Мониторинге](/deployment/monitoring) читают логи как `JSON`. Если используете [Loki](/deployment/dependencies/loki), оставьте формат `json`.

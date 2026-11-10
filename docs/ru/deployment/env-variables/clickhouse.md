@@ -4,9 +4,7 @@
 В файл настроек эти переменные не пишутся: `make_env.py` берёт их из `PU_CLICKHOUSE_DATABASE_URL` и передаёт контейнеру `clickhouse`.
 :::
 
-:::warning
-Полный список переменных в [документации ClickHouse](https://clickhouse.com/docs)
-:::
+Полный список переменных: [документация ClickHouse](https://clickhouse.com/docs).
 
 Переменная | Откуда берётся | Зачем нужна?
 -- | -- | --

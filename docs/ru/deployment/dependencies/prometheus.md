@@ -13,6 +13,6 @@
 Сам `Prometheus` | 15 с
 :::
 
-Метрики [Backend](/deployment/dependencies/backend) публикуются, пока включён флаг `pu_ff_prometheus_enable` в [настройках инстанса](/deployment/instance-settings).
+Метрики `Backend` публикуются, пока включён флаг `pu_ff_prometheus_enable` в [настройках инстанса](/deployment/instance-settings).
 
 Конфиг `data/prometheus/prometheus.yml` собирает `make_env.py` из шаблона `prometheus.yml.template`. Правьте шаблон, а не готовый файл.

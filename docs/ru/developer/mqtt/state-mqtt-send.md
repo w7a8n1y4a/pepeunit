@@ -12,11 +12,7 @@ Unit должен отправлять данные в формате, опис�
 
 ## state/pepeunit - output_base_topic
 
-:::info Когда Unit отправляет данные в этот топик?
-Раз в PU_STATE_SEND_INTERVAL секунд из env.json.
-:::
-
-Pepeunit показывает присланное состояние в клиенте: `Аппараты` → Unit → `Информация`. Его же можно получить через REST.
+Unit отправляет состояние раз в PU_STATE_SEND_INTERVAL секунд из env.json. Pepeunit показывает его в клиенте: `Аппараты` → Unit → `Информация`. Его же можно получить через REST.
 
 ### Формат сообщений в топик state/pepeunit
 
@@ -56,16 +52,12 @@ Pepeunit показывает присланное состояние в кли�
 - pu_commit_version: PU_COMMIT_VERSION из env.json. По нему Pepeunit следит за [обновлениями](/development-pepeunit/mechanics/update-system) и знает текущую версию Unit
 
 :::danger
-pu_commit_version обязателен: без него сообщение отклоняется. Он же нужен, чтобы статус обновления Unit стал успешным.
+pu_commit_version обязателен: без него сообщение отклоняется. По нему же [команда UPDATE](/developer/mqtt/default-mqtt-command#update-update-pepeunit) получает статус успешной.
 :::
 
-:::info
-Остальные ключи необязательны. Можно отправить только millis и pu_commit_version. Неизвестные ключи Pepeunit отбрасывает.
-:::
+Остальные ключи необязательны: можно отправить только millis и pu_commit_version. Неизвестные ключи Pepeunit отбрасывает. Размер сообщения ограничен, см. [структуру сообщений](/developer/mqtt/struct-topic-messages).
 
 :::warning
-Размер сообщения ограничен настройкой инстанса pu_mqtt_max_payload_size, по умолчанию 256 КБ, см. [настройки инстанса](/deployment/instance-settings#mqtt).
-
 Если слать состояние чаще, чем раз в PU_STATE_SEND_INTERVAL, лишние сообщения отбрасываются. Исключение: сообщение с новым pu_commit_version или отправленное, пока ждёт ответа команда обновления, принимается всегда.
 :::
 
@@ -77,12 +69,7 @@ pu_commit_version обязателен: без него сообщение от�
 
 ## log/pepeunit - output_base_topic
 
-:::info Когда Unit отправляет данные в этот топик?
-1. Когда Unit сам решает показать [Пользователю](/development-pepeunit/mechanics/roles#user) один или несколько логов
-2. Когда пришла команда в топик log_sync/pepeunit, [подробнее](/developer/mqtt/default-mqtt-command#формат-сообщения-в-топик-log-sync-pepeunit)
-:::
-
-Pepeunit показывает логи в клиенте: `Аппараты` → Unit → `Управление аппаратом` → `Логи`. Их же можно получить через REST.
+Unit отправляет данные в этот топик, когда сам решает показать [Пользователю](/development-pepeunit/mechanics/roles#user) один или несколько логов, или когда пришла команда в топик log_sync/pepeunit, [подробнее](/developer/mqtt/default-mqtt-command#формат-сообщения-в-топик-log-sync-pepeunit). Pepeunit показывает логи в клиенте: `Аппараты` → Unit → `Управление аппаратом` → `Логи`. Их же можно получить через REST.
 
 ### Формат сообщений в топик log/pepeunit
 
@@ -139,11 +126,7 @@ Pepeunit показывает логи в клиенте: `Аппараты` →
     1. У одного лога берётся время получения сообщения
     1. У нескольких логов первый получает текущее время, а каждый следующий на секунду позже, чтобы сохранился порядок
 
-:::warning
-Размер сообщения ограничен настройкой инстанса pu_mqtt_max_payload_size, см. [настройки инстанса](/deployment/instance-settings#mqtt).
-
-Логи хранятся ограниченное время. Срок задаёт pu_instance_unit_log_expiration, по умолчанию 86400 секунд, то есть сутки, см. [настройки инстанса](/deployment/instance-settings#unit).
-:::
+Размер сообщения ограничен так же, как у состояния. Логи хранятся ограниченное время: срок задаёт pu_instance_unit_log_expiration, по умолчанию 86400 секунд, то есть сутки, см. [настройки инстанса](/deployment/instance-settings#unit).
 
 ### Алгоритм отправки
 

@@ -4,9 +4,7 @@
 В файл настроек эти переменные не пишутся: `make_env.py` берёт их из `PU_SQLALCHEMY_DATABASE_URL` и передаёт контейнеру `postgres`.
 :::
 
-:::warning
-Полный список переменных в [документации PostgreSQL](https://www.postgresql.org/docs)
-:::
+Полный список переменных: [документация PostgreSQL](https://www.postgresql.org/docs).
 
 Переменная | Откуда берётся | Зачем нужна?
 -- | -- | --

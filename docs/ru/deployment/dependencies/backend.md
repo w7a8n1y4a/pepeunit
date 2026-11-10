@@ -18,23 +18,17 @@
 
 ### Запуск контейнера
 
-При старте `backend` сам готовит всё нужное: ждёт [PostgreSQL](/deployment/dependencies/postgresql), применяет миграции баз данных, настраивает [EMQX](/deployment/dependencies/emqx) и [Grafana](/deployment/dependencies/grafana), запускает [DataPipe](/deployment/dependencies/datapipe) и сам сервер. Вручную ничего делать не нужно.
+При старте `backend` сам ждёт PostgreSQL, применяет миграции баз данных, настраивает EMQX и Grafana, запускает DataPipe и сервер. Вручную ничего делать не нужно.
 
-:::info
 Сервер можно перезапустить без остановки контейнера: `Owner` делает это в клиенте, см. [Настройки инстанса](/deployment/instance-settings#применение-изменений).
-:::
 
 ### Что где настраивается
 
 Источник | Что хранит
 -- | --
-[Переменные окружения](/deployment/env-variables/backend) | Адрес, ключи, подключения к базам, [EMQX](/deployment/dependencies/emqx) и [Grafana](/deployment/dependencies/grafana). Меняются только в [файле настроек](/deployment/docker/deploy#файл-настроек)
-[Настройки инстанса](/deployment/instance-settings) | Флаги, лимиты, Telegram Bot, [DataPipe](/deployment/dependencies/datapipe) и всё, что меняет `Owner` из клиента. Хранятся в [PostgreSQL](/deployment/dependencies/postgresql)
+[Переменные окружения](/deployment/env-variables/backend) | Адрес, ключи, подключения к базам, EMQX и Grafana. Меняются только в [файле настроек](/deployment/docker/deploy#файл-настроек)
+[Настройки инстанса](/deployment/instance-settings) | Флаги, лимиты, Telegram Bot, DataPipe и всё, что меняет `Owner` из клиента. Хранятся в PostgreSQL
 
 ### Тома и порты
 
-Что | Значение
--- | --
-Порт в контейнере | 5000
-Порт на хосте | 5291
-Том `backend_repo_cache` | Скачанные Git репозитории
+Порт в контейнере 5000, на хосте 5291. Том `backend_repo_cache` хранит скачанные Git репозитории.

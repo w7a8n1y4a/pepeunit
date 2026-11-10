@@ -1,8 +1,6 @@
 # Нагрузочные тесты - Backend
 
-:::info
-Нагрузочные тесты - это часть репозитория [Backend](/deployment/dependencies/backend), единственная задача которой - проверка, выдерживает ли [Backend](/deployment/dependencies/backend) заданное число запросов в секунду. Они работают с уже запущенным инстансом по адресу `PU_DOMAIN`, поэтому запускайте их на тестовом инстансе.
-:::
+Нагрузочные тесты - часть репозитория [Backend](/deployment/dependencies/backend): они проверяют, выдерживает ли он заданное число запросов в секунду. Тесты работают с уже запущенным инстансом по адресу `PU_DOMAIN`, поэтому запускайте их на тестовом инстансе.
 
 ## Тестирование MQTT
 
@@ -28,9 +26,7 @@ uv run python -m tests.load.load_test_mqtt
 `PU_TEST_LOAD_MQTT_POLICY_TYPE` | `TimeWindow` | `LastValue` / `NRecords` / `TimeWindow` / `Aggregation` | Тип политики [DataPipe](/deployment/dependencies/datapipe) для обработки всех сообщений в тесте
 `PU_TEST_LOAD_MQTT_WORKERS` | `10` | `1`–`128` | Число процессов `multiprocessing`, создающих нагрузку
 
-:::danger
-Тест публикует сообщения в топики [DataPipe](/deployment/dependencies/datapipe) с паттерном `domain.com/<uuid>/pepeunit`, поэтому нагрузку принимает `Golang` процесс DataPipe, а не Python. Системные топики `domain.com/+/+/+/pepeunit` (состояние и логи `Unit`) обрабатывает сам [Backend](/deployment/dependencies/backend), и их пропускная способность заметно ниже. Пока идёт тест, он раз в секунду проверяет, что Backend остался подписан на MQTT, а при потере подписки пишет `Backend crash` и останавливается. В конце тест печатает `Backend sustained N rps`: сравнивайте это число с заданным `PU_TEST_LOAD_MQTT_RPS * PU_TEST_LOAD_MQTT_UNIT_COUNT`.
-:::
+Тест публикует сообщения в топики [DataPipe](/deployment/dependencies/datapipe) с паттерном `domain.com/<uuid>/pepeunit`, поэтому нагрузку принимает `Golang` процесс DataPipe, а не Python. Системные топики `domain.com/+/+/+/pepeunit` (состояние и логи `Unit`) обрабатывает сам Backend, и их пропускная способность заметно ниже. Пока идёт тест, он раз в секунду проверяет, что Backend остался подписан на MQTT, а при потере подписки пишет `Backend crash` и останавливается. В конце тест печатает `Backend sustained N rps`: сравнивайте это число с заданным `PU_TEST_LOAD_MQTT_RPS * PU_TEST_LOAD_MQTT_UNIT_COUNT`.
 
 ## Тестирование REST
 
@@ -49,10 +45,9 @@ uv run locust -f tests/load/locustfile.py
 -- | -- | -- | --
 `LOCUST_HEADLESS` | `True` | `True` / `False` | `CLI` формат работы `locust`
 `LOCUST_USERS` | `400` | `1`–`8192` | Число виртуальных [Пользователей](/development-pepeunit/mechanics/roles#user), которые будут создавать нагрузку
-`LOCUST_SPAWN_RATE` | `10` | `1`–`8192` | Нарастание числа виртуальных [Пользователей](/development-pepeunit/mechanics/roles#user) в секунду. При значениях по умолчанию `400` пользователей появятся за `40` секунд
+`LOCUST_SPAWN_RATE` | `10` | `1`–`8192` | Нарастание числа виртуальных `User` в секунду. При значениях по умолчанию `400` пользователей появятся за `40` секунд
 `LOCUST_RUN_TIME` | `120` | `1`–`3600` | Время выполнения теста в секундах
 
-:::info
 По умолчанию проверяются публичные ручки текущего инстанса:
 
 - `GET /pepeunit/api/v1/instances/current`
@@ -61,10 +56,5 @@ uv run locust -f tests/load/locustfile.py
 - `GET /pepeunit/api/v1/peers/repos`
 - `GET /pepeunit/api/v1/error_codes`
 
-Ручки списков вызываются со случайными параметрами `offset`, `limit` и `trust_status`.
-:::
-
-:::warning
-Время ожидания клиентом до отправки следующего запроса составляет `1` секунду, соответственно `rps ~= числу пользователей`. Каждый виртуальный пользователь случайно выбирает одну из ручек
-:::
+Ручки списков вызываются со случайными параметрами `offset`, `limit` и `trust_status`. Каждый виртуальный пользователь случайно выбирает одну из ручек. Время ожидания клиентом до отправки следующего запроса составляет `1` секунду, соответственно `rps ~= числу пользователей`.
 

@@ -16,17 +16,7 @@
 
 Подключения `DataPipe` берёт из тех же [переменных окружения Backend](/deployment/env-variables/backend), что и сервер.
 
-Остальное меняет `Owner` в клиенте, см. [настройки инстанса](/deployment/instance-settings#datapipe). Изменения подхватываются без перезапуска сервера.
-
-Настройка | Что делает
--- | --
-pu_ff_datapipe_enable | Включает `DataPipe`. Если выключена, процесс не запускается, а его возможности скрываются в клиенте
-pu_ff_notification_enable | Если выключена, `DataPipe` не пишет уведомления конвейеров
-pu_datapipe_buffer_flush_interval | Как часто буфер записывается в [ClickHouse](/deployment/dependencies/clickhouse), в секундах
-pu_datapipe_buffer_max_size | Размер буфера, при котором запись происходит раньше срока
-pu_datapipe_config_sync_interval | Как часто конфигурации конвейеров перечитываются из базы, в секундах
-pu_datapipe_nrecords_cleanup_interval | Как часто удаляются лишние записи политики `NRecords`, в секундах
-pu_datapipe_mqtt_keepalive | Период проверки связи с [EMQX](/deployment/dependencies/emqx), в секундах
+Остальное меняет `Owner` в клиенте без перезапуска: флаги `pu_ff_datapipe_enable` и `pu_ff_notification_enable` в [флагах](/deployment/instance-settings#флаги), интервалы и размеры буфера в [настройках DataPipe](/deployment/instance-settings#datapipe). Если `pu_ff_datapipe_enable` выключен, процесс не запускается, а возможности `DataPipe` скрываются в клиенте. Если выключен `pu_ff_notification_enable`, конвейеры не пишут уведомления.
 
 ## Логи
 

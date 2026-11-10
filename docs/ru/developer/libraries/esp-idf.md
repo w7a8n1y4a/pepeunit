@@ -1,10 +1,6 @@
 # ESP-IDF
 
-:::info
-Компилируемый и имеет полную функциональность [Pepeunit Framework](/developer/libraries/framework)
-:::
-
-Компонент ESP-IDF `5.4+` для интеграции Unit с Pepeunit. Публичный API сосредоточен в `pu_client.h`.
+Компилируемый, имеет полную функциональность [Pepeunit Framework](/developer/libraries/framework). Это компонент ESP-IDF `>=5.4` для интеграции Unit с Pepeunit. Публичный API сосредоточен в `pu_client.h`.
 
 ## Установка
 
@@ -17,7 +13,7 @@ include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(my_pepeunit_device)
 ```
 
-Либо положите библиотеку в каталог `components/` приложения. Требуется ESP-IDF `>=5.4`.
+Либо положите библиотеку в каталог `components/` приложения.
 
 Приложение должно предоставить:
 
@@ -26,7 +22,7 @@ project(my_pepeunit_device)
 - готовое сетевое соединение до `pu_client_start()`, если `manage_wifi=false`
 - `CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=y` для `HTTPS`
 
-Полный пример находится в `examples/basic`. `env.json` и `schema.json` хранятся в `NVS`, а не компилируются в прошивку.
+Полный пример находится в `examples/basic`.
 
 ## Пример
 
@@ -184,9 +180,9 @@ void app_main(void)
 
 ## Важные особенности
 
-1. Библиотека требует ESP-IDF `>=5.4` и рассчитана на семейство `ESP32`
+1. Библиотека рассчитана на семейство `ESP32`
 1. MQTT всегда работает по `mqtt://host:port` без TLS
 1. Для HTTP по умолчанию используется `HTTPS`. Обычный `HTTP` или отключение проверки сертификата требуют одновременно `CONFIG_PU_ALLOW_INSECURE_TRANSPORT=y` и соответствующего runtime-флага
 1. `env.json`, `schema.json` и журнал `log.json` хранятся в `NVS`, а не вшиваются в прошивку
-1. Стандартные команды `update/pepeunit`, `env_update/pepeunit`, `schema_update/pepeunit`, `log_sync/pepeunit` и `reset/pepeunit` обрабатываются клиентом до пользовательского `on_input`
+1. [Стандартные команды](/developer/mqtt/default-mqtt-command) обрабатываются клиентом до пользовательского `on_input`
 1. `pu_client_stop()` и `pu_client_destroy()` нельзя вызывать из callback компонента — управление жизненным циклом нужно вынести в задачу приложения

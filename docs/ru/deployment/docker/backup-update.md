@@ -40,7 +40,7 @@ docker compose up -d --remove-orphans
 docker logs -f backend
 ```
 
-Что здесь происходит: сначала бэкап, затем новая версия репозитория и конфигов, затем запуск. [Backend](/deployment/dependencies/backend) сам обновит базы, дождитесь `Application startup complete`. Если `make_env.py` попросил новые обязательные переменные, добавьте их из актуального `.env.*.example`.
+[Backend](/deployment/dependencies/backend) сам обновит базы, дождитесь `Application startup complete`. Если `make_env.py` попросил новые обязательные переменные, добавьте их из актуального `.env.*.example`.
 
 После обновления проверьте версию сервера:
 
@@ -51,7 +51,7 @@ curl http://127.0.0.1:5291/pepeunit/api/v1/instances/current
 Если что-то пошло не так, посмотрите [логи контейнеров](/deployment/docker/commands) или напишите `issue`.
 
 :::info
-Клиент и сервер совместимы в пределах `1.5.x`. Обновляйте [Frontend](/deployment/dependencies/frontend) и [Backend](/deployment/dependencies/backend) вместе: версии образов закреплены в `docker-compose.yml`.
+Клиент и сервер совместимы в пределах `1.5.x`. Обновляйте [Frontend](/deployment/dependencies/frontend) и `Backend` вместе: версии образов закреплены в `docker-compose.yml`.
 :::
 
 ## Обновление с 1.4.0 на 1.5.0

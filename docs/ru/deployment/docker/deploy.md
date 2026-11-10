@@ -67,7 +67,7 @@ docker logs -f backend
 Первый запуск скачивает образы и занимает несколько минут. Он завершён, когда в логе [Backend](/deployment/dependencies/backend) появилась строка `Application startup complete`.
 
 :::warning
-Если в логе есть строка `[SUBACK] 1 (135,)` вместо `(0,)`, [Backend](/deployment/dependencies/backend) не подписался на MQTT. Проверьте, что порт `1883` открыт и `PU_MQTT_HOST` доступен из контейнеров.
+Если в логе есть строка `[SUBACK] 1 (135,)` вместо `(0,)`, `Backend` не подписался на MQTT. Проверьте, что порт `1883` открыт и `PU_MQTT_HOST` доступен из контейнеров.
 :::
 
 ## Регистрация и Owner
@@ -88,4 +88,4 @@ docker exec -it backend python scripts/set_owner.py <uuid>
 
 `Owner` в инстансе один: при повторном запуске с другим `uuid` прежний владелец станет обычным [Пользователем](/development-pepeunit/mechanics/roles#user).
 
-Дальнейшие настройки инстанса выполняются уже в интерфесе клиента. [Настройки инстанса](/deployment/instance-settings).
+Дальнейшие настройки инстанса выполняются в клиенте: [Настройки инстанса](/deployment/instance-settings).

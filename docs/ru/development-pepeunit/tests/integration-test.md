@@ -1,17 +1,11 @@
 # Интеграционные тесты - Backend
 
-:::tip Какую роль выполняют интеграционные тесты?
-Проверка корректности работы основных сценариев приложения. Благодаря данным тестам, разработчики [Backend](/deployment/dependencies/backend) могут не сомневаться в изменениях кодовой базы
-:::
+Интеграционные тесты проверяют основные сценарии приложения, чтобы разработчики [Backend](/deployment/dependencies/backend) могли уверенно менять кодовую базу. Сценарии проверяют исключительно `бизнес-логику`, а не работу слоёв API.
 
-:::warning
-Тестовые сценарии проверяют исключительно `бизнес-логику`, они не стремятся проверить то, как работает какой-либо из слоёв API
-:::
-
-Тесты работают с настоящими [PostgreSQL](/deployment/dependencies/postgresql), [ClickHouse](/deployment/dependencies/clickhouse), [Redis](/deployment/dependencies/redis) и [EMQX](/deployment/dependencies/emqx): сервисы Backend вызываются напрямую, а сценарии обновления `Unit`, MQTT и [DataPipe](/deployment/dependencies/datapipe) обращаются ещё и к запущенному Backend по HTTP. Имена создаваемых сущностей содержат хэш от `PU_DOMAIN`, чтобы несколько инстансов не пересекались.
+Тесты работают с настоящими [PostgreSQL](/deployment/dependencies/postgresql), [ClickHouse](/deployment/dependencies/clickhouse), [Redis](/deployment/dependencies/redis) и [EMQX](/deployment/dependencies/emqx): сервисы Backend вызываются напрямую, а сценарии обновления `Unit`, MQTT и [DataPipe](/deployment/dependencies/datapipe) обращаются ещё и к запущенному Backend по HTTP.
 
 :::danger
-Тесты создают и удаляют данные инстанса. Тестовые пользователи и сущности получают имена с хэшем от `PU_DOMAIN`, и перед прогоном такие остатки прошлого запуска удаляются. Роль `Owner` тесты на время подменяют, а в конце возвращают прежнему владельцу.
+Тесты создают и удаляют данные инстанса. Тестовые пользователи и сущности получают имена с хэшем от `PU_DOMAIN`, чтобы несколько инстансов не пересекались, и перед прогоном такие остатки прошлого запуска удаляются. Роль `Owner` тесты на время подменяют, а в конце возвращают прежнему владельцу.
 :::
 
 ## Запуск из консоли
@@ -31,7 +25,7 @@
    uv run pytest tests -v
    ```
 
-Тот же прогон [Admin](/development-pepeunit/mechanics/roles#admin) может запустить из клиента: `Сеть` → `Управление` → `Тесты`, или командой `/control` в Telegram Bot. Backend выполняет `uv run pytest tests -v` в фоне, а полный лог приходит [уведомлением](/development-pepeunit/mechanics/operations) типа `IntegrationTests`. Публичное состояние инстанса обновляет поля `state.integration_tests_*` в `GET /pepeunit/api/v1/instances/current`, так что другие инстансы видят результат.
+Тот же прогон [Admin](/development-pepeunit/mechanics/roles#admin) может запустить из клиента или Telegram Bot, см. [операции](/development-pepeunit/mechanics/operations). Backend выполняет `uv run pytest tests -v` в фоне, а полный лог приходит уведомлением типа `IntegrationTests`. Публичное состояние инстанса обновляет поля `state.integration_tests_*` в `GET /pepeunit/api/v1/instances/current`, так что другие инстансы видят результат.
 
 ## Что проверяется
 
@@ -64,11 +58,11 @@
 `PU_TEST_INTEGRATION_UNIVERSAL_REPO_URL` | `https://git.pepemoss.com/pepe/pepeunit/units/universal_test_unit.git` | `http` / `https`, не пусто, `≤ 512` симв. | Универсальный тестовый Unit
 `PU_TEST_INTEGRATION_PRIVATE_REPO_ENABLE` | `False` | `True` / `False` | Включает сценарии приватных репозиториев. При `True` нужен непустой `PU_TEST_INTEGRATION_PRIVATE_REPO_JSON`
 `PU_TEST_INTEGRATION_PRIVATE_REPO_JSON` | пусто | JSON, `≤ 8192` симв. | Объект с полем `data`: список репозиториев. У каждого `link`, `username`, `pat_token`, `is_public` и `platform` (`Github` или `Gitlab`). Обязателен и должен быть валидным JSON при `PU_TEST_INTEGRATION_PRIVATE_REPO_ENABLE=True`
-`PU_TEST_INTEGRATION_TELEGRAM_CHAT_ID` | пусто | пусто или chat id, `≤ 32` симв. | Chat id тестового [Пользователя](/development-pepeunit/mechanics/roles#user) в Telegram. Пустое значение подставляет случайный id. Id из этой переменной не должен принадлежать никакому другому [Пользователю](/development-pepeunit/mechanics/roles#user) инстанса, если будет то тест сломается на ранних этапах
+`PU_TEST_INTEGRATION_TELEGRAM_CHAT_ID` | пусто | пусто или chat id, `≤ 32` симв. | Chat id тестового [Пользователя](/development-pepeunit/mechanics/roles#user) в Telegram. Пустое значение подставляет случайный id. Id не должен принадлежать никакому другому `User` инстанса, иначе тест сломается на ранних этапах
 
 ## Флаги и покрытие
 
-Сценарии выключенных возможностей снимаются с прогона по маркерам `pytest`. Прогон смотрит на флаги инстанса и на переменные теста:
+Сценарии выключенных возможностей снимаются с прогона по маркерам `pytest`. Прогон смотрит на флаги `pu_ff_*` в [настройках инстанса](/deployment/instance-settings) и на переменные теста, поэтому результат нужно читать вместе со списком пропущенных сценариев:
 
 Маркер | Нужно для запуска
 -- | --
@@ -80,7 +74,3 @@
 `federation` | `pu_ff_federation_enable`
 `notification` | `pu_ff_notification_enable`
 `private_repo` | `PU_TEST_INTEGRATION_PRIVATE_REPO_ENABLE` и непустой список репозиториев
-
-:::warning
-Набор функциональных флагов `pu_ff_*` в [настройках инстанса](/deployment/instance-settings) влияет на объём покрытия, поэтому результат прогона нужно читать вместе со списком пропущенных сценариев.
-:::

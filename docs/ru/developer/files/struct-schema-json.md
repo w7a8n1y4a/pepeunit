@@ -81,7 +81,7 @@ Pepeunit берёт имена топиков из [schema_example.json](/develo
 
 :::info
 1. Состоят из двух или трёх частей: с постфиксом /pepeunit на конце или без него
-1. Для топиков без постфикса нельзя настроить [DataPipe](/deployment/dependencies/datapipe)
+1. Для топиков без постфикса нельзя настроить DataPipe, подробнее в [постфиксе /pepeunit](/developer/files/struct-schema-example-json#постфикс-pepeunit)
 
 Структура топика:
 ```txt

@@ -20,11 +20,7 @@
 / | [Frontend](/deployment/dependencies/frontend)
 /grafana/ | [Grafana](/deployment/dependencies/grafana)
 
-Кроме маршрутов, конфиг:
-- ограничивает частоту запросов и число соединений с одного `IP`, внутренние сети без ограничений
-- при превышении лимита отвечает `429`
-- не буферизует ответы [Backend](/deployment/dependencies/backend), чтобы работали уведомления
-- разрешает CORS для API
+Кроме маршрутов, конфиг ограничивает частоту запросов и число соединений с одного `IP` (внутренние сети без ограничений), при превышении отвечает `429`, не буферизует ответы `Backend` и разрешает CORS для API.
 
 Для клиента лимит выше, чем для API: при первой загрузке он запрашивает десятки файлов подряд, и отказ `429` не даст ему запуститься.
 
@@ -76,9 +72,7 @@ server {
 }
 ```
 
-:::warning
 Блок на порту `80` нужен для `esp8266`: у этих микроконтроллеров сертификат не помещается в память.
-:::
 
 :::warning
 Внутренний `Nginx` принимает запросы к API до `50M`, поэтому внешний `client_max_body_size` не должен быть меньше, иначе крупные файлы не загрузятся.
@@ -86,7 +80,7 @@ server {
 
 ## Nginx One Config
 
-Один внешний `Nginx` напрямую ведёт на [Backend](/deployment/dependencies/backend), [Frontend](/deployment/dependencies/frontend) и [Grafana](/deployment/dependencies/grafana), с `https`.
+Один внешний `Nginx` напрямую ведёт на [Backend](/deployment/dependencies/backend) (порт `5291`), [Frontend](/deployment/dependencies/frontend) (`5292`) и [Grafana](/deployment/dependencies/grafana) (`3000`), с `https`. Порты те же, что в `Docker Compose`, а контейнер `nginx` в `docker-compose.yml` при этом отключается.
 
 ```conf
 server {
@@ -163,10 +157,6 @@ server {
 }
 ```
 
-:::warning
-Контейнер `nginx` в `docker-compose.yml` при этом отключается. Порты те же, что в `Docker Compose`: `5291` - [Backend](/deployment/dependencies/backend), `5292` - [Frontend](/deployment/dependencies/frontend), `3000` - [Grafana](/deployment/dependencies/grafana).
-:::
-
 ## EMQX API за HTTPS
 
 Если `PU_MQTT_SECURE=True`, [Backend](/deployment/dependencies/backend) обращается к REST API [EMQX](/deployment/dependencies/emqx) по `https://PU_MQTT_HOST`. Поэтому `PU_MQTT_HOST` должен быть отдельным доменом (например `emqx.pepeunit.com`, не `PU_DOMAIN`), открываться по `https` и вести на порт `18083` контейнера `emqx`:
@@ -192,10 +182,8 @@ server {
 }
 ```
 
-:::info
-MQTT сообщения Unit и [Backend](/deployment/dependencies/backend) не шифруются и идут на порт `PU_MQTT_PORT` (по умолчанию `1883`). `https` нужен только для REST API [EMQX](/deployment/dependencies/emqx).
-:::
+MQTT сообщения Unit и `Backend` не шифруются и идут на порт `PU_MQTT_PORT` (по умолчанию `1883`). `https` нужен только для REST API `EMQX`.
 
 :::danger
-Через этот адрес доступна панель администратора [EMQX](/deployment/dependencies/emqx). Смените пароль из образца и, если можно, разрешите доступ только с `ip` сервера [Backend](/deployment/dependencies/backend).
+Через этот адрес доступна панель администратора `EMQX`. Смените пароль из образца и, если можно, разрешите доступ только с `ip` сервера `Backend`.
 :::

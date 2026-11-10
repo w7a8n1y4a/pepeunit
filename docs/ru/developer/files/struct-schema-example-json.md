@@ -40,17 +40,11 @@
 input_base_topic | Стандартные команды, которые Unit готов выполнять | [Стандартные MQTT команды](/developer/mqtt/default-mqtt-command)
 output_base_topic | Стандартные топики, в которые Unit публикует состояние и логи | [Стандартные MQTT топики состояния](/developer/mqtt/state-mqtt-send)
 input_topic | Input топики Разработчика. По каждому Pepeunit создаёт Input UnitIO | [Топики Разработчика](/developer/files/struct-schema-json#топики-разработчика)
-output_topic | Output топики Разработчика. По каждому Pepeunit создаёт Output UnitIO | [Топики Разработчика](/developer/files/struct-schema-json#топики-разработчика)
+output_topic | Output топики Разработчика. По каждому Pepeunit создаёт Output UnitIO | Там же
 
-:::info
 Название топика может содержать латинские буквы, цифры и символы / _ -
-:::
 
-:::info
-С клиентскими библиотеками ([Micropython](/developer/libraries/micropython), [ESP-IDF](/developer/libraries/esp-idf), [Golang](/developer/libraries/golang), [Python](/developer/libraries/python)) можно указать все стандартные топики, они заработают сами.
-
-Если вы пишете взаимодействие с Pepeunit без библиотек, оставьте только нужные.
-:::
+С клиентскими библиотеками ([Micropython](/developer/libraries/micropython), [ESP-IDF](/developer/libraries/esp-idf), [Golang](/developer/libraries/golang), [Python](/developer/libraries/python)) можно указать все стандартные топики, они заработают сами. Если вы пишете взаимодействие с Pepeunit без библиотек, оставьте только нужные.
 
 :::warning
 Backend отправляет стандартную команду, только если её топик указан в input_base_topic. Без update/pepeunit Unit не получит команду обновления.

@@ -2,17 +2,13 @@
 
 ## Что нужно на сервере
 
-- `Docker` с плагином `Docker Compose` (команда `docker compose`, через пробел)
+- `Docker` с плагином `Docker Compose`: нужна команда `docker compose` (через пробел), а не старая `docker-compose`. Все команды в документации написаны для плагина
 - `Python 3` и `git`
 - `bash`
 
 ## Установка Docker
 
-:::info
-Инструкция для `debian 12`, на других `unix`-системах команды похожи.
-:::
-
-Установите `Docker` от имени `root`:
+Инструкция для `debian 12`, на других `unix`-системах команды похожи. Установите `Docker` от имени `root`:
 ```bash
 sudo su
 curl -fsSL https://get.docker.com -o get-docker.sh
@@ -47,10 +43,6 @@ docker compose version
 ```bash
 sudo apt-get install docker-compose-plugin
 ```
-
-:::warning
-Нужна команда `docker compose` (плагин), а не старая `docker-compose`. Все команды в документации написаны для плагина.
-:::
 
 ## Установка Python и Git
 

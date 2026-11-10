@@ -6,10 +6,4 @@
 
 [ClickHouse](https://clickhouse.com/) - колоночная СУБД для аналитики. Контейнер `clickhouse`, данные в томе `clickhouse_data`. [Переменные окружения](/deployment/env-variables/clickhouse)
 
-:::info
-[Backend](/deployment/dependencies/backend) хранит в ней:
-1. Логи Unit
-1. Данные [DataPipe](/deployment/dependencies/datapipe)
-:::
-
-Базу и таблицы [Backend](/deployment/dependencies/backend) создаёт сам при старте. Системные таблицы `ClickHouse` хранятся один день, чтобы не занимать диск.
+[Backend](/deployment/dependencies/backend) хранит в ней логи Unit и данные [DataPipe](/deployment/dependencies/datapipe). Базу и таблицы он создаёт сам при старте. Системные таблицы `ClickHouse` хранятся один день, чтобы не занимать диск.

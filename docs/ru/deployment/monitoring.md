@@ -7,28 +7,24 @@
 - [Loki](/deployment/dependencies/loki)
 - [Promtail](/deployment/dependencies/promtail)
 
-Вместе с [Grafana](/deployment/dependencies/grafana) они дают набор панелей о состоянии инстанса.
+Вместе с [Grafana](/deployment/dependencies/grafana) они дают набор панелей о состоянии инстанса. Панели [Пользователей](/development-pepeunit/mechanics/roles#user) с графиками данных UnitIO создаются из клиента и с ними не связаны.
 
 ## Grafana Dashboards
 
 Готовые панели подключаются сами из каталога `data/grafana/provisioning/dashboards` в организацию `Main Org`. Данные в [Grafana](/deployment/dependencies/grafana) обновляются не чаще раза в минуту.
 
-Все панели видит администратор [Grafana](/deployment/dependencies/grafana): он входит по логину и паролю `PU_GRAFANA_ADMIN_USER` и `PU_GRAFANA_ADMIN_PASSWORD`. Обычные [Пользователи](/development-pepeunit/mechanics/roles#user) входят через `Pepeunit` и работают в своей организации, где создают собственные панели.
+Все панели видит администратор `Grafana`, остальные [Пользователи](/development-pepeunit/mechanics/roles#user) работают в своей организации, см. [Вход в Grafana](/deployment/dependencies/grafana#вход-в-grafana).
 
 Название | Доступ | Описание
 -- | -- | --
 Docker Logs | Admin | Логи любых контейнеров
-Backend Aggregated Logs | Admin | Логи [Backend](/deployment/dependencies/backend) с группировкой по сообщениям и выбором уровня
-Backend Load Metrics | View | Нагрузка на [Backend](/deployment/dependencies/backend)
-EMQX Load Metrics | View | Нагрузка на [EMQX](/deployment/dependencies/emqx)
+Backend Aggregated Logs | Admin | Логи `Backend` с группировкой по сообщениям и выбором уровня
+Backend Load Metrics | View | Нагрузка на `Backend`
+EMQX Load Metrics | View | Нагрузка на `EMQX`
 Docker Resource Metrics | View | Ресурсы, которые потребляют система и каждый контейнер
 
 :::warning
 В логах есть всё, что пишут контейнеры. Доступ к `Docker Logs` и `Backend Aggregated Logs` оставьте только администратору.
-:::
-
-:::info
-Панели [Пользователей](/development-pepeunit/mechanics/roles#user) с графиками данных UnitIO создаются из клиента и с этими панелями не связаны, см. [Grafana](/deployment/dependencies/grafana).
 :::
 
 ## Выключение мониторинга
@@ -39,5 +35,5 @@ Docker Resource Metrics | View | Ресурсы, которые потребля
 1. Перезапустите Pepeunit: [команды docker compose](/deployment/docker/commands)
 
 :::warning
-[Grafana](/deployment/dependencies/grafana) нужна для панелей [Пользователей](/development-pepeunit/mechanics/roles#user). Выключать её не нужно, даже если вы отключаете мониторинг.
+`Grafana` нужна для панелей Пользователей, её не выключайте.
 :::

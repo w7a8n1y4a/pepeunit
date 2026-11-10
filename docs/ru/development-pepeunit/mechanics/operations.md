@@ -8,7 +8,7 @@
 
 Операция | Тип | Кто запускает | Что делает
 -- | -- | -- | --
-Синхронизация одного `Repo` | `UpdateRepo` | `User` с доступом к `Repo` | Заменяет локальную копию [Repo](/development-pepeunit/mechanics/entities#repo) и загружает релизы
+Синхронизация одного `Repo` | `UpdateRepo` | `User` с доступом к `Repo` | Заменяет локальную копию [Repo](/development-pepeunit/mechanics/entities#repo) и загружает релизы, см. [Обновление Repo](/development-pepeunit/mechanics/update-system#обновление-repo)
 Синхронизация всех `Repo` | `UpdateAllRepos` | `Admin` | То же заново для всех `Repo` инстанса
 Массовое обновление `Unit` | `UpdateAllUnitsFirmware` | `Admin` | Отправляет команду `UPDATE` каждому `Unit` с автообновлением и возвращает, сколько получилось и сколько нет
 Опрос соседей | `ScanAllPeers` | `Admin` | Опрашивает все `Trust` [Peer](/development-pepeunit/mechanics/federation). Не чаще раза в 10 минут
@@ -20,9 +20,7 @@
 
 `Admin` может запустить тесты, опрос соседей и обновление всех `Repo` и командой `/control` в Telegram Bot.
 
-:::info
 Часть операций работает по расписанию без `OperationTask`: каждый час в `:00` обновляются `Unit` и опрашиваются `Peer`, а в `:30` синхронизируются `Repo`. Подробнее в [системе обновлений](/development-pepeunit/mechanics/update-system) и [федерации](/development-pepeunit/mechanics/federation).
-:::
 
 ## Уведомления
 
@@ -52,6 +50,4 @@
 
 Заблокированному `User` уведомления не доставляются.
 
-:::info Включение
 Уведомления работают при включённом флаге `pu_ff_notification_enable`. Лимиты размеров текста и частоты отправки в Telegram [Owner](/development-pepeunit/mechanics/roles#owner) задаёт в настройках инстанса: `pu_notification_*`.
-:::
