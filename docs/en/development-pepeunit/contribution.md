@@ -6,7 +6,7 @@ All `core` repositories are collected on the [Repository map](/development-pepeu
 
 The main development platform is GitLab. To register, contact [@w7a8n1y4a](https://t.me/w7a8n1y4a). All `core` repositories are mirrored on GitHub so that it is easier for [Users](/development-pepeunit/mechanics/roles#user) to leave `issues`.
 
-Every repository has a `Makefile` and a readme.md with important notes on how the code works. List of commands: `make help`.
+The Client and Server repositories have a `Makefile`. List of commands: `make help`.
 
 ## What to run before a commit
 

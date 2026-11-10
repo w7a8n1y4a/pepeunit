@@ -149,6 +149,19 @@ pu_telegram_proxy_url | пусто | Прокси для запросов к Tel
 pu_telegram_header_entity_length | 15 | Длина заголовка сущности в сообщениях, 1..64
 pu_telegram_items_per_page | 7 | Записей на странице списка в боте, 1..20
 
+Список команд для `@BotFather` (`/setcommands`):
+
+```text
+repo - Repo
+unit - Unit Actions
+dashboard - Dashboard List url
+peers - Peer List
+alerts - Alerts and operation status
+info - Instance Metrics
+help - About Instance
+control - Admin Operations
+```
+
 ## Логи
 
 Настройка | По умолчанию | Значения | Назначение

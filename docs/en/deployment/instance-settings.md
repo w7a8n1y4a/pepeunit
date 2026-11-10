@@ -149,6 +149,19 @@ pu_telegram_proxy_url | empty | Proxy for requests to Telegram, for example `soc
 pu_telegram_header_entity_length | 15 | Length of the entity title in messages, 1..64
 pu_telegram_items_per_page | 7 | Records per list page in the bot, 1..20
 
+Command list for `@BotFather` (`/setcommands`):
+
+```text
+repo - Repo
+unit - Unit Actions
+dashboard - Dashboard List url
+peers - Peer List
+alerts - Alerts and operation status
+info - Instance Metrics
+help - About Instance
+control - Admin Operations
+```
+
 ## Logs
 
 Setting | Default | Values | Purpose
