@@ -69,7 +69,7 @@ class InstanceRecord {
 
 const instanceCurrentPath = '/pepeunit/api/v1/instances/current';
 
-const mainInstanceUrl = 'https://unit.pepeunit.com$instanceCurrentPath';
+const mainInstanceUrl = 'https://pepeunit.com$instanceCurrentPath';
 
 const devInstanceUrl = 'https://devunit.pepeunit.com$instanceCurrentPath';
 
