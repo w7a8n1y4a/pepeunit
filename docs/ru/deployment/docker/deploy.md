@@ -1,279 +1,164 @@
 # Развёртывание
+
 ## Pepeunit Deploy
 
-`Pepeunit Deploy` репозиторий - хранит в себе все файлы и примеры, нужные для запуска инстанса Pepeunit при помощи `docker compose`. Чтобы склонировать выполните команды:
+Репозиторий `Pepeunit Deploy` содержит всё для запуска инстанса через `docker compose`: описание контейнеров, генератор конфигов `make_env.py` и скрипт резервных копий `backup.sh`. Состав контейнеров описан в [Зависимостях](/deployment/dependencies/backend).
 ```bash
 git clone https://git.pepemoss.com/pepe/pepeunit/pepeunit_deploy.git
 cd pepeunit_deploy
 ```
 
-## Заполнение первичного .env файла
+:::info
+Заранее установите `Docker`, `Docker Compose`, `Python 3` и `git`: [Установка Docker и Docker Compose](/deployment/docker/install-docker).
+:::
 
-На выбор есть два варианта установки:
-1. Для локального использования - `.env.local.example`
-1. Для глобального использования - `.env.global.example`
+## Файл настроек
 
-Отличие состоит в том, что локальный вариант рассчитан на эксплуатацию в локальной сети, а глобальный позволяет обращаться к инстансу Pepeunit по доменному имени через `https`.
+Есть два образца:
+1. `.env.local.example` - для локальной сети, доступ по `ip` и `http`
+1. `.env.global.example` - для публичного инстанса, доступ по домену и `https`
 
-Выберите один из файлов и уберите у него приставку `.example`
-- `.env.local.example` -> `.env.local`
-- `.env.global.example` -> `.env.global`
-
-Например, командой:
+Скопируйте нужный без `.example`:
 ```bash
-mv .env.local.example .env.local
+cp .env.local.example .env.local
 ```
 
-В файлах `.env.local` и `.env.global` используется уменьшенное число переменных окружения, т.к. на его основе генирируются файлы для всех `docker compose` сервисов:
+:::warning
+Если в репозитории лежат оба файла, `make_env.py` использует `.env.local`.
+:::
 
-Переменная | Пример для `.env.local` | Пример для `.env.global` | Зачем нужна?
+Это единственный файл, который вы правите, остальное `make_env.py` собирает из него. Здесь только [переменные окружения Backend](/deployment/env-variables/backend), которые нельзя менять на работающем инстансе. Остальные параметры меняются из клиента, см. [Настройки инстанса](/deployment/instance-settings).
+
+Обязательно заполните:
+
+Переменная | Пример для .env.local | Пример для .env.global | Зачем нужна?
 -- | -- | -- | --
-`POSTGRES_USER` | `pepeunit-admin` | `pepeunit-admin` | Имя пользователя, от имени которого будет создана база данных
-`POSTGRES_PASSWORD` | `f6prBUMbhvNnlLZ0f0HN` | `f6prBUMbhvNnlLZ0f0HN` | Пароль пользователя, от имени которого будет создана база данных
-`POSTGRES_DB` | `pepeunit-db` | `pepeunit-db` | Название базы данных
-`CLICKHOUSE_USER` | `pepeunit-admin` | `pepeunit-admin` | Имя пользователя, от имени которого будет создана база данных
-`CLICKHOUSE_PASSWORD` | `f6prBUMbhvNnlLZ0f0HN` | `f6prBUMbhvNnlLZ0f0HN` | Пароль пользователя, от имени которого будет создана база данных
-`CLICKHOUSE_DB` | `default` | `default` | Название базы данных
-`PU_DOMAIN` | `192.168.0.22` | `unit.pepeunit.com` | Доменное имя от инстанса Pepeunit
-`PU_SECURE` | `False` | - | Выбирает `http` или `https` для `BACKEND_DOMAIN` инстанса Pepeunit, по умолчанию `https`
-`PU_TELEGRAM_TOKEN `| `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | `1111111111:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA` | Токен Telegram Bot, можно получить у [Bot Father](https://t.me/BotFather)
-`PU_TELEGRAM_BOT_LINK` | `https://t.me/PepeUnitRobot` | `https://t.me/PepeUnitRobot` | Ccылка на Telegram Bot, которого вы создаёте в [Bot Father](https://t.me/BotFather)
-`PU_MQTT_HOST` | `192.168.0.22` | `emqx.pepeunit.com` | Доменное имя от инстансa [EMQX](/deployment/dependencies/emqx). Для локального использования убедитесь, что адрес будет доступен из контейнеров, `127.0.0.1`, скорее всего, работать не будет
-`PU_MQTT_SECURE` | `False` | - | Выбирает `http` или `https` для `MQTT_HOST` инстансa Pepeunit, по умолчанию `https`
-`PU_MQTT_PORT` | `1883` | `1883` | MQTT порт для [EMQX](/deployment/dependencies/emqx)
-`PU_MQTT_USERNAME` | `YabJTlmvQ4tvweuTl0gn` | `YabJTlmvQ4tvweuTl0gn` | Имя администратора [EMQX](/deployment/dependencies/emqx)
-`PU_MQTT_PASSWORD` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | `F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu` | Пароль администратора [EMQX](/deployment/dependencies/emqx)
-`GF_USER` | `admin` | `admin` | Логин администратора для [Grafana](/deployment/dependencies/grafana)
-`GF_PASSWORD` | `aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB` | `aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB` | Пароль администратора для [Grafana](/deployment/dependencies/grafana)
+PU_DOMAIN | 192.168.0.22 | unit.pepeunit.com | Домен или `ip` инстанса
+PU_SECURE | False | True | Использовать `https` вместо `http`
+PU_SQLALCHEMY_DATABASE_URL | postgresql://myuser:mypassword@postgres:5432/pepeunit | postgresql://myuser:mypassword@postgres:5432/pepeunit | Адрес [PostgreSQL](/deployment/dependencies/postgresql). Логин, пароль и база отсюда используются при создании базы
+PU_CLICKHOUSE_DATABASE_URL | clickhouse+native://admin:mypassword@clickhouse:9000/default | clickhouse+native://admin:mypassword@clickhouse:9000/default | Адрес [ClickHouse](/deployment/dependencies/clickhouse), работает так же
+PU_MQTT_HOST | 192.168.0.22 | emqx.pepeunit.com | Домен или `ip` [EMQX](/deployment/dependencies/emqx). Должен открываться из контейнеров, `127.0.0.1` не подойдёт
+PU_MQTT_SECURE | False | True | Как [Backend](/deployment/dependencies/backend) обращается к [EMQX](/deployment/dependencies/emqx), см. [EMQX](/deployment/dependencies/emqx#как-backend-настраивает-emqx)
+PU_MQTT_USERNAME | YabJTlmvQ4tvweuTl0gn | YabJTlmvQ4tvweuTl0gn | Имя администратора [EMQX](/deployment/dependencies/emqx)
+PU_MQTT_PASSWORD | F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu | F2qvym9lxL0DK6DlhmN1HgczWe9lKj30BvJTyvHu | Пароль администратора [EMQX](/deployment/dependencies/emqx)
+PU_GRAFANA_ADMIN_USER | admin | admin | Логин администратора [Grafana](/deployment/dependencies/grafana)
+PU_GRAFANA_ADMIN_PASSWORD | aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB | aN4bzmwMjB0v69LPvxpLLJ7LHXTe6hlqZ703mVmB | Пароль администратора [Grafana](/deployment/dependencies/grafana)
+PU_SECRET_KEY, PU_ENCRYPT_KEY | `<32-bit-key>` | `<32-bit-key>` | Секретные ключи. Оставьте как есть: `make_env.py` создаст случайные и запишет в файл
 
-## Генерация env/.env.service
+:::danger
+Пароли из образца публичные. Замените все логины и пароли на свои.
+:::
 
-Выполните команду, генерирующую итоговые `.env.service` файлы в директории `env/.env.service`:
+Остальные переменные можно оставить как в образце, подробнее в [переменных окружения Backend](/deployment/env-variables/backend).
+
+:::warning
+Логин, пароль и база в адресах `PU_SQLALCHEMY_DATABASE_URL` и `PU_CLICKHOUSE_DATABASE_URL` применяются только при первом создании тома с данными. Позже изменить их в файле недостаточно: базы не пересоздают пользователей, и [Backend](/deployment/dependencies/backend) перестанет подключаться.
+:::
+
+:::info
+Telegram Bot, флаги, лимиты и контакты в файле не задаются: их настраивает `Owner` из клиента после запуска, см. [Настройки инстанса](/deployment/instance-settings).
+:::
+
+## Генерация .env и конфигов
+
+Сначала можно проверить файл, ничего не записывая:
 ```bash
-$> python make_env.py
-2025-09-16 00:51:44,693 - INFO - Run make envs
-2025-09-16 00:51:44,693 - INFO - Run search .env.local or .env.global
-2025-09-16 00:51:44,693 - INFO - The .env.global file was found
-2025-09-16 00:51:44,693 - INFO - Load variables from .env.global
-2025-09-16 00:51:44,694 - INFO - Generate .env.emqx
-2025-09-16 00:51:44,694 - INFO - Save env/.env.emqx
-2025-09-16 00:51:44,694 - INFO - Generate .env.postgres
-2025-09-16 00:51:44,694 - INFO - Save env/.env.postgres
-2025-09-16 00:51:44,694 - INFO - Generate .env.frontend
-2025-09-16 00:51:44,694 - INFO - Save env/.env.frontend
-2025-09-16 00:51:44,694 - INFO - Generate .env.backend
-2025-09-16 00:51:44,694 - INFO - Existing .env.backend found, loading sensitive keys
-2025-09-16 00:51:44,695 - INFO - Load variables from env/.env.backend
-2025-09-16 00:51:44,695 - INFO - Save env/.env.backend
-2025-09-16 00:51:44,695 - INFO - Generate .env.grafana
-2025-09-16 00:51:44,695 - INFO - Save env/.env.grafana
-2025-09-16 00:51:44,695 - INFO - Generate .env.clickhouse
-2025-09-16 00:51:44,695 - INFO - Save env/.env.clickhouse
-2025-09-16 00:51:44,696 - INFO - Generate .env.backend_data_pipe
-2025-09-16 00:51:44,696 - INFO - Existing .env.backend found, loading sensitive keys
-2025-09-16 00:51:44,696 - INFO - Load variables from env/.env.backend
-2025-09-16 00:51:44,696 - INFO - Save env/.env.backend_data_pipe
-2025-09-16 00:51:44,696 - INFO - Generate grafana.ini
-2025-09-16 00:51:44,696 - INFO - Environment file generation is complete
+python3 make_env.py --dry-run
 ```
 
-:::danger
-Команда `python3 make_env.py` каждый раз перегенерирует конфиги. При перегенерации существующие секретные `32-битные ключи` не изменяются. Используйте команды [создания backup](/deployment/docker/backup-update#работа-с-бэкапами), для сохранения старой конфигурации.
-:::
+Затем соберите итоговые файлы:
+```bash
+python3 make_env.py
+```
+
+Что получится:
+
+Файл | Для чего
+-- | --
+.env | Переменные для `docker compose`
+data/nginx/nginx.conf | Конфиг [Nginx](/deployment/dependencies/nginx)
+data/prometheus/prometheus.yml | Конфиг [Prometheus](/deployment/dependencies/prometheus)
+data/grafana/grafana.ini | Конфиг [Grafana](/deployment/dependencies/grafana)
 
 :::danger
-Вам может потребоваться внести изменения в конфигурацию отдельных сервисов для тонкой настройки:
+Эти файлы создаются заново при каждом запуске `make_env.py`: ручные правки в `.env` и `data/` **пропадут**. Правьте только файл настроек, а для тонкой настройки - `*.template` в `data/`.
 
-- [Переменные Backend](/deployment/env-variables/backend)
-- [Переменные DataPipe](/deployment/env-variables/data-pipe)
-- [Переменные Frontend](/deployment/env-variables/frontend)
-- [Переменные PostgreSQL](/deployment/env-variables/postgresql)
-- [Переменные ClickHouse](/deployment/env-variables/clickhouse)
-- [Переменные EMQX](/deployment/env-variables/emqx)
-- [Переменные Grafana](/deployment/env-variables/grafana)
+Ключи `PU_SECRET_KEY` и `PU_ENCRYPT_KEY` при повторном запуске не меняются. Менять их самим нельзя: все токены и зашифрованные данные станут недействительны. Файл настроек входит в [резервную копию](/deployment/docker/backup-update#работа-с-бэкапами).
 :::
+
+Если не хватает обязательных значений или остались шаблоны `<...>`, команда остановится и покажет список ошибок.
 
 ## Настройка Nginx
 
-Обычно, настройка [Nginx](/deployment/dependencies/nginx) для `docker compose` не требуется, но если ваш инстанс Pepeunit будет находиться за ещё одним [Nginx](/deployment/dependencies/nginx), изучите [примеры конфигов Nginx для https и reverse proxy](/deployment/nginx)
+Для `docker compose` настройка [Nginx](/deployment/dependencies/nginx) не нужна. Если инстанс будет за ещё одним `Nginx`, например ради `https`, возьмите [готовые конфиги](/deployment/nginx).
 
 ## Открытие портов
 
-Для корректной работы Pepeunit нужно открыть следующие порты:
-1. `80` - для работы по `http`
-1. `443` - для работы по `https`
-1. `1883` - для работы по протоколу MQTT
-
-:::warning
-Если ваш порт `1883` занят другими приложениями, измените его на другой и внесите изменения: 
-- `PU_MQTT_PORT` - [ENV переменные Backend](/deployment/env-variables/backend)
-- `PU_DP_MQTT_PORT` - [ENV переменные DataPipe](/deployment/env-variables/data-pipe)
-- `docker-compose.yml` в секцию `emqx.ports`, значение `- "1883:1883"` вам нужно будет заменить, например, на `- "1885:1883"`.
-:::
+Откройте на сервере:
+1. `80` - `http`
+1. `443` - `https`, если настроен внешний [Nginx](/deployment/nginx)
+1. `1883` - MQTT
 
 :::danger
-Если у вас публичный инстанс Pepeunit с доменом - вам потребуется открыть указанные порты.
+`docker-compose.yml` публикует на хост порты всех сервисов (базы, [EMQX](/deployment/dependencies/emqx), [Backend](/deployment/dependencies/backend), [Grafana](/deployment/dependencies/grafana) и другие). На публичном сервере закройте их файрволом: наружу должны смотреть только `80`, `443` и `1883`. Исключение одно: при `PU_MQTT_SECURE=True` порт `18083` должен быть доступен [внешнему Nginx](/deployment/nginx#emqx-api-за-https), но не всему интернету.
+:::
+
+:::warning
+Если порт `1883` занят, смените его:
+- задайте новый `PU_MQTT_PORT` в файле настроек
+- в `docker-compose.yml` в секции `emqx.ports` замените `"1883:1883"`, например на `"1885:1883"`
+
+Затем выполните `python3 make_env.py` и `docker compose up -d`.
 :::
 
 ## Первый запуск
 
-Настройте доступ для конфигураций из директории `data`:
-```bash
-sudo chmod 777 -R data
-```
-
-Выполните команду запуска Pepeunit:
 ```bash
 docker compose up -d
 ```
 
-:::info
-Пример корректного запуска [Backend](/deployment/dependencies/backend) на основе конфига `.env.global`. Для `.env.local` будут отличаться только `ip`-адреса и установка `pooling` для Telegram Bot:
+Первый запуск скачивает образы и занимает несколько минут. Ход запуска [Backend](/deployment/dependencies/backend) виден в логах:
 ```bash
-$> docker logs -f backend
-Wait Ready PostgreSQL...
-postgres:5432 - accepting connections
-PostgreSQL available.
-Wait check DB 'pepeunit'...
-DB 'pepeunit' Exist.
-Fix collation postgres for swap version containers
-NOTICE:  version has not changed
-ALTER DATABASE
-Collation fixed.
-Run migration...
-{"asctime": "2025-12-06 11:51:13,514", "levelname": "INFO", "name": "alembic.runtime.migration", "message": "Context impl PostgresqlImpl."}
-{"asctime": "2025-12-06 11:51:13,514", "levelname": "INFO", "name": "alembic.runtime.migration", "message": "Will assume transactional DDL."}
-Del old lock files
-{"time": "2025-12-06 11:51:16,012", "level": "INFO", "logger": "gunicorn.error", "message": "Starting gunicorn 23.0.0", "funcName": "info"}
-{"time": "2025-12-06 11:51:16,013", "level": "INFO", "logger": "gunicorn.error", "message": "Listening at: http://0.0.0.0:5000 (28)", "funcName": "info"}
-{"time": "2025-12-06 11:51:16,014", "level": "INFO", "logger": "gunicorn.error", "message": "Using worker: uvicorn.workers.UvicornWorker", "funcName": "info"}
-{"time": "2025-12-06 11:51:16,017", "level": "INFO", "logger": "gunicorn.error", "message": "Booting worker with pid: 29", "funcName": "info"}
-{"time": "2025-12-06 11:51:16,088", "level": "INFO", "logger": "gunicorn.error", "message": "Booting worker with pid: 30", "funcName": "info"}
-{"time": "2025-12-06 11:51:22,533", "level": "INFO", "logger": "uvicorn.error", "message": "on_connect handler accepted", "funcName": "on_connect"}
-{"time": "2025-12-06 11:51:22,533", "level": "INFO", "logger": "uvicorn.error", "message": "on_message handler accepted", "funcName": "on_message"}
-{"time": "2025-12-06 11:51:22,534", "level": "INFO", "logger": "uvicorn.error", "message": "on_connect handler accepted", "funcName": "on_connect"}
-{"time": "2025-12-06 11:51:22,534", "level": "INFO", "logger": "uvicorn.error", "message": "on_message handler accepted", "funcName": "on_message"}
-{"time": "2025-12-06 11:51:22,827", "level": "INFO", "logger": "uvicorn.error", "message": "Started server process [29]", "funcName": "_serve", "color_message": "Started server process [\u001b[36m%d\u001b[0m]"}
-{"time": "2025-12-06 11:51:22,827", "level": "INFO", "logger": "uvicorn.error", "message": "Waiting for application startup.", "funcName": "startup"}
-{"time": "2025-12-06 11:51:22,844", "level": "INFO", "logger": "uvicorn.error", "message": "Started server process [30]", "funcName": "_serve", "color_message": "Started server process [\u001b[36m%d\u001b[0m]"}
-{"time": "2025-12-06 11:51:22,844", "level": "INFO", "logger": "uvicorn.error", "message": "Waiting for application startup.", "funcName": "startup"}
-{"time": "2025-12-06 11:51:22,856", "level": "INFO", "logger": "root", "message": "Total migrations to apply: 0", "funcName": "apply_migration"}
-{"time": "2025-12-06 11:51:22,856", "level": "INFO", "logger": "root", "message": "Check state EMQX Broker https://dcemqx.pepemoss.com", "funcName": "__init__"}
-{"time": "2025-12-06 11:51:23,650", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET https://dcemqx.pepemoss.com/api-docs/swagger.json \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:25,405", "level": "INFO", "logger": "root", "message": "EMQX Broker https://dcemqx.pepemoss.com - Ready to work", "funcName": "__init__"}
-{"time": "2025-12-06 11:51:25,802", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/login \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:25,803", "level": "INFO", "logger": "root", "message": "Del file auth hook MQTT Broker", "funcName": "delete_auth_hooks"}
-{"time": "2025-12-06 11:51:26,266", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/file \"HTTP/1.1 204 No Content\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:26,268", "level": "INFO", "logger": "root", "message": "Del http auth hook MQTT Broker", "funcName": "delete_auth_hooks"}
-{"time": "2025-12-06 11:51:26,679", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/http \"HTTP/1.1 204 No Content\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:26,681", "level": "INFO", "logger": "root", "message": "Del redis auth hook MQTT Broker", "funcName": "delete_auth_hooks"}
-{"time": "2025-12-06 11:51:27,092", "level": "INFO", "logger": "httpx", "message": "HTTP Request: DELETE https://dcemqx.pepemoss.com/api/v5/authorization/sources/redis \"HTTP/1.1 204 No Content\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:27,095", "level": "INFO", "logger": "root", "message": "Set ACL file auth hook MQTT Broker", "funcName": "set_file_auth_hook"}
-{"time": "2025-12-06 11:51:27,487", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources \"HTTP/1.1 204 No Content\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:27,490", "level": "INFO", "logger": "root", "message": "Set http auth hook MQTT Broker", "funcName": "set_http_auth_hook"}
-{"time": "2025-12-06 11:51:28,282", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources \"HTTP/1.1 204 No Content\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:28,284", "level": "INFO", "logger": "root", "message": "Set redis auth hook MQTT Broker", "funcName": "set_redis_auth_hook"}
-{"time": "2025-12-06 11:51:28,801", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://dcemqx.pepemoss.com/api/v5/authorization/sources \"HTTP/1.1 204 No Content\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:28,803", "level": "INFO", "logger": "root", "message": "Set cache settings auth hook MQTT Broker", "funcName": "set_auth_cache_ttl"}
-{"time": "2025-12-06 11:51:29,286", "level": "INFO", "logger": "httpx", "message": "HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/authorization/settings \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:29,288", "level": "INFO", "logger": "root", "message": "Set settings for tcp listener", "funcName": "set_tcp_listener_settings"}
-{"time": "2025-12-06 11:51:29,710", "level": "INFO", "logger": "httpx", "message": "HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/listeners/tcp:default \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:29,712", "level": "INFO", "logger": "root", "message": "Set global mqtt settings", "funcName": "set_global_mqtt_settings"}
-{"time": "2025-12-06 11:51:30,112", "level": "INFO", "logger": "httpx", "message": "HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/configs/global_zone \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:30,114", "level": "INFO", "logger": "root", "message": "Disable retainer", "funcName": "set_global_mqtt_settings"}
-{"time": "2025-12-06 11:51:30,257", "level": "INFO", "logger": "httpx", "message": "HTTP Request: PUT https://dcemqx.pepemoss.com/api/v5/mqtt/retainer \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:30,264", "level": "INFO", "logger": "root", "message": "Run sync all repository in RepositoryRegistry", "funcName": "sync_local_repository_storage"}
-{"time": "2025-12-06 11:51:30,331", "level": "INFO", "logger": "root", "message": "End sync all repository in RepositoryRegistry", "funcName": "sync_local_repository_storage"}
-
-
-                             ........:
-                            :......::-
-                             .....::.:
-                             .....::.-
-                        :.........::.-****
-                      :........::::--==++###%
-                    :::-++*++=======++*#@@%%-::
-                  ....:-=---==++******###%%*-...:
-                :....:--===++=*=+**%@@%@%%%%*+:..:
-              :....::=====+====+==*##%@%%%#*##+=...:
-            -...........:-===++*=++**#%*:....::---...:
-           :......-..:*##%%*+++===+#*-.:-..+#%%%#*+:...:
-         :......=..++*##%%%%#**++--=..-.--*##%%*%@#+=....-
-        :..:-:.+-+=+#%%***+#@#*=---..+:=**+%@%%*%@@*+=-...:
-       =--===-.%%=#*#%-.=:+@@%**==-::%%#==#@@#%@@+@%**+=:::
-       =-=====.+@%%+@@%:.-#@@##***+-:%@%*%@%@%%=%@@#++::-::
-       =--====-.#@@*@+@@*@@@#***#**#-:%@*%%+@=@*@@#*==-..::
-       ==+*=+++=::#@@@@@@@########*#%==+%@@@@@@@#**++++*+::-
-       *@*+++++++++****#####%##%###%#%%%%#########*##+==*#--
-       -*@%**==+=+*#=+**###%%%%####%%##%%%%%%%#%%%#####@@%=+
-    :::-=--+%%@*##*.-.*#####%%%########%%%%%%%###%%@@%*++=+****
-    ....:---------==***#%%%%%*%#%%#%%%%%%%%%#*++=====+**#######%
-    ....:-:::-=====-----------------------===+++***+++*#%@@%###%
-    :--=:=++++====---::::---------===========++*##%@@@@@@@@@@@@@
-       =--+*++++***+=+*****###########%%%%%%%%%#%%%#@@@@@@@@
-         +==++++**+...:*=+=*=+==*++##++=+++#%-:-*%#%@@@@@@
-            %#*****#####*##*-+-=*==#--+#**%*%%%%@@@@@@@
-              *##%@@@@@@@%%%%%%%%%%%%%%@@@@@@@@@@@@@@
-              *###%%@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-                  %%@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-               _____                            _ _
-              |  __ \                          (_) |
-              | |__) |__ _ __   ___ _   _ _ __  _| |_
-              |  ___/ _ \ '_ \ / _ \ | | | '_ \| | __|
-              | |  |  __/ |_) |  __/ |_| | | | | | |_
-              |_|   \___| .__/ \___|\__,_|_| |_|_|\__|
-                        | |
-                        |_|
-
-       v1.0.0 - AGPL v3 License
-       Federated IoT Platform
-       Front: https://dcunit.pepeunit.com
-       REST:  https://dcunit.pepeunit.com/pepeunit/docs
-       GQL:   https://dcunit.pepeunit.com/pepeunit/graphql
-       TG:    https://t.me/PepeUnitDevRobot
-       Docs:  https://pepeunit.com
-
-{"time": "2025-12-06 11:51:30,333", "level": "INFO", "logger": "root", "message": "Delete webhook before set new webhook", "funcName": "run_webhook_bot"}
-{"time": "2025-12-06 11:51:30,333", "level": "INFO", "logger": "root", "message": "Connect to mqtt server: dcemqx.pepemoss.com:1885", "funcName": "run_mqtt_client"}
-{"time": "2025-12-06 11:51:30,334", "level": "INFO", "logger": "uvicorn.error", "message": "Used broker version is 5", "funcName": "connection"}
-{"time": "2025-12-06 11:51:30,335", "level": "INFO", "logger": "uvicorn.error", "message": "Application startup complete.", "funcName": "startup"}
-{"time": "2025-12-06 11:51:30,343", "level": "INFO", "logger": "root", "message": "NoAccessError('403: 1: No Access: Token is invalid')", "funcName": "get_mqtt_auth"}
-{"time": "2025-12-06 11:51:30,349", "level": "INFO", "logger": "uvicorn.access", "message": "GET /pepeunit/metrics 200", "funcName": "send", "client_ip": "172.20.1.12", "http_method": "GET", "http_path": "/pepeunit/metrics", "http_version": "1.1", "http_status_code": 200}
-{"time": "2025-12-06 11:51:30,445", "level": "INFO", "logger": "gmqtt.mqtt.protocol", "message": "[CONNECTION MADE]", "funcName": "connection_made"}
-{"time": "2025-12-06 11:51:30,724", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET https://dcunit.pepeunit.com/grafana/api/dashboards/uid/all-docker-logs/permissions \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:30,850", "level": "INFO", "logger": "root", "message": "Connect to mqtt server: dcemqx.pepemoss.com:1885", "funcName": "run_mqtt_client"}
-{"time": "2025-12-06 11:51:30,850", "level": "INFO", "logger": "uvicorn.error", "message": "Used broker version is 5", "funcName": "connection"}
-{"time": "2025-12-06 11:51:30,855", "level": "INFO", "logger": "uvicorn.error", "message": "Application startup complete.", "funcName": "startup"}
-{"time": "2025-12-06 11:51:30,978", "level": "INFO", "logger": "gmqtt.mqtt.protocol", "message": "[CONNECTION MADE]", "funcName": "connection_made"}
-{"time": "2025-12-06 11:51:31,193", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://dcunit.pepeunit.com/grafana/api/dashboards/uid/all-docker-logs/permissions \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:31,631", "level": "INFO", "logger": "httpx", "message": "HTTP Request: GET https://dcunit.pepeunit.com/grafana/api/dashboards/uid/backend-aggregated-logs/permissions \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:32,072", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://dcunit.pepeunit.com/grafana/api/dashboards/uid/backend-aggregated-logs/permissions \"HTTP/1.1 200 OK\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:32,553", "level": "INFO", "logger": "root", "message": "MQTT subscriptions initialized in this worker", "funcName": "connect"}
-{"time": "2025-12-06 11:51:32,554", "level": "INFO", "logger": "gmqtt.mqtt.package", "message": "[SEND SUB] 1 [b'dcunit.pepeunit.com/+/+/+/pepeunit']", "funcName": "build_package"}
-{"time": "2025-12-06 11:51:33,087", "level": "INFO", "logger": "root", "message": "Another worker already subscribed to MQTT topics", "funcName": "connect"}
-{"time": "2025-12-06 11:51:33,108", "level": "INFO", "logger": "uvicorn.access", "message": "POST /pepeunit/api/v1/bot 422", "funcName": "send", "client_ip": "172.20.1.10", "http_method": "POST", "http_path": "/pepeunit/api/v1/bot", "http_version": "1.0", "http_status_code": 422}
-{"time": "2025-12-06 11:51:33,113", "level": "INFO", "logger": "uvicorn.access", "message": "POST /pepeunit/api/v1/units/auth 200", "funcName": "send", "client_ip": "172.20.1.10", "http_method": "POST", "http_path": "/pepeunit/api/v1/units/auth", "http_version": "1.0", "http_status_code": 200}
-{"time": "2025-12-06 11:51:33,172", "level": "INFO", "logger": "httpx", "message": "HTTP Request: POST https://dcunit.pepeunit.com/pepeunit/api/v1/bot \"HTTP/1.1 422 Unprocessable Content\"", "funcName": "_send_single_request"}
-{"time": "2025-12-06 11:51:33,179", "level": "INFO", "logger": "uvicorn.access", "message": "GET /pepeunit/metrics 200", "funcName": "send", "client_ip": "172.20.1.12", "http_method": "GET", "http_path": "/pepeunit/metrics", "http_version": "1.1", "http_status_code": 200}
-{"time": "2025-12-06 11:51:33,223", "level": "INFO", "logger": "gmqtt.client", "message": "[SUBACK] 1 (0,)", "funcName": "_handle_suback_packet"}
-{"time": "2025-12-06 11:51:33,249", "level": "INFO", "logger": "root", "message": "Success set TG bot webhook url", "funcName": "run_webhook_bot"}
+docker logs -f backend
 ```
-:::
+
+Запуск завершён, когда в логе появилась строка `Application startup complete` и логотип Pepeunit с версией.
 
 :::warning
-Стоит обратить особое внимание на строчку:
+Найдите в логе строку с `SUBACK`:
 
 ```json
-{"time": "2025-12-06 11:51:33,223", "level": "INFO", "logger": "gmqtt.client", "message": "[SUBACK] 1 (0,)", "funcName": "_handle_suback_packet"}
+{"asctime": "2026-11-10 04:55:01,223", "levelname": "INFO", "name": "gmqtt.client", "message": "[SUBACK] 1 (0,)", "funcName": "_handle_suback_packet"}
 ```
 
-Она отображает, смог ли [Backend](/deployment/dependencies/backend) подписаться на топик `dcunit.pepeunit.com/+/+/+/pepeunit`. Если в скобках будет указано `(135,)` вместо `(0,)`, то [Backend](/deployment/dependencies/backend) `не смог` подписаться на основной топик. Обычно, это одна из ошибок конфигурирования:
-1. Закрыт порт `1883` в роутере, хостинге или системе
-1. Во время настройки портов сервиса [EMQX](/deployment/dependencies/emqx) в `docker-compose.yml` был указан другой порт, который не был открыт
-1. При использовании кастомного порта для MQTT, требуется указать его в двух `.env` файлах: `backend` и `datapipe`
-1. Ошибками в настройках [EMQX](/deployment/dependencies/emqx) и [Backend](/deployment/dependencies/backend), например `PU_MQTT_REDIS_AUTH_URL` или `PU_REDIS_URL`. [Подробнее о переменных окружения Backend Env](/deployment/env-variables/backend). Данные переменные должны содержать в себе данные строго от одного и того же инстанса [Redis](/deployment/dependencies/redis), поскольку за первичную авторизацию отвечает именно [Redis](/deployment/dependencies/redis).
+Она показывает, подписался ли [Backend](/deployment/dependencies/backend) на основной MQTT топик. Если в скобках `(135,)` вместо `(0,)`, подписка не удалась. Проверьте:
+1. Открыт ли порт `1883` на роутере, хостинге и в файрволе
+1. Совпадает ли `PU_MQTT_PORT` с портом `emqx` в `docker-compose.yml`
+1. Открывается ли `PU_MQTT_HOST` из контейнера `backend` (`127.0.0.1` не подойдёт)
+1. Указывают ли `PU_MQTT_REDIS_AUTH_URL` и `PU_REDIS_URL` на один и тот же [Redis](/deployment/dependencies/redis)
 :::
 
-## Создание Администратора
+Версию сервера можно узнать без авторизации:
+```bash
+curl http://127.0.0.1:5291/pepeunit/api/v1/instances/current
+```
 
-Первый созданный пользователь на инстансе Pepeunit автоматически становится [Администратором](/development-pepeunit/mechanics/roles#admin). Для этого достаточно пройти стандартную форму регистрации.
+## Регистрация и Owner
+
+Откройте `PU_DOMAIN` в браузере, веб-клиент сам подключится к инстансу.
+
+Паролей в Pepeunit нет: аккаунт - это пара ключей. Откройте `Аккаунт` → `Регистрация`, клиент создаст ключи и зарегистрирует аккаунт. Сохраните приватный ключ: по нему вы входите, без него доступ потеряется.
+
+Первый пользователь владельцем **не** становится: роль `Owner` назначает администратор сервера. Найдите `uuid` своего аккаунта (`POSTGRES_USER` и `POSTGRES_DB` смотрите в `.env`):
+```bash
+docker exec -it postgres psql -U <POSTGRES_USER> -d <POSTGRES_DB> -c "SELECT uuid, login FROM users;"
+```
+
+Назначьте владельца:
+```bash
+docker exec -it backend python scripts/set_owner.py <uuid>
+```
+
+`Owner` в инстансе один: если выполнить команду с другим `uuid`, прежний владелец станет обычным [Пользователем](/development-pepeunit/mechanics/roles#user).
+
+`Owner` назначает [Администраторов](/development-pepeunit/mechanics/roles#admin) и меняет настройки: `Сеть` → избранный инстанс → `Настройки`. Дальше настройте инстанс: [Настройки инстанса](/deployment/instance-settings).

@@ -1,15 +1,19 @@
 # EMQX
 
-:::warning
-Ручное заполнение обычно не требуется, нужно заполнить только основные переменные т.к. есть [файл генерации .env файлов для сервисов](/deployment/docker/deploy#заполнение-первичного-env-фаила)
+:::info
+В файл настроек эти переменные не пишутся: имя и пароль `docker-compose.yml` берёт из `PU_MQTT_USERNAME` и `PU_MQTT_PASSWORD`, остальное в нём уже задано.
 :::
 
 :::warning
-Полный список переменных окружения доступен в [документации EMQX](https://docs.emqx.com/en/emqx/latest/)
+Полный список переменных в [документации EMQX](https://docs.emqx.com/en/emqx/latest/)
 :::
 
-Переменная | Пример | Зачем нужна?
+Переменная | Значение | Зачем нужна?
 -- | -- | --
-`EMQX_DASHBOARD__DEFAULT_USERNAME` | `admin` | Имя пользователя для сервисного аккаунта
-`EMQX_DASHBOARD__DEFAULT_PASSWORD` | `password` | Пароль пользователя для сервисного аккаунта
-`EMQX_PROMETHEUS__METRICS__ENABLED` | `true` | Признак включения метрик нагрузки
+EMQX_DASHBOARD__DEFAULT_USERNAME | PU_MQTT_USERNAME | Имя администратора [EMQX](/deployment/dependencies/emqx), под ним [Backend](/deployment/dependencies/backend) настраивает брокер
+EMQX_DASHBOARD__DEFAULT_PASSWORD | PU_MQTT_PASSWORD | Пароль администратора [EMQX](/deployment/dependencies/emqx)
+EMQX_PROMETHEUS__ENABLE_BASIC_AUTH | false | Отключает пароль на метриках, чтобы [Prometheus](/deployment/dependencies/prometheus) мог их читать
+
+:::danger
+Пароль администратора задаётся при создании тома `emqx_data`. Позже меняйте его одновременно в самом [EMQX](/deployment/dependencies/emqx) и в `PU_MQTT_PASSWORD`.
+:::

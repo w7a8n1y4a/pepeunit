@@ -1,18 +1,25 @@
 # Grafana
 
-[Grafana](https://grafana.com/) - платформа с открытым исходным кодом, предназначенная для визуализации данных и их анализа. [Подробнее о переменных окружения](/deployment/env-variables/grafana)
+[Grafana](https://grafana.com/) - платформа для визуализации данных. Контейнер `grafana`, адрес `/grafana/` на том же домене, данные в томе `grafana_data`. [Переменные окружения](/deployment/env-variables/grafana)
 
 :::info
-`Grafana` встроена в структуру работы Pepeunit для визуализации данных из [DataPipe](/deployment/dependencies/datapipe) и отображения данных [Мониторинга](/deployment/monitoring).
+В Pepeunit `Grafana` рисует графики данных [DataPipe](/deployment/dependencies/datapipe) и показывает [Мониторинг](/deployment/monitoring). Для мониторинга она берёт данные из [Prometheus](/deployment/dependencies/prometheus) и [Loki](/deployment/dependencies/loki).
 :::
 
-Настройки визуализации можно делать напрямую с [Frontend](/deployment/dependencies/frontend), для этого в ней определён следующий набор сущностей:
-- Datasource
-- Visualization
-- Dashboard
+Панели [Пользователи](/development-pepeunit/mechanics/roles#user) создают прямо в клиенте, в разделе `Панели`: [Backend](/deployment/dependencies/backend) сам создаёт в `Grafana` страницы и графики, к которым привязываются UnitIO.
 
-:::info
-`Grafana` получает данные из [Backend](/deployment/dependencies/backend) для визуализации [DataPipe](/deployment/dependencies/datapipe) при помощи `yesoreyeram-infinity-datasource`
+## Вход в Grafana
 
-Для визуализации данных [Мониторинга](/deployment/monitoring) используется [Prometheus](/deployment/dependencies/prometheus) и [Loki](/deployment/dependencies/loki)
+Паролей у обычных пользователей нет: они открывают панель из клиента, и `Grafana` входит через `Pepeunit`. Для каждого [Пользователя](/development-pepeunit/mechanics/roles#user) [Backend](/deployment/dependencies/backend) создаёт отдельную организацию с ролью `Editor`. Адреса входа `make_env.py` прописывает в `data/grafana/grafana.ini`.
+
+Администратор входит по логину и паролю из `PU_GRAFANA_ADMIN_USER` и `PU_GRAFANA_ADMIN_PASSWORD`. Только он видит панели мониторинга, см. [Мониторинг](/deployment/monitoring#grafana-dashboards).
+
+:::warning
+Без `PU_GRAFANA_ADMIN_USER` и `PU_GRAFANA_ADMIN_PASSWORD` интеграцию с `Grafana` включить нельзя: флаг `pu_ff_grafana_integration_enable` не включится.
 :::
+
+:::warning
+[Backend](/deployment/dependencies/backend) обращается к `Grafana` по адресу `PU_DOMAIN`, а не по имени контейнера. Этот адрес должен открываться изнутри контейнера `backend`, иначе панели не создадутся. Для публичного домена проверьте, что сервер видит сам себя.
+:::
+
+Подключения к [Prometheus](/deployment/dependencies/prometheus) и [Loki](/deployment/dependencies/loki) и готовые панели лежат в `data/grafana/provisioning` репозитория [Pepeunit Deploy](/deployment/docker/deploy).

@@ -1,15 +1,11 @@
 # Frontend
 
-:::warning
-Ручное заполнение обычно не требуется, нужно заполнить только основные переменные т.к. есть [файл генерации .env файлов для сервисов](/deployment/docker/deploy#заполнение-первичного-env-фаила)
-:::
+[Frontend](/deployment/dependencies/frontend) - готовое веб-приложение, ему нужна одна переменная.
 
-:::warning
-У [Frontend](/deployment/dependencies/frontend) нет значений по умолчанию.
-:::
-
-Переменная | Пример | Зачем нужна?
+Переменная | Значение | Зачем нужна?
 -- | -- | --
-`VITE_INSTANCE_NAME` | `example.com` | Используется для генерации ссылок между разными `Node` основного графа
-`VITE_SELF_URI` | `https://example.com/` | Используется для тегов `og:url` и `og:image` в `index.html`
-`VITE_BACKEND_URI` | `https://example.com/pepeunit/graphql` | Используется для отправки GQL запросов к [Backend](/deployment/dependencies/backend)
+INSTANCE_URL | Собирается из `PU_SECURE`, `PU_DOMAIN`, `PU_APP_PREFIX` и `PU_API_V1_PREFIX`, например `https://unit.example.com/pepeunit/api/v1/instances/current` | Адрес инстанса, к которому подключается веб-клиент. Если пусто, клиент использует сервер, с которого загружен
+
+:::info
+Задавать вручную не нужно: значение вычисляется из [файла настроек](/deployment/docker/deploy#файл-настроек). Нативные приложения эту переменную не читают, в них инстанс выбирается вручную.
+:::

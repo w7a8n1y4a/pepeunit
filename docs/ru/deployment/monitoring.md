@@ -1,30 +1,42 @@
 # Grafana Мониторинг
 
-По умолчанию в `docker compose` добавлены:
+Вместе с инстансом по умолчанию запускаются четыре сервиса мониторинга:
 - [Prometheus](/deployment/dependencies/prometheus)
 - [Logporter](/deployment/dependencies/logporter)
-- [loki](/deployment/dependencies/loki)
-- [promtail](/deployment/dependencies/promtail)
+- [Loki](/deployment/dependencies/loki)
+- [Promtail](/deployment/dependencies/promtail)
 
-Эти `4` контейнера вместе с [Grafana](/deployment/dependencies/grafana) позволяют создать набор `Grafana Dashboards` о состоянии инстанса Pepeunit.
+Вместе с [Grafana](/deployment/dependencies/grafana) они дают набор панелей о состоянии инстанса.
 
 ## Grafana Dashboards
 
-Данные `Dashboards` доступны по умолчанию в `Main Org`. Обычные [Пользователи](/development-pepeunit/mechanics/roles#user) имеют доступ `View`. `Admin` доступ есть только при входе с `GF_SECURITY_ADMIN_USER` и `GF_SECURITY_ADMIN_PASSWORD`                       
+Готовые панели подключаются сами из каталога `data/grafana/provisioning/dashboards` в организацию `Main Org`. Данные в [Grafana](/deployment/dependencies/grafana) обновляются не чаще раза в минуту.
 
-Название | Требуемый доступ | Описание
+Все панели видит администратор [Grafana](/deployment/dependencies/grafana): он входит по логину и паролю `PU_GRAFANA_ADMIN_USER` и `PU_GRAFANA_ADMIN_PASSWORD`. Обычные [Пользователи](/development-pepeunit/mechanics/roles#user) входят через `Pepeunit` и работают в своей организации, где создают собственные панели.
+
+Название | Доступ | Описание
 -- | -- | --
-`Docker Logs` | `Admin` | Просмотр логов любых контейнеров
-`Backend Aggregated Logs` | `Admin` | Просмотр логов [Backend](/deployment/dependencies/backend) с группировкой по сообщениям и возможностью выбора уровней логов
-`Backend Load Metrics` | `View` | Позволяет оценить нагрузку в запросах на самую важную часть системы: [Backend](/deployment/dependencies/backend)
-`EMQX Load Metrics` | `View` | Показывает нагрузку на [EMQX](/deployment/dependencies/emqx) - основного менеджера данных в системе
-`Docker Resource Metrics` | `View` | Показывает объём потребляемых ресурсов системой в целом и для каждого контейенера в отдельности
+Docker Logs | Admin | Логи любых контейнеров
+Backend Aggregated Logs | Admin | Логи [Backend](/deployment/dependencies/backend) с группировкой по сообщениям и выбором уровня
+Backend Load Metrics | View | Нагрузка на [Backend](/deployment/dependencies/backend)
+EMQX Load Metrics | View | Нагрузка на [EMQX](/deployment/dependencies/emqx)
+Docker Resource Metrics | View | Ресурсы, которые потребляют система и каждый контейнер
 
 :::warning
-Функционал мониторинга можно выключить, используя следующие шаги:
-1. Закоментировать указанные `4` сервиса в `docker compose`
-1. Установить переменную окружения [EMQX_PROMETHEUS__METRICS__ENABLED](/deployment/env-variables/emqx) как `false`
-1. Установить переменную окружения [PU_FF_PROMETHEUS_ENABLE](/deployment/env-variables/backend) как `False`
-1. Удалить из репозитория развёртывания `json Dashboards` в директории `data/grafana/dashboards` все файлы с расширением `.json`
-1. Перезапустить Pepeunit при помощи [команд docker compose](/deployment/docker/commands)
+В логах есть всё, что пишут контейнеры. Доступ к `Docker Logs` и `Backend Aggregated Logs` оставьте только администратору.
+:::
+
+:::info
+Панели [Пользователей](/development-pepeunit/mechanics/roles#user) с графиками данных UnitIO создаются из клиента и с этими панелями не связаны, см. [Grafana](/deployment/dependencies/grafana).
+:::
+
+## Выключение мониторинга
+
+1. В `docker-compose.yml` закомментируйте четыре сервиса, а у `grafana` уберите `prometheus` из `depends_on`
+1. Выключите флаг `pu_ff_prometheus_enable` в [настройках инстанса](/deployment/instance-settings#флаги) и перезапустите сервер: [применение изменений](/deployment/instance-settings#применение-изменений)
+1. Удалите из `data/grafana/provisioning/dashboards` все файлы `.json`
+1. Перезапустите Pepeunit: [команды docker compose](/deployment/docker/commands)
+
+:::warning
+[Grafana](/deployment/dependencies/grafana) нужна для панелей [Пользователей](/development-pepeunit/mechanics/roles#user). Выключать её не нужно, даже если вы отключаете мониторинг.
 :::

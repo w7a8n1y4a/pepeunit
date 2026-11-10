@@ -1,13 +1,18 @@
 # Prometheus
 
-`Prometheus` — система мониторинга и алертинга с открытым исходным кодом, предназначенная для сбора, хранения и анализа метрик в формате временных рядов.
+`Prometheus` - система сбора метрик. Контейнер `prometheus`, порт `9090`.
 
 :::info
-`Prometheus` в Pepeunit используется для агрегации данных [Мониторинга](/deployment/monitoring) от следующих сервисов:
-- [Prometheus](/deployment/dependencies/prometheus)
-- [Backend](/deployment/dependencies/backend)
-- [EMQX](/deployment/dependencies/emqx)
-- [Logporter](/deployment/dependencies/logporter)
+Он собирает данные для [Мониторинга](/deployment/monitoring) и отдаёт их в [Grafana](/deployment/dependencies/grafana):
 
-Конечная цель его использования в Pepeunit - предоставление данных для [Grafana](/deployment/dependencies/grafana).
+Что собирает | Период
+-- | --
+[Backend](/deployment/dependencies/backend) | 5 с
+[EMQX](/deployment/dependencies/emqx) | 10 с
+[Logporter](/deployment/dependencies/logporter) | 15 с
+Сам `Prometheus` | 15 с
 :::
+
+Метрики [Backend](/deployment/dependencies/backend) публикуются, пока включён флаг `pu_ff_prometheus_enable` в [настройках инстанса](/deployment/instance-settings).
+
+Конфиг `data/prometheus/prometheus.yml` собирает `make_env.py` из шаблона `prometheus.yml.template`. Правьте шаблон, а не готовый файл.

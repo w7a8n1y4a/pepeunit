@@ -1,7 +1,15 @@
 # Loki
 
-`Loki` — система агрегации и хранения логов с открытым исходным кодом, разработанная `Grafana Labs`, предназначенная для сбора, индексации и анализа логов в распределённых системах.
+`Loki` - система хранения логов от `Grafana Labs`. Контейнер `loki`, порт `3100`, данные в томе `loki_data`.
 
 :::info
-`Loki` в Pepeunit используется для агрегации данных из [Promtail](/deployment/dependencies/promtail) и предоставления этих данных для [Grafana](/deployment/dependencies/grafana). Ежедневная сводка [Администратора](/development-pepeunit/mechanics/roles#admin) читает отсюда группы `ERROR` и `CRITICAL` [Backend](/deployment/dependencies/backend) за последние сутки. Адрес можно изменить при помощи `PU_NOTIFICATION_LOKI_URL`
+`Loki` принимает логи от [Promtail](/deployment/dependencies/promtail) и отдаёт их в [Grafana](/deployment/dependencies/grafana). Логи хранятся 7 дней.
 :::
+
+Ежедневная сводка ошибок для [Администратора](/development-pepeunit/mechanics/roles#admin) читает из `Loki` записи `ERROR` и `CRITICAL` за сутки. Адрес можно сменить через `PU_NOTIFICATION_LOKI_URL`.
+
+:::warning
+Сводка читает логи как `JSON`. Если в [настройках инстанса](/deployment/instance-settings#логи) выбрать формат `plain`, она перестанет находить ошибки.
+:::
+
+Том `loki_data` не входит в [резервные копии](/deployment/docker/backup-update).

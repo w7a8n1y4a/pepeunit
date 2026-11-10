@@ -1,34 +1,48 @@
 # Полезные команды
 
-- Остановить `docker compose`
+- Остановить
     ```bash
     docker compose down
     ```
-- Запустить `docker compose` в фоновом режиме
+- Запустить в фоне
     ```bash
     docker compose up -d
     ```
-- Посмотреть логи конкретного контейнера
+- Состояние контейнеров
     ```bash
-    docker logs postgres
+    docker compose ps
     ```
-- Подключение к оболочкам контейнеров `docker`:
+- Логи контейнера
     ```bash
-    docker exec -it frontend /bin/sh
+    docker logs -f backend
+    ```
+- Версия работающего [Backend](/deployment/dependencies/backend)
+    ```bash
+    curl http://127.0.0.1:5291/pepeunit/api/v1/instances/current
+    ```
+- Открыть оболочку контейнера
+    ```bash
     docker exec -it backend /bin/bash
-    docker exec -it datapipe /bin/sh
     docker exec -it emqx /bin/bash
     docker exec -it postgres /bin/bash
     docker exec -it redis /bin/bash
-    docker exec -it nginx /bin/bash
     docker exec -it clickhouse /bin/bash
+    docker exec -it frontend /bin/sh
+    docker exec -it nginx /bin/sh
     ```
-- Зайти в консоль базы данных, `POSTGRES_USER` и `POSTGRES_DB` можно найти в `env/.env.postgres`
+- Консоль [PostgreSQL](/deployment/dependencies/postgresql), `POSTGRES_USER` и `POSTGRES_DB` смотрите в `.env`
     ```bash
     docker exec -it postgres psql -U <POSTGRES_USER> -d <POSTGRES_DB>
-    psql -U <POSTGRES_USER> -d <POSTGRES_DB>
     ```
-- Отправить запрос в `ClickHouse` через `curl`:
+- Запрос в [ClickHouse](/deployment/dependencies/clickhouse)
     ```bash
-    curl "http://admin:mypassword@127.0.0.1:8123/?query=SHOW+TABLES"
+    docker exec -it clickhouse clickhouse-client --query "SHOW TABLES"
+    ```
+- Назначить `Owner`, см. [Регистрация и Owner](/deployment/docker/deploy#регистрация-и-owner)
+    ```bash
+    docker exec -it backend python scripts/set_owner.py <uuid>
+    ```
+- Пересобрать конфиги после изменения файла настроек
+    ```bash
+    python3 make_env.py && docker compose up -d
     ```

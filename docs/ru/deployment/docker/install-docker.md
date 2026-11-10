@@ -1,30 +1,36 @@
 # Установка Docker и Docker Compose
+
+## Что нужно на сервере
+
+- `Docker` с плагином `Docker Compose` (команда `docker compose`, через пробел)
+- `Python 3` и `git`
+- `bash`
+
 ## Установка Docker
 
 :::info
-Данное руководство для `debian 12`, однако может быть применимо для прочих `unix`-систем.
+Инструкция для `debian 12`, на других `unix`-системах команды похожи.
 :::
 
-Данный набор команд позволит установить `Docker` в систему для пользователя `root`:
+Установите `Docker` от имени `root`:
 ```bash
 sudo su
 curl -fsSL https://get.docker.com -o get-docker.sh
 sh ./get-docker.sh
 ```
 
-Проверьте установку `Docker`:
+Проверьте установку:
 ```bash
 docker --version
 docker run hello-world
 ```
 
-Если права для использования команды `docker` нужно предоставить другому пользователю, можно воспользоваться командой:
+Чтобы разрешить `docker` другому пользователю:
 ```bash
-sudo su
 sudo usermod -aG docker <user-name>
 ```
 
-Установите `docker` в автозапуск:
+Включите автозапуск:
 ```bash
 sudo systemctl start docker
 sudo systemctl enable docker
@@ -32,13 +38,22 @@ sudo systemctl enable docker
 
 ## Установка Docker Compose
 
-Выполните команды:
+Скрипт установки ставит `Docker Compose` вместе с `Docker`. Проверьте:
 ```bash
-sudo curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-sudo chmod +x /usr/local/bin/docker-compose
+docker compose version
 ```
 
-Проверьте установку `Docker Compose`:
+Если плагина нет, установите его из пакетов дистрибутива, например для `debian`:
 ```bash
-docker-compose --version
+sudo apt-get install docker-compose-plugin
+```
+
+:::warning
+Нужна команда `docker compose` (плагин), а не старая `docker-compose`. Все команды в документации написаны для плагина.
+:::
+
+## Установка Python и Git
+
+```bash
+sudo apt-get install python3 git
 ```

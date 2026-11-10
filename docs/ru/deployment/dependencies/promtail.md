@@ -1,9 +1,7 @@
 # Promtail
 
-`Promtail` - агент сбора логов с открытым исходным кодом, входящий в стек `Grafana Loki`, который читает логи из файлов, системных журналов `systemd-journal`, `Kubernetes-подов` или `docker containers`, добавляет метки `labels` и отправляет их в [Loki](/deployment/dependencies/loki) для последующего хранения и анализа.
+`Promtail` - агент из стека `Grafana Loki`: читает логи и отправляет их в [Loki](/deployment/dependencies/loki). Контейнер `promtail`.
 
 :::info
-`Promtail` в Pepeunit используется для получения данных из `/var/lib/docker/containers:ro` и `/var/run/docker.sock:ro` с последующей отправкой в [Loki](/deployment/dependencies/loki).
-
-Позволяет в отличии от [Logporter](/deployment/dependencies/logporter) также получать информацию об используемых ресурсах.
+В Pepeunit он собирает логи всех контейнеров. Логи `backend` получают метку `app="backend"`, по ней работают панель `Backend Aggregated Logs` и ежедневная сводка ошибок.
 :::

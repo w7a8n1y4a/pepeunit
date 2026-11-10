@@ -3,7 +3,7 @@
     "text": "Развёртывание",
     "collapsed": false,
     "items": [
-      { "text": "Схема взаимодействия сервисов", "link": "/deployment/schema" },
+      { "text": "Настройки инстанса", "link": "/deployment/instance-settings" },
       {
         "text": "Зависимости",
         "collapsed": true,
@@ -39,7 +39,6 @@
         "collapsed": true,
         "items": [
           { "text": "Backend", "link": "/deployment/env-variables/backend" },
-          { "text": "DataPipe", "link": "/deployment/env-variables/data-pipe" },
           { "text": "Frontend", "link": "/deployment/env-variables/frontend" },
           { "text": "PostgreSQL", "link": "/deployment/env-variables/postgresql" },
           { "text": "ClickHouse", "link": "/deployment/env-variables/clickhouse" },

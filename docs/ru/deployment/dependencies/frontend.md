@@ -2,14 +2,24 @@
 
 ## Frontend в широком смысле
 
-`Frontend в широком смысле` - набор из `2` сервисов: `Frontend` и [Grafana](/deployment/dependencies/grafana). Указанные сервисы вместе обеспечивают взаимодействие [Пользователей](/development-pepeunit/mechanics/roles#user) с [Backend](/deployment/dependencies/backend).
+Два сервиса: `Frontend` и [Grafana](/deployment/dependencies/grafana). Вместе они дают [Пользователям](/development-pepeunit/mechanics/roles#user) доступ к [Backend](/deployment/dependencies/backend).
 
-## Frontend-сервис 
+## Frontend-сервис
 
-`Fronend-сервис` - доступное для скачивания открытым способом приложение, предназначенное для обеспечения взаимодействия [Пользователей](/development-pepeunit/mechanics/roles#user) c [Backend](/deployment/dependencies/backend) средствами визуального интерфейса. Взаимодействует с [Backend](/deployment/dependencies/backend) при помощи:
-- REST
-- GQL
+Веб-версия клиента Pepeunit. Образ `w7a8n1y4a/pepeunit`, контейнер `frontend`, исходники в [`pepeunit`](/development-pepeunit/maps). Клиент написан на `Flutter` и отдаётся как набор статических файлов. Порт в контейнере 80, на хосте 5292. Сам ничего не хранит и общается с [Backend](/deployment/dependencies/backend) по REST.
+
+Те же исходники собираются в нативные приложения для `Android`, `iOS`, `Linux`, `macOS` и `Windows`. В `docker compose` они не входят, инстанс в них выбирается в разделе `Сеть`. Ссылки на сборки есть в клиенте: `Библиотека` → `О приложении`.
+
+### Как клиент узнаёт свой инстанс
+
+Адрес инстанса `make_env.py` собирает из файла настроек, а веб-клиент подключается к нему при загрузке. Если адрес пустой, клиент работает с тем сервером, с которого загружен.
+
+Клиент и [Backend](/deployment/dependencies/backend) должны быть совместимы: этой версии клиента подходит `Backend` `1.5.x`.
+
+### Кэширование
+
+После обновления образа пользователь получает новую версию без очистки кэша.
 
 :::info
-[Подробнее о переменных окружения](/deployment/env-variables/frontend)
+[Переменные окружения](/deployment/env-variables/frontend)
 :::
