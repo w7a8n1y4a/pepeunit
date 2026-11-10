@@ -158,10 +158,10 @@ void main() {
     expect(shortStamp(repo.created), '2026.01.02 03:04');
     final slot = repoMark(id: 'card', repo: repo, language: 'ru', q: 0, r: 0);
     expect(slot.footerLeft, '3 шт.');
-    expect(slot.sideRight, '2 КБ');
+    expect(slot.sideRight, isNull);
     expect(slot.sideLeft, isNull);
     expect(slot.footer, 'Приватный');
-    expect(slotLabel(slot), 'github.com/pepe/unit, 2 КБ');
+    expect(slotLabel(slot), 'github.com/pepe/unit');
   });
 
   test('repo list sends only the url sort and skips creator', () async {

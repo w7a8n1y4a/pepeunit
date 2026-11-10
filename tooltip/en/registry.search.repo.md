@@ -1,1 +1,1 @@
-Opens the repository. The card shows the visibility, the size, and the number of linked Units.
+Opens the repository. The card shows the visibility and the number of linked Units.
