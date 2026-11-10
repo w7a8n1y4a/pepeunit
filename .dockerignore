@@ -2,6 +2,8 @@
 docs/*
 !docs/ru
 docs/ru/index.md
+!docs/en
+docs/en/index.md
 node_modules
 .dart_tool
 build
