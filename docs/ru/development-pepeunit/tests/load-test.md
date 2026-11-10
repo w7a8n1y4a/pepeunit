@@ -29,10 +29,10 @@ uv run python -m tests.load.load_test_mqtt
 `PU_TEST_LOAD_MQTT_WORKERS` | `10` | `1`–`128` | Число процессов `multiprocessing`, создающих нагрузку
 
 :::danger
-[Backend](/deployment/dependencies/backend) использует всегда только `1` воркер `Gunicorn` для обработки MQTT сообщений. Он способен обработать `~4000 rps` сообщений из системных топиков `domain.com/+/+/+/pepeunit`. Для топиков [DataPipe](/deployment/dependencies/datapipe) c паттерном `domain.com/+/pepeunit` количество сообщений может составлять `~25000 rps`.
+[Backend](/deployment/dependencies/backend) использует всегда только `1` воркер `Gunicorn` для обработки MQTT сообщений. Он способен обработать `~4000 rps` сообщений из системных топиков `domain.com/+/+/+/pepeunit`. Для топиков [DataPipe](/deployment/dependencies/datapipe) c паттерном `domain.com/+/pepeunit` количество сообщений может составлять `~25000 rps`, так как они обрабатываются через `Golang`.
 :::
 
-## Тестирование REST и GQL
+## Тестирование REST
 
 Команда для запуска:
 ```bash
@@ -56,25 +56,15 @@ uv run locust -f tests/load/locustfile.py
 По умолчанию проверяются публичные ручки текущего инстанса:
 
 - `GET /pepeunit/api/v1/instances/current`
-- `GET /pepeunit/api/v1/instances`
-- `POST /pepeunit/graphql` - `getInstancesUrls`
-- `POST /pepeunit/graphql` - `getInstancesRegistries`
+- `GET /pepeunit/api/v1/peers`
+- `GET /pepeunit/api/v1/peers/urls`
+- `GET /pepeunit/api/v1/peers/repos`
+- `GET /pepeunit/api/v1/error_codes`
+
+Ручки списков вызываются со случайными параметрами `offset`, `limit` и `trust_status`.
 :::
 
 :::warning
-Время ожидания клиентом до отправки следующего запроса составляет `1` секунду, соответственно `rps ~= числу пользователей`. Нагрузка делится между REST и GQL классами пользователей
+Время ожидания клиентом до отправки следующего запроса составляет `1` секунду, соответственно `rps ~= числу пользователей`. Каждый виртуальный пользователь случайно выбирает одну из ручек
 :::
 
-:::danger
-REST и GQL запросы обрабатываются многопоточно, увеличение числа воркеров почти линейно увеличивает число обрабатываемых запросов в единицу времени. `4` воркера `Gunicorn` выдерживают `~400rps` без перезагрузок. Процентили в миллисекундах:
-```
-Type     Name                                    50%    66%    75%    80%    90%    95%    98%    99%  99.9% 99.99%   100% # reqs
---------|------------------------------------|--------|------|------|------|------|------|------|------|------|------|------|------
-GET      /pepeunit/api/v1/instances              11     14     17     19     28     44     82    110    260    550    550   9600
-GET      /pepeunit/api/v1/instances/current      11     14     16     18     27     41     78    110    290    400    400   9697
-POST     gql:getInstancesRegistries              12     15     17     19     26     38     62     84    200    540    540   9614
-POST     gql:getInstancesUrls                    12     14     17     18     27     40     64     93    350    540    540   9686
---------|------------------------------------|--------|------|------|------|------|------|------|------|------|------|------|------
-         Aggregated                              12     14     17     19     27     41     71    100    260    540    550  38597
-```
-:::

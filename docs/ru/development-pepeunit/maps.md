@@ -3,11 +3,9 @@
 ## Основные репозитории
 Purpose | Lang | Work | Issue | Stack
 -- | -- | -- | -- | --
-Documentation | `TS`, `md` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/pepeunit) | [GitHub](https://github.com/w7a8n1y4a/pepeunit) | `Vue`, `VitePress`
+Client | `Dart`, `md` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/pepeunit) | [GitHub](https://github.com/w7a8n1y4a/pepeunit) | `Flutter`
 Deploy | `Python`, `Bash` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/pepeunit_deploy) | [GitHub](https://github.com/w7a8n1y4a/pepeunit_deploy) | `Docker`, `Docker Compose`
-Backend | `Python` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/pepeunit_backend) | [GitHub](https://github.com/w7a8n1y4a/pepeunit_backend) | `Fastapi`, `Sqlalchemy`, `Httpx`, `Strawberry`, `AioGram`, `Fastapi-MQTT`
-DataPipe | `Golang` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/pepeunit_data_pipe) | [GitHub](https://github.com/w7a8n1y4a/pepeunit_data_pipe) | `Paho-MQTT`
-Frontend | `TS` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/pepeunit_frontend) | [GitHub](https://github.com/w7a8n1y4a/pepeunit_frontend) | `React`, `Vite`, `3d-force-graph`
+Server | `Python`, `Golang` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/pepeunit_server) | [GitHub](https://github.com/w7a8n1y4a/pepeunit_server) | `Fastapi`, `Sqlalchemy`, `Httpx`, `Strawberry`, `AioGram`, `Fastapi-MQTT`
 
 ## Библиотеки
 

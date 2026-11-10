@@ -43,7 +43,3 @@
 3. `refactor(permission_service): add new permission, rest, gql and mutatuion for creator UnitNode`
 4. `resolve(conflicts): resolve`
 5. `ci(Dockerfile): change packages`
-
-:::danger
-Коммиты других форматов приниматься в `MR` не будут.
-:::
