@@ -1,5 +1,6 @@
 # Grafana Мониторинг
 
+## Сервисы
 Вместе с инстансом по умолчанию запускаются четыре сервиса мониторинга:
 - [Prometheus](/deployment/dependencies/prometheus)
 - [Logporter](/deployment/dependencies/logporter)
