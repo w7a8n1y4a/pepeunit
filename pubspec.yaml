@@ -77,6 +77,7 @@ flutter:
     - assets/icons/services/
     - assets/icons/status/
     - tooltip/ru/
+    - tooltip/en/
     - docs/ru/sidebar.json
     - docs/ru/user/
     - docs/ru/user/datapipe/
@@ -93,6 +94,22 @@ flutter:
     - docs/ru/development-pepeunit/mechanics/
     - docs/ru/development-pepeunit/tests/
     - docs/ru/roadmap/
+    - docs/en/sidebar.json
+    - docs/en/user/
+    - docs/en/user/datapipe/
+    - docs/en/user/unit/
+    - docs/en/deployment/
+    - docs/en/deployment/dependencies/
+    - docs/en/deployment/docker/
+    - docs/en/deployment/env-variables/
+    - docs/en/developer/
+    - docs/en/developer/files/
+    - docs/en/developer/libraries/
+    - docs/en/developer/mqtt/
+    - docs/en/development-pepeunit/
+    - docs/en/development-pepeunit/mechanics/
+    - docs/en/development-pepeunit/tests/
+    - docs/en/roadmap/
     - assets/background/animals/
     - assets/background/asia/
     - assets/background/currencies/

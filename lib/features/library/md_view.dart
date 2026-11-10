@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart' show RenderSliverMultiBoxAdaptor;
 import 'package:flutter/services.dart';
 
+import '../../app_scope.dart';
 import '../../hive/bevel.dart';
 import '../../hive/hex_scene.dart';
 import '../../hive/hint.dart';
@@ -13,6 +14,7 @@ import '../../hive/marks.dart';
 import '../../instances/link.dart';
 import '../../library/doc_search.dart';
 import '../../library/markdown.dart';
+import '../../locale/languages.dart';
 import '../code/code_highlight.dart';
 import '../code/code_syntax.dart';
 import '../code/code_view.dart';
@@ -588,6 +590,7 @@ class _Blocks {
         return _Admonition(
           font: font,
           color: color,
+          kind: block.kind,
           title: block.title,
           folded: block.kind == MdAdmonitionKind.details,
           children: built,
@@ -1018,7 +1021,7 @@ class CopyLinkMark extends StatefulWidget {
     required this.link,
     required this.width,
     required this.height,
-    this.label = 'Скопировать ссылку',
+    this.label = '',
     super.key,
   });
 
@@ -1045,14 +1048,20 @@ class _CopyLinkMarkState extends State<CopyLinkMark> {
   @override
   Widget build(BuildContext context) {
     final extent = min(widget.width, widget.height) * 0.8;
+    final label = widget.label.isEmpty
+        ? phrase(AppScope.of(context).vault.language, {
+            'ru': 'Скопировать ссылку',
+            'en': 'Copy link',
+          })
+        : widget.label;
     return HintTarget(
       id: 'button-copy-link',
-      title: widget.label,
+      title: label,
       color: hexMuted,
       child: SelectionContainer.disabled(
         child: Semantics(
           button: true,
-          label: widget.label,
+          label: label,
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: _copy,
@@ -1154,6 +1163,7 @@ class _Admonition extends StatefulWidget {
   const _Admonition({
     required this.font,
     required this.color,
+    required this.kind,
     required this.title,
     required this.folded,
     required this.children,
@@ -1161,6 +1171,7 @@ class _Admonition extends StatefulWidget {
 
   final double font;
   final Color color;
+  final MdAdmonitionKind kind;
   final String title;
   final bool folded;
   final List<Widget> children;
@@ -1175,8 +1186,13 @@ class _AdmonitionState extends State<_Admonition> {
   @override
   Widget build(BuildContext context) {
     final font = widget.font;
+    final language = AppScope.of(context).vault.language;
+    // A title the text did not write is the Russian name of the kind.
+    final name = widget.title == admonitionTitle(widget.kind, 'ru')
+        ? admonitionTitle(widget.kind, language)
+        : widget.title;
     final title = Text(
-      widget.title,
+      name,
       style: TextStyle(
         color: widget.color,
         fontFamily: _bodyFamily,
@@ -1206,7 +1222,7 @@ class _AdmonitionState extends State<_Admonition> {
             if (widget.folded)
               HintTarget(
                 id: 'doc-details',
-                title: widget.title,
+                title: name,
                 color: widget.color,
                 child: GestureDetector(
                   behavior: HitTestBehavior.opaque,
@@ -1295,6 +1311,10 @@ class _CodeBlockState extends State<_CodeBlock> {
   @override
   Widget build(BuildContext context) {
     final font = widget.font;
+    final copyWord = phrase(AppScope.of(context).vault.language, {
+      'ru': 'Скопировать',
+      'en': 'Copy',
+    });
     final lines = widget.code.split('\n');
     final tokens = _tokens;
     final style = codeMono(font);
@@ -1324,11 +1344,11 @@ class _CodeBlockState extends State<_CodeBlock> {
                 ),
                 HintTarget(
                   id: 'button-copy',
-                  title: 'Скопировать',
+                  title: copyWord,
                   color: widget.accent,
                   child: Semantics(
                     button: true,
-                    label: 'Скопировать',
+                    label: copyWord,
                     child: GestureDetector(
                       behavior: HitTestBehavior.opaque,
                       onTap: _copy,
@@ -1473,7 +1493,9 @@ class _Missing extends StatelessWidget {
         border: Border.all(color: hexMuted.withValues(alpha: 0.5)),
       ),
       child: Text(
-        label.isEmpty ? 'Изображение недоступно' : label,
+        label.isEmpty
+            ? phrase(AppScope.of(context).vault.language, {'ru': 'Изображение недоступно', 'en': 'The image is not available'})
+            : label,
         style: TextStyle(
           color: hexMuted,
           fontFamily: _bodyFamily,
@@ -1512,7 +1534,7 @@ class _Zoomable extends StatelessWidget {
           onTap: () => showGeneralDialog<void>(
             context: context,
             barrierDismissible: true,
-            barrierLabel: 'Закрыть',
+            barrierLabel: phrase(AppScope.of(context).vault.language, {'ru': 'Закрыть', 'en': 'Close'}),
             barrierColor: const Color(0xE6000000),
             pageBuilder: (dialog, _, _) => Material(
               type: MaterialType.transparency,
@@ -1592,13 +1614,17 @@ class _Video extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final watch = phrase(AppScope.of(context).vault.language, {
+      'ru': 'Смотреть видео',
+      'en': 'Watch the video',
+    });
     return HintTarget(
       id: 'doc-video',
-      title: 'Смотреть видео',
+      title: watch,
       color: accent,
       child: Semantics(
         button: true,
-        label: 'Смотреть видео',
+        label: watch,
         child: MouseRegion(
           cursor: SystemMouseCursors.click,
           child: GestureDetector(

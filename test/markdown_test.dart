@@ -73,6 +73,8 @@ void main() {
     final second = doc.blocks[1] as MdAdmonition;
     expect(second.title, 'Где?');
     expect(second.blocks.single, isA<MdParagraph>());
+    expect(admonitionTitle(MdAdmonitionKind.warning, 'en'), 'Warning');
+    expect(admonitionTitle(MdAdmonitionKind.warning, 'ru'), first.title);
   });
 
   test('a YouTube iframe or a lone link is a video', () {

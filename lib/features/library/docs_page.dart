@@ -345,7 +345,6 @@ class _DocsPageState extends State<DocsPage> {
   Widget build(BuildContext context) {
     final model = AppScope.of(context);
     final language = model.vault.language;
-    String word(String ru) => libText(language, ru);
     final reader = _reader;
     final tree = _tree;
     String linkTo(String? anchor) => docsLink(
@@ -468,7 +467,7 @@ class _DocsPageState extends State<DocsPage> {
               if (reader != null && reader.canBack)
                 _IconMark(
                   asset: 'assets/icons/actions/back.svg',
-                  label: word('Назад'),
+                  label: libText(language, 'Назад', 'Back'),
                   extent: mark,
                   onTap: reader.back,
                 ),
@@ -495,7 +494,7 @@ class _DocsPageState extends State<DocsPage> {
                       child: Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
-                          word('Документация'),
+                          libText(language, 'Документация', 'Documentation'),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: _style(font * 1.55, const Color(0xFFFFFFFF)),
@@ -512,7 +511,7 @@ class _DocsPageState extends State<DocsPage> {
                       children: [
                         if (!wide)
                           _MenuMark(
-                            label: word('Разделы'),
+                            label: libText(language, 'Разделы', 'Sections'),
                             extent: mark,
                             onTap: () => setState(() => _menu = !_menu),
                           ),
@@ -624,7 +623,7 @@ class _DocsPageState extends State<DocsPage> {
                             ),
                           )
                         : Text(
-                            word('Пусто'),
+                            libText(language, 'Пусто', 'Empty'),
                             style: _style(font * 1.1, hexMuted),
                           ),
                   ),

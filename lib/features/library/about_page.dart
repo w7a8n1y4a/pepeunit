@@ -49,13 +49,13 @@ class _AboutPageState extends State<AboutPage> {
       for (final slot in board)
         switch (slot.id) {
           'back' => backSlot(
-            title: libText(language, 'Назад'),
+            title: libText(language, 'Назад', 'Back'),
             q: slot.q,
             r: slot.r,
           ),
           'version' => HexSlot(
             id: 'version',
-            title: libText(language, 'Версия клиента'),
+            title: libText(language, 'Версия клиента', 'Client version'),
             color: libraryColor,
             q: slot.q,
             r: slot.r,
@@ -65,7 +65,7 @@ class _AboutPageState extends State<AboutPage> {
           ),
           'updates' => HexSlot(
             id: 'updates',
-            title: libText(language, 'Проверить обновления'),
+            title: libText(language, 'Проверить обновления', 'Check updates'),
             color: libraryColor,
             q: slot.q,
             r: slot.r,
@@ -74,7 +74,7 @@ class _AboutPageState extends State<AboutPage> {
           ),
           'apps' => HexSlot(
             id: 'apps',
-            title: libText(language, 'Нативные приложения'),
+            title: libText(language, 'Нативные приложения', 'Native apps'),
             color: libraryColor,
             q: slot.q,
             r: slot.r,
@@ -82,7 +82,7 @@ class _AboutPageState extends State<AboutPage> {
           ),
           'social' => HexSlot(
             id: 'social',
-            title: libText(language, 'Соцсети'),
+            title: libText(language, 'Соцсети', 'Social'),
             color: libraryColor,
             q: slot.q,
             r: slot.r,
@@ -90,7 +90,7 @@ class _AboutPageState extends State<AboutPage> {
           ),
           _ => HexSlot(
             id: 'support',
-            title: libText(language, 'Поддержать проект'),
+            title: libText(language, 'Поддержать проект', 'Support the project'),
             color: libraryColor,
             q: slot.q,
             r: slot.r,
@@ -143,21 +143,33 @@ class _AboutPageState extends State<AboutPage> {
     final binary = result.binary;
     final native = nativePlatform() != null;
     final title = switch (result.state) {
-      UpdateState.available => libText(language, 'Версия ${result.latest}'),
-      _ => libText(language, 'Обновления'),
+      UpdateState.available => libText(
+        language,
+        'Версия ${result.latest}',
+        'Version ${result.latest}',
+      ),
+      _ => libText(language, 'Обновления', 'Updates'),
     };
     final source = switch (result.state) {
       UpdateState.current => libText(
         language,
         'Установлена последняя версия: $clientVersion.',
+        'The latest version is installed: $clientVersion.',
       ),
       UpdateState.noAssets => libText(
         language,
         'Вышла версия ${result.latest}, но у неё пока нет файлов. '
         'Попробуйте позже.',
+        'Version ${result.latest} is out, but it has no files yet. '
+        'Try again later.',
       ),
       UpdateState.available =>
-        result.notes ?? libText(language, 'Описание изменений недоступно.'),
+        result.notes ??
+            libText(
+              language,
+              'Описание изменений недоступно.',
+              'The release notes are not available.',
+            ),
     };
     final missing =
         result.state == UpdateState.available && native && binary == null;
@@ -169,14 +181,22 @@ class _AboutPageState extends State<AboutPage> {
       note:
           _note ??
           (missing
-              ? libText(language, 'В релизе нет файла для этой платформы.')
+              ? libText(
+                  language,
+                  'В релизе нет файла для этой платформы.',
+                  'The release has no file for this platform.',
+                )
               : null),
       noteColor: _note != null && _noteOk ? addColor : errorColor,
       footer: binary == null
           ? null
           : (font) => [
               CodeWordButton(
-                label: libText(language, 'Обновиться до ${result.latest}'),
+                label: libText(
+                  language,
+                  'Обновиться до ${result.latest}',
+                  'Update to ${result.latest}',
+                ),
                 font: font,
                 color: libraryColor,
                 busy: _updating,
@@ -266,12 +286,14 @@ class _AboutPageState extends State<AboutPage> {
         note = libText(
           language,
           'Обновлено. Перезапустите приложение, чтобы начать с новой версии.',
+          'Updated. Restart the app to start the new version.',
         );
       } else if (await model.saveBytes(binary.name, bytes)) {
         ok = true;
         note = libText(
           language,
           'Файл сохранён. Установите его, чтобы обновиться.',
+          'The file is saved. Install it to update.',
         );
       }
     } catch (_) {
@@ -313,7 +335,7 @@ class NativeAppsPage extends StatelessWidget {
       slots: [
         for (final slot in board)
           if (slot.id == 'back')
-            backSlot(title: libText(language, 'Назад'), q: slot.q, r: slot.r)
+            backSlot(title: libText(language, 'Назад', 'Back'), q: slot.q, r: slot.r)
           else
             HexSlot(
               id: slot.id,
@@ -385,7 +407,7 @@ class SocialLinksPage extends StatelessWidget {
       slots: [
         for (final slot in board)
           if (slot.id == 'back')
-            backSlot(title: libText(language, 'Назад'), q: slot.q, r: slot.r)
+            backSlot(title: libText(language, 'Назад', 'Back'), q: slot.q, r: slot.r)
           else
             HexSlot(
               id: slot.id,

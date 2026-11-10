@@ -1,0 +1,47 @@
+# All Pepeunit repositories
+
+## Core repositories
+
+Purpose | Lang | Work | Issue | Stack
+-- | -- | -- | -- | --
+Client | `Dart`, `md` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/pepeunit) | [GitHub](https://github.com/w7a8n1y4a/pepeunit) | `Flutter`, `go_router`
+Deploy | `Python`, `Bash` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/pepeunit_deploy) | [GitHub](https://github.com/w7a8n1y4a/pepeunit_deploy) | `Docker`, `Docker Compose`
+Server | `Python`, `Golang` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/pepeunit_server) | [GitHub](https://github.com/w7a8n1y4a/pepeunit_server) | `FastAPI`, `SQLModel`, `Alembic`, `Httpx`, `Aiogram`, `Fastapi-MQTT`, `GitPython`
+
+## Libraries
+
+Purpose | Lang | Registry | Work | Issue | Stack
+-- | -- | -- | -- | -- | --
+Client Micropython | `Micropython` | [Releases](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client/-/releases) | [GitLab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_micropython_client) | [GitHub](https://github.com/w7a8n1y4a/pepeunit_micropython_client) | `async_http (Reverb)`, `tarfile`, `mqtt_as (Reverb)`
+Client ESP-IDF | `C` | [Tags](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_esp_idf_client/-/tags) | [GitLab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_esp_idf_client) | [GitHub](https://github.com/w7a8n1y4a/pepeunit_esp_idf_client) | `esp-mqtt`, `esp_http_client`, `mbedtls`, `cJSON`, `nvs_flash`
+Client Python | `Python` | [PyPi](https://pypi.org/project/pepeunit-client/) | [GitLab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_python_client) | [GitHub](https://github.com/w7a8n1y4a/pepeunit_python_client) | `Paho-mqtt`, `httpx`
+Client Golang | `Golang` | [go.dev](https://pkg.go.dev/github.com/w7a8n1y4a/pepeunit_go_client) | [GitLab](https://git.pepemoss.com/pepe/pepeunit/libs/pepeunit_go_client) | [GitHub](https://github.com/w7a8n1y4a/pepeunit_go_client) | `Paho-mqtt`
+
+## Infrastructure Units
+
+These are ordinary Units used to test the platform itself.
+
+Purpose | Lang | Work | Issue | Stack
+-- | -- | -- | -- | --
+Integration Tests | `json`, `md` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/universal_test_unit) | - | -
+Load Tests | `json` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/universal_load_unit) | - | -
+Public Platform Tests | - | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/gitlab_unit_pub_test) | [GitHub](https://github.com/w7a8n1y4a/github_unit_pub_test) | -
+Private Platform Tests | - | `do it yourself` | `do it yourself` | -
+
+:::info
+Private test repositories are not published in Pepeunit: create your own and specify them in `PU_TEST_INTEGRATION_PRIVATE_REPO_JSON`, see [integration tests](/development-pepeunit/tests/integration-test#integration-test-variables).
+:::
+
+## Unit
+
+Purpose | Lang | Hardware | Work | Issue | Stack
+-- | -- | -- | -- | -- | --
+Hotkey Bublik, picks a command for the `Input` UnitIO of other Units | `Golang` | `Any-PC` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/go/hotkey_donut) | - | `ebiten-v2`, `pepeunit_go_client`
+WiFi temp sensor ds18b20 | `Micropython` | `esp8266`, `esp32`, `esp32c3`, `esp32s3` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp8266/temp-sensor-ds18b20) | [GitHub](https://github.com/w7a8n1y4a/temp-sensor-ds18b20) | `pepeunit_micropython_client`
+4pin fan regulator on ds18b20 | `Micropython` | `esp32`, `esp32c3`, `esp32s3` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp32/fan-regulator-ds18b20) | [GitHub](https://github.com/w7a8n1y4a/fan-regulator-ds18b20) | `pepeunit_micropython_client`
+Wifi Relay | `Micropython` | `esp8266`, `esp32`, `esp32c3`, `esp32s3` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp8266/wifi_relay) | [GitHub](https://github.com/w7a8n1y4a/wifi_relay) | `pepeunit_micropython_client`
+Button and Encoder | `Micropython` | `esp8266`, `esp32`, `esp32c3`, `esp32s3` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp8266/button_and_encoder) | [GitHub](https://github.com/w7a8n1y4a/button_and_encoder) | `pepeunit_micropython_client`
+BME280 and MH-Z19B climat sensors | `Micropython` | `esp32`, `esp32c3`, `esp32s3` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp32/bme280_and_mh-z19b) | - | `pepeunit_micropython_client`
+Control panel on sh1106 | `Micropython` | `esp32c3`, `esp32s3`, `esp8266` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp32/control_panel_sh1106) | [GitHub](https://github.com/w7a8n1y4a/control_panel_sh1106) | `pepeunit_micropython_client`
+Zigbee2Mqtt Station | `C` | `esp32c6` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/esp32/zigbee_station) | [GitHub](https://github.com/w7a8n1y4a/zigbee_station) | `esp-zigbee-lib`, `pepeunit_esp_idf_client`
+Base64 video stream | `Python` | `Any-PC` | [GitLab](https://git.pepemoss.com/pepe/pepeunit/units/python/base64_video_stream) | [GitHub](https://github.com/w7a8n1y4a/base64_video_stream) | `opencv`, `numpy`, `pillow`, `tqdm`, `pepeunit_python_client`

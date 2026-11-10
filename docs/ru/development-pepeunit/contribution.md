@@ -25,7 +25,7 @@ Deploy | Прогнать `python3 make_env.py` на образце `.env.local.
 Что изменили | Что добавить в том же изменении
 -- | --
 Новый маршрут или ячейка в клиенте | Строку в `lib/library/screen_tree.dart` и файл подсказки `tooltip/ru/<экран>.<ячейка>.md`
-Новая статья документации | Строку в `docs/ru/sidebar.json`
+Новая статья документации | Файл `.md` и строку в `docs/ru/sidebar.json`, а также перевод в `docs/en/` и строку в `docs/en/sidebar.json`
 Новый код ошибки Backend | Строку в `lib/locale/error_texts.dart` клиента: тест клиента сверяет файл с таблицей Backend, когда репозитории лежат рядом
 Новая сущность, роль или поле в API | Правку в [сущностях](/development-pepeunit/mechanics/entities), [ролях](/development-pepeunit/mechanics/roles) и соответствующей статье этого раздела
 Новая настройка инстанса или флаг `pu_ff_*` | Строку в [настройках инстанса](/deployment/instance-settings) и в маркерах [интеграционных тестов](/development-pepeunit/tests/integration-test#флаги-и-покрытие), если флаг включает сценарии

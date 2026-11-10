@@ -9,6 +9,8 @@ library;
 
 import 'package:yaml/yaml.dart';
 
+import '../locale/languages.dart';
+
 // ---------------------------------------------------------------- inlines
 
 sealed class MdInline {
@@ -543,18 +545,23 @@ MdAdmonitionKind _kind(String word) {
   }
 }
 
-String _kindTitle(MdAdmonitionKind kind) {
+String _kindTitle(MdAdmonitionKind kind) => admonitionTitle(kind, 'ru');
+
+/// The name a block shows when its text gives none. The parser writes the
+/// Russian one into [MdAdmonition.title]; a screen that knows the language
+/// swaps it with this.
+String admonitionTitle(MdAdmonitionKind kind, String language) {
   switch (kind) {
     case MdAdmonitionKind.info:
-      return 'Информация';
+      return phrase(language, {'ru': 'Информация', 'en': 'Information'});
     case MdAdmonitionKind.tip:
-      return 'Совет';
+      return phrase(language, {'ru': 'Совет', 'en': 'Tip'});
     case MdAdmonitionKind.warning:
-      return 'Внимание';
+      return phrase(language, {'ru': 'Внимание', 'en': 'Warning'});
     case MdAdmonitionKind.danger:
-      return 'Опасно';
+      return phrase(language, {'ru': 'Опасно', 'en': 'Danger'});
     case MdAdmonitionKind.details:
-      return 'Подробнее';
+      return phrase(language, {'ru': 'Подробнее', 'en': 'Details'});
   }
 }
 

@@ -27,6 +27,20 @@ const _spendingRules = '''
 :::
 ''';
 
+const _spendingRulesEn = '''
+:::info
+The coins will be spent on improving the project:
+1. Hiring specialist developers to raise the quality of the code base or to build new features
+2. Paying for additional infrastructure, if it is needed
+3. Paying for additional specialists in related fields: analysts, legal advisers, video editors and others
+4. Buying IoT components to test the libraries and/or components of Pepeunit. The purchased items will not be resold without a decision of the community, but may be handed to Pepeunit developers for tests.
+
+If a significant amount is spent, a vote will be announced in https://t.me/pepeunit, and the funds will go to the option the community finds most appealing.
+
+The vote will always include the option "None of the above", so the community can cancel the vote and propose other options
+:::
+''';
+
 class SupportPage extends StatefulWidget {
   const SupportPage({super.key});
 
@@ -54,7 +68,7 @@ class _SupportPageState extends State<SupportPage> {
       for (final slot in board)
         switch (slot.id) {
           'back' => backSlot(
-            title: libText(language, 'Назад'),
+            title: libText(language, 'Назад', 'Back'),
             q: slot.q,
             r: slot.r,
           ),
@@ -66,13 +80,13 @@ class _SupportPageState extends State<SupportPage> {
           ),
           'ethereum' => _wallet(
             slot,
-            title: 'Etherium',
+            title: 'Ethereum',
             address: _ethereumAddress,
             language: language,
           ),
           'rules' => HexSlot(
             id: 'rules',
-            title: libText(language, 'Правила расходов'),
+            title: libText(language, 'Правила расходов', 'Spending rules'),
             color: libraryColor,
             q: slot.q,
             r: slot.r,
@@ -81,7 +95,7 @@ class _SupportPageState extends State<SupportPage> {
           ),
           _ => HexSlot(
             id: 'report',
-            title: libText(language, 'Скачать Отчётность'),
+            title: libText(language, 'Скачать Отчётность', 'Download report'),
             color: libraryColor,
             q: slot.q,
             r: slot.r,
@@ -106,9 +120,9 @@ class _SupportPageState extends State<SupportPage> {
         Material(
           type: MaterialType.transparency,
           child: LibraryModal(
-            title: libText(language, 'Правила расходов'),
+            title: libText(language, 'Правила расходов', 'Spending rules'),
             color: libraryColor,
-            source: _spendingRules,
+            source: language == 'en' ? _spendingRulesEn : _spendingRules,
             onClose: () => setState(() => _rulesOpen = false),
           ),
         ),
@@ -132,7 +146,7 @@ class _SupportPageState extends State<SupportPage> {
       body: MetricsCell(
         lines: [address],
         copyText: address,
-        copyLabel: libText(language, 'Скопировать'),
+        copyLabel: libText(language, 'Скопировать', 'Copy'),
       ),
     );
   }

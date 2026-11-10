@@ -64,14 +64,14 @@ class _ToolsPageState extends State<ToolsPage> {
     switch (slot.id) {
       case 'back':
         return backSlot(
-          title: libText(language, 'Назад'),
+          title: libText(language, 'Назад', 'Back'),
           q: slot.q,
           r: slot.r,
         );
       default:
         return HexSlot(
           id: 'readme',
-          title: libText(language, 'Генератор README'),
+          title: libText(language, 'Генератор README', 'README generator'),
           color: dropColor(_dragHot, libraryColor),
           busy: _busy,
           q: slot.q,
@@ -103,7 +103,7 @@ class _ToolsPageState extends State<ToolsPage> {
     setState(() => _busy = true);
     try {
       final bytes = await model.files.pick(
-        dialogTitle: libText(language, 'Выбрать pepeunit.toml'),
+        dialogTitle: libText(language, 'Выбрать pepeunit.toml', 'Choose pepeunit.toml'),
       );
       if (!mounted) return;
       if (bytes == null) {
@@ -113,7 +113,11 @@ class _ToolsPageState extends State<ToolsPage> {
       await _generate(bytes, language);
     } catch (_) {
       if (!mounted) return;
-      _fail(libText(language, 'Не удалось прочитать файл'));
+      _fail(libText(
+          language,
+          'Не удалось прочитать файл',
+          'The file could not be read',
+        ));
     }
   }
 
@@ -133,14 +137,18 @@ class _ToolsPageState extends State<ToolsPage> {
       await _generate(bytes, language);
     } catch (_) {
       if (!mounted) return;
-      _fail(libText(language, 'Не удалось прочитать файл'));
+      _fail(libText(
+          language,
+          'Не удалось прочитать файл',
+          'The file could not be read',
+        ));
     }
   }
 
   Future<void> _generate(Uint8List bytes, String language) async {
     final model = AppScope.of(context);
     if (bytes.isEmpty) {
-      _fail(libText(language, 'Файл пустой'));
+      _fail(libText(language, 'Файл пустой', 'The file is empty'));
       return;
     }
     try {

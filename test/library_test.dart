@@ -167,134 +167,209 @@ void main() {
 
     test('the documentation folders are the ones in pubspec', () {
       final pubspec = File('pubspec.yaml').readAsStringSync();
-      final root = Directory('docs/ru');
-      for (final entity in root.listSync(recursive: true)) {
-        if (entity is! Directory) continue;
-        final path = entity.path;
-        expect(pubspec, contains('- $path/'), reason: path);
+      for (final lang in ['ru', 'en']) {
+        final root = Directory('docs/$lang');
+        for (final entity in root.listSync(recursive: true)) {
+          if (entity is! Directory) continue;
+          final path = entity.path;
+          expect(pubspec, contains('- $path/'), reason: path);
+        }
+        expect(pubspec, contains('- docs/$lang/sidebar.json'));
       }
-      expect(pubspec, contains('- docs/ru/sidebar.json'));
       expect(pubspec, isNot(contains('docs/ru/definitions.md')));
       expect(pubspec, isNot(contains('docs/ru/conception/')));
       expect(pubspec, isNot(contains('docs/ru/index.md')));
     });
 
-    test(
-      'the sidebar lists every bundled article once, and only them',
-      () async {
-        final tree = await library.docs('ru');
-        expect(
-          [for (final n in tree.sidebar) n.text],
-          [
-            'Пользователю',
-            'Развёртывание',
-            'Разработчику Unit',
-            'Разработчику Pepeunit',
-          ],
-        );
-        expect(tree.article('definitions'), isNull);
-        expect(tree.article('conception/overview'), isNull);
-        expect(tree.article('development-pepeunit/maps'), isNotNull);
-        expect(tree.article('user/start'), isNotNull);
-        // The file is read as written: a mistyped link would be left out of
-        // the tree without a word, so every link is checked against the files.
-        final listed = <String>[];
-        void walk(Object? rows) {
-          for (final row in rows as List) {
-            final link = (row as Map)['link'] as String?;
-            if (link != null) {
-              listed.add(docPathOf(link));
-              expect(
-                File('docs/ru/${docPathOf(link)}.md').existsSync(),
-                isTrue,
-                reason: link,
-              );
+    final sidebarTitles = {
+      'ru': [
+        'Пользователю',
+        'Развёртывание',
+        'Разработчику Unit',
+        'Разработчику Pepeunit',
+      ],
+      'en': [
+        'For users',
+        'Deployment',
+        'Unit developers',
+        'Pepeunit developers',
+      ],
+    };
+
+    for (final lang in ['ru', 'en']) {
+      test(
+        'the $lang sidebar lists every bundled article once, and only them',
+        () async {
+          final tree = await library.docs(lang);
+          expect(
+            [for (final n in tree.sidebar) n.text],
+            unorderedEquals([...sidebarTitles[lang]!, 'Roadmap']),
+          );
+          expect(tree.article('definitions'), isNull);
+          expect(tree.article('conception/overview'), isNull);
+          expect(tree.article('development-pepeunit/maps'), isNotNull);
+          expect(tree.article('user/start'), isNotNull);
+          // The file is read as written: a mistyped link would be left out of
+          // the tree without a word, so every link is checked against the
+          // files.
+          final listed = <String>[];
+          void walk(Object? rows) {
+            for (final row in rows as List) {
+              final link = (row as Map)['link'] as String?;
+              if (link != null) {
+                listed.add(docPathOf(link));
+                expect(
+                  File('docs/$lang/${docPathOf(link)}.md').existsSync(),
+                  isTrue,
+                  reason: link,
+                );
+              }
+              if (row['items'] != null) walk(row['items']);
             }
-            if (row['items'] != null) walk(row['items']);
           }
+
+          walk(jsonDecode(File('docs/$lang/sidebar.json').readAsStringSync()));
+          expect(
+            listed.toSet().length,
+            listed.length,
+            reason: 'a link twice',
+          );
+          expect(
+            tree.articles.map((a) => a.path).toSet(),
+            listed.toSet(),
+            reason: 'an article has no row, or a row has no article',
+          );
+        },
+      );
+
+      test(
+        'every $lang article opens with its title and its links lead somewhere',
+        () async {
+          final tree = await library.docs(lang);
+          final docs = {
+            for (final article in tree.articles)
+              article.path: parseMarkdown(article.source),
+          };
+          final link = RegExp(r'\]\(([^)\s]*)\)');
+          final broken = <String>[];
+          for (final article in tree.articles) {
+            final doc = docs[article.path]!;
+            final first = doc.blocks.first;
+            if (first is! MdHeading || first.level != 1) {
+              broken.add('${article.path}: no title first');
+            }
+            for (final match in link.allMatches(article.source)) {
+              final url = match.group(1)!;
+              if (url.startsWith('http') || url.startsWith('mailto:')) continue;
+              // Pictures wait for the schemas to be brought up to date.
+              if (url.startsWith('/schemas/')) continue;
+              final hash = url.indexOf('#');
+              var target = hash < 0 ? url : url.substring(0, hash);
+              if (target.startsWith('/')) target = target.substring(1);
+              if (target.isEmpty) target = article.path;
+              final to = docs[target];
+              if (to == null) {
+                broken.add('${article.path}: $url');
+                continue;
+              }
+              if (hash >= 0) {
+                final key = anchorKey(url.substring(hash + 1));
+                if (!to.headings.any((h) => anchorKey(h.slug) == key)) {
+                  broken.add('${article.path}: $url');
+                }
+              }
+            }
+          }
+          expect(broken, isEmpty);
+        },
+      );
+    }
+
+    test('the English documentation mirrors the Russian one', () {
+      List<File> files(String lang) => Directory('docs/$lang')
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((file) => file.path.endsWith('.md'))
+          .toList();
+      String rel(File file, String lang) =>
+          file.path.substring('docs/$lang/'.length);
+      final english = {for (final f in files('en')) rel(f, 'en'): f};
+      final russian = {for (final f in files('ru')) rel(f, 'ru'): f};
+      expect(english.keys.toSet(), russian.keys.toSet());
+      final cyrillic = RegExp(r'[А-Яа-яЁё]');
+      final off = <String>[];
+      for (final entry in english.entries) {
+        final text = entry.value.readAsStringSync();
+        final other = russian[entry.key]!.readAsStringSync();
+        List<int> levels(String source) {
+          // Headings outside code fences, by level.
+          var fenced = false;
+          final out = <int>[];
+          for (final line in source.split('\n')) {
+            if (line.trimLeft().startsWith('```')) fenced = !fenced;
+            if (fenced) continue;
+            final head = RegExp(r'^(#{1,6}) ').firstMatch(line);
+            if (head != null) out.add(head.group(1)!.length);
+          }
+          return out;
         }
 
-        walk(jsonDecode(File('docs/ru/sidebar.json').readAsStringSync()));
-        expect(listed.toSet().length, listed.length, reason: 'a link twice');
-        expect(
-          tree.articles.map((a) => a.path).toSet(),
-          listed.toSet(),
-          reason: 'an article has no row, or a row has no article',
-        );
-      },
-    );
+        if (cyrillic.hasMatch(text)) off.add('${entry.key}: Russian letters');
+        if (levels(text).join() != levels(other).join()) {
+          off.add('${entry.key}: headings differ');
+        }
+      }
+      expect(off, isEmpty);
+    });
 
-    test(
-      'every article opens with its title and its links lead somewhere',
-      () async {
-        final tree = await library.docs('ru');
-        final docs = {
-          for (final article in tree.articles)
-            article.path: parseMarkdown(article.source),
-        };
+    for (final lang in ['ru', 'en']) {
+      test('every $lang tip is bundled and not empty', () async {
+        final files = Directory('tooltip/$lang')
+            .listSync()
+            .whereType<File>()
+            .where((file) => file.path.endsWith('.md'))
+            .toList();
+        expect(files.length, greaterThan(300));
+        for (final file in files) {
+          final key = file.path.replaceAll('\\', '/');
+          expect(library.has(key), isTrue, reason: key);
+          expect((await library.text(key)).trim(), isNotEmpty, reason: key);
+        }
+      });
+
+      test('every link of a $lang tip leads to an article', () async {
+        final tree = await library.docs(lang);
         final link = RegExp(r'\]\(([^)\s]*)\)');
         final broken = <String>[];
-        for (final article in tree.articles) {
-          final doc = docs[article.path]!;
-          final first = doc.blocks.first;
-          if (first is! MdHeading || first.level != 1) {
-            broken.add('${article.path}: no title first');
-          }
-          for (final match in link.allMatches(article.source)) {
+        for (final file
+            in Directory('tooltip/$lang').listSync().whereType<File>()) {
+          final text = file.readAsStringSync();
+          for (final match in link.allMatches(text)) {
             final url = match.group(1)!;
-            if (url.startsWith('http') || url.startsWith('mailto:')) continue;
-            // Pictures wait for the schemas to be brought up to date.
-            if (url.startsWith('/schemas/')) continue;
-            final hash = url.indexOf('#');
-            var target = hash < 0 ? url : url.substring(0, hash);
-            if (target.startsWith('/')) target = target.substring(1);
-            if (target.isEmpty) target = article.path;
-            final to = docs[target];
-            if (to == null) {
-              broken.add('${article.path}: $url');
-              continue;
-            }
-            if (hash >= 0) {
-              final key = anchorKey(url.substring(hash + 1));
-              if (!to.headings.any((h) => anchorKey(h.slug) == key)) {
-                broken.add('${article.path}: $url');
-              }
+            if (url.startsWith('http')) continue;
+            if (resolveDocLink(url, tree: tree)?.article == null) {
+              broken.add('${file.path}: $url');
             }
           }
         }
         expect(broken, isEmpty);
-      },
-    );
+      });
+    }
 
-    test('every Russian tip is bundled and not empty', () async {
-      final files = Directory('tooltip/ru')
-          .listSync()
-          .whereType<File>()
-          .where((file) => file.path.endsWith('.md'))
-          .toList();
-      expect(files.length, greaterThan(300));
-      for (final file in files) {
-        final key = file.path.replaceAll('\\', '/');
-        expect(library.has(key), isTrue, reason: key);
-        expect((await library.text(key)).trim(), isNotEmpty, reason: key);
-      }
-    });
-
-    test('every link of a tip leads to an article of the bundle', () async {
-      final tree = await library.docs('ru');
-      final link = RegExp(r'\]\(([^)\s]*)\)');
-      final broken = <String>[];
-      for (final file in Directory('tooltip/ru').listSync().whereType<File>()) {
-        final text = file.readAsStringSync();
-        for (final match in link.allMatches(text)) {
-          final url = match.group(1)!;
-          if (url.startsWith('http')) continue;
-          if (resolveDocLink(url, tree: tree)?.article == null) {
-            broken.add('${file.path}: $url');
-          }
-        }
-      }
-      expect(broken, isEmpty);
+    test('the English tips mirror the Russian ones', () {
+      Set<String> names(String lang) => {
+        for (final file in Directory('tooltip/$lang').listSync())
+          if (file is File && file.path.endsWith('.md'))
+            file.uri.pathSegments.last,
+      };
+      expect(names('en'), names('ru'));
+      final cyrillic = RegExp(r'[А-Яа-яЁё]');
+      final off = [
+        for (final file in Directory('tooltip/en').listSync())
+          if (file is File && cyrillic.hasMatch(file.readAsStringSync()))
+            file.path,
+      ];
+      expect(off, isEmpty, reason: 'Russian letters in an English tip');
     });
 
     test('the presentation has no slides yet', () async {

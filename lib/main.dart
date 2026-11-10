@@ -64,6 +64,7 @@ import 'hive/hint.dart';
 import 'hive/hex_scene.dart';
 import 'hive/page_transition.dart';
 import 'library/library.dart';
+import 'locale/languages.dart';
 import 'registry/registry_view.dart';
 
 Future<void> main() async {
@@ -741,7 +742,10 @@ class _PepeunitAppState extends State<PepeunitApp> {
     await showGeneralDialog<void>(
       context: context,
       barrierDismissible: true,
-      barrierLabel: 'Закрыть подсказку',
+      barrierLabel: phrase(language, {
+        'ru': 'Закрыть подсказку',
+        'en': 'Close the tip',
+      }),
       barrierColor: const Color(0x00000000),
       pageBuilder: (dialog, _, _) => Material(
         type: MaterialType.transparency,

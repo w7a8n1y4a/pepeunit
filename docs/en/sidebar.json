@@ -1,0 +1,179 @@
+[
+  {
+    "text": "Deployment",
+    "collapsed": false,
+    "items": [
+      { "text": "Instance settings", "link": "/deployment/instance-settings" },
+      {
+        "text": "Dependencies",
+        "collapsed": true,
+        "items": [
+          { "text": "PostgreSQL", "link": "/deployment/dependencies/postgresql" },
+          { "text": "ClickHouse", "link": "/deployment/dependencies/clickhouse" },
+          { "text": "Redis", "link": "/deployment/dependencies/redis" },
+          { "text": "EMQX", "link": "/deployment/dependencies/emqx" },
+          { "text": "Backend", "link": "/deployment/dependencies/backend" },
+          { "text": "DataPipe", "link": "/deployment/dependencies/datapipe" },
+          { "text": "Frontend", "link": "/deployment/dependencies/frontend" },
+          { "text": "Grafana", "link": "/deployment/dependencies/grafana" },
+          { "text": "Nginx", "link": "/deployment/dependencies/nginx" },
+          { "text": "Prometheus", "link": "/deployment/dependencies/prometheus" },
+          { "text": "Logporter", "link": "/deployment/dependencies/logporter" },
+          { "text": "Loki", "link": "/deployment/dependencies/loki" },
+          { "text": "Promtail", "link": "/deployment/dependencies/promtail" }
+        ]
+      },
+      {
+        "text": "Docker",
+        "collapsed": true,
+        "items": [
+          { "text": "Installing Docker and Compose", "link": "/deployment/docker/install-docker" },
+          { "text": "Deployment", "link": "/deployment/docker/deploy" },
+          { "text": "Backups and updating", "link": "/deployment/docker/backup-update" },
+          { "text": "Useful commands", "link": "/deployment/docker/commands" }
+        ]
+      },
+      { "text": "Nginx configurations", "link": "/deployment/nginx" },
+      {
+        "text": "Environment variables",
+        "collapsed": true,
+        "items": [
+          { "text": "Backend", "link": "/deployment/env-variables/backend" },
+          { "text": "Frontend", "link": "/deployment/env-variables/frontend" },
+          { "text": "PostgreSQL", "link": "/deployment/env-variables/postgresql" },
+          { "text": "ClickHouse", "link": "/deployment/env-variables/clickhouse" },
+          { "text": "EMQX", "link": "/deployment/env-variables/emqx" },
+          { "text": "Grafana", "link": "/deployment/env-variables/grafana" }
+        ]
+      },
+      { "text": "Monitoring", "link": "/deployment/monitoring" }
+    ]
+  },
+  {
+    "text": "For users",
+    "collapsed": false,
+    "items": [
+      { "text": "Getting started", "link": "/user/start" },
+      { "text": "Account", "link": "/user/account" },
+      { "text": "Network", "link": "/user/network" },
+      { "text": "Repositories", "link": "/user/repo" },
+      {
+        "text": "Unit",
+        "collapsed": true,
+        "items": [
+          { "text": "Creating a Unit", "link": "/user/unit/create-unit" },
+          { "text": "Running a Unit on a device", "link": "/user/unit/create-physic-unit" },
+          { "text": "Managing a Unit", "link": "/user/unit/manage" },
+          { "text": "Inputs and outputs", "link": "/user/unit/io" },
+          { "text": "Unit groups", "link": "/user/unit/groups" }
+        ]
+      },
+      {
+        "text": "DataPipe",
+        "collapsed": true,
+        "items": [
+          { "text": "Pipeline setup", "link": "/user/datapipe/datapipe" },
+          { "text": "Examples", "link": "/user/datapipe/example" },
+          { "text": "Importing data", "link": "/user/datapipe/import" }
+        ]
+      },
+      { "text": "Dashboards", "link": "/user/dashboards" },
+      { "text": "Alerts", "link": "/user/alerts" },
+      { "text": "Library", "link": "/user/library" }
+    ]
+  },
+  {
+    "text": "Unit developers",
+    "collapsed": false,
+    "items": [
+      { "text": "Unit creation algorithm", "link": "/developer/alg-create-unit" },
+      {
+        "text": "Files",
+        "collapsed": true,
+        "items": [
+          { "text": "GIT repository structure", "link": "/developer/files/struct-git-repo" },
+          { "text": "schema_example.json", "link": "/developer/files/struct-schema-example-json" },
+          { "text": "schema.json", "link": "/developer/files/struct-schema-json" },
+          { "text": "env_example.json", "link": "/developer/files/struct-env-example-json" },
+          { "text": "env.json", "link": "/developer/files/struct-env-json" },
+          { "text": "pepeunit.toml", "link": "/developer/files/struct-pepeunit-toml" },
+          { "text": "readme.md", "link": "/developer/files/struct-readme" },
+          { "text": ".gitignore", "link": "/developer/files/struct-gitignore" },
+          { "text": ".pepeignore", "link": "/developer/files/struct-pepeignore" },
+          { "text": "Update archive", "link": "/developer/files/struct-archive-update" }
+        ]
+      },
+      {
+        "text": "Unit libraries",
+        "collapsed": true,
+        "items": [
+          { "text": "Pepeunit Framework", "link": "/developer/libraries/framework" },
+          { "text": "Micropython", "link": "/developer/libraries/micropython" },
+          { "text": "ESP-IDF", "link": "/developer/libraries/esp-idf" },
+          { "text": "Golang", "link": "/developer/libraries/golang" },
+          { "text": "Python", "link": "/developer/libraries/python" }
+        ]
+      },
+      {
+        "text": "MQTT interaction",
+        "collapsed": true,
+        "items": [
+          { "text": "Standard Pepeunit MQTT commands", "link": "/developer/mqtt/default-mqtt-command" },
+          { "text": "Standard MQTT state topics", "link": "/developer/mqtt/state-mqtt-send" },
+          { "text": "Structure of messages in MQTT topics", "link": "/developer/mqtt/struct-topic-messages" }
+        ]
+      },
+      { "text": "Unit state storage", "link": "/developer/state-storage-unit" },
+      { "text": "Compiling for different platforms", "link": "/developer/release-assets" }
+    ]
+  },
+  {
+    "text": "Pepeunit developers",
+    "collapsed": true,
+    "items": [
+      { "text": "Repository map", "link": "/development-pepeunit/maps" },
+      {
+        "text": "Mechanics",
+        "collapsed": true,
+        "items": [
+          { "text": "Entities", "link": "/development-pepeunit/mechanics/entities" },
+          { "text": "Roles", "link": "/development-pepeunit/mechanics/roles" },
+          { "text": "Key-based sign-in", "link": "/development-pepeunit/mechanics/authentication" },
+          { "text": "Visibility", "link": "/development-pepeunit/mechanics/visibility" },
+          { "text": "Access", "link": "/development-pepeunit/mechanics/permission" },
+          { "text": "Updates", "link": "/development-pepeunit/mechanics/update-system" },
+          { "text": "Encryption", "link": "/development-pepeunit/mechanics/cipher" },
+          { "text": "Generating a Unit's env.json", "link": "/development-pepeunit/mechanics/alg-env" },
+          { "text": "Instance federation", "link": "/development-pepeunit/mechanics/federation" },
+          { "text": "Operations and notifications", "link": "/development-pepeunit/mechanics/operations" }
+        ]
+      },
+      {
+        "text": "Backend tests",
+        "collapsed": true,
+        "items": [
+          { "text": "Module", "link": "/development-pepeunit/tests/module-test" },
+          { "text": "Integration", "link": "/development-pepeunit/tests/integration-test" },
+          { "text": "Load", "link": "/development-pepeunit/tests/load-test" }
+        ]
+      },
+      { "text": "Contributing", "link": "/development-pepeunit/contribution" }
+    ]
+  },
+  {
+    "text": "Roadmap",
+    "collapsed": true,
+    "items": [
+      { "text": "Frontend refactor into the client", "link": "/roadmap/frontend-refactor" },
+      { "text": "IO typing", "link": "/roadmap/type-for-schemas" },
+      { "text": "MessageProcessor", "link": "/roadmap/message-processor" },
+      { "text": "Federation", "link": "/roadmap/federation" },
+      { "text": "Monetization for instance holders", "link": "/roadmap/monetisation" },
+      { "text": "System design", "link": "/roadmap/system-design" },
+      { "text": "Upload built into the client", "link": "/roadmap/client-upload" },
+      { "text": "MCP agent system", "link": "/roadmap/mcp-agent-system" },
+      { "text": "3D design system of enclosures", "link": "/roadmap/3d" },
+      { "text": "Unit ideas", "link": "/roadmap/units" }
+    ]
+  }
+]

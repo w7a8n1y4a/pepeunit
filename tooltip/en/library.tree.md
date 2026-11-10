@@ -1,0 +1,1 @@
+Opens the tree of 6 paths: all screens and cells of the client on one map. The main menu is in the center, the sections around it, then their screens and the cells on them. At the top are the switch between available and closed cells and the path search.

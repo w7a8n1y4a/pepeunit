@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../library/library.dart';
-import '../../locale/languages.dart';
 import '../code/code_modal.dart';
 import 'doc_reader.dart';
+import 'library_menu_page.dart';
 
 /// A short Library text in one frame: a [CodeModal] whose body is a rendered
 /// markdown or its source with line numbers ([DocBody]). Tips, the
@@ -95,7 +95,6 @@ class _LibraryModalState extends State<LibraryModal> {
     final language = model.vault.language;
     final raw = model.vault.libraryRaw;
     final page = _reader.page;
-    String word(String ru) => phrase(language, {'ru': ru});
     return CodeModal(
       title: page.title,
       color: widget.color,
@@ -108,14 +107,14 @@ class _LibraryModalState extends State<LibraryModal> {
       actions: (font) => [
         if (_reader.canBack)
           CodeWordButton(
-            label: word('Назад'),
+            label: libText(language, 'Назад', 'Back'),
             font: font,
             onTap: _reader.back,
             hint: 'button-doc-back',
           ),
         ...?widget.actions?.call(font),
         CodeChip(
-          label: word('Рендер'),
+          label: libText(language, 'Рендер', 'Render'),
           on: !raw,
           font: font,
           color: widget.color,
@@ -123,7 +122,7 @@ class _LibraryModalState extends State<LibraryModal> {
           hint: 'button-render',
         ),
         CodeChip(
-          label: word('Исходник'),
+          label: libText(language, 'Исходник', 'Source'),
           on: raw,
           font: font,
           color: widget.color,
