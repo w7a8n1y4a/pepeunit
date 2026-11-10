@@ -462,81 +462,81 @@ class _DocsPageState extends State<DocsPage> {
             );
           }
 
-          final tools = Row(
-            children: [
-              if (reader != null && reader.canBack)
-                _IconMark(
+          // Close stands at the right edge of the screen and never moves.
+          // Back stands right before it (before the outline line on a wide
+          // screen), so it appears and goes without shifting Close.
+          final close = CodeCloseMark(
+            label: libErrorText(language, 'Закрыть', 'Close'),
+            extent: mark,
+            onTap: () => closeLibrary(context, '/library'),
+          );
+          final back = reader != null && reader.canBack
+              ? _IconMark(
                   asset: 'assets/icons/actions/back.svg',
                   label: libText(language, 'Назад', 'Back'),
                   extent: mark,
                   onTap: reader.back,
-                ),
-              SizedBox(width: font * 0.2),
-              CodeCloseMark(
-                label: libErrorText(language, 'Закрыть', 'Close'),
-                extent: mark,
-                onTap: () => closeLibrary(context, '/library'),
-              ),
-            ],
-          );
+                )
+              : null;
 
           // The bar: the name of the section above the sidebar, the title of
           // the article and the tools above the text. One line under it.
+          // Every word on it can be selected and copied, so the whole bar is
+          // one selection area.
           final header = SizedBox(
             height: headerH,
-            child: Row(
-              children: [
-                if (wide) ...[
-                  SizedBox(
-                    width: gap + side,
-                    child: Padding(
-                      padding: EdgeInsets.only(left: gap + font, right: font),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          libText(language, 'Документация', 'Documentation'),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: _style(font * 1.55, const Color(0xFFFFFFFF)),
+            child: SelectionArea(
+              child: Row(
+                children: [
+                  if (wide) ...[
+                    SizedBox(
+                      width: gap + side,
+                      child: Padding(
+                        padding: EdgeInsets.only(left: gap + font, right: font),
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          child: Text(
+                            libText(language, 'Документация', 'Documentation'),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: _style(font * 1.55, const Color(0xFFFFFFFF)),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  vline,
-                ],
-                Expanded(
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(font, 0, font * 0.4, 0),
-                    child: Row(
-                      children: [
-                        if (!wide)
-                          _MenuMark(
-                            label: libText(language, 'Разделы', 'Sections'),
-                            extent: mark,
-                            onTap: () => setState(() => _menu = !_menu),
-                          ),
-                        if (!wide && tree != null)
-                          _IconMark(
-                            asset: 'assets/icons/actions/search.svg',
-                            label: libErrorText(language, 'Поиск', 'Search'),
-                            extent: mark,
-                            onTap: _openSearch,
-                          ),
-                        if (reader?.page.path != null)
-                          CopyLinkMark(
-                            link: () => linkTo(null),
-                            label: libErrorText(
-                              language,
-                              'Скопировать ссылку',
-                              'Copy link',
+                    vline,
+                  ],
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(font, 0, font * 0.4, 0),
+                      child: Row(
+                        children: [
+                          if (!wide)
+                            _MenuMark(
+                              label: libText(language, 'Разделы', 'Sections'),
+                              extent: mark,
+                              onTap: () => setState(() => _menu = !_menu),
                             ),
-                            width: mark,
-                            height: mark,
-                          ),
-                        SizedBox(width: font * 0.3),
-                        // The title is text a person may select and copy.
-                        Expanded(
-                          child: SelectionArea(
+                          if (!wide && tree != null)
+                            _IconMark(
+                              asset: 'assets/icons/actions/search.svg',
+                              label: libErrorText(language, 'Поиск', 'Search'),
+                              extent: mark,
+                              onTap: _openSearch,
+                            ),
+                          if (reader?.page.path != null)
+                            CopyLinkMark(
+                              link: () => linkTo(null),
+                              label: libErrorText(
+                                language,
+                                'Скопировать ссылку',
+                                'Copy link',
+                              ),
+                              width: mark,
+                              height: mark,
+                            ),
+                          SizedBox(width: font * 0.3),
+                          Expanded(
                             child: Text(
                               reader?.page.title ?? '',
                               maxLines: 1,
@@ -547,43 +547,52 @@ class _DocsPageState extends State<DocsPage> {
                               ),
                             ),
                           ),
-                        ),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: tools,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                if (outlined) ...[
-                  vline,
-                  // The line takes one pixel of the room, so it stands on
-                  // the same pixel as the line of the outline below it.
-                  SizedBox(
-                    width: outlineRoom - 1,
-                    child: Padding(
-                      padding: EdgeInsets.only(
-                        left: font * 0.8,
-                        right: gap + codeBarRoom,
-                      ),
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        child: Text(
-                          libErrorText(
-                            language,
-                            'На этой странице',
-                            'On this page',
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: _style(font * 1.2, const Color(0xFFFFFFFF)),
-                        ),
+                          ?back,
+                          // On a wide screen Close stands in the outline strip.
+                          if (!outlined) ...[
+                            SizedBox(width: font * 0.2),
+                            close,
+                          ],
+                        ],
                       ),
                     ),
                   ),
+                  if (outlined) ...[
+                    vline,
+                    // The line takes one pixel of the room, so it stands on
+                    // the same pixel as the line of the outline below it.
+                    SizedBox(
+                      width: outlineRoom - 1,
+                      child: Padding(
+                        padding: EdgeInsets.only(
+                          left: font * 0.8,
+                          right: font * 0.4,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                libErrorText(
+                                  language,
+                                  'На этой странице',
+                                  'On this page',
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: _style(
+                                  font * 1.2,
+                                  const Color(0xFFFFFFFF),
+                                ),
+                              ),
+                            ),
+                            close,
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
                 ],
-              ],
+              ),
             ),
           );
 

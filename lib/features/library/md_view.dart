@@ -1,13 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show RenderSliverMultiBoxAdaptor;
+import 'package:flutter/rendering.dart'
+    show RenderSliverMultiBoxAdaptor, ScrollCacheExtent;
 import 'package:flutter/services.dart';
 
 import '../../app_scope.dart';
 import '../../hive/bevel.dart';
+import '../../hive/hex_motion.dart';
 import '../../hive/hex_scene.dart';
 import '../../hive/hint.dart';
 import '../../hive/marks.dart';
@@ -61,6 +64,73 @@ class MdFind {
 
   @override
   int get hashCode => Object.hash(query, current);
+}
+
+/// A scroll controller whose wheel does not jump. A mouse wheel on desktop
+/// and the web sends a step of about fifty pixels per notch, and a plain
+/// position moves the text by that step in one frame, so the page seems to
+/// go block by block. This position glides to where the notches add up.
+/// Touch, drag, the scroll bar and `jumpTo` are the plain ones.
+class _GlideController extends ScrollController {
+  @override
+  ScrollPosition createScrollPosition(
+    ScrollPhysics physics,
+    ScrollContext context,
+    ScrollPosition? oldPosition,
+  ) {
+    return _GlidePosition(
+      physics: physics,
+      context: context,
+      initialPixels: initialScrollOffset,
+      keepScrollOffset: keepScrollOffset,
+      oldPosition: oldPosition,
+      debugLabel: debugLabel,
+    );
+  }
+}
+
+class _GlidePosition extends ScrollPositionWithSingleContext {
+  _GlidePosition({
+    required super.physics,
+    required super.context,
+    super.initialPixels,
+    super.keepScrollOffset,
+    super.oldPosition,
+    super.debugLabel,
+  });
+
+  /// Where the glide in flight ends, so the next notch adds to it and not to
+  /// the place the text has reached so far.
+  double? _goal;
+
+  @override
+  void pointerScroll(double delta) {
+    if (delta == 0.0) {
+      goBallistic(0.0);
+      return;
+    }
+    final goal = ((_goal ?? pixels) + delta).clamp(
+      minScrollExtent,
+      maxScrollExtent,
+    );
+    if (goal == pixels) {
+      _goal = null;
+      return;
+    }
+    _goal = goal;
+    animateTo(
+      goal,
+      duration: const Duration(milliseconds: 170),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  void beginActivity(ScrollActivity? newActivity) {
+    // A drag, a jump or the end of the glide: the goal is no longer valid.
+    if (newActivity is! DrivenScrollActivity) _goal = null;
+    super.beginActivity(newActivity);
+  }
 }
 
 /// Lets the owner of a [MdView] scroll it to a heading.
@@ -143,8 +213,14 @@ class MdView extends StatefulWidget {
 }
 
 class _MdViewState extends State<MdView> {
-  final _scroll = ScrollController();
+  final _scroll = _GlideController();
   final _list = GlobalKey();
+
+  /// The background mosaic redraws the whole screen thirty times a second.
+  /// While the text scrolls it rests, as it does under a press effect, so its
+  /// frames do not fall between the frames of the scroll.
+  final _rest = MotionLease();
+  Timer? _calm;
   final _keys = <String, GlobalKey>{};
 
   /// The text that holds the current match of [MdView.find].
@@ -194,8 +270,21 @@ class _MdViewState extends State<MdView> {
   void dispose() {
     widget.controller?._detach(this);
     _disposeRecognizers();
+    _calm?.cancel();
+    _rest.set(false);
     _scroll.dispose();
     super.dispose();
+  }
+
+  /// The text moves: the mosaic rests until it has been still for a moment.
+  bool _scrolled(ScrollNotification notification) {
+    if (notification.depth != 0 || notification.metrics.axis != Axis.vertical) {
+      return false;
+    }
+    _rest.set(true);
+    _calm?.cancel();
+    _calm = Timer(const Duration(milliseconds: 160), () => _rest.set(false));
+    return false;
   }
 
   void _disposeRecognizers() {
@@ -354,40 +443,48 @@ class _MdViewState extends State<MdView> {
         final right = delta < 0 ? 0.0 : shift;
         return CodeScrollbar(
           controller: _scroll,
-          child: SelectionArea(
-            child: CustomScrollView(
-              controller: _scroll,
-              slivers: [
-                SliverPadding(
-                  padding: EdgeInsets.fromLTRB(
-                    sides + left,
-                    font * 0.3,
-                    sides + right + reserved,
-                    font * 1.5,
-                  ),
-                  // Blocks are built when they come near the window, not all
-                  // at once, so a long article opens at once. The column is
-                  // centered; every block, text or not, has the same width,
-                  // so the left and right edges line up down the page.
-                  sliver: SliverList.builder(
-                    key: _list,
-                    itemCount: _blocks.length,
-                    itemBuilder: (context, i) => Padding(
-                      padding: EdgeInsets.only(top: i > 0 ? _gap(i) : 0),
-                      child: Align(
-                        alignment: Alignment.topCenter,
-                        child: ConstrainedBox(
-                          constraints: BoxConstraints(maxWidth: column),
-                          child: SizedBox(
-                            width: double.infinity,
-                            child: _blocks[i],
+          child: NotificationListener<ScrollNotification>(
+            onNotification: _scrolled,
+            child: SelectionArea(
+              child: CustomScrollView(
+                controller: _scroll,
+                // Blocks are laid out ahead of the window, a screen and a half
+                // each way, so one never appears with its first paint inside
+                // a frame of the scroll. The estimate of the whole length is
+                // also nearer the truth, so the bar does not jump.
+                scrollCacheExtent: const ScrollCacheExtent.viewport(1.5),
+                slivers: [
+                  SliverPadding(
+                    padding: EdgeInsets.fromLTRB(
+                      sides + left,
+                      font * 0.3,
+                      sides + right + reserved,
+                      font * 1.5,
+                    ),
+                    // Blocks are built when they come near the window, not all
+                    // at once, so a long article opens at once. The column is
+                    // centered; every block, text or not, has the same width,
+                    // so the left and right edges line up down the page.
+                    sliver: SliverList.builder(
+                      key: _list,
+                      itemCount: _blocks.length,
+                      itemBuilder: (context, i) => Padding(
+                        padding: EdgeInsets.only(top: i > 0 ? _gap(i) : 0),
+                        child: Align(
+                          alignment: Alignment.topCenter,
+                          child: ConstrainedBox(
+                            constraints: BoxConstraints(maxWidth: column),
+                            child: SizedBox(
+                              width: double.infinity,
+                              child: _blocks[i],
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         );
@@ -1494,7 +1591,10 @@ class _Missing extends StatelessWidget {
       ),
       child: Text(
         label.isEmpty
-            ? phrase(AppScope.of(context).vault.language, {'ru': 'Изображение недоступно', 'en': 'The image is not available'})
+            ? phrase(AppScope.of(context).vault.language, {
+                'ru': 'Изображение недоступно',
+                'en': 'The image is not available',
+              })
             : label,
         style: TextStyle(
           color: hexMuted,
@@ -1534,7 +1634,10 @@ class _Zoomable extends StatelessWidget {
           onTap: () => showGeneralDialog<void>(
             context: context,
             barrierDismissible: true,
-            barrierLabel: phrase(AppScope.of(context).vault.language, {'ru': 'Закрыть', 'en': 'Close'}),
+            barrierLabel: phrase(AppScope.of(context).vault.language, {
+              'ru': 'Закрыть',
+              'en': 'Close',
+            }),
             barrierColor: const Color(0xE6000000),
             pageBuilder: (dialog, _, _) => Material(
               type: MaterialType.transparency,

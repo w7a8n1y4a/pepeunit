@@ -19,6 +19,7 @@ import 'package:pepeunit_client/features/library/docs_page.dart';
 import 'package:pepeunit_client/features/library/library_modal.dart';
 import 'package:pepeunit_client/features/library/tip_modal.dart';
 import 'package:pepeunit_client/hive/bevel.dart';
+import 'package:pepeunit_client/hive/hex_motion.dart';
 import 'package:pepeunit_client/features/library/md_view.dart';
 import 'package:pepeunit_client/library/library.dart';
 import 'package:pepeunit_client/library/markdown.dart';
@@ -201,10 +202,9 @@ void main() {
         'the $lang sidebar lists every bundled article once, and only them',
         () async {
           final tree = await library.docs(lang);
-          expect(
-            [for (final n in tree.sidebar) n.text],
-            unorderedEquals([...sidebarTitles[lang]!, 'Roadmap']),
-          );
+          expect([
+            for (final n in tree.sidebar) n.text,
+          ], unorderedEquals([...sidebarTitles[lang]!, 'Roadmap']));
           expect(tree.article('definitions'), isNull);
           expect(tree.article('conception/overview'), isNull);
           expect(tree.article('development-pepeunit/maps'), isNotNull);
@@ -229,11 +229,7 @@ void main() {
           }
 
           walk(jsonDecode(File('docs/$lang/sidebar.json').readAsStringSync()));
-          expect(
-            listed.toSet().length,
-            listed.length,
-            reason: 'a link twice',
-          );
+          expect(listed.toSet().length, listed.length, reason: 'a link twice');
           expect(
             tree.articles.map((a) => a.path).toSet(),
             listed.toSet(),
@@ -286,11 +282,12 @@ void main() {
     }
 
     test('the English documentation mirrors the Russian one', () {
-      List<File> files(String lang) => Directory('docs/$lang')
-          .listSync(recursive: true)
-          .whereType<File>()
-          .where((file) => file.path.endsWith('.md'))
-          .toList();
+      List<File> files(String lang) =>
+          Directory('docs/$lang')
+              .listSync(recursive: true)
+              .whereType<File>()
+              .where((file) => file.path.endsWith('.md'))
+              .toList();
       String rel(File file, String lang) =>
           file.path.substring('docs/$lang/'.length);
       final english = {for (final f in files('en')) rel(f, 'en'): f};
@@ -341,8 +338,9 @@ void main() {
         final tree = await library.docs(lang);
         final link = RegExp(r'\]\(([^)\s]*)\)');
         final broken = <String>[];
-        for (final file
-            in Directory('tooltip/$lang').listSync().whereType<File>()) {
+        for (final file in Directory(
+          'tooltip/$lang',
+        ).listSync().whereType<File>()) {
           final text = file.readAsStringSync();
           for (final match in link.allMatches(text)) {
             final url = match.group(1)!;
@@ -1421,6 +1419,44 @@ void main() {
       await tester.pumpWidget(view(const MdFind('нету', 0)));
       await tester.pumpAndSettle();
       expect(count, 0);
+    });
+
+    testWidgets('the wheel glides to where its notches add up', (tester) async {
+      final filler = [for (var i = 0; i < 80; i++) 'Строка $i\n'].join('\n');
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MdView(
+              doc: parseMarkdown(filler),
+              font: 16,
+              accent: const Color(0xFF00BCD4),
+              canOpen: (_) => false,
+              onOpen: (_) {},
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      final scrollable = tester.state<ScrollableState>(
+        find.byType(Scrollable).first,
+      );
+      final center = tester.getCenter(find.byType(MdView));
+      final pointer = TestPointer(1, PointerDeviceKind.mouse);
+      await tester.sendEventToBinding(pointer.hover(center));
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0, 50)));
+      await tester.sendEventToBinding(pointer.scroll(const Offset(0, 50)));
+      // Not there in the frame of the wheel; there when the glide ends.
+      expect(scrollable.position.pixels, 0);
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 60));
+      expect(scrollable.position.pixels, greaterThan(0));
+      expect(scrollable.position.pixels, lessThan(100));
+      await tester.pumpAndSettle();
+      expect(scrollable.position.pixels, 100);
+      // The mosaic rests while the text moves, and wakes when it is still.
+      expect(MotionLoad.active, isTrue);
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(MotionLoad.active, isFalse);
     });
 
     testWidgets('a long text has no contents word', (tester) async {
