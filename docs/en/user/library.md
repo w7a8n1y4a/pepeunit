@@ -14,6 +14,8 @@ Cell | What it opens
 
 The table of contents is on the left, the text of the article on the right. On a wide screen, the outline of the article itself sits next to it: a tap takes you to a heading. The page address keeps the open article and section, so you can share it: the icon next to a heading copies the link.
 
+The `RU` / `EN` mark on the top bar switches the language of the documentation. The open article stays open. The choice is kept and does not change the language of the app: [Account](/user/account).
+
 Hotkeys:
 
 - `Ctrl+K` / `Cmd+K` or `/` - search the whole documentation

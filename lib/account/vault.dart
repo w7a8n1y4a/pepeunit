@@ -15,6 +15,7 @@ class Vault {
     this.profileSentAt,
     this.registeredAt,
     this.language = 'ru',
+    this.docsLanguage,
     this.timeZone = '0',
     this.libraryRaw = false,
     List<String>? allow,
@@ -38,6 +39,10 @@ class Vault {
   /// Epoch milliseconds of the last registration press. Sign out keeps it.
   int? registeredAt;
   String language;
+
+  /// Language of the documentation, chosen on its own screen. Null follows
+  /// [language].
+  String? docsLanguage;
   String timeZone;
 
   /// Library texts open as source, not rendered.
@@ -102,6 +107,7 @@ class Vault {
       profileSentAt: profileSentAt,
       registeredAt: registeredAt,
       language: language,
+      docsLanguage: docsLanguage,
       timeZone: timeZone,
       libraryRaw: libraryRaw,
       allow: [...allow],
@@ -123,6 +129,7 @@ class Vault {
       'profileSentAt': profileSentAt,
       'registeredAt': registeredAt,
       'language': language,
+      'docsLanguage': docsLanguage,
       'timeZone': timeZone,
       'libraryRaw': libraryRaw,
       'allow': allow,
@@ -146,6 +153,7 @@ class Vault {
       profileSentAt: json['profileSentAt'] as int?,
       registeredAt: json['registeredAt'] as int?,
       language: _language(json['language'] as String?),
+      docsLanguage: _docsLanguage(json['docsLanguage'] as String?),
       timeZone: _timeZone(json['timeZone'] as String?),
       libraryRaw: json['libraryRaw'] == true,
       allow: _urls(json['allow']),
@@ -165,6 +173,9 @@ String _language(String? raw) {
   if (raw != null && knownLanguage(raw)) return raw;
   return 'ru';
 }
+
+String? _docsLanguage(String? raw) =>
+    raw != null && knownLanguage(raw) ? raw : null;
 
 String _timeZone(String? raw) => zoneMinutes(raw ?? '0').toString();
 

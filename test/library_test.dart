@@ -607,6 +607,40 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
+    testWidgets('Library: the language of the documentation has its own mark', (
+      tester,
+    ) async {
+      await openDocs(tester, const Size(1200, 800));
+      final model = AppScope.of(tester.element(find.byType(DocsPage)));
+      expect(model.vault.language, 'ru');
+      expect(find.text('Конфигурации Nginx'), findsOneWidget);
+      await tester.tap(find.text('Docker'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Установка Docker и Compose'));
+      await settle(tester);
+      String? doc() =>
+          GoRouterState.of(tester.element(find.byType(DocsPage)))
+              .uri
+              .queryParameters['doc'];
+      expect(doc(), 'deployment/docker/install-docker');
+      await tester.tap(find.bySemanticsLabel('Язык документации'));
+      await settle(tester);
+      // The documentation is English, the open article stayed open, and the
+      // language of the client did not move.
+      expect(model.vault.docsLanguage, 'en');
+      expect(model.vault.language, 'ru');
+      expect(doc(), 'deployment/docker/install-docker');
+      expect(find.text('Nginx configurations'), findsOneWidget);
+      expect(find.text('Конфигурации Nginx'), findsNothing);
+      expect(find.bySemanticsLabel('Documentation language'), findsOneWidget);
+      // And back.
+      await tester.tap(find.bySemanticsLabel('Documentation language'));
+      await settle(tester);
+      expect(model.vault.docsLanguage, 'ru');
+      expect(find.text('Конфигурации Nginx'), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
     testWidgets('Library: search on a phone opens from the bar', (
       tester,
     ) async {

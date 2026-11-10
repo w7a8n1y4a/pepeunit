@@ -340,6 +340,16 @@ class AppModel extends ChangeNotifier {
     return _commit();
   }
 
+  /// The language of the documentation alone; the language of the client
+  /// stays as it is.
+  Future<void> setDocsLanguage(String code) {
+    if (!knownLanguage(code) || vault.docsLanguage == code) {
+      return Future<void>.value();
+    }
+    vault.docsLanguage = code;
+    return _commit();
+  }
+
   Future<void> setLibraryRaw(bool value) {
     if (vault.libraryRaw == value) return Future<void>.value();
     vault.libraryRaw = value;

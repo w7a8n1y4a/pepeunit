@@ -11,6 +11,8 @@ import '../../hive/bevel.dart';
 import '../../hive/grain.dart';
 import '../../hive/hex_scene.dart';
 import '../../hive/hint.dart';
+import '../../account/vault.dart';
+import '../../locale/languages.dart';
 import '../../library/doc_search.dart';
 import '../../library/library.dart';
 import '../../library/markdown.dart';
@@ -21,6 +23,10 @@ import 'doc_reader.dart';
 import 'doc_search_panel.dart';
 import 'library_menu_page.dart';
 import 'md_view.dart';
+
+/// The language of the documentation: its own choice, or the language of the
+/// client while the person has not made one.
+String docsLanguageOf(Vault vault) => vault.docsLanguage ?? vault.language;
 
 /// The address of the documentation at an article, and at a heading of it.
 String docsAddress({String? doc, String? anchor}) {
@@ -87,6 +93,9 @@ const _outlineFonts = 13.5;
 ///   article that is open, so the page can be sent or reloaded. The title of
 ///   the article and every heading of level two to four have a mark that
 ///   copies that address.
+/// - The language of the documentation is chosen on the bar ([_LanguageMark]),
+///   apart from the language of the client. The article that is open stays
+///   open in the other language.
 /// - The search stands at the top of the sidebar (a mark on the bar on a
 ///   narrow screen). It, Ctrl+K (Cmd+K) and `/` open a panel over the page
 ///   that finds the words of a query in every article and leads to the
@@ -126,6 +135,10 @@ class _DocsPageState extends State<DocsPage> {
   var _findAt = 0;
   var _findCount = 0;
 
+  /// The last load that was asked for; an older one that ends later is
+  /// dropped.
+  var _loads = 0;
+
   @override
   void dispose() {
     _page.dispose();
@@ -161,12 +174,16 @@ class _DocsPageState extends State<DocsPage> {
     reader.show(article, anchor: anchor);
   }
 
-  Future<void> _load() async {
-    final language = AppScope.of(context).vault.language;
+  /// Reads the tree of the language of the documentation. [keep] is the
+  /// article to open in it, after a change of language: its headings are
+  /// named in the other language, so no heading is kept.
+  Future<void> _load({String? keep}) async {
+    final load = ++_loads;
+    final language = docsLanguageOf(AppScope.of(context).vault);
     try {
       final tree = await Library.instance.docs(language);
-      if (!mounted) return;
-      final wanted = widget.doc;
+      if (!mounted || load != _loads) return;
+      final wanted = keep ?? widget.doc;
       final asked = wanted == null ? null : tree.article(wanted);
       final first = asked ?? tree.first;
       setState(() {
@@ -175,7 +192,9 @@ class _DocsPageState extends State<DocsPage> {
           _reader = DocReader(
             first: DocPage.of(
               first,
-              anchor: asked == null ? null : _clean(widget.anchor),
+              anchor: asked == null || keep != null
+                  ? null
+                  : _clean(widget.anchor),
             ),
             docs: tree,
             onChange: _changed,
@@ -199,10 +218,40 @@ class _DocsPageState extends State<DocsPage> {
           replace: true,
         );
       }
+      if (keep != null && first != null) {
+        // The address drops a heading of the other language.
+        final path = first.path;
+        if (path != widget.doc || _clean(widget.anchor) != null) {
+          GoRouter.of(context).go(docsAddress(doc: path));
+        }
+      }
     } catch (error) {
-      if (!mounted) return;
+      if (!mounted || load != _loads) return;
       setState(() => _failure = '$error');
     }
+  }
+
+  /// The next language of the documentation, for the mark on the bar. The
+  /// tree is read again and the open article stays open.
+  Future<void> _switchLanguage() async {
+    final model = AppScope.of(context);
+    final now = docsLanguageOf(model.vault);
+    final at = appLanguages.indexWhere((item) => item.code == now);
+    final next = appLanguages[(at + 1) % appLanguages.length].code;
+    if (next == now) return;
+    final path = _reader?.page.path;
+    _closeFind();
+    setState(() {
+      _tree = null;
+      _reader = null;
+      _failure = null;
+      _open.clear();
+      _menu = false;
+      _searching = false;
+    });
+    await model.setDocsLanguage(next);
+    if (!mounted) return;
+    await _load(keep: path ?? widget.doc);
   }
 
   /// The trail moved: the sidebar follows, and so does the address.
@@ -344,7 +393,7 @@ class _DocsPageState extends State<DocsPage> {
   @override
   Widget build(BuildContext context) {
     final model = AppScope.of(context);
-    final language = model.vault.language;
+    final language = docsLanguageOf(model.vault);
     final reader = _reader;
     final tree = _tree;
     String linkTo(String? anchor) => docsLink(
@@ -467,14 +516,14 @@ class _DocsPageState extends State<DocsPage> {
           // screen), so it appears and goes without shifting Close.
           final close = CodeCloseMark(
             label: libErrorText(language, 'Закрыть', 'Close'),
-            extent: mark,
+            extent: mark * 0.9,
             onTap: () => closeLibrary(context, '/library'),
           );
           final back = reader != null && reader.canBack
               ? _IconMark(
                   asset: 'assets/icons/actions/back.svg',
                   label: libText(language, 'Назад', 'Back'),
-                  extent: mark,
+                  extent: mark * 0.9,
                   onTap: reader.back,
                 )
               : null;
@@ -547,6 +596,19 @@ class _DocsPageState extends State<DocsPage> {
                               ),
                             ),
                           ),
+                          SizedBox(width: font * 0.3),
+                          _LanguageMark(
+                            code: language.toUpperCase(),
+                            label: libText(
+                              language,
+                              'Язык документации',
+                              'Documentation language',
+                            ),
+                            height: mark * 0.8,
+                            font: font,
+                            onTap: _switchLanguage,
+                          ),
+                          SizedBox(width: font * 0.3),
                           ?back,
                           // On a wide screen Close stands in the outline strip.
                           if (!outlined) ...[
@@ -1057,6 +1119,65 @@ class _SearchPillState extends State<_SearchPill> {
                     ),
                     Text(widget.hint, style: _style(font * 0.8, hexMuted)),
                   ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The language of the documentation on the bar: its code in a cut frame. A
+/// tap goes to the next language.
+class _LanguageMark extends StatelessWidget {
+  const _LanguageMark({
+    required this.code,
+    required this.label,
+    required this.height,
+    required this.font,
+    required this.onTap,
+  });
+
+  final String code;
+  final String label;
+  final double height;
+  final double font;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return HintTarget(
+      id: 'doc-language',
+      title: label,
+      color: libraryColor,
+      child: Semantics(
+        button: true,
+        label: label,
+        value: code,
+        excludeSemantics: true,
+        onTap: onTap,
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: onTap,
+          child: HoverPop(
+            child: BevelFrame(
+              color: const Color(0x99FFFFFF),
+              radius: height * 0.3,
+              width: 1.2,
+              child: Container(
+                height: height,
+                padding: EdgeInsets.symmetric(horizontal: font * 0.8),
+                alignment: Alignment.center,
+                // The bar is one selection area; the code is a button, not
+                // a text to copy.
+                child: SelectionContainer.disabled(
+                  child: Text(
+                    code,
+                    maxLines: 1,
+                    style: _style(font * 0.95, const Color(0xFFFFFFFF)),
+                  ),
                 ),
               ),
             ),
