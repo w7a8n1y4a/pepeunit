@@ -413,8 +413,13 @@ const mdGutter = 1.8;
 
 const _ink = Color(0xFFFFFFFF);
 
-/// Running text is a shade under white, so bold and headings stand out.
-const _bodyInk = Color(0xFFE6E6EB);
+/// Running text is a shade under white, so bold and headings stand out. The
+/// page has no fill and the mosaic shows under the text, so the shade is
+/// close to white.
+const _bodyInk = Color(0xFFF5F5F8);
+
+/// A quote is quieter than running text, but still readable on the mosaic.
+const _quoteInk = Color(0xFFCFCFD6);
 const _bodyFamily = 'OpenGost Type B';
 
 /// How far under the baseline a link's underline stands, in font sizes. The
@@ -538,7 +543,7 @@ class _Blocks {
     color: _bodyInk,
     fontFamily: _bodyFamily,
     fontSize: font,
-    height: 1.5,
+    height: 1.55,
     decoration: TextDecoration.none,
   );
 
@@ -571,7 +576,7 @@ class _Blocks {
           font: font,
           children: [
             for (final inner in block.blocks)
-              this.block(inner, style: base.copyWith(color: hexMuted)),
+              this.block(inner, style: base.copyWith(color: _quoteInk)),
           ],
         );
       case MdAdmonition():

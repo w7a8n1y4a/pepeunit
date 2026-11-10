@@ -19,7 +19,7 @@ class _Read {
 final _reads = Expando<_Read>();
 
 /// Size of the running text, from the size of code on the same screen.
-double docFontOf(double codeFont) => max(13.0, codeFont * 1.2);
+double docFontOf(double codeFont) => max(15.0, codeFont * 1.3);
 
 /// One text the reader has shown.
 class DocPage {
