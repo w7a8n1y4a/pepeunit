@@ -159,5 +159,21 @@
       },
       { "text": "Вклад", "link": "/development-pepeunit/contribution" }
     ]
+  },
+  {
+    "text": "Roadmap",
+    "collapsed": true,
+    "items": [
+      { "text": "Рефактор фронтенда в клиент", "link": "/roadmap/frontend-refactor" },
+      { "text": "Типизация IO", "link": "/roadmap/type-for-schemas" },
+      { "text": "MessageProcessor", "link": "/roadmap/message-processor" },
+      { "text": "Федерация", "link": "/roadmap/federation" },
+      { "text": "Монетизация для держателей инстансов", "link": "/roadmap/monetisation" },
+      { "text": "Систем дизайн", "link": "/roadmap/system-design" },
+      { "text": "Upload встроеный в клиент", "link": "/roadmap/client-upload" },
+      { "text": "MCP агентная система", "link": "/roadmap/mcp-agent-system" },
+      { "text": "3D дизайн система корпусов", "link": "/roadmap/3d" },
+      { "text": "Идеи Unit", "link": "/roadmap/units" }
+    ]
   }
 ]
