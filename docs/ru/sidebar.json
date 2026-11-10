@@ -103,12 +103,16 @@
         "text": "Механики",
         "collapsed": true,
         "items": [
+          { "text": "Сущности", "link": "/development-pepeunit/mechanics/entities" },
           { "text": "Система Ролей", "link": "/development-pepeunit/mechanics/roles" },
+          { "text": "Вход по ключу", "link": "/development-pepeunit/mechanics/authentication" },
           { "text": "Система Видимости", "link": "/development-pepeunit/mechanics/visibility" },
           { "text": "Система Доступов", "link": "/development-pepeunit/mechanics/permission" },
           { "text": "Система Обновлений", "link": "/development-pepeunit/mechanics/update-system" },
           { "text": "Шифрование", "link": "/development-pepeunit/mechanics/cipher" },
-          { "text": "Генерация env.json у Unit", "link": "/development-pepeunit/mechanics/alg-env" }
+          { "text": "Генерация env.json у Unit", "link": "/development-pepeunit/mechanics/alg-env" },
+          { "text": "Федерация инстансов", "link": "/development-pepeunit/mechanics/federation" },
+          { "text": "Операции и уведомления", "link": "/development-pepeunit/mechanics/operations" }
         ]
       },
       {
