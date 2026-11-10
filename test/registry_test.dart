@@ -320,7 +320,7 @@ void main() {
     await model.load();
     model.vault.instances.add(
       InstanceRecord(
-        url: defaultInstanceUrl,
+        url: devInstanceUrl,
         token: 't',
         role: 'User',
         active: true,
@@ -456,7 +456,7 @@ void main() {
     await model.load();
     model.vault.instances.add(
       InstanceRecord(
-        url: defaultInstanceUrl,
+        url: devInstanceUrl,
         token: 't',
         role: 'User',
         active: true,

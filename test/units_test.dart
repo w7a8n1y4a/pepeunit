@@ -111,7 +111,7 @@ void main() {
     await model.load();
     model.vault.instances.add(
       InstanceRecord(
-        url: defaultInstanceUrl,
+        url: devInstanceUrl,
         token: 't',
         role: 'User',
         userUuid: 'me',
@@ -192,7 +192,7 @@ void main() {
     await model.load();
     model.vault.instances.add(
       InstanceRecord(
-        url: defaultInstanceUrl,
+        url: devInstanceUrl,
         token: 't',
         role: 'User',
         userUuid: 'me',
@@ -252,7 +252,7 @@ void main() {
     await model.load();
     model.vault.instances.add(
       InstanceRecord(
-        url: defaultInstanceUrl,
+        url: devInstanceUrl,
         token: 't',
         role: 'User',
         userUuid: 'me',
@@ -478,7 +478,7 @@ void main() {
     await model.load();
     model.vault.instances.add(
       InstanceRecord(
-        url: defaultInstanceUrl,
+        url: devInstanceUrl,
         token: 't',
         role: 'User',
         userUuid: 'me',

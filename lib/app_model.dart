@@ -235,6 +235,7 @@ class AppModel extends ChangeNotifier {
   /// Urls the client knows, after the allow and deny lists and the search.
   List<String> visibleInstances({bool searched = true}) {
     final known = <String>{
+      ...defaultInstanceUrls,
       ...discovered,
       ...vault.pinned,
       if (target != null) target!.url,
@@ -249,6 +250,7 @@ class AppModel extends ChangeNotifier {
 
   List<String> catalog() {
     final known = <String>{
+      ...defaultInstanceUrls,
       ...discovered,
       ...vault.pinned,
       ...vault.allow,
@@ -280,7 +282,17 @@ class AppModel extends ChangeNotifier {
       if (waitForNetwork) await refresh;
     } else {
       notifyListeners();
+      final known = _loadDefaults();
+      if (waitForNetwork) await known;
     }
+  }
+
+  /// With no favorite the built-in instances still get their portraits and
+  /// icons, so the search shows them like live ones.
+  Future<void> _loadDefaults() async {
+    final ticket = ++_ticket;
+    await _loadPortraits(ticket, defaultInstanceUrls.where(vault.admits));
+    if (ticket == _ticket && !_disposed) notifyListeners();
   }
 
   /// Starts the registration wait at the moment the cell is pressed.

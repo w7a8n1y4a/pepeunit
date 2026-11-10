@@ -3,15 +3,16 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
-import 'instance.dart';
-
-/// Web reads `instance-config.json`, which the container writes from
-/// `INSTANCE_URL` at start. An empty value means the instance that served
-/// the page. Desktop and mobile stay without a target until one is chosen.
-/// A compile-time `INSTANCE_URL` is used when it is set.
+/// The favorite instance `INSTANCE_URL` names, or null when it is not set.
+///
+/// A compile-time `INSTANCE_URL` wins on every platform. Web otherwise reads
+/// `instance-config.json`, which the container writes from `INSTANCE_URL` at
+/// start. An empty value means no favorite: the origin that served the page is
+/// not guessed, and the person picks one in the instance search. Desktop and
+/// mobile behave the same way, they only rarely have the variable.
 Future<String?> readHostedInstanceUrl({http.Client? client}) async {
   const defined = String.fromEnvironment('INSTANCE_URL');
-  if (defined.isNotEmpty) return defined;
+  if (defined.trim().isNotEmpty) return defined.trim();
   if (!kIsWeb) return null;
   final httpClient = client ?? http.Client();
   final close = client == null;
@@ -33,7 +34,5 @@ Future<String?> readHostedInstanceUrl({http.Client? client}) async {
   } finally {
     if (close) httpClient.close();
   }
-  // `flutter run` serves the client itself. That origin is not an instance.
-  if (kDebugMode) return null;
-  return Uri.base.resolve(instanceCurrentPath).replace(query: '').toString();
+  return null;
 }

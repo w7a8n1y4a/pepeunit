@@ -131,6 +131,8 @@ void main() {
       hostedUrl: () async => null,
     );
     await model.load();
+    // The built-in instances are read at start, with no favorite yet.
+    origins.clear();
     await model.adoptIdentity(Identity.generate());
     model.vault.login = 'pepe';
     model.vault.iconPng = base64.encode(Uint8List.fromList(const [1, 2, 3]));

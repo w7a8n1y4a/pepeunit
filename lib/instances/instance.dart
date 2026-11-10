@@ -69,7 +69,15 @@ class InstanceRecord {
 
 const instanceCurrentPath = '/pepeunit/api/v1/instances/current';
 
-const defaultInstanceUrl = 'https://devunit.pepeunit.com$instanceCurrentPath';
+const mainInstanceUrl = 'https://unit.pepeunit.com$instanceCurrentPath';
+
+const devInstanceUrl = 'https://devunit.pepeunit.com$instanceCurrentPath';
+
+/// Instances the client knows out of the box. They are listed in the instance
+/// search even when no favorite is set, so a native client can pick one and
+/// then pull the wider directory from that live instance. The list is
+/// extended with releases; nothing here is a favorite or a fallback.
+const defaultInstanceUrls = <String>[mainInstanceUrl, devInstanceUrl];
 
 /// The single settings row. Uploading the instance picture addresses this uuid.
 const instanceSettingsUuid = '00000000-0000-4000-8000-000000000001';

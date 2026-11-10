@@ -40,20 +40,20 @@ void main() {
         {'url': 'https://localunit.pepeunit.com', 'active': true},
       ],
     });
-    expect(vault.instances.single.url, defaultInstanceUrl);
+    expect(vault.instances.single.url, devInstanceUrl);
     expect(vault.instances.single.active, isTrue);
   });
 
   test('instance url is the current link', () {
     expect(
       canonicalInstanceUrl('https://devunit.pepeunit.com'),
-      defaultInstanceUrl,
+      devInstanceUrl,
     );
     expect(
       canonicalInstanceUrl(
         'https://devunit.pepeunit.com/pepeunit/api/v1/instances/current',
       ),
-      defaultInstanceUrl,
+      devInstanceUrl,
     );
     expect(
       () => canonicalInstanceUrl('https://devunit.pepeunit.com/pepeunit/docs'),
@@ -164,7 +164,7 @@ void main() {
     );
     model.vault.instances.add(
       InstanceRecord(
-        url: defaultInstanceUrl,
+        url: devInstanceUrl,
         active: true,
         token: 'token',
         userUuid: 'user',
@@ -181,7 +181,7 @@ void main() {
     expect(model.vault.language, 'en');
     expect(model.vault.instances.single.token, isNull);
     expect(model.vault.instances.single.userUuid, isNull);
-    expect(model.vault.instances.single.url, defaultInstanceUrl);
+    expect(model.vault.instances.single.url, devInstanceUrl);
     expect((await store.read()).hasKey, isFalse);
     expect((await store.read()).registeredAt, 5);
   });

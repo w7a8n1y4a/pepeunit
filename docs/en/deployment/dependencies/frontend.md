@@ -16,4 +16,4 @@ After the image is updated, the user gets the new version without clearing the c
 
 ### How the client finds its instance
 
-`make_env.py` builds the instance address from the settings file, and the web client connects to it on load. If the address is empty, the client works with the server it was loaded from.
+`make_env.py` builds the instance address from the settings file, and the web client connects to it on load. If the address is empty, the client has no favorite instance and the person picks one in the instance search.

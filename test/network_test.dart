@@ -149,10 +149,10 @@ void main() {
     final many = [
       for (var i = 0; i < 40; i++) 'https://h$i.example$instanceCurrentPath',
     ];
-    final aimed = networkBoard(target: defaultInstanceUrl);
+    final aimed = networkBoard(target: devInstanceUrl);
     expect(
       aimed.slots.firstWhere((slot) => slot.id == 'target').url,
-      defaultInstanceUrl,
+      devInstanceUrl,
     );
     final first = searchBoard(tick: 1, urls: many, page: 0);
     expect(first.slots.any((slot) => slot.id == 'settings'), isTrue);
@@ -682,16 +682,48 @@ void main() {
     final model = AppModel(
       store: store,
       api: (origin) => _DirectoryApi(origin),
-      hostedUrl: () async => defaultInstanceUrl,
+      hostedUrl: () async => devInstanceUrl,
     );
     await model.load();
-    expect(model.target?.url, defaultInstanceUrl);
+    expect(model.target?.url, devInstanceUrl);
     expect(
       model.vault.instances.any(
         (instance) => instance.url.contains('localhost'),
       ),
       isFalse,
     );
+  });
+
+  test('without a favorite the built-in instances are listed', () async {
+    final model = AppModel(
+      store: MemoryVaultStore(),
+      api: (origin) => _DirectoryApi(origin),
+      hostedUrl: () async => null,
+    );
+    await model.load();
+    expect(model.target, isNull);
+    expect(model.visibleInstances(), containsAll(defaultInstanceUrls));
+    expect(model.catalog(), containsAll(defaultInstanceUrls));
+    await model.denyInstance(devInstanceUrl);
+    expect(model.visibleInstances(), isNot(contains(devInstanceUrl)));
+    expect(model.visibleInstances(), contains(mainInstanceUrl));
+  });
+
+  test('a hosted address is the favorite, an empty one is not', () async {
+    final hosted = AppModel(
+      store: MemoryVaultStore(),
+      api: (origin) => _DirectoryApi(origin),
+      hostedUrl: () async => mainInstanceUrl,
+    );
+    await hosted.load();
+    expect(hosted.target?.url, mainInstanceUrl);
+    final empty = AppModel(
+      store: MemoryVaultStore(),
+      api: (origin) => _DirectoryApi(origin),
+      hostedUrl: () async => null,
+    );
+    await empty.load();
+    expect(empty.target, isNull);
   });
 
   test('local add reads current and does not create a peer', () async {
@@ -702,8 +734,10 @@ void main() {
       hostedUrl: () async => null,
     );
     await model.load();
+    // Without a favorite the built-in instances were read at start.
+    final before = api.portraits;
     await model.rememberInstance('https://unit.pepeunit.com');
-    expect(api.portraits, 1);
+    expect(api.portraits - before, 1);
     expect(api.created, isEmpty);
     expect(model.vault.pinned, [_unit]);
     expect(model.portraitOf(_unit)?.version, '1.5.0');
@@ -715,13 +749,13 @@ void main() {
     final store = MemoryVaultStore();
     store.vault = Vault.fromJson({
       'instances': [
-        {'url': defaultInstanceUrl, 'active': true, 'role': 'User'},
+        {'url': devInstanceUrl, 'active': true, 'role': 'User'},
       ],
     });
     final model = AppModel(
       store: store,
       api: (_) => api,
-      hostedUrl: () async => defaultInstanceUrl,
+      hostedUrl: () async => devInstanceUrl,
     );
     await model.load();
     await expectLater(
@@ -848,7 +882,7 @@ void main() {
     final model = AppModel(
       store: MemoryVaultStore(),
       api: (origin) => _DirectoryApi(origin),
-      hostedUrl: () async => defaultInstanceUrl,
+      hostedUrl: () async => devInstanceUrl,
     );
     await model.load();
     // The signed sections need a session on the target, not only a target.
@@ -858,7 +892,7 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(model.target?.url, defaultInstanceUrl);
+    expect(model.target?.url, devInstanceUrl);
     expect(model.discovered, containsAll([_unit, _dc]));
     expect(
       tester

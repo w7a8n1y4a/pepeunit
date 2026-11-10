@@ -196,7 +196,7 @@ InstanceRecord _migrateInstance(InstanceRecord instance) {
 String _migrateUrl(String url) {
   if (url == 'https://localunit.pepeunit.com' ||
       url == 'https://localunit.pepeunit.com$instanceCurrentPath') {
-    return defaultInstanceUrl;
+    return devInstanceUrl;
   }
   try {
     return canonicalInstanceUrl(url);
