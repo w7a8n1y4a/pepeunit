@@ -44,5 +44,6 @@ EXPOSE 80
 
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY docker/40-instance-url.sh /docker-entrypoint.d/40-instance-url.sh
-RUN chmod +x /docker-entrypoint.d/40-instance-url.sh
+COPY docker/50-og-url.sh /docker-entrypoint.d/50-og-url.sh
+RUN chmod +x /docker-entrypoint.d/40-instance-url.sh /docker-entrypoint.d/50-og-url.sh
 COPY --from=builder /app/build/web /usr/share/nginx/html
