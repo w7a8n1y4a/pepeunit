@@ -51,8 +51,12 @@ class IconAtlas {
     final pictures = <PictureInfo>[];
     for (final asset in assets) {
       try {
+        // Read on the UI isolate: SvgAssetLoader captures the bundle when
+        // compiling in a worker isolate. Its cached futures are not sendable
+        // on native platforms. Only pass the SVG text to the compiler.
+        final source = await bundle.loadString(asset);
         final info = await vg.loadPicture(
-          SvgAssetLoader(asset, assetBundle: bundle),
+          SvgStringLoader(source),
           null,
         );
         if (info.size.isEmpty) {

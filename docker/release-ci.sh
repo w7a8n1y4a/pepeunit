@@ -49,8 +49,16 @@ case "$target" in
     args+=(-f docker/release.Dockerfile --target linux --platform linux/amd64,linux/arm64
       --output "type=local,dest=$RELEASE_DIR,platform-split=false") ;;
   android)
-    : "${ANDROID_KEYSTORE_FILE:?Set a GitLab file variable containing the release keystore}"
     : "${ANDROID_KEYSTORE_PASSWORD:?}" "${ANDROID_KEY_PASSWORD:?}" "${ANDROID_KEY_ALIAS:?}"
+    if [[ -z "${ANDROID_KEYSTORE_FILE:-}" ]]; then
+      : "${ANDROID_KEYSTORE_BASE64:?Set ANDROID_KEYSTORE_BASE64 or ANDROID_KEYSTORE_FILE}"
+      ANDROID_KEYSTORE_FILE="$workspace/android-release.keystore"
+      (umask 077; printf '%s' "$ANDROID_KEYSTORE_BASE64" | base64 --decode > "$ANDROID_KEYSTORE_FILE")
+    fi
+    if [[ ! -s "$ANDROID_KEYSTORE_FILE" ]]; then
+      echo "Android release keystore is missing or empty." >&2
+      exit 1
+    fi
     args+=(-f docker/release.Dockerfile --target android --platform linux/amd64
       --build-arg "BUILD_NUMBER=${CI_PIPELINE_IID:?}"
       --secret "id=android_keystore,src=$ANDROID_KEYSTORE_FILE"

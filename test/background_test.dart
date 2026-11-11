@@ -1,11 +1,60 @@
 import 'dart:io';
 import 'dart:math';
-import 'dart:ui' show Offset, Size;
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:pepeunit_client/hive/background.dart';
+import 'package:pepeunit_client/hive/icon_atlas.dart';
 
 void main() {
+  testWidgets('bundled background SVGs produce visible atlas masks', (
+    tester,
+  ) async {
+    await tester.runAsync(() async {
+      final manifest = await AssetManifest.loadFromAssetBundle(rootBundle);
+      final assets =
+          manifest
+              .listAssets()
+              .where(
+                (asset) =>
+                    asset.startsWith('assets/background/') &&
+                    asset.endsWith('.svg'),
+              )
+              .toList()
+            ..sort();
+      expect(assets, isNotEmpty);
+      final atlas = await IconAtlas.load(rootBundle);
+      expect(atlas, isNotNull);
+      if (atlas == null) return;
+      try {
+        expect(atlas.count, assets.length);
+        final pixels = (await atlas.image.toByteData())!;
+        final side = IconAtlas.cell.toInt();
+        for (var i = 0; i < atlas.count; i++) {
+          var ink = 0;
+          var clear = 0;
+          for (var y = 0; y < side; y++) {
+            for (var x = 0; x < side; x++) {
+              final at =
+                  ((i ~/ atlas.columns * side + y) * atlas.image.width +
+                          i % atlas.columns * side +
+                          x) *
+                      4 +
+                  3;
+              final alpha = pixels.getUint8(at);
+              if (alpha > 40) ink++;
+              if (alpha == 0) clear++;
+            }
+          }
+          expect(ink, greaterThan(0), reason: assets[i]);
+          expect(clear, greaterThan(0), reason: assets[i]);
+        }
+      } finally {
+        atlas.dispose();
+      }
+    });
+  });
+
   group('Mosaic', () {
     test('covers the screen and keeps neighbours different', () {
       final mosaic = Mosaic(const Size(1200, 800), 20);
@@ -65,9 +114,10 @@ void main() {
     test('is the same for the same size', () {
       final a = Mosaic(const Size(640, 480), 12);
       final b = Mosaic(const Size(640, 480), 12);
-      expect([for (var i = 0; i < a.count; i++) a.iconAt(i)], [
-        for (var i = 0; i < b.count; i++) b.iconAt(i),
-      ]);
+      expect(
+        [for (var i = 0; i < a.count; i++) a.iconAt(i)],
+        [for (var i = 0; i < b.count; i++) b.iconAt(i)],
+      );
     });
 
     test('keeps the same few tiles flipping all the time', () {
