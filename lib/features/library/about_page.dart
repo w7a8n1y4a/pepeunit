@@ -341,7 +341,12 @@ class NativeAppsPage extends StatelessWidget {
               r: slot.r,
               icon: _platforms.firstWhere((item) => item.id == slot.id).icon,
               footer: clientVersion,
-              footerLeft: '.${platformExtensions[slot.id]}',
+              footerLeft: switch (slot.id) {
+                'linux' => '.tar.gz',
+                'windows' => '.zip',
+                _ => '.${platformExtensions[slot.id]}',
+              },
+              enabled: slot.id != 'macos' && slot.id != 'ios',
             ),
       ],
       onTap: (id) {
@@ -349,8 +354,20 @@ class NativeAppsPage extends StatelessWidget {
           popOrHome(context);
           return;
         }
-        // The link comes from the version of this client, with no request.
-        launchExternal(assetUri(githubSource, clientVersion, id));
+        if (id == 'macos' || id == 'ios') return;
+        final file = switch (id) {
+          'linux' => 'pepeunit-client-linux-amd64.tar.gz',
+          'windows' => 'pepeunit-client-windows-amd64.zip',
+          'android' => 'pepeunit-client-android-arm64-v8a.apk',
+          _ => null,
+        };
+        if (file == null) return;
+        launchExternal(
+          Uri.parse(
+            'https://git.pepemoss.com/api/v4/projects/212/packages/generic/'
+            'pepeunit-client/$clientVersion/$file',
+          ),
+        );
       },
     );
   }

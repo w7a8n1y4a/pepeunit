@@ -221,26 +221,42 @@ deploy_dev:image:master:
     - docker run -d --name=$PROJ -p 5501:80 --restart=always $DOCKER_IMAGE_NAME:$DOCKER_IMAGE_TAG
     - docker system prune -a -f
 
-# A git tag publishes the web client image to Docker Hub and writes a release.
-tag:
+# Native jobs upload immutable packages before cleaning their isolated resources.
+.tag_native:
   stage: tag
   tags:
     - shell-main-pc
-  variables:
-    HUB_IMAGE: w7a8n1y4a/pepeunit-client
   rules:
     - if: $CI_COMMIT_TAG
       when: on_success
   before_script:
     - docker run --privileged --rm tonistiigi/binfmt --install all
-    - !reference [.ensure_multiarch_builder, script]
-    - docker buildx inspect --bootstrap
+  after_script:
+    - bash docker/release-ci.sh cleanup
+
+tag:linux:
+  extends: .tag_native
+  resource_group: release-linux-$CI_COMMIT_REF_SLUG
   script:
-    - docker buildx build --platform linux/amd64,linux/arm64 --provenance=false --sbom=false -t $HUB_IMAGE:$CI_COMMIT_TAG --push .
-    - >
-      curl --silent --show-error --fail-with-body
-      --request POST "$CI_API_V4_URL/projects/$CI_PROJECT_ID/releases"
-      --header "PRIVATE-TOKEN: $CI_ACCESS_TOKEN"
-      --data-urlencode "name=Release Tag - $CI_COMMIT_TAG"
-      --data-urlencode "tag_name=$CI_COMMIT_TAG"
-      --data-urlencode "description=All builds on [Docker Hub](https://hub.docker.com/r/$HUB_IMAGE/tags) - $CI_COMMIT_TAG"
+    - bash docker/release-ci.sh linux
+
+tag:android:
+  extends: .tag_native
+  resource_group: release-android-$CI_COMMIT_REF_SLUG
+  script:
+    - bash docker/release-ci.sh android
+
+# Only publish the release once every platform's packages are available.
+tag:
+  extends: .tag_native
+  resource_group: release-publish-$CI_COMMIT_REF_SLUG
+  needs:
+    - job: tag:linux
+      artifacts: false
+    - job: tag:android
+      artifacts: false
+  variables:
+    HUB_IMAGE: w7a8n1y4a/pepeunit-client
+  script:
+    - bash docker/release-ci.sh web
+    - bash docker/publish-release.sh
