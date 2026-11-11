@@ -323,7 +323,11 @@ void main() {
           expect(step, closeTo(unit, 1e-6));
         }
       }
-      expect(gaps, 6, reason: 'seven sections have six gaps between them');
+      expect(
+        gaps,
+        screenMap.childrenOf('/').length - 1,
+        reason: 'every screen under home is parted from the next by a gap',
+      );
     });
 
     test('keeps the sections in the order of the home menu', () {
@@ -336,7 +340,11 @@ void main() {
     test('the outline lists every row with its address', () {
       final text = treeOutline('ru', screenMap);
       expect(text.split('\n').length, screenTree.length);
-      expect(text, startsWith('- Главная `/`\n  - Аккаунт `/people`'));
+      expect(text, startsWith(
+          '- Главная `/`\n'
+          '  - Только фон `/background-only`\n'
+          '  - Аккаунт `/people`',
+        ));
       expect(
         text,
         contains('\n        - Вход или выход `/units/:uuid/io/:io`'),

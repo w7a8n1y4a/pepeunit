@@ -337,7 +337,7 @@ void main() {
     expect(find.bySemanticsLabel('Публичные'), findsOneWidget);
     expect(find.bySemanticsLabel('Приватные'), findsOneWidget);
     expect(find.bySemanticsLabel('А-Я'), findsOneWidget);
-    expect(find.bySemanticsLabel('gitlab.com/pepe/unit, 1 КБ'), findsOneWidget);
+    expect(find.bySemanticsLabel('gitlab.com/pepe/unit'), findsOneWidget);
     final prompt = find.byKey(const ValueKey('line-prompt'));
     expect(tester.widget<Text>(prompt).data, 'Поиск');
     final promptBox = tester.getRect(prompt);
@@ -445,7 +445,7 @@ void main() {
     expect(find.bySemanticsLabel('Синхронизировать репо'), findsOneWidget);
     final unit = tester.getSemantics(find.bySemanticsLabel('Создать аппарат'));
     expect(unit.flagsCollection.isEnabled, Tristate.isTrue);
-    expect(find.bySemanticsLabel('gitlab.com/pepe/unit, 1 КБ'), findsOneWidget);
+    expect(find.bySemanticsLabel('gitlab.com/pepe/unit'), findsOneWidget);
   });
 
   testWidgets('update copy watches the repo until it leaves updating', (

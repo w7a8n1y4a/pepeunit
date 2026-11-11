@@ -34,9 +34,9 @@ void main() {
   ) async {
     await tester.runAsync(() async {
       final (mean, spread) = await _red(cellGrain, const ui.Color(0xFF000000));
-      // hexFill red is 0x14.
-      expect(mean, closeTo(0x14, 1));
-      expect(spread, closeTo(cellGrain.spread, 1));
+      // hexFill red is 0x14, and the fill lets the scene through.
+      expect(mean, closeTo(0x14 * hexFillOpacity, 1));
+      expect(spread, closeTo(cellGrain.spread * hexFillOpacity, 1));
     });
   });
 
