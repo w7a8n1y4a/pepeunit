@@ -11,7 +11,19 @@ export RELEASE_DIR="$workspace/output"
 # Native jobs use independent registry credentials and buildx metadata. The
 # web publish keeps the runner's existing Docker Hub authentication.
 if [[ "$target" == linux || "$target" == android || -d "$workspace/docker-config" ]]; then
+  runner_docker_config=${DOCKER_CONFIG:-$HOME/.docker}
   export DOCKER_CONFIG="$workspace/docker-config"
+  # Changing DOCKER_CONFIG also changes where Docker discovers CLI plugins.
+  # Retain the runner's plugin paths without copying its registry credentials.
+  if [[ ! -f "$DOCKER_CONFIG/config.json" ]]; then
+    mkdir -p -m 700 "$DOCKER_CONFIG"
+    runner_config="$runner_docker_config/config.json"
+    [[ -f "$runner_config" ]] || runner_config=/dev/null
+    (umask 077; jq -n --arg plugins "$runner_docker_config/cli-plugins" \
+      --slurpfile config "$runner_config" \
+      '{cliPluginsExtraDirs: (($config[0].cliPluginsExtraDirs // []) + [$plugins])}' \
+      > "$DOCKER_CONFIG/config.json")
+  fi
 fi
 
 cleanup() {
@@ -45,7 +57,10 @@ if [[ "$target" != web ]]; then
     if ((status != 3)); then exit "$status"; fi
   fi
 fi
-if [[ "$target" != web ]]; then mkdir -p "$DOCKER_CONFIG"; fi
+if ! "$DOCKER" buildx version; then
+  echo "Docker Buildx is unavailable; install docker-buildx-plugin on the runner." >&2
+  exit 1
+fi
 touch "$workspace/builder-started"
 "$DOCKER" buildx create --name "$builder" --driver docker-container --driver-opt env.GODEBUG=tlsmlkem=0
 "$DOCKER" buildx inspect "$builder" --bootstrap
