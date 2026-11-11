@@ -28,21 +28,6 @@
 | [Разработчику Unit](https://pepeunit.com/library/docs?doc=developer/alg-create-unit) | Как написать свой `Unit` |
 | [Вклад в проект](https://pepeunit.com/library/docs?doc=development-pepeunit/contribution) | Как внести вклад |
 
-## Кеш релизных сборок
-
-Linux- и Android-job сохраняют кеш BuildKit в GitLab Container Registry:
-`$CI_REGISTRY_IMAGE/build-cache:linux` и `:android`. Используются стандартные
-`CI_REGISTRY`, `CI_REGISTRY_USER` и `CI_REGISTRY_PASSWORD`. Builder и временные
-файлы удаляются после job, кеш слоёв остаётся между тегами. Первый запуск
-заполняет кеш; ускорение подготовки SDK и зависимостей ожидается со следующего.
-Для Android отдельно кешируются NDK, Gradle и плагины сборки до копирования
-исходников приложения. Maven-зависимости приложения и компиляция изменённого
-кода по-прежнему выполняются в сборочном слое.
-
-`RELEASE_CACHE_REF` позволяет указать другой адрес кеша в том же registry;
-пустое значение отключает кеширование. Linux ARM64 на x86-runner собирается
-через QEMU: для ускорения самой компиляции нужен нативный ARM64-runner.
-
 ## Репозитории
 
 | | |
