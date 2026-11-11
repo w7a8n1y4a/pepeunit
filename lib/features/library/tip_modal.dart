@@ -163,20 +163,14 @@ class _TipModalState extends State<TipModal> {
                                 ),
                                 if (_reader.canBack)
                                   CodeWordButton(
-                                    label: phrase(language, {
-                                      'ru': 'Назад',
-                                      'en': 'Back',
-                                    }),
+                                    label: localized(language, 'Назад', 'Back'),
                                     font: font,
                                     onTap: _reader.back,
                                     hint: 'button-doc-back',
                                   ),
                                 ...?widget.actions?.call(font),
                                 CodeCloseMark(
-                                  label: phrase(language, {
-                                    'ru': 'Закрыть',
-                                    'en': 'Close',
-                                  }),
+                                  label: localized(language, 'Закрыть', 'Close'),
                                   extent: font * 2.2,
                                   onTap: widget.onClose,
                                 ),

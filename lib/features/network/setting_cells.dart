@@ -6,7 +6,7 @@ import '../../hive/hex_scene.dart';
 import '../../hive/hint.dart';
 import '../../instances/settings_catalog.dart';
 import '../line_input.dart';
-import 'network_chrome.dart';
+import '../../locale/languages.dart';
 
 class EnumSettingCell extends StatelessWidget {
   const EnumSettingCell({
@@ -149,7 +149,7 @@ class _ValueSettingCellState extends State<ValueSettingCell> {
     final hint =
         widget.field.hint ??
         (widget.field.nullable
-            ? netText(widget.language, 'пусто', 'empty')
+            ? localized(widget.language, 'пусто', 'empty')
             : '');
     final problem = _dirty ? _problem : null;
     return LineInput(
@@ -178,11 +178,11 @@ class _ValueSettingCellState extends State<ValueSettingCell> {
             : 14.0;
         return HintTarget(
           id: 'button-setting-save',
-          title: netText(widget.language, 'Сохранить', 'Save'),
+          title: localized(widget.language, 'Сохранить', 'Save'),
           color: widget.color,
           child: Semantics(
             button: true,
-            label: netText(widget.language, 'Сохранить', 'Save'),
+            label: localized(widget.language, 'Сохранить', 'Save'),
             child: GestureDetector(
               behavior: HitTestBehavior.opaque,
               onTap: _submit,

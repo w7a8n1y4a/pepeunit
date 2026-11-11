@@ -10,6 +10,7 @@ import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
 import '../hex_page.dart';
 import 'network_chrome.dart';
+import '../../locale/languages.dart';
 
 class MemberPage extends StatefulWidget {
   const MemberPage({required this.uuid, super.key});
@@ -59,7 +60,6 @@ class _MemberPageState extends State<MemberPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: netText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: (id) => _tap(id, language));
@@ -74,16 +74,12 @@ class _MemberPageState extends State<MemberPage> {
   ) {
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: netText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'card':
         if (user == null) {
           return HexSlot(
             id: 'card',
-            title: netText(language, 'Пользователь', 'User'),
+            title: localized(language, 'Пользователь', 'User'),
             color: color,
             busy: _loading,
             q: slot.q,
@@ -160,7 +156,7 @@ class _MemberPageState extends State<MemberPage> {
   ) {
     return HexSlot(
       id: slot.id,
-      title: netText(language, ru, en),
+      title: localized(language, ru, en),
       color: color,
       busy: _pending == slot.id,
       q: slot.q,
@@ -192,7 +188,7 @@ class _MemberPageState extends State<MemberPage> {
     if (widget.uuid.isEmpty) {
       setState(() {
         _loading = false;
-        _failure = netText(language, 'Нет пользователя', 'No user');
+        _failure = localized(language, 'Нет пользователя', 'No user');
       });
       return;
     }

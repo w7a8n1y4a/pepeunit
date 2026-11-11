@@ -18,6 +18,7 @@ import '../line_input.dart';
 import '../network/network_chrome.dart';
 import 'unit_panels.dart';
 import 'units_chrome.dart';
+import '../../locale/languages.dart';
 
 /// Nodes of one unit. With [pickOutput] only its outputs are listed, and a tap
 /// hands the output to [AppModel.finishPick] instead of opening the node.
@@ -75,22 +76,18 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
     if (board == null) {
       final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
       slots.add(
-        backSlot(
-          title: unitText(language, 'Назад', 'Back'),
-          q: frame.back!.$1,
-          r: frame.back!.$2,
-        ),
+        backSlot(language, q: frame.back!.$1, r: frame.back!.$2),
       );
       slots.add(
         HexSlot(
           id: 'empty',
           title: _loading
-              ? unitText(language, 'Входы и выходы', 'Inputs and outputs')
+              ? localized(language, 'Входы и выходы', 'Inputs and outputs')
               : widget.anyNode
-              ? unitText(language, 'Нет узлов', 'No nodes')
+              ? localized(language, 'Нет узлов', 'No nodes')
               : widget.pickOutput
-              ? unitText(language, 'Нет выходов', 'No outputs')
-              : unitText(language, 'Пусто', 'Empty'),
+              ? localized(language, 'Нет выходов', 'No outputs')
+              : localized(language, 'Пусто', 'Empty'),
           color: widget.pickOutput && !widget.anyNode
               ? unitOutputColor
               : unitIoColor,
@@ -110,7 +107,6 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(
@@ -144,11 +140,7 @@ class _UnitIoListPageState extends State<UnitIoListPage> {
 
   HexSlot _slot(BoardSlot slot, String language, NetworkBoard board) {
     if (slot.id == 'back') {
-      return backSlot(
-        title: unitText(language, 'Назад', 'Back'),
-        q: slot.q,
-        r: slot.r,
-      );
+      return backSlot(language, q: slot.q, r: slot.r);
     }
     if (slot.id == 'prev' || slot.id == 'next') {
       final forward = slot.id == 'next';
@@ -304,7 +296,6 @@ class _UnitIoPageState extends State<UnitIoPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     final scene = HexPage(
@@ -334,15 +325,11 @@ class _UnitIoPageState extends State<UnitIoPage> {
     final color = unitIoTone(_input);
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: unitText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'card':
         return HexSlot(
           id: 'card',
-          title: io?.topic ?? unitText(language, 'Топик', 'Topic'),
+          title: io?.topic ?? localized(language, 'Топик', 'Topic'),
           sideRight: io == null ? null : unitIoTypeLabel(language, io.type),
           footer: io == null
               ? null
@@ -365,7 +352,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
       case 'value':
         return HexSlot(
           id: 'value',
-          title: unitText(language, 'Значение', 'Value'),
+          title: localized(language, 'Значение', 'Value'),
           center: io == null ? null : ioValueGlance(io.state),
           color: color,
           q: slot.q,
@@ -422,7 +409,7 @@ class _UnitIoPageState extends State<UnitIoPage> {
   }) {
     return HexSlot(
       id: slot.id,
-      title: unitText(language, ru, en),
+      title: localized(language, ru, en),
       footer: footer,
       color: color,
       q: slot.q,
@@ -569,7 +556,7 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
     final text = _max.text.trim();
     if (text.isEmpty && !_tried) return '';
     if (unitIoMaxConnections(text) != null) return '';
-    return unitText(
+    return localized(
       language,
       'От $unitIoMaxConnectionsFloor до $unitIoMaxConnectionsCeil',
       '$unitIoMaxConnectionsFloor to $unitIoMaxConnectionsCeil',
@@ -589,14 +576,10 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         switch (slot.id) {
-          'back' => backSlot(
-            title: unitText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'max' => HexSlot(
             id: 'max',
-            title: unitText(language, 'Максимум связей', 'Max links'),
+            title: localized(language, 'Максимум связей', 'Max links'),
             color: tone,
             q: slot.q,
             r: slot.r,
@@ -617,7 +600,7 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
           ),
           'visibility' => HexSlot(
             id: 'visibility',
-            title: unitText(language, 'Видимость', 'Visibility'),
+            title: localized(language, 'Видимость', 'Visibility'),
             color: tone,
             q: slot.q,
             r: slot.r,
@@ -635,10 +618,10 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
           ),
           'rewrite' => HexSlot(
             id: 'rewrite',
-            title: unitText(language, 'Перезаписываемый?', 'Rewritable?'),
+            title: localized(language, 'Перезаписываемый?', 'Rewritable?'),
             footer: _rewritable
-                ? unitText(language, 'да', 'yes')
-                : unitText(language, 'нет', 'no'),
+                ? localized(language, 'да', 'yes')
+                : localized(language, 'нет', 'no'),
             color: tone,
             enabled: ready,
             q: slot.q,
@@ -649,7 +632,7 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
           ),
           'save' => HexSlot(
             id: 'save',
-            title: unitText(language, 'Сохранить', 'Save'),
+            title: localized(language, 'Сохранить', 'Save'),
             color: unitAddColor,
             busy: _busy,
             enabled: ready,
@@ -671,7 +654,6 @@ class _UnitIoSettingsPageState extends State<UnitIoSettingsPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(
@@ -816,15 +798,11 @@ class _UnitLinksPageState extends State<UnitLinksPage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         if (slot.id == 'back')
-          backSlot(
-            title: unitText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          )
+          backSlot(language, q: slot.q, r: slot.r)
         else if (slot.id == 'add')
           HexSlot(
             id: 'add',
-            title: unitText(language, 'Добавить', 'Add'),
+            title: localized(language, 'Добавить', 'Add'),
             color: unitLinkColor,
             busy: _loading || _adding,
             q: slot.q,
@@ -839,7 +817,6 @@ class _UnitLinksPageState extends State<UnitLinksPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: _tap);
@@ -982,7 +959,7 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
     final language = AppScope.of(context).vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
     final limit = AppScope.of(context).cappedLimit(headPageLimit(widget.scope));
-    final board = headBoard(
+    final board = listBoard(
       tick: widget.scope,
       head: const ['filter', 'window'],
       ids: [for (var i = 0; i < _rows.length; i++) '$i'],
@@ -993,14 +970,10 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
     final slots = <HexSlot>[
       for (final slot in board.slots)
         switch (slot.id) {
-          'back' => backSlot(
-            title: unitText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'filter' => HexSlot(
             id: 'filter',
-            title: unitText(language, 'Политика', 'Policy'),
+            title: localized(language, 'Политика', 'Policy'),
             color: _tone,
             q: slot.q,
             r: slot.r,
@@ -1021,7 +994,7 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
           ),
           'window' => HexSlot(
             id: 'window',
-            title: unitText(language, 'Страница', 'Page'),
+            title: localized(language, 'Страница', 'Page'),
             color: _tone,
             busy: _loading,
             q: slot.q,
@@ -1064,7 +1037,6 @@ class _UnitPipeDataPageState extends State<UnitPipeDataPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(

@@ -553,15 +553,15 @@ String _kindTitle(MdAdmonitionKind kind) => admonitionTitle(kind, 'ru');
 String admonitionTitle(MdAdmonitionKind kind, String language) {
   switch (kind) {
     case MdAdmonitionKind.info:
-      return phrase(language, {'ru': 'Информация', 'en': 'Information'});
+      return localized(language, 'Информация', 'Information');
     case MdAdmonitionKind.tip:
-      return phrase(language, {'ru': 'Совет', 'en': 'Tip'});
+      return localized(language, 'Совет', 'Tip');
     case MdAdmonitionKind.warning:
-      return phrase(language, {'ru': 'Внимание', 'en': 'Warning'});
+      return localized(language, 'Внимание', 'Warning');
     case MdAdmonitionKind.danger:
-      return phrase(language, {'ru': 'Опасно', 'en': 'Danger'});
+      return localized(language, 'Опасно', 'Danger');
     case MdAdmonitionKind.details:
-      return phrase(language, {'ru': 'Подробнее', 'en': 'Details'});
+      return localized(language, 'Подробнее', 'Details');
   }
 }
 

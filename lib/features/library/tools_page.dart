@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../app_scope.dart';
 import '../../hive/hex_motion.dart';
@@ -13,6 +12,7 @@ import '../../navigation/back.dart';
 import '../file_drop.dart';
 import '../hex_page.dart';
 import 'library_menu_page.dart';
+import '../../locale/languages.dart';
 
 /// The tools of the Library: the README.md generator.
 class ToolsPage extends StatefulWidget {
@@ -40,7 +40,6 @@ class _ToolsPageState extends State<ToolsPage> {
       message: _failure,
       open: _failureOpen,
       language: language,
-      text: libErrorText,
       wide: wide,
     );
     return HexPage(
@@ -63,15 +62,11 @@ class _ToolsPageState extends State<ToolsPage> {
   HexSlot _slot(BoardSlot slot, String language) {
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: libText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       default:
         return HexSlot(
           id: 'readme',
-          title: libText(language, 'Генератор README', 'README generator'),
+          title: localized(language, 'Генератор README', 'README generator'),
           color: dropColor(_dragHot, libraryColor),
           busy: _busy,
           q: slot.q,
@@ -103,7 +98,7 @@ class _ToolsPageState extends State<ToolsPage> {
     setState(() => _busy = true);
     try {
       final bytes = await model.files.pick(
-        dialogTitle: libText(language, 'Выбрать pepeunit.toml', 'Choose pepeunit.toml'),
+        dialogTitle: localized(language, 'Выбрать pepeunit.toml', 'Choose pepeunit.toml'),
       );
       if (!mounted) return;
       if (bytes == null) {
@@ -113,7 +108,7 @@ class _ToolsPageState extends State<ToolsPage> {
       await _generate(bytes, language);
     } catch (_) {
       if (!mounted) return;
-      _fail(libText(
+      _fail(localized(
           language,
           'Не удалось прочитать файл',
           'The file could not be read',
@@ -137,7 +132,7 @@ class _ToolsPageState extends State<ToolsPage> {
       await _generate(bytes, language);
     } catch (_) {
       if (!mounted) return;
-      _fail(libText(
+      _fail(localized(
           language,
           'Не удалось прочитать файл',
           'The file could not be read',
@@ -148,7 +143,7 @@ class _ToolsPageState extends State<ToolsPage> {
   Future<void> _generate(Uint8List bytes, String language) async {
     final model = AppScope.of(context);
     if (bytes.isEmpty) {
-      _fail(libText(language, 'Файл пустой', 'The file is empty'));
+      _fail(localized(language, 'Файл пустой', 'The file is empty'));
       return;
     }
     try {

@@ -16,6 +16,7 @@ import '../code/code_modal.dart';
 import '../hex_page.dart';
 import 'library_menu_page.dart';
 import 'library_modal.dart';
+import '../../locale/languages.dart';
 
 class AboutPage extends StatefulWidget {
   const AboutPage({super.key});
@@ -48,14 +49,10 @@ class _AboutPageState extends State<AboutPage> {
     final slots = [
       for (final slot in board)
         switch (slot.id) {
-          'back' => backSlot(
-            title: libText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'version' => HexSlot(
             id: 'version',
-            title: libText(language, 'Версия клиента', 'Client version'),
+            title: localized(language, 'Версия клиента', 'Client version'),
             color: libraryColor,
             q: slot.q,
             r: slot.r,
@@ -65,7 +62,7 @@ class _AboutPageState extends State<AboutPage> {
           ),
           'updates' => HexSlot(
             id: 'updates',
-            title: libText(language, 'Проверить обновления', 'Check updates'),
+            title: localized(language, 'Проверить обновления', 'Check updates'),
             color: libraryColor,
             q: slot.q,
             r: slot.r,
@@ -74,7 +71,7 @@ class _AboutPageState extends State<AboutPage> {
           ),
           'apps' => HexSlot(
             id: 'apps',
-            title: libText(language, 'Нативные приложения', 'Native apps'),
+            title: localized(language, 'Нативные приложения', 'Native apps'),
             color: libraryColor,
             q: slot.q,
             r: slot.r,
@@ -82,7 +79,7 @@ class _AboutPageState extends State<AboutPage> {
           ),
           'social' => HexSlot(
             id: 'social',
-            title: libText(language, 'Соцсети', 'Social'),
+            title: localized(language, 'Соцсети', 'Social'),
             color: libraryColor,
             q: slot.q,
             r: slot.r,
@@ -90,7 +87,7 @@ class _AboutPageState extends State<AboutPage> {
           ),
           _ => HexSlot(
             id: 'support',
-            title: libText(language, 'Поддержать проект', 'Support the project'),
+            title: localized(language, 'Поддержать проект', 'Support the project'),
             color: libraryColor,
             q: slot.q,
             r: slot.r,
@@ -103,7 +100,6 @@ class _AboutPageState extends State<AboutPage> {
       message: _failure,
       open: _failureOpen,
       language: language,
-      text: libErrorText,
       wide: wide,
     );
     final scene = HexPage(
@@ -143,20 +139,20 @@ class _AboutPageState extends State<AboutPage> {
     final binary = result.binary;
     final native = nativePlatform() != null;
     final title = switch (result.state) {
-      UpdateState.available => libText(
+      UpdateState.available => localized(
         language,
         'Версия ${result.latest}',
         'Version ${result.latest}',
       ),
-      _ => libText(language, 'Обновления', 'Updates'),
+      _ => localized(language, 'Обновления', 'Updates'),
     };
     final source = switch (result.state) {
-      UpdateState.current => libText(
+      UpdateState.current => localized(
         language,
         'Установлена последняя версия: $clientVersion.',
         'The latest version is installed: $clientVersion.',
       ),
-      UpdateState.noAssets => libText(
+      UpdateState.noAssets => localized(
         language,
         'Вышла версия ${result.latest}, но у неё пока нет файлов. '
         'Попробуйте позже.',
@@ -165,7 +161,7 @@ class _AboutPageState extends State<AboutPage> {
       ),
       UpdateState.available =>
         result.notes ??
-            libText(
+            localized(
               language,
               'Описание изменений недоступно.',
               'The release notes are not available.',
@@ -181,7 +177,7 @@ class _AboutPageState extends State<AboutPage> {
       note:
           _note ??
           (missing
-              ? libText(
+              ? localized(
                   language,
                   'В релизе нет файла для этой платформы.',
                   'The release has no file for this platform.',
@@ -192,7 +188,7 @@ class _AboutPageState extends State<AboutPage> {
           ? null
           : (font) => [
               CodeWordButton(
-                label: libText(
+                label: localized(
                   language,
                   'Обновиться до ${result.latest}',
                   'Update to ${result.latest}',
@@ -245,7 +241,7 @@ class _AboutPageState extends State<AboutPage> {
     } on TimeoutException {
       if (!mounted) return;
       _fail(
-        libErrorText(
+        localized(
           language,
           'Проверка заняла больше минуты',
           'The check took longer than a minute',
@@ -254,7 +250,7 @@ class _AboutPageState extends State<AboutPage> {
     } catch (_) {
       if (!mounted) return;
       _fail(
-        libErrorText(
+        localized(
           language,
           'Не удалось проверить обновления',
           'Updates could not be checked',
@@ -283,21 +279,21 @@ class _AboutPageState extends State<AboutPage> {
       if (!mounted) return;
       if (await replaceRunningApp(bytes, platform)) {
         ok = true;
-        note = libText(
+        note = localized(
           language,
           'Обновлено. Перезапустите приложение, чтобы начать с новой версии.',
           'Updated. Restart the app to start the new version.',
         );
       } else if (await model.saveBytes(binary.name, bytes)) {
         ok = true;
-        note = libText(
+        note = localized(
           language,
           'Файл сохранён. Установите его, чтобы обновиться.',
           'The file is saved. Install it to update.',
         );
       }
     } catch (_) {
-      note = libErrorText(
+      note = localized(
         language,
         'Не удалось скачать обновление',
         'The update could not be downloaded',
@@ -335,7 +331,7 @@ class NativeAppsPage extends StatelessWidget {
       slots: [
         for (final slot in board)
           if (slot.id == 'back')
-            backSlot(title: libText(language, 'Назад', 'Back'), q: slot.q, r: slot.r)
+            backSlot(language, q: slot.q, r: slot.r)
           else
             HexSlot(
               id: slot.id,
@@ -407,7 +403,7 @@ class SocialLinksPage extends StatelessWidget {
       slots: [
         for (final slot in board)
           if (slot.id == 'back')
-            backSlot(title: libText(language, 'Назад', 'Back'), q: slot.q, r: slot.r)
+            backSlot(language, q: slot.q, r: slot.r)
           else
             HexSlot(
               id: slot.id,

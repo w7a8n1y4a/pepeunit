@@ -13,8 +13,10 @@ import '../../units/unit_view.dart';
 import '../hex_page.dart';
 import '../line_input.dart';
 import '../network/network_chrome.dart';
+import '../paged_search.dart';
 import '../slanted_choices.dart';
 import 'units_chrome.dart';
+import '../../locale/languages.dart';
 
 /// Unit search. [pick] returns the chosen uuid with [pop] instead of opening
 /// the card. [outputsOnly] lists only units that have an output, and a tap
@@ -46,13 +48,10 @@ class UnitsPage extends StatefulWidget {
   State<UnitsPage> createState() => _UnitsPageState();
 }
 
-class _UnitsPageState extends State<UnitsPage> {
-  var _offset = 0;
-  var _loading = false;
-  var _failureOpen = false;
-  String? _failure;
-  var _ticket = 0;
-  final _typing = SearchDelay();
+class _UnitsPageState extends State<UnitsPage> with PagedSearch<UnitsPage> {
+  @override
+  int scopeOf(UnitsPage widget) => widget.scope;
+
   List<Unit> _units = const [];
   var _count = 0;
   late final UnitQuery _local = UnitQuery();
@@ -66,28 +65,6 @@ class _UnitsPageState extends State<UnitsPage> {
 
   int _capacity() => AppScope.of(context)
       .pageCapacity(headPageLimit(scaleTickMax, head: unitsHead));
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _load();
-    });
-  }
-
-  @override
-  void didUpdateWidget(UnitsPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.scope == widget.scope) return;
-    _offset = 0;
-    _load();
-  }
-
-  @override
-  void dispose() {
-    _typing.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,10 +82,9 @@ class _UnitsPageState extends State<UnitsPage> {
     ];
     appendError(
       slots,
-      message: _failure,
-      open: _failureOpen,
+      message: failure,
+      open: failureOpen,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(
@@ -133,28 +109,24 @@ class _UnitsPageState extends State<UnitsPage> {
     final color = unitsColor;
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: unitText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'query':
         return HexSlot(
           id: 'query',
-          title: unitText(language, 'Поиск', 'Search'),
+          title: localized(language, 'Поиск', 'Search'),
           color: color,
           q: slot.q,
           r: slot.r,
           body: _QueryCell(
             query: _query(context),
             local: widget.pick,
-            onSearch: _searchLater,
+            onSearch: searchLater,
           ),
         );
       case 'filter':
         return HexSlot(
           id: 'filter',
-          title: unitText(language, 'Показать', 'Show'),
+          title: localized(language, 'Показать', 'Show'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -162,20 +134,20 @@ class _UnitsPageState extends State<UnitsPage> {
           body: _ShowCell(
             query: _query(context),
             local: widget.pick,
-            onRetune: _retune,
+            onRetune: retune,
           ),
         );
       case 'window':
         return HexSlot(
           id: 'window',
-          title: unitText(language, 'Страница', 'Page'),
+          title: localized(language, 'Страница', 'Page'),
           color: color,
-          busy: _loading,
+          busy: loading,
           q: slot.q,
           r: slot.r,
           body: UnitWindow(
             language: language,
-            offset: _offset,
+            offset: offset,
             limit: limit,
             count: _count,
             capacity: _capacity(),
@@ -228,22 +200,8 @@ class _UnitsPageState extends State<UnitsPage> {
       case 'back':
         popOrHome(context);
       case 'error':
-        setState(() => _failureOpen = true);
+        setState(() => failureOpen = true);
     }
-  }
-
-  void _searchLater() {
-    _typing.later(() {
-      if (!mounted) return;
-      setState(() => _offset = 0);
-      _load();
-    });
-  }
-
-  void _retune() {
-    _typing.cancel();
-    setState(() => _offset = 0);
-    _load();
   }
 
   void _order(String value) {
@@ -251,63 +209,31 @@ class _UnitsPageState extends State<UnitsPage> {
         ? _query(context).setOrder(value)
         : AppScope.of(context).setUnitOrder(value);
     if (!changed) return;
-    _retune();
+    retune();
   }
 
-  void _step(int direction) {
-    if (_loading) return;
-    final limit = _rowLimit();
-    final next = pageShift(
-      direction: direction,
-      offset: _offset,
-      limit: limit,
-      count: _count,
-      capacity: _capacity(),
+  void _step(int direction) => step(
+    direction,
+    limit: _rowLimit(),
+    count: _count,
+    capacity: _capacity(),
+  );
+
+  @override
+  Future<VoidCallback?> fetch(AppModel model) async {
+    final page = await model.listUnits(
+      offset: offset,
+      limit: _rowLimit(),
+      query: _query(context),
+      ioTypes: widget._nodeTypes,
     );
-    if (next == null) return;
-    setState(() => _offset = next);
-    _load();
-  }
-
-  Future<void> _load() async {
-    final ticket = ++_ticket;
-    final model = AppScope.of(context);
-    if (!model.signedIn) {
-      setState(() {
-        _loading = false;
-        _failure = model.notSignedIn;
-      });
-      return;
-    }
-    setState(() {
-      _loading = true;
-      _failure = null;
-      _failureOpen = false;
-    });
-    try {
-      final limit = _rowLimit();
-      final page = await model.listUnits(
-        offset: _offset,
-        limit: limit,
-        query: _query(context),
-        ioTypes: widget._nodeTypes,
-      );
-      if (!mounted || ticket != _ticket) return;
-      unawaited(
-        model.ensureIcons([for (final unit in page.units) unit.iconUuid]),
-      );
-      setState(() {
-        _units = page.units;
-        _count = page.count;
-        _loading = false;
-      });
-    } catch (error) {
-      if (!mounted || ticket != _ticket) return;
-      setState(() {
-        _loading = false;
-        _failure = '$error';
-      });
-    }
+    unawaited(
+      model.ensureIcons([for (final unit in page.units) unit.iconUuid]),
+    );
+    return () {
+      _units = page.units;
+      _count = page.count;
+    };
   }
 }
 
@@ -359,7 +285,7 @@ class _QueryCellState extends State<_QueryCell> {
       color: unitsColor,
       controller: _controller,
       fieldKey: const ValueKey('unit-search'),
-      hint: unitText(language, 'Название', 'Name'),
+      hint: localized(language, 'Название', 'Name'),
       leading: 'assets/icons/actions/search.svg',
       onChanged: (text) {
         if (widget.local) {

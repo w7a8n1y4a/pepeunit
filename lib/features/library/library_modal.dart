@@ -5,7 +5,7 @@ import '../../hive/hex_scene.dart';
 import '../../library/library.dart';
 import '../code/code_modal.dart';
 import 'doc_reader.dart';
-import 'library_menu_page.dart';
+import '../../locale/languages.dart';
 
 /// A short Library text in one frame: a [CodeModal] whose body is a rendered
 /// markdown or its source with line numbers ([DocBody]). Tips, the
@@ -107,14 +107,14 @@ class _LibraryModalState extends State<LibraryModal> {
       actions: (font) => [
         if (_reader.canBack)
           CodeWordButton(
-            label: libText(language, 'Назад', 'Back'),
+            label: localized(language, 'Назад', 'Back'),
             font: font,
             onTap: _reader.back,
             hint: 'button-doc-back',
           ),
         ...?widget.actions?.call(font),
         CodeChip(
-          label: libText(language, 'Рендер', 'Render'),
+          label: localized(language, 'Рендер', 'Render'),
           on: !raw,
           font: font,
           color: widget.color,
@@ -122,7 +122,7 @@ class _LibraryModalState extends State<LibraryModal> {
           hint: 'button-render',
         ),
         CodeChip(
-          label: libText(language, 'Исходник', 'Source'),
+          label: localized(language, 'Исходник', 'Source'),
           on: raw,
           font: font,
           color: widget.color,

@@ -351,11 +351,11 @@ bool unitOwnedBy(String creator, String? userUuid) {
 String unitVisibilityLabel(String language, String visibility) {
   switch (visibility) {
     case 'Public':
-      return phrase(language, {'ru': 'Публичный', 'en': 'Public'});
+      return localized(language, 'Публичный', 'Public');
     case 'Internal':
-      return phrase(language, {'ru': 'Внутренний', 'en': 'Internal'});
+      return localized(language, 'Внутренний', 'Internal');
     case 'Private':
-      return phrase(language, {'ru': 'Приватный', 'en': 'Private'});
+      return localized(language, 'Приватный', 'Private');
     default:
       return visibility;
   }
@@ -365,9 +365,9 @@ String unitVisibilityLabel(String language, String visibility) {
 String unitIoTypeLabel(String language, String type) {
   switch (type) {
     case 'Input':
-      return phrase(language, {'ru': 'Вход', 'en': 'Input'});
+      return localized(language, 'Вход', 'Input');
     case 'Output':
-      return phrase(language, {'ru': 'Выход', 'en': 'Output'});
+      return localized(language, 'Выход', 'Output');
     default:
       return type;
   }
@@ -394,27 +394,15 @@ bool unitIoPipeCapable(String topic) => topic.endsWith('/pepeunit');
 String unitCommandLabel(String language, String command) {
   switch (command) {
     case 'Update':
-      return phrase(language, {
-        'ru': 'Обновить прошивку',
-        'en': 'Update firmware',
-      });
+      return localized(language, 'Обновить прошивку', 'Update firmware');
     case 'EnvUpdate':
-      return phrase(language, {
-        'ru': 'Обновить окружение',
-        'en': 'Update environment',
-      });
+      return localized(language, 'Обновить окружение', 'Update environment');
     case 'SchemaUpdate':
-      return phrase(language, {'ru': 'Обновить схему', 'en': 'Update schema'});
+      return localized(language, 'Обновить схему', 'Update schema');
     case 'LogSync':
-      return phrase(language, {
-        'ru': 'Синхронизировать логи',
-        'en': 'Sync logs',
-      });
+      return localized(language, 'Синхронизировать логи', 'Sync logs');
     case 'Reset':
-      return phrase(language, {
-        'ru': 'Перезапустить аппарат',
-        'en': 'Restart unit',
-      });
+      return localized(language, 'Перезапустить аппарат', 'Restart unit');
     default:
       return command;
   }
@@ -423,11 +411,11 @@ String unitCommandLabel(String language, String command) {
 String firmwareStatusLabel(String language, String? status) {
   switch (status) {
     case 'RequestSent':
-      return phrase(language, {'ru': 'Запрошено', 'en': 'Requested'});
+      return localized(language, 'Запрошено', 'Requested');
     case 'Success':
-      return phrase(language, {'ru': 'Готово', 'en': 'Done'});
+      return localized(language, 'Готово', 'Done');
     case 'Error':
-      return phrase(language, {'ru': 'Ошибка', 'en': 'Error'});
+      return localized(language, 'Ошибка', 'Error');
     default:
       return '—';
   }

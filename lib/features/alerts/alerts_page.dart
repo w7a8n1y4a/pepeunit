@@ -15,6 +15,7 @@ import '../slanted_choices.dart';
 import '../code/code_modal.dart';
 import '../code/code_view.dart';
 import 'alerts_chrome.dart';
+import '../../locale/languages.dart';
 
 class AlertsPage extends StatefulWidget {
   const AlertsPage({required this.scope, super.key});
@@ -82,7 +83,6 @@ class _AlertsPageState extends State<AlertsPage> {
       message: _failure,
       open: _failureOpen,
       language: language,
-      text: alertText,
       wide: wide,
     );
     final scene = HexPage(
@@ -104,8 +104,8 @@ class _AlertsPageState extends State<AlertsPage> {
         scene,
         CodeModal(
           title: open.hasLog
-              ? alertText(language, 'Результаты тестов', 'Test results')
-              : alertText(language, 'Уведомление', 'Notification'),
+              ? localized(language, 'Результаты тестов', 'Test results')
+              : localized(language, 'Уведомление', 'Notification'),
           color: color,
           onClose: close,
           text: text,
@@ -127,15 +127,11 @@ class _AlertsPageState extends State<AlertsPage> {
   ) {
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: alertText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'filter':
         return HexSlot(
           id: 'filter',
-          title: alertText(language, 'Фильтр', 'Filter'),
+          title: localized(language, 'Фильтр', 'Filter'),
           color: color,
           busy: _loading,
           q: slot.q,
@@ -154,7 +150,7 @@ class _AlertsPageState extends State<AlertsPage> {
       case 'types':
         return HexSlot(
           id: 'types',
-          title: alertText(language, 'Видимые типы', 'Visible types'),
+          title: localized(language, 'Видимые типы', 'Visible types'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -260,7 +256,7 @@ class _AlertsPageState extends State<AlertsPage> {
   }
 
   int _limit(AppModel model) =>
-      model.cappedLimit(noticePageLimit(widget.scope));
+      model.cappedLimit(headPageLimit(widget.scope));
 
   void _step(int direction) {
     if (_loading) return;
@@ -272,7 +268,7 @@ class _AlertsPageState extends State<AlertsPage> {
       offset: _offset,
       limit: limit,
       count: count,
-      capacity: model.pageCapacity(noticePageLimit(scaleTickMax)),
+      capacity: model.pageCapacity(headPageLimit(scaleTickMax)),
     );
     if (next == null) return;
     setState(() => _offset = next);
@@ -338,14 +334,14 @@ class _FilterCell extends StatelessWidget {
       offset: offset,
       limit: limit,
       count: count,
-      ofWord: alertText(language, 'из', 'of'),
+      ofWord: localized(language, 'из', 'of'),
     );
-    final back = noticeCanPageBack(
+    final back = listCanBack(
       offset: offset,
       count: count,
       cap: model.pageLimit,
     );
-    final forward = noticeCanPageForward(
+    final forward = listCanForward(
       offset: offset,
       limit: limit,
       count: count,
@@ -384,11 +380,11 @@ class _FilterCell extends StatelessWidget {
               SizedBox(height: side * 0.06),
               HintTarget(
                 id: 'button-read-all',
-                title: alertText(language, 'Прочитать все', 'Read all'),
+                title: localized(language, 'Прочитать все', 'Read all'),
                 color: color,
                 child: Semantics(
                   button: true,
-                  label: alertText(language, 'Прочитать все', 'Read all'),
+                  label: localized(language, 'Прочитать все', 'Read all'),
                   child: GestureDetector(
                     behavior: HitTestBehavior.opaque,
                     onTap: onReadAll,
@@ -399,7 +395,7 @@ class _FilterCell extends StatelessWidget {
                         child: FittedBox(
                           fit: BoxFit.scaleDown,
                           child: Text(
-                            alertText(language, 'Прочитать все', 'Read all'),
+                            localized(language, 'Прочитать все', 'Read all'),
                             key: const ValueKey('notice-read-all'),
                             style: style.copyWith(
                               color: color,
@@ -433,12 +429,12 @@ class _FilterCell extends StatelessWidget {
                     range: range,
                     canBack: back,
                     canForward: forward,
-                    previousLabel: alertText(
+                    previousLabel: localized(
                       language,
                       'Предыдущие',
                       'Previous',
                     ),
-                    nextLabel: alertText(language, 'Следующие', 'Next'),
+                    nextLabel: localized(language, 'Следующие', 'Next'),
                     onStep: onStep,
                     style: style,
                     chevronExtent: side * 0.14,

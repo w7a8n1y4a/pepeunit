@@ -27,9 +27,6 @@ String treeLocation(String node) {
   ).toString();
 }
 
-String _t(String language, String ru, String en) =>
-    phrase(language, {'ru': ru, 'en': en});
-
 /// Whether this session may go to [node]: its section is open on the chosen
 /// instance, and the account has what the row asks. A creator is told apart
 /// by the record, which the tree does not know, so a signed-in account passes.
@@ -71,12 +68,12 @@ String? _closedWhy(String language, ScreenNode node, ScreenMap map) {
   final need = map.needOf(node.path);
   if (need == ScreenNeed.open) {
     return switch (node.section) {
-      'alerts' => _t(
+      'alerts' => localized(
         language,
         'нужны вход и включённые уведомления',
         'a sign-in and enabled alerts are needed',
       ),
-      _ => _t(language, 'нужен выбранный экземпляр', 'a chosen instance'),
+      _ => localized(language, 'нужен выбранный экземпляр', 'a chosen instance'),
     };
   }
   return screenNeedLabel(language, need).toLowerCase();
@@ -92,11 +89,11 @@ String treeCardText(
   final lines = <String>[
     '`${node.screenPath}`',
     '',
-    '- ${_t(language, 'Вид', 'Kind')}: ${screenKindLabel(language, node.kind)}',
+    '- ${localized(language, 'Вид', 'Kind')}: ${screenKindLabel(language, node.kind)}',
   ];
   if (node.path != screenRoot) {
     lines.add(
-      '- ${_t(language, 'Путь', 'Path')}: '
+      '- ${localized(language, 'Путь', 'Path')}: '
       '${screenRouteText(language, map, node.path)}',
     );
   }
@@ -104,26 +101,26 @@ String treeCardText(
     final screen = map.node(node.screenPath);
     if (screen != null) {
       lines.add(
-        '- ${_t(language, 'На экране', 'On the screen')}: '
+        '- ${localized(language, 'На экране', 'On the screen')}: '
         '${screen.title(language)}',
       );
     }
   }
   lines.add(
-    '- ${_t(language, 'Доступ', 'Access')}: ${available ? _t(language, 'есть', 'yes') : _t(language, 'нет', 'no')}'
+    '- ${localized(language, 'Доступ', 'Access')}: ${available ? localized(language, 'есть', 'yes') : localized(language, 'нет', 'no')}'
     '${available ? '' : ', ${_closedWhy(language, node, map)}'}',
   );
   final inside = map.childrenOf(node.path);
   if (inside.isNotEmpty) {
     final shown = inside.take(8).map((item) => item.title(language));
     lines.add(
-      '- ${_t(language, 'Внутри', 'Inside')}: ${shown.join(', ')}'
+      '- ${localized(language, 'Внутри', 'Inside')}: ${shown.join(', ')}'
       '${inside.length > 8 ? ', …' : ''}',
     );
   }
   if (!node.isCell && !node.open) {
     lines.add(
-      '- ${_t(language, 'Открывается только через родителя: нужна запись или данные предыдущего экрана.', 'Opens only through its parent: it needs a record or the data of the screen before it.')}',
+      '- ${localized(language, 'Открывается только через родителя: нужна запись или данные предыдущего экрана.', 'Opens only through its parent: it needs a record or the data of the screen before it.')}',
     );
   }
   return lines.join('\n');
@@ -246,7 +243,7 @@ class _TreePageState extends State<TreePage> {
                     child: ConstrainedBox(
                       constraints: BoxConstraints(maxWidth: font * 16),
                       child: TreeSearchPill(
-                        label: _t(language, 'Поиск пути', 'Path search'),
+                        label: localized(language, 'Поиск пути', 'Path search'),
                         font: font,
                         onTap: () => setState(() {
                           _card = null;
@@ -257,13 +254,13 @@ class _TreePageState extends State<TreePage> {
                   ),
                 ),
                 CodeWordButton(
-                  label: _t(language, 'Целиком', 'Fit'),
+                  label: localized(language, 'Целиком', 'Fit'),
                   font: font,
                   onTap: () => _mapKey.currentState?.fit(),
                   hint: 'button-tree-fit',
                 ),
                 CodeCloseMark(
-                  label: _t(language, 'Закрыть', 'Close'),
+                  label: localized(language, 'Закрыть', 'Close'),
                   extent: font * 2.2,
                   onTap: () => closeLibrary(context, '/library'),
                 ),
@@ -283,19 +280,19 @@ class _TreePageState extends State<TreePage> {
                   children: [
                     chip(
                       TreeShow.all,
-                      _t(language, 'Все', 'All'),
+                      localized(language, 'Все', 'All'),
                       total,
                       'button-tree-show-all',
                     ),
                     chip(
                       TreeShow.yes,
-                      _t(language, 'Доступные', 'Available'),
+                      localized(language, 'Доступные', 'Available'),
                       yes,
                       'button-tree-show-yes',
                     ),
                     chip(
                       TreeShow.no,
-                      _t(language, 'Недоступные', 'Closed'),
+                      localized(language, 'Недоступные', 'Closed'),
                       total - yes,
                       'button-tree-show-no',
                     ),
@@ -308,7 +305,7 @@ class _TreePageState extends State<TreePage> {
                     child: Text(
                       picked != null && picked.path != screenRoot
                           ? screenRouteText(language, screenMap, picked.path)
-                          : _t(
+                          : localized(
                               language,
                               'Заливка: открывается по адресу. Малая сота: кнопка или поле экрана. Тусклая: закрыта для этой сессии.',
                               'Filled: opens from its address. Small: a button or a field of a screen. Dim: closed for this session.',
@@ -355,7 +352,7 @@ class _TreePageState extends State<TreePage> {
       actions: (font) => [
         if (!card.isCell && card.open && yes && card.path != treePath)
           CodeWordButton(
-            label: _t(language, 'Открыть', 'Open'),
+            label: localized(language, 'Открыть', 'Open'),
             font: font,
             onTap: () => context.push(card.path),
             hint: 'button-tree-open',

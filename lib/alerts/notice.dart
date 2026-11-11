@@ -162,62 +162,18 @@ DateTime? _utc(String raw) {
   );
 }
 
-/// Cards beside Back, the filter, and the type menu at this tick.
-int noticePageLimit(int tick) =>
-    scaleTickCells(tick.clamp(scaleTickMin, scaleTickMax)) - 3;
-
-bool noticeCanPageBack({
-  required int offset,
-  required int count,
-  int? cap,
-}) => pageCanBack(
-  offset: offset,
-  count: count,
-  capacity: capacityUnder(noticePageLimit(scaleTickMax), cap),
-);
-
-bool noticeCanPageForward({
-  required int offset,
-  required int limit,
-  required int count,
-  int? cap,
-}) => pageCanForward(
-  offset: offset,
-  limit: limit,
-  count: count,
-  capacity: capacityUnder(noticePageLimit(scaleTickMax), cap),
-);
-
 /// Back, filter, type menu, then notice cards. The tick caps the disk.
 NetworkBoard noticesBoard({
   required int tick,
   required List<String> uuids,
   bool wide = false,
-}) {
-  final step = tick.clamp(scaleTickMin, scaleTickMax);
-  final ids = <String>[
-    'filter',
-    'types',
-    for (final uuid in uuids) 'notice:$uuid',
-  ];
-  final frame = hexFrame(
-    count: ids.length,
-    back: HexBack.center,
-    wide: wide,
-    cells: scaleTickCells(step),
-  );
-  final back = frame.back!;
-  return NetworkBoard(
-    slots: [
-      BoardSlot('back', back.$1, back.$2),
-      for (var i = 0; i < ids.length && i < frame.cells.length; i++)
-        BoardSlot(ids[i], frame.cells[i].$1, frame.cells[i].$2),
-    ],
-    canZoomIn: step < scaleTickMax,
-    page: 0,
-    pages: 1,
-  );
-}
+}) => listBoard(
+  tick: tick,
+  head: const ['filter', 'types'],
+  ids: uuids,
+  prefix: 'notice:',
+  wide: wide,
+);
 
 /// Pulls complete SSE frames out of a byte stream and reads `data:` lines.
 class SseBuffer {

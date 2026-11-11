@@ -7,6 +7,7 @@ import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
 import '../hex_page.dart';
 import 'alerts_chrome.dart';
+import '../../locale/languages.dart';
 
 /// One cell per type the signed-in role can receive. A tap adds or removes
 /// that type from the list request.
@@ -30,11 +31,7 @@ class AlertTypesPage extends StatelessWidget {
     final back = frame.back!;
     return HexPage(
       slots: [
-        backSlot(
-          title: alertText(language, 'Назад', 'Back'),
-          q: back.$1,
-          r: back.$2,
-        ),
+        backSlot(language, q: back.$1, r: back.$2),
         for (var i = 0; i < types.length && i < frame.cells.length; i++)
           _type(types[i], frame.cells[i], language, color, model.noticeQuery),
       ],
@@ -61,8 +58,8 @@ class AlertTypesPage extends StatelessWidget {
       id: 'type:$type',
       title: type,
       footer: on
-          ? alertText(language, 'Вкл', 'On')
-          : alertText(language, 'Выкл', 'Off'),
+          ? localized(language, 'Вкл', 'On')
+          : localized(language, 'Выкл', 'Off'),
       color: on ? color : hexMuted,
       q: at.$1,
       r: at.$2,

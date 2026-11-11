@@ -8,6 +8,7 @@ import '../../navigation/back.dart';
 import '../../registry/registry_view.dart';
 import '../hex_page.dart';
 import 'registry_chrome.dart';
+import '../../locale/languages.dart';
 
 /// First screen of the repositories section: add and search.
 class RegistryMenuPage extends StatelessWidget {
@@ -36,15 +37,11 @@ class RegistryMenuPage extends StatelessWidget {
   HexSlot _slot(BoardSlot slot, String language) {
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: regText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'add':
         return HexSlot(
           id: 'add',
-          title: regText(language, 'Добавить репозиторий', 'Add repository'),
+          title: localized(language, 'Добавить репозиторий', 'Add repository'),
           color: addColor,
           q: slot.q,
           r: slot.r,
@@ -53,7 +50,7 @@ class RegistryMenuPage extends StatelessWidget {
       default:
         return HexSlot(
           id: 'search',
-          title: regText(language, 'Поиск', 'Search'),
+          title: localized(language, 'Поиск', 'Search'),
           color: registryColor,
           q: slot.q,
           r: slot.r,

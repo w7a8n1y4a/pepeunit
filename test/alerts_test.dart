@@ -48,14 +48,14 @@ void main() {
   });
 
   test('the list opens on tick 3 and pages only past the last tick', () {
-    expect(noticePageLimit(1), 4);
-    expect(noticePageLimit(searchScaleTick), 10);
-    expect(noticePageLimit(scaleTickMax), 16);
-    expect(noticeCanPageBack(offset: 0, count: 40), isFalse);
-    expect(noticeCanPageBack(offset: 10, count: 16), isFalse);
-    expect(noticeCanPageBack(offset: 10, count: 17), isTrue);
-    expect(noticeCanPageForward(offset: 0, limit: 10, count: 16), isFalse);
-    expect(noticeCanPageForward(offset: 0, limit: 10, count: 17), isTrue);
+    expect(headPageLimit(1), 4);
+    expect(headPageLimit(searchScaleTick), 10);
+    expect(headPageLimit(scaleTickMax), 16);
+    expect(listCanBack(offset: 0, count: 40), isFalse);
+    expect(listCanBack(offset: 10, count: 16), isFalse);
+    expect(listCanBack(offset: 10, count: 17), isTrue);
+    expect(listCanForward(offset: 0, limit: 10, count: 16), isFalse);
+    expect(listCanForward(offset: 0, limit: 10, count: 17), isTrue);
     final board = noticesBoard(tick: searchScaleTick, uuids: const ['a', 'b']);
     expect(board.slots.map((slot) => slot.id), [
       'back',

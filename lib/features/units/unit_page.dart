@@ -16,6 +16,7 @@ import '../../units/unit_view.dart';
 import '../hex_page.dart';
 import 'unit_panels.dart';
 import 'units_chrome.dart';
+import '../../locale/languages.dart';
 
 class UnitPage extends StatefulWidget {
   const UnitPage({required this.uuid, super.key});
@@ -88,7 +89,6 @@ class _UnitPageState extends State<UnitPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     final scene = HexPage(
@@ -114,16 +114,12 @@ class _UnitPageState extends State<UnitPage> {
     final color = unitsColor;
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: unitText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'card':
         if (unit == null) {
           return HexSlot(
             id: 'card',
-            title: unitText(language, 'Аппарат', 'Unit'),
+            title: localized(language, 'Аппарат', 'Unit'),
             color: color,
             busy: _loading,
             q: slot.q,
@@ -143,7 +139,7 @@ class _UnitPageState extends State<UnitPage> {
       case 'info':
         return HexSlot(
           id: 'info',
-          title: unitText(language, 'Информация', 'Information'),
+          title: localized(language, 'Информация', 'Information'),
           footer: unit == null
               ? null
               : deviceTimeEdge(unit.state?.millis, language),
@@ -159,7 +155,7 @@ class _UnitPageState extends State<UnitPage> {
       case 'nodes':
         return HexSlot(
           id: 'nodes',
-          title: unitText(language, 'Входы и выходы', 'Inputs and outputs'),
+          title: localized(language, 'Входы и выходы', 'Inputs and outputs'),
           footer: _ios == null
               ? null
               : pieceCount(language, _ios!.inputs + _ios!.outputs),
@@ -172,7 +168,7 @@ class _UnitPageState extends State<UnitPage> {
       case 'settings':
         return HexSlot(
           id: 'settings',
-          title: unitText(language, 'Настройки', 'Settings'),
+          title: localized(language, 'Настройки', 'Settings'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -181,7 +177,7 @@ class _UnitPageState extends State<UnitPage> {
       case 'env':
         return HexSlot(
           id: 'env',
-          title: unitText(
+          title: localized(
             language,
             'Переменные окружения',
             'Environment variables',
@@ -194,7 +190,7 @@ class _UnitPageState extends State<UnitPage> {
       case 'operate':
         return HexSlot(
           id: 'operate',
-          title: unitText(language, 'Управление аппаратом', 'Manage unit'),
+          title: localized(language, 'Управление аппаратом', 'Manage unit'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -203,7 +199,7 @@ class _UnitPageState extends State<UnitPage> {
       case 'access':
         return HexSlot(
           id: 'access',
-          title: unitText(language, 'Доступы', 'Access'),
+          title: localized(language, 'Доступы', 'Access'),
           color: accessColor,
           q: slot.q,
           r: slot.r,
@@ -408,11 +404,7 @@ class _UnitWorkPageState extends State<UnitWorkPage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         switch (slot.id) {
-          'back' => backSlot(
-            title: unitText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'commands' => _cell(
             slot,
             language,
@@ -444,7 +436,7 @@ class _UnitWorkPageState extends State<UnitWorkPage> {
           ),
           'delete' => HexSlot(
             id: 'delete',
-            title: unitText(language, 'Удалить аппарат', 'Delete unit'),
+            title: localized(language, 'Удалить аппарат', 'Delete unit'),
             color: errorColor,
             q: slot.q,
             r: slot.r,
@@ -464,7 +456,6 @@ class _UnitWorkPageState extends State<UnitWorkPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     final scene = HexPage(slots: slots, onTap: _tap);
@@ -499,7 +490,7 @@ class _UnitWorkPageState extends State<UnitWorkPage> {
   ) {
     return HexSlot(
       id: slot.id,
-      title: unitText(language, ru, en),
+      title: localized(language, ru, en),
       color: unitsColor,
       q: slot.q,
       r: slot.r,

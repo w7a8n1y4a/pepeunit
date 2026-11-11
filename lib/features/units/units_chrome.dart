@@ -39,34 +39,31 @@ String unitIoIcon(bool input) => input
     ? 'assets/icons/objects/input.svg'
     : 'assets/icons/objects/output.svg';
 
-String unitText(String language, String ru, String en) =>
-    phrase(language, {'ru': ru, 'en': en});
-
 String unitOrderLabel(String language, String order) {
-  if (order == 'desc') return unitText(language, 'Я-А', 'Z-A');
-  return unitText(language, 'А-Я', 'A-Z');
+  if (order == 'desc') return localized(language, 'Я-А', 'Z-A');
+  return localized(language, 'А-Я', 'A-Z');
 }
 
 String unitOwnerLabel(String language, String owner) {
-  if (owner == 'all') return unitText(language, 'Все', 'All');
-  return unitText(language, 'Свои', 'Mine');
+  if (owner == 'all') return localized(language, 'Все', 'All');
+  return localized(language, 'Свои', 'Mine');
 }
 
 String unitAutoLabel(String language, String auto) {
-  if (auto == 'off') return unitText(language, 'Вручную', 'Manual');
-  return unitText(language, 'Авто', 'Auto');
+  if (auto == 'off') return localized(language, 'Вручную', 'Manual');
+  return localized(language, 'Авто', 'Auto');
 }
 
 /// Auto or by hand, on the updates cell of the unit form.
 String unitHandsLabel(String language, bool auto) {
-  if (auto) return unitText(language, 'Авто', 'Auto');
-  return unitText(language, 'Руками', 'Manual');
+  if (auto) return localized(language, 'Авто', 'Auto');
+  return localized(language, 'Руками', 'Manual');
 }
 
 /// Compilable or interpreted, short enough for one edge of that cell.
 String unitRunLabel(String language, bool compilable) {
-  if (compilable) return unitText(language, 'Компил', 'Comp');
-  return unitText(language, 'Интерп', 'Interp');
+  if (compilable) return localized(language, 'Компил', 'Comp');
+  return localized(language, 'Интерп', 'Interp');
 }
 
 /// Search card and the identity cell of one unit.
@@ -136,7 +133,7 @@ class UnitWindow extends StatelessWidget {
       offset: offset,
       limit: limit,
       count: count,
-      ofWord: unitText(language, 'из', 'of'),
+      ofWord: localized(language, 'из', 'of'),
     );
     final back = pageCanBack(offset: offset, count: count, capacity: capacity);
     final forward = pageCanForward(
@@ -145,8 +142,8 @@ class UnitWindow extends StatelessWidget {
       count: count,
       capacity: capacity,
     );
-    final previous = unitText(language, 'Предыдущие', 'Previous');
-    final next = unitText(language, 'Следующие', 'Next');
+    final previous = localized(language, 'Предыдущие', 'Previous');
+    final next = localized(language, 'Следующие', 'Next');
     if (order != null && onOrder != null) {
       return OrderWindow(
         orders: [

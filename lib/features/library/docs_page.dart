@@ -476,7 +476,7 @@ class _DocsPageState extends State<DocsPage> {
                     menuFont * 0.2,
                   ),
                   child: _SearchPill(
-                    label: libErrorText(language, 'Поиск', 'Search'),
+                    label: localized(language, 'Поиск', 'Search'),
                     hint: _searchKeys(),
                     font: menuFont,
                     onTap: _openSearch,
@@ -515,14 +515,14 @@ class _DocsPageState extends State<DocsPage> {
           // Back stands right before it (before the outline line on a wide
           // screen), so it appears and goes without shifting Close.
           final close = CodeCloseMark(
-            label: libErrorText(language, 'Закрыть', 'Close'),
+            label: localized(language, 'Закрыть', 'Close'),
             extent: mark * 0.9,
             onTap: () => closeLibrary(context, '/library'),
           );
           final back = reader != null && reader.canBack
               ? _IconMark(
                   asset: 'assets/icons/actions/back.svg',
-                  label: libText(language, 'Назад', 'Back'),
+                  label: localized(language, 'Назад', 'Back'),
                   extent: mark * 0.9,
                   onTap: reader.back,
                 )
@@ -545,7 +545,7 @@ class _DocsPageState extends State<DocsPage> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            libText(language, 'Документация', 'Documentation'),
+                            localized(language, 'Документация', 'Documentation'),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: _style(font * 1.55, const Color(0xFFFFFFFF)),
@@ -562,21 +562,21 @@ class _DocsPageState extends State<DocsPage> {
                         children: [
                           if (!wide)
                             _MenuMark(
-                              label: libText(language, 'Разделы', 'Sections'),
+                              label: localized(language, 'Разделы', 'Sections'),
                               extent: mark,
                               onTap: () => setState(() => _menu = !_menu),
                             ),
                           if (!wide && tree != null)
                             _IconMark(
                               asset: 'assets/icons/actions/search.svg',
-                              label: libErrorText(language, 'Поиск', 'Search'),
+                              label: localized(language, 'Поиск', 'Search'),
                               extent: mark,
                               onTap: _openSearch,
                             ),
                           if (reader?.page.path != null)
                             CopyLinkMark(
                               link: () => linkTo(null),
-                              label: libErrorText(
+                              label: localized(
                                 language,
                                 'Скопировать ссылку',
                                 'Copy link',
@@ -599,7 +599,7 @@ class _DocsPageState extends State<DocsPage> {
                           SizedBox(width: font * 0.3),
                           _LanguageMark(
                             code: language.toUpperCase(),
-                            label: libText(
+                            label: localized(
                               language,
                               'Язык документации',
                               'Documentation language',
@@ -634,7 +634,7 @@ class _DocsPageState extends State<DocsPage> {
                           children: [
                             Expanded(
                               child: Text(
-                                libErrorText(
+                                localized(
                                   language,
                                   'На этой странице',
                                   'On this page',
@@ -694,7 +694,7 @@ class _DocsPageState extends State<DocsPage> {
                             ),
                           )
                         : Text(
-                            libText(language, 'Пусто', 'Empty'),
+                            localized(language, 'Пусто', 'Empty'),
                             style: _style(font * 1.1, hexMuted),
                           ),
                   ),

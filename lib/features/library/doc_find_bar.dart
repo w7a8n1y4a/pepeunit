@@ -9,13 +9,8 @@ import '../../hive/hex_scene.dart';
 import '../../hive/hint.dart';
 import '../code/code_modal.dart';
 import 'library_menu_page.dart';
-
-TextStyle _style(double size, Color color) => TextStyle(
-  color: color,
-  fontFamily: 'OpenGost Type B',
-  fontSize: size,
-  decoration: TextDecoration.none,
-);
+import 'search_panel.dart';
+import '../../locale/languages.dart';
 
 /// Find in the open article: a small bar over the text with a field, the
 /// place of the current match among all of them, a step to the previous and
@@ -94,25 +89,20 @@ class DocFindBar extends StatelessWidget {
                   Expanded(
                     child: Semantics(
                       textField: true,
-                      label: libErrorText(
+                      label: localized(
                         language,
                         'Найти в статье',
                         'Find in the article',
                       ),
-                      child: TextField(
+                      child: QuietField(
                         controller: controller,
                         focusNode: focusNode,
-                        autofocus: true,
-                        cursorColor: libraryColor,
-                        style: _style(font * 1.15, const Color(0xFFFFFFFF)),
-                        decoration: InputDecoration.collapsed(
-                          hintText: libErrorText(
-                            language,
-                            'Найти в статье',
-                            'Find in the article',
-                          ),
-                          hintStyle: _style(font * 1.15, hexMuted),
+                        hint: localized(
+                          language,
+                          'Найти в статье',
+                          'Find in the article',
                         ),
+                        size: font * 1.15,
                         // The field keeps the focus after Enter.
                         onEditingComplete: () {},
                         onChanged: onChanged,
@@ -124,24 +114,24 @@ class DocFindBar extends StatelessWidget {
                   if (asked)
                     Text(
                       none ? '0/0' : '${current + 1}/$count',
-                      style: _style(font * 0.95, none ? errorColor : hexMuted),
+                      style: searchStyle(font * 0.95, none ? errorColor : hexMuted),
                     ),
                   _StepMark(
-                    label: libErrorText(language, 'Предыдущее', 'Previous'),
+                    label: localized(language, 'Предыдущее', 'Previous'),
                     extent: mark,
                     up: true,
                     enabled: count > 0,
                     onTap: () => onStep(-1),
                   ),
                   _StepMark(
-                    label: libErrorText(language, 'Следующее', 'Next'),
+                    label: localized(language, 'Следующее', 'Next'),
                     extent: mark,
                     up: false,
                     enabled: count > 0,
                     onTap: () => onStep(1),
                   ),
                   CodeCloseMark(
-                    label: libErrorText(
+                    label: localized(
                       language,
                       'Закрыть поиск по статье',
                       'Close find',

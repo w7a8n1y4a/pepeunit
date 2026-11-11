@@ -43,7 +43,7 @@ String byteText(num? value, String language) {
     n /= 1024;
     step++;
   }
-  final unit = phrase(language, {'ru': ru[step], 'en': en[step]});
+  final unit = localized(language, ru[step], en[step]);
   if (step == 0) return '${n.round()} $unit';
   final shown = n.toStringAsFixed(n >= 10 ? 0 : 1);
   final trimmed = shown.endsWith('.0')
@@ -56,12 +56,12 @@ String freqText(num? freq, String language) {
   if (freq == null) return '—';
   final hz = freq.toDouble();
   if (hz >= 1000000) {
-    return '${_compact(hz / 1000000)} ${phrase(language, {'ru': 'МГц', 'en': 'MHz'})}';
+    return '${_compact(hz / 1000000)} ${localized(language, 'МГц', 'MHz')}';
   }
   if (hz >= 1000) {
-    return '${_compact(hz / 1000)} ${phrase(language, {'ru': 'кГц', 'en': 'kHz'})}';
+    return '${_compact(hz / 1000)} ${localized(language, 'кГц', 'kHz')}';
   }
-  return '${hz.round()} ${phrase(language, {'ru': 'Гц', 'en': 'Hz'})}';
+  return '${hz.round()} ${localized(language, 'Гц', 'Hz')}';
 }
 
 String _compact(double value) {
@@ -86,7 +86,7 @@ String? deviceTimeEdge(num? millis, String language) {
   final hours = (total % 86400) ~/ 3600;
   final minutes = (total % 3600) ~/ 60;
   final seconds = total % 60;
-  String mark(String ru, String en) => phrase(language, {'ru': ru, 'en': en});
+  String mark(String ru, String en) => localized(language, ru, en);
   if (days > 0) return '$days${mark('д', 'd')} $hours${mark('ч', 'h')}';
   if (hours > 0) return '$hours${mark('ч', 'h')} $minutes${mark('м', 'm')}';
   if (minutes > 0) return '$minutes${mark('м', 'm')} $seconds${mark('с', 's')}';
@@ -110,12 +110,12 @@ List<String> deviceTimeLines(num? millis, String language) {
   final hours = (total % 86400) ~/ 3600;
   final minutes = (total % 3600) ~/ 60;
   final seconds = total % 60;
-  String mark(String ru, String en) => phrase(language, {'ru': ru, 'en': en});
+  String mark(String ru, String en) => localized(language, ru, en);
   final clock =
       '$days${mark('д', 'd')} $hours${mark('ч', 'h')} $minutes${mark('м', 'm')} $seconds${mark('с', 's')}';
   return [
     clock,
-    phrase(language, {'ru': 'с запуска', 'en': 'since start'}),
+    localized(language, 'с запуска', 'since start'),
   ];
 }
 
@@ -124,7 +124,7 @@ List<String> unitGlance(Unit unit, String language) {
   final live = unit.state;
   final flash = flashUse(live?.statvfs ?? const []);
   final second = flash == null
-      ? '${phrase(language, {'ru': 'Занято', 'en': 'Used'})} ${byteText(live?.memAlloc, language)}'
+      ? '${localized(language, 'Занято', 'Used')} ${byteText(live?.memAlloc, language)}'
       : 'Flash ${byteText(flash.free, language)}';
   return [
     'RAM ${byteText(live?.memFree, language)}',
@@ -143,8 +143,8 @@ List<String> updateLines(Unit unit, String language) {
   final device = _deviceCommit(unit);
   final target = unit.commit?.trim() ?? '';
   return [
-    '${phrase(language, {'ru': 'Устройство', 'en': 'Device'})} ${device.isEmpty ? '—' : shortCommit(device)}',
-    '${phrase(language, {'ru': 'Цель', 'en': 'Target'})} ${target.isEmpty ? '—' : shortCommit(target)}',
+    '${localized(language, 'Устройство', 'Device')} ${device.isEmpty ? '—' : shortCommit(device)}',
+    '${localized(language, 'Цель', 'Target')} ${target.isEmpty ? '—' : shortCommit(target)}',
     firmwareStatusLabel(language, unit.firmwareStatus),
     if ((unit.firmwareError ?? '').trim().isNotEmpty)
       unit.firmwareError!.trim(),
@@ -167,8 +167,8 @@ List<String> networkLines(Unit unit, String language) {
   if (rows.isEmpty) return const ['—'];
   final labels = [
     'IP',
-    phrase(language, {'ru': 'Маска', 'en': 'Mask'}),
-    phrase(language, {'ru': 'Шлюз', 'en': 'Gateway'}),
+    localized(language, 'Маска', 'Mask'),
+    localized(language, 'Шлюз', 'Gateway'),
     'DNS',
   ];
   return [
@@ -180,8 +180,8 @@ List<String> networkLines(Unit unit, String language) {
 List<String> ramLines(Unit unit, String language) {
   final live = unit.state;
   return [
-    '${phrase(language, {'ru': 'Свободно', 'en': 'Free'})} ${byteText(live?.memFree, language)}',
-    '${phrase(language, {'ru': 'Занято', 'en': 'Used'})} ${byteText(live?.memAlloc, language)}',
+    '${localized(language, 'Свободно', 'Free')} ${byteText(live?.memFree, language)}',
+    '${localized(language, 'Занято', 'Used')} ${byteText(live?.memAlloc, language)}',
   ];
 }
 
@@ -189,9 +189,9 @@ List<String> flashLines(Unit unit, String language) {
   final flash = flashUse(unit.state?.statvfs ?? const []);
   if (flash == null) return const ['—'];
   return [
-    '${phrase(language, {'ru': 'Всего', 'en': 'Total'})} ${byteText(flash.total, language)}',
-    '${phrase(language, {'ru': 'Свободно', 'en': 'Free'})} ${byteText(flash.free, language)}',
-    '${phrase(language, {'ru': 'Занято', 'en': 'Used'})} ${byteText(flash.used, language)}',
+    '${localized(language, 'Всего', 'Total')} ${byteText(flash.total, language)}',
+    '${localized(language, 'Свободно', 'Free')} ${byteText(flash.free, language)}',
+    '${localized(language, 'Занято', 'Used')} ${byteText(flash.used, language)}',
   ];
 }
 
@@ -221,7 +221,7 @@ EnvNote? envIssue(String language, String raw) {
   if (raw.trim().isEmpty) {
     return EnvNote(
       line: 1,
-      text: phrase(language, {'ru': 'Строка 1: пусто', 'en': 'Line 1: empty'}),
+      text: localized(language, 'Строка 1: пусто', 'Line 1: empty'),
     );
   }
   try {
@@ -230,17 +230,14 @@ EnvNote? envIssue(String language, String raw) {
       final line = _lineAt(raw, raw.indexOf(RegExp(r'\S')));
       return EnvNote(
         line: line,
-        text: phrase(language, {
-          'ru': 'Строка $line: нужен объект',
-          'en': 'Line $line: an object is required',
-        }),
+        text: localized(language, 'Строка $line: нужен объект', 'Line $line: an object is required'),
       );
     }
     for (final key in value.keys) {
       if ('$key'.isEmpty) {
         return EnvNote(
           line: 1,
-          text: phrase(language, {'ru': 'Пустой ключ', 'en': 'Empty key'}),
+          text: localized(language, 'Пустой ключ', 'Empty key'),
         );
       }
     }
@@ -250,11 +247,8 @@ EnvNote? envIssue(String language, String raw) {
     final key = _keyAt(raw, line);
     final hint = _jsonHint(language, error.message);
     final where = key == null
-        ? phrase(language, {'ru': 'Строка $line', 'en': 'Line $line'})
-        : phrase(language, {
-            'ru': 'Строка $line, ключ $key',
-            'en': 'Line $line, key $key',
-          });
+        ? localized(language, 'Строка $line', 'Line $line')
+        : localized(language, 'Строка $line, ключ $key', 'Line $line, key $key');
     return EnvNote(line: line, text: '$where: $hint');
   }
 }
@@ -310,24 +304,15 @@ String? _keyAt(String text, int line) {
 String _jsonHint(String language, String message) {
   final lower = message.toLowerCase();
   if (lower.contains('unterminated')) {
-    return phrase(language, {
-      'ru': 'строка не закрыта',
-      'en': 'unterminated string',
-    });
+    return localized(language, 'строка не закрыта', 'unterminated string');
   }
   if (lower.contains('unexpected') || lower.contains('character')) {
-    return phrase(language, {
-      'ru': 'неожиданный символ',
-      'en': 'unexpected character',
-    });
+    return localized(language, 'неожиданный символ', 'unexpected character');
   }
   if (lower.contains('expected')) {
-    return phrase(language, {
-      'ru': 'ожидалось значение',
-      'en': 'a value was expected',
-    });
+    return localized(language, 'ожидалось значение', 'a value was expected');
   }
-  return phrase(language, {'ru': 'ошибка синтаксиса', 'en': 'syntax error'});
+  return localized(language, 'ошибка синтаксиса', 'syntax error');
 }
 
 /// The value of a node as the modal shows it. Text stays exactly as the

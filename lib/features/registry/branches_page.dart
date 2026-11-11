@@ -9,6 +9,7 @@ import '../../registry/repo.dart';
 import '../hex_page.dart';
 import '../network/network_chrome.dart';
 import 'registry_chrome.dart';
+import '../../locale/languages.dart';
 
 /// Branches are names, so each one is a cell with the name across the top.
 /// Tick 1 holds a short list. A higher tick shows more. A pager appears
@@ -63,17 +64,13 @@ class _BranchesPageState extends State<BranchesPage> {
       final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
       final back = frame.back!;
       slots.add(
-        backSlot(
-          title: regText(language, 'Назад', 'Back'),
-          q: back.$1,
-          r: back.$2,
-        ),
+        backSlot(language, q: back.$1, r: back.$2),
       );
       if (!_loading && _failure == null) {
         slots.add(
           HexSlot(
             id: 'empty',
-            title: regText(language, 'Нет веток', 'No branches'),
+            title: localized(language, 'Нет веток', 'No branches'),
             color: color,
             q: frame.cells.first.$1,
             r: frame.cells.first.$2,
@@ -84,7 +81,7 @@ class _BranchesPageState extends State<BranchesPage> {
         slots.add(
           HexSlot(
             id: 'wait',
-            title: regText(language, 'Ветки', 'Branches'),
+            title: localized(language, 'Ветки', 'Branches'),
             color: color,
             busy: true,
             q: frame.cells.first.$1,
@@ -104,7 +101,6 @@ class _BranchesPageState extends State<BranchesPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: regText,
       wide: wide,
     );
     return HexPage(
@@ -136,11 +132,7 @@ class _BranchesPageState extends State<BranchesPage> {
   ) {
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: regText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'prev':
         return pageStepSlot(
           id: 'prev',

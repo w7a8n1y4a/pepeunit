@@ -74,11 +74,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     } else {
       final back = hexBackCell(HexBack.center)!;
       slots = [
-        backSlot(
-          title: netText(language, 'Назад', 'Back'),
-          q: back.$1,
-          r: back.$2,
-        ),
+        backSlot(language, q: back.$1, r: back.$2),
       ];
     }
 
@@ -87,7 +83,6 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: netText,
       wide: wide,
     );
     return HexPage(
@@ -135,11 +130,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     final spots = frame.cells;
     final back = frame.back!;
     return [
-      backSlot(
-        title: netText(language, 'Назад', 'Back'),
-        q: back.$1,
-        r: back.$2,
-      ),
+      backSlot(language, q: back.$1, r: back.$2),
       for (var i = 0; i < items.length && i < spots.length; i++)
         switch (items[i]) {
           'identity' => instanceMark(
@@ -156,7 +147,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
           ),
           'tests' => HexSlot(
             id: 'tests',
-            title: netText(language, 'Тесты', 'Tests'),
+            title: localized(language, 'Тесты', 'Tests'),
             footer: portrait?.testsStatus,
             color: color,
             busy: _pending == 'tests',
@@ -166,7 +157,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
           ),
           'scan-all' => HexSlot(
             id: 'scan-all',
-            title: netText(language, 'Опросить соседей', 'Poll neighbors'),
+            title: localized(language, 'Опросить соседей', 'Poll neighbors'),
             color: color,
             busy: _pending == 'scan-all',
             q: spots[i].$1,
@@ -175,7 +166,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
           ),
           'update-repos' => HexSlot(
             id: 'update-repos',
-            title: netText(
+            title: localized(
               language,
               'Обновить репозитории',
               'Update repositories',
@@ -188,7 +179,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
           ),
           'update-units' => HexSlot(
             id: 'update-units',
-            title: netText(language, 'Обновить все', 'Update all'),
+            title: localized(language, 'Обновить все', 'Update all'),
             color: color,
             busy: _pending == 'update-units',
             q: spots[i].$1,
@@ -197,7 +188,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
           ),
           'reboot' => HexSlot(
             id: 'reboot',
-            title: netText(language, 'Перезапуск', 'Reboot'),
+            title: localized(language, 'Перезапуск', 'Reboot'),
             color: errorColor,
             busy: _pending == 'reboot',
             q: spots[i].$1,
@@ -229,11 +220,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     final spots = frame.cells;
     final back = frame.back!;
     return [
-      backSlot(
-        title: netText(language, 'Назад', 'Back'),
-        q: back.$1,
-        r: back.$2,
-      ),
+      backSlot(language, q: back.$1, r: back.$2),
       for (var i = 0; i < ownerSettingSections.length && i < spots.length; i++)
         _sectionSlot(
           model,
@@ -260,7 +247,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
       final image = targetUrl.isEmpty ? null : model.iconOf(targetUrl);
       return HexSlot(
         id: 'icon',
-        title: netText(language, 'Загрузить аватар', 'Upload avatar'),
+        title: localized(language, 'Загрузить аватар', 'Upload avatar'),
         footer: portrait?.version,
         color: dropColor(_dragHot, color),
         busy: _pending == 'icon',
@@ -305,11 +292,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     final back = frame.back!;
     final flagLocked = !settingFieldsReady(category, values);
     final slots = <HexSlot>[
-      backSlot(
-        title: netText(language, 'Назад', 'Back'),
-        q: back.$1,
-        r: back.$2,
-      ),
+      backSlot(language, q: back.$1, r: back.$2),
     ];
     var index = 0;
     for (final field in category.fields) {
@@ -366,8 +349,8 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
         id: 'bool:${field.key}',
         title: title,
         footer: on
-            ? netText(language, 'вкл', 'on')
-            : netText(language, 'выкл', 'off'),
+            ? localized(language, 'вкл', 'on')
+            : localized(language, 'выкл', 'off'),
         color: on && !locked ? color : hexMuted,
         enabled: !locked,
         busy: _pending == 'bool:${field.key}',
@@ -460,7 +443,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     final parsed = parseSetting(field, raw);
     if (parsed == null && raw.trim().isNotEmpty) {
       setState(() {
-        _failure = netText(
+        _failure = localized(
           language,
           'Некорректное значение (${field.rangeHint() ?? field.kind})',
           'Invalid value (${field.rangeHint() ?? field.kind})',
@@ -471,7 +454,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     }
     if (parsed == null && !field.nullable) {
       setState(() {
-        _failure = netText(language, 'Пустое значение', 'Empty value');
+        _failure = localized(language, 'Пустое значение', 'Empty value');
         _open = false;
       });
       return;
@@ -487,7 +470,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
           : (_drafts[patKey] ?? '${currentValues[patKey] ?? ''}').trim();
       if (nameVal.isNotEmpty != patVal.isNotEmpty) {
         setState(() {
-          _failure = netText(
+          _failure = localized(
             language,
             'Заполните оба поля GitHub и нажмите Enter',
             'Fill both GitHub fields and press Enter',
@@ -544,7 +527,7 @@ class _SettingCategoryPageState extends State<SettingCategoryPage> {
     if (_pending != null) return;
     final model = AppScope.of(context);
     final bytes = await model.files.pick(
-      dialogTitle: netText(language, 'Картинка инстанса', 'Instance picture'),
+      dialogTitle: localized(language, 'Картинка инстанса', 'Instance picture'),
     );
     if (bytes == null || !mounted) return;
     await _accept(bytes, language);

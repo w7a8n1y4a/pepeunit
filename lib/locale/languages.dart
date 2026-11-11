@@ -19,6 +19,14 @@ bool knownLanguage(String code) {
   return false;
 }
 
+/// The Russian or the English line, as [phrase] would pick it, with no map.
+/// Any other language gets Russian; an empty line falls back to the other.
+String localized(String language, String ru, String en) {
+  final direct = language == 'en' ? en : ru;
+  if (direct.isNotEmpty) return direct;
+  return ru.isNotEmpty ? ru : en;
+}
+
 /// Picks [language], then Russian, then the first filled line.
 String phrase(String language, Map<String, String> values) {
   final direct = values[language];

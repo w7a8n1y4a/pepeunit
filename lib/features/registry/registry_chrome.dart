@@ -9,21 +9,18 @@ import '../../registry/repo.dart';
 
 Color get registryColor => sectionById('registry')!.color;
 
-String regText(String language, String ru, String en) =>
-    phrase(language, {'ru': ru, 'en': en});
-
 String repoKindLabel(String language, String kind) {
   switch (kind) {
     case 'private':
-      return regText(language, 'Приватные', 'Private');
+      return localized(language, 'Приватные', 'Private');
     default:
-      return regText(language, 'Публичные', 'Public');
+      return localized(language, 'Публичные', 'Public');
   }
 }
 
 String repoOrderLabel(String language, String order) {
-  if (order == 'desc') return regText(language, 'Я-А', 'Z-A');
-  return regText(language, 'А-Я', 'A-Z');
+  if (order == 'desc') return localized(language, 'Я-А', 'Z-A');
+  return localized(language, 'А-Я', 'A-Z');
 }
 
 /// Search card and the identity cell inside a repository.

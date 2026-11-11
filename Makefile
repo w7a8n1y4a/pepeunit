@@ -16,7 +16,7 @@ else
 NATIVE_TARGETS := build-android build-aab build-windows
 endif
 
-.PHONY: help install run-dev run-build run-preview clean \
+.PHONY: help install run-dev run-build run-preview clean test analyze \
 	build-web build-android build-apk-split build-aab build-linux build-macos build-windows build-ios build-all
 
 define PREVIEW_PY
@@ -42,6 +42,8 @@ help:
 	@echo "run-build:        Build the web client"
 	@echo "run-preview:      Serve the web build on http://127.0.0.1:$(PORT)"
 	@echo "clean:            Remove the Flutter build"
+	@echo "test:             Run the tests (one file or more: make test T=test/network_test.dart)"
+	@echo "analyze:          Run the static analysis"
 	@echo ""
 	@echo "Builds (artifacts are listed after each build):"
 	@echo "build-web:        Web           -> build/web"
@@ -76,6 +78,14 @@ run-preview:
 clean:
 	@echo "Remove the Flutter build"
 	$(FLUTTER) clean
+
+test:
+	@echo "Run the tests"
+	$(FLUTTER) test $(T)
+
+analyze:
+	@echo "Run the static analysis"
+	$(FLUTTER) analyze
 
 build-web: run-build
 

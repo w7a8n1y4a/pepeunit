@@ -124,10 +124,6 @@ class UserQuery {
 bool takeSort(String current, String value) =>
     (value == 'asc' || value == 'desc') && value != current;
 
-/// Cards beside Back, the filter, and the page window at this tick.
-int userPageLimit(int tick) =>
-    scaleTickCells(tick.clamp(scaleTickMin, scaleTickMax)) - 3;
-
 /// `start-end of count`. An empty list is `0 of 0`.
 String pageWindowText({
   required int offset,
@@ -184,56 +180,63 @@ int? pageShift({
   return offset + direction * limit;
 }
 
-String userWindowText({
-  required int offset,
-  required int limit,
-  required int count,
-  required String ofWord,
-}) =>
-    pageWindowText(offset: offset, limit: limit, count: count, ofWord: ofWord);
-
 /// What a screen shows at most: [fits] cells, or the instance page size
 /// [cap] when that is smaller. Arrows must not wait for a list the page size
 /// already cuts.
 int capacityUnder(int fits, int? cap) =>
     cap == null || cap < 1 || fits < cap ? fits : cap;
 
-bool userCanPageBack({
+/// Cards beside Back and the [head] cells ahead of them at this tick.
+int headPageLimit(int tick, {int head = 2}) =>
+    scaleTickCells(tick.clamp(scaleTickMin, scaleTickMax)) - 1 - head;
+
+/// A zoomable list grows only while the next tick still shows another cell.
+bool listCanZoom({required int tick, required int total, required int room}) {
+  if (tick >= scaleTickMax) return false;
+  return total > room;
+}
+
+/// The page arrows of a list. They wait for more rows than the largest tick
+/// shows, or than the instance page size [cap] allows.
+bool listCanBack({
   required int offset,
   required int count,
   int? cap,
+  int head = 2,
 }) => pageCanBack(
   offset: offset,
   count: count,
-  capacity: capacityUnder(userPageLimit(scaleTickMax), cap),
+  capacity: capacityUnder(headPageLimit(scaleTickMax, head: head), cap),
 );
 
-bool userCanPageForward({
+bool listCanForward({
   required int offset,
   required int limit,
   required int count,
   int? cap,
+  int head = 2,
 }) => pageCanForward(
   offset: offset,
   limit: limit,
   count: count,
-  capacity: capacityUnder(userPageLimit(scaleTickMax), cap),
+  capacity: capacityUnder(headPageLimit(scaleTickMax, head: head), cap),
 );
 
-/// Back, two filter cells, then user cards. The tick caps the disk.
-NetworkBoard usersBoard({
+/// Back, the [head] cells, then one cell per id, each id under [prefix]. The
+/// tick caps the disk. With [total] the list zooms only while the next tick
+/// shows another card; without it, up to the last tick.
+NetworkBoard listBoard({
   required int tick,
-  required List<String> uuids,
+  required List<String> head,
+  required List<String> ids,
+  required String prefix,
+  int? total,
   bool wide = false,
 }) {
   final step = tick.clamp(scaleTickMin, scaleTickMax);
-  final ids = <String>[
-    'query',
-    'window',
-    for (final uuid in uuids) 'user:$uuid',
-  ];
+  final names = <String>[...head, for (final id in ids) '$prefix$id'];
   final frame = hexFrame(
-    count: ids.length,
+    count: names.length,
     back: HexBack.center,
     wide: wide,
     cells: scaleTickCells(step),
@@ -242,14 +245,33 @@ NetworkBoard usersBoard({
   return NetworkBoard(
     slots: [
       BoardSlot('back', back.$1, back.$2),
-      for (var i = 0; i < ids.length && i < frame.cells.length; i++)
-        BoardSlot(ids[i], frame.cells[i].$1, frame.cells[i].$2),
+      for (var i = 0; i < names.length && i < frame.cells.length; i++)
+        BoardSlot(names[i], frame.cells[i].$1, frame.cells[i].$2),
     ],
-    canZoomIn: step < scaleTickMax,
+    canZoomIn: total == null
+        ? step < scaleTickMax
+        : listCanZoom(
+            tick: step,
+            total: total,
+            room: scaleTickCells(step) - 1 - head.length,
+          ),
     page: 0,
     pages: 1,
   );
 }
+
+/// Back, two filter cells, then user cards. The tick caps the disk.
+NetworkBoard usersBoard({
+  required int tick,
+  required List<String> uuids,
+  bool wide = false,
+}) => listBoard(
+  tick: tick,
+  head: const ['query', 'window'],
+  ids: uuids,
+  prefix: 'user:',
+  wide: wide,
+);
 
 /// Inside a user card. Grant and revoke are owner-only. Block is Admin and
 /// Owner. A plain user only sees the card again.
@@ -393,50 +415,15 @@ NetworkBoard searchBoard({
   required List<String> urls,
   required int page,
   bool wide = false,
-}) {
-  final step = tick.clamp(scaleTickMin, scaleTickMax);
-  final chrome = <String>['text', 'settings'];
-  final free = scaleTickCells(step) - 1;
-  final instanceCap = free - chrome.length;
-  final overflow = urls.length > instanceCap;
-  final paging = step >= scaleTickMax && overflow && instanceCap >= 3;
-  final urlRoom = instanceCap - (paging ? 2 : 0);
-  final pages = paging && urlRoom > 0 ? (urls.length / urlRoom).ceil() : 1;
-  final safePage = page.clamp(0, pages - 1);
-  final slice = paging
-      ? urls.skip(safePage * urlRoom).take(urlRoom).toList()
-      : urls.take(urlRoom).toList();
-  final frame = hexFrame(
-    count: chrome.length + slice.length,
-    back: HexBack.center,
-    wide: wide,
-    cells: scaleTickCells(step),
-    tail: paging ? 2 : 0,
-  );
-  final back = frame.back!;
-  final slots = <BoardSlot>[
-    BoardSlot('back', back.$1, back.$2),
-    for (var i = 0; i < chrome.length; i++)
-      BoardSlot(chrome[i], frame.cells[i].$1, frame.cells[i].$2),
-    for (var i = 0; i < slice.length; i++)
-      BoardSlot(
-        'instance',
-        frame.cells[chrome.length + i].$1,
-        frame.cells[chrome.length + i].$2,
-        url: slice[i],
-      ),
-    if (frame.tail.length == 2) ...[
-      BoardSlot('prev', frame.tail[0].$1, frame.tail[0].$2),
-      BoardSlot('next', frame.tail[1].$1, frame.tail[1].$2),
-    ],
-  ];
-  return NetworkBoard(
-    slots: slots,
-    canZoomIn: step < scaleTickMax,
-    page: safePage,
-    pages: pages,
-  );
-}
+}) => pagedBoard<String>(
+  tick: tick,
+  page: page,
+  items: urls,
+  head: const ['text', 'settings'],
+  slot: (url, _, at) => BoardSlot('instance', at.$1, at.$2, url: url),
+  zoomOnlyOverflow: false,
+  wide: wide,
+);
 
 /// One url per free cell. Back sits in the center. A pager takes the tail.
 NetworkBoard catalogBoard({
@@ -444,37 +431,58 @@ NetworkBoard catalogBoard({
   required List<String> urls,
   required int page,
   bool wide = false,
+}) => pagedBoard<String>(
+  tick: tick,
+  page: page,
+  items: urls,
+  slot: (url, _, at) => BoardSlot('url', at.$1, at.$2, url: url),
+  wide: wide,
+);
+
+/// Back, the [head] cells, then one cell per item. Tick 1 is the short list.
+/// The last tick pages the tail when the items still do not fit, and the
+/// pager takes two cells. [slot] makes the cell of an item at [index] in
+/// the place `at`.
+NetworkBoard pagedBoard<T>({
+  required int tick,
+  required int page,
+  required List<T> items,
+  required BoardSlot Function(T item, int index, (int, int) at) slot,
+  List<String> head = const [],
+  bool zoomOnlyOverflow = true,
+  bool wide = false,
 }) {
   final step = tick.clamp(scaleTickMin, scaleTickMax);
-  final free = scaleTickCells(step) - 1;
-  final overflow = urls.length > free;
+  final free = scaleTickCells(step) - 1 - head.length;
+  final overflow = items.length > free;
   final paging = step >= scaleTickMax && overflow && free >= 3;
   final room = free - (paging ? 2 : 0);
-  final pages = paging && room > 0 ? (urls.length / room).ceil() : 1;
+  final pages = paging && room > 0 ? (items.length / room).ceil() : 1;
   final safePage = page.clamp(0, pages - 1);
   final slice = paging
-      ? urls.skip(safePage * room).take(room).toList()
-      : urls.take(room).toList();
+      ? items.skip(safePage * room).take(room).toList()
+      : items.take(room).toList();
   final frame = hexFrame(
-    count: slice.length,
+    count: head.length + slice.length,
     back: HexBack.center,
     wide: wide,
     cells: scaleTickCells(step),
     tail: paging ? 2 : 0,
   );
   final back = frame.back!;
-  final slots = <BoardSlot>[
-    BoardSlot('back', back.$1, back.$2),
-    for (var i = 0; i < slice.length; i++)
-      BoardSlot('url', frame.cells[i].$1, frame.cells[i].$2, url: slice[i]),
-    if (frame.tail.length == 2) ...[
-      BoardSlot('prev', frame.tail[0].$1, frame.tail[0].$2),
-      BoardSlot('next', frame.tail[1].$1, frame.tail[1].$2),
-    ],
-  ];
   return NetworkBoard(
-    slots: slots,
-    canZoomIn: step < scaleTickMax && overflow,
+    slots: [
+      BoardSlot('back', back.$1, back.$2),
+      for (var i = 0; i < head.length; i++)
+        BoardSlot(head[i], frame.cells[i].$1, frame.cells[i].$2),
+      for (var i = 0; i < slice.length; i++)
+        slot(slice[i], i, frame.cells[head.length + i]),
+      if (frame.tail.length == 2) ...[
+        BoardSlot('prev', frame.tail[0].$1, frame.tail[0].$2),
+        BoardSlot('next', frame.tail[1].$1, frame.tail[1].$2),
+      ],
+    ],
+    canZoomIn: step < scaleTickMax && (!zoomOnlyOverflow || overflow),
     page: safePage,
     pages: pages,
   );

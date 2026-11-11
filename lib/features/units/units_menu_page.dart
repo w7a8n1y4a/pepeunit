@@ -8,6 +8,7 @@ import '../../navigation/back.dart';
 import '../../units/unit_view.dart';
 import '../hex_page.dart';
 import 'units_chrome.dart';
+import '../../locale/languages.dart';
 
 /// First screen of the units section: add, search and groups.
 class UnitsMenuPage extends StatelessWidget {
@@ -38,15 +39,11 @@ class UnitsMenuPage extends StatelessWidget {
   HexSlot _slot(BoardSlot slot, String language) {
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: unitText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'add':
         return HexSlot(
           id: 'add',
-          title: unitText(language, 'Создать аппарат', 'Create unit'),
+          title: localized(language, 'Создать аппарат', 'Create unit'),
           color: unitAddColor,
           q: slot.q,
           r: slot.r,
@@ -55,7 +52,7 @@ class UnitsMenuPage extends StatelessWidget {
       case 'search':
         return HexSlot(
           id: 'search',
-          title: unitText(language, 'Поиск', 'Search'),
+          title: localized(language, 'Поиск', 'Search'),
           color: unitsColor,
           q: slot.q,
           r: slot.r,
@@ -64,7 +61,7 @@ class UnitsMenuPage extends StatelessWidget {
       default:
         return HexSlot(
           id: 'groups',
-          title: unitText(language, 'Группы', 'Groups'),
+          title: localized(language, 'Группы', 'Groups'),
           color: unitGroupsColor,
           q: slot.q,
           r: slot.r,

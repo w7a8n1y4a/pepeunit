@@ -13,8 +13,10 @@ import '../../navigation/sections.dart';
 import '../hex_page.dart';
 import '../line_input.dart';
 import '../page_window.dart';
+import '../paged_search.dart';
 import '../slanted_choices.dart';
 import 'network_chrome.dart';
+import '../../locale/languages.dart';
 
 /// User search. [pick] returns the chosen uuid with [pop] instead of opening
 /// the card, and takes the Account colors.
@@ -28,35 +30,9 @@ class UsersPage extends StatefulWidget {
   State<UsersPage> createState() => _UsersPageState();
 }
 
-class _UsersPageState extends State<UsersPage> {
-  var _offset = 0;
-  var _loading = false;
-  var _failureOpen = false;
-  String? _failure;
-  var _ticket = 0;
-  final _typing = SearchDelay();
-
+class _UsersPageState extends State<UsersPage> with PagedSearch<UsersPage> {
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _load();
-    });
-  }
-
-  @override
-  void didUpdateWidget(UsersPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.scope == widget.scope) return;
-    _offset = 0;
-    _load();
-  }
-
-  @override
-  void dispose() {
-    _typing.dispose();
-    super.dispose();
-  }
+  int scopeOf(UsersPage widget) => widget.scope;
 
   @override
   Widget build(BuildContext context) {
@@ -78,10 +54,9 @@ class _UsersPageState extends State<UsersPage> {
     ];
     appendError(
       slots,
-      message: _failure,
-      open: _failureOpen,
+      message: failure,
+      open: failureOpen,
       language: language,
-      text: netText,
       wide: wide,
     );
     return HexPage(
@@ -107,34 +82,30 @@ class _UsersPageState extends State<UsersPage> {
   ) {
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: netText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'query':
         return HexSlot(
           id: 'query',
-          title: netText(language, 'Фильтр', 'Filter'),
+          title: localized(language, 'Фильтр', 'Filter'),
           color: color,
           q: slot.q,
           r: slot.r,
           body: MemberQueryCell(
             color: color,
-            onSearch: _searchLater,
-            onRetune: _retune,
+            onSearch: searchLater,
+            onRetune: retune,
           ),
         );
       case 'window':
         return HexSlot(
           id: 'window',
-          title: netText(language, 'Страница', 'Page'),
+          title: localized(language, 'Страница', 'Page'),
           color: color,
-          busy: _loading,
+          busy: loading,
           q: slot.q,
           r: slot.r,
           body: MemberWindowCell(
-            offset: _offset,
+            offset: offset,
             limit: limit,
             count: count,
             onStep: _step,
@@ -184,78 +155,35 @@ class _UsersPageState extends State<UsersPage> {
       case 'back':
         popOrHome(context);
       case 'error':
-        setState(() => _failureOpen = true);
+        setState(() => failureOpen = true);
     }
   }
 
-  int _limit(AppModel model) => model.cappedLimit(userPageLimit(widget.scope));
-
-  void _searchLater() {
-    _typing.later(() {
-      if (!mounted) return;
-      setState(() => _offset = 0);
-      _load();
-    });
-  }
-
-  void _retune() {
-    _typing.cancel();
-    setState(() => _offset = 0);
-    _load();
-  }
+  int _limit(AppModel model) => model.cappedLimit(headPageLimit(widget.scope));
 
   void _order(String value) {
     final model = AppScope.of(context);
     if (!model.setUserOrder(value)) return;
-    _retune();
+    retune();
   }
 
   void _step(int direction) {
-    if (_loading) return;
     final model = AppScope.of(context);
-    final count = model.directory?.count ?? 0;
-    final limit = _limit(model);
-    final next = pageShift(
-      direction: direction,
-      offset: _offset,
-      limit: limit,
-      count: count,
-      capacity: model.pageCapacity(userPageLimit(scaleTickMax)),
+    step(
+      direction,
+      limit: _limit(model),
+      count: model.directory?.count ?? 0,
+      capacity: model.pageCapacity(headPageLimit(scaleTickMax)),
     );
-    if (next == null) return;
-    setState(() => _offset = next);
-    _load();
   }
 
-  Future<void> _load() async {
-    final ticket = ++_ticket;
-    final model = AppScope.of(context);
-    if (!model.signedIn) {
-      setState(() {
-        _loading = false;
-        _failure = model.notSignedIn;
-      });
-      return;
-    }
-    setState(() {
-      _loading = true;
-      _failure = null;
-      _failureOpen = false;
-    });
-    try {
-      final fresh = await model.loadDirectory(
-        offset: _offset,
-        limit: _limit(model),
-      );
-      if (!mounted || ticket != _ticket || !fresh) return;
-      setState(() => _loading = false);
-    } catch (error) {
-      if (!mounted || ticket != _ticket) return;
-      setState(() {
-        _loading = false;
-        _failure = '$error';
-      });
-    }
+  @override
+  Future<VoidCallback?> fetch(AppModel model) async {
+    final fresh = await model.loadDirectory(
+      offset: offset,
+      limit: _limit(model),
+    );
+    return fresh ? () {} : null;
   }
 }
 
@@ -308,7 +236,7 @@ class _MemberQueryCellState extends State<MemberQueryCell> {
       color: widget.color,
       controller: _controller,
       fieldKey: const ValueKey('member-search'),
-      hint: netText(language, 'Поиск', 'Search'),
+      hint: localized(language, 'Поиск', 'Search'),
       leading: 'assets/icons/actions/search.svg',
       roomyCaption: true,
       captionGap: 0,
@@ -465,7 +393,7 @@ class MemberWindowCell extends StatelessWidget {
       offset: offset,
       limit: limit,
       count: count,
-      ofWord: netText(language, 'из', 'of'),
+      ofWord: localized(language, 'из', 'of'),
     );
     return OrderWindow(
       orders: [
@@ -475,19 +403,19 @@ class MemberWindowCell extends StatelessWidget {
       selected: order,
       onOrder: onOrder,
       range: range,
-      canBack: userCanPageBack(
+      canBack: listCanBack(
         offset: offset,
         count: count,
         cap: model.pageLimit,
       ),
-      canForward: userCanPageForward(
+      canForward: listCanForward(
         offset: offset,
         limit: limit,
         count: count,
         cap: model.pageLimit,
       ),
-      previousLabel: netText(language, 'Предыдущие', 'Previous'),
-      nextLabel: netText(language, 'Следующие', 'Next'),
+      previousLabel: localized(language, 'Предыдущие', 'Previous'),
+      nextLabel: localized(language, 'Следующие', 'Next'),
       onStep: onStep,
     );
   }

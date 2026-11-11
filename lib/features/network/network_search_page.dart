@@ -11,6 +11,7 @@ import '../hex_page.dart';
 import '../line_input.dart';
 import '../slanted_choices.dart';
 import 'network_chrome.dart';
+import '../../locale/languages.dart';
 
 class NetworkSearchPage extends StatefulWidget {
   const NetworkSearchPage({required this.scope, super.key});
@@ -62,15 +63,11 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
   ) {
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: netText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'text':
         return HexSlot(
           id: 'text',
-          title: netText(language, 'Фильтр', 'Filter'),
+          title: localized(language, 'Фильтр', 'Filter'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -79,7 +76,7 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
       case 'settings':
         return HexSlot(
           id: 'settings',
-          title: netText(language, 'Настройки', 'Settings'),
+          title: localized(language, 'Настройки', 'Settings'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -120,7 +117,7 @@ class _NetworkSearchPageState extends State<NetworkSearchPage> {
         final versionText = portrait?.version ?? '';
         final pingText = ping == null
             ? null
-            : '${ping.round()} ${netText(language, 'мс', 'ms')}';
+            : '${ping.round()} ${localized(language, 'мс', 'ms')}';
         return instanceMark(
           id: 'open:$url',
           url: url,
@@ -184,7 +181,7 @@ class LineSearch extends StatelessWidget {
     return LineField(
       color: color,
       value: model.query.text,
-      hint: netText(language, 'Поиск', 'Search'),
+      hint: localized(language, 'Поиск', 'Search'),
       language: language,
       activeTrust: model.query.trust,
       onChanged: model.setSearch,

@@ -18,12 +18,6 @@ Color get libraryColor => sectionById('library')!.color;
 
 /// A line of the Library screens in both languages. A language with no line
 /// falls back to Russian.
-String libText(String language, String ru, String en) =>
-    phrase(language, {'ru': ru, 'en': en});
-
-String libErrorText(String language, String ru, String en) =>
-    phrase(language, {'ru': ru, 'en': en});
-
 /// Leaves a Library text: back to the screen under it, or to the Library
 /// when the text was opened by its address.
 void closeLibrary(BuildContext context, String home) {
@@ -100,7 +94,6 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
       message: _failure,
       open: _failureOpen,
       language: language,
-      text: libErrorText,
       wide: wide,
     );
     final scene = HexPage(
@@ -143,7 +136,7 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
           return Material(
             type: MaterialType.transparency,
             child: LibraryModal(
-              title: libText(language, 'Презентация', 'Presentation'),
+              title: localized(language, 'Презентация', 'Presentation'),
               color: libraryColor,
               source: '',
               docs: _tree,
@@ -156,7 +149,7 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
         return Material(
           type: MaterialType.transparency,
           child: LibraryModal(
-            title: libText(language, 'Презентация', 'Presentation'),
+            title: localized(language, 'Презентация', 'Presentation'),
             color: libraryColor,
             source: _slides[at],
             docs: _tree,
@@ -192,15 +185,11 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
   HexSlot _slot(BoardSlot slot, String language) {
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: libText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'presentation':
         return HexSlot(
           id: 'presentation',
-          title: libText(language, 'Презентация', 'Presentation'),
+          title: localized(language, 'Презентация', 'Presentation'),
           color: libraryColor,
           q: slot.q,
           r: slot.r,
@@ -209,7 +198,7 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
       case 'docs':
         return HexSlot(
           id: 'docs',
-          title: libText(language, 'Документация', 'Documentation'),
+          title: localized(language, 'Документация', 'Documentation'),
           color: libraryColor,
           q: slot.q,
           r: slot.r,
@@ -219,7 +208,7 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
       case 'tree':
         return HexSlot(
           id: 'tree',
-          title: libText(language, 'Дерево 6 путей', 'Tree of 6 paths'),
+          title: localized(language, 'Дерево 6 путей', 'Tree of 6 paths'),
           color: libraryColor,
           q: slot.q,
           r: slot.r,
@@ -228,7 +217,7 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
       case 'tools':
         return HexSlot(
           id: 'tools',
-          title: libText(language, 'Инструменты', 'Tools'),
+          title: localized(language, 'Инструменты', 'Tools'),
           color: libraryColor,
           q: slot.q,
           r: slot.r,
@@ -237,7 +226,7 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
       default:
         return HexSlot(
           id: 'about',
-          title: libText(language, 'О приложении', 'About'),
+          title: localized(language, 'О приложении', 'About'),
           color: libraryColor,
           q: slot.q,
           r: slot.r,

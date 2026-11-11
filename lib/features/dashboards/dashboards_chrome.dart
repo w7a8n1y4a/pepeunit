@@ -21,13 +21,10 @@ Color dashboardStatusColor(String? status) {
   }
 }
 
-String dashText(String language, String ru, String en) =>
-    phrase(language, {'ru': ru, 'en': en});
-
 /// Words for the page window's order cell: `desc` is newest first.
 String dashboardOrderLabel(String language, String order) {
-  if (order == 'asc') return dashText(language, 'Старые', 'Old');
-  return dashText(language, 'Новые', 'New');
+  if (order == 'asc') return localized(language, 'Старые', 'Old');
+  return localized(language, 'Новые', 'New');
 }
 
 /// Name and title of a dashboard or a panel: `4..20` of letters, digits, `_`,
@@ -36,7 +33,7 @@ final dashboardNamePattern = RegExp(r'^[A-Za-z0-9_.-]{4,20}$');
 
 bool dashboardNameOk(String name) => dashboardNamePattern.hasMatch(name.trim());
 
-String dashboardNameIssue(String language) => dashText(
+String dashboardNameIssue(String language) => localized(
   language,
   'От 4 до 20: буквы, цифры, _ . -',
   '4 to 20: letters, digits, _ . -',

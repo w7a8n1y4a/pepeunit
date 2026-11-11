@@ -16,6 +16,7 @@ import '../code/code_panel.dart';
 import '../code/code_view.dart';
 import '../hex_page.dart';
 import 'units_chrome.dart';
+import '../../locale/languages.dart';
 
 /// DataPipe of one node. The whole section wears the DataPipe cell color of
 /// the node menu, the node's own direction color stays out of it.
@@ -84,7 +85,6 @@ class _UnitPipePageState extends State<UnitPipePage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     final scene = HexPage(slots: slots, onTap: _tap);
@@ -111,18 +111,14 @@ class _UnitPipePageState extends State<UnitPipePage> {
     final usable = live && _on;
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: unitText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'flag':
         return HexSlot(
           id: 'flag',
           title: 'DataPipe',
           footer: _on
-              ? unitText(language, 'вкл', 'on')
-              : unitText(language, 'выкл', 'off'),
+              ? localized(language, 'вкл', 'on')
+              : localized(language, 'выкл', 'off'),
           color: unitPipeColor,
           enabled: _ready,
           busy: _pending == 'flag',
@@ -136,7 +132,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
         final policy = pipePolicyOfStored(_io?.pipeYml);
         return HexSlot(
           id: 'editor',
-          title: unitText(language, 'Редактор', 'Editor'),
+          title: localized(language, 'Редактор', 'Editor'),
           footer: policy == null ? null : pipePolicyLabel(language, policy),
           color: unitPipeColor,
           enabled: usable,
@@ -176,7 +172,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
       case 'confirm':
         return HexSlot(
           id: 'confirm',
-          title: unitText(language, 'Удалить все данные', 'Delete all data'),
+          title: localized(language, 'Удалить все данные', 'Delete all data'),
           color: errorColor,
           busy: _pending == 'confirm',
           q: slot.q,
@@ -204,8 +200,8 @@ class _UnitPipePageState extends State<UnitPipePage> {
   }) {
     return HexSlot(
       id: slot.id,
-      title: unitText(language, ru, en),
-      footer: _done == slot.id ? unitText(language, 'готово', 'done') : null,
+      title: localized(language, ru, en),
+      footer: _done == slot.id ? localized(language, 'готово', 'done') : null,
       color: color,
       enabled: enabled,
       busy: _pending == slot.id,
@@ -296,7 +292,7 @@ class _UnitPipePageState extends State<UnitPipePage> {
     Uint8List? file;
     try {
       file = await model.files.pick(
-        dialogTitle: unitText(language, 'CSV с данными', 'CSV with data'),
+        dialogTitle: localized(language, 'CSV с данными', 'CSV with data'),
       );
     } catch (error) {
       if (!mounted) return;
@@ -429,7 +425,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
     final idle = !loading && pending == null;
     final notice = _notice(language);
     return CodeModal(
-      title: unitText(language, 'Редактор DataPipe', 'DataPipe editor'),
+      title: localized(language, 'Редактор DataPipe', 'DataPipe editor'),
       color: unitPipeColor,
       onClose: widget.onClose,
       barrierCloses: _clean && pending == null,
@@ -441,7 +437,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
       copy: () => _text.text,
       strip: (font) => [
         Text(
-          unitText(language, 'Примеры в буфер:', 'Examples to clipboard:'),
+          localized(language, 'Примеры в буфер:', 'Examples to clipboard:'),
           style: codeMono(font * 0.95, color: hexMuted),
         ),
         SizedBox(width: font * 0.3),
@@ -457,7 +453,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
       ],
       actions: (font) => [
         CodeWordButton(
-          label: unitText(language, 'Сохранить', 'Save'),
+          label: localized(language, 'Сохранить', 'Save'),
           font: font,
           color: unitAddColor,
           enabled: idle && !_flawed,
@@ -466,7 +462,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
           hint: 'button-pipe-save',
         ),
         CodeWordButton(
-          label: unitText(language, 'Проверить', 'Check'),
+          label: localized(language, 'Проверить', 'Check'),
           font: font,
           color: unitPipeColor,
           enabled: idle,
@@ -475,7 +471,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
           hint: 'button-pipe-check',
         ),
         CodeWordButton(
-          label: unitText(language, 'Загрузить', 'Upload'),
+          label: localized(language, 'Загрузить', 'Upload'),
           font: font,
           enabled: idle,
           busy: pending == 'import',
@@ -483,7 +479,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
           hint: 'button-pipe-import',
         ),
         CodeWordButton(
-          label: unitText(language, 'Выгрузить', 'Download'),
+          label: localized(language, 'Выгрузить', 'Download'),
           font: font,
           enabled: idle,
           busy: pending == 'export',
@@ -590,7 +586,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
     setState(() {
       pending = null;
       if (ok) {
-        _saved = unitText(language, 'Конфиг корректен', 'The config is valid');
+        _saved = localized(language, 'Конфиг корректен', 'The config is valid');
       }
     });
   }
@@ -612,7 +608,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
     if (!saved || skipped) return;
     setState(() {
       _baseline = text;
-      _saved = unitText(language, 'Сохранено', 'Saved');
+      _saved = localized(language, 'Сохранено', 'Saved');
     });
     widget.onSaved();
   }
@@ -626,7 +622,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
     final language = AppScope.of(context).vault.language;
     setState(() {
       failure = null;
-      _saved = unitText(
+      _saved = localized(
         language,
         'Пример $name скопирован в буфер обмена',
         'Example $name copied to the clipboard',
@@ -640,7 +636,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
     String? text;
     final picked = await work('import', () async {
       final file = await model.files.pick(
-        dialogTitle: unitText(language, 'Конфиг DataPipe', 'DataPipe config'),
+        dialogTitle: localized(language, 'Конфиг DataPipe', 'DataPipe config'),
       );
       if (file != null) text = utf8.decode(file, allowMalformed: true);
     }, hold: false);

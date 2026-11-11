@@ -18,6 +18,7 @@ import '../line_input.dart';
 import '../network/network_chrome.dart';
 import '../units/units_chrome.dart';
 import 'dashboards_chrome.dart';
+import '../../locale/languages.dart';
 
 /// Panel card in a list: title above, type on the lower right and the count
 /// of linked nodes along the right edge.
@@ -109,7 +110,6 @@ class _PanelsPageState extends State<PanelsPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: dashText,
       wide: wide,
     );
     return HexPage(
@@ -137,15 +137,11 @@ class _PanelsPageState extends State<PanelsPage> {
   HexSlot _slot(BoardSlot slot, String language, NetworkBoard board) {
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: dashText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'add':
         return HexSlot(
           id: 'add',
-          title: dashText(language, 'Добавить', 'Add'),
+          title: localized(language, 'Добавить', 'Add'),
           color: addColor,
           busy: _loading,
           q: slot.q,
@@ -253,14 +249,10 @@ class _PanelCreatePageState extends State<PanelCreatePage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         switch (slot.id) {
-          'back' => backSlot(
-            title: dashText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'name' => HexSlot(
             id: 'name',
-            title: dashText(language, 'Название', 'Title'),
+            title: localized(language, 'Название', 'Title'),
             color: dashboardsColor,
             q: slot.q,
             r: slot.r,
@@ -269,7 +261,7 @@ class _PanelCreatePageState extends State<PanelCreatePage> {
               color: dashboardsColor,
               controller: _title,
               fieldKey: const ValueKey('panel-title'),
-              hint: dashText(language, 'название', 'title'),
+              hint: localized(language, 'название', 'title'),
               issue: _issue ?? '',
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9_.-]')),
@@ -280,7 +272,7 @@ class _PanelCreatePageState extends State<PanelCreatePage> {
           ),
           'type' => HexSlot(
             id: 'type',
-            title: dashText(language, 'Тип', 'Type'),
+            title: localized(language, 'Тип', 'Type'),
             footer: panelTypeLabel(_type),
             color: dashboardsColor,
             q: slot.q,
@@ -289,7 +281,7 @@ class _PanelCreatePageState extends State<PanelCreatePage> {
           ),
           'create' => HexSlot(
             id: 'create',
-            title: dashText(language, 'Создать', 'Create'),
+            title: localized(language, 'Создать', 'Create'),
             color: addColor,
             busy: _busy,
             q: slot.q,
@@ -310,7 +302,6 @@ class _PanelCreatePageState extends State<PanelCreatePage> {
       message: _failure,
       open: _open,
       language: language,
-      text: dashText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: _tap);
@@ -413,16 +404,12 @@ class _PanelPageState extends State<PanelPage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         switch (slot.id) {
-          'back' => backSlot(
-            title: dashText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'card' =>
             panel == null
                 ? HexSlot(
                     id: 'card',
-                    title: dashText(language, 'Визуализация', 'Panel'),
+                    title: localized(language, 'Визуализация', 'Panel'),
                     color: dashboardsColor,
                     busy: _loading,
                     q: slot.q,
@@ -439,7 +426,7 @@ class _PanelPageState extends State<PanelPage> {
                   ),
           'nodes' => HexSlot(
             id: 'nodes',
-            title: dashText(language, 'Входы и выходы', 'Inputs and outputs'),
+            title: localized(language, 'Входы и выходы', 'Inputs and outputs'),
             footer: panel == null
                 ? null
                 : pieceCount(language, panel.links.length),
@@ -456,7 +443,7 @@ class _PanelPageState extends State<PanelPage> {
           ),
           'delete' => HexSlot(
             id: 'delete',
-            title: dashText(language, 'Удалить', 'Delete'),
+            title: localized(language, 'Удалить', 'Delete'),
             color: errorColor,
             busy: _deleting,
             q: slot.q,
@@ -477,7 +464,6 @@ class _PanelPageState extends State<PanelPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: dashText,
       wide: wide,
     );
     return HexPage(
@@ -536,7 +522,7 @@ class _PanelPageState extends State<PanelPage> {
         _loading = false;
         _seen = true;
         if (found == null) {
-          _failure = dashText(
+          _failure = localized(
             model.vault.language,
             'Визуализация не найдена',
             'Panel not found',
@@ -647,7 +633,6 @@ class _PanelNodesPageState extends State<PanelNodesPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: dashText,
       wide: wide,
     );
     return HexPage(
@@ -665,15 +650,11 @@ class _PanelNodesPageState extends State<PanelNodesPage> {
   HexSlot _slot(BoardSlot slot, String language, NetworkBoard board) {
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: dashText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'add':
         return HexSlot(
           id: 'add',
-          title: dashText(language, 'Добавить', 'Add'),
+          title: localized(language, 'Добавить', 'Add'),
           color: addColor,
           busy: _loading,
           q: slot.q,
@@ -699,7 +680,7 @@ class _PanelNodesPageState extends State<PanelNodesPage> {
     final input = link?.io.input ?? true;
     final flags = [
       if (link != null && link.lastOnly)
-        dashText(language, 'Последнее', 'Last'),
+        localized(language, 'Последнее', 'Last'),
       if (link != null && link.asJson) 'JSON',
     ];
     return HexSlot(
@@ -867,14 +848,10 @@ class _PanelNodeFormPageState extends State<PanelNodeFormPage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         switch (slot.id) {
-          'back' => backSlot(
-            title: dashText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'node' => HexSlot(
             id: 'node',
-            title: io?.topic ?? dashText(language, 'Узел', 'Node'),
+            title: io?.topic ?? localized(language, 'Узел', 'Node'),
             sideRight: io == null ? null : unitIoTypeLabel(language, io.type),
             footer: io == null
                 ? null
@@ -889,20 +866,20 @@ class _PanelNodeFormPageState extends State<PanelNodeFormPage> {
           'last' => _flag(
             slot,
             language,
-            dashText(language, 'Только последнее', 'Only last value'),
+            localized(language, 'Только последнее', 'Only last value'),
             _last,
             ready,
           ),
           'json' => _flag(
             slot,
             language,
-            dashText(language, 'Значение как JSON', 'Value as JSON'),
+            localized(language, 'Значение как JSON', 'Value as JSON'),
             _json,
             ready,
           ),
           'create' => HexSlot(
             id: 'create',
-            title: dashText(language, 'Связать', 'Link'),
+            title: localized(language, 'Связать', 'Link'),
             color: addColor,
             busy: _busy,
             enabled: ready,
@@ -924,7 +901,6 @@ class _PanelNodeFormPageState extends State<PanelNodeFormPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: dashText,
       wide: wide,
     );
     return HexPage(
@@ -956,7 +932,7 @@ class _PanelNodeFormPageState extends State<PanelNodeFormPage> {
     return HexSlot(
       id: slot.id,
       title: title,
-      footer: dashText(language, on ? 'вкл' : 'выкл', on ? 'on' : 'off'),
+      footer: localized(language, on ? 'вкл' : 'выкл', on ? 'on' : 'off'),
       color: on ? dashboardsColor : hexMuted,
       enabled: enabled,
       q: slot.q,

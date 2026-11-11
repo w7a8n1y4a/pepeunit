@@ -9,6 +9,7 @@ import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
 import '../hex_page.dart';
 import 'network_chrome.dart';
+import '../../locale/languages.dart';
 
 /// Search settings: allow list, deny list, then local add.
 ///
@@ -30,11 +31,7 @@ class NetworkSearchSettingsPage extends StatelessWidget {
     final slots = <HexSlot>[
       for (var i = 0; i < ids.length; i++)
         _slot(ids[i], frame.cells[i], language, color, allow, deny),
-      backSlot(
-        title: netText(language, 'Назад', 'Back'),
-        q: back.$1,
-        r: back.$2,
-      ),
+      backSlot(language, q: back.$1, r: back.$2),
     ];
     return HexPage(
       slots: slots,
@@ -65,7 +62,7 @@ class NetworkSearchSettingsPage extends StatelessWidget {
       case 'add':
         return HexSlot(
           id: 'add',
-          title: netText(language, 'Добавить локально', 'Add locally'),
+          title: localized(language, 'Добавить локально', 'Add locally'),
           color: addColor,
           q: at.$1,
           r: at.$2,
@@ -74,8 +71,8 @@ class NetworkSearchSettingsPage extends StatelessWidget {
       case 'allow':
         return HexSlot(
           id: 'allow',
-          title: netText(language, 'Белый список', 'Allow list'),
-          footer: allow == 0 ? netText(language, 'все', 'all') : '$allow',
+          title: localized(language, 'Белый список', 'Allow list'),
+          footer: allow == 0 ? localized(language, 'все', 'all') : '$allow',
           color: color,
           q: at.$1,
           r: at.$2,
@@ -84,7 +81,7 @@ class NetworkSearchSettingsPage extends StatelessWidget {
       case 'deny':
         return HexSlot(
           id: 'deny',
-          title: netText(language, 'Чёрный список', 'Deny list'),
+          title: localized(language, 'Чёрный список', 'Deny list'),
           footer: '$deny',
           color: color,
           q: at.$1,
@@ -133,7 +130,6 @@ class _NetworkListPageState extends State<NetworkListPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: netText,
       wide: wide,
     );
     final path = widget.deny ? '/peers/deny' : '/peers/allow';
@@ -158,11 +154,7 @@ class _NetworkListPageState extends State<NetworkListPage> {
   ) {
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: netText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'prev':
         return pageStepSlot(
           id: 'prev',
@@ -197,7 +189,7 @@ class _NetworkListPageState extends State<NetworkListPage> {
         return HexSlot(
           id: 'url:$url',
           title: instanceHost(url),
-          footer: listed ? netText(language, 'в списке', 'listed') : null,
+          footer: listed ? localized(language, 'в списке', 'listed') : null,
           color: listed ? const Color(0xFFFFFFFF) : color,
           q: slot.q,
           r: slot.r,

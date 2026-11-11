@@ -4,6 +4,7 @@ import '../hive/hex_motion.dart';
 import '../hive/hex_order.dart';
 import '../hive/hex_scene.dart';
 import '../locale/failure.dart';
+import '../locale/languages.dart';
 import 'account/error_reader.dart';
 
 /// The shared hex renderer. The background is under the router.
@@ -39,10 +40,10 @@ class HexPage extends StatelessWidget {
 }
 
 /// Back cell. Every screen that has Back uses this slot.
-HexSlot backSlot({required String title, required int q, required int r}) {
+HexSlot backSlot(String language, {required int q, required int r}) {
   return HexSlot(
     id: 'back',
-    title: title,
+    title: localized(language, 'Назад', 'Back'),
     color: hexMuted,
     q: q,
     r: r,
@@ -62,7 +63,6 @@ void appendError(
   required String? message,
   required bool open,
   required String language,
-  required String Function(String language, String ru, String en) text,
   required bool wide,
 }) {
   if (message == null) return;
@@ -72,7 +72,7 @@ void appendError(
   slots.add(
     HexSlot(
       id: 'error',
-      title: text(language, 'Ошибка', 'Error'),
+      title: localized(language, 'Ошибка', 'Error'),
       color: errorColor,
       titleColor: errorColor,
       q: spot.$1,
@@ -84,7 +84,7 @@ void appendError(
               detail: shown == message || LocalFailure.read(message) != null
                   ? null
                   : message,
-              copyLabel: text(language, 'Скопировать', 'Copy'),
+              copyLabel: localized(language, 'Скопировать', 'Copy'),
             )
           : null,
     ),

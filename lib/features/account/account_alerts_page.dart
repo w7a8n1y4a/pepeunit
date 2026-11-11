@@ -7,7 +7,7 @@ import '../../hive/hex_scene.dart';
 import '../../locale/languages.dart';
 import '../../navigation/sections.dart';
 import '../hex_page.dart';
-import 'account_nav.dart';
+import '../../navigation/back.dart';
 import 'alert_time_cell.dart';
 
 class AccountAlertsPage extends StatefulWidget {
@@ -41,7 +41,7 @@ class _AccountAlertsPageState extends State<AccountAlertsPage> {
       slots: [
         _toggle(
           id: 'scheduled',
-          title: phrase(language, {'ru': 'Сводки', 'en': 'Summaries'}),
+          title: localized(language, 'Сводки', 'Summaries'),
           on: alerts.scheduled,
           language: language,
           color: color,
@@ -50,7 +50,7 @@ class _AccountAlertsPageState extends State<AccountAlertsPage> {
         ),
         HexSlot(
           id: 'time',
-          title: phrase(language, {'ru': 'Время UTC', 'en': 'UTC time'}),
+          title: localized(language, 'Время UTC', 'UTC time'),
           color: color,
           q: spot[1].$1,
           r: spot[1].$2,
@@ -58,7 +58,7 @@ class _AccountAlertsPageState extends State<AccountAlertsPage> {
         ),
         _toggle(
           id: 'pipe',
-          title: phrase(language, {'ru': 'DataPipe', 'en': 'DataPipe'}),
+          title: localized(language, 'DataPipe', 'DataPipe'),
           on: alerts.dataPipe,
           language: language,
           color: color,
@@ -67,18 +67,14 @@ class _AccountAlertsPageState extends State<AccountAlertsPage> {
         ),
         _toggle(
           id: 'telegram',
-          title: phrase(language, {'ru': 'Телеграм', 'en': 'Telegram'}),
+          title: localized(language, 'Телеграм', 'Telegram'),
           on: alerts.telegram,
           language: language,
           color: color,
           q: spot[3].$1,
           r: spot[3].$2,
         ),
-        backSlot(
-          title: phrase(language, {'ru': 'Назад', 'en': 'Back'}),
-          q: backAt.$1,
-          r: backAt.$2,
-        ),
+        backSlot(language, q: backAt.$1, r: backAt.$2),
       ],
       onTap: _tap,
     );

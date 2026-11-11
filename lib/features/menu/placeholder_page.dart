@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_order.dart';
 import '../../hive/hex_scene.dart';
+import '../../locale/languages.dart';
 import '../../navigation/back.dart';
 import '../../navigation/sections.dart';
 import '../hex_page.dart';
@@ -18,8 +19,7 @@ class PlaceholderPage extends StatelessWidget {
     final language = model.vault.language;
     final section = sectionById(sectionId);
     final title = section?.title(language) ?? sectionId;
-    final soon = language == 'en' ? 'Soon' : 'Скоро';
-    final back = language == 'en' ? 'Back' : 'Назад';
+    final soon = localized(language, 'Скоро', 'Soon');
     final frame = hexFrame(
       count: 2,
       back: HexBack.center,
@@ -45,7 +45,7 @@ class PlaceholderPage extends StatelessWidget {
           q: at[1].$1,
           r: at[1].$2,
         ),
-        backSlot(title: back, q: backAt.$1, r: backAt.$2),
+        backSlot(language, q: backAt.$1, r: backAt.$2),
       ],
       onTap: (id) {
         if (id == 'back') popOrHome(context);

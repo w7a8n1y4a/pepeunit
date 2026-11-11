@@ -1,24 +1,11 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
-import '../../hive/bevel.dart';
-import '../../hive/grain.dart';
 import '../../hive/hex_scene.dart';
 import '../../hive/hint.dart';
 import '../../library/doc_search.dart';
-import '../code/code_modal.dart';
+import '../../locale/languages.dart';
 import 'library_menu_page.dart';
-
-TextStyle _style(double size, Color color, {double? height}) => TextStyle(
-  color: color,
-  fontFamily: 'OpenGost Type B',
-  fontSize: size,
-  height: height,
-  decoration: TextDecoration.none,
-);
+import 'search_panel.dart';
 
 /// The search of the documentation, the way the local search of VitePress
 /// looks: a panel over the page with a field on top and the places found
@@ -54,236 +41,48 @@ class DocSearchPanel extends StatefulWidget {
 }
 
 class _DocSearchPanelState extends State<DocSearchPanel> {
-  final _field = TextEditingController();
-  final _focus = FocusNode();
-  final _scroll = ScrollController();
+  /// Words of the last query, for marking them in the rows.
   var _terms = const <String>[];
-  var _hits = const <DocHit>[];
-  var _lit = 0;
 
-  @override
-  void initState() {
-    super.initState();
-    // The page under the panel holds the focus, so the field's autofocus is
-    // not taken: ask for it, and typing starts at once.
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _focus.requestFocus();
-    });
-  }
-
-  @override
-  void dispose() {
-    _field.dispose();
-    _focus.dispose();
-    _scroll.dispose();
-    super.dispose();
-  }
-
-  void _typed(String text) {
-    setState(() {
-      _terms = queryTerms(text);
-      _hits = widget.index.search(text);
-      _lit = 0;
-    });
-    if (_scroll.hasClients) _scroll.jumpTo(0);
-  }
-
-  void _move(int step, double rowH, double viewport) {
-    if (_hits.isEmpty) return;
-    setState(() => _lit = (_lit + step).clamp(0, _hits.length - 1));
-    if (!_scroll.hasClients) return;
-    final top = _lit * rowH;
-    final bottom = top + rowH;
-    final from = _scroll.offset;
-    if (top < from) {
-      _scroll.jumpTo(top);
-    } else if (bottom > from + viewport) {
-      _scroll.jumpTo(bottom - viewport);
-    }
-  }
-
-  void _open(int at) {
-    if (at < 0 || at >= _hits.length) return;
-    widget.onOpen(_hits[at].section);
+  List<DocHit> _search(String text) {
+    _terms = queryTerms(text);
+    return widget.index.search(text);
   }
 
   @override
   Widget build(BuildContext context) {
-    final font = widget.font;
     final language = widget.language;
-    final asked = _field.text.trim();
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final size = constraints.biggest;
-        final margin = min(font * 1.2, size.width * 0.03);
-        final width = min(size.width - margin * 2, font * 52);
-        final top = max(margin, size.height * 0.07);
-        final barH = font * 3.4;
-        final rowH = font * 5.4;
-        final room = max(font * 6, size.height - top - margin - barH - 1);
-        final natural = _hits.isEmpty ? font * 5.5 : _hits.length * rowH;
-        final listH = min(room, natural + font * 0.6);
-        final viewport = listH - font * 0.6;
-        return Stack(
-          children: [
-            Positioned.fill(
-              child: GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: widget.onClose,
-                child: const ColoredBox(color: Color(0xB3000000)),
-              ),
+    return SearchPanel<DocHit>(
+      font: widget.font,
+      rowExtent: 5.4,
+      fieldLabel: localized(
+        language,
+        'Поиск по документации',
+        'Search the documentation',
+      ),
+      closeLabel: localized(language, 'Закрыть поиск', 'Close search'),
+      search: _search,
+      emptyText: (asked) => asked.isEmpty
+          ? localized(
+              language,
+              'Введите слова из статьи',
+              'Type words from an article',
+            )
+          : localized(
+              language,
+              'Ничего не найдено по запросу «$asked»',
+              'No results for “$asked”',
             ),
-            Positioned(
-              top: top,
-              left: (size.width - width) / 2,
-              width: width,
-              height: barH + 1 + listH,
-              child: Focus(
-                onKeyEvent: (node, event) {
-                  if (event is! KeyDownEvent && event is! KeyRepeatEvent) {
-                    return KeyEventResult.ignored;
-                  }
-                  final key = event.logicalKey;
-                  if (key == LogicalKeyboardKey.escape) {
-                    widget.onClose();
-                    return KeyEventResult.handled;
-                  }
-                  if (key == LogicalKeyboardKey.arrowDown) {
-                    _move(1, rowH, viewport);
-                    return KeyEventResult.handled;
-                  }
-                  if (key == LogicalKeyboardKey.arrowUp) {
-                    _move(-1, rowH, viewport);
-                    return KeyEventResult.handled;
-                  }
-                  return KeyEventResult.ignored;
-                },
-                child: BevelFrame(
-                  color: libraryColor,
-                  width: max(1.4, font * 0.12),
-                  radius: font,
-                  child: GrainBox(
-                    tile: cellGrain,
-                    opacity: modalFillOpacity,
-                    child: Column(
-                      children: [
-                        SizedBox(
-                          height: barH,
-                          child: Padding(
-                            padding: EdgeInsets.fromLTRB(
-                              font * 1.1,
-                              0,
-                              font * 0.4,
-                              0,
-                            ),
-                            child: Row(
-                              children: [
-                                SvgPicture.asset(
-                                  'assets/icons/actions/search.svg',
-                                  width: font * 1.5,
-                                  height: font * 1.5,
-                                ),
-                                SizedBox(width: font * 0.8),
-                                Expanded(
-                                  child: Semantics(
-                                    textField: true,
-                                    label: libErrorText(
-                                      language,
-                                      'Поиск по документации',
-                                      'Search the documentation',
-                                    ),
-                                    child: TextField(
-                                      controller: _field,
-                                      focusNode: _focus,
-                                      autofocus: true,
-                                      cursorColor: libraryColor,
-                                      style: _style(
-                                        font * 1.25,
-                                        const Color(0xFFFFFFFF),
-                                      ),
-                                      textInputAction: TextInputAction.search,
-                                      decoration: InputDecoration.collapsed(
-                                        hintText: libErrorText(
-                                          language,
-                                          'Поиск по документации',
-                                          'Search the documentation',
-                                        ),
-                                        hintStyle: _style(
-                                          font * 1.25,
-                                          hexMuted,
-                                        ),
-                                      ),
-                                      onChanged: _typed,
-                                      onSubmitted: (_) => _open(_lit),
-                                    ),
-                                  ),
-                                ),
-                                CodeCloseMark(
-                                  label: libErrorText(
-                                    language,
-                                    'Закрыть поиск',
-                                    'Close search',
-                                  ),
-                                  extent: font * 2.2,
-                                  onTap: widget.onClose,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ),
-                        Container(height: 1, color: const Color(0x33FFFFFF)),
-                        Expanded(
-                          child: _hits.isEmpty
-                              ? Center(
-                                  child: Padding(
-                                    padding: EdgeInsets.symmetric(
-                                      horizontal: font,
-                                    ),
-                                    child: Text(
-                                      asked.isEmpty
-                                          ? libErrorText(
-                                              language,
-                                              'Введите слова из статьи',
-                                              'Type words from an article',
-                                            )
-                                          : libErrorText(
-                                              language,
-                                              'Ничего не найдено по запросу «$asked»',
-                                              'No results for “$asked”',
-                                            ),
-                                      textAlign: TextAlign.center,
-                                      style: _style(font * 1.05, hexMuted),
-                                    ),
-                                  ),
-                                )
-                              : ListView.builder(
-                                  controller: _scroll,
-                                  padding: EdgeInsets.symmetric(
-                                    vertical: font * 0.3,
-                                  ),
-                                  itemExtent: rowH,
-                                  itemCount: _hits.length,
-                                  itemBuilder: (context, i) => _HitRow(
-                                    hit: _hits[i],
-                                    terms: _terms,
-                                    font: font,
-                                    lit: i == _lit,
-                                    onHover: () {
-                                      if (_lit != i) setState(() => _lit = i);
-                                    },
-                                    onTap: () => _open(i),
-                                  ),
-                                ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
+      rowBuilder: (context, hit, lit, onHover, onTap) => _HitRow(
+        hit: hit,
+        terms: _terms,
+        font: widget.font,
+        lit: lit,
+        onHover: onHover,
+        onTap: onTap,
+      ),
+      onPick: (hit) => widget.onOpen(hit.section),
+      onClose: widget.onClose,
     );
   }
 }
@@ -345,13 +144,13 @@ class _HitRow extends StatelessWidget {
     for (var i = 0; i < parts.length; i++) {
       final last = i == parts.length - 1;
       if (i > 0) {
-        spans.add(TextSpan(text: '  ›  ', style: _style(font, hexMuted)));
+        spans.add(TextSpan(text: '  ›  ', style: searchStyle(font, hexMuted)));
       }
       spans.addAll(
         _marked(
           parts[i],
           terms,
-          _style(
+          searchStyle(
             font * 1.05,
             last ? const Color(0xFFFFFFFF) : hexMuted,
             height: 1.25,
@@ -365,63 +164,38 @@ class _HitRow extends StatelessWidget {
       id: 'doc-result',
       title: parts.join(' › '),
       color: libraryColor,
-      child: Semantics(
-        button: true,
-        selected: lit,
+      child: SearchRowFrame(
+        font: font,
+        lit: lit,
         label: parts.join(', '),
-        child: MouseRegion(
-          cursor: SystemMouseCursors.click,
-          onHover: (_) => onHover(),
-          child: GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: onTap,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: font * 0.6,
-                vertical: font * 0.15,
-              ),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: lit ? const Color(0x14FFFFFF) : null,
-                  border: Border.all(
-                    color: lit ? libraryColor : const Color(0x00000000),
-                  ),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: font * 0.7,
-                    vertical: font * 0.35,
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text.rich(
-                        TextSpan(children: spans),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      if (text.isNotEmpty) ...[
-                        SizedBox(height: font * 0.25),
-                        Text.rich(
-                          TextSpan(
-                            children: _marked(
-                              excerptOf(text, terms),
-                              terms,
-                              _style(font * 0.88, hexMuted, height: 1.25),
-                              libraryColor,
-                            ),
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ),
+        verticalPad: 0.35,
+        onHover: onHover,
+        onTap: onTap,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text.rich(
+              TextSpan(children: spans),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
-          ),
+            if (text.isNotEmpty) ...[
+              SizedBox(height: font * 0.25),
+              Text.rich(
+                TextSpan(
+                  children: _marked(
+                    excerptOf(text, terms),
+                    terms,
+                    searchStyle(font * 0.88, hexMuted, height: 1.25),
+                    libraryColor,
+                  ),
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ],
         ),
       ),
     );

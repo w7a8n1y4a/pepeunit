@@ -15,10 +15,10 @@ import 'package:pepeunit_client/features/units/unit_create_page.dart';
 import 'package:pepeunit_client/features/units/unit_panels.dart';
 import 'package:pepeunit_client/features/units/units_menu_page.dart';
 import 'package:pepeunit_client/features/units/units_page.dart';
-import 'package:pepeunit_client/hive/hex_order.dart';
 import 'package:pepeunit_client/instances/instance.dart';
 import 'package:pepeunit_client/units/unit.dart';
 import 'package:pepeunit_client/units/unit_read.dart';
+import 'package:pepeunit_client/instances/network_view.dart';
 import 'package:pepeunit_client/units/unit_view.dart';
 
 void main() {

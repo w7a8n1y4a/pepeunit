@@ -7,12 +7,13 @@ import '../../instances/network_view.dart';
 import '../../navigation/pick.dart';
 import '../../registry/repo.dart';
 import '../../units/unit.dart';
-import '../../units/unit_view.dart';
 import '../hex_page.dart';
+import '../paged_search.dart';
 import '../line_input.dart';
 import '../network/network_chrome.dart';
 import '../slanted_choices.dart';
 import 'units_chrome.dart';
+import '../../locale/languages.dart';
 
 /// Commit search. A tap gives the hash to the opener through [givePick]. A compilable unit shows tags only.
 class CommitPickPage extends StatefulWidget {
@@ -33,19 +34,21 @@ class CommitPickPage extends StatefulWidget {
   State<CommitPickPage> createState() => _CommitPickPageState();
 }
 
-class _CommitPickPageState extends State<CommitPickPage> {
+class _CommitPickPageState extends State<CommitPickPage>
+    with PagedSearch<CommitPickPage> {
   static const _head = 2;
 
-  var _offset = 0;
   var _count = 0;
   var _onlyTag = false;
   var _search = '';
-  var _loading = false;
-  var _open = false;
-  String? _failure;
-  var _ticket = 0;
   List<RepoCommit> _rows = const [];
-  final _typing = SearchDelay();
+
+  @override
+  int scopeOf(CommitPickPage widget) => widget.scope;
+
+  @override
+  bool canLoad(AppModel model) =>
+      model.signedIn && widget.repoUuid.isNotEmpty && widget.branch.isNotEmpty;
 
   int _limit(AppModel model) =>
       model.cappedLimit(headPageLimit(widget.scope, head: _head));
@@ -62,23 +65,6 @@ class _CommitPickPageState extends State<CommitPickPage> {
   void initState() {
     super.initState();
     _onlyTag = widget.compilable;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (mounted) _load();
-    });
-  }
-
-  @override
-  void didUpdateWidget(CommitPickPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.scope == widget.scope) return;
-    _offset = 0;
-    _load();
-  }
-
-  @override
-  void dispose() {
-    _typing.dispose();
-    super.dispose();
   }
 
   @override
@@ -86,7 +72,7 @@ class _CommitPickPageState extends State<CommitPickPage> {
     final model = AppScope.of(context);
     final language = model.vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
-    final board = headBoard(
+    final board = listBoard(
       tick: widget.scope,
       head: const ['query', 'window'],
       ids: [for (final row in _rows) row.commit],
@@ -100,10 +86,9 @@ class _CommitPickPageState extends State<CommitPickPage> {
     ];
     appendError(
       slots,
-      message: _failure,
-      open: _open,
+      message: failure,
+      open: failureOpen,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(
@@ -122,15 +107,11 @@ class _CommitPickPageState extends State<CommitPickPage> {
     final color = unitsColor;
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: unitText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'query':
         return HexSlot(
           id: 'query',
-          title: unitText(language, 'Поиск', 'Search'),
+          title: localized(language, 'Поиск', 'Search'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -139,26 +120,26 @@ class _CommitPickPageState extends State<CommitPickPage> {
             tags: _onlyTag,
             onSearch: (text) {
               _search = text;
-              _searchLater();
+              searchLater();
             },
             onTags: (tags) {
               if (widget.compilable || tags == _onlyTag) return;
               setState(() => _onlyTag = tags);
-              _retune();
+              retune();
             },
           ),
         );
       case 'window':
         return HexSlot(
           id: 'window',
-          title: unitText(language, 'Страница', 'Page'),
+          title: localized(language, 'Страница', 'Page'),
           color: color,
-          busy: _loading,
+          busy: loading,
           q: slot.q,
           r: slot.r,
           body: UnitWindow(
             language: language,
-            offset: _offset,
+            offset: offset,
             limit: limit,
             count: _count,
             capacity: _capacity(),
@@ -211,75 +192,31 @@ class _CommitPickPageState extends State<CommitPickPage> {
       case 'back':
         givePick(context, null);
       case 'error':
-        setState(() => _open = true);
+        setState(() => failureOpen = true);
     }
   }
 
-  void _searchLater() {
-    _typing.later(() {
-      if (!mounted) return;
-      setState(() => _offset = 0);
-      _load();
-    });
-  }
+  void _step(int direction) => step(
+    direction,
+    limit: _limit(AppScope.of(context)),
+    count: _count,
+    capacity: _capacity(),
+  );
 
-  void _retune() {
-    _typing.cancel();
-    setState(() => _offset = 0);
-    _load();
-  }
-
-  void _step(int direction) {
-    if (_loading) return;
-    final next = pageShift(
-      direction: direction,
-      offset: _offset,
-      limit: _limit(AppScope.of(context)),
-      count: _count,
-      capacity: _capacity(),
+  @override
+  Future<VoidCallback?> fetch(AppModel model) async {
+    final page = await model.branchCommits(
+      widget.repoUuid,
+      widget.branch,
+      onlyTag: widget.compilable || _onlyTag,
+      search: _search,
+      offset: offset,
+      limit: _limit(model),
     );
-    if (next == null) return;
-    setState(() => _offset = next);
-    _load();
-  }
-
-  Future<void> _load() async {
-    final ticket = ++_ticket;
-    final model = AppScope.of(context);
-    if (!model.signedIn || widget.repoUuid.isEmpty || widget.branch.isEmpty) {
-      setState(() {
-        _loading = false;
-        _failure = model.notSignedIn;
-      });
-      return;
-    }
-    setState(() {
-      _loading = true;
-      _failure = null;
-      _open = false;
-    });
-    try {
-      final page = await model.branchCommits(
-        widget.repoUuid,
-        widget.branch,
-        onlyTag: widget.compilable || _onlyTag,
-        search: _search,
-        offset: _offset,
-        limit: _limit(model),
-      );
-      if (!mounted || ticket != _ticket) return;
-      setState(() {
-        _rows = page.commits;
-        _count = page.count;
-        _loading = false;
-      });
-    } catch (error) {
-      if (!mounted || ticket != _ticket) return;
-      setState(() {
-        _loading = false;
-        _failure = '$error';
-      });
-    }
+    return () {
+      _rows = page.commits;
+      _count = page.count;
+    };
   }
 }
 
@@ -322,7 +259,7 @@ class _QueryCellState extends State<_QueryCell> {
       color: unitsColor,
       controller: _controller,
       fieldKey: const ValueKey('commit-search'),
-      hint: unitText(language, 'Хеш или тег', 'Hash or tag'),
+      hint: localized(language, 'Хеш или тег', 'Hash or tag'),
       leading: 'assets/icons/actions/search.svg',
       roomyCaption: !widget.compilable,
       onChanged: widget.onSearch,
@@ -350,12 +287,12 @@ class _TagWords extends StatelessWidget {
           maxWidth: searchLineWidth(constraints.maxWidth),
           choices: [
             SlantedChoice(
-              label: unitText(language, 'Все', 'All'),
+              label: localized(language, 'Все', 'All'),
               selected: !tags,
               onTap: () => onTags(false),
             ),
             SlantedChoice(
-              label: unitText(language, 'Только теги', 'Tags only'),
+              label: localized(language, 'Только теги', 'Tags only'),
               selected: tags,
               onTap: () => onTags(true),
             ),

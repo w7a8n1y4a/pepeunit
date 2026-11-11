@@ -15,7 +15,7 @@ import '../../locale/languages.dart';
 import '../../navigation/sections.dart';
 import '../file_drop.dart';
 import '../hex_page.dart';
-import 'account_nav.dart';
+import '../../navigation/back.dart';
 import 'login_cell.dart';
 import 'parameters_cell.dart';
 
@@ -71,10 +71,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     final slots = <HexSlot>[
       HexSlot(
         id: 'icon',
-        title: phrase(language, {
-          'ru': 'Загрузить аватар',
-          'en': 'Upload avatar',
-        }),
+        title: localized(language, 'Загрузить аватар', 'Upload avatar'),
         color: iconColor,
         busy: _pending == 'icon',
         q: spot[0].$1,
@@ -84,23 +81,16 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       ),
       HexSlot(
         id: 'login',
-        title: phrase(language, {'ru': 'Изменить логин', 'en': 'Change login'}),
+        title: localized(language, 'Изменить логин', 'Change login'),
         color: color,
         q: spot[1].$1,
         r: spot[1].$2,
         body: LoginCell(color: color),
       ),
-      backSlot(
-        title: phrase(language, {'ru': 'Назад', 'en': 'Back'}),
-        q: backAt.$1,
-        r: backAt.$2,
-      ),
+      backSlot(language, q: backAt.$1, r: backAt.$2),
       HexSlot(
         id: 'sync',
-        title: phrase(language, {
-          'ru': 'Отправить в избранный',
-          'en': 'Send to favorite',
-        }),
+        title: localized(language, 'Отправить в избранный', 'Send to favorite'),
         footer: !waiting && cooling > Duration.zero
             ? cooldownClock(cooling)
             : null,
@@ -113,10 +103,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       ),
       HexSlot(
         id: 'pull',
-        title: phrase(language, {
-          'ru': 'Вытянуть из избранного',
-          'en': 'Pull from favorite',
-        }),
+        title: localized(language, 'Вытянуть из избранного', 'Pull from favorite'),
         color: _pending == 'pull' || model.target != null ? color : hexMuted,
         enabled: _pending == 'pull' || model.target != null,
         busy: _pending == 'pull',
@@ -126,7 +113,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       ),
       HexSlot(
         id: 'parameters',
-        title: phrase(language, {'ru': 'Приложение', 'en': 'Application'}),
+        title: localized(language, 'Приложение', 'Application'),
         color: color,
         q: spot[3].$1,
         r: spot[3].$2,
@@ -134,7 +121,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       ),
       HexSlot(
         id: 'alerts',
-        title: phrase(language, {'ru': 'Уведомления', 'en': 'Notifications'}),
+        title: localized(language, 'Уведомления', 'Notifications'),
         color: color,
         q: spot[4].$1,
         r: spot[4].$2,
@@ -146,7 +133,6 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
       message: failure,
       open: _failureOpen,
       language: language,
-      text: accountText,
       wide: wide,
     );
     return HexPage(
@@ -191,10 +177,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     setState(() => _pending = 'icon');
     try {
       final bytes = await model.files.pick(
-        dialogTitle: phrase(language, {
-          'ru': 'Выбрать иконку',
-          'en': 'Choose an icon',
-        }),
+        dialogTitle: localized(language, 'Выбрать иконку', 'Choose an icon'),
       );
       if (!mounted) return;
       if (bytes == null) {
@@ -269,7 +252,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     if (!mounted) return;
     final String? message;
     if (report.empty) {
-      message = phrase(language, {'ru': 'Нет избранного', 'en': 'No favorite'});
+      message = localized(language, 'Нет избранного', 'No favorite');
     } else if (report.problems.isNotEmpty) {
       message = report.problems.join('\n');
     } else {
@@ -295,7 +278,7 @@ class _AccountSettingsPageState extends State<AccountSettingsPage> {
     if (!mounted) return;
     final String? message;
     if (report.empty) {
-      message = phrase(language, {'ru': 'Нет избранного', 'en': 'No favorite'});
+      message = localized(language, 'Нет избранного', 'No favorite');
     } else if (report.problems.isNotEmpty) {
       message = report.problems.join('\n');
     } else {

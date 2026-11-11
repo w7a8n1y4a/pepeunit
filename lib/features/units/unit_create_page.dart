@@ -10,47 +10,9 @@ import '../../navigation/pick.dart';
 import '../../registry/repo.dart';
 import '../../units/unit.dart';
 import '../hex_page.dart';
-import '../line_input.dart';
+import 'unit_form_parts.dart';
 import 'units_chrome.dart';
-
-/// Update flags collected on the updates menu and returned to the form.
-class UnitUpdateDraft {
-  const UnitUpdateDraft({
-    required this.compilable,
-    required this.auto,
-    required this.tagsOnly,
-    this.commit,
-    this.platform,
-  });
-
-  final bool compilable;
-  final bool auto;
-  final bool tagsOnly;
-  final String? commit;
-  final String? platform;
-}
-
-/// Route of the updates menu with the flags the form holds now.
-String unitUpdatesPath({
-  required String repo,
-  required String branch,
-  required bool compilable,
-  required bool auto,
-  required bool tags,
-  String? commit,
-  String? platform,
-}) {
-  final query = <String, String>{
-    'repo': repo,
-    'branch': branch,
-    'compilable': compilable ? '1' : '0',
-    'auto': auto ? '1' : '0',
-    'tags': tags ? '1' : '0',
-    if (commit != null && commit.isNotEmpty) 'commit': commit,
-    if (platform != null && platform.isNotEmpty) 'platform': platform,
-  };
-  return Uri(path: '/units/new/updates', queryParameters: query).toString();
-}
+import '../../locale/languages.dart';
 
 /// Creates a unit. A repository may already be chosen via `repo`.
 class UnitCreatePage extends StatefulWidget {
@@ -65,14 +27,8 @@ class UnitCreatePage extends StatefulWidget {
 class _UnitCreatePageState extends State<UnitCreatePage> {
   final _name = TextEditingController();
   final _nameFocus = FocusNode();
+  final _form = UnitFormFields();
   RegistryRepo? _repo;
-  String _visibility = 'Internal';
-  var _compilable = false;
-  var _auto = true;
-  var _tags = true;
-  String _branch = '';
-  String? _commit;
-  String? _platform;
   String? _failure;
   String? _issue;
   var _open = false;
@@ -114,7 +70,6 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: _tap);
@@ -125,18 +80,14 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
     final ready = _ready;
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: unitText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'repo':
         final caption = _repo == null
             ? null
             : repoCaption(_repo!.repositoryUrl);
         return HexSlot(
           id: 'repo',
-          title: unitText(language, 'Выбрать репозиторий', 'Select repository'),
+          title: localized(language, 'Выбрать репозиторий', 'Select repository'),
           footer: caption,
           color: color,
           busy: _loading,
@@ -146,73 +97,35 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
           image: image,
         );
       case 'name':
-        return HexSlot(
-          id: 'name',
-          title: unitText(language, 'Имя', 'Name'),
-          color: color,
-          q: slot.q,
-          r: slot.r,
-          tappable: false,
+        return unitFormNameSlot(
+          slot,
+          language,
+          controller: _name,
+          focusNode: _nameFocus,
+          issue: _issue,
           enabled: ready,
-          body: LineInput(
-            color: color,
-            controller: _name,
-            focusNode: _nameFocus,
-            fieldKey: const ValueKey('unit-name'),
-            hint: unitText(language, 'имя', 'name'),
-            issue: _issue ?? '',
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9_.-]')),
-              LengthLimitingTextInputFormatter(20),
-            ],
-          ),
         );
       case 'visibility':
-        return HexSlot(
-          id: 'visibility',
-          title: unitText(language, 'Видимость', 'Visibility'),
-          color: color,
-          q: slot.q,
-          r: slot.r,
-          tappable: false,
+        return unitFormVisibilitySlot(
+          slot,
+          language,
+          fields: _form,
           enabled: ready,
-          body: ChoiceWords(
-            center: true,
-            choices: [
-              for (final level in unitVisibilities)
-                (id: level, label: unitVisibilityLabel(language, level)),
-            ],
-            selected: (id) => _visibility == id,
-            onTap: (id) => setState(() => _visibility = id),
-          ),
+          onPick: (id) => setState(() => _form.visibility = id),
         );
       case 'branch':
-        return HexSlot(
-          id: 'branch',
-          title: unitText(language, 'Ветка', 'Branch'),
-          footer: _branch.isEmpty ? null : _branch,
-          color: color,
-          enabled: ready,
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/objects/repo.svg',
-        );
+        return unitFormBranchSlot(slot, language, fields: _form, enabled: ready);
       case 'updates':
-        return HexSlot(
-          id: 'updates',
-          title: unitText(language, 'Обновления', 'Updates'),
-          footer: unitRunLabel(language, _compilable),
-          footerLeft: unitHandsLabel(language, _auto),
-          color: color,
+        return unitFormUpdatesSlot(
+          slot,
+          language,
+          fields: _form,
           enabled: ready,
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/actions/updates.svg',
         );
       case 'create':
         return HexSlot(
           id: 'create',
-          title: unitText(language, 'Создать', 'Create'),
+          title: localized(language, 'Создать', 'Create'),
           color: unitAddColor,
           busy: _busy,
           enabled: ready,
@@ -221,13 +134,7 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
           icon: 'assets/icons/actions/unit_add.svg',
         );
       default:
-        return HexSlot(
-          id: slot.id,
-          title: slot.id,
-          color: color,
-          q: slot.q,
-          r: slot.r,
-        );
+        return unitFormFallbackSlot(slot);
     }
   }
 
@@ -252,32 +159,13 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
           items: [for (final name in repo.branches) (id: name, label: name)],
         );
         if (picked == null || !mounted) return;
-        setState(() {
-          _branch = picked;
-          _commit = null;
-          _platform = null;
-        });
+        setState(() => _form.takeBranch(picked));
       case 'updates':
-        if (!_ready || _repo == null) return;
-        final picked = await context.push<UnitUpdateDraft>(
-          unitUpdatesPath(
-            repo: _repo?.uuid ?? '',
-            branch: _branch,
-            compilable: _compilable,
-            auto: _auto,
-            tags: _compilable || _tags,
-            commit: _commit,
-            platform: _platform,
-          ),
-        );
+        final repo = _repo;
+        if (!_ready || repo == null) return;
+        final picked = await _form.pickUpdates(context, repo.uuid);
         if (picked == null || !mounted) return;
-        setState(() {
-          _compilable = picked.compilable;
-          _auto = picked.auto;
-          _tags = picked.compilable || picked.tagsOnly;
-          _commit = picked.commit;
-          _platform = picked.platform;
-        });
+        setState(() => _form.takeUpdates(picked));
       case 'create':
         await _create();
     }
@@ -302,9 +190,7 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
       if (!mounted) return;
       setState(() {
         _repo = repo;
-        _branch = repo.branches.isEmpty ? '' : repo.branches.first;
-        _commit = null;
-        _platform = null;
+        _form.takeBranch(repo.branches.isEmpty ? '' : repo.branches.first);
         _loading = false;
       });
     } catch (error) {
@@ -324,7 +210,7 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
     final name = _name.text.trim();
     if (repo == null) {
       setState(() {
-        _failure = unitText(
+        _failure = localized(
           language,
           'Выберите репозиторий',
           'Select a repository',
@@ -332,39 +218,11 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
       });
       return;
     }
-    if (!unitNameOk(name)) {
+    final problem = _form.problem(language, name);
+    if (problem != null) {
       setState(() {
-        _issue = unitText(
-          language,
-          'От 4 до 20: буквы, цифры, _ . -',
-          '4 to 20: letters, digits, _ . -',
-        );
-        _failure = null;
-      });
-      return;
-    }
-    if (_branch.isEmpty) {
-      setState(() {
-        _issue = null;
-        _failure = unitText(language, 'Нужна ветка', 'A branch is required');
-      });
-      return;
-    }
-    if (!_auto && (_commit == null || _commit!.isEmpty)) {
-      setState(() {
-        _issue = null;
-        _failure = unitText(language, 'Нужен коммит', 'A commit is required');
-      });
-      return;
-    }
-    if (_compilable && (_platform == null || _platform!.isEmpty)) {
-      setState(() {
-        _issue = null;
-        _failure = unitText(
-          language,
-          'Нужна платформа',
-          'A platform is required',
-        );
+        _issue = problem.issue;
+        _failure = problem.failure;
       });
       return;
     }
@@ -376,15 +234,8 @@ class _UnitCreatePageState extends State<UnitCreatePage> {
     });
     try {
       final unit = await model.createUnit({
-        'name': name,
+        ..._form.body(name),
         'repo_uuid': repo.uuid,
-        'visibility_level': _visibility,
-        'target_branch': _branch,
-        'is_auto_update_unit': _auto,
-        'is_compilable_unit': _compilable,
-        'is_only_tag_update': _compilable || _tags,
-        if (!_auto) 'target_commit': _commit,
-        if (_compilable) 'target_firmware_platform': _platform,
       });
       if (!mounted) return;
       context.pushReplacement('/units/${unit.uuid}');
@@ -457,26 +308,22 @@ class _UnitUpdatesPageState extends State<UnitUpdatesPage> {
   }
 
   String _tagsTitle(String language) {
-    if (_compilable) return unitText(language, 'Последний тег', 'Last tag');
-    if (_tags) return unitText(language, 'Только теги', 'Tags only');
-    return unitText(language, 'Последний коммит', 'Last commit');
+    if (_compilable) return localized(language, 'Последний тег', 'Last tag');
+    if (_tags) return localized(language, 'Только теги', 'Tags only');
+    return localized(language, 'Последний коммит', 'Last commit');
   }
 
   HexSlot _slot(BoardSlot slot, String language) {
     final color = unitsColor;
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: unitText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'compilable':
         return HexSlot(
           id: 'compilable',
           title: _compilable
-              ? unitText(language, 'Компилируемый', 'Compilable')
-              : unitText(language, 'Интерпретируемый', 'Interpreted'),
+              ? localized(language, 'Компилируемый', 'Compilable')
+              : localized(language, 'Интерпретируемый', 'Interpreted'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -486,8 +333,8 @@ class _UnitUpdatesPageState extends State<UnitUpdatesPage> {
         return HexSlot(
           id: 'auto',
           title: _auto
-              ? unitText(language, 'Автообновление', 'Auto-update')
-              : unitText(language, 'Руками', 'Manual'),
+              ? localized(language, 'Автообновление', 'Auto-update')
+              : localized(language, 'Руками', 'Manual'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -506,7 +353,7 @@ class _UnitUpdatesPageState extends State<UnitUpdatesPage> {
       case 'commit':
         return HexSlot(
           id: 'commit',
-          title: unitText(language, 'Коммит', 'Commit'),
+          title: localized(language, 'Коммит', 'Commit'),
           footer: shortCommit(_commit).isEmpty ? null : shortCommit(_commit),
           color: color,
           q: slot.q,
@@ -516,7 +363,7 @@ class _UnitUpdatesPageState extends State<UnitUpdatesPage> {
       case 'platform':
         return HexSlot(
           id: 'platform',
-          title: unitText(language, 'Платформа', 'Platform'),
+          title: localized(language, 'Платформа', 'Platform'),
           footer: _platform,
           color: color,
           q: slot.q,

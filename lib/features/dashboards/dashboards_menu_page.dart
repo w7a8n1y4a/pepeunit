@@ -7,6 +7,7 @@ import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
 import '../hex_page.dart';
 import 'dashboards_chrome.dart';
+import '../../locale/languages.dart';
 
 /// First screen of the dashboards section: add and search.
 class DashboardsMenuPage extends StatelessWidget {
@@ -35,15 +36,11 @@ class DashboardsMenuPage extends StatelessWidget {
   HexSlot _slot(BoardSlot slot, String language) {
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: dashText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'add':
         return HexSlot(
           id: 'add',
-          title: dashText(language, 'Добавить панель', 'Add dashboard'),
+          title: localized(language, 'Добавить панель', 'Add dashboard'),
           color: addColor,
           q: slot.q,
           r: slot.r,
@@ -52,7 +49,7 @@ class DashboardsMenuPage extends StatelessWidget {
       default:
         return HexSlot(
           id: 'search',
-          title: dashText(language, 'Поиск', 'Search'),
+          title: localized(language, 'Поиск', 'Search'),
           color: dashboardsColor,
           q: slot.q,
           r: slot.r,

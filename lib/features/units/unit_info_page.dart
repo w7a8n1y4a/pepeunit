@@ -9,6 +9,7 @@ import '../../units/unit_read.dart';
 import '../hex_page.dart';
 import '../network/line_cell.dart';
 import 'units_chrome.dart';
+import '../../locale/languages.dart';
 
 /// Commits, network, memory, clock and the crystal of one unit.
 class UnitInfoPage extends StatefulWidget {
@@ -44,7 +45,6 @@ class _UnitInfoPageState extends State<UnitInfoPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(
@@ -61,11 +61,7 @@ class _UnitInfoPageState extends State<UnitInfoPage> {
     final color = unitsColor;
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: unitText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'updates':
         return _facts(
           slot,
@@ -136,7 +132,7 @@ class _UnitInfoPageState extends State<UnitInfoPage> {
   }) {
     return HexSlot(
       id: slot.id,
-      title: unitText(language, ru, en),
+      title: localized(language, ru, en),
       color: unitsColor,
       busy: _loading && slot.id == 'updates',
       q: slot.q,
@@ -145,7 +141,7 @@ class _UnitInfoPageState extends State<UnitInfoPage> {
       body: MetricsCell(
         lines: lines,
         copyText: copy.isEmpty ? null : copy,
-        copyLabel: unitText(language, 'Скопировать', 'Copy'),
+        copyLabel: localized(language, 'Скопировать', 'Copy'),
       ),
     );
   }

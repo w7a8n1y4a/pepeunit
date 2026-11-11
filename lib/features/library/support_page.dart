@@ -8,6 +8,7 @@ import '../hex_page.dart';
 import '../network/line_cell.dart';
 import 'library_menu_page.dart';
 import 'library_modal.dart';
+import '../../locale/languages.dart';
 
 const _bitcoinAddress = 'bc1q537kletr80tg9s3cc47920cd5qcef0dwly08qr';
 const _ethereumAddress = '0xF7BF1e2C10c562679A88DB8DC73b67cc8469Ca19';
@@ -67,11 +68,7 @@ class _SupportPageState extends State<SupportPage> {
     final slots = [
       for (final slot in board)
         switch (slot.id) {
-          'back' => backSlot(
-            title: libText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'bitcoin' => _wallet(
             slot,
             title: 'Bitcoin',
@@ -86,7 +83,7 @@ class _SupportPageState extends State<SupportPage> {
           ),
           'rules' => HexSlot(
             id: 'rules',
-            title: libText(language, 'Правила расходов', 'Spending rules'),
+            title: localized(language, 'Правила расходов', 'Spending rules'),
             color: libraryColor,
             q: slot.q,
             r: slot.r,
@@ -95,7 +92,7 @@ class _SupportPageState extends State<SupportPage> {
           ),
           _ => HexSlot(
             id: 'report',
-            title: libText(language, 'Скачать Отчётность', 'Download report'),
+            title: localized(language, 'Скачать Отчётность', 'Download report'),
             color: libraryColor,
             q: slot.q,
             r: slot.r,
@@ -109,7 +106,6 @@ class _SupportPageState extends State<SupportPage> {
       message: _failure,
       open: _failureOpen,
       language: language,
-      text: libErrorText,
       wide: wide,
     );
     final scene = HexPage(slots: slots, onTap: (id) => _tap(id, language));
@@ -120,7 +116,7 @@ class _SupportPageState extends State<SupportPage> {
         Material(
           type: MaterialType.transparency,
           child: LibraryModal(
-            title: libText(language, 'Правила расходов', 'Spending rules'),
+            title: localized(language, 'Правила расходов', 'Spending rules'),
             color: libraryColor,
             source: language == 'en' ? _spendingRulesEn : _spendingRules,
             onClose: () => setState(() => _rulesOpen = false),
@@ -146,7 +142,7 @@ class _SupportPageState extends State<SupportPage> {
       body: MetricsCell(
         lines: [address],
         copyText: address,
-        copyLabel: libText(language, 'Скопировать', 'Copy'),
+        copyLabel: localized(language, 'Скопировать', 'Copy'),
       ),
     );
   }
@@ -178,7 +174,7 @@ class _SupportPageState extends State<SupportPage> {
       if (!mounted) return;
       await model.saveBytes('detail.csv', bytes);
     } catch (_) {
-      failure = libErrorText(
+      failure = localized(
         language,
         'Не удалось скачать отчётность',
         'The report could not be downloaded',

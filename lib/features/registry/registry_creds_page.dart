@@ -9,6 +9,7 @@ import '../../registry/registry_view.dart';
 import '../hex_page.dart';
 import '../line_input.dart';
 import 'registry_chrome.dart';
+import '../../locale/languages.dart';
 
 /// Name and token of a repository that is not saved yet. Back hands the
 /// draft to the add form.
@@ -51,14 +52,10 @@ class _RegistryCredsPageState extends State<RegistryCredsPage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         switch (slot.id) {
-          'back' => backSlot(
-            title: regText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'name' => HexSlot(
             id: 'name',
-            title: regText(language, 'Имя', 'Name'),
+            title: localized(language, 'Имя', 'Name'),
             color: color,
             q: slot.q,
             r: slot.r,
@@ -67,13 +64,13 @@ class _RegistryCredsPageState extends State<RegistryCredsPage> {
               color: color,
               controller: _name,
               fieldKey: const ValueKey('repo-create-name'),
-              hint: regText(language, 'имя', 'name'),
+              hint: localized(language, 'имя', 'name'),
               issue: '',
             ),
           ),
           _ => HexSlot(
             id: 'token',
-            title: regText(language, 'Токен', 'Token'),
+            title: localized(language, 'Токен', 'Token'),
             color: color,
             q: slot.q,
             r: slot.r,
@@ -82,7 +79,7 @@ class _RegistryCredsPageState extends State<RegistryCredsPage> {
               color: color,
               controller: _token,
               fieldKey: const ValueKey('repo-create-token'),
-              hint: regText(language, 'токен', 'token'),
+              hint: localized(language, 'токен', 'token'),
               issue: '',
               onSubmitted: (_) => _close(),
             ),

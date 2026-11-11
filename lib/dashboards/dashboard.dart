@@ -45,13 +45,13 @@ String panelTypeLabel(String type) {
 String dashboardStatusLabel(String language, String? status) {
   switch (status) {
     case 'Success':
-      return phrase(language, {'ru': 'Отправлена', 'en': 'Synced'});
+      return localized(language, 'Отправлена', 'Synced');
     case 'Processing':
-      return phrase(language, {'ru': 'Отправляется', 'en': 'Syncing'});
+      return localized(language, 'Отправляется', 'Syncing');
     case 'Error':
-      return phrase(language, {'ru': 'Ошибка', 'en': 'Error'});
+      return localized(language, 'Ошибка', 'Error');
     default:
-      return phrase(language, {'ru': 'Черновик', 'en': 'Draft'});
+      return localized(language, 'Черновик', 'Draft');
   }
 }
 

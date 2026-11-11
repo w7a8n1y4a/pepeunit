@@ -154,7 +154,7 @@ class AppModel extends ChangeNotifier {
 
   /// The note a screen shows when it was opened without a sign-in.
   String get notSignedIn =>
-      phrase(vault.language, {'ru': 'Нет входа', 'en': 'Not signed in'});
+      localized(vault.language, 'Нет входа', 'Not signed in');
 
   static const profileCooldown = Duration(minutes: 1);
   static const resignCooldown = Duration(minutes: 1);
@@ -473,7 +473,7 @@ class AppModel extends ChangeNotifier {
   Future<bool> loadDirectory({required int offset, required int limit}) async {
     final current = _signedTarget();
     final ticket = ++_directoryTicket;
-    final page = await api(originOf(current.url)).directoryUsers(
+    final page = await _clientFor(current.url).directoryUsers(
       token: current.token!,
       offset: offset,
       limit: cappedLimit(limit),
@@ -500,7 +500,7 @@ class AppModel extends ChangeNotifier {
   Future<bool> loadRegistry({required int offset, required int limit}) async {
     final current = _signedTarget();
     final ticket = ++_registryTicket;
-    final page = await api(originOf(current.url)).repos(
+    final page = await _clientFor(current.url).repos(
       token: current.token!,
       offset: offset,
       limit: cappedLimit(limit),
@@ -573,7 +573,7 @@ class AppModel extends ChangeNotifier {
       notifyListeners();
       return ticket == _noticeLoad;
     }
-    final page = await api(originOf(current.url)).notices(
+    final page = await _clientFor(current.url).notices(
       token: current.token!,
       offset: offset,
       limit: cappedLimit(limit),
@@ -597,7 +597,7 @@ class AppModel extends ChangeNotifier {
 
   Future<void> markNoticeRead(String uuid) async {
     final current = _signedTarget();
-    final updated = await api(originOf(current.url))
+    final updated = await _clientFor(current.url)
         .markNoticeRead(current.token!, uuid);
     final page = notices;
     if (page != null) {
@@ -631,7 +631,7 @@ class AppModel extends ChangeNotifier {
 
   Future<void> markAllNoticesRead() async {
     final current = _signedTarget();
-    await api(originOf(current.url)).markAllNoticesRead(current.token!);
+    await _clientFor(current.url).markAllNoticesRead(current.token!);
     unreadCount = 0;
     final page = notices;
     if (page != null) {
@@ -692,7 +692,7 @@ class AppModel extends ChangeNotifier {
     final token = record.token;
     if (token == null || token.isEmpty) return;
     try {
-      final page = await api(originOf(record.url))
+      final page = await _clientFor(record.url)
           .dashboards(token: token, offset: 0, limit: 1);
       if (ticket != _dashboardTicket) return;
       dashboardTotal = page.count;
@@ -786,7 +786,7 @@ class AppModel extends ChangeNotifier {
 
   Future<RegistryRepo> readRepo(String uuid) async {
     final current = _signedTarget();
-    final repo = await api(originOf(current.url))
+    final repo = await _clientFor(current.url)
         .readRepo(current.token!, uuid);
     _replaceListedRepo(repo);
     unawaited(ensureIcon(repo.iconUuid));
@@ -801,7 +801,7 @@ class AppModel extends ChangeNotifier {
     String? pat,
   }) async {
     final current = _signedTarget();
-    final repo = await api(originOf(current.url)).createRepo(
+    final repo = await _clientFor(current.url).createRepo(
       current.token!,
       url: url,
       platform: platform,
@@ -815,7 +815,7 @@ class AppModel extends ChangeNotifier {
 
   Future<void> deleteRepo(String uuid) async {
     final current = _signedTarget();
-    await api(originOf(current.url)).deleteRepo(current.token!, uuid);
+    await _clientFor(current.url).deleteRepo(current.token!, uuid);
     final page = registry;
     if (page == null) return;
     registry = (
@@ -844,13 +844,13 @@ class AppModel extends ChangeNotifier {
 
   Future<void> updateLocalRepo(String uuid) async {
     final current = _signedTarget();
-    await api(originOf(current.url))
+    await _clientFor(current.url)
         .updateLocalRepository(current.token!, uuid);
   }
 
   Future<RepoCredentials?> readRepoCredentials(String uuid) async {
     final current = _signedTarget();
-    return api(originOf(current.url)).repoCredentials(current.token!, uuid);
+    return _clientFor(current.url).repoCredentials(current.token!, uuid);
   }
 
   Future<void> saveRepoCredentials(
@@ -859,14 +859,14 @@ class AppModel extends ChangeNotifier {
     String pat,
   ) async {
     final current = _signedTarget();
-    await api(originOf(current.url))
+    await _clientFor(current.url)
         .setRepoCredentials(current.token!, uuid, username, pat);
   }
 
-  PepeunitApi get _api {
-    final current = _signedTarget();
-    return api(originOf(current.url));
-  }
+  /// The client of one instance, shared by every call to that origin.
+  PepeunitApi _clientFor(String url) => api(originOf(url));
+
+  PepeunitApi get _api => _clientFor(_signedTarget().url);
 
   String get _token => _signedTarget().token!;
 
@@ -1275,7 +1275,7 @@ class AppModel extends ChangeNotifier {
     Uint8List png,
   ) async {
     final current = _signedTarget();
-    final uuid = await api(originOf(current.url))
+    final uuid = await _clientFor(current.url)
         .uploadEntityIcon(current.token!, entityUuid, entityType, png);
     if (uuid != null && uuid.isNotEmpty) {
       await _icons.remember(IconStore.keyOf(originOf(current.url), uuid), png);
@@ -1286,12 +1286,12 @@ class AppModel extends ChangeNotifier {
   /// Admin and Owner. Schedules an update of every repository.
   Future<void> updateAllRepos() async {
     final current = _staffTarget();
-    await api(originOf(current.url)).updateAllRepos(current.token!);
+    await _clientFor(current.url).updateAllRepos(current.token!);
   }
 
   Future<DirectoryUser> readMember(String uuid) async {
     final current = _signedTarget();
-    final user = await api(originOf(current.url))
+    final user = await _clientFor(current.url)
         .readDirectoryUser(current.token!, uuid);
     unawaited(ensureIcon(user.iconUuid));
     return user;
@@ -1397,7 +1397,7 @@ class AppModel extends ChangeNotifier {
     networkFailure = null;
     notifyListeners();
     try {
-      final client = api(originOf(current.url));
+      final client = _clientFor(current.url);
       unawaited(_learnErrorCodes(client));
       final portrait = await client.portrait();
       if (ticket != _ticket) return;
@@ -1493,7 +1493,7 @@ class AppModel extends ChangeNotifier {
     try {
       final identity = Identity.fromParts(vault.publicKey!, vault.secretKey!);
       final record = _ensureRecord(url);
-      final client = api(originOf(url));
+      final client = _clientFor(url);
       await _open(record, client, identity);
       final token = record.token!;
       final userUuid = record.userUuid!;
@@ -1530,7 +1530,7 @@ class AppModel extends ChangeNotifier {
     try {
       final identity = Identity.fromParts(vault.publicKey!, vault.secretKey!);
       final record = _ensureRecord(url);
-      final client = api(originOf(url));
+      final client = _clientFor(url);
       await _open(record, client, identity);
       final token = record.token!;
       final user = await client.readDirectoryUser(token, record.userUuid!);
@@ -1584,7 +1584,7 @@ class AppModel extends ChangeNotifier {
     if (resignCooldownLeft(url) != Duration.zero) return;
     final record = _ensureRecord(url);
     final identity = Identity.fromParts(vault.publicKey!, vault.secretKey!);
-    await _open(record, api(originOf(url)), identity);
+    await _open(record, _clientFor(url), identity);
     resignAt[url] = DateTime.now().millisecondsSinceEpoch;
     _syncNoticeStream();
     await _commit();
@@ -1595,7 +1595,7 @@ class AppModel extends ChangeNotifier {
   /// Does not create a peer, whatever the role is.
   Future<void> rememberInstance(String raw) async {
     final url = canonicalInstanceUrl(raw);
-    final client = api(originOf(url));
+    final client = _clientFor(url);
     final portrait = await client.portrait();
     portraits[url] = portrait;
     final uuid = portrait.iconUuid;
@@ -1616,7 +1616,7 @@ class AppModel extends ChangeNotifier {
   Future<void> createPeer(String raw) async {
     final current = _staffTarget();
     final url = canonicalInstanceUrl(raw);
-    await api(originOf(current.url)).createPeer(current.token!, url);
+    await _clientFor(current.url).createPeer(current.token!, url);
     await refreshTarget();
   }
 
@@ -1632,7 +1632,7 @@ class AppModel extends ChangeNotifier {
     if (head == null) {
       throw StateError('peer');
     }
-    await api(originOf(current.url))
+    await _clientFor(current.url)
         .updatePeer(current.token!, head.uuid, trust);
     await refreshTarget();
   }
@@ -1641,7 +1641,7 @@ class AppModel extends ChangeNotifier {
     final current = _staffTarget();
     final head = peers[url];
     if (head == null) throw StateError('peer');
-    await api(originOf(current.url)).deletePeer(current.token!, head.uuid);
+    await _clientFor(current.url).deletePeer(current.token!, head.uuid);
     await refreshTarget();
   }
 
@@ -1649,18 +1649,18 @@ class AppModel extends ChangeNotifier {
     final current = _staffTarget();
     final head = peers[url];
     if (head == null) throw StateError('peer');
-    await api(originOf(current.url)).scanPeer(current.token!, head.uuid);
+    await _clientFor(current.url).scanPeer(current.token!, head.uuid);
     await refreshTarget();
   }
 
   Future<void> scanAll() async {
     final current = _staffTarget();
-    await api(originOf(current.url)).scanAll(current.token!);
+    await _clientFor(current.url).scanAll(current.token!);
   }
 
   Future<void> loadSettings() async {
     final current = _ownerTarget();
-    targetSettings = await api(originOf(current.url)).settings(current.token!);
+    targetSettings = await _clientFor(current.url).settings(current.token!);
     final existing = portraits[current.url];
     if (existing != null && targetSettings != null) {
       final updated = existing.applySettings(targetSettings!);
@@ -1672,7 +1672,7 @@ class AppModel extends ChangeNotifier {
 
   Future<void> patchSettings(Map<String, Object?> patch) async {
     final current = _ownerTarget();
-    targetSettings = await api(originOf(current.url))
+    targetSettings = await _clientFor(current.url)
         .patchSettings(current.token!, patch);
     final existing = portraits[current.url];
     if (existing != null && targetSettings != null) {
@@ -1686,18 +1686,18 @@ class AppModel extends ChangeNotifier {
 
   Future<void> reboot() async {
     final current = _ownerTarget();
-    await api(originOf(current.url)).reboot(current.token!);
+    await _clientFor(current.url).reboot(current.token!);
   }
 
   /// Backend allows Admin and Owner (`[UserRole.ADMIN]`) to start integration tests.
   Future<void> runIntegrationTests() async {
     final current = _staffTarget();
-    await api(originOf(current.url)).integrationTests(current.token!);
+    await _clientFor(current.url).integrationTests(current.token!);
   }
 
   Future<void> setInstanceIcon(Uint8List png) async {
     final current = _ownerTarget();
-    final newUuid = await api(originOf(current.url))
+    final newUuid = await _clientFor(current.url)
         .uploadInstanceIcon(current.token!, png);
     final uuid = newUuid ?? portraits[current.url]?.iconUuid;
     if (uuid != null && uuid.isNotEmpty) {
@@ -1717,7 +1717,7 @@ class AppModel extends ChangeNotifier {
   Future<String> verificationLink(String url) async {
     if (!vault.hasKey) throw StateError('key');
     final record = _ensureRecord(url);
-    final client = api(originOf(url));
+    final client = _clientFor(url);
     final identity = Identity.fromParts(vault.publicKey!, vault.secretKey!);
     await _open(record, client, identity);
     await _commit();
@@ -1732,7 +1732,7 @@ class AppModel extends ChangeNotifier {
     bool owner = false,
   }) async {
     final current = owner ? _ownerTarget() : _staffTarget();
-    final user = await change(api(originOf(current.url)), current.token!);
+    final user = await change(_clientFor(current.url), current.token!);
     try {
       if (directory != null) {
         await loadDirectory(offset: directoryOffset, limit: directoryLimit);
@@ -1937,7 +1937,7 @@ class AppModel extends ChangeNotifier {
       if (ticket != _ticket) return false;
       final url = pending[index];
       try {
-        final portrait = await api(originOf(url)).portrait();
+        final portrait = await _clientFor(url).portrait();
         if (ticket != _ticket) return false;
         portraits[url] = portrait;
         take(url, portrait.iconUuid);

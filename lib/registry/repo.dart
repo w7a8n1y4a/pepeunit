@@ -129,7 +129,7 @@ String tailText(String text, int limit) {
 
 /// `12 шт.` / `12 pcs`.
 String pieceCount(String language, int count) {
-  return phrase(language, {'ru': '$count шт.', 'en': '$count pcs'});
+  return localized(language, '$count шт.', '$count pcs');
 }
 
 /// Bare size: `512 Б` / `512 B`, `1.5 КБ` / `1.5 KB`. Powers of 1024.
@@ -155,9 +155,9 @@ String repoSizeLabel(int bytes, String language) {
 String repoPlatformLabel(String language, String platform) {
   switch (platform) {
     case 'Github':
-      return phrase(language, {'ru': 'Гитхаб', 'en': 'GitHub'});
+      return localized(language, 'Гитхаб', 'GitHub');
     case 'Gitlab':
-      return phrase(language, {'ru': 'Гитлаб', 'en': 'GitLab'});
+      return localized(language, 'Гитлаб', 'GitLab');
     default:
       return platform.trim();
   }
@@ -183,11 +183,11 @@ bool repoOwnedBy(RegistryRepo? repo, String? userUuid) {
 String repoSyncLabel(String language, String? status) {
   switch (status) {
     case 'Updated':
-      return phrase(language, {'ru': 'Обновлён', 'en': 'Updated'});
+      return localized(language, 'Обновлён', 'Updated');
     case 'Processing':
-      return phrase(language, {'ru': 'Обновляется', 'en': 'Updating'});
+      return localized(language, 'Обновляется', 'Updating');
     case 'Error':
-      return phrase(language, {'ru': 'Ошибка', 'en': 'Error'});
+      return localized(language, 'Ошибка', 'Error');
     default:
       return '—';
   }
@@ -196,11 +196,11 @@ String repoSyncLabel(String language, String? status) {
 String credentialStatusLabel(String language, String status) {
   switch (status) {
     case 'Valid':
-      return phrase(language, {'ru': 'Действителен', 'en': 'Valid'});
+      return localized(language, 'Действителен', 'Valid');
     case 'NotVerified':
-      return phrase(language, {'ru': 'Не проверен', 'en': 'Unchecked'});
+      return localized(language, 'Не проверен', 'Unchecked');
     case 'Error':
-      return phrase(language, {'ru': 'Ошибка', 'en': 'Error'});
+      return localized(language, 'Ошибка', 'Error');
     default:
       return '';
   }
@@ -238,16 +238,16 @@ List<RepoSummary> repoSummaries(RegistryRepo repo, String language) {
       : shortStamp(repo.syncLast);
   final pages = <RepoSummary>[
     RepoSummary(
-      title: phrase(language, {'ru': 'Сводка', 'en': 'Summary'}),
+      title: localized(language, 'Сводка', 'Summary'),
       lines: [
         _joined([access, platform]),
         _joined([status, stamp]),
         _joined([
           repoSizeLabel(repo.localSize, language),
-          '${phrase(language, {'ru': 'Ветки', 'en': 'Branches'})} ${repo.branches.length}',
+          '${localized(language, 'Ветки', 'Branches')} ${repo.branches.length}',
         ]),
         if (tags.isNotEmpty)
-          '${phrase(language, {'ru': 'Релизы', 'en': 'Releases'})} ${tags.length}',
+          '${localized(language, 'Релизы', 'Releases')} ${tags.length}',
       ],
     ),
   ];
@@ -256,21 +256,21 @@ List<RepoSummary> repoSummaries(RegistryRepo repo, String language) {
   if (syncLines.isNotEmpty) {
     pages.add(
       RepoSummary(
-        title: phrase(language, {'ru': 'Синхронизация', 'en': 'Sync'}),
+        title: localized(language, 'Синхронизация', 'Sync'),
         lines: syncLines,
       ),
     );
   }
   final when = <String>[
     if (repo.created.isNotEmpty)
-      '${phrase(language, {'ru': 'Создан', 'en': 'Created'})} ${shortStamp(repo.created)}',
+      '${localized(language, 'Создан', 'Created')} ${shortStamp(repo.created)}',
     if (repo.updated.isNotEmpty)
-      '${phrase(language, {'ru': 'Изменён', 'en': 'Updated'})} ${shortStamp(repo.updated)}',
+      '${localized(language, 'Изменён', 'Updated')} ${shortStamp(repo.updated)}',
   ];
   if (when.isNotEmpty) {
     pages.add(
       RepoSummary(
-        title: phrase(language, {'ru': 'Время', 'en': 'Time'}),
+        title: localized(language, 'Время', 'Time'),
         lines: when,
       ),
     );
@@ -278,7 +278,7 @@ List<RepoSummary> repoSummaries(RegistryRepo repo, String language) {
   if (tags.isNotEmpty) {
     pages.add(
       RepoSummary(
-        title: phrase(language, {'ru': 'Релизы', 'en': 'Releases'}),
+        title: localized(language, 'Релизы', 'Releases'),
         lines: [for (final tag in tags.take(5)) tag],
       ),
     );

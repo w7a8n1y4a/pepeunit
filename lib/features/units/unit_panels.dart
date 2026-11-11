@@ -15,6 +15,7 @@ import '../code/code_modal.dart';
 import '../code/code_panel.dart';
 import '../code/code_view.dart';
 import 'units_chrome.dart';
+import '../../locale/languages.dart';
 
 Color logLevelColor(String level) {
   switch (level.toLowerCase()) {
@@ -67,7 +68,7 @@ class _UnitLogPanelState extends State<UnitLogPanel> with CodePanelState {
   Widget build(BuildContext context) {
     final language = AppScope.of(context).vault.language;
     return CodeModal(
-      title: unitText(language, 'Логи', 'Logs'),
+      title: localized(language, 'Логи', 'Logs'),
       color: unitsColor,
       onClose: widget.onClose,
       note: failure,
@@ -238,7 +239,7 @@ class _UnitStoragePanelState extends State<UnitStoragePanel>
   Widget build(BuildContext context) {
     final language = AppScope.of(context).vault.language;
     return CodeModal(
-      title: unitText(language, 'Хранилище аппарата', 'Unit storage'),
+      title: localized(language, 'Хранилище аппарата', 'Unit storage'),
       color: unitsColor,
       onClose: widget.onClose,
       note: failure,
@@ -307,7 +308,7 @@ class _UnitEnvPanelState extends State<UnitEnvPanel> with CodePanelState {
     final syntax = loading ? null : envIssue(language, _text.text);
     final clean = _text.text == _baseline;
     return CodeModal(
-      title: unitText(
+      title: localized(
         language,
         'Переменные окружения',
         'Environment variables',
@@ -320,7 +321,7 @@ class _UnitEnvPanelState extends State<UnitEnvPanel> with CodePanelState {
       copy: () => _text.text,
       actions: (font) => [
         CodeWordButton(
-          label: unitText(language, 'Сохранить', 'Save'),
+          label: localized(language, 'Сохранить', 'Save'),
           font: font,
           color: unitAddColor,
           enabled: !loading && pending == null && syntax == null,
@@ -329,7 +330,7 @@ class _UnitEnvPanelState extends State<UnitEnvPanel> with CodePanelState {
           hint: 'button-env-save',
         ),
         CodeWordButton(
-          label: unitText(language, 'Сброс', 'Reset'),
+          label: localized(language, 'Сброс', 'Reset'),
           font: font,
           color: const Color(0xFFFFC107),
           enabled: !loading && pending == null,
@@ -427,7 +428,7 @@ class _UnitIoValuePanelState extends State<UnitIoValuePanel>
     final language = AppScope.of(context).vault.language;
     final clean = _text.text == _baseline;
     return CodeModal(
-      title: unitText(language, 'Значение', 'Value'),
+      title: localized(language, 'Значение', 'Value'),
       color: unitIoTone(widget.input),
       onClose: widget.onClose,
       barrierCloses: !widget.editable || (clean && pending == null),
@@ -437,7 +438,7 @@ class _UnitIoValuePanelState extends State<UnitIoValuePanel>
       actions: widget.editable
           ? (font) => [
               CodeWordButton(
-                label: unitText(language, 'Отправить', 'Send'),
+                label: localized(language, 'Отправить', 'Send'),
                 font: font,
                 color: unitAddColor,
                 enabled: !loading && pending == null,

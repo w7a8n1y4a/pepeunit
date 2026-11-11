@@ -1,7 +1,6 @@
 import 'package:desktop_drop/desktop_drop.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 
 import '../../account/icon_file.dart';
 import '../../app_scope.dart';
@@ -12,9 +11,9 @@ import '../../navigation/pick.dart';
 import '../../units/unit.dart';
 import '../file_drop.dart';
 import '../hex_page.dart';
-import '../line_input.dart';
-import 'unit_create_page.dart';
+import 'unit_form_parts.dart';
 import 'units_chrome.dart';
+import '../../locale/languages.dart';
 
 class UnitSettingsPage extends StatefulWidget {
   const UnitSettingsPage({required this.uuid, super.key});
@@ -28,14 +27,8 @@ class UnitSettingsPage extends StatefulWidget {
 class _UnitSettingsPageState extends State<UnitSettingsPage> {
   final _name = TextEditingController();
   final _nameFocus = FocusNode();
+  final _form = UnitFormFields();
   Unit? _unit;
-  String _visibility = 'Internal';
-  var _compilable = false;
-  var _auto = true;
-  var _tags = true;
-  String _branch = '';
-  String? _commit;
-  String? _platform;
   String? _failure;
   String? _issue;
   var _open = false;
@@ -74,7 +67,6 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(
@@ -98,15 +90,11 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
     final ready = _ready;
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: unitText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'avatar':
         return HexSlot(
           id: 'avatar',
-          title: unitText(language, 'Загрузить аватар', 'Upload avatar'),
+          title: localized(language, 'Загрузить аватар', 'Upload avatar'),
           color: dropColor(_hot, color),
           busy: _loading,
           enabled: ready,
@@ -116,73 +104,35 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
           image: image,
         );
       case 'name':
-        return HexSlot(
-          id: 'name',
-          title: unitText(language, 'Имя', 'Name'),
-          color: color,
-          q: slot.q,
-          r: slot.r,
-          tappable: false,
+        return unitFormNameSlot(
+          slot,
+          language,
+          controller: _name,
+          focusNode: _nameFocus,
+          issue: _issue,
           enabled: ready,
-          body: LineInput(
-            color: color,
-            controller: _name,
-            focusNode: _nameFocus,
-            fieldKey: const ValueKey('unit-name'),
-            hint: unitText(language, 'имя', 'name'),
-            issue: _issue ?? '',
-            inputFormatters: [
-              FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9_.-]')),
-              LengthLimitingTextInputFormatter(20),
-            ],
-          ),
         );
       case 'visibility':
-        return HexSlot(
-          id: 'visibility',
-          title: unitText(language, 'Видимость', 'Visibility'),
-          color: color,
-          q: slot.q,
-          r: slot.r,
-          tappable: false,
+        return unitFormVisibilitySlot(
+          slot,
+          language,
+          fields: _form,
           enabled: ready,
-          body: ChoiceWords(
-            center: true,
-            choices: [
-              for (final level in unitVisibilities)
-                (id: level, label: unitVisibilityLabel(language, level)),
-            ],
-            selected: (id) => _visibility == id,
-            onTap: (id) => setState(() => _visibility = id),
-          ),
+          onPick: (id) => setState(() => _form.visibility = id),
         );
       case 'branch':
-        return HexSlot(
-          id: 'branch',
-          title: unitText(language, 'Ветка', 'Branch'),
-          footer: _branch.isEmpty ? null : _branch,
-          color: color,
-          enabled: ready,
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/objects/repo.svg',
-        );
+        return unitFormBranchSlot(slot, language, fields: _form, enabled: ready);
       case 'updates':
-        return HexSlot(
-          id: 'updates',
-          title: unitText(language, 'Обновления', 'Updates'),
-          footer: unitRunLabel(language, _compilable),
-          footerLeft: unitHandsLabel(language, _auto),
-          color: color,
+        return unitFormUpdatesSlot(
+          slot,
+          language,
+          fields: _form,
           enabled: ready,
-          q: slot.q,
-          r: slot.r,
-          icon: 'assets/icons/actions/updates.svg',
         );
       case 'save':
         return HexSlot(
           id: 'save',
-          title: unitText(language, 'Сохранить', 'Save'),
+          title: localized(language, 'Сохранить', 'Save'),
           color: unitAddColor,
           busy: _busy,
           enabled: ready,
@@ -191,13 +141,7 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
           icon: 'assets/icons/actions/check.svg',
         );
       default:
-        return HexSlot(
-          id: slot.id,
-          title: slot.id,
-          color: color,
-          q: slot.q,
-          r: slot.r,
-        );
+        return unitFormFallbackSlot(slot);
     }
   }
 
@@ -218,32 +162,12 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
           '/units/new/branch?repo=$repo',
         );
         if (picked == null || !mounted) return;
-        setState(() {
-          _branch = picked;
-          _commit = null;
-          _platform = null;
-        });
+        setState(() => _form.takeBranch(picked));
       case 'updates':
         if (!_ready) return;
-        final picked = await context.push<UnitUpdateDraft>(
-          unitUpdatesPath(
-            repo: _unit?.repoUuid ?? '',
-            branch: _branch,
-            compilable: _compilable,
-            auto: _auto,
-            tags: _compilable || _tags,
-            commit: _commit,
-            platform: _platform,
-          ),
-        );
+        final picked = await _form.pickUpdates(context, _unit?.repoUuid ?? '');
         if (picked == null || !mounted) return;
-        setState(() {
-          _compilable = picked.compilable;
-          _auto = picked.auto;
-          _tags = picked.compilable || picked.tagsOnly;
-          _commit = picked.commit;
-          _platform = picked.platform;
-        });
+        setState(() => _form.takeUpdates(picked));
       case 'save':
         await _save();
     }
@@ -264,13 +188,7 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
       _name.text = unit.name;
       setState(() {
         _unit = unit;
-        _visibility = unit.visibility.isEmpty ? 'Internal' : unit.visibility;
-        _compilable = unit.compilable;
-        _auto = unit.auto;
-        _tags = unit.compilable || unit.tagsOnly;
-        _branch = unit.branch;
-        _commit = unit.commit;
-        _platform = unit.platform;
+        _form.takeUnit(unit);
         _loading = false;
       });
     } catch (error) {
@@ -286,39 +204,11 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
     if (_busy || !_ready) return;
     final language = AppScope.of(context).vault.language;
     final name = _name.text.trim();
-    if (!unitNameOk(name)) {
+    final problem = _form.problem(language, name);
+    if (problem != null) {
       setState(() {
-        _issue = unitText(
-          language,
-          'От 4 до 20: буквы, цифры, _ . -',
-          '4 to 20: letters, digits, _ . -',
-        );
-        _failure = null;
-      });
-      return;
-    }
-    if (_branch.isEmpty) {
-      setState(() {
-        _issue = null;
-        _failure = unitText(language, 'Нужна ветка', 'A branch is required');
-      });
-      return;
-    }
-    if (!_auto && (_commit == null || _commit!.isEmpty)) {
-      setState(() {
-        _issue = null;
-        _failure = unitText(language, 'Нужен коммит', 'A commit is required');
-      });
-      return;
-    }
-    if (_compilable && (_platform == null || _platform!.isEmpty)) {
-      setState(() {
-        _issue = null;
-        _failure = unitText(
-          language,
-          'Нужна платформа',
-          'A platform is required',
-        );
+        _issue = problem.issue;
+        _failure = problem.failure;
       });
       return;
     }
@@ -329,16 +219,10 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
       _open = false;
     });
     try {
-      final unit = await AppScope.of(context).updateUnit(widget.uuid, {
-        'name': name,
-        'visibility_level': _visibility,
-        'target_branch': _branch,
-        'is_auto_update_unit': _auto,
-        'is_compilable_unit': _compilable,
-        'is_only_tag_update': _compilable || _tags,
-        'target_commit': _auto ? null : _commit,
-        'target_firmware_platform': _compilable ? _platform : null,
-      });
+      final unit = await AppScope.of(context).updateUnit(
+        widget.uuid,
+        _form.body(name, clearUnused: true),
+      );
       if (!mounted) return;
       setState(() {
         _unit = unit;
@@ -356,7 +240,7 @@ class _UnitSettingsPageState extends State<UnitSettingsPage> {
   Future<void> _pickIcon() async {
     final model = AppScope.of(context);
     final bytes = await model.files.pick(
-      dialogTitle: unitText(model.vault.language, 'Аватар', 'Avatar'),
+      dialogTitle: localized(model.vault.language, 'Аватар', 'Avatar'),
     );
     if (bytes == null) return;
     await _storeIcon(bytes);

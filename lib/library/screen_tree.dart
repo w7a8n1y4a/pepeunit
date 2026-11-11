@@ -7,21 +7,21 @@ enum ScreenKind { menu, search, list, form, card, pick, text, cell }
 String screenKindLabel(String language, ScreenKind kind) {
   switch (kind) {
     case ScreenKind.menu:
-      return phrase(language, {'ru': 'Меню', 'en': 'Menu'});
+      return localized(language, 'Меню', 'Menu');
     case ScreenKind.search:
-      return phrase(language, {'ru': 'Поиск', 'en': 'Search'});
+      return localized(language, 'Поиск', 'Search');
     case ScreenKind.list:
-      return phrase(language, {'ru': 'Список', 'en': 'List'});
+      return localized(language, 'Список', 'List');
     case ScreenKind.form:
-      return phrase(language, {'ru': 'Форма', 'en': 'Form'});
+      return localized(language, 'Форма', 'Form');
     case ScreenKind.card:
-      return phrase(language, {'ru': 'Карточка', 'en': 'Card'});
+      return localized(language, 'Карточка', 'Card');
     case ScreenKind.pick:
-      return phrase(language, {'ru': 'Выбор', 'en': 'Pick'});
+      return localized(language, 'Выбор', 'Pick');
     case ScreenKind.text:
-      return phrase(language, {'ru': 'Текст', 'en': 'Text'});
+      return localized(language, 'Текст', 'Text');
     case ScreenKind.cell:
-      return phrase(language, {'ru': 'Сота', 'en': 'Cell'});
+      return localized(language, 'Сота', 'Cell');
   }
 }
 
@@ -31,27 +31,15 @@ enum ScreenNeed { open, signedIn, creator, staff, owner }
 String screenNeedLabel(String language, ScreenNeed need) {
   switch (need) {
     case ScreenNeed.open:
-      return phrase(language, {'ru': 'Всем', 'en': 'Anyone'});
+      return localized(language, 'Всем', 'Anyone');
     case ScreenNeed.signedIn:
-      return phrase(language, {
-        'ru': 'Нужен вход в аккаунт',
-        'en': 'A sign-in is needed',
-      });
+      return localized(language, 'Нужен вход в аккаунт', 'A sign-in is needed');
     case ScreenNeed.creator:
-      return phrase(language, {
-        'ru': 'Нужен вход, создателю записи',
-        'en': 'A sign-in, for the creator of the record',
-      });
+      return localized(language, 'Нужен вход, создателю записи', 'A sign-in, for the creator of the record');
     case ScreenNeed.staff:
-      return phrase(language, {
-        'ru': 'Нужна роль Admin или Owner',
-        'en': 'The Admin or Owner role is needed',
-      });
+      return localized(language, 'Нужна роль Admin или Owner', 'The Admin or Owner role is needed');
     case ScreenNeed.owner:
-      return phrase(language, {
-        'ru': 'Нужна роль Owner',
-        'en': 'The Owner role is needed',
-      });
+      return localized(language, 'Нужна роль Owner', 'The Owner role is needed');
   }
 }
 
@@ -87,7 +75,7 @@ class ScreenNode {
 
   bool get isCell => kind == ScreenKind.cell;
 
-  String title(String language) => phrase(language, {'ru': ru, 'en': en});
+  String title(String language) => localized(language, ru, en);
 
   /// The address of the screen: for a cell, the one it stands on.
   String get screenPath {
@@ -1342,11 +1330,6 @@ class ScreenMap {
       if (_byPath.containsKey(upper)) return upper;
     }
     return screenRoot;
-  }
-
-  ScreenNode? parentOf(String path) {
-    final upper = parentPath(path);
-    return upper == null ? null : _byPath[upper];
   }
 
   List<ScreenNode> childrenOf(String path) => _children[path] ?? const [];

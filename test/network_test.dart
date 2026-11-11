@@ -315,35 +315,35 @@ void main() {
       expect(people.setOrder('asc'), isTrue);
       expect(people.setOrder('asc'), isFalse);
       expect(people.order, 'asc');
-      expect(userPageLimit(1), 4);
-      expect(userPageLimit(searchScaleTick), 10);
-      expect(userPageLimit(scaleTickMax), 16);
+      expect(headPageLimit(1), 4);
+      expect(headPageLimit(searchScaleTick), 10);
+      expect(headPageLimit(scaleTickMax), 16);
       expect(
-        userWindowText(offset: 0, limit: 16, count: 40, ofWord: 'из'),
+        pageWindowText(offset: 0, limit: 16, count: 40, ofWord: 'из'),
         '1-16 из 40',
       );
       expect(
-        userWindowText(offset: 0, limit: 34, count: 40, ofWord: 'из'),
+        pageWindowText(offset: 0, limit: 34, count: 40, ofWord: 'из'),
         '1-34 из 40',
       );
       expect(
-        userWindowText(offset: 16, limit: 16, count: 40, ofWord: 'из'),
+        pageWindowText(offset: 16, limit: 16, count: 40, ofWord: 'из'),
         '17-32 из 40',
       );
       expect(
-        userWindowText(offset: 34, limit: 34, count: 80, ofWord: 'из'),
+        pageWindowText(offset: 34, limit: 34, count: 80, ofWord: 'из'),
         '35-68 из 80',
       );
       expect(
-        userWindowText(offset: 0, limit: 16, count: 0, ofWord: 'of'),
+        pageWindowText(offset: 0, limit: 16, count: 0, ofWord: 'of'),
         '0 of 0',
       );
-      expect(userCanPageBack(offset: 0, count: 10), isFalse);
-      expect(userCanPageForward(offset: 0, limit: 16, count: 10), isFalse);
-      expect(userCanPageForward(offset: 0, limit: 16, count: 20), isTrue);
-      expect(userCanPageBack(offset: 16, count: 20), isTrue);
-      expect(userCanPageForward(offset: 0, limit: 34, count: 20), isFalse);
-      expect(userCanPageForward(offset: 0, limit: 34, count: 40), isTrue);
+      expect(listCanBack(offset: 0, count: 10), isFalse);
+      expect(listCanForward(offset: 0, limit: 16, count: 10), isFalse);
+      expect(listCanForward(offset: 0, limit: 16, count: 20), isTrue);
+      expect(listCanBack(offset: 16, count: 20), isTrue);
+      expect(listCanForward(offset: 0, limit: 34, count: 20), isFalse);
+      expect(listCanForward(offset: 0, limit: 34, count: 40), isTrue);
       expect(
         pageShift(direction: 1, offset: 0, limit: 15, count: 16, capacity: 15),
         15,
@@ -612,10 +612,10 @@ void main() {
     expect(capacityUnder(16, 100), 16);
     expect(capacityUnder(16, 5), 5);
     expect(capacityUnder(16, 0), 16);
-    expect(userCanPageForward(offset: 0, limit: 5, count: 10), isFalse);
-    expect(userCanPageForward(offset: 0, limit: 5, count: 10, cap: 5), isTrue);
-    expect(userCanPageBack(offset: 5, count: 10), isFalse);
-    expect(userCanPageBack(offset: 5, count: 10, cap: 5), isTrue);
+    expect(listCanForward(offset: 0, limit: 5, count: 10), isFalse);
+    expect(listCanForward(offset: 0, limit: 5, count: 10, cap: 5), isTrue);
+    expect(listCanBack(offset: 5, count: 10), isFalse);
+    expect(listCanBack(offset: 5, count: 10, cap: 5), isTrue);
     expect(
       pageShift(
         direction: 1,

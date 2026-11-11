@@ -15,17 +15,14 @@ import '../../navigation/sections.dart';
 
 Color get networkColor => sectionById('peers')!.color;
 
-String netText(String language, String ru, String en) =>
-    phrase(language, {'ru': ru, 'en': en});
-
 String trustLabel(String language, String trust) {
   switch (trust) {
     case 'Trust':
-      return netText(language, 'Доверенный', 'Trusted');
+      return localized(language, 'Доверенный', 'Trusted');
     case 'Pending':
-      return netText(language, 'Ожидает', 'Waiting');
+      return localized(language, 'Ожидает', 'Waiting');
     case 'Blocking':
-      return netText(language, 'Заблокирован', 'Blocked');
+      return localized(language, 'Заблокирован', 'Blocked');
     default:
       return trust;
   }
@@ -34,26 +31,26 @@ String trustLabel(String language, String trust) {
 String roleLabel(String language, String role) {
   switch (role) {
     case 'Admin':
-      return netText(language, 'Админ', 'Admin');
+      return localized(language, 'Админ', 'Admin');
     case 'Owner':
-      return netText(language, 'Владелец', 'Owner');
+      return localized(language, 'Владелец', 'Owner');
     default:
-      return netText(language, 'Пользователь', 'User');
+      return localized(language, 'Пользователь', 'User');
   }
 }
 
 String memberStatusLabel(String language, String status) {
   switch (status) {
     case 'Blocked':
-      return netText(language, 'Заблокирован', 'Blocked');
+      return localized(language, 'Заблокирован', 'Blocked');
     default:
-      return netText(language, 'Активный', 'Active');
+      return localized(language, 'Активный', 'Active');
   }
 }
 
 String memberOrderLabel(String language, String order) {
-  if (order == 'asc') return netText(language, 'Старые', 'Old');
-  return netText(language, 'Новые', 'New');
+  if (order == 'asc') return localized(language, 'Старые', 'Old');
+  return localized(language, 'Новые', 'New');
 }
 
 Color trustColor(String? trust, Color accent) {
@@ -92,7 +89,7 @@ HexSlot instanceMark({
     title: instanceHost(url),
     footerLeft:
         footerLeft ??
-        (current ? netText(language, 'Избранный', 'Favorite') : null),
+        (current ? localized(language, 'Избранный', 'Favorite') : null),
     footerLeftColor: footerLeftColor,
     footer: version,
     footerColor: footerColor,
@@ -153,8 +150,8 @@ HexSlot pageStepSlot({
   return HexSlot(
     id: id,
     title: left
-        ? netText(language, 'Предыдущие', 'Previous')
-        : netText(language, 'Следующие', 'Next'),
+        ? localized(language, 'Предыдущие', 'Previous')
+        : localized(language, 'Следующие', 'Next'),
     footer: pages > 1 ? '${page + 1}/$pages' : null,
     color: color,
     q: q,

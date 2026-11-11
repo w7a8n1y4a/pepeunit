@@ -717,23 +717,6 @@ class PepeunitApi {
     await _send('DELETE', '/units/env/$uuid', token: token);
   }
 
-  Future<({String commit, String? tag})> targetVersion(
-    String token,
-    String uuid,
-  ) async {
-    final response = await _send(
-      'GET',
-      '/units/get_target_version/$uuid',
-      token: token,
-    );
-    final json = _object(response);
-    final tag = json['tag'];
-    return (
-      commit: json['commit'] as String? ?? '',
-      tag: tag is String && tag.isNotEmpty ? tag : null,
-    );
-  }
-
   Future<String> unitSchema(String token, String uuid) async {
     final response = await _send(
       'GET',

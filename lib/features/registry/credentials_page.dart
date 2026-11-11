@@ -8,6 +8,7 @@ import '../../registry/repo.dart';
 import '../hex_page.dart';
 import '../line_input.dart';
 import 'registry_chrome.dart';
+import '../../locale/languages.dart';
 
 class CredentialsPage extends StatefulWidget {
   const CredentialsPage({required this.uuid, super.key});
@@ -56,14 +57,10 @@ class _CredentialsPageState extends State<CredentialsPage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         switch (slot.id) {
-          'back' => backSlot(
-            title: regText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'name' => HexSlot(
             id: 'name',
-            title: regText(language, 'Имя', 'Name'),
+            title: localized(language, 'Имя', 'Name'),
             color: color,
             busy: _loading || _pending == 'name',
             q: slot.q,
@@ -74,7 +71,7 @@ class _CredentialsPageState extends State<CredentialsPage> {
               controller: _name,
               focusNode: _nameFocus,
               fieldKey: const ValueKey('repo-name'),
-              hint: regText(language, 'имя', 'name'),
+              hint: localized(language, 'имя', 'name'),
               language: language,
               revision: _revision,
               onSubmit: () => _save('name'),
@@ -82,7 +79,7 @@ class _CredentialsPageState extends State<CredentialsPage> {
           ),
           'token' => HexSlot(
             id: 'token',
-            title: regText(language, 'Токен', 'Token'),
+            title: localized(language, 'Токен', 'Token'),
             footer: status.isEmpty ? null : status,
             footerColor: _status == 'Error'
                 ? errorColor
@@ -97,7 +94,7 @@ class _CredentialsPageState extends State<CredentialsPage> {
               controller: _token,
               focusNode: _tokenFocus,
               fieldKey: const ValueKey('repo-token'),
-              hint: regText(language, 'токен', 'token'),
+              hint: localized(language, 'токен', 'token'),
               language: language,
               revision: _revision,
               onSubmit: () => _save('token'),
@@ -117,7 +114,6 @@ class _CredentialsPageState extends State<CredentialsPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: regText,
       wide: wide,
     );
     return HexPage(
@@ -174,7 +170,7 @@ class _CredentialsPageState extends State<CredentialsPage> {
     final pat = _token.text.trim();
     if (username.isEmpty || pat.isEmpty) {
       setState(() {
-        _failure = regText(
+        _failure = localized(
           language,
           'Нужны имя и токен',
           'Name and token are required',
@@ -265,7 +261,7 @@ class _FieldState extends State<_Field> {
             : 14.0;
         return Semantics(
           button: true,
-          label: regText(widget.language, 'Сохранить', 'Save'),
+          label: localized(widget.language, 'Сохранить', 'Save'),
           child: GestureDetector(
             behavior: HitTestBehavior.opaque,
             onTap: widget.onSubmit,

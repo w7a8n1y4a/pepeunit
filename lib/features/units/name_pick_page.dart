@@ -9,6 +9,7 @@ import '../../units/unit_view.dart';
 import '../hex_page.dart';
 import '../network/network_chrome.dart';
 import 'units_chrome.dart';
+import '../../locale/languages.dart';
 
 /// A short named list. A tap gives the id to the opener through [givePick];
 /// the opener awaits it with [openPick].
@@ -77,7 +78,7 @@ class _NamePickPageState extends State<NamePickPage> {
     final board = _items.isEmpty
         ? null
         : widget.paged
-        ? headBoard(
+        ? listBoard(
             tick: widget.scope,
             head: const ['window'],
             ids: [for (final item in shown) item.id],
@@ -95,16 +96,12 @@ class _NamePickPageState extends State<NamePickPage> {
     if (board == null) {
       final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
       slots.add(
-        backSlot(
-          title: unitText(language, 'Назад', 'Back'),
-          q: frame.back!.$1,
-          r: frame.back!.$2,
-        ),
+        backSlot(language, q: frame.back!.$1, r: frame.back!.$2),
       );
       slots.add(
         HexSlot(
           id: 'empty',
-          title: _loading ? widget.title : unitText(language, 'Пусто', 'Empty'),
+          title: _loading ? widget.title : localized(language, 'Пусто', 'Empty'),
           color: widget.color ?? unitsColor,
           busy: _loading,
           tappable: false,
@@ -116,17 +113,13 @@ class _NamePickPageState extends State<NamePickPage> {
       for (final slot in board.slots) {
         if (slot.id == 'back') {
           slots.add(
-            backSlot(
-              title: unitText(language, 'Назад', 'Back'),
-              q: slot.q,
-              r: slot.r,
-            ),
+            backSlot(language, q: slot.q, r: slot.r),
           );
         } else if (slot.id == 'window') {
           slots.add(
             HexSlot(
               id: 'window',
-              title: unitText(language, 'Страница', 'Page'),
+              title: localized(language, 'Страница', 'Page'),
               color: widget.color ?? unitsColor,
               q: slot.q,
               r: slot.r,
@@ -182,7 +175,6 @@ class _NamePickPageState extends State<NamePickPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(

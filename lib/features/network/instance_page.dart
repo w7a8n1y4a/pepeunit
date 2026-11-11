@@ -14,6 +14,7 @@ import '../../navigation/back.dart';
 import '../hex_page.dart';
 import 'line_cell.dart';
 import 'network_chrome.dart';
+import '../../locale/languages.dart';
 
 class InstancePage extends StatefulWidget {
   const InstancePage({required this.url, super.key});
@@ -97,7 +98,6 @@ class _InstancePageState extends State<InstancePage> {
       message: _failure,
       open: _open,
       language: language,
-      text: netText,
       wide: wide,
     );
     return HexPage(
@@ -120,16 +120,12 @@ class _InstancePageState extends State<InstancePage> {
     final record = model.vault.recordFor(url);
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: netText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'identity':
         final ping = peer?.lastPing;
         final pingText = ping == null
             ? null
-            : '${ping.round()} ${netText(language, 'мс', 'ms')}';
+            : '${ping.round()} ${localized(language, 'мс', 'ms')}';
         final cooling = isTarget
             ? model.resignCooldownLeft(url)
             : Duration.zero;
@@ -155,7 +151,7 @@ class _InstancePageState extends State<InstancePage> {
         final pages = _summaryPages(language, portrait, peer);
         return HexSlot(
           id: 'metrics',
-          title: netText(language, 'Сводка', 'Summary'),
+          title: localized(language, 'Сводка', 'Summary'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -164,13 +160,13 @@ class _InstancePageState extends State<InstancePage> {
             lines: pages.first.lines,
             pages: pages,
             copyText: url,
-            copyLabel: netText(language, 'Скопировать ссылку', 'Copy link'),
-            prevLabel: netText(
+            copyLabel: localized(language, 'Скопировать ссылку', 'Copy link'),
+            prevLabel: localized(
               language,
               'Предыдущая сводка',
               'Previous summary',
             ),
-            nextLabel: netText(language, 'Следующая сводка', 'Next summary'),
+            nextLabel: localized(language, 'Следующая сводка', 'Next summary'),
           ),
         );
       case 'target':
@@ -203,7 +199,7 @@ class _InstancePageState extends State<InstancePage> {
       case 'settings':
         return HexSlot(
           id: 'settings',
-          title: netText(language, 'Управление инстансом', 'Manage instance'),
+          title: localized(language, 'Управление инстансом', 'Manage instance'),
           footer: record?.role,
           color: color,
           q: slot.q,
@@ -213,7 +209,7 @@ class _InstancePageState extends State<InstancePage> {
       case 'users':
         return HexSlot(
           id: 'users',
-          title: netText(language, 'Пользователи', 'Users'),
+          title: localized(language, 'Пользователи', 'Users'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -228,7 +224,7 @@ class _InstancePageState extends State<InstancePage> {
         };
         return HexSlot(
           id: 'peer',
-          title: netText(language, 'Модерация', 'Moderation'),
+          title: localized(language, 'Модерация', 'Moderation'),
           footer: trust.isEmpty ? null : trustLabel(language, trust),
           color: trustColor(trust, color),
           q: slot.q,
@@ -288,23 +284,23 @@ class _InstancePageState extends State<InstancePage> {
     PeerHead? peer,
   ) {
     final metricsLines = <String>[
-      netText(
+      localized(
         language,
         'Юзеры ${portrait?.users ?? '—'}',
         'Users ${portrait?.users ?? '—'}',
       ),
-      netText(
+      localized(
         language,
         'Аппараты ${portrait?.units ?? '—'}',
         'Units ${portrait?.units ?? '—'}',
       ),
-      netText(
+      localized(
         language,
         'Репозитории ${portrait?.repos ?? '—'}',
         'Repos ${portrait?.repos ?? '—'}',
       ),
       if (portrait?.unitIos != null)
-        netText(
+        localized(
           language,
           'UnitIO ${portrait!.unitIos}',
           'UnitIO ${portrait.unitIos}',
@@ -314,18 +310,18 @@ class _InstancePageState extends State<InstancePage> {
     ];
     final pages = <SummaryPage>[
       SummaryPage(
-        title: netText(language, 'Метрики', 'Metrics'),
+        title: localized(language, 'Метрики', 'Metrics'),
         lines: metricsLines,
       ),
     ];
 
     final statusLines = <String>[
       if (peer != null)
-        '${netText(language, 'Статус', 'Status')}: ${peer.collectionStatus ?? peer.trust}',
+        '${localized(language, 'Статус', 'Status')}: ${peer.collectionStatus ?? peer.trust}',
       if (peer?.lastPing != null)
-        '${netText(language, 'Пинг', 'Ping')}: ${peer!.lastPing!.round()} ${netText(language, 'мс', 'ms')}',
+        '${localized(language, 'Пинг', 'Ping')}: ${peer!.lastPing!.round()} ${localized(language, 'мс', 'ms')}',
       if (peer != null && peer.consecutiveSuccessCount > 0)
-        '${netText(language, 'Серия', 'Streak')}: ${peer.consecutiveSuccessCount}',
+        '${localized(language, 'Серия', 'Streak')}: ${peer.consecutiveSuccessCount}',
       if (portrait != null && portrait.email.isNotEmpty) portrait.email,
       if (portrait != null && portrait.telegramContact.isNotEmpty)
         portrait.telegramContact,
@@ -334,7 +330,7 @@ class _InstancePageState extends State<InstancePage> {
     if (statusLines.isNotEmpty) {
       pages.add(
         SummaryPage(
-          title: netText(language, 'Инфо', 'Info'),
+          title: localized(language, 'Инфо', 'Info'),
           lines: statusLines,
         ),
       );
@@ -348,7 +344,7 @@ class _InstancePageState extends State<InstancePage> {
       String mark(bool? v) => v == true ? '+' : '-';
       pages.add(
         SummaryPage(
-          title: netText(language, 'Флаги', 'Flags'),
+          title: localized(language, 'Флаги', 'Flags'),
           lines: [
             'Pipe ${mark(portrait.datapipe)} · Fed ${mark(portrait.federation)}',
             'Graf ${mark(portrait.grafana)} · Alert ${mark(portrait.notifications)}',
@@ -370,7 +366,7 @@ class _InstancePageState extends State<InstancePage> {
   ) {
     return HexSlot(
       id: slot.id,
-      title: netText(language, ru, en),
+      title: localized(language, ru, en),
       color: color,
       busy: _pending == slot.id,
       q: slot.q,
@@ -407,7 +403,7 @@ class _InstancePageState extends State<InstancePage> {
         if (model.target?.url != url) return;
         if (!model.vault.hasKey) {
           setState(() {
-            _failure = netText(language, 'Нет ключа', 'No key');
+            _failure = localized(language, 'Нет ключа', 'No key');
           });
           return;
         }
@@ -444,7 +440,7 @@ class _InstancePageState extends State<InstancePage> {
         await _run('telegram', () => model.openExternal(Uri.parse(botUrl)));
         return;
       }
-      setState(() => _failure = netText(language, 'Нет ключа', 'No key'));
+      setState(() => _failure = localized(language, 'Нет ключа', 'No key'));
       return;
     }
     await _run('telegram', () async {

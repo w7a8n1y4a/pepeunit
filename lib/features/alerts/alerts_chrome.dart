@@ -5,23 +5,20 @@ import '../../navigation/sections.dart';
 
 Color get alertsColor => sectionById('alerts')!.color;
 
-String alertText(String language, String ru, String en) =>
-    phrase(language, {'ru': ru, 'en': en});
-
 String noticeReadLabel(String language, String read) {
   switch (read) {
     case 'all':
-      return alertText(language, 'Все', 'All');
+      return localized(language, 'Все', 'All');
     case 'read':
-      return alertText(language, 'Прочитанные', 'Read');
+      return localized(language, 'Прочитанные', 'Read');
     default:
-      return alertText(language, 'К прочтению', 'To read');
+      return localized(language, 'К прочтению', 'To read');
   }
 }
 
 String noticeStatusLabel(String language, {required bool read}) {
-  if (read) return alertText(language, 'Прочитана', 'Read');
-  return alertText(language, 'Не прочитана', 'Unread');
+  if (read) return localized(language, 'Прочитана', 'Read');
+  return localized(language, 'Не прочитана', 'Unread');
 }
 
 String noticeIcon(String type) {

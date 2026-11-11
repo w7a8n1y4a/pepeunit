@@ -7,6 +7,7 @@ import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
 import '../hex_page.dart';
 import 'network_chrome.dart';
+import '../../locale/languages.dart';
 
 /// Instance administration hub (`/peers/tune`).
 ///
@@ -64,7 +65,6 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
       message: _failure,
       open: _open,
       language: language,
-      text: netText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: _tap);
@@ -77,15 +77,11 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
         : AppScope.of(context).portraitOf(targetUrl);
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: netText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'settings':
         return HexSlot(
           id: 'settings',
-          title: netText(language, 'Настройки', 'Settings'),
+          title: localized(language, 'Настройки', 'Settings'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -94,7 +90,7 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
       case 'ops':
         return HexSlot(
           id: 'ops',
-          title: netText(language, 'Команды', 'Commands'),
+          title: localized(language, 'Команды', 'Commands'),
           footer: portrait?.testsStatus,
           color: color,
           q: slot.q,
@@ -104,7 +100,7 @@ class _InstanceTunePageState extends State<InstanceTunePage> {
       case 'track':
         return HexSlot(
           id: 'track',
-          title: netText(language, 'Добавить инстанс', 'Add instance'),
+          title: localized(language, 'Добавить инстанс', 'Add instance'),
           color: addColor,
           q: slot.q,
           r: slot.r,

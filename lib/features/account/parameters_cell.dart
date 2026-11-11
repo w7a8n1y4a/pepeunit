@@ -66,10 +66,7 @@ class ParametersCell extends StatelessWidget {
                     _ZoneStep(
                       left: true,
                       extent: side * 0.18,
-                      label: phrase(language, {
-                        'ru': 'Предыдущий пояс',
-                        'en': 'Previous zone',
-                      }),
+                      label: localized(language, 'Предыдущий пояс', 'Previous zone'),
                       onTap: () => model.setTimeZone(stepZone(timeZone, -1)),
                     ),
                     Expanded(
@@ -90,10 +87,7 @@ class ParametersCell extends StatelessWidget {
                     _ZoneStep(
                       left: false,
                       extent: side * 0.18,
-                      label: phrase(language, {
-                        'ru': 'Следующий пояс',
-                        'en': 'Next zone',
-                      }),
+                      label: localized(language, 'Следующий пояс', 'Next zone'),
                       onTap: () => model.setTimeZone(stepZone(timeZone, 1)),
                     ),
                   ],

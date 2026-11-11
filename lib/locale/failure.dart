@@ -79,34 +79,19 @@ String describeFailure(String raw, String language, {Map<int, String>? names}) {
     return _byStatus(status, language, code);
   }
   if (_timeout.hasMatch(text)) {
-    return phrase(language, {
-      'ru':
-          'Сервер не ответил вовремя. Он перегружен или недоступен, '
-          'повторите позже.',
-      'en':
-          'The server did not answer in time. It is overloaded or '
-          'unavailable, try again later.',
-    });
+    return localized(language, 'Сервер не ответил вовремя. Он перегружен или недоступен, '
+          'повторите позже.', 'The server did not answer in time. It is overloaded or '
+          'unavailable, try again later.');
   }
   if (_offline.hasMatch(text)) {
-    return phrase(language, {
-      'ru':
-          'Нет связи с сервером. Проверьте интернет и адрес инстанса, '
-          'возможно, сервер сейчас выключен.',
-      'en':
-          'No connection to the server. Check the internet and the instance '
-          'address, the server may be down.',
-    });
+    return localized(language, 'Нет связи с сервером. Проверьте интернет и адрес инстанса, '
+          'возможно, сервер сейчас выключен.', 'No connection to the server. Check the internet and the instance '
+          'address, the server may be down.');
   }
   if (_technical.hasMatch(text)) {
-    return phrase(language, {
-      'ru':
-          'Не удалось разобрать ответ сервера. Возможно, версия инстанса не '
-          'подходит этому клиенту: обновите клиент или инстанс.',
-      'en':
-          'The server answer could not be read. The instance version may not '
-          'fit this client: update the client or the instance.',
-    });
+    return localized(language, 'Не удалось разобрать ответ сервера. Возможно, версия инстанса не '
+          'подходит этому клиенту: обновите клиент или инстанс.', 'The server answer could not be read. The instance version may not '
+          'fit this client: update the client or the instance.');
   }
   return raw;
 }

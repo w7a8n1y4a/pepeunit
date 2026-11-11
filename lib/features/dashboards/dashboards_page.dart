@@ -2,17 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../app_model.dart';
 import '../../app_scope.dart';
 import '../../dashboards/dashboard.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
-import '../../units/unit_view.dart';
 import '../hex_page.dart';
+import '../paged_search.dart';
 import '../line_input.dart';
 import '../network/network_chrome.dart';
 import '../units/units_chrome.dart';
 import 'dashboards_chrome.dart';
+import '../../locale/languages.dart';
 
 /// Search over the dashboards of the signed-in user, one step below the
 /// section menu. The backend lists no
@@ -26,38 +28,27 @@ class DashboardsPage extends StatefulWidget {
   State<DashboardsPage> createState() => _DashboardsPageState();
 }
 
-class _DashboardsPageState extends State<DashboardsPage> {
+class _DashboardsPageState extends State<DashboardsPage>
+    with PagedSearch<DashboardsPage> {
   final _search = TextEditingController();
-  final _typing = SearchDelay();
-  var _ticket = 0;
   String _order = 'desc';
-  var _offset = 0;
   var _count = 0;
   List<Dashboard> _dashboards = const [];
-  String? _failure;
-  var _open = false;
-  var _loading = true;
 
   /// Cells ahead of the cards: the filter and the page window.
   static const _head = 2;
 
   @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
-  }
+  int scopeOf(DashboardsPage widget) => widget.scope;
 
   @override
-  void didUpdateWidget(DashboardsPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.scope == widget.scope) return;
-    _offset = 0;
-    _load();
+  void initState() {
+    super.initState();
+    loading = true;
   }
 
   @override
   void dispose() {
-    _typing.dispose();
     _search.dispose();
     super.dispose();
   }
@@ -71,7 +62,7 @@ class _DashboardsPageState extends State<DashboardsPage> {
     final capacity = model.pageCapacity(
       headPageLimit(scaleTickMax, head: _head),
     );
-    final board = headBoard(
+    final board = listBoard(
       tick: widget.scope,
       head: const ['query', 'window'],
       ids: [for (final dashboard in _dashboards) dashboard.uuid],
@@ -82,41 +73,31 @@ class _DashboardsPageState extends State<DashboardsPage> {
     final slots = <HexSlot>[
       for (final slot in board.slots)
         switch (slot.id) {
-          'back' => backSlot(
-            title: dashText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'query' => HexSlot(
             id: 'query',
-            title: dashText(language, 'Фильтр', 'Filter'),
+            title: localized(language, 'Фильтр', 'Filter'),
             color: dashboardsColor,
             q: slot.q,
             r: slot.r,
             body: LineInput(
               color: dashboardsColor,
               controller: _search,
-              hint: dashText(language, 'Поиск', 'Search'),
+              hint: localized(language, 'Поиск', 'Search'),
               leading: 'assets/icons/actions/search.svg',
-              onChanged: (_) {
-                _typing.later(() {
-                  if (!mounted) return;
-                  setState(() => _offset = 0);
-                  _load();
-                });
-              },
+              onChanged: (_) => searchLater(),
             ),
           ),
           'window' => HexSlot(
             id: 'window',
-            title: dashText(language, 'Страница', 'Page'),
+            title: localized(language, 'Страница', 'Page'),
             color: dashboardsColor,
-            busy: _loading,
+            busy: loading,
             q: slot.q,
             r: slot.r,
             body: UnitWindow(
               language: language,
-              offset: _offset,
+              offset: offset,
               limit: limit,
               count: _count,
               capacity: capacity,
@@ -124,14 +105,11 @@ class _DashboardsPageState extends State<DashboardsPage> {
               orderLabel: (order) => dashboardOrderLabel(language, order),
               onOrder: (value) {
                 if (value == _order) return;
-                _typing.cancel();
-                setState(() {
-                  _order = value;
-                  _offset = 0;
-                });
-                _load();
+                setState(() => _order = value);
+                retune();
               },
-              onStep: (direction) => _step(direction, limit, capacity),
+              onStep: (direction) =>
+                  step(direction, limit: limit, count: _count, capacity: capacity),
             ),
           ),
           _ => _card(slot, language),
@@ -139,10 +117,9 @@ class _DashboardsPageState extends State<DashboardsPage> {
     ];
     appendError(
       slots,
-      message: _failure,
-      open: _open,
+      message: failure,
+      open: failureOpen,
       language: language,
-      text: dashText,
       wide: wide,
     );
     return HexPage(
@@ -151,7 +128,7 @@ class _DashboardsPageState extends State<DashboardsPage> {
         if (id == 'back') {
           popOrHome(context);
         } else if (id == 'error') {
-          setState(() => _open = true);
+          setState(() => failureOpen = true);
         } else if (id.startsWith('dashboard:')) {
           context.push('/dashboards/${id.substring(10)}');
         }
@@ -186,55 +163,18 @@ class _DashboardsPageState extends State<DashboardsPage> {
     );
   }
 
-  void _step(int direction, int limit, int capacity) {
-    if (_loading) return;
-    final next = pageShift(
-      direction: direction,
-      offset: _offset,
-      limit: limit,
-      count: _count,
-      capacity: capacity,
+  @override
+  Future<VoidCallback?> fetch(AppModel model) async {
+    final page = await model.listDashboards(
+      offset: offset,
+      limit: headPageLimit(widget.scope, head: _head),
+      search: _search.text,
+      order: _order,
     );
-    if (next == null) return;
-    setState(() => _offset = next);
-    _load();
-  }
-
-  Future<void> _load() async {
-    final ticket = ++_ticket;
-    final model = AppScope.of(context);
-    if (!model.signedIn) {
-      setState(() {
-        _loading = false;
-        _failure = model.notSignedIn;
-      });
-      return;
-    }
-    setState(() {
-      _loading = true;
-      _failure = null;
-      _open = false;
-    });
-    try {
-      final page = await model.listDashboards(
-        offset: _offset,
-        limit: headPageLimit(widget.scope, head: _head),
-        search: _search.text,
-        order: _order,
-      );
-      if (!mounted || ticket != _ticket) return;
-      setState(() {
-        _dashboards = page.dashboards;
-        _count = page.count;
-        _loading = false;
-      });
-    } catch (error) {
-      if (!mounted || ticket != _ticket) return;
-      setState(() {
-        _loading = false;
-        _failure = '$error';
-      });
-    }
+    return () {
+      _dashboards = page.dashboards;
+      _count = page.count;
+    };
   }
 }
 
@@ -267,14 +207,10 @@ class _DashboardCreatePageState extends State<DashboardCreatePage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         switch (slot.id) {
-          'back' => backSlot(
-            title: dashText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'name' => HexSlot(
             id: 'name',
-            title: dashText(language, 'Имя', 'Name'),
+            title: localized(language, 'Имя', 'Name'),
             color: dashboardsColor,
             q: slot.q,
             r: slot.r,
@@ -283,7 +219,7 @@ class _DashboardCreatePageState extends State<DashboardCreatePage> {
               color: dashboardsColor,
               controller: _name,
               fieldKey: const ValueKey('dashboard-name'),
-              hint: dashText(language, 'имя', 'name'),
+              hint: localized(language, 'имя', 'name'),
               issue: _issue ?? '',
               inputFormatters: [
                 FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9_.-]')),
@@ -294,7 +230,7 @@ class _DashboardCreatePageState extends State<DashboardCreatePage> {
           ),
           'create' => HexSlot(
             id: 'create',
-            title: dashText(language, 'Создать панель', 'Create dashboard'),
+            title: localized(language, 'Создать панель', 'Create dashboard'),
             color: addColor,
             busy: _busy,
             q: slot.q,
@@ -315,7 +251,6 @@ class _DashboardCreatePageState extends State<DashboardCreatePage> {
       message: _failure,
       open: _open,
       language: language,
-      text: dashText,
       wide: wide,
     );
     return HexPage(

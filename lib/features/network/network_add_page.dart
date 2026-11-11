@@ -7,7 +7,7 @@ import '../../hive/hex_scene.dart';
 import '../../navigation/back.dart';
 import '../hex_page.dart';
 import 'line_cell.dart';
-import 'network_chrome.dart';
+import '../../locale/languages.dart';
 
 class NetworkAddPage extends StatefulWidget {
   const NetworkAddPage({this.track = false, super.key});
@@ -36,7 +36,7 @@ class _NetworkAddPageState extends State<NetworkAddPage> {
     final slots = <HexSlot>[
       HexSlot(
         id: 'url',
-        title: netText(language, 'Ссылка current', 'Current link'),
+        title: localized(language, 'Ссылка current', 'Current link'),
         color: color,
         busy: _busy,
         q: url.$1,
@@ -47,18 +47,13 @@ class _NetworkAddPageState extends State<NetworkAddPage> {
           onSubmit: _submit,
         ),
       ),
-      backSlot(
-        title: netText(language, 'Назад', 'Back'),
-        q: backAt.$1,
-        r: backAt.$2,
-      ),
+      backSlot(language, q: backAt.$1, r: backAt.$2),
     ];
     appendError(
       slots,
       message: _failure,
       open: _open,
       language: language,
-      text: netText,
       wide: wide,
     );
     return HexPage(

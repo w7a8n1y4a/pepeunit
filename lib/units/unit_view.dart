@@ -63,16 +63,6 @@ class UnitQuery {
   }
 }
 
-/// Cards beside Back, the filter and the page window.
-int headPageLimit(int tick, {int head = 2}) =>
-    scaleTickCells(tick.clamp(scaleTickMin, scaleTickMax)) - 1 - head;
-
-/// A zoomable list grows only while the next tick still shows another cell.
-bool listCanZoom({required int tick, required int total, required int room}) {
-  if (tick >= scaleTickMax) return false;
-  return total > room;
-}
-
 /// Add, search and groups around Back. The menu stays on tick 1.
 NetworkBoard unitsMenuBoard({bool wide = false}) {
   const ids = ['add', 'search', 'groups'];
@@ -98,58 +88,13 @@ NetworkBoard unitsBoard({
   required int tick,
   required List<String> uuids,
   bool wide = false,
-}) {
-  final step = tick.clamp(scaleTickMin, scaleTickMax);
-  const head = ['query', 'filter', 'window'];
-  final ids = <String>[...head, for (final uuid in uuids) 'unit:$uuid'];
-  final frame = hexFrame(
-    count: ids.length,
-    back: HexBack.center,
-    wide: wide,
-    cells: scaleTickCells(step),
-  );
-  final back = frame.back!;
-  return NetworkBoard(
-    slots: [
-      BoardSlot('back', back.$1, back.$2),
-      for (var i = 0; i < ids.length && i < frame.cells.length; i++)
-        BoardSlot(ids[i], frame.cells[i].$1, frame.cells[i].$2),
-    ],
-    canZoomIn: step < scaleTickMax,
-    page: 0,
-    pages: 1,
-  );
-}
-
-NetworkBoard headBoard({
-  required int tick,
-  required List<String> head,
-  required List<String> ids,
-  required String prefix,
-  required int total,
-  bool wide = false,
-}) {
-  final step = tick.clamp(scaleTickMin, scaleTickMax);
-  final names = <String>[...head, for (final id in ids) '$prefix$id'];
-  final frame = hexFrame(
-    count: names.length,
-    back: HexBack.center,
-    wide: wide,
-    cells: scaleTickCells(step),
-  );
-  final back = frame.back!;
-  final room = scaleTickCells(step) - 1 - head.length;
-  return NetworkBoard(
-    slots: [
-      BoardSlot('back', back.$1, back.$2),
-      for (var i = 0; i < names.length && i < frame.cells.length; i++)
-        BoardSlot(names[i], frame.cells[i].$1, frame.cells[i].$2),
-    ],
-    canZoomIn: listCanZoom(tick: step, total: total, room: room),
-    page: 0,
-    pages: 1,
-  );
-}
+}) => listBoard(
+  tick: tick,
+  head: const ['query', 'filter', 'window'],
+  ids: uuids,
+  prefix: 'unit:',
+  wide: wide,
+);
 
 /// One cell per id. Tick 1 is the short list. The last tick pages the tail.
 NetworkBoard tailBoard({
@@ -158,46 +103,14 @@ NetworkBoard tailBoard({
   required List<String> ids,
   List<String> head = const [],
   bool wide = false,
-}) {
-  final step = tick.clamp(scaleTickMin, scaleTickMax);
-  final free = scaleTickCells(step) - 1 - head.length;
-  final overflow = ids.length > free;
-  final paging = step >= scaleTickMax && overflow && free >= 3;
-  final room = free - (paging ? 2 : 0);
-  final pages = paging && room > 0 ? (ids.length / room).ceil() : 1;
-  final safePage = page.clamp(0, pages - 1);
-  final slice = paging
-      ? ids.skip(safePage * room).take(room).toList()
-      : ids.take(room).toList();
-  final frame = hexFrame(
-    count: head.length + slice.length,
-    back: HexBack.center,
-    wide: wide,
-    cells: scaleTickCells(step),
-    tail: paging ? 2 : 0,
-  );
-  final back = frame.back!;
-  return NetworkBoard(
-    slots: [
-      BoardSlot('back', back.$1, back.$2),
-      for (var i = 0; i < head.length && i < frame.cells.length; i++)
-        BoardSlot(head[i], frame.cells[i].$1, frame.cells[i].$2),
-      for (var i = 0; i < slice.length; i++)
-        BoardSlot(
-          slice[i],
-          frame.cells[head.length + i].$1,
-          frame.cells[head.length + i].$2,
-        ),
-      if (frame.tail.length == 2) ...[
-        BoardSlot('prev', frame.tail[0].$1, frame.tail[0].$2),
-        BoardSlot('next', frame.tail[1].$1, frame.tail[1].$2),
-      ],
-    ],
-    canZoomIn: step < scaleTickMax && overflow,
-    page: safePage,
-    pages: pages,
-  );
-}
+}) => pagedBoard<String>(
+  tick: tick,
+  page: page,
+  items: ids,
+  head: head,
+  slot: (id, _, at) => BoardSlot(id, at.$1, at.$2),
+  wide: wide,
+);
 
 /// Creator sees the card, the info, settings, device control, the nodes and
 /// the environment, and for a private unit the access grants. A guest sees

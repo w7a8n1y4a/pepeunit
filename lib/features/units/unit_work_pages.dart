@@ -11,6 +11,7 @@ import '../../navigation/back.dart';
 import '../../units/unit.dart';
 import '../hex_page.dart';
 import 'units_chrome.dart';
+import '../../locale/languages.dart';
 
 class UnitCommandsPage extends StatefulWidget {
   const UnitCommandsPage({required this.uuid, super.key});
@@ -44,11 +45,7 @@ class _UnitCommandsPageState extends State<UnitCommandsPage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         slot.id == 'back'
-            ? backSlot(
-                title: unitText(language, 'Назад', 'Back'),
-                q: slot.q,
-                r: slot.r,
-              )
+            ? backSlot(language, q: slot.q, r: slot.r)
             : HexSlot(
                 id: slot.id,
                 hint: slot.id.toLowerCase(),
@@ -67,7 +64,6 @@ class _UnitCommandsPageState extends State<UnitCommandsPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: _tap, echo: _echo);
@@ -161,11 +157,7 @@ class _UnitArchivesPageState extends State<UnitArchivesPage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         slot.id == 'back'
-            ? backSlot(
-                title: unitText(language, 'Назад', 'Back'),
-                q: slot.q,
-                r: slot.r,
-              )
+            ? backSlot(language, q: slot.q, r: slot.r)
             : HexSlot(
                 id: slot.id,
                 title: slot.id,
@@ -181,7 +173,6 @@ class _UnitArchivesPageState extends State<UnitArchivesPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: _tap);
@@ -263,18 +254,14 @@ class _UnitPlatformsPageState extends State<UnitPlatformsPage> {
     if (ids.isEmpty) {
       final frame = hexFrame(count: 1, back: HexBack.center, wide: wide);
       slots.add(
-        backSlot(
-          title: unitText(language, 'Назад', 'Back'),
-          q: frame.back!.$1,
-          r: frame.back!.$2,
-        ),
+        backSlot(language, q: frame.back!.$1, r: frame.back!.$2),
       );
       slots.add(
         HexSlot(
           id: 'empty',
           title: _loading
-              ? unitText(language, 'Платформы', 'Platforms')
-              : unitText(language, 'Пусто', 'Empty'),
+              ? localized(language, 'Платформы', 'Platforms')
+              : localized(language, 'Пусто', 'Empty'),
           color: unitsColor,
           busy: _loading,
           tappable: false,
@@ -288,11 +275,7 @@ class _UnitPlatformsPageState extends State<UnitPlatformsPage> {
       for (final slot in placed) {
         slots.add(
           slot.id == 'back'
-              ? backSlot(
-                  title: unitText(language, 'Назад', 'Back'),
-                  q: slot.q,
-                  r: slot.r,
-                )
+              ? backSlot(language, q: slot.q, r: slot.r)
               : HexSlot(
                   id: slot.id,
                   title: slot.id.startsWith('platform:')
@@ -311,7 +294,6 @@ class _UnitPlatformsPageState extends State<UnitPlatformsPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: _tap);
@@ -385,14 +367,10 @@ class _UnitDeletePageState extends State<UnitDeletePage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         slot.id == 'back'
-            ? backSlot(
-                title: unitText(language, 'Назад', 'Back'),
-                q: slot.q,
-                r: slot.r,
-              )
+            ? backSlot(language, q: slot.q, r: slot.r)
             : HexSlot(
                 id: 'confirm',
-                title: unitText(language, 'Удалить аппарат', 'Delete unit'),
+                title: localized(language, 'Удалить аппарат', 'Delete unit'),
                 color: errorColor,
                 busy: _busy,
                 q: slot.q,
@@ -405,7 +383,6 @@ class _UnitDeletePageState extends State<UnitDeletePage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: _tap);

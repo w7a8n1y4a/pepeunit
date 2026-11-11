@@ -35,70 +35,18 @@ class RepoQuery {
   }
 }
 
-/// Cards beside Back, the filter, and the page window at this tick.
-int repoPageLimit(int tick) =>
-    scaleTickCells(tick.clamp(scaleTickMin, scaleTickMax)) - 3;
-
-String repoWindowText({
-  required int offset,
-  required int limit,
-  required int count,
-  required String ofWord,
-}) =>
-    pageWindowText(offset: offset, limit: limit, count: count, ofWord: ofWord);
-
-bool repoCanPageBack({
-  required int offset,
-  required int count,
-  int? cap,
-}) => pageCanBack(
-  offset: offset,
-  count: count,
-  capacity: capacityUnder(repoPageLimit(scaleTickMax), cap),
-);
-
-bool repoCanPageForward({
-  required int offset,
-  required int limit,
-  required int count,
-  int? cap,
-}) => pageCanForward(
-  offset: offset,
-  limit: limit,
-  count: count,
-  capacity: capacityUnder(repoPageLimit(scaleTickMax), cap),
-);
-
 /// Back, filter, page window, then repo cards. The tick caps the disk.
 NetworkBoard reposBoard({
   required int tick,
   required List<String> uuids,
   bool wide = false,
-}) {
-  final step = tick.clamp(scaleTickMin, scaleTickMax);
-  final ids = <String>[
-    'query',
-    'window',
-    for (final uuid in uuids) 'repo:$uuid',
-  ];
-  final frame = hexFrame(
-    count: ids.length,
-    back: HexBack.center,
-    wide: wide,
-    cells: scaleTickCells(step),
-  );
-  final back = frame.back!;
-  return NetworkBoard(
-    slots: [
-      BoardSlot('back', back.$1, back.$2),
-      for (var i = 0; i < ids.length && i < frame.cells.length; i++)
-        BoardSlot(ids[i], frame.cells[i].$1, frame.cells[i].$2),
-    ],
-    canZoomIn: step < scaleTickMax,
-    page: 0,
-    pages: 1,
-  );
-}
+}) => listBoard(
+  tick: tick,
+  head: const ['query', 'window'],
+  ids: uuids,
+  prefix: 'repo:',
+  wide: wide,
+);
 
 /// Wire values of `platform` in `POST /repo`.
 const repoPlatforms = ['Github', 'Gitlab'];
@@ -156,42 +104,10 @@ NetworkBoard branchesBoard({
   required int page,
   required List<String> names,
   bool wide = false,
-}) {
-  final step = tick.clamp(scaleTickMin, scaleTickMax);
-  final free = scaleTickCells(step) - 1;
-  final overflow = names.length > free;
-  final paging = step >= scaleTickMax && overflow && free >= 3;
-  final room = free - (paging ? 2 : 0);
-  final pages = paging && room > 0 ? (names.length / room).ceil() : 1;
-  final safePage = page.clamp(0, pages - 1);
-  final slice = paging
-      ? names.skip(safePage * room).take(room).toList()
-      : names.take(room).toList();
-  final frame = hexFrame(
-    count: slice.length,
-    back: HexBack.center,
-    wide: wide,
-    cells: scaleTickCells(step),
-    tail: paging ? 2 : 0,
-  );
-  final back = frame.back!;
-  return NetworkBoard(
-    slots: [
-      BoardSlot('back', back.$1, back.$2),
-      for (var i = 0; i < slice.length; i++)
-        BoardSlot(
-          'branch:$i',
-          frame.cells[i].$1,
-          frame.cells[i].$2,
-          url: slice[i],
-        ),
-      if (frame.tail.length == 2) ...[
-        BoardSlot('prev', frame.tail[0].$1, frame.tail[0].$2),
-        BoardSlot('next', frame.tail[1].$1, frame.tail[1].$2),
-      ],
-    ],
-    canZoomIn: step < scaleTickMax && overflow,
-    page: safePage,
-    pages: pages,
-  );
-}
+}) => pagedBoard<String>(
+  tick: tick,
+  page: page,
+  items: names,
+  slot: (name, i, at) => BoardSlot('branch:$i', at.$1, at.$2, url: name),
+  wide: wide,
+);

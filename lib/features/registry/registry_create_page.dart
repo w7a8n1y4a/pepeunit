@@ -11,6 +11,7 @@ import '../hex_page.dart';
 import '../line_input.dart';
 import '../units/units_chrome.dart';
 import 'registry_chrome.dart';
+import '../../locale/languages.dart';
 
 /// Adds a repository: link, platform, access and, for a private one,
 /// the credentials.
@@ -52,7 +53,6 @@ class _RegistryCreatePageState extends State<RegistryCreatePage> {
       message: _failure,
       open: _open,
       language: language,
-      text: regText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: _tap);
@@ -62,15 +62,11 @@ class _RegistryCreatePageState extends State<RegistryCreatePage> {
     final color = registryColor;
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: regText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'url':
         return HexSlot(
           id: 'url',
-          title: regText(language, 'Ссылка', 'Link'),
+          title: localized(language, 'Ссылка', 'Link'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -81,7 +77,7 @@ class _RegistryCreatePageState extends State<RegistryCreatePage> {
             fieldKey: const ValueKey('repo-url'),
             hint: 'https://…/name.git',
             issue: _url.text.trim().isNotEmpty && !_linkOk
-                ? regText(
+                ? localized(
                     language,
                     'Нужна ссылка http(s):// … .git',
                     'A http(s):// … .git link is required',
@@ -94,7 +90,7 @@ class _RegistryCreatePageState extends State<RegistryCreatePage> {
       case 'platform':
         return HexSlot(
           id: 'platform',
-          title: regText(language, 'Платформа', 'Platform'),
+          title: localized(language, 'Платформа', 'Platform'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -122,7 +118,7 @@ class _RegistryCreatePageState extends State<RegistryCreatePage> {
       case 'credentials':
         return HexSlot(
           id: 'credentials',
-          title: regText(language, 'Креды', 'Credentials'),
+          title: localized(language, 'Креды', 'Credentials'),
           footer: _creds.ready ? _creds.username.trim() : null,
           color: color,
           q: slot.q,
@@ -132,7 +128,7 @@ class _RegistryCreatePageState extends State<RegistryCreatePage> {
       default:
         return HexSlot(
           id: 'create',
-          title: regText(language, 'Добавить', 'Add'),
+          title: localized(language, 'Добавить', 'Add'),
           color: addColor,
           busy: _busy,
           enabled: _ready,

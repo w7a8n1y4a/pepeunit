@@ -14,7 +14,8 @@ import '../../hive/hex_order.dart';
 import '../../hive/hex_scene.dart';
 import '../../navigation/sections.dart';
 import '../hex_page.dart';
-import 'account_nav.dart';
+import '../../navigation/back.dart';
+import '../../locale/languages.dart';
 
 class AccountMenuPage extends StatefulWidget {
   const AccountMenuPage({super.key});
@@ -53,14 +54,12 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
     final model = AppScope.of(context);
     final language = model.vault.language;
     final color = peopleColor;
-    final back = accountText(language, 'Назад', 'Back');
     final wide = hexWide(MediaQuery.sizeOf(context));
     final slots = model.vault.hasKey
-        ? _signedIn(language, color, back, wide)
+        ? _signedIn(language, color, wide)
         : _signedOut(
             language,
             color,
-            back,
             wide,
             model.registrationCooldownLeft,
           );
@@ -69,7 +68,6 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
       message: _failure,
       open: _failureOpen,
       language: language,
-      text: accountText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: (id) => _tap(id, language));
@@ -78,7 +76,6 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
   List<HexSlot> _signedOut(
     String language,
     Color color,
-    String back,
     bool wide,
     Duration cooling,
   ) {
@@ -88,21 +85,20 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
     return [
       HexSlot(
         id: 'login',
-        title: accountText(language, 'Вход', 'Login'),
+        title: localized(language, 'Вход', 'Login'),
         color: color,
         q: spot[0].$1,
         r: spot[0].$2,
         icon: 'assets/icons/actions/signin.svg',
       ),
       _registration(language, color, spot[1].$1, spot[1].$2, cooling),
-      backSlot(title: back, q: backAt.$1, r: backAt.$2),
+      backSlot(language, q: backAt.$1, r: backAt.$2),
     ];
   }
 
   List<HexSlot> _signedIn(
     String language,
     Color color,
-    String back,
     bool wide,
   ) {
     final model = AppScope.of(context);
@@ -114,7 +110,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
     return [
       HexSlot(
         id: 'profile',
-        title: login.isEmpty ? accountText(language, 'Логин', 'Login') : login,
+        title: login.isEmpty ? localized(language, 'Логин', 'Login') : login,
         color: color,
         q: spot[0].$1,
         r: spot[0].$2,
@@ -124,7 +120,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
       ),
       HexSlot(
         id: 'settings',
-        title: accountText(language, 'Настройки', 'Settings'),
+        title: localized(language, 'Настройки', 'Settings'),
         color: color,
         q: spot[1].$1,
         r: spot[1].$2,
@@ -132,7 +128,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
       ),
       HexSlot(
         id: 'key',
-        title: accountText(language, 'Скачать ключ', 'Download key'),
+        title: localized(language, 'Скачать ключ', 'Download key'),
         footer: keyMarkFromBase64(model.vault.publicKey),
         color: color,
         busy: _busy,
@@ -142,13 +138,13 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
       ),
       HexSlot(
         id: 'signout',
-        title: accountText(language, 'Выход', 'Sign out'),
+        title: localized(language, 'Выход', 'Sign out'),
         color: color,
         q: spot[3].$1,
         r: spot[3].$2,
         icon: 'assets/icons/actions/signout.svg',
       ),
-      backSlot(title: back, q: backAt.$1, r: backAt.$2),
+      backSlot(language, q: backAt.$1, r: backAt.$2),
     ];
   }
 
@@ -162,7 +158,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
     final locked = cooling > Duration.zero;
     return HexSlot(
       id: 'registration',
-      title: accountText(language, 'Регистрация', 'Registration'),
+      title: localized(language, 'Регистрация', 'Registration'),
       footer: locked ? cooldownClock(cooling) : null,
       color: locked ? hexMuted : color,
       enabled: !locked,
@@ -242,7 +238,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
         bytes: Uint8List.fromList(
           utf8.encode(encodeSecretKeyFile(base64.decode(encoded))),
         ),
-        dialogTitle: accountText(language, 'Сохранить ключ', 'Save the key'),
+        dialogTitle: localized(language, 'Сохранить ключ', 'Save the key'),
       );
       if (!mounted) return;
       setState(() {
@@ -256,7 +252,7 @@ class _AccountMenuPageState extends State<AccountMenuPage> {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _failure = accountText(
+        _failure = localized(
           language,
           'Не удалось записать ключ',
           'The key could not be saved',

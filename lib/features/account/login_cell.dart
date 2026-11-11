@@ -64,16 +64,10 @@ class _LoginCellState extends State<LoginCell> {
   String? _issue(String language) {
     final text = _loaded ? _controller.text : '';
     if (text.isNotEmpty && text.length < loginMin) {
-      return phrase(language, {
-        'ru': 'От 4 до 20 символов',
-        'en': '4 to 20 characters',
-      });
+      return localized(language, 'От 4 до 20 символов', '4 to 20 characters');
     }
     if (_rejected) {
-      return phrase(language, {
-        'ru': 'Недопустимый символ',
-        'en': 'Character not allowed',
-      });
+      return localized(language, 'Недопустимый символ', 'Character not allowed');
     }
     return null;
   }

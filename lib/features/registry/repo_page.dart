@@ -15,6 +15,7 @@ import '../../registry/repo.dart';
 import '../hex_page.dart';
 import '../network/line_cell.dart';
 import 'registry_chrome.dart';
+import '../../locale/languages.dart';
 
 class RepoPage extends StatefulWidget {
   const RepoPage({required this.uuid, super.key});
@@ -80,7 +81,6 @@ class _RepoPageState extends State<RepoPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: regText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: _tap, echo: _echo);
@@ -90,16 +90,12 @@ class _RepoPageState extends State<RepoPage> {
     final repo = _repo;
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: regText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'card':
         if (repo == null) {
           return HexSlot(
             id: 'card',
-            title: regText(language, 'Репозиторий', 'Repository'),
+            title: localized(language, 'Репозиторий', 'Repository'),
             color: color,
             busy: _loading || _pending == 'card',
             q: slot.q,
@@ -125,7 +121,7 @@ class _RepoPageState extends State<RepoPage> {
               ];
         return HexSlot(
           id: 'summary',
-          title: regText(language, 'Сводка', 'Summary'),
+          title: localized(language, 'Сводка', 'Summary'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -134,19 +130,19 @@ class _RepoPageState extends State<RepoPage> {
             lines: pages.isEmpty ? const ['—'] : pages.first.lines,
             pages: pages,
             copyText: repo?.repositoryUrl,
-            copyLabel: regText(language, 'Скопировать ссылку', 'Copy link'),
-            prevLabel: regText(
+            copyLabel: localized(language, 'Скопировать ссылку', 'Copy link'),
+            prevLabel: localized(
               language,
               'Предыдущая сводка',
               'Previous summary',
             ),
-            nextLabel: regText(language, 'Следующая сводка', 'Next summary'),
+            nextLabel: localized(language, 'Следующая сводка', 'Next summary'),
           ),
         );
       case 'unit':
         return HexSlot(
           id: 'unit',
-          title: regText(language, 'Создать аппарат', 'Create unit'),
+          title: localized(language, 'Создать аппарат', 'Create unit'),
           color: addColor,
           q: slot.q,
           r: slot.r,
@@ -157,7 +153,7 @@ class _RepoPageState extends State<RepoPage> {
         final watching = _syncUntil != null;
         return HexSlot(
           id: 'sync',
-          title: regText(language, 'Синхронизировать репо', 'Synchronize repo'),
+          title: localized(language, 'Синхронизировать репо', 'Synchronize repo'),
           footer: _syncFooter(language, repo),
           color: watching
               ? hexMuted
@@ -171,7 +167,7 @@ class _RepoPageState extends State<RepoPage> {
       case 'credentials':
         return HexSlot(
           id: 'credentials',
-          title: regText(language, 'Креды', 'Credentials'),
+          title: localized(language, 'Креды', 'Credentials'),
           color: color,
           q: slot.q,
           r: slot.r,
@@ -181,7 +177,7 @@ class _RepoPageState extends State<RepoPage> {
         final count = repo?.branches.length;
         return HexSlot(
           id: 'branches',
-          title: regText(language, 'Ветки', 'Branches'),
+          title: localized(language, 'Ветки', 'Branches'),
           footer: count == null ? null : pieceCount(language, count),
           color: color,
           q: slot.q,
@@ -191,7 +187,7 @@ class _RepoPageState extends State<RepoPage> {
       case 'delete':
         return HexSlot(
           id: 'delete',
-          title: regText(language, 'Удалить', 'Delete'),
+          title: localized(language, 'Удалить', 'Delete'),
           color: errorColor,
           busy: _pending == 'delete',
           q: slot.q,

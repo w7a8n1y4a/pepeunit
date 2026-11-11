@@ -47,14 +47,8 @@ class AlertTimeCell extends StatelessWidget {
                     value: parts[0],
                     style: style,
                     extent: side * 0.18,
-                    previous: phrase(language, {
-                      'ru': 'Предыдущий час',
-                      'en': 'Previous hour',
-                    }),
-                    next: phrase(language, {
-                      'ru': 'Следующий час',
-                      'en': 'Next hour',
-                    }),
+                    previous: localized(language, 'Предыдущий час', 'Previous hour'),
+                    next: localized(language, 'Следующий час', 'Next hour'),
                     onPrevious: () =>
                         model.setAlertTime(stepAlertHour(time, -1)),
                     onNext: () => model.setAlertTime(stepAlertHour(time, 1)),
@@ -70,14 +64,8 @@ class AlertTimeCell extends StatelessWidget {
                     value: parts[1],
                     style: style,
                     extent: side * 0.18,
-                    previous: phrase(language, {
-                      'ru': 'Предыдущая минута',
-                      'en': 'Previous minute',
-                    }),
-                    next: phrase(language, {
-                      'ru': 'Следующая минута',
-                      'en': 'Next minute',
-                    }),
+                    previous: localized(language, 'Предыдущая минута', 'Previous minute'),
+                    next: localized(language, 'Следующая минута', 'Next minute'),
                     onPrevious: () =>
                         model.setAlertTime(stepAlertMinute(time, -1)),
                     onNext: () => model.setAlertTime(stepAlertMinute(time, 1)),

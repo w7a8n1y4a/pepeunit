@@ -671,34 +671,25 @@ String? settingIssue(SettingField field, String raw, String language) {
   if (field.nullable && text.isEmpty) return null;
   if (parseSetting(field, raw) != null) return null;
   if (text.isEmpty) {
-    return phrase(language, {'ru': 'Пустое значение', 'en': 'Empty value'});
+    return localized(language, 'Пустое значение', 'Empty value');
   }
   if (field.kind == 'int' || field.kind == 'number') {
     final number = field.kind == 'int'
         ? int.tryParse(text)
         : num.tryParse(text);
     if (number == null) {
-      return phrase(language, {'ru': 'Нужно число', 'en': 'Need a number'});
+      return localized(language, 'Нужно число', 'Need a number');
     }
     final range = field.rangeHint();
     if (range != null) {
-      return phrase(language, {
-        'ru': 'Вне диапазона $range',
-        'en': 'Outside $range',
-      });
+      return localized(language, 'Вне диапазона $range', 'Outside $range');
     }
   }
   final hint = field.rangeHint();
   if (hint != null) {
-    return phrase(language, {
-      'ru': 'Не подходит: $hint',
-      'en': 'Does not match: $hint',
-    });
+    return localized(language, 'Не подходит: $hint', 'Does not match: $hint');
   }
-  return phrase(language, {
-    'ru': 'Некорректное значение',
-    'en': 'Invalid value',
-  });
+  return localized(language, 'Некорректное значение', 'Invalid value');
 }
 
 /// A value the settings patch will accept, or null when [raw] is not valid.

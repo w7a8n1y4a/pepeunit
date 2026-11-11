@@ -22,27 +22,15 @@ String? iconProblem(Uint8List bytes) {
 String? iconProblemText(String? code, String language) {
   switch (code) {
     case 'empty':
-      return phrase(language, {'ru': 'Файл пустой', 'en': 'The file is empty'});
+      return localized(language, 'Файл пустой', 'The file is empty');
     case 'large':
-      return phrase(language, {
-        'ru': 'Картинка больше 128 КБ',
-        'en': 'The picture is larger than 128 KB',
-      });
+      return localized(language, 'Картинка больше 128 КБ', 'The picture is larger than 128 KB');
     case 'png':
-      return phrase(language, {
-        'ru': 'Нужен файл PNG',
-        'en': 'A PNG file is required',
-      });
+      return localized(language, 'Нужен файл PNG', 'A PNG file is required');
     case 'size':
-      return phrase(language, {
-        'ru': 'Нужен размер 192x192',
-        'en': 'The picture must be 192x192',
-      });
+      return localized(language, 'Нужен размер 192x192', 'The picture must be 192x192');
     case 'read':
-      return phrase(language, {
-        'ru': 'Не удалось прочитать файл',
-        'en': 'The file could not be read',
-      });
+      return localized(language, 'Не удалось прочитать файл', 'The file could not be read');
     default:
       return null;
   }

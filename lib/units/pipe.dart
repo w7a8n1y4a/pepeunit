@@ -142,13 +142,13 @@ String? _policyOf(Object? config) {
 String pipePolicyLabel(String language, String type) {
   switch (type) {
     case 'LastValue':
-      return phrase(language, {'ru': 'Последнее значение', 'en': 'Last value'});
+      return localized(language, 'Последнее значение', 'Last value');
     case 'NRecords':
-      return phrase(language, {'ru': 'N записей', 'en': 'N records'});
+      return localized(language, 'N записей', 'N records');
     case 'TimeWindow':
-      return phrase(language, {'ru': 'Временное окно', 'en': 'Time window'});
+      return localized(language, 'Временное окно', 'Time window');
     case 'Aggregation':
-      return phrase(language, {'ru': 'Агрегация', 'en': 'Aggregation'});
+      return localized(language, 'Агрегация', 'Aggregation');
     default:
       return type;
   }
@@ -184,20 +184,11 @@ PipeSyntax? pipeSyntaxIssue(String text) {
 String pipeSyntaxText(String language, PipeSyntax issue) {
   switch (issue.kind) {
     case PipeSyntaxKind.empty:
-      return phrase(language, {
-        'ru': 'YAML: конфиг пуст',
-        'en': 'YAML: the config is empty',
-      });
+      return localized(language, 'YAML: конфиг пуст', 'YAML: the config is empty');
     case PipeSyntaxKind.notMap:
-      return phrase(language, {
-        'ru': 'YAML: ожидается словарь ключей',
-        'en': 'YAML: a mapping of keys is expected',
-      });
+      return localized(language, 'YAML: ожидается словарь ключей', 'YAML: a mapping of keys is expected');
     case PipeSyntaxKind.yaml:
-      return phrase(language, {
-        'ru': 'YAML, строка ${issue.line}: ${issue.message}',
-        'en': 'YAML, line ${issue.line}: ${issue.message}',
-      });
+      return localized(language, 'YAML, строка ${issue.line}: ${issue.message}', 'YAML, line ${issue.line}: ${issue.message}');
   }
 }
 

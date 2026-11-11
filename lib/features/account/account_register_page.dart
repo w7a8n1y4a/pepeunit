@@ -11,7 +11,8 @@ import '../../hive/hex_order.dart';
 import '../../hive/hex_scene.dart';
 import '../../navigation/sections.dart';
 import '../hex_page.dart';
-import 'account_nav.dart';
+import '../../navigation/back.dart';
+import '../../locale/languages.dart';
 
 class AccountRegisterPage extends StatefulWidget {
   const AccountRegisterPage({super.key});
@@ -56,7 +57,7 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
     final slots = <HexSlot>[
       HexSlot(
         id: 'generate',
-        title: accountText(language, 'Генерация ключа', 'Generate key'),
+        title: localized(language, 'Генерация ключа', 'Generate key'),
         footer: locked ? cooldownClock(cooling) : null,
         color: locked ? hexMuted : color,
         enabled: !locked,
@@ -65,18 +66,13 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
         r: generate.$2,
         icon: 'assets/icons/actions/key_gen.svg',
       ),
-      backSlot(
-        title: accountText(language, 'Назад', 'Back'),
-        q: backAt.$1,
-        r: backAt.$2,
-      ),
+      backSlot(language, q: backAt.$1, r: backAt.$2),
     ];
     appendError(
       slots,
       message: _failure,
       open: _failureOpen,
       language: language,
-      text: accountText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: (id) => _tap(id, language));
@@ -133,7 +129,7 @@ class _AccountRegisterPageState extends State<AccountRegisterPage> {
       if (!mounted) return;
       setState(() {
         _busy = false;
-        _failure = accountText(
+        _failure = localized(
           language,
           'Не удалось создать ключ',
           'The key could not be created',

@@ -6,17 +6,19 @@ import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../account/icon_file.dart';
+import '../../app_model.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
 import '../../units/unit.dart';
-import '../../units/unit_view.dart';
 import '../file_drop.dart';
 import '../hex_page.dart';
+import '../paged_search.dart';
 import '../line_input.dart';
 import '../network/network_chrome.dart';
 import 'units_chrome.dart';
+import '../../locale/languages.dart';
 
 class GroupsPage extends StatefulWidget {
   const GroupsPage({required this.scope, super.key});
@@ -27,35 +29,23 @@ class GroupsPage extends StatefulWidget {
   State<GroupsPage> createState() => _GroupsPageState();
 }
 
-class _GroupsPageState extends State<GroupsPage> {
+class _GroupsPageState extends State<GroupsPage> with PagedSearch<GroupsPage> {
   final _search = TextEditingController();
-  final _typing = SearchDelay();
-  var _ticket = 0;
   String _order = 'asc';
-  var _offset = 0;
   var _count = 0;
   List<UnitGroup> _groups = const [];
-  String? _failure;
-  var _open = false;
-  var _loading = true;
+
+  @override
+  int scopeOf(GroupsPage widget) => widget.scope;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
-  }
-
-  @override
-  void didUpdateWidget(GroupsPage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.scope == widget.scope) return;
-    _offset = 0;
-    _load();
+    loading = true;
   }
 
   @override
   void dispose() {
-    _typing.dispose();
     _search.dispose();
     super.dispose();
   }
@@ -66,7 +56,7 @@ class _GroupsPageState extends State<GroupsPage> {
     final language = model.vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
     final limit = model.cappedLimit(headPageLimit(widget.scope, head: 3));
-    final board = headBoard(
+    final board = listBoard(
       tick: widget.scope,
       head: const ['query', 'create', 'window'],
       ids: [for (final group in _groups) group.uuid],
@@ -77,34 +67,24 @@ class _GroupsPageState extends State<GroupsPage> {
     final slots = <HexSlot>[
       for (final slot in board.slots)
         switch (slot.id) {
-          'back' => backSlot(
-            title: unitText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'query' => HexSlot(
             id: 'query',
-            title: unitText(language, 'Фильтр', 'Filter'),
+            title: localized(language, 'Фильтр', 'Filter'),
             color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
             body: LineInput(
               color: unitGroupsColor,
               controller: _search,
-              hint: unitText(language, 'Поиск', 'Search'),
+              hint: localized(language, 'Поиск', 'Search'),
               leading: 'assets/icons/actions/search.svg',
-              onChanged: (_) {
-                _typing.later(() {
-                  if (!mounted) return;
-                  setState(() => _offset = 0);
-                  _load();
-                });
-              },
+              onChanged: (_) => searchLater(),
             ),
           ),
           'create' => HexSlot(
             id: 'create',
-            title: unitText(language, 'Создать группу', 'Create group'),
+            title: localized(language, 'Создать группу', 'Create group'),
             color: addColor,
             q: slot.q,
             r: slot.r,
@@ -112,28 +92,31 @@ class _GroupsPageState extends State<GroupsPage> {
           ),
           'window' => HexSlot(
             id: 'window',
-            title: unitText(language, 'Страница', 'Page'),
+            title: localized(language, 'Страница', 'Page'),
             color: unitGroupsColor,
-            busy: _loading,
+            busy: loading,
             q: slot.q,
             r: slot.r,
             body: UnitWindow(
               language: language,
-              offset: _offset,
+              offset: offset,
               limit: limit,
               count: _count,
               capacity: model.pageCapacity(headPageLimit(scaleTickMax, head: 3)),
               order: _order,
               onOrder: (value) {
                 if (value == _order) return;
-                _typing.cancel();
-                setState(() {
-                  _order = value;
-                  _offset = 0;
-                });
-                _load();
+                setState(() => _order = value);
+                retune();
               },
-              onStep: (direction) => _step(direction, limit),
+              onStep: (direction) => step(
+                direction,
+                limit: limit,
+                count: _count,
+                capacity: model.pageCapacity(
+                  headPageLimit(scaleTickMax, head: 3),
+                ),
+              ),
             ),
           ),
           _ => HexSlot(
@@ -151,10 +134,9 @@ class _GroupsPageState extends State<GroupsPage> {
     ];
     appendError(
       slots,
-      message: _failure,
-      open: _open,
+      message: failure,
+      open: failureOpen,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(
@@ -163,7 +145,7 @@ class _GroupsPageState extends State<GroupsPage> {
         if (id == 'back') {
           popOrHome(context);
         } else if (id == 'error') {
-          setState(() => _open = true);
+          setState(() => failureOpen = true);
         } else if (id == 'create') {
           context.push('/units/groups/new');
         } else if (id.startsWith('group:')) {
@@ -195,55 +177,21 @@ class _GroupsPageState extends State<GroupsPage> {
     return null;
   }
 
-  void _step(int direction, int limit) {
-    final next = pageShift(
-      direction: direction,
-      offset: _offset,
-      limit: limit,
-      count: _count,
-      capacity: AppScope.of(context)
-          .pageCapacity(headPageLimit(scaleTickMax, head: 3)),
+  @override
+  Future<VoidCallback?> fetch(AppModel model) async {
+    final page = await model.listGroups(
+      offset: offset,
+      limit: model.cappedLimit(headPageLimit(widget.scope, head: 3)),
+      search: _search.text,
+      order: _order,
     );
-    if (next == null) return;
-    setState(() => _offset = next);
-    _load();
-  }
-
-  Future<void> _load() async {
-    final ticket = ++_ticket;
-    final model = AppScope.of(context);
-    if (!model.signedIn) {
-      setState(() {
-        _loading = false;
-        _failure = model.notSignedIn;
-      });
-      return;
-    }
-    setState(() => _loading = true);
-    try {
-      final page = await model.listGroups(
-        offset: _offset,
-        limit: model.cappedLimit(headPageLimit(widget.scope, head: 3)),
-        search: _search.text,
-        order: _order,
-      );
-      if (!mounted || ticket != _ticket) return;
-      unawaited(
-        model.ensureIcons([for (final group in page.groups) group.iconUuid]),
-      );
-      setState(() {
-        _groups = page.groups;
-        _count = page.count;
-        _loading = false;
-        _failure = null;
-      });
-    } catch (error) {
-      if (!mounted || ticket != _ticket) return;
-      setState(() {
-        _loading = false;
-        _failure = '$error';
-      });
-    }
+    unawaited(
+      model.ensureIcons([for (final group in page.groups) group.iconUuid]),
+    );
+    return () {
+      _groups = page.groups;
+      _count = page.count;
+    };
   }
 }
 
@@ -274,14 +222,10 @@ class _GroupCreatePageState extends State<GroupCreatePage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         switch (slot.id) {
-          'back' => backSlot(
-            title: unitText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'name' => HexSlot(
             id: 'name',
-            title: unitText(language, 'Имя', 'Name'),
+            title: localized(language, 'Имя', 'Name'),
             color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
@@ -289,13 +233,13 @@ class _GroupCreatePageState extends State<GroupCreatePage> {
             body: LineInput(
               color: unitGroupsColor,
               controller: _name,
-              hint: unitText(language, 'группа', 'group'),
+              hint: localized(language, 'группа', 'group'),
               onSubmitted: (_) => _create(),
             ),
           ),
           'create' => HexSlot(
             id: 'create',
-            title: unitText(language, 'Создать группу', 'Create group'),
+            title: localized(language, 'Создать группу', 'Create group'),
             color: addColor,
             busy: _busy,
             q: slot.q,
@@ -316,7 +260,6 @@ class _GroupCreatePageState extends State<GroupCreatePage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(
@@ -394,14 +337,10 @@ class _GroupPageState extends State<GroupPage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         switch (slot.id) {
-          'back' => backSlot(
-            title: unitText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'name' => HexSlot(
             id: 'name',
-            title: unitText(language, 'Имя', 'Name'),
+            title: localized(language, 'Имя', 'Name'),
             color: unitGroupsColor,
             busy: _loading || _pending == 'name',
             q: slot.q,
@@ -410,13 +349,13 @@ class _GroupPageState extends State<GroupPage> {
             body: LineInput(
               color: unitGroupsColor,
               controller: _name,
-              hint: unitText(language, 'группа', 'group'),
+              hint: localized(language, 'группа', 'group'),
               onSubmitted: (_) => _rename(),
             ),
           ),
           'icon' => HexSlot(
             id: 'icon',
-            title: unitText(language, 'Иконка', 'Icon'),
+            title: localized(language, 'Иконка', 'Icon'),
             color: dropColor(_hot, unitGroupsColor),
             q: slot.q,
             r: slot.r,
@@ -427,7 +366,7 @@ class _GroupPageState extends State<GroupPage> {
           ),
           'members' => HexSlot(
             id: 'members',
-            title: unitText(language, 'Состав', 'Members'),
+            title: localized(language, 'Состав', 'Members'),
             color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
@@ -435,7 +374,7 @@ class _GroupPageState extends State<GroupPage> {
           ),
           'delete' => HexSlot(
             id: 'delete',
-            title: unitText(language, 'Удалить', 'Delete'),
+            title: localized(language, 'Удалить', 'Delete'),
             color: errorColor,
             busy: _pending == 'delete',
             q: slot.q,
@@ -456,7 +395,6 @@ class _GroupPageState extends State<GroupPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(
@@ -603,7 +541,7 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
     final language = model.vault.language;
     final wide = hexWide(MediaQuery.sizeOf(context));
     final limit = model.cappedLimit(headPageLimit(widget.scope));
-    final board = headBoard(
+    final board = listBoard(
       tick: widget.scope,
       head: const ['add', 'window'],
       ids: [for (final unit in _units) unit.uuid],
@@ -614,14 +552,10 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
     final slots = <HexSlot>[
       for (final slot in board.slots)
         switch (slot.id) {
-          'back' => backSlot(
-            title: unitText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'add' => HexSlot(
             id: 'add',
-            title: unitText(language, 'Добавить', 'Add'),
+            title: localized(language, 'Добавить', 'Add'),
             color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
@@ -629,7 +563,7 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
           ),
           'window' => HexSlot(
             id: 'window',
-            title: unitText(language, 'Страница', 'Page'),
+            title: localized(language, 'Страница', 'Page'),
             color: unitGroupsColor,
             busy: _loading,
             q: slot.q,
@@ -685,7 +619,6 @@ class _GroupMembersPageState extends State<GroupMembersPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(
@@ -789,14 +722,10 @@ class _MembershipPageState extends State<MembershipPage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         switch (slot.id) {
-          'back' => backSlot(
-            title: unitText(language, 'Назад', 'Back'),
-            q: slot.q,
-            r: slot.r,
-          ),
+          'back' => backSlot(language, q: slot.q, r: slot.r),
           'open' => HexSlot(
             id: 'open',
-            title: unitText(language, 'Открыть', 'Open'),
+            title: localized(language, 'Открыть', 'Open'),
             color: unitGroupsColor,
             q: slot.q,
             r: slot.r,
@@ -804,7 +733,7 @@ class _MembershipPageState extends State<MembershipPage> {
           ),
           'unlink' => HexSlot(
             id: 'unlink',
-            title: unitText(language, 'Убрать', 'Remove'),
+            title: localized(language, 'Убрать', 'Remove'),
             color: errorColor,
             busy: _busy,
             q: slot.q,
@@ -825,7 +754,6 @@ class _MembershipPageState extends State<MembershipPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(

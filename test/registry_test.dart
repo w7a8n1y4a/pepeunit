@@ -65,15 +65,15 @@ void main() {
     expect(query.setOrder('desc'), isTrue);
     expect(query.setOrder('desc'), isFalse);
     expect(query.setOrder('sideways'), isFalse);
-    expect(repoPageLimit(1), 4);
-    expect(repoPageLimit(searchScaleTick), 10);
-    expect(repoPageLimit(scaleTickMax), 16);
+    expect(headPageLimit(1), 4);
+    expect(headPageLimit(searchScaleTick), 10);
+    expect(headPageLimit(scaleTickMax), 16);
     expect(
-      repoWindowText(offset: 0, limit: 16, count: 40, ofWord: 'из'),
+      pageWindowText(offset: 0, limit: 16, count: 40, ofWord: 'из'),
       '1-16 из 40',
     );
-    expect(repoCanPageBack(offset: 0, count: 40), isFalse);
-    expect(repoCanPageForward(offset: 0, limit: 16, count: 40), isTrue);
+    expect(listCanBack(offset: 0, count: 40), isFalse);
+    expect(listCanForward(offset: 0, limit: 16, count: 40), isTrue);
     final board = reposBoard(
       tick: scaleTickMax,
       uuids: [for (var i = 0; i < 16; i++) 'r$i'],

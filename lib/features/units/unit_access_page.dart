@@ -14,6 +14,7 @@ import '../../units/unit_view.dart';
 import '../hex_page.dart';
 import '../network/network_chrome.dart';
 import 'units_chrome.dart';
+import '../../locale/languages.dart';
 
 /// The agent chosen on the kind screen: `User` or `Unit`, and its uuid.
 typedef AccessPick = ({String kind, String uuid});
@@ -78,7 +79,6 @@ class _AccessPageState extends State<AccessPage> {
       message: _failure,
       open: _open,
       language: language,
-      text: unitText,
       wide: wide,
     );
     return HexPage(
@@ -95,16 +95,12 @@ class _AccessPageState extends State<AccessPage> {
 
   HexSlot _slot(BoardSlot slot, String language, NetworkBoard board) {
     if (slot.id == 'back') {
-      return backSlot(
-        title: unitText(language, 'Назад', 'Back'),
-        q: slot.q,
-        r: slot.r,
-      );
+      return backSlot(language, q: slot.q, r: slot.r);
     }
     if (slot.id == 'add') {
       return HexSlot(
         id: 'add',
-        title: unitText(language, 'Добавить', 'Add'),
+        title: localized(language, 'Добавить', 'Add'),
         color: accessColor,
         busy: _loading,
         q: slot.q,
@@ -170,8 +166,8 @@ class _AccessPageState extends State<AccessPage> {
       id: slot.id,
       hint: 'grant',
       title: isUnit
-          ? unitText(language, 'Аппарат', 'Unit')
-          : unitText(language, 'Пользователь', 'User'),
+          ? localized(language, 'Аппарат', 'Unit')
+          : localized(language, 'Пользователь', 'User'),
       footer: grant == null ? null : shortCommit(grant.agentUuid),
       color: isUnit ? unitsColor : peopleColor,
       q: slot.q,
@@ -300,17 +296,13 @@ class AccessKindPage extends StatelessWidget {
       slots: [
         for (final slot in placed)
           slot.id == 'back'
-              ? backSlot(
-                  title: unitText(language, 'Назад', 'Back'),
-                  q: slot.q,
-                  r: slot.r,
-                )
+              ? backSlot(language, q: slot.q, r: slot.r)
               : HexSlot(
                   id: slot.id,
                   hint: slot.id == 'User' ? 'user' : 'unit',
                   title: slot.id == 'User'
-                      ? unitText(language, 'Пользователь', 'User')
-                      : unitText(language, 'Аппарат', 'Unit'),
+                      ? localized(language, 'Пользователь', 'User')
+                      : localized(language, 'Аппарат', 'Unit'),
                   color: slot.id == 'User' ? peopleColor : unitsColor,
                   q: slot.q,
                   r: slot.r,

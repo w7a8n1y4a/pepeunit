@@ -13,6 +13,7 @@ import '../../navigation/back.dart';
 import '../../registry/repo.dart';
 import '../hex_page.dart';
 import 'dashboards_chrome.dart';
+import '../../locale/languages.dart';
 
 /// One dashboard: its state, the panels it holds, the sync to Grafana, the
 /// link into Grafana and the delete. Only the creator reaches it, because the
@@ -81,7 +82,6 @@ class _DashboardPageState extends State<DashboardPage> {
       message: _shown,
       open: _open,
       language: language,
-      text: dashText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: _tap, echo: _echo);
@@ -91,16 +91,12 @@ class _DashboardPageState extends State<DashboardPage> {
     final dashboard = _dashboard;
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: dashText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'card':
         if (dashboard == null) {
           return HexSlot(
             id: 'card',
-            title: dashText(language, 'Панель', 'Dashboard'),
+            title: localized(language, 'Панель', 'Dashboard'),
             color: dashboardsColor,
             busy: _loading,
             q: slot.q,
@@ -119,7 +115,7 @@ class _DashboardPageState extends State<DashboardPage> {
       case 'info':
         return HexSlot(
           id: 'info',
-          title: dashText(language, 'Информация', 'Information'),
+          title: localized(language, 'Информация', 'Information'),
           center: dashboardLines(
             dashboard,
             language,
@@ -133,7 +129,7 @@ class _DashboardPageState extends State<DashboardPage> {
       case 'panels':
         return HexSlot(
           id: 'panels',
-          title: dashText(language, 'Визуализации', 'Panels'),
+          title: localized(language, 'Визуализации', 'Panels'),
           footer: _panels == null ? null : pieceCount(language, _panels!),
           color: dashboardsColor,
           q: slot.q,
@@ -143,7 +139,7 @@ class _DashboardPageState extends State<DashboardPage> {
       case 'sync':
         return HexSlot(
           id: 'sync',
-          title: dashText(language, 'Отправить в Grafana', 'Send to Grafana'),
+          title: localized(language, 'Отправить в Grafana', 'Send to Grafana'),
           color: dashboardsColor,
           busy: _pending == 'sync',
           enabled: dashboard != null && _pending == null,
@@ -154,7 +150,7 @@ class _DashboardPageState extends State<DashboardPage> {
       case 'open':
         return HexSlot(
           id: 'open',
-          title: dashText(language, 'Открыть в Grafana', 'Open in Grafana'),
+          title: localized(language, 'Открыть в Grafana', 'Open in Grafana'),
           color: dashboardsColor,
           busy: _pending == 'open',
           enabled: dashboard?.opens == true && _pending == null,
@@ -165,7 +161,7 @@ class _DashboardPageState extends State<DashboardPage> {
       case 'delete':
         return HexSlot(
           id: 'delete',
-          title: dashText(language, 'Удалить панель', 'Delete dashboard'),
+          title: localized(language, 'Удалить панель', 'Delete dashboard'),
           color: errorColor,
           q: slot.q,
           r: slot.r,
@@ -327,14 +323,10 @@ class _DashboardDeletePageState extends State<DashboardDeletePage> {
     final slots = <HexSlot>[
       for (final slot in placed)
         slot.id == 'back'
-            ? backSlot(
-                title: dashText(language, 'Назад', 'Back'),
-                q: slot.q,
-                r: slot.r,
-              )
+            ? backSlot(language, q: slot.q, r: slot.r)
             : HexSlot(
                 id: 'confirm',
-                title: dashText(language, 'Удалить панель', 'Delete dashboard'),
+                title: localized(language, 'Удалить панель', 'Delete dashboard'),
                 color: errorColor,
                 busy: _busy,
                 q: slot.q,
@@ -347,7 +339,6 @@ class _DashboardDeletePageState extends State<DashboardDeletePage> {
       message: _failure,
       open: _open,
       language: language,
-      text: dashText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: _tap);

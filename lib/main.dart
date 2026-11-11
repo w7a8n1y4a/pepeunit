@@ -55,7 +55,6 @@ import 'features/units/unit_io_pages.dart';
 import 'features/units/unit_pipe_pages.dart';
 import 'features/units/unit_page.dart';
 import 'features/units/unit_work_pages.dart';
-import 'features/units/units_chrome.dart';
 import 'features/units/units_menu_page.dart';
 import 'features/units/units_page.dart';
 import 'dashboards/dashboard.dart';
@@ -65,6 +64,7 @@ import 'hive/hex_order.dart';
 import 'hive/hint.dart';
 import 'hive/hex_scene.dart';
 import 'hive/page_transition.dart';
+import 'hive/scroll_behavior.dart';
 import 'library/library.dart';
 import 'locale/languages.dart';
 import 'registry/registry_view.dart';
@@ -357,7 +357,7 @@ class _PepeunitAppState extends State<PepeunitApp> {
                 builder: (context, state) {
                   final repo = state.uri.queryParameters['repo'] ?? '';
                   return NamePickPage(
-                    title: unitText(
+                    title: localized(
                       AppScope.of(context).vault.language,
                       'Ветка',
                       'Branch',
@@ -414,7 +414,7 @@ class _PepeunitAppState extends State<PepeunitApp> {
                   final branch = state.uri.queryParameters['branch'];
                   final commit = state.uri.queryParameters['commit'];
                   return NamePickPage(
-                    title: unitText(
+                    title: localized(
                       AppScope.of(context).vault.language,
                       'Платформа',
                       'Platform',
@@ -593,7 +593,7 @@ class _PepeunitAppState extends State<PepeunitApp> {
           GoRoute(
             path: 'type',
             builder: (context, state) => NamePickPage(
-              title: dashText(
+              title: localized(
                 AppScope.of(context).vault.language,
                 'Тип',
                 'Type',
@@ -759,10 +759,7 @@ class _PepeunitAppState extends State<PepeunitApp> {
     await showGeneralDialog<void>(
       context: context,
       barrierDismissible: true,
-      barrierLabel: phrase(language, {
-        'ru': 'Закрыть подсказку',
-        'en': 'Close the tip',
-      }),
+      barrierLabel: localized(language, 'Закрыть подсказку', 'Close the tip'),
       barrierColor: const Color(0x00000000),
       pageBuilder: (dialog, _, _) => Material(
         type: MaterialType.transparency,
@@ -782,9 +779,16 @@ class _PepeunitAppState extends State<PepeunitApp> {
     return MaterialApp.router(
       title: 'Pepeunit',
       debugShowCheckedModeBanner: false,
+      scrollBehavior: const UniformScrollBehavior(),
       theme: ThemeData(
         brightness: Brightness.dark,
         fontFamily: 'OpenGost Type B',
+        // Material reads these from the platform: a compact density on the
+        // desktop, tap targets that shrink there, the text geometry of the
+        // system font. One fixed value each keeps the screens the same.
+        visualDensity: VisualDensity.standard,
+        materialTapTargetSize: MaterialTapTargetSize.padded,
+        typography: Typography.material2021(platform: TargetPlatform.android),
         pageTransitionsTheme: PageTransitionsTheme(
           builders: {
             for (final platform in TargetPlatform.values)

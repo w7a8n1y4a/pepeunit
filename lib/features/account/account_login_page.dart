@@ -11,7 +11,8 @@ import '../../hive/hex_scene.dart';
 import '../../navigation/sections.dart';
 import '../file_drop.dart';
 import '../hex_page.dart';
-import 'account_nav.dart';
+import '../../navigation/back.dart';
+import '../../locale/languages.dart';
 
 class AccountLoginPage extends StatefulWidget {
   const AccountLoginPage({super.key});
@@ -47,25 +48,20 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
     final slots = <HexSlot>[
       HexSlot(
         id: 'load',
-        title: accountText(language, 'Загрузка ключа', 'Load key'),
+        title: localized(language, 'Загрузка ключа', 'Load key'),
         color: loadColor,
         busy: _busy,
         q: load.$1,
         r: load.$2,
         icon: 'assets/icons/actions/key_load.svg',
       ),
-      backSlot(
-        title: accountText(language, 'Назад', 'Back'),
-        q: backAt.$1,
-        r: backAt.$2,
-      ),
+      backSlot(language, q: backAt.$1, r: backAt.$2),
     ];
     appendError(
       slots,
       message: _failure,
       open: _failureOpen,
       language: language,
-      text: accountText,
       wide: wide,
     );
     return HexPage(
@@ -101,7 +97,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
     setState(() => _busy = true);
     try {
       final bytes = await model.files.pick(
-        dialogTitle: accountText(language, 'Выбрать ключ', 'Choose a key'),
+        dialogTitle: localized(language, 'Выбрать ключ', 'Choose a key'),
       );
       if (!mounted) return;
       if (bytes == null) {
@@ -112,7 +108,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
     } catch (_) {
       if (!mounted) return;
       _fail(
-        accountText(
+        localized(
           language,
           'Не удалось прочитать файл',
           'The file could not be read',
@@ -132,7 +128,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
     } catch (_) {
       if (!mounted) return;
       _fail(
-        accountText(
+        localized(
           language,
           'Не удалось прочитать файл',
           'The file could not be read',
@@ -144,13 +140,13 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
   Future<void> _accept(Uint8List bytes, String language) async {
     final model = AppScope.of(context);
     if (bytes.isEmpty) {
-      _fail(accountText(language, 'Файл пустой', 'The file is empty'));
+      _fail(localized(language, 'Файл пустой', 'The file is empty'));
       return;
     }
     final secret = decodeSecretKeyFile(bytes);
     if (secret == null) {
       _fail(
-        accountText(
+        localized(
           language,
           'Это не приватный ключ ML-DSA-87',
           'This is not an ML-DSA-87 private key',
@@ -162,7 +158,7 @@ class _AccountLoginPageState extends State<AccountLoginPage> {
     if (!mounted) return;
     if (derived == null) {
       _fail(
-        accountText(
+        localized(
           language,
           'Это не приватный ключ ML-DSA-87',
           'This is not an ML-DSA-87 private key',

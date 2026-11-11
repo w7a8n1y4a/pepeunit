@@ -8,6 +8,7 @@ import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
 import '../hex_page.dart';
 import 'network_chrome.dart';
+import '../../locale/languages.dart';
 
 class NetworkPage extends StatefulWidget {
   const NetworkPage({super.key});
@@ -45,7 +46,6 @@ class _NetworkPageState extends State<NetworkPage> {
       message: failure,
       open: _failureOpen,
       language: language,
-      text: netText,
       wide: wide,
     );
     return HexPage(slots: slots, onTap: _tap);
@@ -54,16 +54,12 @@ class _NetworkPageState extends State<NetworkPage> {
   HexSlot _slot(BoardSlot slot, AppModel model, String language, Color color) {
     switch (slot.id) {
       case 'back':
-        return backSlot(
-          title: netText(language, 'Назад', 'Back'),
-          q: slot.q,
-          r: slot.r,
-        );
+        return backSlot(language, q: slot.q, r: slot.r);
       case 'search':
         final text = model.query.text.trim();
         return HexSlot(
           id: 'search',
-          title: netText(language, 'Поиск инстансов', 'Search instances'),
+          title: localized(language, 'Поиск инстансов', 'Search instances'),
           footer: text.isEmpty ? null : text,
           color: color,
           q: slot.q,
@@ -73,7 +69,7 @@ class _NetworkPageState extends State<NetworkPage> {
       case 'idle':
         return HexSlot(
           id: 'idle',
-          title: netText(language, 'Найди инстанс', 'Find instance'),
+          title: localized(language, 'Найди инстанс', 'Find instance'),
           color: color,
           q: slot.q,
           r: slot.r,

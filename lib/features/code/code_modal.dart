@@ -144,19 +144,19 @@ class CodeModal extends StatelessWidget {
             ...?actions?.call(font),
             if (onDownload != null)
               _DownloadMark(
-                label: phrase(language, {'ru': 'Скачать', 'en': 'Download'}),
+                label: localized(language, 'Скачать', 'Download'),
                 extent: font * 2.2,
                 busy: downloading,
                 onTap: onDownload!,
               ),
             _CopyMark(
               text: copy,
-              label: phrase(language, {'ru': 'Скопировать', 'en': 'Copy'}),
+              label: localized(language, 'Скопировать', 'Copy'),
               extent: font * 2.2,
             ),
             SizedBox(width: font * 0.2),
             CodeCloseMark(
-              label: phrase(language, {'ru': 'Закрыть', 'en': 'Close'}),
+              label: localized(language, 'Закрыть', 'Close'),
               extent: font * 2.2,
               onTap: onClose,
             ),
