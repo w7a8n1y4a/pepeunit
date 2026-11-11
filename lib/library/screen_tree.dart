@@ -116,6 +116,13 @@ const screenRoot = '/';
 /// screens with the router, parents included.
 const screenTree = <ScreenNode>[
   ScreenNode('/', ScreenKind.menu, 'Главная', 'Home', open: true),
+  ScreenNode(
+    '/background-only',
+    ScreenKind.card,
+    'Только фон',
+    'Background only',
+    open: true,
+  ),
   ScreenNode('/people', ScreenKind.menu, 'Аккаунт', 'Account', open: true),
   ScreenNode(
     '/people#profile',

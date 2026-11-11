@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
@@ -135,6 +136,13 @@ class _PepeunitAppState extends State<PepeunitApp> {
   late final GoRouter _router = GoRouter(
     routes: [
       GoRoute(path: '/', builder: (context, state) => const HomePage()),
+      // Only the scene under the router: the grain and the mosaic. Web only,
+      // elsewhere the address leads home.
+      GoRoute(
+        path: '/background-only',
+        redirect: (context, state) => kIsWeb ? null : '/',
+        builder: (context, state) => const SizedBox.expand(),
+      ),
       GoRoute(
         path: '/people',
         builder: (context, state) => const AccountMenuPage(),

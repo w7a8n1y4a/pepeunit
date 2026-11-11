@@ -9,6 +9,7 @@ import '../../instances/network_view.dart';
 import '../../library/screen_search.dart';
 import '../../library/screen_tree.dart';
 import '../../locale/languages.dart';
+import '../../navigation/sections.dart';
 import '../code/code_modal.dart';
 import 'library_menu_page.dart';
 import 'tip_modal.dart';
@@ -41,7 +42,8 @@ bool treeAccess(
   bool? notifications,
   bool? grafana,
 }) {
-  if (node.section.isNotEmpty &&
+  // A screen outside the sections of the home menu has no section to close.
+  if (sectionById(node.section) != null &&
       !menuSectionEnabled(
         node.section,
         hasTarget: hasTarget,

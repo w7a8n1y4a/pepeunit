@@ -143,7 +143,8 @@ void main() {
 
     test('has the sections of the home menu under the home screen', () {
       final sections = [
-        for (final node in screenMap.childrenOf('/')) node.section,
+        for (final node in screenMap.childrenOf('/'))
+          if (node.path != '/background-only') node.section,
       ];
       expect(sections.toSet(), {
         'people',
