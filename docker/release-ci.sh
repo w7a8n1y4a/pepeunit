@@ -8,6 +8,11 @@ DOCKER=${DOCKER:-docker}
 builder="pepeunit-release-${CI_JOB_ID}"
 workspace="$CI_PROJECT_DIR/build/release-ci-${CI_JOB_ID}"
 export RELEASE_DIR="$workspace/output"
+# Native jobs use independent registry credentials and buildx metadata. The
+# web publish keeps the runner's existing Docker Hub authentication.
+if [[ "$target" == linux || "$target" == android || -d "$workspace/docker-config" ]]; then
+  export DOCKER_CONFIG="$workspace/docker-config"
+fi
 
 cleanup() {
   local failed=0
@@ -40,10 +45,25 @@ if [[ "$target" != web ]]; then
     if ((status != 3)); then exit "$status"; fi
   fi
 fi
+if [[ "$target" != web ]]; then mkdir -p "$DOCKER_CONFIG"; fi
 touch "$workspace/builder-started"
 "$DOCKER" buildx create --name "$builder" --driver docker-container --driver-opt env.GODEBUG=tlsmlkem=0
 "$DOCKER" buildx inspect "$builder" --bootstrap
 args=(--builder "$builder" --build-arg "INSTANCE_URL=${INSTANCE_URL:-}")
+# Keep the cache outside the job's disposable builder, including SDK and
+# dependency stages that are absent from the final scratch/nginx images.
+# An explicitly empty RELEASE_CACHE_REF disables registry caching.
+cache_ref=
+if [[ "$target" != web ]]; then
+  cache_ref=${RELEASE_CACHE_REF-${CI_REGISTRY_IMAGE:+$CI_REGISTRY_IMAGE/build-cache:$target}}
+fi
+if [[ -n "$cache_ref" ]]; then
+  : "${CI_REGISTRY:?}" "${CI_REGISTRY_USER:?}" "${CI_REGISTRY_PASSWORD:?}"
+  printf '%s' "$CI_REGISTRY_PASSWORD" | "$DOCKER" login "$CI_REGISTRY" \
+    --username "$CI_REGISTRY_USER" --password-stdin
+  args+=(--cache-from "type=registry,ref=$cache_ref"
+    --cache-to "type=registry,ref=$cache_ref,mode=max")
+fi
 case "$target" in
   linux)
     args+=(-f docker/release.Dockerfile --target linux --platform linux/amd64,linux/arm64

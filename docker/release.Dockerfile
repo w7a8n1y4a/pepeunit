@@ -33,7 +33,11 @@ USER flutter
 RUN flutter config --no-analytics --enable-linux-desktop && flutter precache --linux
 COPY --chown=flutter:flutter pubspec.yaml pubspec.lock ./
 RUN flutter pub get
-COPY --chown=flutter:flutter . .
+COPY --chown=flutter:flutter lib/ lib/
+COPY --chown=flutter:flutter assets/ assets/
+COPY --chown=flutter:flutter docs/ docs/
+COPY --chown=flutter:flutter tooltip/ tooltip/
+COPY --chown=flutter:flutter linux/ linux/
 ARG INSTANCE_URL
 ARG TARGETARCH
 RUN flutter build linux --release --dart-define="INSTANCE_URL=${INSTANCE_URL}" \
@@ -48,6 +52,8 @@ COPY --from=linux-sdk /app/output/ /
 FROM sdk AS android-sdk
 ARG ANDROID_TOOLS_VERSION=15859902
 ARG ANDROID_TOOLS_SHA256=4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583
+# Match flutter.ndkVersion in the pinned Flutter SDK.
+ARG ANDROID_NDK_VERSION=28.2.13676358
 ENV ANDROID_HOME=/opt/android-sdk \
     JAVA_HOME=/usr/lib/jvm/java-21-openjdk-amd64
 RUN apt-get update && apt-get install -y --no-install-recommends openjdk-21-jdk-headless \
@@ -65,10 +71,19 @@ RUN yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/n
 RUN "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platform-tools" \
     && flutter config --no-analytics --android-sdk "$ANDROID_HOME" \
     && flutter precache --android
-RUN "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platforms;android-36" "build-tools;36.0.0"
+RUN "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+    "platforms;android-36" "build-tools;36.0.0" "ndk;${ANDROID_NDK_VERSION}"
 COPY --chown=flutter:flutter pubspec.yaml pubspec.lock ./
+COPY --chown=flutter:flutter android/ android/
 RUN flutter pub get
-COPY --chown=flutter:flutter . .
+# Warm the Gradle distribution and build plugins before application sources
+# change. Registry cache exports this layer even with a fresh builder.
+RUN printf 'sdk.dir=%s\nflutter.sdk=%s\n' "$ANDROID_HOME" "$FLUTTER_HOME" > android/local.properties \
+    && cd android && ./gradlew --no-daemon help
+COPY --chown=flutter:flutter lib/ lib/
+COPY --chown=flutter:flutter assets/ assets/
+COPY --chown=flutter:flutter docs/ docs/
+COPY --chown=flutter:flutter tooltip/ tooltip/
 
 FROM android-sdk AS android-build
 ARG INSTANCE_URL
