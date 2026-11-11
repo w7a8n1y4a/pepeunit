@@ -24,7 +24,11 @@ if [[ "$mode" != release ]]; then
     *) echo "Unknown platform: $group" >&2; exit 2 ;;
   esac
 fi
-project="${CI_API_V4_URL%/}/projects/$(jq -rn --arg value "$CI_PROJECT_ID" '$value|@uri')"
+# GitLab behind a TLS proxy may advertise an http CI_API_V4_URL. Use HTTPS
+# before sending credentials or PUT/POST bodies; redirects are not upload URLs.
+# Override explicitly for installations that intentionally use plain HTTP.
+api=${RELEASE_API_V4_URL:-${CI_API_V4_URL/#http:/https:}}
+project="${api%/}/projects/$(jq -rn --arg value "$CI_PROJECT_ID" '$value|@uri')"
 tag=$(jq -rn --arg value "$CI_COMMIT_TAG" '$value|@uri')
 package="$project/packages/generic/pepeunit-client/$tag"
 release="$project/releases/$tag"
