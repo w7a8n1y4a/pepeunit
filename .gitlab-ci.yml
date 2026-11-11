@@ -222,15 +222,16 @@ deploy_dev:image:master:
     - docker system prune -a -f
 
 # Native jobs upload immutable packages before cleaning their isolated resources.
-.tag_native:
+.tag_base:
   stage: tag
   tags:
     - shell-main-pc
   rules:
     - if: $CI_COMMIT_TAG
       when: on_success
-  before_script:
-    - docker run --privileged --rm tonistiigi/binfmt --install all
+
+.tag_native:
+  extends: .tag_base
   after_script:
     - bash docker/release-ci.sh cleanup
 
@@ -246,17 +247,27 @@ tag:android:
   script:
     - bash docker/release-ci.sh android
 
-# Only publish the release once every platform's packages are available.
-tag:
+# Build the web image alongside native packages instead of after them.
+tag:web:
   extends: .tag_native
+  resource_group: release-web-$CI_COMMIT_REF_SLUG
+  variables:
+    HUB_IMAGE: w7a8n1y4a/pepeunit-client
+  script:
+    - bash docker/release-ci.sh web
+
+# Publish metadata only after all packages and the web image are available.
+tag:
+  extends: .tag_base
   resource_group: release-publish-$CI_COMMIT_REF_SLUG
   needs:
     - job: tag:linux
       artifacts: false
     - job: tag:android
       artifacts: false
+    - job: tag:web
+      artifacts: false
   variables:
     HUB_IMAGE: w7a8n1y4a/pepeunit-client
   script:
-    - bash docker/release-ci.sh web
     - bash docker/publish-release.sh

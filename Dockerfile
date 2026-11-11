@@ -31,9 +31,15 @@ COPY --chown=flutter:flutter pubspec.yaml pubspec.lock ./
 
 RUN flutter pub get
 
-COPY --chown=flutter:flutter . ./
+COPY --chown=flutter:flutter lib/ lib/
+COPY --chown=flutter:flutter assets/ assets/
+COPY --chown=flutter:flutter docs/ docs/
+COPY --chown=flutter:flutter tooltip/ tooltip/
+COPY --chown=flutter:flutter web/ web/
+COPY --chown=flutter:flutter docker/stamp-main-js.sh docker/stamp-main-js.sh
 
-RUN flutter build web --release --base-href / \
+ARG CLIENT_VERSION=1.5.0
+RUN flutter build web --release --dart-define="CLIENT_VERSION=${CLIENT_VERSION}" --base-href / \
     && ./docker/stamp-main-js.sh
 
 FROM nginx:1.30-alpine

@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1
-# Native Linux builds run on the target architecture (QEMU may be used by buildx).
+# CI builds on amd64: Linux x64 and Android ARM64 via the Android toolchain.
 FROM ubuntu:24.04 AS sdk
 ARG FLUTTER_VERSION=3.47.7
 ENV DEBIAN_FRONTEND=noninteractive \
@@ -13,17 +13,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && git clone --depth 1 --branch "$FLUTTER_VERSION" https://github.com/flutter/flutter.git /opt/flutter \
     && mkdir /app && chown -R flutter:flutter /opt/flutter /app
 WORKDIR /app
-
-FROM sdk AS web-build
-USER flutter
-RUN flutter config --no-analytics --enable-web && flutter precache --web
-COPY --chown=flutter:flutter pubspec.yaml pubspec.lock ./
-RUN flutter pub get
-COPY --chown=flutter:flutter . .
-RUN flutter build web --release --base-href / && ./docker/stamp-main-js.sh
-
-FROM scratch AS web
-COPY --from=web-build /app/build/web/ /
 
 FROM sdk AS linux-sdk
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -39,16 +28,15 @@ COPY --chown=flutter:flutter docs/ docs/
 COPY --chown=flutter:flutter tooltip/ tooltip/
 COPY --chown=flutter:flutter linux/ linux/
 ARG INSTANCE_URL
-ARG TARGETARCH
-RUN flutter build linux --release --dart-define="INSTANCE_URL=${INSTANCE_URL}" \
+ARG CLIENT_VERSION=1.5.0
+RUN flutter build linux --release --dart-define="CLIENT_VERSION=${CLIENT_VERSION}" --dart-define="INSTANCE_URL=${INSTANCE_URL}" \
     && mkdir /app/output \
-    && case "$TARGETARCH" in amd64) bundle=x64 ;; arm64) bundle=arm64 ;; *) exit 1 ;; esac \
-    && tar -czf "/app/output/pepeunit-client-linux-${TARGETARCH}.tar.gz" -C "build/linux/$bundle/release/bundle" .
+    && tar -czf "/app/output/pepeunit-${CLIENT_VERSION}-linux-amd64.tar.gz" -C build/linux/x64/release/bundle .
 
 FROM scratch AS linux
 COPY --from=linux-sdk /app/output/ /
 
-# Android SDK tools are Linux x86_64 executables. All APK ABIs are built here.
+# Android SDK tools run on Linux x86_64; the release APK targets ARM64.
 FROM sdk AS android-sdk
 ARG ANDROID_TOOLS_VERSION=15859902
 ARG ANDROID_TOOLS_SHA256=4e4c464f145a7512b57d088ac6c278c03c9eea610886b35a5e0804e74eedf583
@@ -70,7 +58,7 @@ USER flutter
 RUN yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses >/dev/null
 RUN "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" "platform-tools" \
     && flutter config --no-analytics --android-sdk "$ANDROID_HOME" \
-    && flutter precache --android
+    && flutter precache --android_gen_snapshot
 RUN "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
     "platforms;android-36" "build-tools;36.0.0" "ndk;${ANDROID_NDK_VERSION}"
 COPY --chown=flutter:flutter pubspec.yaml pubspec.lock ./
@@ -87,6 +75,7 @@ COPY --chown=flutter:flutter tooltip/ tooltip/
 
 FROM android-sdk AS android-build
 ARG INSTANCE_URL
+ARG CLIENT_VERSION=1.5.0
 ARG BUILD_NUMBER=1
 RUN --mount=type=secret,id=android_keystore,required=true,mode=0444 \
     --mount=type=secret,id=android_store_password,required=true,mode=0444 \
@@ -96,17 +85,17 @@ RUN --mount=type=secret,id=android_keystore,required=true,mode=0444 \
     ANDROID_KEYSTORE_PASSWORD="$(cat /run/secrets/android_store_password)" \
     ANDROID_KEY_PASSWORD="$(cat /run/secrets/android_key_password)" \
     ANDROID_KEY_ALIAS="$(cat /run/secrets/android_key_alias)" \
-    flutter build apk --release --split-per-abi --build-number="$BUILD_NUMBER" --dart-define="INSTANCE_URL=${INSTANCE_URL}" \
+    flutter build apk --release --dart-define="CLIENT_VERSION=${CLIENT_VERSION}" --target-platform=android-arm64 --split-per-abi --build-number="$BUILD_NUMBER" --dart-define="INSTANCE_URL=${INSTANCE_URL}" \
     && mkdir /app/output \
-    && for abi in armeabi-v7a arm64-v8a x86_64; do \
-         cp "build/app/outputs/flutter-apk/app-${abi}-release.apk" "/app/output/pepeunit-client-android-${abi}.apk" || exit 1; \
-       done
+    && cp build/app/outputs/flutter-apk/app-arm64-v8a-release.apk \
+         "/app/output/pepeunit-${CLIENT_VERSION}-android-arm64-v8a.apk"
 
 FROM scratch AS android
 COPY --from=android-build /app/output/ /
 
 FROM android-sdk AS aab-build
 ARG INSTANCE_URL
+ARG CLIENT_VERSION=1.5.0
 ARG BUILD_NUMBER=1
 RUN --mount=type=secret,id=android_keystore,required=true,mode=0444 \
     --mount=type=secret,id=android_store_password,required=true,mode=0444 \
@@ -116,7 +105,10 @@ RUN --mount=type=secret,id=android_keystore,required=true,mode=0444 \
     ANDROID_KEYSTORE_PASSWORD="$(cat /run/secrets/android_store_password)" \
     ANDROID_KEY_PASSWORD="$(cat /run/secrets/android_key_password)" \
     ANDROID_KEY_ALIAS="$(cat /run/secrets/android_key_alias)" \
-    flutter build appbundle --release --build-number="$BUILD_NUMBER" --dart-define="INSTANCE_URL=${INSTANCE_URL}"
+    flutter build appbundle --release --dart-define="CLIENT_VERSION=${CLIENT_VERSION}" --target-platform=android-arm64 --build-number="$BUILD_NUMBER" --dart-define="INSTANCE_URL=${INSTANCE_URL}" \
+    && mkdir /app/output \
+    && cp build/app/outputs/bundle/release/app-release.aab \
+         "/app/output/pepeunit-${CLIENT_VERSION}-android-arm64-v8a.aab"
 
 FROM scratch AS aab
-COPY --from=aab-build /app/build/app/outputs/bundle/release/app-release.aab /pepeunit-client-android.aab
+COPY --from=aab-build /app/output/ /

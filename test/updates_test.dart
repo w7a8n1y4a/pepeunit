@@ -29,18 +29,28 @@ Map<String, Object?> _release(
 
 void main() {
   test('names and links of the files follow the rule', () {
-    expect(assetName('1.5.0', 'android'), 'pepeunit-1.5.0-android.apk');
-    expect(assetName('1.5.0', 'linux'), 'pepeunit-1.5.0-linux.AppImage');
+    expect(
+      assetName('1.5.0', 'android'),
+      'pepeunit-1.5.0-android-arm64-v8a.apk',
+    );
+    expect(assetName('1.5.0', 'linux'), 'pepeunit-1.5.0-linux-amd64.tar.gz');
     expect(
       assetUri(githubSource, '1.5.0', 'linux').toString(),
       'https://github.com/w7a8n1y4a/pepeunit/releases/download/1.5.0/'
-      'pepeunit-1.5.0-linux.AppImage',
+      'pepeunit-1.5.0-linux-amd64.tar.gz',
     );
     expect(
       assetUri(gitlabSource, '1.5.0', 'android').toString(),
       'https://git.pepemoss.com/api/v4/projects/212/packages/generic/'
-      'release/1.5.0/pepeunit-1.5.0-android.apk',
+      'pepeunit-client/1.5.0/pepeunit-1.5.0-android-arm64-v8a.apk',
     );
+  });
+
+  test('different tags produce distinct local filenames', () {
+    for (final platform in ['linux', 'android']) {
+      expect(assetName('1.5.0', platform), isNot(assetName('1.6.0', platform)));
+      expect(assetName('v1.6.0', platform), startsWith('pepeunit-v1.6.0-'));
+    }
   });
 
   test('versions compare by number, other tags are not versions', () {
@@ -65,6 +75,26 @@ void main() {
     expect(release.assetFor('linux')?.url, 'l');
     expect(release.assetFor('windows'), isNull);
     expect(release.notes?.url, 'n');
+  });
+
+  test('current packages are recognized and preferred over legacy files', () {
+    const release = Release(
+      tag: '1.6.0',
+      assets: [
+        ReleaseAsset(name: 'pepeunit-1.6.0-linux.AppImage', url: 'old'),
+        ReleaseAsset(
+          name: 'pepeunit-client-linux-amd64.tar.gz',
+          url: 'unversioned',
+        ),
+        ReleaseAsset(name: 'pepeunit-1.6.0-linux-amd64.tar.gz', url: 'linux'),
+        ReleaseAsset(
+          name: 'pepeunit-1.6.0-android-arm64-v8a.apk',
+          url: 'android',
+        ),
+      ],
+    );
+    expect(release.assetFor('linux')?.url, 'linux');
+    expect(release.assetFor('android')?.url, 'android');
   });
 
   test('the newest release skips drafts, pre-releases and odd tags', () {

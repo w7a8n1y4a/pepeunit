@@ -8,20 +8,22 @@ DOCKER=${DOCKER:-docker}
 builder="pepeunit-release-${CI_JOB_ID}"
 workspace="$CI_PROJECT_DIR/build/release-ci-${CI_JOB_ID}"
 export RELEASE_DIR="$workspace/output"
-# Native jobs use independent registry credentials and buildx metadata. The
-# web publish keeps the runner's existing Docker Hub authentication.
-if [[ "$target" == linux || "$target" == android || -d "$workspace/docker-config" ]]; then
+export BUILDX_CONFIG="$workspace/buildx"
+# Each job owns its Docker config and Buildx metadata. Web builds inherit
+# the runner's pull/push credentials, without writing back to its config.
+if [[ "$target" != cleanup || -d "$workspace/docker-config" ]]; then
   runner_docker_config=${DOCKER_CONFIG:-$HOME/.docker}
   export DOCKER_CONFIG="$workspace/docker-config"
   # Changing DOCKER_CONFIG also changes where Docker discovers CLI plugins.
-  # Retain the runner's plugin paths without copying its registry credentials.
+  # Preserve CLI plugin discovery; only web needs the runner's registry auth.
   if [[ ! -f "$DOCKER_CONFIG/config.json" ]]; then
     mkdir -p -m 700 "$DOCKER_CONFIG"
     runner_config="$runner_docker_config/config.json"
     [[ -f "$runner_config" ]] || runner_config=/dev/null
     (umask 077; jq -n --arg plugins "$runner_docker_config/cli-plugins" \
-      --slurpfile config "$runner_config" \
-      '{cliPluginsExtraDirs: (($config[0].cliPluginsExtraDirs // []) + [$plugins])}' \
+      --arg target "$target" --slurpfile config "$runner_config" \
+      '(if $target == "web" then ($config[0] // {} | {auths, credsStore, credHelpers}) else {} end)
+       + {cliPluginsExtraDirs: (($config[0].cliPluginsExtraDirs // []) + [$plugins])}' \
       > "$DOCKER_CONFIG/config.json")
   fi
 fi
@@ -64,16 +66,19 @@ fi
 touch "$workspace/builder-started"
 "$DOCKER" buildx create --name "$builder" --driver docker-container --driver-opt env.GODEBUG=tlsmlkem=0
 "$DOCKER" buildx inspect "$builder" --bootstrap
-args=(--builder "$builder" --build-arg "INSTANCE_URL=${INSTANCE_URL:-}")
+args=(--builder "$builder" --build-arg "INSTANCE_URL=${INSTANCE_URL:-}"
+  --build-arg "CLIENT_VERSION=${CI_COMMIT_TAG:?}")
 # Keep the cache outside the job's disposable builder, including SDK and
 # dependency stages that are absent from the final scratch/nginx images.
 # An explicitly empty RELEASE_CACHE_REF disables registry caching.
-cache_ref=
-if [[ "$target" != web ]]; then
-  cache_ref=${RELEASE_CACHE_REF-${CI_REGISTRY_IMAGE:+$CI_REGISTRY_IMAGE/build-cache:$target}}
-fi
+cache_ref=${RELEASE_CACHE_REF-${CI_REGISTRY_IMAGE:+$CI_REGISTRY_IMAGE/build-cache:$target}}
 if [[ -n "$cache_ref" ]]; then
   : "${CI_REGISTRY:?}" "${CI_REGISTRY_USER:?}" "${CI_REGISTRY_PASSWORD:?}"
+  # Keep job registry credentials in this disposable file, even when the
+  # runner uses a global credential helper for Docker Hub.
+  jq --arg registry "$CI_REGISTRY" '.credHelpers[$registry] = ""' \
+    "$DOCKER_CONFIG/config.json" > "$DOCKER_CONFIG/config.next.json"
+  mv "$DOCKER_CONFIG/config.next.json" "$DOCKER_CONFIG/config.json"
   printf '%s' "$CI_REGISTRY_PASSWORD" | "$DOCKER" login "$CI_REGISTRY" \
     --username "$CI_REGISTRY_USER" --password-stdin
   args+=(--cache-from "type=registry,ref=$cache_ref"
@@ -81,7 +86,7 @@ if [[ -n "$cache_ref" ]]; then
 fi
 case "$target" in
   linux)
-    args+=(-f docker/release.Dockerfile --target linux --platform linux/amd64,linux/arm64
+    args+=(-f docker/release.Dockerfile --target linux --platform linux/amd64
       --output "type=local,dest=$RELEASE_DIR,platform-split=false") ;;
   android)
     : "${ANDROID_KEYSTORE_PASSWORD:?}" "${ANDROID_KEY_PASSWORD:?}" "${ANDROID_KEY_ALIAS:?}"
@@ -102,7 +107,7 @@ case "$target" in
       --secret id=android_key_alias,env=ANDROID_KEY_ALIAS
       --output "type=local,dest=$RELEASE_DIR") ;;
   web)
-    args+=(--platform linux/amd64,linux/arm64 --provenance=false --sbom=false
+    args+=(--platform linux/amd64 --provenance=false --sbom=false
       -t "${HUB_IMAGE:?}:${CI_COMMIT_TAG:?}" --push) ;;
   *) echo "Unknown release target: $target" >&2; exit 2 ;;
 esac

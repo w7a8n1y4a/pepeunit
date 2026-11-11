@@ -14,3 +14,13 @@ linux
 macos
 windows
 .env
+
+.env.*
+.aws
+.codex
+.agents
+.idea
+.vscode
+**/*.jks
+**/*.keystore
+**/key.properties

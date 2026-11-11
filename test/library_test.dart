@@ -835,11 +835,9 @@ void main() {
       await tester.tap(find.bySemanticsLabel('Нативные приложения'));
       await tester.pumpAndSettle();
       const apps = {
-        'Android': 'pepeunit-$clientVersion-android.apk',
-        'iOS': 'pepeunit-$clientVersion-ios.ipa',
-        'Linux': 'pepeunit-$clientVersion-linux.AppImage',
-        'macOS': 'pepeunit-$clientVersion-macos.dmg',
-        'Windows': 'pepeunit-$clientVersion-windows.exe',
+        'Android': 'pepeunit-$clientVersion-android-arm64-v8a.apk',
+        'Linux': 'pepeunit-$clientVersion-linux-amd64.tar.gz',
+        'Windows': 'pepeunit-$clientVersion-windows-amd64.zip',
       };
       for (final app in apps.entries) {
         await tester.tap(find.bySemanticsLabel(app.key));
@@ -849,8 +847,8 @@ void main() {
         [for (final call in launches) call.arguments['url']],
         [
           for (final file in apps.values)
-            'https://github.com/w7a8n1y4a/pepeunit/releases/download/'
-                '$clientVersion/$file',
+            'https://git.pepemoss.com/api/v4/projects/212/packages/generic/'
+                'pepeunit-client/$clientVersion/$file',
         ],
       );
       launches.clear();

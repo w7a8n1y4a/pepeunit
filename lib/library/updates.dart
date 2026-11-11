@@ -6,8 +6,7 @@ import 'package:http/http.dart' as http;
 /// Where releases of the client live and how their files are named.
 ///
 /// The first source is the default, the next ones answer when it fails.
-/// A release holds `UPGRADE.md` and one file per platform named
-/// `pepeunit-<version>-<platform>.<extension>`.
+/// Packages include the release tag, platform and architecture in their names.
 enum ReleaseHost { github, gitlab }
 
 class ReleaseSource {
@@ -43,8 +42,7 @@ const gitlabSource = ReleaseSource(
   repository: 'https://git.pepemoss.com/pepe/pepeunit/pepeunit',
   releases:
       'https://git.pepemoss.com/api/v4/projects/212/releases?per_page=100',
-  downloads:
-      'https://git.pepemoss.com/api/v4/projects/212/packages/generic/release',
+  downloads: 'https://git.pepemoss.com/api/v4/projects/212/packages/generic/pepeunit-client',
 );
 
 const releaseSources = [githubSource, gitlabSource];
@@ -55,13 +53,19 @@ const upgradeNotesName = 'UPGRADE.md';
 const platformExtensions = <String, String>{
   'android': 'apk',
   'ios': 'ipa',
-  'linux': 'AppImage',
+  'linux': 'tar.gz',
   'macos': 'dmg',
   'windows': 'exe',
 };
 
+const nativePackageSuffixes = <String, String>{
+  'linux': 'linux-amd64.tar.gz',
+  'android': 'android-arm64-v8a.apk',
+  'windows': 'windows-amd64.zip',
+};
+
 String assetName(String version, String platform) =>
-    'pepeunit-$version-$platform.${platformExtensions[platform]}';
+    'pepeunit-$version-${nativePackageSuffixes[platform] ?? '$platform.${platformExtensions[platform]}'}';
 
 /// The link of a file, made from the version alone. No request is made.
 Uri assetUri(ReleaseSource source, String version, String platform) =>
@@ -113,6 +117,11 @@ class ReleaseAsset {
 
   /// The `<platform>` block of `pepeunit-<version>-<platform>.<extension>`.
   String? get platform {
+    for (final entry in nativePackageSuffixes.entries) {
+      if (name.startsWith('pepeunit-') && name.endsWith('-${entry.value}')) {
+        return entry.key;
+      }
+    }
     final blocks = name.split('-');
     if (blocks.length < 3 || blocks.first != 'pepeunit') return null;
     return blocks.last.split('.').first;
@@ -134,6 +143,9 @@ class Release {
 
   /// The ready link for a platform: the asset that has it as its block.
   ReleaseAsset? assetFor(String platform) {
+    for (final asset in assets) {
+      if (asset.name == assetName(tag, platform)) return asset;
+    }
     for (final asset in assets) {
       if (asset.platform == platform) return asset;
     }

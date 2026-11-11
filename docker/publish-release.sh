@@ -14,8 +14,8 @@ while (($#)); do
     *) echo "Unknown option: $1" >&2; exit 2 ;;
   esac
 done
-linux=(pepeunit-client-linux-amd64.tar.gz pepeunit-client-linux-arm64.tar.gz)
-android=(pepeunit-client-android-armeabi-v7a.apk pepeunit-client-android-arm64-v8a.apk pepeunit-client-android-x86_64.apk)
+linux=("pepeunit-${CI_COMMIT_TAG}-linux-amd64.tar.gz")
+android=("pepeunit-${CI_COMMIT_TAG}-android-arm64-v8a.apk")
 files=("${linux[@]}" "${android[@]}")
 if [[ "$mode" != release ]]; then
   case "$group" in
@@ -45,17 +45,23 @@ token=${token//\"/\\\"}
 # Return 3 only for a missing file; auth/network/server failures must stop the job.
 request() {
   local method=$1 url=$2 status location
+  local -a head_args=()
   shift 2
+  if [[ "$method" == HEAD ]]; then head_args=(--head); fi
   status=$(printf 'header = "PRIVATE-TOKEN: %s"\n' "$token" | curl --config - \
     --silent --show-error --connect-timeout 30 --max-time 1800 \
-    --request "$method" --output "$temporary/response" --dump-header "$temporary/headers" \
+    "${head_args[@]}" --request "$method" --output "$temporary/response" --dump-header "$temporary/headers" \
     --write-out '%{http_code}' "$@" "$url") || return 1
+  # Some proxies reject HEAD; signed object-storage links may allow GET only.
+  if [[ "$method" == HEAD && ( "$status" =~ ^30[12378]$ || "$status" == 405 || "$status" == 501 ) ]]; then
+    return 4
+  fi
   if [[ "$method" == GET && "$status" =~ ^30[12378]$ ]]; then
     # Generic Packages can redirect to signed object-storage URLs. Never forward the token.
     location=$(sed -n 's/^[Ll]ocation: *//p' "$temporary/headers" | tr -d '\r' | tail -n 1)
     [[ "$location" == https://* || "$location" == http://* ]] || { echo "Invalid package redirect" >&2; return 1; }
-    status=$(curl --silent --show-error --location --max-redirs 5 \
-      --connect-timeout 30 --max-time 1800 --output "$temporary/response" \
+    status=$(curl --silent --show-error "${head_args[@]}" --location --max-redirs 5 \
+      --connect-timeout 30 --max-time 1800 --dump-header "$temporary/headers" --output "$temporary/response" \
       --write-out '%{http_code}' "$location") || return 1
   fi
   case "$status" in
@@ -63,6 +69,20 @@ request() {
     404) return 3 ;;
     *) echo "GitLab request failed: $method $url (HTTP $status)" >&2; return 1 ;;
   esac
+}
+# Presence probes avoid downloading APKs/archives just to skip a rebuild.
+# Downloads are still checksummed after upload and before publishing a release.
+exists() {
+  local status length
+  if request HEAD "$package/$1"; then
+    :
+  else
+    status=$?
+    if ((status == 4)); then digest "$1" >/dev/null; return $?; fi
+    return "$status"
+  fi
+  length=$(sed -n 's/^[Cc]ontent-[Ll]ength: *//p' "$temporary/headers" | tr -d '\r' | tail -n 1)
+  [[ "$length" != 0 ]] || { echo "Empty package file: $1" >&2; return 1; }
 }
 digest() {
   request GET "$package/$1" || return $?
@@ -74,12 +94,12 @@ upload() {
 }
 
 if [[ "$mode" == check ]]; then
-  for file in "${files[@]}"; do digest "$file" >/dev/null || exit $?; done
+  for file in "${files[@]}"; do exists "$file" || exit $?; done
   exit 0
 fi
 if [[ "$mode" == upload ]]; then
   for file in "${files[@]}"; do
-    if digest "$file" >/dev/null; then
+    if exists "$file"; then
       # Archives/APKs can differ after a rebuild: the first published bytes win.
       echo "Keeping published file: $file"
       continue

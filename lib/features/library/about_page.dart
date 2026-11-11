@@ -87,7 +87,11 @@ class _AboutPageState extends State<AboutPage> {
           ),
           _ => HexSlot(
             id: 'support',
-            title: localized(language, 'Поддержать проект', 'Support the project'),
+            title: localized(
+              language,
+              'Поддержать проект',
+              'Support the project',
+            ),
             color: libraryColor,
             q: slot.q,
             r: slot.r,
@@ -155,9 +159,9 @@ class _AboutPageState extends State<AboutPage> {
       UpdateState.noAssets => localized(
         language,
         'Вышла версия ${result.latest}, но у неё пока нет файлов. '
-        'Попробуйте позже.',
+            'Попробуйте позже.',
         'Version ${result.latest} is out, but it has no files yet. '
-        'Try again later.',
+            'Try again later.',
       ),
       UpdateState.available =>
         result.notes ??
@@ -277,7 +281,8 @@ class _AboutPageState extends State<AboutPage> {
           .downloadFile(Uri.parse(binary.url))
           .timeout(const Duration(minutes: 10));
       if (!mounted) return;
-      if (await replaceRunningApp(bytes, platform)) {
+      if (binary.name.endsWith('.AppImage') &&
+          await replaceRunningApp(bytes, platform)) {
         ok = true;
         note = localized(
           language,
@@ -355,19 +360,8 @@ class NativeAppsPage extends StatelessWidget {
           return;
         }
         if (id == 'macos' || id == 'ios') return;
-        final file = switch (id) {
-          'linux' => 'pepeunit-client-linux-amd64.tar.gz',
-          'windows' => 'pepeunit-client-windows-amd64.zip',
-          'android' => 'pepeunit-client-android-arm64-v8a.apk',
-          _ => null,
-        };
-        if (file == null) return;
-        launchExternal(
-          Uri.parse(
-            'https://git.pepemoss.com/api/v4/projects/212/packages/generic/'
-            'pepeunit-client/$clientVersion/$file',
-          ),
-        );
+        if (!nativePackageSuffixes.containsKey(id)) return;
+        launchExternal(assetUri(gitlabSource, clientVersion, id));
       },
     );
   }
