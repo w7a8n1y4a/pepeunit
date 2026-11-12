@@ -18,6 +18,7 @@ import 'package:pepeunit_client/features/library/doc_find_bar.dart';
 import 'package:pepeunit_client/features/library/doc_search_panel.dart';
 import 'package:pepeunit_client/features/library/docs_page.dart';
 import 'package:pepeunit_client/features/library/library_modal.dart';
+import 'package:pepeunit_client/features/library/presentation_page.dart';
 import 'package:pepeunit_client/features/library/tip_modal.dart';
 import 'package:pepeunit_client/hive/bevel.dart';
 import 'package:pepeunit_client/hive/hex_motion.dart';
@@ -369,10 +370,6 @@ void main() {
             file.path,
       ];
       expect(off, isEmpty, reason: 'Russian letters in an English tip');
-    });
-
-    test('the presentation has no slides yet', () async {
-      expect(await library.presentation('ru'), isEmpty);
     });
   });
 
@@ -1131,7 +1128,7 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('Library: the presentation cell opens an empty panel', (
+    testWidgets('Library: the presentation cell opens a full page', (
       tester,
     ) async {
       await start(tester);
@@ -1139,11 +1136,27 @@ void main() {
       await tester.pumpAndSettle();
       await tester.tap(find.bySemanticsLabel('Презентация'));
       await settle(tester);
-      expect(find.byType(LibraryModal), findsOneWidget);
-      await tester.tap(find.bySemanticsLabel('Закрыть'));
-      await settle(tester);
+      expect(find.byType(PresentationPage), findsOneWidget);
       expect(find.byType(LibraryModal), findsNothing);
+      expect(find.text('От кода\nк работающей системе'), findsOneWidget);
+      expect(
+        tester.getSize(find.byType(PresentationPage)),
+        const Size(1000, 800),
+      );
+      await tester.tap(find.byTooltip('Закрыть'));
+      await settle(tester);
+      expect(find.byType(PresentationPage), findsNothing);
       expect(find.bySemanticsLabel('Презентация'), findsOneWidget);
+      await tester.tap(find.bySemanticsLabel('Презентация'));
+      await settle(tester);
+      await tester.sendKeyEvent(LogicalKeyboardKey.end);
+      await tester.pumpAndSettle();
+      await tester.ensureVisible(find.bySemanticsLabel('В главное меню'));
+      await tester.tap(find.bySemanticsLabel('В главное меню'));
+      await tester.pumpAndSettle();
+      expect(find.byType(PresentationPage), findsNothing);
+      expect(find.bySemanticsLabel('Аккаунт'), findsOneWidget);
+      expect(find.bySemanticsLabel('Библиотека'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
 

@@ -164,7 +164,6 @@
     "text": "Roadmap",
     "collapsed": true,
     "items": [
-      { "text": "Frontend refactor into the client", "link": "/roadmap/frontend-refactor" },
       { "text": "IO typing", "link": "/roadmap/type-for-schemas" },
       { "text": "MessageProcessor", "link": "/roadmap/message-processor" },
       { "text": "Federation", "link": "/roadmap/federation" },

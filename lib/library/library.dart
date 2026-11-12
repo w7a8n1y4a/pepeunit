@@ -17,7 +17,7 @@ import 'markdown.dart';
 ///   text still opens it. An article takes the title of its panel from its
 ///   first `# ` heading.
 /// - Tips: `tooltip/<language>/<screen>.<cell>.md`
-/// - Everything else (presentation, about): `assets/library/<language>/`.
+/// - Other Library texts: `assets/library/<language>/`.
 ///
 /// A text that has no translation falls back to Russian, and so does the
 /// sidebar.
@@ -315,22 +315,6 @@ class Library {
       if (has(key)) return text(key);
     }
     return null;
-  }
-
-  /// The slides of the presentation: `presentation/01`, `02`, ... until one
-  /// is missing.
-  Future<List<String>> presentation(String language) async {
-    await load();
-    final slides = <String>[];
-    for (var n = 1; ; n++) {
-      final text = await page(
-        language,
-        'presentation/${n.toString().padLeft(2, '0')}',
-      );
-      if (text == null) break;
-      slides.add(text);
-    }
-    return slides;
   }
 
   /// The documentation tree of [language].

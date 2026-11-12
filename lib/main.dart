@@ -22,6 +22,7 @@ import 'features/home/home_page.dart';
 import 'features/library/about_page.dart';
 import 'features/library/docs_page.dart';
 import 'features/library/library_menu_page.dart';
+import 'features/library/presentation_page.dart';
 import 'features/library/tip_modal.dart';
 import 'features/library/support_page.dart';
 import 'features/library/tools_page.dart';
@@ -669,8 +670,12 @@ class _PepeunitAppState extends State<PepeunitApp> {
         routes: [
           GoRoute(
             path: 'presentation',
-            builder: (context, state) =>
-                const LibraryMenuPage(open: LibraryOpen.presentation),
+            builder: (context, state) => PresentationPage(
+              language: AppScope.of(context).vault.language,
+              onClose: () => closeLibrary(context, '/library'),
+              onDocs: () => context.go('/library/docs?doc=user/start'),
+              onHome: () => context.go('/'),
+            ),
           ),
           GoRoute(
             path: 'about',

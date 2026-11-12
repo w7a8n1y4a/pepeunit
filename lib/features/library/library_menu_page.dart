@@ -4,20 +4,14 @@ import 'package:go_router/go_router.dart';
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
-import '../../library/library.dart';
 import '../../locale/languages.dart';
 import '../../navigation/back.dart';
 import '../../navigation/sections.dart';
-import '../code/code_modal.dart';
-import '../code/code_view.dart';
 import '../hex_page.dart';
-import 'library_modal.dart';
 import 'tree_page.dart';
 
 Color get libraryColor => sectionById('library')!.color;
 
-/// A line of the Library screens in both languages. A language with no line
-/// falls back to Russian.
 /// Leaves a Library text: back to the screen under it, or to the Library
 /// when the text was opened by its address.
 void closeLibrary(BuildContext context, String home) {
@@ -28,54 +22,9 @@ void closeLibrary(BuildContext context, String home) {
   }
 }
 
-/// What the Library menu shows on top of itself.
-enum LibraryOpen { none, presentation }
-
-/// The first screen of the Library: documentation, the tree of 6 paths,
-/// presentation, tools, about.
-/// The presentation is a panel over this screen, so closing it returns here.
-class LibraryMenuPage extends StatefulWidget {
-  const LibraryMenuPage({this.open = LibraryOpen.none, super.key});
-
-  final LibraryOpen open;
-
-  @override
-  State<LibraryMenuPage> createState() => _LibraryMenuPageState();
-}
-
-class _LibraryMenuPageState extends State<LibraryMenuPage> {
-  DocsTree? _tree;
-  List<String> _slides = const [];
-  var _slide = 0;
-  String? _failure;
-  var _failureOpen = false;
-
-  @override
-  void initState() {
-    super.initState();
-    if (widget.open != LibraryOpen.none) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _load());
-    }
-  }
-
-  Future<void> _load() async {
-    final language = AppScope.of(context).vault.language;
-    try {
-      final library = Library.instance;
-      final tree = await library.docs(language);
-      final slides = widget.open == LibraryOpen.presentation
-          ? await library.presentation(language)
-          : const <String>[];
-      if (!mounted) return;
-      setState(() {
-        _tree = tree;
-        _slides = slides;
-      });
-    } catch (error) {
-      if (!mounted) return;
-      setState(() => _failure = '$error');
-    }
-  }
+/// Documentation, the screen tree, presentation, tools and project information.
+class LibraryMenuPage extends StatelessWidget {
+  const LibraryMenuPage({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -89,14 +38,7 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
       'about',
     ], wide: wide);
     final slots = [for (final slot in board) _slot(slot, language)];
-    appendError(
-      slots,
-      message: _failure,
-      open: _failureOpen,
-      language: language,
-      wide: wide,
-    );
-    final scene = HexPage(
+    return HexPage(
       slots: slots,
       onTap: (id) {
         switch (id) {
@@ -114,72 +56,9 @@ class _LibraryMenuPageState extends State<LibraryMenuPage> {
             context.push('/library/tools');
           case 'about':
             context.push('/library/about');
-          case 'error':
-            setState(() => _failureOpen = true);
         }
       },
     );
-    final panel = _panel(language);
-    if (panel == null) return scene;
-    return Stack(children: [scene, panel]);
-  }
-
-  Widget? _panel(String language) {
-    void close() => closeLibrary(context, '/library');
-    switch (widget.open) {
-      case LibraryOpen.none:
-        return null;
-      case LibraryOpen.presentation:
-        // No slides yet: the panel opens empty. Slides come back as files in
-        // `assets/library/<language>/presentation/`.
-        if (_slides.isEmpty) {
-          return Material(
-            type: MaterialType.transparency,
-            child: LibraryModal(
-              title: localized(language, 'Презентация', 'Presentation'),
-              color: libraryColor,
-              source: '',
-              docs: _tree,
-              onClose: close,
-            ),
-          );
-        }
-        final last = _slides.length - 1;
-        final at = _slide.clamp(0, last);
-        return Material(
-          type: MaterialType.transparency,
-          child: LibraryModal(
-            title: localized(language, 'Презентация', 'Presentation'),
-            color: libraryColor,
-            source: _slides[at],
-            docs: _tree,
-            onClose: close,
-            actions: (font) => [
-              CodeWordButton(
-                label: '‹',
-                font: font,
-                enabled: at > 0,
-                onTap: () => setState(() => _slide = at - 1),
-                hint: 'button-presentation-prev',
-              ),
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: font * 0.3),
-                child: Text(
-                  '${at + 1}/${_slides.length}',
-                  style: codeMono(font * 0.95, color: hexMuted),
-                ),
-              ),
-              CodeWordButton(
-                label: '›',
-                font: font,
-                enabled: at < last,
-                onTap: () => setState(() => _slide = at + 1),
-                hint: 'button-presentation-next',
-              ),
-            ],
-          ),
-        );
-    }
   }
 
   HexSlot _slot(BoardSlot slot, String language) {

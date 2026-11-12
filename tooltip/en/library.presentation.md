@@ -1,1 +1,1 @@
-Opens the built-in Pepeunit presentation. The arrows flip through the slides.
+Opens the full-page interactive Pepeunit presentation: 9 slides and a story of about 5 minutes. Navigate with arrows, buttons or swipes. Open presenter notes with the notes button or N; use F for fullscreen when supported by the browser.

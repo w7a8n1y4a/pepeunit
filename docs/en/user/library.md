@@ -4,11 +4,23 @@ The `Library` section works without signing in.
 
 Cell | What it opens
 -- | --
-`Presentation` | Slides about Pepeunit. The arrow keys flip through them
+`Presentation` | A full-page interactive introduction to Pepeunit, about 5 minutes long
 `Documentation` | This documentation
 `Tools` | `README generator`
 `About` | Version, updates, apps, links, project support
 `Tree of 6 paths` | All screens and cells of the client on one map
+
+## Presentation
+
+Nine slides for a live presenter: Units, the path from Git to a device, updates, MQTT connections, operations, DataPipe and Grafana, self-hosting and federation. Also opens directly at `/library/presentation`, without signing in.
+
+- Navigate with the buttons, `←` / `→`, `Page Up` / `Page Down`, Space to advance, or horizontal swipes. `Home` and `End` go to the first and last slides. The `Slides` button opens a honeycomb slide map.
+- Select components, connect a sensor to a fan, change the temperature and enable a data filter. These are local demonstrations with sample data.
+- The `Notes` button (`N` on narrow screens) or the `N` key shows the presenter script and planned time range. Notes appear on the presentation screen itself; hide them when showing the audience.
+- Click the timer to start or pause it. The speaking plan totals `5:00`; the presenter advances the slides. The final slide offers a “Go to main menu” button, a restart that resets the timer and a link to the first Unit guide.
+- `RU` / `EN` switches the presentation language. The fullscreen button or `F` enters fullscreen when supported by the browser. Close with the cross button. `Esc` closes the presentation when the browser does not intercept it to leave fullscreen.
+
+On narrow or short screens, slide content scrolls while navigation remains available. When an interactive control has focus, arrows and Space operate that control; click an empty part of the slide to restore presentation keyboard navigation.
 
 ## Documentation
 

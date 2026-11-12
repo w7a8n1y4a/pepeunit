@@ -8,8 +8,8 @@ import 'doc_reader.dart';
 import '../../locale/languages.dart';
 
 /// A short Library text in one frame: a [CodeModal] whose body is a rendered
-/// markdown or its source with line numbers ([DocBody]). Tips, the
-/// presentation and the support rules use it. The documentation has a screen
+/// markdown or its source with line numbers ([DocBody]). The support
+/// rules use it. The documentation has a screen
 /// of its own (`DocsPage`).
 ///
 /// - A switch on the bar picks Render or Source. The pick is stored with the
@@ -50,7 +50,7 @@ class LibraryModal extends StatefulWidget {
   /// Heading the first text opens at.
   final String? anchor;
 
-  /// Words before the switch, such as the presentation pager.
+  /// Additional actions before the render/source switch.
   final List<Widget> Function(double font)? actions;
 
   /// One action under the text, such as Update.
