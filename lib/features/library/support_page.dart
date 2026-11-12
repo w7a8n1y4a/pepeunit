@@ -141,7 +141,7 @@ class _SupportPageState extends State<SupportPage> {
       tappable: false,
       body: MetricsCell(
         lines: [address],
-        copyText: address,
+        showCopyButton: true,
         copyLabel: localized(language, 'Скопировать', 'Copy'),
       ),
     );

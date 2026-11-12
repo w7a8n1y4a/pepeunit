@@ -159,8 +159,7 @@ class _InstancePageState extends State<InstancePage> {
           body: MetricsCell(
             lines: pages.first.lines,
             pages: pages,
-            copyText: url,
-            copyLabel: localized(language, 'Скопировать ссылку', 'Copy link'),
+            linkColor: color,
             prevLabel: localized(
               language,
               'Предыдущая сводка',
@@ -299,12 +298,6 @@ class _InstancePageState extends State<InstancePage> {
         'Репозитории ${portrait?.repos ?? '—'}',
         'Repos ${portrait?.repos ?? '—'}',
       ),
-      if (portrait?.unitIos != null)
-        localized(
-          language,
-          'UnitIO ${portrait!.unitIos}',
-          'UnitIO ${portrait.unitIos}',
-        ),
       if (portrait?.testsStatus != null)
         '${portrait!.testsStatus} ${portrait.testsPercent?.round() ?? ''}%',
     ];
@@ -312,6 +305,10 @@ class _InstancePageState extends State<InstancePage> {
       SummaryPage(
         title: localized(language, 'Метрики', 'Metrics'),
         lines: metricsLines,
+        footerAddress: (
+          label: localized(language, 'Адрес', 'Address'),
+          url: widget.url,
+        ),
       ),
     ];
 

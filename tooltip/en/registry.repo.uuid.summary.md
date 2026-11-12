@@ -1,1 +1,1 @@
-Shows the branches, the commits, and other details of the repository. The arrows page through the summary, the icon copies the address.
+Shows the sync status, branches, releases, and other repository details. The first line on the first page links to the repository and uses the section color. The arrows switch pages. Select text to copy it. Long text wraps and scrolls inside the cell.

@@ -6,6 +6,7 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
+import '../../registry/repo.dart';
 import '../hex_page.dart';
 import 'network_chrome.dart';
 import '../../locale/languages.dart';
@@ -60,7 +61,8 @@ class _NetworkPageState extends State<NetworkPage> {
         return HexSlot(
           id: 'search',
           title: localized(language, 'Поиск инстансов', 'Search instances'),
-          footer: text.isEmpty ? null : text,
+          footer: pieceCount(language, model.visibleInstances().length),
+          sideRight: text.isEmpty ? null : text,
           color: color,
           q: slot.q,
           r: slot.r,

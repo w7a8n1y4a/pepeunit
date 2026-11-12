@@ -5,6 +5,7 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
+import '../../registry/repo.dart';
 import '../../units/unit_view.dart';
 import '../hex_page.dart';
 import 'units_chrome.dart';
@@ -16,11 +17,15 @@ class UnitsMenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final language = AppScope.of(context).vault.language;
+    final model = AppScope.of(context);
+    final language = model.vault.language;
+    final count = model.target == null
+        ? null
+        : model.portraitOf(model.target!.url)?.units;
     final wide = hexWide(MediaQuery.sizeOf(context));
     final board = unitsMenuBoard(wide: wide);
     return HexPage(
-      slots: [for (final slot in board.slots) _slot(slot, language)],
+      slots: [for (final slot in board.slots) _slot(slot, language, count)],
       onTap: (id) {
         switch (id) {
           case 'back':
@@ -36,7 +41,7 @@ class UnitsMenuPage extends StatelessWidget {
     );
   }
 
-  HexSlot _slot(BoardSlot slot, String language) {
+  HexSlot _slot(BoardSlot slot, String language, int? count) {
     switch (slot.id) {
       case 'back':
         return backSlot(language, q: slot.q, r: slot.r);
@@ -53,6 +58,7 @@ class UnitsMenuPage extends StatelessWidget {
         return HexSlot(
           id: 'search',
           title: localized(language, 'Поиск', 'Search'),
+          footer: count == null ? null : pieceCount(language, count),
           color: unitsColor,
           q: slot.q,
           r: slot.r,

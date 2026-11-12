@@ -1,1 +1,1 @@
-Shows technical details and statistics of the instance. The arrows switch pages, the icon copies the address.
+Shows technical details and statistics of the instance. The arrows switch pages. Select text to copy it. On the first page, Address copies the full /instances/current URL of the selected instance to the clipboard.

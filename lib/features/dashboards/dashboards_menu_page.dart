@@ -5,6 +5,7 @@ import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
 import '../../instances/network_view.dart';
 import '../../navigation/back.dart';
+import '../../registry/repo.dart';
 import '../hex_page.dart';
 import 'dashboards_chrome.dart';
 import '../../locale/languages.dart';
@@ -15,11 +16,13 @@ class DashboardsMenuPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final language = AppScope.of(context).vault.language;
+    final model = AppScope.of(context);
+    final language = model.vault.language;
+    final count = model.dashboardTotal;
     final wide = hexWide(MediaQuery.sizeOf(context));
     final board = cardBoard(dashboardsMenuIds, wide: wide);
     return HexPage(
-      slots: [for (final slot in board) _slot(slot, language)],
+      slots: [for (final slot in board) _slot(slot, language, count)],
       onTap: (id) {
         switch (id) {
           case 'back':
@@ -33,7 +36,7 @@ class DashboardsMenuPage extends StatelessWidget {
     );
   }
 
-  HexSlot _slot(BoardSlot slot, String language) {
+  HexSlot _slot(BoardSlot slot, String language, int? count) {
     switch (slot.id) {
       case 'back':
         return backSlot(language, q: slot.q, r: slot.r);
@@ -50,6 +53,7 @@ class DashboardsMenuPage extends StatelessWidget {
         return HexSlot(
           id: 'search',
           title: localized(language, 'Поиск', 'Search'),
+          footer: count == null ? null : pieceCount(language, count),
           color: dashboardsColor,
           q: slot.q,
           r: slot.r,

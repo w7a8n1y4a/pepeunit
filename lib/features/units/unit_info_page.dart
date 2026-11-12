@@ -69,18 +69,10 @@ class _UnitInfoPageState extends State<UnitInfoPage> {
           'Обновления',
           'Updates',
           unit == null ? const ['—'] : updateLines(unit, language),
-          copy: unit == null ? '' : updateCopy(unit),
         );
       case 'network':
         final lines = unit == null ? const ['—'] : networkLines(unit, language);
-        return _facts(
-          slot,
-          language,
-          'Сеть',
-          'Network',
-          lines,
-          copy: lines.join('\n'),
-        );
+        return _facts(slot, language, 'Сеть', 'Network', lines);
       case 'ram':
         return _facts(
           slot,
@@ -127,9 +119,8 @@ class _UnitInfoPageState extends State<UnitInfoPage> {
     String language,
     String ru,
     String en,
-    List<String> lines, {
-    String copy = '',
-  }) {
+    List<String> lines,
+  ) {
     return HexSlot(
       id: slot.id,
       title: localized(language, ru, en),
@@ -138,11 +129,7 @@ class _UnitInfoPageState extends State<UnitInfoPage> {
       q: slot.q,
       r: slot.r,
       tappable: false,
-      body: MetricsCell(
-        lines: lines,
-        copyText: copy.isEmpty ? null : copy,
-        copyLabel: localized(language, 'Скопировать', 'Copy'),
-      ),
+      body: MetricsCell(lines: lines),
     );
   }
 

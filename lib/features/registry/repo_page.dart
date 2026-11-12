@@ -117,7 +117,11 @@ class _RepoPageState extends State<RepoPage> {
             ? const <SummaryPage>[]
             : [
                 for (final page in repoSummaries(repo, language))
-                  SummaryPage(title: page.title, lines: page.lines),
+                  SummaryPage(
+                    title: page.title,
+                    lines: page.lines,
+                    firstLineUrl: page.firstLineUrl,
+                  ),
               ];
         return HexSlot(
           id: 'summary',
@@ -129,8 +133,7 @@ class _RepoPageState extends State<RepoPage> {
           body: MetricsCell(
             lines: pages.isEmpty ? const ['—'] : pages.first.lines,
             pages: pages,
-            copyText: repo?.repositoryUrl,
-            copyLabel: localized(language, 'Скопировать ссылку', 'Copy link'),
+            linkColor: color,
             prevLabel: localized(
               language,
               'Предыдущая сводка',
@@ -153,7 +156,11 @@ class _RepoPageState extends State<RepoPage> {
         final watching = _syncUntil != null;
         return HexSlot(
           id: 'sync',
-          title: localized(language, 'Синхронизировать репо', 'Synchronize repo'),
+          title: localized(
+            language,
+            'Синхронизировать репо',
+            'Synchronize repo',
+          ),
           footer: _syncFooter(language, repo),
           color: watching
               ? hexMuted

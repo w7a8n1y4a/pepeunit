@@ -1,1 +1,1 @@
-Shows the branch, commit and update mode. The icon copies this information.
+Shows the branch, commit and update mode. Select text to copy it.

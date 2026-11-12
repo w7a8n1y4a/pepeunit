@@ -98,10 +98,15 @@ class RepoCredentials {
 }
 
 class RepoSummary {
-  const RepoSummary({required this.title, required this.lines});
+  const RepoSummary({
+    required this.title,
+    required this.lines,
+    this.firstLineUrl,
+  });
 
   final String title;
   final List<String> lines;
+  final String? firstLineUrl;
 }
 
 /// Host and path of a repository link. `https://`, `http://` and a trailing
@@ -239,6 +244,9 @@ List<RepoSummary> repoSummaries(RegistryRepo repo, String language) {
   final pages = <RepoSummary>[
     RepoSummary(
       title: localized(language, 'Сводка', 'Summary'),
+      firstLineUrl: repo.repositoryUrl.trim().isEmpty
+          ? null
+          : repo.repositoryUrl.trim(),
       lines: [
         _joined([access, platform]),
         _joined([status, stamp]),
@@ -252,7 +260,7 @@ List<RepoSummary> repoSummaries(RegistryRepo repo, String language) {
     ),
   ];
   final error = repo.syncError?.trim() ?? '';
-  final syncLines = <String>[if (error.isNotEmpty) tailText(error, 48)];
+  final syncLines = <String>[if (error.isNotEmpty) error];
   if (syncLines.isNotEmpty) {
     pages.add(
       RepoSummary(
@@ -269,10 +277,7 @@ List<RepoSummary> repoSummaries(RegistryRepo repo, String language) {
   ];
   if (when.isNotEmpty) {
     pages.add(
-      RepoSummary(
-        title: localized(language, 'Время', 'Time'),
-        lines: when,
-      ),
+      RepoSummary(title: localized(language, 'Время', 'Time'), lines: when),
     );
   }
   if (tags.isNotEmpty) {

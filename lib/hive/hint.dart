@@ -1,4 +1,5 @@
 import 'package:flutter/gestures.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
@@ -62,6 +63,18 @@ class _HintTargetState extends State<HintTarget> {
   /// 500 ms, which feels like nothing happens on a phone.
   static const _hold = Duration(milliseconds: 380);
 
+  bool _overSelectableText(PointerDownEvent event) {
+    final box = context.findRenderObject();
+    if (box is! RenderBox) return false;
+    final hit = BoxHitTestResult();
+    box.hitTest(hit, position: box.globalToLocal(event.position));
+    return hit.path.any(
+      (entry) =>
+          entry.target is RenderParagraph &&
+          (entry.target as RenderParagraph).registrar != null,
+    );
+  }
+
   void _open({bool held = false}) {
     final host = HintHost.maybeOf(context);
     if (host == null || !host.has(context, widget.id)) return;
@@ -78,9 +91,12 @@ class _HintTargetState extends State<HintTarget> {
       behavior: HitTestBehavior.translucent,
       gestures: {
         // Any pointer: a finger, a pen, or the primary button of a mouse.
-        LongPressGestureRecognizer:
-            GestureRecognizerFactoryWithHandlers<LongPressGestureRecognizer>(
-              () => LongPressGestureRecognizer(duration: _hold),
+        _HintLongPressRecognizer:
+            GestureRecognizerFactoryWithHandlers<_HintLongPressRecognizer>(
+              () => _HintLongPressRecognizer(
+                duration: _hold,
+                overSelectableText: _overSelectableText,
+              ),
               (recognizer) => recognizer.onLongPress = () => _open(held: true),
             ),
       },
@@ -96,4 +112,19 @@ class _HintTargetState extends State<HintTarget> {
       ),
     );
   }
+}
+
+/// Text selection owns a hold on selectable text; the rest of the cell
+/// continues to open its hint, as does a middle click anywhere in the cell.
+class _HintLongPressRecognizer extends LongPressGestureRecognizer {
+  _HintLongPressRecognizer({
+    required super.duration,
+    required this.overSelectableText,
+  });
+
+  final bool Function(PointerDownEvent) overSelectableText;
+
+  @override
+  bool isPointerAllowed(PointerDownEvent event) =>
+      !overSelectableText(event) && super.isPointerAllowed(event);
 }

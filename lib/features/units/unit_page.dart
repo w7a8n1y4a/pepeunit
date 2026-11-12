@@ -29,6 +29,7 @@ class UnitPage extends StatefulWidget {
 
 class _UnitPageState extends State<UnitPage> {
   Unit? _unit;
+  RegistryRepo? _repo;
   ({int inputs, int outputs})? _ios;
   int? _access;
   String? _failure;
@@ -61,6 +62,8 @@ class _UnitPageState extends State<UnitPage> {
     if (oldWidget.uuid == widget.uuid) return;
     _stop();
     _ios = null;
+    _unit = null;
+    _repo = null;
     _load();
   }
 
@@ -140,7 +143,8 @@ class _UnitPageState extends State<UnitPage> {
         return HexSlot(
           id: 'info',
           title: localized(language, 'Информация', 'Information'),
-          footer: unit == null
+          footer: _repo == null ? null : repoCaption(_repo!.repositoryUrl),
+          sideRight: unit == null
               ? null
               : deviceTimeEdge(unit.state?.millis, language),
           center:
@@ -298,6 +302,21 @@ class _UnitPageState extends State<UnitPage> {
     }
   }
 
+  Future<void> _loadRepo(Unit unit) async {
+    if (unit.repoUuid.isEmpty) return;
+    try {
+      final repo = await AppScope.of(context).readRepo(unit.repoUuid);
+      if (!mounted ||
+          widget.uuid != unit.uuid ||
+          _unit?.repoUuid != unit.repoUuid) {
+        return;
+      }
+      setState(() => _repo = repo);
+    } catch (_) {
+      // Missing repository access must not hide the unit's information.
+    }
+  }
+
   /// A tap on the card reads the entity again and shows how it went.
   Future<void> _reloadCard() async {
     await _load();
@@ -321,14 +340,17 @@ class _UnitPageState extends State<UnitPage> {
       _open = false;
     });
     try {
-      final unit = await model.readUnit(widget.uuid);
-      if (!mounted) return;
+      final uuid = widget.uuid;
+      final unit = await model.readUnit(uuid);
+      if (!mounted || widget.uuid != uuid) return;
       setState(() {
         _unit = unit;
+        if (_repo?.uuid != unit.repoUuid) _repo = null;
         _loading = false;
         _seen = true;
       });
       _watch(unit);
+      unawaited(_loadRepo(unit));
       unawaited(_loadIos());
       unawaited(_loadAccess(unit));
     } catch (error) {

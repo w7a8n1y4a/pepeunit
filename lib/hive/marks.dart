@@ -79,12 +79,31 @@ class LinkMarkPainter extends CustomPainter {
 
 /// Two overlapping sheets. The error cell and the summary cell share this mark.
 class CopyMarkPainter extends CustomPainter {
-  const CopyMarkPainter(this.color);
+  const CopyMarkPainter(this.color, {this.tight = false});
 
   final Color color;
+  final bool tight;
+
+  /// Bounds of the square mark, including half the stroke on each side.
+  static const _inkBounds = Rect.fromLTRB(0.065, 0.045, 0.915, 0.935);
+  static const tightAspectRatio = 0.85 / 0.89;
 
   @override
   void paint(Canvas canvas, Size size) {
+    if (tight) {
+      final side = min(
+        size.width / _inkBounds.width,
+        size.height / _inkBounds.height,
+      );
+      canvas.save();
+      canvas.translate(
+        (size.width - side * _inkBounds.width) / 2 - side * _inkBounds.left,
+        (size.height - side * _inkBounds.height) / 2 - side * _inkBounds.top,
+      );
+      CopyMarkPainter(color).paint(canvas, Size.square(side));
+      canvas.restore();
+      return;
+    }
     final paint = Paint()
       ..style = PaintingStyle.stroke
       ..strokeWidth = size.shortestSide * 0.07
@@ -119,5 +138,5 @@ class CopyMarkPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant CopyMarkPainter oldDelegate) =>
-      oldDelegate.color != color;
+      oldDelegate.color != color || oldDelegate.tight != tight;
 }
