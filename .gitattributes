@@ -1,0 +1,5 @@
+# Keep shell scripts runnable after a Windows checkout (core.autocrlf=true).
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.Dockerfile text eol=lf
+*.ps1 text eol=crlf

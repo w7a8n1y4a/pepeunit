@@ -55,6 +55,10 @@ add_subdirectory("runner")
 
 # Generated plugin build rules, which manage building the plugins and adding
 # them to the application.
+# JNI is pulled in by path_provider_android/shared_preferences_android. The
+# Windows implementations use Win32, not Java. Keep the native Windows build
+# independent of locally installed JDKs instead of bundling an unused JVM bridge.
+set(CMAKE_DISABLE_FIND_PACKAGE_JNI TRUE)
 include(flutter/generated_plugins.cmake)
 
 
@@ -71,6 +75,13 @@ endif()
 
 set(INSTALL_BUNDLE_DATA_DIR "${CMAKE_INSTALL_PREFIX}/data")
 set(INSTALL_BUNDLE_LIB_DIR "${CMAKE_INSTALL_PREFIX}")
+
+# Bundle the runtime from the selected MSVC toolchain so the ZIP also runs on
+# Windows machines without Visual Studio or a separately installed VC runtime.
+set(CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS_SKIP TRUE)
+include(InstallRequiredSystemLibraries)
+install(PROGRAMS ${CMAKE_INSTALL_SYSTEM_RUNTIME_LIBS}
+  DESTINATION "${INSTALL_BUNDLE_LIB_DIR}" COMPONENT Runtime)
 
 install(TARGETS ${BINARY_NAME} RUNTIME DESTINATION "${CMAKE_INSTALL_PREFIX}"
   COMPONENT Runtime)
