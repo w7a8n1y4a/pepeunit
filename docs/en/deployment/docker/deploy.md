@@ -77,13 +77,15 @@ Open `PU_DOMAIN` in a browser. Pepeunit has no passwords: an account is a pair o
 The first user does not become the owner; the `Owner` role is assigned by the server administrator. Find the `uuid` of your account (see `POSTGRES_USER` and `POSTGRES_DB` in `.env`):
 
 ```bash
-docker exec -it postgres psql -U <POSTGRES_USER> -d <POSTGRES_DB> -c "SELECT uuid, login FROM users;"
+docker exec -it postgres psql -U <POSTGRES_USER> -d <POSTGRES_DB> -c "SELECT uuid, LEFT(hash_public_key, 6) || '-' || RIGHT(hash_public_key, 6) AS hash_public_key, role, create_datetime FROM users;"
 ```
 
-Assign the owner:
+The query shows `uuid`, the first and last 6 characters of `hash_public_key` separated by `-`, the account role `role`, and the account creation date `create_datetime`.
+
+Assign the owner by running the script as a module from `/app` so Python can import the `app` package:
 
 ```bash
-docker exec -it backend python scripts/set_owner.py <uuid>
+docker exec -it -w /app backend python -m scripts.set_owner <uuid>
 ```
 
 There is only one `Owner` in an instance: if you run it again with a different `uuid`, the previous owner becomes an ordinary [User](/development-pepeunit/mechanics/roles#user).

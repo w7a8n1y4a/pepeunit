@@ -40,7 +40,7 @@
     ```
 - Assign the `Owner`, see [Registration and Owner](/deployment/docker/deploy#registration-and-owner)
     ```bash
-    docker exec -it backend python scripts/set_owner.py <uuid>
+    docker exec -it -w /app backend python -m scripts.set_owner <uuid>
     ```
 - Rebuild the configs after changing the settings file
     ```bash

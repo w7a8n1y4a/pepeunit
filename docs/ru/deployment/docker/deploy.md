@@ -77,13 +77,15 @@ docker logs -f backend
 Первый пользователь владельцем не становится, роль `Owner` назначает администратор сервера. Найдите `uuid` своего аккаунта (`POSTGRES_USER` и `POSTGRES_DB` смотрите в `.env`):
 
 ```bash
-docker exec -it postgres psql -U <POSTGRES_USER> -d <POSTGRES_DB> -c "SELECT uuid, login FROM users;"
+docker exec -it postgres psql -U <POSTGRES_USER> -d <POSTGRES_DB> -c "SELECT uuid, LEFT(hash_public_key, 6) || '-' || RIGHT(hash_public_key, 6) AS hash_public_key, role, create_datetime FROM users;"
 ```
 
-Назначьте владельца:
+Запрос показывает `uuid`, первые и последние 6 символов `hash_public_key` через `-`, роль `role` и дату создания аккаунта `create_datetime`.
+
+Назначьте владельца, запустив скрипт как модуль из `/app`, чтобы Python мог импортировать пакет `app`:
 
 ```bash
-docker exec -it backend python scripts/set_owner.py <uuid>
+docker exec -it -w /app backend python -m scripts.set_owner <uuid>
 ```
 
 `Owner` в инстансе один: при повторном запуске с другим `uuid` прежний владелец станет обычным [Пользователем](/development-pepeunit/mechanics/roles#user).
