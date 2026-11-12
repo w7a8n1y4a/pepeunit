@@ -1,7 +1,7 @@
 # Pepeunit
 
 <div align="center">
-    <img align="center" src="https://pepeunit.com/pepeunit-og.jpg"  width="640" height="320">
+    <img align="center" src="https://pepeunit.com/images/pepeunit-og.jpg"  width="640" height="320">
 </div>
 
 **Демо** - [pepeunit.com](https://pepeunit.com)
