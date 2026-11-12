@@ -60,10 +60,6 @@ class DocFindBar extends StatelessWidget {
           return KeyEventResult.ignored;
         }
         final key = event.logicalKey;
-        if (key == LogicalKeyboardKey.escape) {
-          onClose();
-          return KeyEventResult.handled;
-        }
         // Enter alone is the field's own submit, which steps forward.
         if ((key == LogicalKeyboardKey.enter ||
                 key == LogicalKeyboardKey.numpadEnter) &&

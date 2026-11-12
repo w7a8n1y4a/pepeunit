@@ -412,8 +412,10 @@ class _DocsPageState extends State<DocsPage> {
           // A narrow screen is a touch screen: the bar, its marks and the
           // rows of the sidebar are drawn for a finger, not a pointer.
           final menuFont = wide ? font : max(font * 1.35, 17.0);
-          final headerH = wide ? font * 3.55 : max(font * 3.55, 52.0);
+          final headerH = max(font * 3.55, wide ? 56.0 : 64.0);
           final mark = wide ? font * 2.2 : max(font * 2.2, 40.0);
+          final toolGap = max(12.0, font * 0.7);
+          final edge = max(16.0, font);
           final side = min(menuFont * 15.5, size.width * (wide ? 0.4 : 0.86));
           // What the screen has over the block, on the left of the sidebar.
           final outlined = size.width >= _centeredDocs;
@@ -511,12 +513,13 @@ class _DocsPageState extends State<DocsPage> {
             );
           }
 
-          // Close stands at the right edge of the screen and never moves.
+          // Close keeps a comfortable inset from the right edge and never moves.
           // Back stands right before it (before the outline line on a wide
           // screen), so it appears and goes without shifting Close.
           final close = CodeCloseMark(
             label: localized(language, 'Закрыть', 'Close'),
-            extent: mark * 0.9,
+            extent: max(48.0, mark * 0.9),
+            iconExtent: mark * 0.9,
             onTap: () => closeLibrary(context, '/library'),
           );
           final back = reader != null && reader.canBack
@@ -545,7 +548,11 @@ class _DocsPageState extends State<DocsPage> {
                         child: Align(
                           alignment: Alignment.centerLeft,
                           child: Text(
-                            localized(language, 'Документация', 'Documentation'),
+                            localized(
+                              language,
+                              'Документация',
+                              'Documentation',
+                            ),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: _style(font * 1.55, const Color(0xFFFFFFFF)),
@@ -557,7 +564,12 @@ class _DocsPageState extends State<DocsPage> {
                   ],
                   Expanded(
                     child: Padding(
-                      padding: EdgeInsets.fromLTRB(font, 0, font * 0.4, 0),
+                      padding: EdgeInsets.fromLTRB(
+                        font,
+                        0,
+                        outlined ? font : edge,
+                        0,
+                      ),
                       child: Row(
                         children: [
                           if (!wide)
@@ -584,7 +596,7 @@ class _DocsPageState extends State<DocsPage> {
                               width: mark,
                               height: mark,
                             ),
-                          SizedBox(width: font * 0.3),
+                          if (wide) SizedBox(width: font * 0.3),
                           Expanded(
                             child: Text(
                               reader?.page.title ?? '',
@@ -596,7 +608,7 @@ class _DocsPageState extends State<DocsPage> {
                               ),
                             ),
                           ),
-                          SizedBox(width: font * 0.3),
+                          if (wide) SizedBox(width: font * 0.3),
                           _LanguageMark(
                             code: language.toUpperCase(),
                             label: localized(
@@ -604,17 +616,14 @@ class _DocsPageState extends State<DocsPage> {
                               'Язык документации',
                               'Documentation language',
                             ),
-                            height: mark * 0.8,
+                            height: max(wide ? 36.0 : 48.0, mark * 0.8),
                             font: font,
                             onTap: _switchLanguage,
                           ),
-                          SizedBox(width: font * 0.3),
-                          ?back,
+                          SizedBox(width: toolGap),
+                          if (back != null) ...[back, SizedBox(width: toolGap)],
                           // On a wide screen Close stands in the outline strip.
-                          if (!outlined) ...[
-                            SizedBox(width: font * 0.2),
-                            close,
-                          ],
+                          if (!outlined) ...[close],
                         ],
                       ),
                     ),
@@ -626,10 +635,7 @@ class _DocsPageState extends State<DocsPage> {
                     SizedBox(
                       width: outlineRoom - 1,
                       child: Padding(
-                        padding: EdgeInsets.only(
-                          left: font * 0.8,
-                          right: font * 0.4,
-                        ),
+                        padding: EdgeInsets.only(left: font * 0.8, right: edge),
                         child: Row(
                           children: [
                             Expanded(
@@ -1168,6 +1174,7 @@ class _LanguageMark extends StatelessWidget {
               width: 1.2,
               child: Container(
                 height: height,
+                constraints: BoxConstraints(minWidth: max(64.0, height * 1.3)),
                 padding: EdgeInsets.symmetric(horizontal: font * 0.8),
                 alignment: Alignment.center,
                 // The bar is one selection area; the code is a button, not

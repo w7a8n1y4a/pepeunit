@@ -14,6 +14,7 @@ import '../../units/unit.dart';
 import '../../units/unit_read.dart';
 import '../../units/unit_view.dart';
 import '../hex_page.dart';
+import '../registry/registry_chrome.dart';
 import 'unit_panels.dart';
 import 'units_chrome.dart';
 import '../../locale/languages.dart';
@@ -143,8 +144,7 @@ class _UnitPageState extends State<UnitPage> {
         return HexSlot(
           id: 'info',
           title: localized(language, 'Информация', 'Information'),
-          footer: _repo == null ? null : repoCaption(_repo!.repositoryUrl),
-          sideRight: unit == null
+          footer: unit == null
               ? null
               : deviceTimeEdge(unit.state?.millis, language),
           center:
@@ -155,6 +155,27 @@ class _UnitPageState extends State<UnitPage> {
           color: color,
           q: slot.q,
           r: slot.r,
+        );
+      case 'repo':
+        final repo = _repo;
+        if (repo == null) {
+          return HexSlot(
+            id: 'repo',
+            title: localized(language, 'Репозиторий', 'Repository'),
+            color: registryColor,
+            enabled: unit?.repoUuid.isNotEmpty == true,
+            q: slot.q,
+            r: slot.r,
+            icon: 'assets/icons/objects/repo.svg',
+          );
+        }
+        return repoMark(
+          id: 'repo',
+          repo: repo,
+          language: language,
+          q: slot.q,
+          r: slot.r,
+          image: model.cachedIcon(repo.iconUuid),
         );
       case 'nodes':
         return HexSlot(
@@ -231,6 +252,10 @@ class _UnitPageState extends State<UnitPage> {
         await _reloadCard();
       case 'info':
         context.push('/units/${widget.uuid}/info');
+      case 'repo':
+        if (unit != null && unit.repoUuid.isNotEmpty) {
+          context.push('/registry/repo/${unit.repoUuid}');
+        }
       case 'nodes':
         context.push('/units/${widget.uuid}/io');
       case 'settings':

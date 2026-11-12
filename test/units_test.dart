@@ -48,8 +48,9 @@ void main() {
       'operate',
       'nodes',
       'env',
+      'repo',
     ]);
-    expect(unitMenuIds(owned: false), ['card', 'info', 'nodes']);
+    expect(unitMenuIds(owned: false), ['card', 'info', 'nodes', 'repo']);
     expect(unitMenuIds(owned: true), isNot(contains('access')));
     expect(unitMenuIds(owned: true, private: true).last, 'access');
     expect(unitMenuIds(owned: false, private: true), isNot(contains('access')));

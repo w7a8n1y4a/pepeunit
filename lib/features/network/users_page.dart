@@ -17,6 +17,7 @@ import '../paged_search.dart';
 import '../slanted_choices.dart';
 import 'network_chrome.dart';
 import '../../locale/languages.dart';
+import '../../locale/roles.dart';
 
 /// User search. [pick] returns the chosen uuid with [pop] instead of opening
 /// the card, and takes the Account colors.

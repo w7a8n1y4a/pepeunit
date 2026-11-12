@@ -139,9 +139,9 @@ String _deviceCommit(Unit unit) {
   return unit.currentCommit?.trim() ?? '';
 }
 
-List<String> updateLines(Unit unit, String language) {
+List<String> updateLines(Unit unit, String language, {String? targetCommit}) {
   final device = _deviceCommit(unit);
-  final target = unit.commit?.trim() ?? '';
+  final target = (targetCommit ?? unit.commit)?.trim() ?? '';
   return [
     '${localized(language, 'Устройство', 'Device')} ${device.isEmpty ? '—' : shortCommit(device)}',
     '${localized(language, 'Цель', 'Target')} ${target.isEmpty ? '—' : shortCommit(target)}',

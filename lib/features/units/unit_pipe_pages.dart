@@ -3,6 +3,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
+import 'package:url_launcher/link.dart';
 
 import '../../app_scope.dart';
 import '../../hive/hex_scene.dart';
@@ -435,6 +437,32 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
       stackActions: true,
       text: _text.text,
       copy: () => _text.text,
+      intro: (font) => Link(
+        uri: Uri.parse('/library/docs?doc=user/datapipe/datapipe'),
+        builder: (context, followLink) => Semantics(
+          link: true,
+          child: HoverPop(
+            child: GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () =>
+                  context.push('/library/docs?doc=user/datapipe/datapipe'),
+              child: Text(
+                localized(
+                  language,
+                  'Ссылка на документацию',
+                  'Documentation link',
+                ),
+                style: TextStyle(
+                  color: unitPipeColor,
+                  fontFamily: 'OpenGost Type B',
+                  fontSize: font * CodeWordButton.scale,
+                  decoration: TextDecoration.none,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
       strip: (font) => [
         Text(
           localized(language, 'Примеры в буфер:', 'Examples to clipboard:'),
@@ -464,7 +492,7 @@ class _UnitPipePanelState extends State<UnitPipePanel> with CodePanelState {
         CodeWordButton(
           label: localized(language, 'Проверить', 'Check'),
           font: font,
-          color: unitPipeColor,
+          color: Colors.yellow,
           enabled: idle,
           busy: pending == 'check',
           onTap: _checkTap,

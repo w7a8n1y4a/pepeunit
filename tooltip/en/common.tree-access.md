@@ -1,0 +1,1 @@
+The current role is shown on the left: Bot when signed out, User, Admin, or Owner. The bar shows the share of available screens and cells; its number is available out of total. Availability accounts for the selected instance and its enabled sections. Unavailable nodes remain dimmed on the map.

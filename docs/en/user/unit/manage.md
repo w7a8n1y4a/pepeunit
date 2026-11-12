@@ -6,6 +6,7 @@ Cell | What it does | Who
 -- | -- | --
 `Unit card` | Name, visibility, version. A tap rereads the data | Everyone who sees the `Unit`
 `Information` | Device state | Everyone who sees the `Unit`
+`Repo card` | Opens the parent repository | Everyone who sees the `Unit`; access to the `Repo` is checked separately
 `Inputs and outputs` | [UnitIO](/user/unit/io) | Everyone who sees the `Unit`
 `Settings` | Avatar, name, visibility, branch, updates | Creator
 `Manage unit` | Commands, logs, archives, storage, deletion | Creator
@@ -18,12 +19,12 @@ Someone else's `Unit` allows only viewing: [what is available to agents](/develo
 
 Data from the last [state](/developer/mqtt/state-mqtt-send) the `Unit` sent. A tap on the cell opens the details:
 
-- `Updates`: branch, commit, mode, and the status of the last update command
+- `Updates`: the device commit, target commit, and the status of the last update command. For the creator, the server resolves the target commit using the update mode, branch, and tags
 - `Network`: addresses and network parameters
 - Memory: `RAM` and `Flash`
 - `Time` and `Frequency` of the processor
 
-Empty if the `Unit` has not been in touch yet.
+Device data is empty if the `Unit` has not been in touch yet.
 
 ## Settings
 

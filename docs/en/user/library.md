@@ -39,4 +39,6 @@ Cell | What it does
 
 ## Tree of 6 paths
 
-A map of all screens: the main menu is in the center, the sections around it, then screens and cells. The wheel and a pinch change the scale, dragging moves the map. The search at the top looks for a screen or a cell and draws the path to it from the main menu. The switch at the bottom shows all cells, only those available to you, or only the closed ones.
+A map of all screens: the main menu is in the center, surrounded by compact section branches with their screens and cells. The wheel and a pinch change the scale, dragging moves the map. The search at the top looks for a screen or a cell and draws the path to it from the main menu.
+
+The bottom right shows the current role (`Bot`, `User`, `Admin`, or `Owner`) and an availability bar. Its filled portion represents available screens and cells; the number inside shows available out of total. Without signing in, the role is `Bot`. Availability also depends on the selected instance and its enabled sections. Unavailable nodes remain dimmed on the map; their cards explain the restrictions.

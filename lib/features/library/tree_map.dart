@@ -10,8 +10,8 @@ import '../units/units_chrome.dart';
 
 /// The tree is drawn on a canvas whose shorter side is this many units, and
 /// scaled to the screen. Every size below is in these units, so the picture
-/// keeps its shape. The longer side follows the screen: the rings of a wide
-/// screen are ovals, so the tree uses the width and not only the height.
+/// keeps its shape. The longer side follows the screen, so the branches use
+/// the available width and height.
 const treeBase = 1800.0;
 const _outer = 760.0;
 
@@ -22,20 +22,16 @@ const _leafHex = 10.0;
 const _cellHex = 8.0;
 
 /// Names are drawn on the picture, in its own units, so they grow and shrink
-/// with the zoom like the hexagons. A leaf is as tall as the room two
-/// neighbours leave each other on the outer ring.
+/// with the zoom like the hexagons. Leaves use smaller captions.
 const _nameBig = 20.0;
 const _nameInner = 13.0;
 const _nameLeaf = 10.0;
 
 /// A name shorter than this many pixels on the screen is not drawn: it could
-/// not be read. A picked row and its way are never smaller than
-/// [_namePicked].
+/// not be read. Section headings remain visible at the overview scale;
+/// a picked row and its way are never smaller than [_namePicked].
 const _nameLeast = 6.5;
 const _namePicked = 10.0;
-
-/// Which rows the picture shows at full strength.
-enum TreeShow { all, yes, no }
 
 /// The canvas for a viewport of this shape.
 Size treeCanvasFor(Size viewport) {
@@ -98,9 +94,8 @@ double _hexOf(TreeSpot spot) {
   return spot.isLeaf ? _leafHex : _innerHex;
 }
 
-/// The whole tree on one round picture: the home screen in the middle, the
-/// sections around it, and every screen and cell further out along its
-/// branch. Wheel and pinch zoom, a drag moves, a tap picks a row.
+/// Home in the middle, with compact branches around each section.
+/// Wheel and pinch zoom, a drag moves, a tap picks a row.
 ///
 /// A filled hexagon is a screen that opens from its address and may be opened
 /// now; a hollow one needs a chosen record or the screen before it. A small
@@ -113,7 +108,6 @@ class ScreenTreeMap extends StatefulWidget {
     required this.language,
     required this.selected,
     required this.available,
-    required this.show,
     required this.onSelect,
     super.key,
   });
@@ -126,7 +120,7 @@ class ScreenTreeMap extends StatefulWidget {
 
   /// Addresses of the rows this session may use.
   final Set<String> available;
-  final TreeShow show;
+
   /// A tap on a row picks it; a tap on nothing picks null.
   final ValueChanged<ScreenNode?> onSelect;
 
@@ -136,11 +130,20 @@ class ScreenTreeMap extends StatefulWidget {
 
 class ScreenTreeMapState extends State<ScreenTreeMap> {
   final controller = TransformationController();
-  late final List<TreeSpot> _spots = radialTree(widget.map);
+  late List<TreeSpot> _spots = radialTree(widget.map);
   final _names = <_Label>[];
   var _points = const <String, Offset>{};
   var _canvas = Size.zero;
   var _size = Size.zero;
+
+  @override
+  void didUpdateWidget(ScreenTreeMap oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.map == widget.map) return;
+    _spots = radialTree(widget.map);
+    _names.clear();
+    if (!_canvas.isEmpty) _points = _place(_canvas);
+  }
 
   /// Shows the whole tree again.
   void fit() => controller.value = treeFit(_size);
@@ -164,8 +167,7 @@ class ScreenTreeMapState extends State<ScreenTreeMap> {
     );
   }
 
-  /// The spots on a canvas of this shape: the outer ring is an oval on a
-  /// screen that is not square.
+  /// Stretch the branches to use the viewport's aspect ratio.
   Map<String, Offset> _place(Size canvas) {
     final wide = canvas.width / canvas.height;
     final radiusX = _outer * (wide >= 1 ? wide : 1);
@@ -199,7 +201,6 @@ class ScreenTreeMapState extends State<ScreenTreeMap> {
     TreeSpot? best;
     var bestGap = double.infinity;
     for (final spot in _spots) {
-      if (_faded(spot.node.path)) continue;
       final reach = max(_hexOf(spot) * 1.4, 14 / zoom);
       final gap = (_points[spot.node.path]! - at).distance / reach;
       if (gap <= 1 && gap < bestGap) {
@@ -209,8 +210,6 @@ class ScreenTreeMapState extends State<ScreenTreeMap> {
     }
     widget.onSelect(best?.node);
   }
-
-  bool _faded(String path) => _fadedIn(widget.show, widget.available, path);
 
   @override
   Widget build(BuildContext context) {
@@ -250,7 +249,6 @@ class ScreenTreeMapState extends State<ScreenTreeMap> {
                     language: widget.language,
                     selected: widget.selected,
                     available: widget.available,
-                    show: widget.show,
                     controller: controller,
                     fit: scale,
                     viewport: size,
@@ -263,17 +261,6 @@ class ScreenTreeMapState extends State<ScreenTreeMap> {
         );
       },
     );
-  }
-}
-
-bool _fadedIn(TreeShow show, Set<String> available, String path) {
-  switch (show) {
-    case TreeShow.all:
-      return false;
-    case TreeShow.yes:
-      return !available.contains(path);
-    case TreeShow.no:
-      return available.contains(path);
   }
 }
 
@@ -340,7 +327,6 @@ class _TreePainter extends CustomPainter {
     required this.language,
     required this.selected,
     required this.available,
-    required this.show,
     required this.controller,
     required this.fit,
     required this.viewport,
@@ -357,7 +343,6 @@ class _TreePainter extends CustomPainter {
   final String language;
   final String? selected;
   final Set<String> available;
-  final TreeShow show;
   final TransformationController controller;
   final double fit;
   final Size viewport;
@@ -402,12 +387,8 @@ class _TreePainter extends CustomPainter {
     return path..close();
   }
 
-  /// How strong a row is drawn: closed rows are dim, and the rows the switch
-  /// leaves out fade almost to nothing.
-  double _strength(String path) {
-    if (_fadedIn(show, available, path)) return 0.1;
-    return available.contains(path) ? 1 : 0.45;
-  }
+  /// Unavailable rows stay on the map, dimmed, with their details accessible.
+  double _strength(String path) => available.contains(path) ? 1 : 0.45;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -471,8 +452,7 @@ class _TreePainter extends CustomPainter {
   /// Names along the radius, in the units of the picture, so they grow and
   /// shrink with the zoom like the hexagons. A name starts at its hexagon and
   /// runs outward, away from the home screen, and turns over on the left half
-  /// so it is never upside down. Parallel names of neighbours on a ring stand
-  /// side by side, so far more of them fit than of horizontal ones. The rows
+  /// so it is never upside down. The rows
   /// nearer the middle are named first; a name too small to read, or one that
   /// would lie on another name or on a hexagon, waits for a deeper zoom. The
   /// picked row and its way are always named. The home screen is named below
@@ -487,8 +467,7 @@ class _TreePainter extends CustomPainter {
     ).inflate(max(60 / zoom, 160));
     final inView = [
       for (final spot in spots)
-        if (seen.contains(points[spot.node.path]!) &&
-            _strength(spot.node.path) > 0.1)
+        if (seen.contains(points[spot.node.path]!))
           spot,
     ];
     final circles = [
@@ -518,10 +497,13 @@ class _TreePainter extends CustomPainter {
           : spot.isLeaf
           ? _nameLeaf
           : _nameInner;
-      final strong = node.path == selected || route.contains(node.path);
+      final heading = spot.depth <= 1;
+      final strong = heading || node.path == selected || route.contains(node.path);
       // A name too small to read waits for a deeper zoom, except the way.
       if (!strong && base * zoom < _nameLeast) continue;
-      final units = strong ? max(base, _namePicked / zoom) : base;
+      final units = strong
+          ? max(base, (heading ? 12 : _namePicked) / zoom)
+          : base;
       final text = _name(
         node.title(language),
         available.contains(node.path)
@@ -587,7 +569,6 @@ class _TreePainter extends CustomPainter {
       old.selected != selected ||
       old.language != language ||
       old.fit != fit ||
-      old.show != show ||
       !identical(old.available, available) ||
       old.viewport != viewport ||
       old.points != points ||

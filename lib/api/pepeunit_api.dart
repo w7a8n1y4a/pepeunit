@@ -677,6 +677,15 @@ class PepeunitApi {
     return Unit.fromJson(_object(response));
   }
 
+  Future<UnitTargetVersion> unitTargetVersion(String token, String uuid) async {
+    final response = await _send(
+      'GET',
+      '/units/get_target_version/$uuid',
+      token: token,
+    );
+    return UnitTargetVersion.fromJson(_object(response));
+  }
+
   Future<Unit> updateUnit(
     String token,
     String uuid,

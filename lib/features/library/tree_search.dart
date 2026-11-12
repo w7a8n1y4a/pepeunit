@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
@@ -55,7 +57,7 @@ class _TreeSearchPillState extends State<TreeSearchPill> {
               radius: font * 0.6,
               width: 1.2,
               child: Container(
-                height: font * 2.4,
+                height: max(48.0, font * 2.8),
                 padding: EdgeInsets.symmetric(horizontal: font * 0.8),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,

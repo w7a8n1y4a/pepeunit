@@ -113,8 +113,8 @@ NetworkBoard tailBoard({
 );
 
 /// Creator sees the card, the info, settings, device control, the nodes and
-/// the environment, and for a private unit the access grants. A guest sees
-/// the card, the info and the nodes.
+/// the environment, and for a private unit the access grants. Everyone sees
+/// the parent repository; a guest also sees the card, the info and the nodes.
 List<String> unitMenuIds({required bool owned, bool private = false}) {
   return [
     'card',
@@ -123,6 +123,7 @@ List<String> unitMenuIds({required bool owned, bool private = false}) {
     if (owned) 'operate',
     'nodes',
     if (owned) 'env',
+    'repo',
     if (owned && private) 'access',
   ];
 }

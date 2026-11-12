@@ -13,6 +13,7 @@ import 'package:pepeunit_client/features/units/units_chrome.dart';
 import 'package:pepeunit_client/navigation/sections.dart';
 import 'package:pepeunit_client/features/library/tip_modal.dart';
 import 'package:pepeunit_client/features/library/tree_map.dart';
+import 'package:pepeunit_client/features/library/tree_access_bar.dart';
 import 'package:pepeunit_client/features/library/tree_page.dart';
 import 'package:pepeunit_client/features/library/tree_search.dart';
 import 'package:pepeunit_client/library/tree_layout.dart';
@@ -20,6 +21,8 @@ import 'package:pepeunit_client/library/library.dart';
 import 'package:pepeunit_client/library/screen_search.dart';
 import 'package:pepeunit_client/library/screen_tree.dart';
 import 'package:pepeunit_client/main.dart';
+import 'package:pepeunit_client/instances/instance.dart';
+import 'package:pepeunit_client/locale/roles.dart';
 
 /// Routes of `lib/main.dart` with the pattern of the route that holds each,
 /// read from the source. A `GoRoute` opens with its `path:`, and the router
@@ -264,7 +267,7 @@ void main() {
     });
   });
 
-  group('the round layout', () {
+  group('the branch layout', () {
     final spots = radialTree(screenMap);
     final byPath = {for (final spot in spots) spot.node.path: spot};
 
@@ -279,55 +282,60 @@ void main() {
       }
     });
 
-    test('puts every row with nothing under it on the outer ring', () {
+    test('spreads leaves through the interior, with Home at the center', () {
       expect(byPath['/']!.ring, 0);
       for (final spot in spots) {
         final kids = screenMap.childrenOf(spot.node.path);
-        if (kids.isEmpty) {
-          expect(spot.ring, 1, reason: spot.node.path);
-          expect(spot.isLeaf, isTrue);
-        } else if (spot.depth > 0) {
-          expect(spot.ring, inExclusiveRange(0, 1), reason: spot.node.path);
-        }
+        expect(spot.isLeaf, kids.isEmpty, reason: spot.node.path);
+        expect(spot.ring, inInclusiveRange(0, 1), reason: spot.node.path);
+        expect(spot.angle.isFinite, isTrue);
       }
-      final deeper = byPath['/units/:uuid/io/:io']!;
+      final leaves = spots.where((spot) => spot.isLeaf).toList();
+      expect(
+        leaves.where((spot) => spot.ring < 0.8).length,
+        greaterThan(leaves.length * 0.6),
+      );
       final upper = byPath['/units/:uuid']!;
-      expect(deeper.ring, greaterThan(upper.ring));
       final point = byPath['/units/:uuid']!.at(100, 100);
       expect(
         point.distanceTo(const Point(0, 0)),
         closeTo(100 * upper.ring, 1e-9),
       );
-      // An oval screen stretches the rings.
+      // A wide screen stretches the branches.
       final wide = byPath['/library/docs']!.at(200, 100);
       expect(wide.x.abs() / 200, lessThanOrEqualTo(1));
       expect(wide.y.abs() / 100, lessThanOrEqualTo(1));
     });
 
-    test('last rows are spread evenly, sections are parted by a gap', () {
-      final ends = [
-        for (final spot in spots)
-          if (spot.isLeaf) spot.angle,
-      ]..sort();
-      final steps = [
-        for (var i = 1; i < ends.length; i++) ends[i] - ends[i - 1],
-      ];
-      final unit = steps.reduce(min);
-      expect(unit, greaterThan(0));
-      var gaps = 0;
-      for (final step in steps) {
-        if (step > unit * 1.5) {
-          gaps++;
-          expect(step, closeTo(unit * 3, 1e-6));
-        } else {
-          expect(step, closeTo(unit, 1e-6));
+    test('separates hexagons and keeps children near their parent', () {
+      final points = [for (final spot in spots) spot.at(760, 760)];
+      for (var i = 0; i < spots.length; i++) {
+        for (var j = i + 1; j < spots.length; j++) {
+          expect(
+            points[i].distanceTo(points[j]),
+            greaterThan(32),
+            reason: '${spots[i].node.path} / ${spots[j].node.path}',
+          );
+        }
+        final parent = screenMap.parentPath(spots[i].node.path);
+        if (parent != null) {
+          expect(
+            points[i].distanceTo(byPath[parent]!.at(760, 760)),
+            lessThan(260),
+            reason: spots[i].node.path,
+          );
         }
       }
-      expect(
-        gaps,
-        screenMap.childrenOf('/').length - 1,
-        reason: 'every screen under home is parted from the next by a gap',
-      );
+    });
+
+    test('is deterministic and handles a map with only Home', () {
+      final again = radialTree(ScreenMap(screenTree));
+      for (var i = 0; i < spots.length; i++) {
+        expect(again[i].at(760, 760), spots[i].at(760, 760));
+      }
+      final single = radialTree(ScreenMap([screenMap.root])).single;
+      expect(single.at(760, 760), const Point(0.0, 0.0));
+      expect(single.isLeaf, isTrue);
     });
 
     test('keeps the sections in the order of the home menu', () {
@@ -340,11 +348,14 @@ void main() {
     test('the outline lists every row with its address', () {
       final text = treeOutline('ru', screenMap);
       expect(text.split('\n').length, screenTree.length);
-      expect(text, startsWith(
+      expect(
+        text,
+        startsWith(
           '- Главная `/`\n'
           '  - Только фон `/background-only`\n'
           '  - Аккаунт `/people`',
-        ));
+        ),
+      );
       expect(
         text,
         contains('\n        - Вход или выход `/units/:uuid/io/:io`'),
@@ -354,16 +365,19 @@ void main() {
   });
 
   group('the path search', () {
-    List<String> find(String query, {int limit = 200, String language = 'ru'}) =>
-        [
-          for (final node in searchScreens(
-            screenMap,
-            query,
-            limit: limit,
-            language: language,
-          ))
-            node.path,
-        ];
+    List<String> find(
+      String query, {
+      int limit = 200,
+      String language = 'ru',
+    }) => [
+      for (final node in searchScreens(
+        screenMap,
+        query,
+        limit: limit,
+        language: language,
+      ))
+        node.path,
+    ];
 
     test('an empty query finds nothing', () {
       expect(find(''), isEmpty);
@@ -391,9 +405,7 @@ void main() {
     test('the nearest row to the home screen comes first', () {
       final rows = find('аппарат');
       expect(rows.first, '/units');
-      final depths = [
-        for (final path in rows) screenMap.trail(path).length,
-      ];
+      final depths = [for (final path in rows) screenMap.trail(path).length];
       expect([...depths]..sort(), depths);
       expect(find('аппарат', limit: 3).length, 3);
     });
@@ -478,22 +490,77 @@ void main() {
       expect(open.split('\n').length, lessThan(8));
     });
 
-    Future<void> open(WidgetTester tester) async {
-      tester.view.physicalSize = const Size(1000, 800);
+    Future<void> open(
+      WidgetTester tester, {
+      Size size = const Size(1000, 800),
+      FakeViewPadding padding = const FakeViewPadding(),
+      String language = 'ru',
+    }) async {
+      tester.view.physicalSize = size;
       tester.view.devicePixelRatio = 1;
+      tester.view.padding = padding;
       addTearDown(tester.view.resetPhysicalSize);
       addTearDown(tester.view.resetDevicePixelRatio);
+      addTearDown(tester.view.resetPadding);
       await tester.runAsync(Library.instance.load);
       final model = AppModel(store: MemoryVaultStore());
       await model.load();
+      model.vault.language = language;
       await tester.pumpWidget(
         AppScope(model: model, child: const PepeunitApp(background: false)),
       );
       await tester.pumpAndSettle();
-      await tester.tap(find.bySemanticsLabel('Библиотека'));
+      await tester.tap(
+        find.bySemanticsLabel(language == 'ru' ? 'Библиотека' : 'Library'),
+      );
       await tester.pumpAndSettle();
-      await tester.tap(find.bySemanticsLabel('Дерево 6 путей'));
+      await tester.tap(
+        find.bySemanticsLabel(
+          language == 'ru' ? 'Дерево 6 путей' : 'Tree of 6 paths',
+        ),
+      );
       await tester.pumpAndSettle();
+    }
+
+    for (final size in [const Size(360, 800), const Size(800, 360)]) {
+      for (final language in ['ru', 'en']) {
+        testWidgets('controls respect safe areas at $size in $language', (
+          tester,
+        ) async {
+          const padding = FakeViewPadding(
+            top: 44,
+            bottom: 24,
+            left: 20,
+            right: 20,
+          );
+          await open(tester, size: size, padding: padding, language: language);
+          final search = tester.getRect(find.byType(TreeSearchPill));
+          final fit = tester.getRect(find.byType(CodeWordButton));
+          final close = tester.getRect(find.byType(CodeCloseMark));
+          for (final rect in [search, fit, close]) {
+            expect(rect.top, greaterThanOrEqualTo(60));
+            expect(rect.left, greaterThanOrEqualTo(36));
+            expect(rect.right, lessThanOrEqualTo(size.width - 36));
+            expect(rect.height, greaterThanOrEqualTo(48));
+          }
+          expect(close.left - fit.right, greaterThanOrEqualTo(12));
+          expect(fit.left - search.right, greaterThanOrEqualTo(12));
+          expect(fit.width, greaterThanOrEqualTo(48));
+          expect(close.width, greaterThanOrEqualTo(48));
+          final access = tester.getRect(find.byType(TreeAccessBar));
+          expect(access.bottom, lessThanOrEqualTo(size.height - 40));
+          expect(access.left, greaterThanOrEqualTo(36));
+          expect(access.right, lessThanOrEqualTo(size.width - 36));
+          expect(find.textContaining('Заливка:'), findsNothing);
+          expect(find.textContaining('Filled:'), findsNothing);
+          await tester.tap(find.byType(TreeSearchPill));
+          await tester.pumpAndSettle();
+          final field = tester.getRect(find.byType(TextField));
+          expect(field.top, greaterThan(44));
+          expect(field.left, greaterThan(20));
+          expect(tester.takeException(), isNull);
+        });
+      }
     }
 
     testWidgets('fills the screen, a tap opens a small card', (tester) async {
@@ -575,30 +642,85 @@ void main() {
       expect(tester.takeException(), isNull);
     });
 
-    testWidgets('the switch keeps the available or the closed rows', (
-      tester,
-    ) async {
-      await open(tester);
-      final total = screenTree.length;
-      expect(find.text('Все $total'), findsOneWidget);
-      // No instance is chosen: every section but the open ones is closed.
-      final map = tester.getRect(find.byType(ScreenTreeMap));
-      final yes = find.textContaining(RegExp(r'^Доступные \d+$'));
-      final no = find.textContaining(RegExp(r'^Недоступные \d+$'));
-      expect(yes, findsOneWidget);
-      expect(no, findsOneWidget);
-      await tester.tap(no);
-      await tester.pumpAndSettle();
-      // The home screen is open, so it is faded and a tap there picks nothing.
-      await tester.tapAt(map.center);
-      await tester.pumpAndSettle();
-      expect(find.byType(TipModal), findsNothing);
-      await tester.tap(yes);
-      await tester.pumpAndSettle();
-      await tester.tapAt(map.center);
-      await tester.pumpAndSettle();
-      expect(find.byType(TipModal), findsOneWidget);
-      expect(tester.takeException(), isNull);
-    });
+    testWidgets(
+      'role and availability follow the session and enabled sections',
+      (tester) async {
+        await open(tester);
+        final model = AppScope.of(tester.element(find.byType(TreePage)));
+        int check(String role) {
+          final bar = tester.widget<TreeAccessBar>(find.byType(TreeAccessBar));
+          final target = model.target;
+          final expected = screenMap.nodes
+              .where(
+                (node) => treeAccess(
+                  node,
+                  screenMap,
+                  hasTarget: target != null,
+                  signedIn: target?.signedIn ?? false,
+                  role: target?.role,
+                  notifications: target?.notifications,
+                  grafana: target?.grafana,
+                ),
+              )
+              .length;
+          expect(bar.role, role);
+          expect(bar.total, screenMap.nodes.length);
+          expect(bar.available, expected);
+          expect(
+            find.text(roleLabel(model.vault.language, role)),
+            findsOneWidget,
+          );
+          expect(
+            find.text('$expected / ${screenMap.nodes.length}'),
+            findsOneWidget,
+          );
+          expect(
+            tester
+                .widget<LinearProgressIndicator>(
+                  find.byType(LinearProgressIndicator),
+                )
+                .value,
+            expected / screenMap.nodes.length,
+          );
+          return expected;
+        }
+
+        final bot = check('Bot');
+        expect(find.byType(CodeChip), findsNothing);
+        final target = InstanceRecord(
+          url: 'https://example.com',
+          token: 't',
+          role: 'User',
+          userUuid: 'me',
+          active: true,
+          notifications: false,
+          grafana: false,
+        );
+        model.vault.instances.add(target);
+        await model.setLanguage('en');
+        await tester.pumpAndSettle();
+        final user = check('User');
+        expect(user, greaterThan(bot));
+        target.role = 'Admin';
+        await model.setLanguage('ru');
+        await tester.pumpAndSettle();
+        final admin = check('Admin');
+        expect(admin, greaterThan(user));
+        target.role = 'Owner';
+        await model.setLanguage('en');
+        await tester.pumpAndSettle();
+        final owner = check('Owner');
+        expect(owner, greaterThan(admin));
+        target.notifications = true;
+        target.grafana = true;
+        await model.setLanguage('ru');
+        await tester.pumpAndSettle();
+        expect(check('Owner'), greaterThan(owner));
+        await model.signOut();
+        await tester.pumpAndSettle();
+        check('Bot');
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 }

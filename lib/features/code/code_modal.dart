@@ -12,6 +12,7 @@ import '../../hive/hex_scene.dart';
 import '../../hive/hint.dart';
 import '../../hive/marks.dart';
 import '../../locale/languages.dart';
+import '../../navigation/escape.dart';
 import 'code_view.dart';
 
 /// The one frame for every panel that shows text or code: logs, storage,
@@ -34,6 +35,7 @@ class CodeModal extends StatelessWidget {
     this.text,
     this.rows,
     this.actions,
+    this.intro,
     this.strip,
     this.footer,
     this.onDownload,
@@ -66,6 +68,9 @@ class CodeModal extends StatelessWidget {
 
   /// Words and chips before the marks, such as Save or a level filter.
   final List<Widget> Function(double font)? actions;
+
+  /// An optional row between the header tools and the quick inserts.
+  final Widget Function(double font)? intro;
 
   /// A row of its own under the bar, for quick inserts such as examples. It
   /// scrolls sideways. Hidden when null.
@@ -109,11 +114,13 @@ class CodeModal extends StatelessWidget {
           decoration: TextDecoration.none,
         );
         final stacked = stackActions && size.width < 640;
+        final introH = intro == null ? 0.0 : rowH;
         final stripH = strip == null ? 0.0 : rowH * 0.8;
         final footerH = footer == null ? 0.0 : rowH;
         final chrome =
             font * 0.6 +
             rowH * (stacked ? 2 : 1) +
+            introH +
             stripH +
             footerH +
             gap +
@@ -219,6 +226,15 @@ class CodeModal extends StatelessWidget {
                             height: rowH,
                             width: double.infinity,
                             child: _scrolling(tools),
+                          ),
+                        if (intro != null)
+                          SizedBox(
+                            height: introH,
+                            width: double.infinity,
+                            child: Align(
+                              alignment: Alignment.centerLeft,
+                              child: intro!(font),
+                            ),
                           ),
                         if (strip != null)
                           SizedBox(
@@ -445,24 +461,32 @@ class CodeCloseMark extends StatelessWidget {
     required this.label,
     required this.extent,
     required this.onTap,
+    this.iconExtent,
     super.key,
   });
 
   final String label;
   final double extent;
+  final double? iconExtent;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return _Mark(
-      label: label,
-      extent: extent,
-      onTap: onTap,
-      hint: 'button-close',
-      child: SvgPicture.asset(
-        'assets/icons/actions/close.svg',
-        width: extent,
-        height: extent,
+    return EscapeTarget(
+      kind: EscapeKind.close,
+      onEscape: onTap,
+      child: _Mark(
+        label: label,
+        extent: extent,
+        onTap: onTap,
+        hint: 'button-close',
+        child: Center(
+          child: SvgPicture.asset(
+            'assets/icons/actions/close.svg',
+            width: iconExtent ?? extent,
+            height: iconExtent ?? extent,
+          ),
+        ),
       ),
     );
   }

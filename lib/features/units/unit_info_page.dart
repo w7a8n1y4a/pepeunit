@@ -23,6 +23,7 @@ class UnitInfoPage extends StatefulWidget {
 
 class _UnitInfoPageState extends State<UnitInfoPage> {
   Unit? _unit;
+  UnitTargetVersion? _targetVersion;
   String? _failure;
   var _open = false;
   var _loading = true;
@@ -68,7 +69,13 @@ class _UnitInfoPageState extends State<UnitInfoPage> {
           language,
           'Обновления',
           'Updates',
-          unit == null ? const ['—'] : updateLines(unit, language),
+          unit == null
+              ? const ['—']
+              : updateLines(
+                  unit,
+                  language,
+                  targetCommit: _targetVersion?.commit,
+                ),
         );
       case 'network':
         final lines = unit == null ? const ['—'] : networkLines(unit, language);
@@ -147,6 +154,14 @@ class _UnitInfoPageState extends State<UnitInfoPage> {
       if (!mounted) return;
       setState(() {
         _unit = unit;
+      });
+      // The target-version endpoint permits only the creator and the unit.
+      final target = unitOwnedBy(unit.creatorUuid, model.target?.userUuid)
+          ? await model.unitTargetVersion(widget.uuid)
+          : null;
+      if (!mounted) return;
+      setState(() {
+        _targetVersion = target;
         _loading = false;
       });
     } catch (error) {

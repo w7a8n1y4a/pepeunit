@@ -98,6 +98,21 @@ class Unit {
   }
 }
 
+/// The version resolved by the server from the unit's update settings.
+class UnitTargetVersion {
+  const UnitTargetVersion({required this.commit, this.tag});
+
+  final String commit;
+  final String? tag;
+
+  factory UnitTargetVersion.fromJson(Map<String, Object?> json) {
+    return UnitTargetVersion(
+      commit: json['commit'] as String,
+      tag: _text(json['tag']),
+    );
+  }
+}
+
 class UnitLive {
   const UnitLive({
     this.millis,

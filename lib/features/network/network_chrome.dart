@@ -11,6 +11,7 @@ import '../../hive/marks.dart';
 import '../../instances/directory_user.dart';
 import '../../instances/instance.dart';
 import '../../locale/languages.dart';
+import '../../locale/roles.dart';
 import '../../navigation/sections.dart';
 
 Color get networkColor => sectionById('peers')!.color;
@@ -25,17 +26,6 @@ String trustLabel(String language, String trust) {
       return localized(language, 'Заблокирован', 'Blocked');
     default:
       return trust;
-  }
-}
-
-String roleLabel(String language, String role) {
-  switch (role) {
-    case 'Admin':
-      return localized(language, 'Админ', 'Admin');
-    case 'Owner':
-      return localized(language, 'Владелец', 'Owner');
-    default:
-      return localized(language, 'Пользователь', 'User');
   }
 }
 

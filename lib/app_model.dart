@@ -905,6 +905,9 @@ class AppModel extends ChangeNotifier {
   Future<Unit> createUnit(Map<String, Object?> body) =>
       _api.createUnit(_token, body);
 
+  Future<UnitTargetVersion> unitTargetVersion(String uuid) =>
+      _api.unitTargetVersion(_token, uuid);
+
   Future<Unit> updateUnit(String uuid, Map<String, Object?> patch) =>
       _api.updateUnit(_token, uuid, patch);
 

@@ -365,6 +365,13 @@ const screenTree = <ScreenNode>[
     need: ScreenNeed.creator,
   ),
   ScreenNode(
+    '/units/:uuid#repo',
+    ScreenKind.cell,
+    'Родительский репозиторий',
+    'Parent repository',
+    tone: 'registry',
+  ),
+  ScreenNode(
     '/units/:uuid/settings',
     ScreenKind.form,
     'Настройки',

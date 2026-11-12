@@ -184,9 +184,7 @@ class _SearchPanelState<T> extends State<SearchPanel<T>> {
       return KeyEventResult.ignored;
     }
     final key = event.logicalKey;
-    if (key == LogicalKeyboardKey.escape) {
-      widget.onClose();
-    } else if (key == LogicalKeyboardKey.arrowDown) {
+    if (key == LogicalKeyboardKey.arrowDown) {
       _move(1, rowH, viewport);
     } else if (key == LogicalKeyboardKey.arrowUp) {
       _move(-1, rowH, viewport);

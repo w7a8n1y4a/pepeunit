@@ -5,6 +5,7 @@ import '../hive/hex_order.dart';
 import '../hive/hex_scene.dart';
 import '../locale/failure.dart';
 import '../locale/languages.dart';
+import '../navigation/escape.dart';
 import 'account/error_reader.dart';
 
 /// The shared hex renderer. The background is under the router.
@@ -31,10 +32,23 @@ class HexPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scene = HexScene(slots: slots, onTap: onTap, wrap: wrap, echo: echo);
+    final back = slots
+        .where(
+          (slot) =>
+              slot.id == 'back' || slot.icon == 'assets/icons/actions/back.svg',
+        )
+        .firstOrNull;
     // Transparent, but it still takes every tap and gesture in the gaps.
-    return ColoredBox(
-      color: const Color(0x00000000),
-      child: frame == null ? scene : frame!(scene),
+    return EscapeTarget(
+      kind: EscapeKind.back,
+      onEscape:
+          back != null && back.enabled && back.tappable && back.body == null
+          ? () => onTap(back.id)
+          : null,
+      child: ColoredBox(
+        color: const Color(0x00000000),
+        child: frame == null ? scene : frame!(scene),
+      ),
     );
   }
 }

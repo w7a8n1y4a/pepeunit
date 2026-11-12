@@ -13,6 +13,7 @@ import '../../navigation/sections.dart';
 import '../code/code_modal.dart';
 import 'library_menu_page.dart';
 import 'tip_modal.dart';
+import 'tree_access_bar.dart';
 import 'tree_map.dart';
 import 'tree_search.dart';
 
@@ -73,7 +74,11 @@ String? _closedWhy(String language, ScreenNode node, ScreenMap map) {
         'нужны вход и включённые уведомления',
         'a sign-in and enabled alerts are needed',
       ),
-      _ => localized(language, 'нужен выбранный экземпляр', 'a chosen instance'),
+      _ => localized(
+        language,
+        'нужен выбранный экземпляр',
+        'a chosen instance',
+      ),
     };
   }
   return screenNeedLabel(language, need).toLowerCase();
@@ -127,8 +132,8 @@ String treeCardText(
 }
 
 /// The tree of 6 paths: every screen and cell of the client on one full
-/// screen: the round map (`ScreenTreeMap`), a switch of what it shows (all,
-/// available, closed) at the bottom right, the path search, Fit and Close on
+/// screen: the branch map (`ScreenTreeMap`), role and availability at the
+/// bottom right, the path search, Fit and Close on
 /// top. A picked row, by a tap or by the search, wears the way from the home
 /// screen drawn white. A tap on a row opens its small card; the card offers Open for
 /// a screen that really opens. `?node=` opens the page with a row already
@@ -154,8 +159,14 @@ class _TreePageState extends State<TreePage> {
 
   /// Whether the modal of the path search is open.
   var _searching = false;
-  var _show = TreeShow.all;
-  String? _openedFor;
+  ({
+    bool hasTarget,
+    bool signedIn,
+    String? role,
+    bool? notifications,
+    bool? grafana,
+  })?
+  _openedFor;
   var _available = <String>{};
 
   /// A row chosen in the search: the modal closes, the map moves to the row
@@ -172,9 +183,13 @@ class _TreePageState extends State<TreePage> {
   Set<String> _reach() {
     final model = AppScope.of(context);
     final target = model.target;
-    final key =
-        '${target != null}|${target?.signedIn}|${target?.role}|'
-        '${target?.notifications}|${target?.grafana}';
+    final key = (
+      hasTarget: target != null,
+      signedIn: target?.signedIn ?? false,
+      role: target?.role,
+      notifications: target?.notifications,
+      grafana: target?.grafana,
+    );
     if (key == _openedFor) return _available;
     _openedFor = key;
     return _available = {
@@ -182,11 +197,11 @@ class _TreePageState extends State<TreePage> {
         if (treeAccess(
           node,
           screenMap,
-          hasTarget: target != null,
-          signedIn: target?.signedIn ?? false,
-          role: target?.role,
-          notifications: target?.notifications,
-          grafana: target?.grafana,
+          hasTarget: key.hasTarget,
+          signedIn: key.signedIn,
+          role: key.role,
+          notifications: key.notifications,
+          grafana: key.grafana,
         ))
           node.path,
     };
@@ -194,25 +209,18 @@ class _TreePageState extends State<TreePage> {
 
   @override
   Widget build(BuildContext context) {
-    final language = AppScope.of(context).vault.language;
+    final model = AppScope.of(context);
+    final language = model.vault.language;
+    final target = model.target;
+    final role = target?.signedIn == true ? target?.role ?? 'User' : 'Bot';
     final available = _reach();
     final card = _card;
     final picked = _picked;
     final size = MediaQuery.sizeOf(context);
     final font = max(12.0, size.shortestSide * 0.018);
-    final total = screenMap.nodes.length;
-    final yes = available.length;
-    Widget chip(TreeShow show, String label, int count, String hint) {
-      return CodeChip(
-        label: '$label $count',
-        on: _show == show,
-        font: font,
-        color: libraryColor,
-        onTap: () => setState(() => _show = show),
-        hint: hint,
-      );
-    }
-
+    final safe = MediaQuery.paddingOf(context);
+    final edge = max(16.0, font * 1.2);
+    final controlSize = max(48.0, font * 2.8);
     return Material(
       type: MaterialType.transparency,
       child: Stack(
@@ -224,7 +232,6 @@ class _TreePageState extends State<TreePage> {
               language: language,
               selected: picked?.path,
               available: available,
-              show: _show,
               onSelect: (node) => setState(() {
                 _picked = node;
                 _card = node;
@@ -232,9 +239,9 @@ class _TreePageState extends State<TreePage> {
             ),
           ),
           Positioned(
-            left: font,
-            right: font * 0.6,
-            top: font * 0.8,
+            left: safe.left + edge,
+            right: safe.right + edge,
+            top: safe.top + edge,
             child: Row(
               children: [
                 Expanded(
@@ -253,87 +260,82 @@ class _TreePageState extends State<TreePage> {
                     ),
                   ),
                 ),
-                CodeWordButton(
-                  label: localized(language, 'Целиком', 'Fit'),
-                  font: font,
-                  onTap: () => _mapKey.currentState?.fit(),
-                  hint: 'button-tree-fit',
+                const SizedBox(width: 12),
+                ConstrainedBox(
+                  constraints: BoxConstraints(minWidth: controlSize),
+                  child: SizedBox(
+                    height: controlSize,
+                    child: CodeWordButton(
+                      label: localized(language, 'Целиком', 'Fit'),
+                      font: font,
+                      onTap: () => _mapKey.currentState?.fit(),
+                      hint: 'button-tree-fit',
+                    ),
+                  ),
                 ),
+                const SizedBox(width: 12),
                 CodeCloseMark(
                   label: localized(language, 'Закрыть', 'Close'),
-                  extent: font * 2.2,
+                  extent: controlSize,
+                  iconExtent: font * 2.2,
                   onTap: () => closeLibrary(context, '/library'),
                 ),
               ],
             ),
           ),
           Positioned(
-            left: font,
-            right: font,
-            bottom: font * 0.7,
+            left: safe.left + edge,
+            right: safe.right + edge,
+            bottom: safe.bottom + edge,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Wrap(
-                  alignment: WrapAlignment.end,
-                  children: [
-                    chip(
-                      TreeShow.all,
-                      localized(language, 'Все', 'All'),
-                      total,
-                      'button-tree-show-all',
-                    ),
-                    chip(
-                      TreeShow.yes,
-                      localized(language, 'Доступные', 'Available'),
-                      yes,
-                      'button-tree-show-yes',
-                    ),
-                    chip(
-                      TreeShow.no,
-                      localized(language, 'Недоступные', 'Closed'),
-                      total - yes,
-                      'button-tree-show-no',
-                    ),
-                  ],
+                TreeAccessBar(
+                  language: language,
+                  role: role,
+                  available: available.length,
+                  total: screenMap.nodes.length,
+                  font: font,
                 ),
-                SizedBox(height: font * 0.3),
-                SizedBox(
-                  width: double.infinity,
-                  child: IgnorePointer(
-                    child: Text(
-                      picked != null && picked.path != screenRoot
-                          ? screenRouteText(language, screenMap, picked.path)
-                          : localized(
-                              language,
-                              'Заливка: открывается по адресу. Малая сота: кнопка или поле экрана. Тусклая: закрыта для этой сессии.',
-                              'Filled: opens from its address. Small: a button or a field of a screen. Dim: closed for this session.',
-                            ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        color: hexMuted,
-                        fontFamily: 'OpenGost Type B',
-                        fontSize: font * 0.85,
-                        decoration: TextDecoration.none,
+                if (picked != null && picked.path != screenRoot) ...[
+                  SizedBox(height: font * 0.3),
+                  SizedBox(
+                    width: double.infinity,
+                    child: IgnorePointer(
+                      child: Text(
+                        screenRouteText(language, screenMap, picked.path),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: hexMuted,
+                          fontFamily: 'OpenGost Type B',
+                          fontSize: font * 0.85,
+                          decoration: TextDecoration.none,
+                        ),
                       ),
                     ),
                   ),
-                ),
+                ],
               ],
             ),
           ),
-          if (card != null) _cardPanel(card, language, available),
+          if (card != null)
+            Positioned.fill(
+              child: SafeArea(child: _cardPanel(card, language, available)),
+            ),
           if (_searching)
             Positioned.fill(
-              child: TreeSearchPanel(
-                map: screenMap,
-                language: language,
-                font: font,
-                available: available,
-                onPick: _found,
-                onClose: () => setState(() => _searching = false),
+              child: SafeArea(
+                minimum: EdgeInsets.all(edge),
+                child: TreeSearchPanel(
+                  map: screenMap,
+                  language: language,
+                  font: font,
+                  available: available,
+                  onPick: _found,
+                  onClose: () => setState(() => _searching = false),
+                ),
               ),
             ),
         ],

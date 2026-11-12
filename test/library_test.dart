@@ -13,6 +13,7 @@ import 'package:pepeunit_client/account/vault_store.dart';
 import 'package:pepeunit_client/app_model.dart';
 import 'package:pepeunit_client/app_scope.dart';
 import 'package:pepeunit_client/client_version.dart';
+import 'package:pepeunit_client/features/code/code_modal.dart';
 import 'package:pepeunit_client/features/library/doc_find_bar.dart';
 import 'package:pepeunit_client/features/library/doc_search_panel.dart';
 import 'package:pepeunit_client/features/library/docs_page.dart';
@@ -640,6 +641,68 @@ void main() {
       expect(find.text('Конфигурации Nginx'), findsOneWidget);
       expect(tester.takeException(), isNull);
     });
+
+    for (final width in [320.0, 420.0, 960.0, 1920.0]) {
+      testWidgets('Library: language and Close have room at width $width', (
+        tester,
+      ) async {
+        await openDocs(tester, Size(width, 800));
+        void check(String label) {
+          final language = tester.getRect(find.bySemanticsLabel(label));
+          final close = tester.getRect(find.byType(CodeCloseMark));
+          expect(language.width, greaterThanOrEqualTo(64));
+          expect(language.width, greaterThan(language.height));
+          if (width < 960) expect(language.height, greaterThanOrEqualTo(48));
+          expect(close.width, greaterThanOrEqualTo(48));
+          expect(close.height, greaterThanOrEqualTo(48));
+          expect(width - close.right, greaterThanOrEqualTo(15.99));
+          expect(close.left - language.right, greaterThanOrEqualTo(11.99));
+          expect(tester.takeException(), isNull);
+        }
+
+        check('Язык документации');
+        // Navigating to another article adds Back beside the same controls.
+        await tester.tap(find.bySemanticsLabel('Поиск'));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField), 'docker');
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find
+              .descendant(
+                of: find.byType(DocSearchPanel),
+                matching: find.bySemanticsLabel(RegExp('Docker')),
+              )
+              .first,
+        );
+        await settle(tester);
+        expect(find.bySemanticsLabel('Назад'), findsOneWidget);
+        check('Язык документации');
+        await tester.tap(find.bySemanticsLabel('Язык документации'));
+        await settle(tester);
+        check('Documentation language');
+        // Switching language starts a fresh article history; create Back again.
+        await tester.tap(find.bySemanticsLabel('Search'));
+        await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField), 'nginx');
+        await tester.pumpAndSettle();
+        await tester.tap(
+          find
+              .descendant(
+                of: find.byType(DocSearchPanel),
+                matching: find.bySemanticsLabel(RegExp('Nginx')),
+              )
+              .first,
+        );
+        await settle(tester);
+        expect(find.bySemanticsLabel('Back'), findsOneWidget);
+        check('Documentation language');
+        // Close must win over the article's Back, regardless of focus.
+        await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+        await settle(tester);
+        expect(find.byType(DocsPage), findsNothing);
+        expect(find.bySemanticsLabel('Документация'), findsOneWidget);
+      });
+    }
 
     testWidgets('Library: search on a phone opens from the bar', (
       tester,
