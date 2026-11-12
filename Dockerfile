@@ -44,7 +44,8 @@ RUN flutter build web --release --dart-define="CLIENT_VERSION=${CLIENT_VERSION}"
 
 FROM nginx:1.30-alpine
 
-RUN apk upgrade --no-cache zlib
+# Apply security fixes to all runtime packages, including libxslt.
+RUN apk upgrade --no-cache
 
 EXPOSE 80
 

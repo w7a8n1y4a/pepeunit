@@ -72,8 +72,10 @@ RUN flutter pub get
 RUN cp "$FLUTTER_HOME/bin/cache/artifacts/gradle_wrapper/gradlew" android/gradlew \
     && cp "$FLUTTER_HOME/bin/cache/artifacts/gradle_wrapper/gradle/wrapper/gradle-wrapper.jar" android/gradle/wrapper/gradle-wrapper.jar \
     && chmod +x android/gradlew \
-    && printf 'sdk.dir=%s\nflutter.sdk=%s\n' "$ANDROID_HOME" "$FLUTTER_HOME" > android/local.properties \
-    && cd android && ./gradlew --no-daemon help
+    && printf 'sdk.dir=%s\nflutter.sdk=%s\n' "$ANDROID_HOME" "$FLUTTER_HOME" > android/local.properties
+WORKDIR /app/android
+RUN ./gradlew --no-daemon help
+WORKDIR /app
 COPY --chown=flutter:flutter lib/ lib/
 COPY --chown=flutter:flutter assets/ assets/
 COPY --chown=flutter:flutter docs/ docs/
