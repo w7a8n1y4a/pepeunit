@@ -8,7 +8,7 @@ A proposed format. Authors write concise YAML; the Backend checks it and builds 
 | `.env` | Backend | Settings for a specific Unit |
 | `io_topics.yml` | Backend | Topics for a specific Unit |
 
-The Unit repository contains one author-maintained schema file at its root: `unit.yml`. It has exactly four required sections: `search`, `env`, `input`, and `output`. Unused `env`, `input`, or `output` sections are empty maps `{}`.
+The Unit repository contains one author-maintained schema file at its root: `unit.yml`. The required overall `version` field appears at the beginning of the file at the same level as the four required sections: `search`, `env`, `input`, and `output`. Unused `env`, `input`, or `output` sections are empty maps `{}`.
 
 Pepeunit reads `unit.yml` and generates `.env` for a specific physical Unit using its selected settings. The Unit starts with this `.env`, then downloads its own `io_topics.yml` from Pepeunit using the connection and authentication settings in `.env`. Once it has the topics, the Unit subscribes to its Inputs and publishes to its Outputs.
 
@@ -19,9 +19,11 @@ The device only needs `.env` and `io_topics.yml`. No `.env.example` is needed.
 An example of a new actuator Unit (`actor`) contract that controls a fan through incoming commands, not a ready-to-use configuration for existing firmware.
 
 ```yaml
+version: 1
+
 search:
-  version: 1
   type: actor
+  execution_type: compiled
   name: garage-fan
   summary: Controls a fan through incoming commands.
   tags: [garage, ventilation]
@@ -41,18 +43,16 @@ env:
   FAN_PIN:
     type: int
     min: 0
+    example: 4
     description: GPIO used to control the fan.
   WIFI_PASSWORD:
     type: string
     secret: true
+    example: "example-password"
     description: Wi-Fi network password.
 
 input:
-  reset:
-    type: object
-    fields: {}
-    role: command
-    description: Restarts the Unit when an empty object is received.
+  reset: {base: reset}
 
   set_speed:
     type: object
@@ -63,6 +63,8 @@ input:
       duration: {type: int, min: 1, max: 3600, unit: s}
 
 output:
+  state: {base: state}
+
   speed:
     type: int
     min: 0
@@ -82,18 +84,19 @@ Example message for `set_speed`:
 
 - All declared fields are required. `optional: true` allows omission; `nullable: true` allows `null`.
 - Objects accept only the declared `fields`. `extra: true` allows additional fields with arbitrary JSON values.
-- The Backend uses `default` when generating `.env`. Defaults are not automatically inserted into messages.
+- The Backend uses `default` inside an ENV schema when generating `.env`. Defaults are not automatically inserted into messages.
 - The default encoding is JSON. Plain text requires `codec: utf8`; `type: bytes` always uses binary encoding.
 - The default message limit is 4096 bytes. Set `max_bytes` on an IO to override it; the limit is checked before decoding.
-- `role` and `description` are required for IO. They are not required for object fields or ENV settings; descriptions are recommended.
+- `role` and `description` are required in the resolved IO schema; `base` supplies them from the dictionary. They are not required for object fields or ENV settings; descriptions are recommended.
+- Every variable in `env` requires `example`, including variables with `optional: true` or a `default`. The example must satisfy the variable's type and all constraints; `example: null` is allowed only with `nullable: true`. Missing or invalid examples are rejected during registration. `example` is a configuration hint and is not inserted into `.env` in place of a value or `default`. For `secret: true`, use a fictitious value.
 - ENV supports scalar values: `bool`, `int`, `number`, and `string`, optionally with `nullable`. The Backend adds standard `PU_*` settings.
 - Unknown keys, duplicate YAML keys, invalid types, and unsupported combinations are rejected during registration.
 
-`search.version: 1` selects **one immutable revision of the format, metaschema, and dictionary**. There are no separate `profile` or `dictionary_version` fields. Changing the rules requires a new version; existing contracts continue using theirs.
+`version: 1` selects **one immutable revision of the format, metaschema, and dictionary**. There are no separate `profile` or `dictionary_version` fields. Changing the rules requires a new version; existing contracts continue using theirs.
 
 ## search and Unit Type
 
-`search` contains discovery metadata: name, summary, tags, platforms, hardware, and behavior. `search.version` specifies the version of the entire `unit.yml` format, while the required `search.type` field specifies the Unit type.
+`search` contains discovery metadata: name, summary, tags, platforms, hardware, and behavior. The required `search.type` field specifies the Unit type.
 
 | Type | Purpose | Example |
 | -- | -- | -- |
@@ -105,6 +108,15 @@ Example message for `set_speed`:
 A Unit has exactly one of these four types. `search.type` is a string, not a list; missing types, unknown values, or multiple types are rejected during registration. The Unit type describes its purpose, while `role` describes an individual Input or Output. For example, an `actor` can publish its state while remaining an `actor`.
 
 A ventilation system can be split as follows: a `sensor` publishes temperature, a `controller` receives it and sends commands to an `actor`, and an `observer` receives readings to store their history. The Unit type does not replace compatibility checks for individual IOs.
+
+The required `search.execution_type` field specifies how the Unit program runs:
+
+| Value | Execution mode |
+| -- | -- |
+| `interpreted` | The Unit runs the program through an interpreter |
+| `compiled` | The Unit runs a prebuilt program or firmware |
+
+Exactly one value from `execution_types` is required. Missing fields, unknown values, and lists are rejected during registration. The value describes the execution mode of the specific Unit distribution; the Backend uses it to select the update workflow.
 
 The registry stores `unit.yml` from the selected repository version. MCP can return behavior descriptions, settings, or a specific IO separately, without requiring the entire README to be read.
 
@@ -137,12 +149,15 @@ input:
   reset: domain.com/9d0c2f4d-108e-488a-85e5-6040ef3d8425
   set_speed: domain.com/2d98b4ba-c935-4379-8e1a-520e76018c17
 output:
+  state: domain.com/7279d28d-53b6-4866-99da-0b81bc1cc025
   speed: domain.com/d76b4234-3997-4a4a-a113-6d1c21d6b84a
 ```
 
 `schema_revision` identifies the revision of the Unit's effective contract; `config_revision` identifies the revision of the `.env` and `io_topics.yml` bundle. When settings affecting IO change, the Backend checks the connections again.
 
 MessageProcessor subscribes to `domain.com/+`: both Input and Output are covered by a single subscription. DataPipe operates in both directions. Output → Input connections are stored on the server; received Input messages are not routed again. A Unit publishes to its own Outputs and subscribes to its own Inputs.
+
+Message rate limiting is enforced by the MQTT broker. The allowed message count is taken directly from the Pepeunit database for the specific Unit. This is a server setting; it is not part of `unit.yml`, the schema dictionary, or the generated `.env` and `io_topics.yml` files.
 
 ## Other Data Types
 
@@ -225,6 +240,7 @@ env:
     type: string
     nullable: true
     default: null
+    example: "click"
     description: null disables sending; an empty string sends an empty payload.
 ```
 
@@ -246,12 +262,13 @@ The controller publishes to its own Output. MessageProcessor checks the UUID, pe
 
 ## Platform Dictionary
 
-Unit authors do not write this file. This `dictionary.yml` example lists allowed format values, without cataloging devices or their purposes.
+Unit authors do not write this file. This `dictionary.yml` example defines allowed format values and base service Inputs/Outputs. Their schemas and behavior are shared across the platform.
 
 ```yaml
 version: 1
 
 unit_types: [sensor, actor, controller, observer]
+execution_types: [interpreted, compiled]
 types: [bool, int, number, string, object, array, any, bytes]
 codecs: [json, utf8, bytes]
 roles: [measurement, state, event, command]
@@ -266,6 +283,75 @@ units:
   ms: Millisecond
   Hz: Hertz
 
+input:
+  update:
+    type: object
+    role: command
+    description: Update the Unit program to the specified version.
+    fields:
+      COMMAND: {type: string, enum: [Update]}
+      PU_COMMIT_VERSION: {type: string}
+      COMPILED_FIRMWARE_LINK: {type: string, optional: true}
+  env_update:
+    type: object
+    role: command
+    description: Download and apply the current .env.
+    fields:
+      COMMAND: {type: string, enum: [EnvUpdate]}
+  schema_update:
+    type: object
+    role: command
+    description: Download the current io_topics.yml and update subscriptions.
+    fields:
+      COMMAND: {type: string, enum: [SchemaUpdate]}
+  log_sync:
+    type: object
+    role: command
+    description: Send stored logs through the log Output.
+    fields:
+      COMMAND: {type: string, enum: [LogSync]}
+  reset:
+    type: object
+    role: command
+    description: Restart the device or program.
+    fields:
+      COMMAND: {type: string, enum: [Reset]}
+
+output:
+  state:
+    type: object
+    role: state
+    description: Report the program version and system state.
+    fields:
+      pu_commit_version: {type: string}
+      millis: {type: number, min: 0, unit: ms, optional: true}
+      mem_free: {type: number, min: 0, optional: true}
+      mem_alloc: {type: number, min: 0, optional: true}
+      freq: {type: number, min: 0, unit: Hz, optional: true}
+      ifconfig:
+        type: array
+        items: {type: string}
+        min_items: 4
+        max_items: 4
+        optional: true
+      statvfs:
+        type: array
+        items: {type: int, min: 0}
+        min_items: 10
+        max_items: 10
+        optional: true
+  log:
+    type: array
+    role: event
+    description: Send a batch of log entries.
+    min_items: 1
+    items:
+      type: object
+      fields:
+        level: {type: string, enum: [Debug, Info, Warning, Error, Critical]}
+        text: {type: string}
+        create_datetime: {type: string, optional: true}
+
 defaults:
   codec: json
   max_bytes: 4096
@@ -277,15 +363,45 @@ defaults:
 
 Unit codes come from the supported UCUM subset. `bytes` always uses binary encoding; `any` means any JSON value, not arbitrary bytes. `any` allows `null` regardless of `nullable`.
 
+### Enabling Base IOs
+
+Base IOs are explicitly enabled in the existing `input` and `output` sections of `unit.yml`. This fragment enables the complete base set:
+
+```yaml
+input:
+  update: {base: update}
+  env_update: {base: env_update}
+  schema_update: {base: schema_update}
+  log_sync: {base: log_sync}
+  reset: {base: reset}
+output:
+  state: {base: state}
+  log: {base: log}
+```
+
+- `base` selects an entry from the matching dictionary section for `version`. The Backend expands it into a complete schema before validation and topic generation. Sibling keys alongside `base` are forbidden: the standard contract cannot be overridden.
+- Base IO names are reserved in their respective direction. The IO name must match the `base` value; unknown references or references from the other direction are rejected. Authors provide full schemas for other IOs, such as `set_speed` above.
+- Base IOs are not added automatically. Declaring one means the firmware implements its behavior; the Backend only sends declared commands. `log_sync` requires the `log` Output, and `update` requires the `state` Output to confirm the program version.
+- Base IOs are available to all four Unit types. Maintaining the Unit itself, including restarting a `sensor`, does not change its type.
+- In `io_topics.yml`, base and author-defined IOs share the `input` and `output` sections and receive `domain.com/<uuid>` addresses. No additional sections or `/pepeunit` suffix are needed. The Backend retains the base IO designation: service commands, state, and logs are available to the Unit itself and authorized Pepeunit management, and do not participate in user Output → Input connections.
+
+The base `reset` message is `{"COMMAND":"Reset"}`. Commands retain the existing protocol names and fields; `env_update` now updates `.env`, and `schema_update` updates `io_topics.yml`. With `search.execution_type: compiled`, the `update` handler additionally requires `COMPILED_FIRMWARE_LINK`; with `interpreted`, the link is optional. This condition is checked separately from the message schema using the Unit metadata.
+
+`state` requires `pu_commit_version`; other fields are optional. `mem_free` and `mem_alloc` are measured in bytes, `ifconfig` contains IP, netmask, gateway, and DNS, and `statvfs` contains the ten filesystem state values from the current protocol. `millis` retains its semantics: milliseconds since startup or Unix time in milliseconds. Unknown fields are rejected under the new format's general rule.
+
+In the new contract, `log` always sends a nonempty array, even for one entry. This simplifies the schema; the previous single-object form requires adaptation. `create_datetime` is an ISO 8601 time string; when absent, the Backend reception time is used. The handler validates the time format. Log batches must be split so that each fits within `max_bytes`.
+
 ## What the Metaschema Checks
 
 The full machine-readable metaschema belongs in Pepeunit. Authors only need the rules below; this is a new Pepeunit format, not JSON Schema written in YAML.
 
 | Fields | Allowed on | Rule |
 | -- | -- | -- |
-| `version` | `search` | Required supported version of the entire format |
+| `version` | `unit.yml` root | Required supported version of the entire format |
 | `type` | `search` | Required string: one value from `unit_types` |
-| `type` | ENV or IO value schema | Required; selected from `types` |
+| `execution_type` | `search` | Required string: one value from `execution_types` |
+| `base` | IO root | Reference to a base IO in the same direction; no sibling keys |
+| `type` | ENV or IO value schema | Required after expanding `base`; selected from `types` |
 | `min`, `max` | `int`, `number` | Inclusive bounds; `min <= max` |
 | `enum` | Scalar | A nonempty list of distinct values of the declared type |
 | `format` | `string` | Selected from the dictionary; UUID validation is explicitly enforced |
@@ -297,6 +413,7 @@ The full machine-readable metaschema belongs in Pepeunit. Authors only need the 
 | `min_items`, `max_items` | `array` | Nonnegative integer length bounds |
 | `optional` | Object field or ENV setting | Allows the field to be omitted |
 | `nullable` | Any JSON type | Additionally allows `null` |
+| `example` | ENV | Required; must pass the variable schema validation; never inserted automatically |
 | `default`, `secret` | ENV | The default must pass validation; secrets are hidden in diagnostics |
 | `description` | Any value | Text; required for IO |
 | `role`, `codec`, `max_bytes` | IO root | Role is required; the byte limit must be positive |
