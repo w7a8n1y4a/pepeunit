@@ -104,10 +104,13 @@ Example message for `set_speed`:
 | `actor` | Performs actions in the physical world | Fan, relay, actuator |
 | `controller` | Receives information from `sensor` Units, makes decisions, and sends commands to `actor` Units | A regulator that turns on a fan based on temperature |
 | `observer` | Analyzes or accumulates sensor information without controlling `actor` Units | Measurement history collector |
+| `gateway` | Relays data and commands between Pepeunit and devices using an external protocol | ZigBee, LoRa, or Meshtastic gateway |
 
-A Unit has exactly one of these four types. `search.type` is a string, not a list; missing types, unknown values, or multiple types are rejected during registration. The Unit type describes its purpose, while `role` describes an individual Input or Output. For example, an `actor` can publish its state while remaining an `actor`.
+A Unit has exactly one of these five types. `search.type` is a string, not a list; missing types, unknown values, or multiple types are rejected during registration. The Unit type describes its purpose, while `role` describes an individual Input or Output. For example, an `actor` can publish its state while remaining an `actor`.
 
 A ventilation system can be split as follows: a `sensor` publishes temperature, a `controller` receives it and sends commands to an `actor`, and an `observer` receives readings to store their history. The Unit type does not replace compatibility checks for individual IOs.
+
+For a `gateway`, the schema describes only the gateway's own ENV and Input/Output on the Pepeunit side. Devices behind the gateway and their protocols are not described in this schema. Developers of `controller` Units that work through the gateway are responsible for handling those device protocols, constructing commands, and interpreting responses. Validating the gateway's IO does not confirm correct interaction with devices behind it.
 
 The required `search.execution_type` field specifies how the Unit program runs:
 
@@ -267,7 +270,7 @@ Unit authors do not write this file. This `dictionary.yml` example defines allow
 ```yaml
 version: 1
 
-unit_types: [sensor, actor, controller, observer]
+unit_types: [sensor, actor, controller, observer, gateway]
 execution_types: [interpreted, compiled]
 types: [bool, int, number, string, object, array, any, bytes]
 codecs: [json, utf8, bytes]
@@ -382,7 +385,7 @@ output:
 - `base` selects an entry from the matching dictionary section for `version`. The Backend expands it into a complete schema before validation and topic generation. Sibling keys alongside `base` are forbidden: the standard contract cannot be overridden.
 - Base IO names are reserved in their respective direction. The IO name must match the `base` value; unknown references or references from the other direction are rejected. Authors provide full schemas for other IOs, such as `set_speed` above.
 - Base IOs are not added automatically. Declaring one means the firmware implements its behavior; the Backend only sends declared commands. `log_sync` requires the `log` Output, and `update` requires the `state` Output to confirm the program version.
-- Base IOs are available to all four Unit types. Maintaining the Unit itself, including restarting a `sensor`, does not change its type.
+- Base IOs are available to all five Unit types. Maintaining the Unit itself, including restarting a `sensor`, does not change its type.
 - In `io_topics.yml`, base and author-defined IOs share the `input` and `output` sections and receive `domain.com/<uuid>` addresses. No additional sections or `/pepeunit` suffix are needed. The Backend retains the base IO designation: service commands, state, and logs are available to the Unit itself and authorized Pepeunit management, and do not participate in user Output → Input connections.
 
 The base `reset` message is `{"COMMAND":"Reset"}`. Commands retain the existing protocol names and fields; `env_update` now updates `.env`, and `schema_update` updates `io_topics.yml`. With `search.execution_type: compiled`, the `update` handler additionally requires `COMPILED_FIRMWARE_LINK`; with `interpreted`, the link is optional. This condition is checked separately from the message schema using the Unit metadata.
