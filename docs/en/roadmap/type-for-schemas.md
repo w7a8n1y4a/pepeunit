@@ -4,32 +4,44 @@ A proposed format. Authors write concise YAML; the Backend checks it and builds 
 
 | File | Created by | Contents |
 | -- | -- | -- |
-| `serach.yml` | Unit author | Purpose, platforms, hardware, behavior |
-| `unit_schema.yml` | Unit author | Settings and Input/Output types |
+| `unit.yml` | Unit author | Unit description and type, settings, and Input/Output types |
 | `.env` | Backend | Settings for a specific Unit |
 | `io_topics.yml` | Backend | Topics for a specific Unit |
 
+The Unit repository contains one author-maintained schema file at its root: `unit.yml`. It has exactly four required sections: `search`, `env`, `input`, and `output`. Unused `env`, `input`, or `output` sections are empty maps `{}`.
+
+Pepeunit reads `unit.yml` and generates `.env` for a specific physical Unit using its selected settings. The Unit starts with this `.env`, then downloads its own `io_topics.yml` from Pepeunit using the connection and authentication settings in `.env`. Once it has the topics, the Unit subscribes to its Inputs and publishes to its Outputs.
+
 The device only needs `.env` and `io_topics.yml`. No `.env.example` is needed.
 
-## unit_schema.yml
+## unit.yml
 
-An example of a new fan controller contract, not a ready-to-use configuration for existing firmware.
+An example of a new actuator Unit (`actor`) contract that controls a fan through incoming commands, not a ready-to-use configuration for existing firmware.
 
 ```yaml
-version: 1
+search:
+  version: 1
+  type: actor
+  name: garage-fan
+  summary: Controls a fan through incoming commands.
+  tags: [garage, ventilation]
+  platforms: [esp32]
+  hardware:
+    - Fan with a suitable PWM driver.
+  behavior:
+    manual: >
+      set_speed sets the power level for duration seconds.
+      A new command replaces the previous one and restarts the timer.
+      When the timer expires, the power level is set to 0%.
+      The power level represents the PWM duty cycle.
+    reporting: Publishes the requested power level once per second.
+    limitations: Does not measure RPM or confirm physical rotation.
 
 env:
   FAN_PIN:
     type: int
     min: 0
     description: GPIO used to control the fan.
-  TARGET_TEMP:
-    type: number
-    min: 0
-    max: 80
-    unit: Cel
-    default: 30
-    description: Temperature threshold for turning the fan on.
   WIFI_PASSWORD:
     type: string
     secret: true
@@ -51,14 +63,6 @@ input:
       duration: {type: int, min: 1, max: 3600, unit: s}
 
 output:
-  temperature:
-    type: number
-    min: -55
-    max: 125
-    unit: Cel
-    role: measurement
-    description: Temperature reported by the sensor.
-
   speed:
     type: int
     min: 0
@@ -85,32 +89,24 @@ Example message for `set_speed`:
 - ENV supports scalar values: `bool`, `int`, `number`, and `string`, optionally with `nullable`. The Backend adds standard `PU_*` settings.
 - Unknown keys, duplicate YAML keys, invalid types, and unsupported combinations are rejected during registration.
 
-`version: 1` selects **one immutable revision of the format, metaschema, and dictionary**. There are no separate `profile` or `dictionary_version` fields. Changing the rules requires a new version; existing contracts continue using theirs.
+`search.version: 1` selects **one immutable revision of the format, metaschema, and dictionary**. There are no separate `profile` or `dictionary_version` fields. Changing the rules requires a new version; existing contracts continue using theirs.
 
-## serach.yml
+## search and Unit Type
 
-```yaml
-version: 1
-name: garage-fan
-summary: Activates ventilation based on temperature and accepts manual commands.
-tags: [garage, ventilation, temperature]
-platforms: [esp32]
-hardware:
-  - DS18B20 temperature sensor.
-  - Fan with a suitable PWM driver.
-behavior:
-  automatic: >
-    Sets the power level to 100% when the temperature exceeds TARGET_TEMP,
-    otherwise to 0%. The power level represents the PWM duty cycle.
-  manual: >
-    set_speed sets the power level for duration seconds.
-    A new command replaces the previous one and restarts the timer.
-    Automatic control resumes when the timer expires.
-  reporting: Publishes the temperature and requested power level once per second.
-  limitations: Does not measure RPM or confirm physical rotation.
-```
+`search` contains discovery metadata: name, summary, tags, platforms, hardware, and behavior. `search.version` specifies the version of the entire `unit.yml` format, while the required `search.type` field specifies the Unit type.
 
-The registry stores both files from the same repository version. MCP can return behavior descriptions, settings, or a specific IO separately, without requiring the entire README to be read.
+| Type | Purpose | Example |
+| -- | -- | -- |
+| `sensor` | Only reads and publishes information; does not control physical devices | Temperature sensor |
+| `actor` | Performs actions in the physical world | Fan, relay, actuator |
+| `controller` | Receives information from `sensor` Units, makes decisions, and sends commands to `actor` Units | A regulator that turns on a fan based on temperature |
+| `observer` | Analyzes or accumulates sensor information without controlling `actor` Units | Measurement history collector |
+
+A Unit has exactly one of these four types. `search.type` is a string, not a list; missing types, unknown values, or multiple types are rejected during registration. The Unit type describes its purpose, while `role` describes an individual Input or Output. For example, an `actor` can publish its state while remaining an `actor`.
+
+A ventilation system can be split as follows: a `sensor` publishes temperature, a `controller` receives it and sends commands to an `actor`, and an `observer` receives readings to store their history. The Unit type does not replace compatibility checks for individual IOs.
+
+The registry stores `unit.yml` from the selected repository version. MCP can return behavior descriptions, settings, or a specific IO separately, without requiring the entire README to be read.
 
 ## .env
 
@@ -118,7 +114,6 @@ Generated by the Backend. Secrets are placeholders, and only some standard setti
 
 ```dotenv
 FAN_PIN=4
-TARGET_TEMP=30
 WIFI_PASSWORD="example-password"
 PU_DOMAIN="domain.com"
 PU_MQTT_HOST="emqx.domain.com"
@@ -132,7 +127,7 @@ Strings use JSON quoting and escaping. Numbers, booleans, and `null` are unquote
 
 ## io_topics.yml
 
-Generated by the Backend. The IO entries match `unit_schema.yml`.
+Generated by the Backend for a specific Unit; the Unit downloads this file after startup. Its IO entries match the `input` and `output` sections in `unit.yml`.
 
 ```yaml
 version: 1
@@ -142,7 +137,6 @@ input:
   reset: domain.com/9d0c2f4d-108e-488a-85e5-6040ef3d8425
   set_speed: domain.com/2d98b4ba-c935-4379-8e1a-520e76018c17
 output:
-  temperature: domain.com/7279d28d-53b6-4866-99da-0b81bc1cc025
   speed: domain.com/d76b4234-3997-4a4a-a113-6d1c21d6b84a
 ```
 
@@ -152,7 +146,7 @@ MessageProcessor subscribes to `domain.com/+`: both Input and Output are covered
 
 ## Other Data Types
 
-Fragments from separate version 1 `unit_schema.yml` files.
+Fragments from separate version 1 `unit.yml` files.
 
 ### Arbitrary JSON and an Object with Arbitrary Content
 
@@ -257,6 +251,7 @@ Unit authors do not write this file. This `dictionary.yml` example lists allowed
 ```yaml
 version: 1
 
+unit_types: [sensor, actor, controller, observer]
 types: [bool, int, number, string, object, array, any, bytes]
 codecs: [json, utf8, bytes]
 roles: [measurement, state, event, command]
@@ -288,7 +283,9 @@ The full machine-readable metaschema belongs in Pepeunit. Authors only need the 
 
 | Fields | Allowed on | Rule |
 | -- | -- | -- |
-| `type` | Any value | Required; selected from the dictionary |
+| `version` | `search` | Required supported version of the entire format |
+| `type` | `search` | Required string: one value from `unit_types` |
+| `type` | ENV or IO value schema | Required; selected from `types` |
 | `min`, `max` | `int`, `number` | Inclusive bounds; `min <= max` |
 | `enum` | Scalar | A nonempty list of distinct values of the declared type |
 | `format` | `string` | Selected from the dictionary; UUID validation is explicitly enforced |
