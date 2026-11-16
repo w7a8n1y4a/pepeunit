@@ -12,11 +12,10 @@
 - `is_compilable_unit` теперь определяется из `unit.yml`
 - Соединяя `UnitIO` у которых одна величина но разные размерности, `messageProcessor` будет делать преобразование при пересылке
 - `Backend` научится считать максимальный размер `.env`, это сильно упростит автоматизированную прошивку в будущем
-- `unit.yml` пишется строго на английском
+- `unit.yml` и словарь схем пишутся строго на английском. Вынужденная мера для оптимизации `MCP`
+- добавляется ошибка обработки последнего сообщения у `UnitIO`, чтобы можно было понять почему `MessageProcessor` отклонил
 
 ## unit.yml
-
-Пример нового контракта исполнительного Unit (`actor`), управляющего вентилятором по входящим командам. Это не готовая конфигурация существующей прошивки.
 
 ```yaml
 version: 1
@@ -25,31 +24,32 @@ search:
   type: actor
   execution_type: compiled
   name: garage-fan
-  summary: Управляет вентилятором по входящим командам.
+  summary: Controls a fan through incoming commands.
   tags: [garage, ventilation]
   platforms: [esp32]
   hardware:
-    - Вентилятор с подходящим PWM-драйвером.
+    - Fan with a suitable PWM driver.
   behavior:
     manual: >
-      set_speed задаёт мощность на duration секунд.
-      Новая команда заменяет предыдущую и запускает срок заново.
-      После истечения срока мощность устанавливается в 0%.
-      Мощность означает заполнение PWM.
-    reporting: Публикует заданную мощность раз в секунду.
-    limitations: Не измеряет обороты и не подтверждает физическое вращение.
+      set_speed sets the power level for duration seconds.
+      A new command replaces the previous one and restarts the timer.
+      When the timer expires, the power level is set to 0%.
+      The power level represents the PWM duty cycle.
+    reporting: Publishes the requested power level once per second.
+    limitations: Does not measure RPM or confirm physical rotation.
 
 env:
   FAN_PIN:
     type: int
     min: 0
     example: 4
-    description: GPIO управления вентилятором.
+    description: GPIO used to control the fan.
   WIFI_PASSWORD:
     type: string
+    max_bytes: 128
     secret: true
     example: "example-password"
-    description: Пароль Wi-Fi сети.
+    description: Wi-Fi network password.
 
 input:
   reset: {base: reset}
@@ -57,7 +57,8 @@ input:
   set_speed:
     type: object
     role: command
-    description: Задаёт мощность вентилятора на указанное время.
+    qos: 1
+    description: Sets the fan power level for the specified duration.
     fields:
       speed: {type: int, min: 0, max: 100, unit: '%'}
       duration: {type: int, min: 1, max: 3600, unit: s}
@@ -71,7 +72,7 @@ output:
     max: 100
     unit: '%'
     role: state
-    description: Заданная мощность вентилятора, не измеренные обороты.
+    description: Requested fan power level, not measured RPM.
 ```
 
 ### Произвольный JSON и объект с произвольной частью
@@ -80,17 +81,18 @@ output:
 output:
   anything:
     type: any
+    max_bytes: 2048
     role: event
-    description: Любое JSON-значение, включая null.
+    description: Any JSON value, including null.
 
   event:
     type: object
     role: event
-    description: Событие с произвольным содержимым.
+    description: An event with arbitrary content.
     fields:
-      kind: {type: string, enum: [measurement, alert]}
-      data: {type: any}
-      note: {type: string, optional: true}
+      kind: {type: string, max_bytes: 16, enum: [measurement, alert]}
+      data: {type: any, max_bytes: 2048}
+      note: {type: string, max_bytes: 256, optional: true}
 ```
 
 ### Массив, текст и байты
@@ -99,23 +101,24 @@ output:
 output:
   readings:
     type: array
-    items: {type: number, min: -55, max: 125, unit: Cel}
+    items: {type: float, min: -55, max: 125, unit: Cel}
     max_items: 16
     role: measurement
-    description: Массив показаний температуры.
+    description: An array of temperature readings.
 
   button:
     type: string
+    max_bytes: 16
     codec: utf8
     enum: [Left, Right, One, Double, Long]
     role: event
-    description: Действие пользователя; текст без JSON-кавычек.
+    description: A user action expressed as text without JSON quotes.
 
   packet:
     type: bytes
     max_bytes: 220
     role: event
-    description: Непрозрачный радиопакет.
+    description: An opaque radio packet.
 ```
 
 ### Команда с вариантами
@@ -127,7 +130,8 @@ input:
   relay:
     type: object
     role: command
-    description: Установить состояние или включить на время.
+    qos: 1
+    description: Sets the state or turns the relay on for a specified duration.
     variants:
       set:
         enabled: {type: bool}
@@ -149,10 +153,11 @@ input:
 env:
   CLICK_MESSAGE:
     type: string
+    max_bytes: 256
     nullable: true
     default: null
     example: "click"
-    description: null отключает отправку, пустая строка отправляет пустой payload.
+    description: null disables sending; an empty string sends an empty payload.
 ```
 
 ### Универсальный пульт
@@ -162,31 +167,17 @@ output:
   send_command:
     type: object
     role: command
+    qos: 1
     routing: selected-link
-    description: Отправить JSON в Input выбранной связи.
+    description: Sends JSON to the Input of the selected connection.
     fields:
-      link_id: {type: string, format: uuid}
-      data: {type: any}
+      link_id: {type: string, max_bytes: 36, format: uuid}
+      data: {type: any, max_bytes: 2048}
 ```
 
+### search и тип Unit
 
-## Правила короткой записи
-
-- Все перечисленные поля обязательны. `optional: true` разрешает отсутствие, `nullable: true` — значение `null`.
-- В объекте разрешены только перечисленные `fields`. `extra: true` разрешает дополнительные поля с произвольными JSON-значениями.
-- Предел сообщения по умолчанию — 4096 байт. `max_bytes` на IO меняет его; ограничение проверяется до декодирования.
-- `role` и `description` обязательны в итоговой схеме IO; при использовании `base` они берутся из словаря. У полей объекта и ENV они не требуются; описание рекомендуется.
-- Каждая переменная в `env` требует `example`, в том числе при `optional: true` или наличии `default`. Пример должен соответствовать типу и всем ограничениям переменной; `example: null` допустим только при `nullable: true`. Отсутствующий или невалидный пример отклоняется при регистрации. `example` служит подсказкой при настройке и не подставляется в `.env` вместо значения или `default`. Для `secret: true` указывается вымышленное значение.
-- ENV содержит скалярные значения: `bool`, `int`, `number`, `string`, с возможностью `nullable`. Стандартные `PU_*` добавляет Backend.
-- Неизвестные ключи, дубли YAML-ключей, неверные типы и неподдерживаемые сочетания отклоняются при регистрации.
-
-`version: 1` выбирает **единую неизменяемую редакцию формата, метасхемы и словаря**. Отдельных `profile` и `dictionary_version` нет. Обновление правил требует новой версии; существующие контракты продолжают использовать свою.
-
-## search и тип Unit
-
-`search` содержит метаданные для поиска: имя, краткое описание, теги, платформы, оборудование и поведение.
-
-Обязательное поле `search.type` задаёт тип Unit:
+`search.type` задаёт тип Unit:
 
 | Тип | Назначение | Пример |
 | -- | -- | -- |
@@ -196,7 +187,7 @@ output:
 | `observer` | Анализирует или накапливает информацию от сенсоров, не управляя `actor` | Сборщик истории измерений |
 | `gateway` | Передаёт данные и команды между Pepeunit и устройствами с внешним протоколом | Шлюз ZigBee, LoRa или Meshtastic |
 
-Обязательное поле `search.execution_type` задаёт способ исполнения программы Unit:
+`search.execution_type` задаёт способ исполнения программы Unit:
 
 | Значение | Способ исполнения |
 | -- | -- |
@@ -205,7 +196,7 @@ output:
 
 ## .env
 
-Генерируется Backend. Секреты в примере условные, стандартные переменные показаны частично.
+- Генерируется Backend. Секреты в примере условные, стандартные переменные показаны частично.
 
 ```dotenv
 FAN_PIN=4
@@ -221,98 +212,95 @@ PU_CONFIG_REVISION=12
 
 ## io_topics.yml
 
-Генерируется Backend для конкретного Unit; Unit сам скачивает этот файл после запуска. Состав IO соответствует разделам `input` и `output` в `unit.yml`.
-
 ```yaml
 version: 1
 
 input:
-  reset: domain.com/9d0c2f4d-108e-488a-85e5-6040ef3d8425
-  set_speed: domain.com/2d98b4ba-c935-4379-8e1a-520e76018c17
+  reset:
+    topic: domain.com/9d0c2f4d-108e-488a-85e5-6040ef3d8425
+    qos: 1
+  set_speed:
+    topic: domain.com/2d98b4ba-c935-4379-8e1a-520e76018c17
+    qos: 1
 output:
-  state: domain.com/7279d28d-53b6-4866-99da-0b81bc1cc025
-  speed: domain.com/d76b4234-3997-4a4a-a113-6d1c21d6b84a
+  state:
+    topic: domain.com/7279d28d-53b6-4866-99da-0b81bc1cc025
+  speed:
+    topic: domain.com/d76b4234-3997-4a4a-a113-6d1c21d6b84a
 ```
-
-- `version` - это ревизия `io_topics.yml`, по аналогии с `version` из `unit.yml`
-
-MessageProcessor подписывается на `domain.com/+`: Input и Output попадают в одну подписку. DataPipe работает на обоих направлениях. Связи Output → Input хранятся на сервере; полученный Input повторно не маршрутизируется. Unit публикует собственные Output и подписывается на собственные Input.
-
-Ограничение частоты сообщений применяется на уровне MQTT-брокера. Допустимое число сообщений берётся напрямую из БД Pepeunit для конкретного Unit. Это серверная настройка; она не входит в `unit.yml`, словарь схем или генерируемые `.env` и `io_topics.yml`.
-
-
 
 ## Словарь платформы
 
-Автор Unit этот файл не пишет. Пример `dictionary.yml` описывает допустимые значения формата и базовые служебные Input/Output. Их схемы и поведение едины для платформы.
+- `dictionary.yml` описывает допустимые значения формата и базовые служебные Input/Output. Их схемы и поведение едины для платформы.
 
 ```yaml
 version: 1
 
 unit_types: [sensor, actor, controller, observer, gateway]
 execution_types: [interpreted, compiled]
-types: [bool, int, number, string, object, array, any, bytes]
-codecs: [json, utf8, bytes]
+types: [bool, int, float, string, object, array, any, bytes]
 roles: [measurement, state, event, command]
 platforms: [esp8266, esp32, esp32s3, esp32c6, esp32c3, linux, windows, macos]
 formats: [uuid]
 routing: [broadcast, selected-link]
 
-units:
-  Cel: Градус Цельсия
-  '%': Процент
-  s: Секунда
-  ms: Миллисекунда
-  Hz: Герц
+units_of_measurement:
+  standard: UCUM
+  version: '2.2'
 
 input:
   update:
     type: object
     role: command
-    description: Обновить программу Unit до указанной версии.
+    qos: 1
+    description: Update the Unit program to the specified version.
     fields:
-      COMMAND: {type: string, enum: [Update]}
-      PU_COMMIT_VERSION: {type: string}
-      COMPILED_FIRMWARE_LINK: {type: string, optional: true}
+      COMMAND: {type: string, max_bytes: 16, enum: [Update]}
+      PU_COMMIT_VERSION: {type: string, max_bytes: 128}
+      COMPILED_FIRMWARE_LINK: {type: string, max_bytes: 2048, optional: true}
   env_update:
     type: object
     role: command
-    description: Скачать и применить актуальный .env.
+    qos: 1
+    description: Download and apply the current .env.
     fields:
-      COMMAND: {type: string, enum: [EnvUpdate]}
+      COMMAND: {type: string, max_bytes: 16, enum: [EnvUpdate]}
   schema_update:
     type: object
     role: command
-    description: Скачать актуальный io_topics.yml и обновить подписки.
+    qos: 1
+    description: Download the current io_topics.yml and update subscriptions.
     fields:
-      COMMAND: {type: string, enum: [SchemaUpdate]}
+      COMMAND: {type: string, max_bytes: 16, enum: [SchemaUpdate]}
   log_sync:
     type: object
     role: command
-    description: Отправить накопленные логи через Output log.
+    qos: 1
+    description: Send stored logs through the log Output.
     fields:
-      COMMAND: {type: string, enum: [LogSync]}
+      COMMAND: {type: string, max_bytes: 16, enum: [LogSync]}
   reset:
     type: object
     role: command
-    description: Перезапустить устройство или программу.
+    qos: 1
+    description: Restart the device or program.
     fields:
-      COMMAND: {type: string, enum: [Reset]}
+      COMMAND: {type: string, max_bytes: 16, enum: [Reset]}
 
 output:
   state:
     type: object
     role: state
-    description: Сообщить версию программы и состояние системы.
+    description: Report the program version and system state.
     fields:
-      pu_commit_version: {type: string}
-      millis: {type: number, min: 0, unit: ms, optional: true}
-      mem_free: {type: number, min: 0, optional: true}
-      mem_alloc: {type: number, min: 0, optional: true}
-      freq: {type: number, min: 0, unit: Hz, optional: true}
+      pu_commit_version: {type: string, max_bytes: 128}
+      millis: {type: float, min: 0, unit: ms, optional: true}
+      mem_free: {type: float, min: 0, optional: true}
+      mem_alloc: {type: float, min: 0, optional: true}
+      freq: {type: float, min: 0, unit: Hz, optional: true}
       ifconfig:
         type: array
-        items: {type: string}
+        items: {type: string, max_bytes: 45}
         min_items: 4
         max_items: 4
         optional: true
@@ -325,25 +313,23 @@ output:
   log:
     type: array
     role: event
-    description: Передать пакет записей журнала.
+    description: Send a batch of log entries.
     min_items: 1
     items:
       type: object
       fields:
-        level: {type: string, enum: [Debug, Info, Warning, Error, Critical]}
-        text: {type: string}
-        create_datetime: {type: string, optional: true}
+        level: {type: string, max_bytes: 16, enum: [Debug, Info, Warning, Error, Critical]}
+        text: {type: string, max_bytes: 4096}
+        create_datetime: {type: string, max_bytes: 64, optional: true}
 
 defaults:
   codec: json
-  max_bytes: 4096
   optional: false
   nullable: false
   extra: false
   routing: broadcast
+  qos: 0
 ```
-
-Коды единиц — поддерживаемый набор UCUM. У `bytes` всегда бинарное кодирование; `any` означает любое JSON-значение, не произвольные байты. У `any` допустим `null` независимо от `nullable`.
 
 ### Подключение базовых IO
 
@@ -360,51 +346,3 @@ output:
   state: {base: state}
   log: {base: log}
 ```
-
-- `base` выбирает запись из одноимённого раздела словаря версии `version`. Backend разворачивает её в полную схему до валидации и генерации топиков. Соседние ключи у `base` запрещены: стандартный контракт нельзя переопределить.
-- Имена базовых IO зарезервированы в соответствующем направлении. Имя IO должно совпадать со значением `base`; неизвестная ссылка или ссылка из другого направления отклоняется. Остальные IO автор описывает полной схемой, как `set_speed` в примере выше.
-- Автоматически базовые IO не добавляются. Объявление означает, что прошивка реализует соответствующее поведение; Backend отправляет только объявленные команды. `log_sync` требует Output `log`, а `update` — Output `state` для подтверждения версии.
-- Базовые IO доступны всем пяти типам Unit. Обслуживание самого Unit, включая перезапуск `sensor`, не меняет его тип.
-- В `io_topics.yml` базовые и авторские IO находятся в общих `input` и `output` и получают адреса `domain.com/<uuid>`. Дополнительные разделы и постфикс `/pepeunit` не нужны. Backend сохраняет признак базового IO: служебные команды, состояние и логи доступны самому Unit и авторизованному управлению Pepeunit, не участвуют в пользовательских связях Output → Input.
-
-Для базового `reset` сообщение — `{"COMMAND":"Reset"}`. Команды сохраняют существующие имена и поля протокола; `env_update` теперь обновляет `.env`, а `schema_update` — `io_topics.yml`. При `search.execution_type: compiled` обработчик `update` дополнительно требует `COMPILED_FIRMWARE_LINK`; при `interpreted` ссылка не обязательна. Это условие проверяется отдельно от схемы сообщения с учётом метаданных Unit.
-
-`state` содержит обязательный `pu_commit_version`; остальные поля необязательны. `mem_free` и `mem_alloc` измеряются в байтах, `ifconfig` содержит IP, маску, шлюз и DNS, `statvfs` — десять значений состояния файловой системы из текущего протокола. `millis` сохраняет его семантику: миллисекунды с запуска либо Unix-время в миллисекундах. Неизвестные поля отклоняются по общему правилу нового формата.
-
-В новом контракте `log` всегда передаёт непустой массив, даже для одной записи. Это упрощает схему: прежний вариант с одиночным объектом требует адаптации. `create_datetime` — строка времени в ISO 8601; при отсутствии используется время приёма Backend. Проверка формата времени выполняется обработчиком. Пакеты логов нужно делить так, чтобы каждый укладывался в `max_bytes`.
-
-## Что проверяет метасхема
-
-Полная машинная метасхема хранится в Pepeunit. Автору достаточно этих правил; это новый формат Pepeunit, а не JSON Schema в YAML.
-
-| Поля | Где разрешены | Правило |
-| -- | -- | -- |
-| `version` | Корень `unit.yml` | Обязательная поддерживаемая версия всего формата |
-| `type` | `search` | Обязательная строка: одно значение из `unit_types` |
-| `execution_type` | `search` | Обязательная строка: одно значение из `execution_types` |
-| `base` | Корень IO | Ссылка на базовый IO того же направления; без соседних ключей |
-| `type` | Схема значения ENV или IO | Обязателен после раскрытия `base`, выбирается из `types` |
-| `min`, `max` | `int`, `number` | Включительные границы; `min <= max` |
-| `enum` | Скаляр | Непустой список разных значений указанного типа |
-| `format` | `string` | Значение из словаря; UUID проверяется явно |
-| `unit` | `int`, `number` | Значение из словаря |
-| `fields` | `object` | Словарь полей, в том числе пустой |
-| `variants` | `object` | Непустой словарь вариантов вместо `fields`; имя `action` зарезервировано |
-| `extra` | Объект с `fields` | Разрешает дополнительные поля |
-| `items` | `array` | Обязательная схема элемента |
-| `min_items`, `max_items` | `array` | Неотрицательные целые границы длины |
-| `optional` | Поле объекта или ENV | Разрешает отсутствие поля |
-| `nullable` | Любой JSON-тип | Дополнительно разрешает `null` |
-| `example` | ENV | Обязателен; значение проходит проверку по схеме переменной, автоматически не подставляется |
-| `default`, `secret` | ENV | Значение проходит проверку; секрет скрывается в диагностике |
-| `description` | Любое значение | Текст, обязателен у IO |
-| `role`, `codec`, `max_bytes` | Корень IO | Роль обязательна; положительный предел байт |
-| `routing` | Output | Обычная рассылка либо выбор связи; второй режим требует оболочки пульта |
-
-Объект задаёт ровно одно из `fields` или `variants`. `bytes` допустим только в корне IO; `utf8` — только для `string`. Общие ограничения ресурсов валидатора задаёт Backend. Допустимые GPIO, межполевые условия ENV, форматы бинарных пакетов и подтверждение исполнения требуют отдельных правил; типы сами их не проверяют.
-
-## Проверка связи через MCP
-
-Агент ищет Unit и предлагает связи. Backend проверяет роли, кодирование, типы, диапазоны, единицы и ограничения размера. Ответ содержит версии контрактов и результат: **совместимо по данным**, **нужно преобразование**, **проверка при доставке**, **несовместимо** или **недостаточно данных**.
-
-Одинаковые типы не доказывают одинаковое назначение: процент влажности и процент мощности — разные вещи. Описание помогает агенту выбрать связь, но не является формальным доказательством. Пока назначение не подтверждено, нельзя обещать автоматическую совместимость всей системы. Проверка сообщений также не подтверждает физическое исполнение команды.
