@@ -20,6 +20,7 @@
 1. Подбор аналогов Unit для замены
 1. Конструктор систем
 1. Обработка qos
+1. Генерация README.md
 
 База:
 - На устройство загружается только код в виде бинарников/raw и `.env` всё остальное уже в рантайме
@@ -39,16 +40,71 @@ search:
   type: actor
   execution_type: interpreted
   name: pwm-4pin-fan
-  summary: Controls a 4pin fan through incoming commands.
   platforms: [esp32, esp32s3, esp32c3]
-  behavior:
-    manual: >
-      set_speed sets the power level for duration seconds.
-      A new command replaces the previous one and restarts the timer.
-      When the timer expires, the power level is set to 0%.
-      The power level represents the PWM duty cycle.
-    reporting: Publishes the requested power level once per second.
-    limitations: Does not measure RPM or confirm physical rotation.
+  description: |
+    `set_speed` sets PWM duty to `speed`% for `duration` seconds.
+    New commands replace the previous one and restart the timer.
+    On expiry, PWM is 0%. Reports requested PWM every second.
+    Does not measure RPM or verify rotation.
+
+docs:
+  video:
+    preview: https://minio.pepemoss.com/public-data/video/hotkey_bublik_prev.jpg
+    link: https://youtu.be/kAPHAMLkP_A
+  schema:
+    link: https://minio.pepemoss.com/public-data/schema/schema_fan_4pin_unit.pn
+  images:
+    "Schema esp32s3 zero": https://minio.pepemoss.com/public-data/schema/control_panel_sh1106_esp32s3_zero.png
+    "Schema esp32c3 super mini": https://minio.pepemoss.com/public-data/schema/control_panel_sh1106_esp32c3_super_mini.png
+    "Schema esp8266 wemos d1 mini": https://minio.pepemoss.com/public-data/schema/control_panel_sh1106_esp8266_wemos_d1_mini.png
+  models:
+    "inside capsule": https://minio.pepemoss.com/public-data/model/control_panel_sh1106/v3/stl/capsule_insert.stl
+    "capsule_panel": https://minio.pepemoss.com/public-data/model/control_panel_sh1106/v3/stl/capsule_panel.stl
+  algorithm: |
+    ### Command handling
+
+    The Unit controls the fan through PWM. The `speed` value specifies
+    the duty cycle as a percentage, and `duration` specifies seconds.
+
+    1. Receive a `set_speed` command.
+    2. Apply the requested PWM duty cycle.
+    3. Start the timer for the requested duration.
+    4. Set the PWM duty cycle to 0% when the timer expires.
+
+    A new command replaces the previous command and restarts the timer.
+
+    ### Reporting and limitations
+
+    - Publish the requested duty cycle through the `speed` Output once per second.
+    - Report the requested value, not measured RPM.
+    - **Physical fan rotation is not verified.**
+
+  installation: |
+    ### Preparation
+
+    - Choose a supported ESP32 board and a compatible runtime for the Unit.
+    - Prepare a 4-pin fan, a suitable power supply, and a PWM driver.
+    - Follow the wiring diagram provided in `docs.schema`.
+
+    ### Setup
+
+    1. Connect the fan and PWM driver according to the wiring diagram.
+    2. Set `FAN_PIN` to the GPIO connected to the PWM driver.
+    3. Set `WIFI_PASSWORD` to the Wi-Fi network password.
+    4. Generate `.env` in Pepeunit for this Unit.
+    5. Upload the Unit code and `.env` to the device, then start the program.
+
+    The Unit downloads `io_topics.yml` at runtime and uses it to configure
+    its Input subscriptions and Output publications.
+
+    ### Verification
+
+    1. Send `{"speed": 50, "duration": 10}` to the `set_speed` Input.
+    2. Check that the `speed` Output reports `50` during the active command.
+    3. Check that the reported value returns to `0` after 10 seconds.
+
+    Observe the fan separately to verify its physical response.
+
 
 env:
   FAN_PIN:
