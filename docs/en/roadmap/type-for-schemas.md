@@ -7,6 +7,21 @@ New concept:
 | `.env` | Backend | Settings for a specific Unit |
 | `io_topics.yml` | Backend; no longer included in the archive | Topics for a specific Unit |
 
+What will rely on the new schemas:
+1. Generation of io_topics.yml and .env
+1. Unit search
+1. Data validation
+1. Type and unit conversions
+1. Partial typing for datapipe, possibly with suggestions for some parameters
+1. IO compatibility analysis
+1. Validation when entering Input values
+1. Update hints
+1. Device emulators with manually adjustable values
+1. Finding equivalent Units for replacement
+1. System builder
+1. QoS handling
+
+Basics:
 - Only the code as binaries or raw files and `.env` are uploaded to the device; everything else is handled at runtime.
 - `unit.yml` is retrieved from the target version as before.
 - `is_compilable_unit` is now determined from `unit.yml`.
@@ -22,13 +37,10 @@ version: 1
 
 search:
   type: actor
-  execution_type: compiled
-  name: garage-fan
-  summary: Controls a fan through incoming commands.
-  tags: [garage, ventilation]
-  platforms: [esp32]
-  hardware:
-    - Fan with a suitable PWM driver.
+  execution_type: interpreted
+  name: pwm-4pin-fan
+  summary: Controls a 4pin fan through incoming commands.
+  platforms: [esp32, esp32s3, esp32c3]
   behavior:
     manual: >
       set_speed sets the power level for duration seconds.

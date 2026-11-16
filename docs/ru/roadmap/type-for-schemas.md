@@ -7,6 +7,21 @@
 | `.env` | Backend | Значения настроек конкретного Unit |
 | `io_topics.yml` | Backend, но в архив он больше не кладётся | Топики конкретного Unit |
 
+Что в итоге будет завязано на новые схемы:
+1. Генерация io_topics.yml и .env
+1. Поиск по Unit
+1. Валидация данных
+1. Преобразование типов и размерностей
+1. Часть типизирования datapipe, возможно предлагать параметры частично
+1. Анализатор совместимости io
+1. Валидация про вводе значений в input
+1. Подсказки при обновлении
+1. Эмуляторы устройств с ручной регулировкой значений
+1. Подбор аналогов Unit для замены
+1. Конструктор систем
+1. Обработка qos
+
+База:
 - На устройство загружается только код в виде бинарников/raw и `.env` всё остальное уже в рантайме
 - `unit.yml` берётся как и раньше и таргет версии
 - `is_compilable_unit` теперь определяется из `unit.yml`
@@ -22,13 +37,10 @@ version: 1
 
 search:
   type: actor
-  execution_type: compiled
-  name: garage-fan
-  summary: Controls a fan through incoming commands.
-  tags: [garage, ventilation]
-  platforms: [esp32]
-  hardware:
-    - Fan with a suitable PWM driver.
+  execution_type: interpreted
+  name: pwm-4pin-fan
+  summary: Controls a 4pin fan through incoming commands.
+  platforms: [esp32, esp32s3, esp32c3]
   behavior:
     manual: >
       set_speed sets the power level for duration seconds.
