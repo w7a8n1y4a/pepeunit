@@ -5,7 +5,7 @@ DataPipe in Go becomes just one stage of MessageProcessor.
 ## MessageProcessor stages
 
 0. All subscriptions converge on `domain.com/+` through typing
-1. Count incoming messages and bytes, check limits
+1. Count incoming messages and bytes
 2. Validate against the schemas from [New schemas](./type-for-schemas.md)
 3. Convert units of measurement according to [New schemas](./type-for-schemas.md)
 4. Forward to other UnitIO topics
@@ -14,8 +14,8 @@ DataPipe in Go becomes just one stage of MessageProcessor.
 ## Moving subscriptions from Backend to MessageProcessor
 
 - Backend no longer subscribes to anything over MQTT
-- Backend no longer triggers Unit schema updates itself
-- Backend retains only EMQX configuration and access provisioning
+- Backend configures EMQX, grants access, and publishes commands to base Inputs. When a link is created or deleted, Backend still sends `SchemaUpdate` to the Unit on the Input side if that Unit declares the `schema_update` base Input.
+- EMQX enforces MQTT traffic limits. MessageProcessor counts the messages it receives from the broker, including those it subsequently rejects during validation.
 - Backend MQTT connections can be refactored
 
 ## Processing base topics
@@ -28,7 +28,7 @@ output:
 
 - Base Output UnitIO processing takes place entirely in MessageProcessor
 - `pepeunit_server` does not participate, except for topic authorization
-- All Inputs remain in `pepeunit_server`, since these are commands triggered through REST endpoints
+- Backend sends commands to base Inputs in response to REST requests or automatically when links change.
 
 ## Storing UnitIO load data
 
@@ -52,7 +52,6 @@ The `unit_io_resources_aggregation` table in ClickHouse:
 - Each UnitIO will have approximately 2160 history records over 90 days
 - The current hour is populated gradually, so the latest record allows current usage to be calculated from the start of the hour to the present. Accurate reads require `SUM(...) GROUP BY`, since merging is not guaranteed.
 - If UnitIO load is zero, no record is created
-- When a Unit exceeds its limits, the user receives an alert
 
 ### Populating the current hour
 

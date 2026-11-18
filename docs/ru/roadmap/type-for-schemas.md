@@ -227,6 +227,8 @@ env:
     description: null disables sending; an empty string sends an empty payload.
 ```
 
+`nullable: true` разрешает значение `null`. Его смысл определяет код Unit. В примере с `CLICK_MESSAGE` Unit пропускает публикацию при `null`, а при пустой строке публикует сообщение с пустой полезной нагрузкой.
+
 ### Универсальный пульт
 
 ```yaml

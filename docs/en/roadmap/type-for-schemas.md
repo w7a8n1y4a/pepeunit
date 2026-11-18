@@ -228,6 +228,8 @@ env:
     description: null disables sending; an empty string sends an empty payload.
 ```
 
+`nullable: true` allows the value `null`. The Unit's code determines what it means. In the `CLICK_MESSAGE` example, the Unit skips publication for `null` and publishes a message with an empty payload for an empty string.
+
 ### Universal Remote Control
 
 ```yaml
