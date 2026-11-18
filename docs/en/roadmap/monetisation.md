@@ -2,49 +2,71 @@
 
 ## Main points
 
-1. Turned on and off with a flag
-1. Monetization based on cryptocurrencies and the Telegram wallet
-1. The money goes to the holder of the Instance on which monetization is enabled, since running an instance is not an easy task
-1. In the future there may be a feature which, when enabled, sends money also to the creators of Pepeunit to a wallet, but spending from this wallet will be regulated. It is assumed that this feature will be provided under a special license, or will be a separate microservice altogether
-1. 100% unit test coverage for the money code
-1. 100% integration test coverage for the money code
-
-## Monetization mechanism
-
-The instance status is in [federation](/roadmap/federation). The counters are in [MessageProcessor](/roadmap/message-processor).
-
-Monetization is enabled only if the instance status is Yellow. All Unit are colored by their statistics:
-1. Green - resource consumption below the 50th percentile, low resource consumption, works for free - monetization is not required
-1. Yellow - resource consumption above the 50th percentile but below the 80th percentile
-1. Red - resource consumption above the 80th percentile
-
-Yellow and Red statuses spend the internal currency, the amount is deducted from the internal account every hour. When the amount runs out, the Unit is stopped.
-
-User balance:
-1. Free tokens, credited on the first day of every month in the amount set by the admin, do not accumulate
-1. Tokens topped up with crypto; the free tokens are spent first, and if they are not enough, the tokens honestly earned by the user start being deducted
-
-Admin capabilities:
-1. Setting the percentiles of yellow, green and red Unit
-1. The size of the monthly allowance for users
-1. A faucet for adding money to the account of everyone or of specific users
-1. Setting the price in the yellow and red percentile - in different regions, people have different purchasing power, ping is an important parameter after all, so there will be regionality
-
-## Parameters
-
-All monetization parameters and statuses must be included in the basic parameters of the instance, so that people can choose
-
-## Grafana board
-A publicly available monetization board on every instance, how much money came into the instance and how much was spent, over a certain time
-
-## Average message load values for repo registry
-
-This parameter must be added to the registry, without fail. It is desirable to show on the instance how much this or that registry will cost
+1. Enabled and disabled with a flag
+1. Monetization based on cryptocurrencies and the instance's Ethereum wallet
+1. The money goes to the holder of the Instance on which monetization is enabled
+1. 100% unit test coverage for code that handles money
+1. 100% integration test coverage for code that handles money
 
 ## Why is monetization needed at all?
 
-Monetization is the only way that is fair to users to give them access to the limited resources of instances. In essence, it is a publicly known rule by which Unit will be switched off when Instances are overloaded.
+Monetization is the only way that is fair to users to give them access to the limited resources of instances. It should be understood as a publicly known rule by which Unit are disabled when Instances are overloaded.
 
-At the same time, users will be able to bring their Unit back into operation, also by publicly known rules. The money from monetization goes to the Instance holders, which lets them have a financial cushion for running the instances
+Users will also be able to bring their Unit back into operation according to publicly known rules. The money from monetization goes to Instance holders, giving them a financial cushion for running their instances.
 
-The more popular an instance is, the harder it is to maintain, and the more funds the person who maintains it must have
+The more popular an instance is, the harder it is to maintain, and the more funds the person maintaining it needs.
+
+## Monetization mechanism
+
+The monetization module aims to prevent an instance from going down by responding to new Unit being created or existing Unit consuming more resources. The goal is to keep instance utilization below 90% of capacity, always reserving 10% for spikes from existing Unit. Users will always have an incentive to look for an instance with a lower rate.
+
+[MessageProcessor](/roadmap/message-processor) calculates the following (see [MessageProcessor](/roadmap/message-processor) for calculation details):
+
+1. How many resources each Unit consumes
+2. How many resources the instance has in total
+3. What percentage of resources is in use
+
+The monetization module automatically calculates the rate based on this data.
+
+The rate is a resource price multiplier for Unit:
+
+- The higher the rate, the more expensive it is to host a Unit on the instance
+- The lower the rate, the cheaper it is to host a Unit on the instance
+
+The monetization module aims to prevent an instance from going down by responding to new Unit being created or existing Unit consuming more resources. The goal is to keep instance utilization below 90% of capacity, always reserving 10% for spikes from existing Unit.
+
+- When the instance is empty, the rate is at its minimum. As load from Unit increases, the rate rises.
+- When the instance's rate rises quickly, Unit holders receive notifications so they know prices are increasing.
+- The rate grows exponentially: as instance utilization approaches 90%, the rate should skyrocket.
+- At low utilization, up to approximately 50–60%, the rate remains at its minimum.
+
+## User balance
+
+1. Free tokens are credited daily in an amount set by the Instance Owner
+    - A top-up cannot raise the free token balance above the target amount, so free tokens do not accumulate
+1. Paid tokens are topped up using crypto; free tokens are spent first, and paid tokens are spent last
+
+## Instance Owner
+
+1. Sets hardware limits:
+    - Network bandwidth
+    - The machine's monthly traffic limit
+1. Sets the daily free token allowance for the entire instance
+1. Can grant tokens at their discretion
+1. Sets the instance wallet address
+1. Sets the instance's base price
+    - For example, $200 means that at N% utilization, the Owner expects to receive 200 USDT
+    - There will be no other pricing parameters, to avoid overloading the Owner with settings
+1. Schedules downtime with alerts for users
+1. Can increase the number of Ethereum nodes
+
+## MessageProcessor changes
+
+- When a user runs out of tokens, message forwarding for their Unit is suspended
+
+## Wishlist
+
+- A publicly available monetization dashboard on every instance showing how much money came in and how much was spent over a specified period
+- A repo hosting cost metric so users can estimate the cost of hosting a particular repo
+- Expose monetization parameters in /instences/current
+- Rate forecasts for an hour, a week and a month

@@ -1,77 +1,15 @@
 # MessageProcessor
 
-DataPipe becomes a separate stage of MessageProcessor
-
-The main goal at this stage is two base tables in ClickHouse:
-
-1. Hourly use of VM resources by the instance
-1. Hourly resource usage by each Unit
-
-The current hour is updated once a minute. These tables provide usage totals for a period, consumption trends and the current instance status. Hourly totals do not preserve the history of each minute: monitoring remains responsible for detailed charts and short spikes
+DataPipe in Go becomes just one stage of MessageProcessor.
 
 ## MessageProcessor stages
 
-0. All subscriptions converge on `domain.com/+` through typing and the new approaches
+0. All subscriptions converge on `domain.com/+` through typing
 1. Count incoming messages and bytes, check limits
-2. Validate against the schema
-3. Convert units of measurement
+2. Validate against the schemas from [New schemas](./type-for-schemas.md)
+3. Convert units of measurement according to [New schemas](./type-for-schemas.md)
 4. Forward to other UnitIO topics
-5. Pass the original message to DataPipe
-
-- Stage outcomes are counted separately: accepted, rejected, forwarded, written
-- Limits are checked while processing a message, without waiting for statistics to be written to ClickHouse
-
-## Accumulation and writes
-
-1. A shared instance buffer accumulates usage by Unit and hour, similarly to DataPipe batches
-1. Each event updates numeric counters in memory; the accounting buffer does not store the messages themselves
-1. Changed records are sent in a single batch every 5 seconds or when the record count limit is reached. The batch is shared across the entire Pepeunit instance
-1. ClickHouse receives a new version of the accumulated total since the start of the hour, rather than an in-place row update: `100 → 230 → 310`, with `310` as the total
-1. Both tables use `ReplacingMergeTree` with a record version. Reads select the latest version of each key without waiting for background merges. Resending the same version does not increase usage
-1. A new accumulator is created at the start of each hour, and the previous hour's final total must be saved. The payer and accounting rules version are recorded; changes to either split the accumulated usage
-1. If several processes count Unit usage, the key includes the source and its epoch: the latest versions of their non-overlapping contributions are summed. A restart must not replace an existing total with a reset counter
-1. An unacknowledged batch is retained for retry, while new events continue to accumulate separately. A write failure does not clear the buffer
-
-- Messages, bytes and operations are stored as sums; average rates are calculated when reading
-- Counters are stored as columns in a single Unit record; a separate row for each metric is unnecessary
-- If the instance is down or a failure occurs, the hour is treated as an hour with no load, and users are not charged
-- Hourly history is retained for 90 days
-- Charge history is retained longer, but this is a future task; charges might be applied once a day, for example
-
-## Instance resources over time
-
-1. One active collector per instance updates its state once a minute and writes the accumulated total for the current hour to the VM resources table
-1. Logporter provides container CPU, RAM and network metrics; a separate VM exporter provides total capacity, usage and available resources under the effective limits
-1. Metrics include CPU-seconds, RAM, used and free disk space, disk operations and I/O bytes, and incoming and outgoing network bytes
-1. PostgreSQL and ClickHouse data sizes are obtained from the databases themselves. Connection pool, worker and queue occupancy, processing latency and errors are tracked separately
-1. Network speed limits by direction, the traffic quota and its billing period are configured in the instance settings or obtained from the provider
-1. Resource occupancy records retain the latest value, minimum, maximum and time integral; counters retain the increase over the hour. Observation duration and gaps are recorded so that missing data is not treated as zero load
-
-- VM integrals and peaks are estimates at the collection interval's resolution; averages are calculated using observation duration
-- The latest values allow instance status updates every minute, while history supports resource exhaustion forecasts
-- Prometheus remains the monitoring system; the ClickHouse tables are the source for usage calculations
-
-## Unit resources over time
-
-1. UnitIO events accumulate in the Unit's hourly counters: incoming messages and bytes, accepted and rejected messages, and completed transformations
-1. Outgoing messages and bytes are counted separately for each recipient after transformation. Broker acceptance is not equivalent to processing by the device
-1. Exchanges within the instance and with external instances are distinguished. External network traffic is accounted for at the network boundary, separately by direction and cost category
-1. DataPipe tracks confirmed writes and logical bytes written, current logical storage size and storage byte-seconds
-1. Storage size changes on writes, replacements, deletions and expiry. Byte-seconds accumulate even without new messages and are split at hour boundaries
-1. The payer is determined by the operation's rules. Internal platform retries must not increase billable usage again
-
-- Logical data size is calculated using fixed rules; physical database size belongs to instance resource usage
-- An owner's historical usage is calculated using the payer recorded at the time, rather than the Unit's current owner
-- Limits apply to both the Unit and its owner so that creating new Units cannot bypass restrictions
-
-## General approach to future monetization
-
-1. We know how hourly consumption is distributed across Units
-1. We know how many instance resources are occupied. This determines the pricing rate: the less total VM capacity is occupied, the lower the rate. The rate is calculated per hour
-1. The instance also knows users' resource allocations to avoid situations where they would allow users to occupy 120% of VM capacity
-1. The instance rate is calculated dynamically
-1. The instance always aims to keep 10% of capacity available to handle spikes and is willing to increase the rate to preserve that reserve
-1. The rate acts as a load regulator. It can be recalculated once a minute, with a guaranteed cap on its increase of N% over a specified time interval
+5. DataPipe processing
 
 ## Moving subscriptions from Backend to MessageProcessor
 
@@ -79,3 +17,95 @@ The current hour is updated once a minute. These tables provide usage totals for
 - Backend no longer triggers Unit schema updates itself
 - Backend retains only EMQX configuration and access provisioning
 - Backend MQTT connections can be refactored
+
+## Storing UnitIO load data
+
+For each UnitIO of either type, we need to know:
+
+1. Average requests per second, regardless of outcome: success, rejection, etc.
+2. Average bytes per second
+3. Growth in DataPipe storage volume
+
+The `unit_io_resources_aggregation` table in ClickHouse:
+
+1. `start_window_datetime` — the start of the window, at the start of an hour, e.g. 15:00
+2. `end_window_datetime` — the end of the window, e.g. 16:00
+3. `unit_io_uuid` — a reference to UnitIO
+4. `total_requests` — the total number of requests received or sent by UnitIO during the window
+5. `total_bytes` — the total number of bytes received or sent by UnitIO during the window
+6. `total_datapipe_bytes_increment` — how much data was added to DataPipe (the number of records multiplied by the size of one record in the target ClickHouse table)
+7. TTL — 90 days
+
+- `end_window_datetime - start_window_datetime` is always one hour
+- Each UnitIO will have approximately 2160 history records over 90 days
+- The current hour is populated gradually, so the latest record allows current usage to be calculated from the start of the hour to the present. Accurate reads require `SUM(...) GROUP BY`, since merging is not guaranteed.
+- If UnitIO load is zero, no record is created
+- When a Unit exceeds its limits, the user receives an alert
+
+### Populating the current hour
+
+A shared buffer, similar to DataPipe's, uses `settings.BufferFlushInterval` (default: 5 seconds) and `settings.BufferMaxSize` (default: 1000).
+
+Increments for all UnitIO are added to this buffer. When the buffer determines that it needs to flush, it inserts the changes into ClickHouse as a batch.
+
+## Storing Instance load data
+
+- All basic metrics come from Logporter. Even if they are not the most accurate, this keeps collection consistent across all instances.
+
+The instance must monitor:
+
+1. CPU — utilization percentage across all cores
+2. RAM — utilization percentage
+3. Network bandwidth utilization — a percentage
+    - Relative to the speed limit set by the Owner
+4. Total PostgreSQL data size — can be obtained through queries
+    - Relative to the available PostgreSQL capacity
+    - Configured in instance settings as `pu_instance_pg_size_limit`
+    - A possible default is 1 GB
+5. Total ClickHouse data size — can be obtained through queries
+    - Relative to the available ClickHouse capacity
+    - Configured in instance settings as `pu_instance_cc_size_limit`
+    - A possible default is 1 GB
+
+The `instance_resources_samples` table in ClickHouse:
+
+1. `create_datetime` — measurement time
+2. `cpu_percent`
+3. `ram_percent`
+4. `network_width_percent`
+5. `pu_instance_network_speed_limit` — the speed limit in bytes per second at measurement time, allowing approximate traffic consumption to be calculated
+6. `pg_disk_percent`
+7. `cc_disk_percent`
+8. TTL — 90 days
+
+### Data collection
+
+- Collect all metrics once a minute using Python code
+- If any metric exceeds 90%, notify the Owner without flooding them every minute; for example, send no more than one notification every 15 minutes across all metrics
+- Approximately 129600 records will be retained over 90 days
+
+### Network traffic
+
+- An important metric that often limits what a VM can do under a hosting provider's plan
+- The Owner can set a monthly traffic limit, for example 3 TB
+- The instance can estimate consumption using `instance_resources_samples.network_width_percent` and `instance_resources_samples.pu_instance_network_speed_limit`
+- Checking traffic consumption therefore requires a separate query
+
+## New instance_settings variables
+
+1. `pu_instance_pg_size_limit`
+    - In bytes, greater than 0
+    - Default: `2**30` — 1 GiB
+2. `pu_instance_cc_size_limit`
+    - In bytes, greater than 0
+    - Default: `2**30` — 1 GiB
+3. `pu_instance_network_speed_limit`
+    - In bytes per second, greater than 0
+    - Default: `2**24` — 16 MiB/s
+4. `pu_instance_network_monthly_traffic_limit`
+    - In bytes, greater than 0
+    - Default: `3 * 2**40` — 3 TiB
+5. `pu_instance_network_traffic_reset_day`
+    - Values from 1 to 31
+    - Default: 1
+    - If the month does not have that day, use its last day
