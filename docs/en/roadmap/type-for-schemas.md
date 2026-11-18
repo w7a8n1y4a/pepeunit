@@ -8,19 +8,19 @@ New concept:
 | `io_topics.yml` | Backend; no longer included in the archive | Topics for a specific Unit |
 
 What will rely on the new schemas:
-1. Generation of io_topics.yml and .env
-1. Unit search
-1. Data validation
-1. Type and unit conversions
-1. Partial typing for datapipe, possibly with suggestions for some parameters
-1. IO compatibility analysis
-1. Validation when entering Input values
-1. Update hints
-1. Device emulators with manually adjustable values
-1. Finding equivalent Units for replacement
-1. System builder
-1. QoS handling
-1. README.md generation
+
+1. Generation of `io_topics.yml` and `.env` from `unit.yml`
+1. More precise Unit search based on `unit.yml.search`
+1. Data validation within MessageProcessor
+1. Unit conversions within MessageProcessor
+1. QoS 0–1 handling throughout the stack, from the schema to the end Unit
+1. `README.md` generation, similar to the existing endpoint
+1. Partial typing for DataPipe, possibly with suggestions for some parameters (a separate endpoint)
+1. IO compatibility analysis (a separate endpoint)
+1. Validation when entering Input values (a separate endpoint)
+1. Unit update hints (a separate endpoint)
+
+- The endpoints must use a dedicated schema service and a separate router.
 
 Basics:
 - Only the code as binaries or raw files and `.env` are uploaded to the device; everything else is handled at runtime.
@@ -414,3 +414,56 @@ output:
   state: {base: state}
   log: {base: log}
 ```
+
+## Unit conversions
+
+- Only works between UnitIO entries representing the same physical quantity
+- For example, converting from millions of seconds to thousands of seconds
+
+## Type conversion and compatibility
+
+General rules:
+
+- Compatibility is checked in the Output → Input direction.
+- After conversion, the message must conform to the Input schema, including ranges, required fields, and size limits.
+- An incompatible message is rejected, and the error is recorded on UnitIO.
+
+| Output ↓ / Input → | bool | int | float | string | object | array | any | bytes |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **bool** | 🟩 | 🟩 | 🟩 | 🟥 | 🟥 | 🟥 | 🟩 | 🟥 |
+| **int** | 🟩 | 🟩 | 🟩 | 🟩 | 🟥 | 🟥 | 🟩 | 🟥 |
+| **float** | 🟩 | 🟩 | 🟩 | 🟩 | 🟥 | 🟥 | 🟩 | 🟥 |
+| **string** | 🟥 | 🟥 | 🟥 | 🟩 | 🟥 | 🟥 | 🟩 | 🟥 |
+| **object** | 🟥 | 🟥 | 🟥 | 🟥 | 🟨 | 🟥 | 🟩 | 🟥 |
+| **array** | 🟥 | 🟥 | 🟥 | 🟥 | 🟥 | 🟨 | 🟩 | 🟥 |
+| **any** | 🟨 | 🟨 | 🟨 | 🟨 | 🟨 | 🟨 | 🟩 | 🟥 |
+| **bytes** | 🟥 | 🟥 | 🟥 | 🟥 | 🟥 | 🟥 | 🟥 | 🟩 |
+
+Details:
+
+- 🟩 permits type conversion but does not override Input constraints: range, enum, format, size, and other conditions are checked after conversion.
+- Numbers ↔ bool: false → 0, true → 1; zero → false, any nonzero number → true. No rounding is applied first: 0.1 → true.
+- float → int: round to the nearest integer, with ties rounded away from zero: 1.5 → 2, -1.5 → -2. Overflow, NaN, and infinities are rejected.
+- Numbers → string: decimal representation without thousands separators, using a period as the decimal separator. Reverse conversion is not supported.
+- object → object: fields are matched by name and checked recursively using this table. `extra: true` on Input allows additional keys but does not waive required fields or validation of declared fields.
+- array → array: compatibility depends on item schemas and length limits. Items are converted recursively; an error in any item rejects the entire message.
+- any → a specific type: the link is allowed, but each message is evaluated using the value's actual type and this table. For example, a number from any can be passed to int, but an object cannot.
+- any contains JSON values, including null, but not raw bytes. Passing null to a specific type requires `nullable: true`.
+- Units and ranges: numeric conversion first converts units of the same physical quantity, then converts the type. Guaranteed compatibility requires the entire converted Output range to fit within the Input range.
+
+## Schema capabilities
+
+1. `README.md` generation, similar to the existing endpoint
+1. Partial typing for DataPipe, possibly with suggestions for some parameters (a separate endpoint)
+    - The schema validates `datapipe.yml` configuration.
+    - Validation covers data types and numeric limits.
+    - For example, an array type cannot use aggregation or the number type.
+    - The client has an IDE for editing YAML.
+1. IO compatibility analysis (a separate endpoint)
+    - Type compatibility is defined above.
+    - Declared ranges must be compatible: the Output range must fit within the Input range; otherwise, the link is incompatible.
+1. Validation when entering Input values (a separate endpoint)
+1. Unit update hints (a separate endpoint)
+    - Compare the previous and target version schemas and highlight potential breaking changes, such as a type change.
+    - Warn without blocking the update.
+    - Only applies to manual updates; automatic updates have no place to display warnings.

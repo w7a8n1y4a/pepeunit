@@ -18,6 +18,18 @@ DataPipe in Go becomes just one stage of MessageProcessor.
 - Backend retains only EMQX configuration and access provisioning
 - Backend MQTT connections can be refactored
 
+## Processing base topics
+
+```yaml
+output:
+  state: {base: state}
+  log: {base: log}
+```
+
+- Base Output UnitIO processing takes place entirely in MessageProcessor
+- `pepeunit_server` does not participate, except for topic authorization
+- All Inputs remain in `pepeunit_server`, since these are commands triggered through REST endpoints
+
 ## Storing UnitIO load data
 
 For each UnitIO of either type, we need to know:

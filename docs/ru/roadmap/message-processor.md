@@ -18,6 +18,18 @@ DataPipe на golang становится лишь 1 из этапов MessagePr
 - Backend оставляет себе только настройку EMQX и выдачу доступов
 - Можно будет на Backend провести рефакторинг MQTT-соединений
 
+## Обработка базовых топиков
+
+```yaml
+output:
+  state: {base: state}
+  log: {base: log}
+```
+
+- Обработка base Output UnitIO Идёт полностью на стороне MessageProcessor
+- peepunit_server никаким образом не участвует (кроме auth на топики)
+- Все Input напротив остаются в peepunit_server, т.к. это команды запускаемые с rest ручек
+
 ## Хранение данных о нагрузке UnitIO
 
 Для каждого UnitIO обоих типов, мы должны знать:
