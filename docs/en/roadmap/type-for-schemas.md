@@ -417,6 +417,8 @@ output:
   log: {base: log}
 ```
 
+- Each declared base Input or Output will now have its own UnitIO entity.
+
 ## Unit conversions
 
 - Only works between UnitIO entries representing the same physical quantity

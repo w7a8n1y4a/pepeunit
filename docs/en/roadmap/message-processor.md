@@ -14,7 +14,11 @@ DataPipe in Go becomes just one stage of MessageProcessor.
 ## Moving subscriptions from Backend to MessageProcessor
 
 - Backend no longer subscribes to anything over MQTT
-- Backend configures EMQX, grants access, and publishes commands to base Inputs. When a link is created or deleted, Backend still sends `SchemaUpdate` to the Unit on the Input side if that Unit declares the `schema_update` base Input.
+- Backend configures EMQX, grants access, and publishes commands to base Inputs.
+- Backend sends `SchemaUpdate` only on request.
+    - During an update, the Unit downloads `io_topics.yml` itself.
+    - Link changes do not require the Unit to download the file again.
+    - MessageProcessor synchronizes the links it uses to forward messages to other UnitIO topics.
 - EMQX enforces MQTT traffic limits. MessageProcessor counts the messages it receives from the broker, including those it subsequently rejects during validation.
 - Backend MQTT connections can be refactored
 
@@ -28,7 +32,7 @@ output:
 
 - Base Output UnitIO processing takes place entirely in MessageProcessor
 - `pepeunit_server` does not participate, except for topic authorization
-- Backend sends commands to base Inputs in response to REST requests or automatically when links change.
+- Backend can send a command to a base Input in response to a REST request.
 
 ## Storing UnitIO load data
 
@@ -120,3 +124,23 @@ The `instance_resources_samples` table in ClickHouse:
     - Values from 1 to 31
     - Default: 1
     - If the month does not have that day, use its last day
+
+## Schema synchronization
+
+The Go module `pepeunit_server/data_pipe` already synchronizes pipeline configurations. In `internal/datapipe/data_pipe_config_sync.go`, `LoadNodeConfigs` reads the configurations of active pipelines from PostgreSQL. `StartConfigSync` reloads all of them on a timer and after a batch of notifications from the `backend_data_pipe_nodes` Redis stream.
+
+The proposed MessageProcessor keeps a single in-memory snapshot of the schemas and links for every Input and Output on the instance, including base IOs. The DataPipe flag controls only the pipeline processing stage.
+
+### Snapshot contents
+
+- For each `unit_io_uuid`, Backend stores the corresponding Input or Output schema in PostgreSQL. It takes the schema from `unit.yml` for the target Unit version, resolves `base` references, and applies the defaults from `dictionary.yml`. MessageProcessor uses the UUID to look up the direction, validation rules, units of measurement, codec, QoS, and routing mode. The snapshot also includes the `base` identifier for each base IO and the DataPipe configuration for each enabled pipeline.
+- For each Output, MessageProcessor builds a list of `(link_id, input_uuid)` pairs from the `links` table. Each `link_id` is the UUID of a link. In `broadcast` mode, every Input in the list is a destination. In `selected-link` mode, MessageProcessor looks up the supplied `link_id` only among that Output's links.
+
+### When the snapshot is refreshed
+
+1. Before subscribing to `domain.com/+`, MessageProcessor reads the schemas, links, pipeline configurations, and their shared instance-wide revision from PostgreSQL in a single `REPEATABLE READ` transaction. It builds lookup tables keyed by UUID in Go and prepares the validation and conversion rules.
+2. When Backend adds or removes UnitIO entries or changes their schemas, links, or pipeline configurations, it increments the revision in the same transaction. This also applies when deleting a Unit cascades to its UnitIO entries and links. After the transaction commits, Backend sends a notification with the new revision to the `backend_message_processor` Redis stream.
+3. A dedicated goroutine reads the Redis stream and passes notifications to the synchronization goroutine. The latter collects a batch until the next `BufferFlushInterval` tick (5 seconds by default) or until it has `BufferMaxSize` events (1000). Once per batch, it compares the PostgreSQL revision with the revision of the active snapshot. It also checks every `ConfigSyncInterval` (60 seconds) independently of Redis to catch changes when a notification is lost.
+4. If the revisions differ, the synchronization goroutine reloads the entire snapshot and publishes it using `atomic.Pointer`. If the reload fails, it keeps the previous snapshot, logs the cause, and retries on the next timer tick. The MQTT handler reads the pointer once per message and uses that snapshot at every processing stage.
+
+For example, if a sensor sends to two Inputs and one link is deleted, the new snapshot lists only the remaining Input. Messages may still reach both Inputs between the commit and the snapshot switch. The Unit listens on its own Input, and MessageProcessor updates the list of destinations.
