@@ -123,7 +123,6 @@ input:
 
   set_speed:
     type: object
-    role: command
     qos: 1
     description: Sets the fan power level for the specified duration.
     fields:
@@ -138,7 +137,6 @@ output:
     min: 0
     max: 100
     unit: '%'
-    role: state
     description: Requested fan power level, not measured RPM.
 ```
 
@@ -149,12 +147,10 @@ output:
   anything:
     type: any
     max_bytes: 2048
-    role: event
     description: Any JSON value, including null.
 
   event:
     type: object
-    role: event
     description: An event with arbitrary content.
     fields:
       kind: {type: string, max_bytes: 16, enum: [measurement, alert]}
@@ -170,7 +166,6 @@ output:
     type: array
     items: {type: float, min: -55, max: 125, unit: Cel}
     max_items: 16
-    role: measurement
     description: An array of temperature readings.
 
   button:
@@ -178,13 +173,11 @@ output:
     max_bytes: 16
     codec: utf8
     enum: [Left, Right, One, Double, Long]
-    role: event
     description: A user action expressed as text without JSON quotes.
 
   packet:
     type: bytes
     max_bytes: 220
-    role: event
     description: An opaque radio packet.
 ```
 
@@ -196,7 +189,6 @@ output:
 input:
   relay:
     type: object
-    role: command
     qos: 1
     description: Sets the state or turns the relay on for a specified duration.
     variants:
@@ -235,7 +227,6 @@ env:
 output:
   send_command:
     type: object
-    role: command
     qos: 1
     routing: selected-link
     description: Sends JSON to the Input of the selected connection.
@@ -274,8 +265,6 @@ PU_DOMAIN=domain.com
 PU_MQTT_HOST=emqx.domain.com
 PU_MQTT_PORT=1883
 PU_AUTH_TOKEN=example-token
-PU_SCHEMA_REVISION=7
-PU_CONFIG_REVISION=12
 ...
 ```
 
@@ -300,7 +289,8 @@ output:
 
 ## Словарь платформы
 
-- `dictionary.yml` описывает допустимые значения формата и базовые служебные Input/Output. Их схемы и поведение едины для платформы.
+- `dictionary.yml` описывает допустимые значения формата и базовые служебные Input/Output.
+- Раздел `env` словаря описывает стандартные переменные `PU_*` для файла `.env`. Автору Unit достаточно описать собственные настройки в `unit.yml`. При генерации Backend берёт актуальные параметры инстанса и значения конкретного Unit. Поле `default` указывает штатное значение, если оно предусмотрено.
 
 ```yaml
 version: 1
@@ -308,7 +298,6 @@ version: 1
 unit_types: [sensor, actor, controller, observer, gateway]
 execution_types: [interpreted, compiled]
 types: [bool, int, float, string, object, array, any, bytes]
-roles: [measurement, state, event, command]
 platforms: [esp8266, esp32, esp32s3, esp32c6, esp32c3, linux, windows, macos]
 formats: [uuid]
 routing: [broadcast, selected-link]
@@ -317,10 +306,72 @@ units_of_measurement:
   standard: UCUM
   version: '2.2'
 
+env:
+  PU_DOMAIN:
+    type: string
+    description: Hostname or IP address of the Pepeunit instance.
+  PU_HTTP_TYPE:
+    type: string
+    enum: [http, https]
+    default: https
+    description: URL scheme selected by the backend secure setting.
+  PU_APP_PREFIX:
+    type: string
+    default: /pepeunit
+    description: Application path prefix on the backend.
+  PU_API_ACTUAL_PREFIX:
+    type: string
+    default: /api/v1
+    description: Path prefix for the active backend API version.
+  PU_MQTT_HOST:
+    type: string
+    description: Hostname or IP address of the MQTT broker.
+  PU_MQTT_PORT:
+    type: int
+    min: 1
+    max: 65535
+    default: 1883
+    description: MQTT broker port configured on the backend.
+  PU_MQTT_PING_INTERVAL:
+    type: int
+    default: 20
+    description: Interval between MQTT pings in seconds.
+  PU_MQTT_KEEPALIVE:
+    type: int
+    default: 60
+    description: MQTT keepalive interval in seconds from the instance settings.
+  PU_AUTH_TOKEN:
+    type: string
+    secret: true
+    description: Unit token for the backend API and MQTT broker.
+  PU_SECRET_KEY:
+    type: string
+    secret: true
+    description: Unit signing key encoded in Base64.
+  PU_ENCRYPT_KEY:
+    type: string
+    secret: true
+    description: Unit encryption key encoded in Base64.
+  PU_STATE_SEND_INTERVAL:
+    type: int
+    default: 60
+    description: Interval between Unit state reports in seconds from the instance settings.
+  PU_MIN_LOG_LEVEL:
+    type: string
+    enum: [Debug, Info, Warning, Error, Critical]
+    default: Debug
+    description: Minimum severity of Unit log entries.
+  PU_MAX_LOG_LENGTH:
+    type: int
+    default: 64
+    description: Maximum number of log entries stored on the Unit.
+  PU_COMMIT_VERSION:
+    type: string
+    description: Git commit selected for this Unit.
+
 input:
   update:
     type: object
-    role: command
     qos: 1
     description: Update the Unit program to the specified version.
     fields:
@@ -329,28 +380,24 @@ input:
       COMPILED_FIRMWARE_LINK: {type: string, max_bytes: 2048, optional: true}
   env_update:
     type: object
-    role: command
     qos: 1
     description: Download and apply the current .env.
     fields:
       COMMAND: {type: string, max_bytes: 16, enum: [EnvUpdate]}
   schema_update:
     type: object
-    role: command
     qos: 1
     description: Download the current io_topics.yml and update subscriptions.
     fields:
       COMMAND: {type: string, max_bytes: 16, enum: [SchemaUpdate]}
   log_sync:
     type: object
-    role: command
     qos: 1
     description: Send stored logs through the log Output.
     fields:
       COMMAND: {type: string, max_bytes: 16, enum: [LogSync]}
   reset:
     type: object
-    role: command
     qos: 1
     description: Restart the device or program.
     fields:
@@ -359,7 +406,6 @@ input:
 output:
   state:
     type: object
-    role: state
     description: Report the program version and system state.
     fields:
       pu_commit_version: {type: string, max_bytes: 128}
@@ -381,7 +427,6 @@ output:
         optional: true
   log:
     type: array
-    role: event
     description: Send a batch of log entries.
     min_items: 1
     items:
