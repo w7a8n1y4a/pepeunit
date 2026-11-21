@@ -1,9 +1,11 @@
 # Типизация для схем
 
-Новый концепт:
+Манифест Unit — единый контракт, который задаёт схемы `unit.yml` и `dictionary.yml` и правила их совместного применения. Оба файла указывают одну и ту же строку `contract_version`. Формы `v<major>` и `v<major>.<minor>` допускают, например, `v1`, `v1.2` и `v3`. Сейчас Backend поддерживает `v1`.
+
 | Файл | Кто создаёт | Что внутри |
 | -- | -- | -- |
 | `unit.yml` | Автор Unit | Описание и тип Unit, настройки и типы Input/Output |
+| `dictionary.yml` | Backend | Типы полей, базовые Input/Output и значения по умолчанию для контракта |
 | `.env` | Backend | Значения настроек конкретного Unit |
 | `io_topics.yml` | Backend, но в архив он больше не кладётся | Топики конкретного Unit |
 
@@ -33,7 +35,7 @@
 ## unit.yml
 
 ```yaml
-version: 1
+contract_version: v1
 
 search:
   type: actor
@@ -296,10 +298,12 @@ output:
 ## Словарь платформы
 
 - `dictionary.yml` описывает допустимые значения формата и базовые служебные Input/Output.
+- Backend читает `contract_version` из `unit.yml` и открывает `app/schemas/unit_manifest/<contract_version>/dictionary.yml`. Для `contract_version: v1` это `app/schemas/unit_manifest/v1/dictionary.yml`. Значение `contract_version` в словаре должно совпадать со значением в `unit.yml`.
+- Неизвестная версия контракта отклоняется до чтения словаря. Проверки `search`, раскрытие `base`, значения по умолчанию и генерация `.env` используют словарь запрошенного контракта.
 - Раздел `env` словаря описывает стандартные переменные `PU_*` для файла `.env`. Автору Unit достаточно описать собственные настройки в `unit.yml`. При генерации Backend берёт актуальные параметры инстанса и значения конкретного Unit. Поле `default` указывает штатное значение, если оно предусмотрено.
 
 ```yaml
-version: 1
+contract_version: v1
 
 unit_types: [sensor, actor, controller, observer, gateway]
 execution_types: [interpreted, compiled]

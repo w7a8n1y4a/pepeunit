@@ -1,9 +1,11 @@
 # Schema Typing
 
-New concept:
+The Unit manifest is the contract that defines the schemas of `unit.yml` and `dictionary.yml` and how the two files work together. Both files declare the same `contract_version` string. The forms `v<major>` and `v<major>.<minor>` allow values such as `v1`, `v1.2`, and `v3`. The backend currently supports `v1`.
+
 | File | Created by | Contents |
 | -- | -- | -- |
 | `unit.yml` | Unit author | Unit description and type, settings, and Input/Output types |
+| `dictionary.yml` | Backend | Field types, base Inputs/Outputs, and defaults for the contract |
 | `.env` | Backend | Settings for a specific Unit |
 | `io_topics.yml` | Backend; no longer included in the archive | Topics for a specific Unit |
 
@@ -34,7 +36,7 @@ Basics:
 ## unit.yml
 
 ```yaml
-version: 1
+contract_version: v1
 
 search:
   type: actor
@@ -297,10 +299,12 @@ output:
 ## Platform Dictionary
 
 - `dictionary.yml` defines allowed format values and base service Inputs/Outputs.
+- The backend reads `contract_version` from `unit.yml` and opens `app/schemas/unit_manifest/<contract_version>/dictionary.yml`. For `contract_version: v1`, this is `app/schemas/unit_manifest/v1/dictionary.yml`. The dictionary must declare the same `contract_version` as `unit.yml`.
+- The backend rejects an unsupported contract version before reading a dictionary. Search validation, `base` resolution, defaults, and `.env` generation use the dictionary for the requested contract.
 - The dictionary's `env` section defines the standard `PU_*` variables for the device's `.env`. Unit authors only need to declare their own settings in `unit.yml`. The backend generates device values using the current instance settings and the individual Unit. The `default` field records the platform default where one exists.
 
 ```yaml
-version: 1
+contract_version: v1
 
 unit_types: [sensor, actor, controller, observer, gateway]
 execution_types: [interpreted, compiled]

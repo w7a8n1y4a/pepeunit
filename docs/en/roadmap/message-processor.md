@@ -133,7 +133,7 @@ The proposed MessageProcessor keeps a single in-memory snapshot of the schemas a
 
 ### Snapshot contents
 
-- For each `unit_io_uuid`, Backend stores the corresponding Input or Output schema in PostgreSQL. It takes the schema from `unit.yml` for the target Unit version, resolves `base` references, and applies the defaults from `dictionary.yml`. MessageProcessor uses the UUID to look up the direction, validation rules, units of measurement, codec, QoS, and routing mode. The snapshot also includes the `base` identifier for each base IO and the DataPipe configuration for each enabled pipeline.
+- For each `unit_io_uuid`, Backend stores the corresponding Input or Output schema in PostgreSQL. It reads `unit.yml` from the target Unit version. The file’s `contract_version` determines how to resolve `base` references and apply defaults. The backend takes these definitions from `dictionary.yml` with the same `contract_version`. MessageProcessor uses the UUID to look up the direction, validation rules, units of measurement, codec, QoS, and routing mode. The snapshot also includes the `base` identifier for each base IO and the DataPipe configuration for each enabled pipeline.
 - For each Output, MessageProcessor reads the set of linked Input UUIDs from the `links` table. In `broadcast` mode, every Input in that set is a destination. In `selected-link` mode, MessageProcessor forwards only `data` to the Input identified by `input_uuid`. It rejects the message if that UUID is outside the sending Output's set.
 
 ### When the snapshot is refreshed
