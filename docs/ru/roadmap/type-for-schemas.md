@@ -229,10 +229,16 @@ output:
     type: object
     qos: 1
     routing: selected-link
-    description: Sends JSON to the Input of the selected connection.
+    description: Sends JSON to the linked Input identified by input_uuid.
     fields:
-      link_id: {type: string, max_bytes: 36, format: uuid}
+      input_uuid: {type: string, max_bytes: 36, format: uuid}
       data: {type: any, max_bytes: 2048}
+```
+
+Пульт берёт UUID своего Output из топика `send_command` в `io_topics.yml`. С токеном Unit он запрашивает `GET /unit_ios?output_uuid=<output_uuid>`, выбирает доступный связанный Input из списка `unit_ios` и записывает его `uuid` в поле `input_uuid`. Команду пульт публикует в свой топик `send_command`.
+
+```json
+{"input_uuid":"2d98b4ba-c935-4379-8e1a-520e76018c17","data":{"speed":50,"duration":10}}
 ```
 
 ### search и тип Unit

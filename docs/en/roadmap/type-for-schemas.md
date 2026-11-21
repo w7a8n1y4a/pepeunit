@@ -230,10 +230,16 @@ output:
     type: object
     qos: 1
     routing: selected-link
-    description: Sends JSON to the Input of the selected connection.
+    description: Sends JSON to the linked Input identified by input_uuid.
     fields:
-      link_id: {type: string, max_bytes: 36, format: uuid}
+      input_uuid: {type: string, max_bytes: 36, format: uuid}
       data: {type: any, max_bytes: 2048}
+```
+
+The remote reads its Output UUID from the `send_command` topic in `io_topics.yml`. Using its Unit token, it calls `GET /unit_ios?output_uuid=<output_uuid>`, selects a linked Input it can access from the `unit_ios` list, and copies its `uuid` into `input_uuid`. It publishes the command to its own `send_command` topic.
+
+```json
+{"input_uuid":"2d98b4ba-c935-4379-8e1a-520e76018c17","data":{"speed":50,"duration":10}}
 ```
 
 ### search and Unit Type
