@@ -196,6 +196,9 @@ const _ru = <String, String>{
       'env_example.json в репозитории не читается.',
   'GIT_REPO_ENV_JSON_INVALID': 'env.json не читается как JSON.',
   'GIT_REPO_COMMIT_MISSING': 'Коммит не найден в репозитории.',
+  'GIT_REPO_UNIT_MANIFEST_INVALID': 'Манифест unit.yml не прошёл проверку.',
+  'GIT_REPO_UNIT_MANIFEST_TOO_LARGE':
+      'Файл unit.yml превышает допустимый размер.',
 
   // Grafana
   'GRAFANA_NAME_INVALID':
@@ -314,13 +317,6 @@ const _ru = <String, String>{
   'PERMISSION_NOT_FOUND': 'Доступ не найден.',
   'PERMISSION_AGENT_UUID_INVALID': 'Идентификатор получателя доступа неверен.',
   'PERMISSION_RESOURCE_UUID_INVALID': 'Идентификатор ресурса неверен.',
-
-  // Readme
-  'README_FIELD_TOO_LONG': 'Поле в описании репозитория слишком длинное.',
-  'README_FIELD_TOO_MANY_ITEMS':
-      'В поле описания репозитория слишком много пунктов.',
-  'README_TOML_TOO_LARGE': 'Описание репозитория больше 10 000 символов.',
-  'README_TOML_INVALID': 'Описание репозитория записано с ошибкой в TOML.',
 
   // Repo
   'REPO_URL_EXISTS': 'Репозиторий с таким адресом уже добавлен.',
@@ -617,6 +613,9 @@ const _en = <String, String>{
       'env_example.json in the repository cannot be read.',
   'GIT_REPO_ENV_JSON_INVALID': 'env.json cannot be read as JSON.',
   'GIT_REPO_COMMIT_MISSING': 'The commit is not found in the repository.',
+  'GIT_REPO_UNIT_MANIFEST_INVALID': 'The unit.yml manifest failed validation.',
+  'GIT_REPO_UNIT_MANIFEST_TOO_LARGE':
+      'The unit.yml file exceeds the size limit.',
 
   // Grafana
   'GRAFANA_NAME_INVALID':
@@ -739,14 +738,6 @@ const _en = <String, String>{
   'PERMISSION_AGENT_UUID_INVALID':
       'The identifier of the access recipient is wrong.',
   'PERMISSION_RESOURCE_UUID_INVALID': 'The resource identifier is wrong.',
-
-  // Readme
-  'README_FIELD_TOO_LONG': 'A field in the repository description is too long.',
-  'README_FIELD_TOO_MANY_ITEMS':
-      'A field in the repository description has too many items.',
-  'README_TOML_TOO_LARGE':
-      'The repository description is larger than 10,000 characters.',
-  'README_TOML_INVALID': 'The repository description has a TOML syntax error.',
 
   // Repo
   'REPO_URL_EXISTS': 'A repository with this address is already added.',
