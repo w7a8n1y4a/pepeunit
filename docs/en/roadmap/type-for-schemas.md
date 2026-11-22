@@ -35,6 +35,16 @@ Basics:
 
 ## unit.yml
 
+IO names are unique throughout the file: a key cannot be declared twice or appear in both `input` and `output`. Names from the selected `dictionary.yml` Input and Output sections are reserved together with their direction. To enable one, the author writes, for example, `state: {}` in `output`. Its type, constraints, codec and QoS come from the dictionary. Any properties on a reserved IO declaration, use in the wrong direction, and the `base` marker are errors. An ordinary IO declares its own type.
+
+### Mapping to UnitIO
+
+The only source of IO definitions is `unit.yml` at the Unit's exact target Git commit and `dictionary.yml` for its declared contract. The `units_io` table stores UUID, `unit_uuid`, direction `type`, `topic_name`, and mutable settings for that particular IO: access, state and DataPipe. Links are stored in `links`. `topic_name` is the key in `unit.yml.input` or `unit.yml.output`, such as `state`. Separate `base` and `io_schema` columns are unnecessary.
+
+Each Unit's existing `target_commit` always stores the exact target commit its UnitIO entries match, including with automatic updates enabled. Update flags and `target_branch` control how the next version is selected; `current_commit_version` reports the device's actual version and may differ from the target. No additional commit field is needed. Creation and every update first select a commit and validate its manifest, then save `target_commit`, execution type and UnitIO set in one transaction. An IO whose name and direction remain the same retains its UUID, links and settings. On failure, the entire previous state is preserved.
+
+A moving branch or new tag does not change the active schema by itself. All consumers, including device file generation and MessageProcessor, read the manifest at the stored `target_commit`; version selection runs only when creating or updating a Unit. Required Git objects remain available while referenced by a Unit; a published contract dictionary is immutable. A missing commit or mismatch between UnitIO entries and the manifest is an error; falling back to the latest version is forbidden. Resolved schemas are computed in memory once per `(repo_uuid, target_commit)` while building a snapshot and shared by all Units using that version.
+
 ```yaml
 contract_version: v1
 
@@ -122,7 +132,7 @@ env:
     description: Wi-Fi network password.
 
 input:
-  reset: {base: reset}
+  reset: {}
 
   set_speed:
     type: object
@@ -133,7 +143,7 @@ input:
       duration: {type: int, min: 1, max: 3600, unit: s}
 
 output:
-  state: {base: state}
+  state: {}
 
   speed:
     type: int
@@ -300,7 +310,7 @@ output:
 
 - `dictionary.yml` defines allowed format values and base service Inputs/Outputs.
 - The backend reads `contract_version` from `unit.yml` and opens `app/schemas/unit_manifest/<contract_version>/dictionary.yml`. For `contract_version: v1`, this is `app/schemas/unit_manifest/v1/dictionary.yml`. The dictionary must declare the same `contract_version` as `unit.yml`.
-- The backend rejects an unsupported contract version before reading a dictionary. Search validation, `base` resolution, defaults, and `.env` generation use the dictionary for the requested contract.
+- The backend rejects an unsupported contract version before reading a dictionary. Search validation, reserved IO resolution by name and direction, defaults, and `.env` generation use the dictionary for the requested contract.
 - The dictionary's `env` section defines the standard `PU_*` variables for the device's `.env`. Unit authors only need to declare their own settings in `unit.yml`. The backend generates device values using the current instance settings and the individual Unit. The `default` field records the platform default where one exists.
 
 ```yaml
@@ -462,14 +472,14 @@ Base IOs are explicitly enabled in the existing `input` and `output` sections of
 
 ```yaml
 input:
-  update: {base: update}
-  env_update: {base: env_update}
-  schema_update: {base: schema_update}
-  log_sync: {base: log_sync}
-  reset: {base: reset}
+  update: {}
+  env_update: {}
+  schema_update: {}
+  log_sync: {}
+  reset: {}
 output:
-  state: {base: state}
-  log: {base: log}
+  state: {}
+  log: {}
 ```
 
 - Each declared base Input or Output will now have its own UnitIO entity.

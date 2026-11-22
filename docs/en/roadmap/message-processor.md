@@ -26,11 +26,11 @@ DataPipe in Go becomes just one stage of MessageProcessor.
 
 ```yaml
 output:
-  state: {base: state}
-  log: {base: log}
+  state: {}
+  log: {}
 ```
 
-- Base Output UnitIO processing takes place entirely in MessageProcessor
+- Standard Output UnitIO processing takes place entirely in MessageProcessor. The reserved name and direction in the contract dictionary identify its purpose; there is no separate `base` marker.
 - `pepeunit_server` does not participate, except for topic authorization
 - Backend can send a command to a base Input in response to a REST request.
 
@@ -133,14 +133,15 @@ The proposed MessageProcessor keeps a single in-memory snapshot of the schemas a
 
 ### Snapshot contents
 
-- For each `unit_io_uuid`, Backend stores the corresponding Input or Output schema in PostgreSQL. It reads `unit.yml` from the target Unit version. The file’s `contract_version` determines how to resolve `base` references and apply defaults. The backend takes these definitions from `dictionary.yml` with the same `contract_version`. MessageProcessor uses the UUID to look up the direction, validation rules, units of measurement, codec, QoS, and routing mode. The snapshot also includes the `base` identifier for each base IO and the DataPipe configuration for each enabled pipeline.
+- PostgreSQL stores UnitIO UUIDs, directions and `topic_name`, and each Unit's `repo_uuid` and `target_commit` matching its IO set. Schemas are not copied into UnitIO rows. Backend reads `unit.yml` at that exact commit, resolves standard IOs by reserved name and applies defaults from `dictionary.yml` with the same `contract_version`.
+- The snapshot sends resolved definitions once per `(repo_uuid, target_commit)`. Each `unit_io_uuid` references that pair, its direction and IO name, owning Unit and enabled DataPipe configuration. Go builds in-memory UUID lookups for validation rules, units of measurement, codec, QoS and routing mode. Standard `state` and `log` outputs are identified by direction and exact name; there is no separate `base` identifier.
 - For each Output, MessageProcessor reads the set of linked Input UUIDs from the `links` table. In `broadcast` mode, every Input in that set is a destination. In `selected-link` mode, MessageProcessor forwards only `data` to the Input identified by `input_uuid`. It rejects the message if that UUID is outside the sending Output's set.
 
 ### When the snapshot is refreshed
 
-1. Before subscribing to `domain.com/+`, MessageProcessor reads the schemas, links, pipeline configurations, and their shared instance-wide revision from PostgreSQL in a single `REPEATABLE READ` transaction. It builds lookup tables keyed by UUID in Go and prepares the validation and conversion rules.
-2. When Backend adds or removes UnitIO entries or changes their schemas, links, or pipeline configurations, it increments the revision in the same transaction. This also applies when deleting a Unit cascades to its UnitIO entries and links. After the transaction commits, Backend sends a notification with the new revision to the `backend_message_processor` Redis stream.
+1. Before subscribing to `domain.com/+`, MessageProcessor requests a full snapshot from Backend through an HTTP endpoint requiring MessageProcessor service authorization. Backend reads the revision, Units with pinned target commits, UnitIO entries, links and pipeline configurations in one PostgreSQL `REPEATABLE READ` transaction. It then loads the immutable manifests at the captured commits and resolves schemas through the shared `UnitManifestService`. The result carries the revision of the captured data even if another transaction commits during assembly. Secrets and `env` are excluded. Go neither reads Git nor reimplements dictionary resolution.
+2. When Backend changes a Unit's selected commit, UnitIO set, links or pipeline configurations, it increments the revision in the same transaction. Updating `target_commit`, execution type and UnitIO entries is atomic. This also applies to cascading Unit deletion. After the transaction commits, Backend sends the new revision to the `backend_message_processor` Redis stream. Synchronizing Git without switching a Unit does not change the active snapshot revision.
 3. A dedicated goroutine reads the Redis stream and passes notifications to the synchronization goroutine. The latter collects a batch until the next `BufferFlushInterval` tick (5 seconds by default) or until it has `BufferMaxSize` events (1000). Once per batch, it compares the PostgreSQL revision with the revision of the active snapshot. It also checks every `ConfigSyncInterval` (60 seconds) independently of Redis to catch changes when a notification is lost.
-4. If the revisions differ, the synchronization goroutine reloads the entire snapshot and publishes it using `atomic.Pointer`. If the reload fails, it keeps the previous snapshot, logs the cause, and retries on the next timer tick. The MQTT handler reads the pointer once per message and uses that snapshot at every processing stage.
+4. If the revisions differ, the synchronization goroutine requests another full snapshot from Backend and publishes it through `atomic.Pointer` only after successful assembly and checking that every UnitIO entry matches its manifest. On any error, including an unavailable Git commit, it keeps the previous snapshot, logs the cause and retries on the next timer tick. On initial startup, MQTT subscription waits until a snapshot is ready. The MQTT handler reads the pointer once per message and uses that snapshot at every processing stage.
 
 For example, if a sensor sends to two Inputs and one link is deleted, the new snapshot lists only the remaining Input. Messages may still reach both Inputs between the commit and the snapshot switch. The Unit listens on its own Input, and MessageProcessor updates the list of destinations.
