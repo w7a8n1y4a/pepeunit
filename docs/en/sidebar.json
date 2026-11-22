@@ -166,6 +166,7 @@
     "items": [
       { "text": "IO typing", "link": "/roadmap/type-for-schemas" },
       { "text": "MessageProcessor", "link": "/roadmap/message-processor" },
+      { "text": "Architecture", "link": "/roadmap/architecture" },
       { "text": "Federation", "link": "/roadmap/federation" },
       { "text": "Monetization for instance holders", "link": "/roadmap/monetisation" },
       { "text": "System design", "link": "/roadmap/system-design" },

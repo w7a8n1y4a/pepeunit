@@ -166,6 +166,7 @@
     "items": [
       { "text": "Типизация IO", "link": "/roadmap/type-for-schemas" },
       { "text": "MessageProcessor", "link": "/roadmap/message-processor" },
+      { "text": "Архитектура", "link": "/roadmap/architecture" },
       { "text": "Федерация", "link": "/roadmap/federation" },
       { "text": "Монетизация для держателей инстансов", "link": "/roadmap/monetisation" },
       { "text": "Систем дизайн", "link": "/roadmap/system-design" },
