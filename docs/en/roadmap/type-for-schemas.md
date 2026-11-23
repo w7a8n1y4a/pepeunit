@@ -341,6 +341,14 @@ name_patterns:
   io: '[A-Za-z0-9_.-]+'
   env: '[A-Za-z_][A-Za-z0-9_]*'
 
+type_limits:
+  int:
+    min: -9223372036854775808
+    max: 9223372036854775807
+  float:
+    min: -1.7976931348623157e+308
+    max: 1.7976931348623157e+308
+
 units_of_measurement:
   standard: UCUM
   version: '2.2'
@@ -506,8 +514,9 @@ Each standard Input and Output gets its own UnitIO record when the Unit is creat
 
 ## Unit conversions
 
-- Only works between UnitIO entries representing the same physical quantity
-- For example, converting from millions of seconds to thousands of seconds
+Numeric Output and Input either declare UCUM 2.2 units of the same dimension or both omit `unit`. Backend compares ranges after applying scale and offset, for example from `ms` to `s` or from `Cel` to `[degF]`. If a conversion is unavailable, the check returns the `unit` reason.
+
+The dictionary's `type_limits` section defines the base ranges for numeric IOs, including nested fields. In `v1`, these ranges are signed `int64` and finite `float64`. Backend fills missing bounds from the dictionary. Explicit bounds must fit within the type's range.
 
 ## Type conversion and compatibility
 
