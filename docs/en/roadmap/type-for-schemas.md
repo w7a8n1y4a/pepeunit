@@ -543,8 +543,8 @@ Details:
 - Numbers ↔ bool: false → 0, true → 1; zero → false, any nonzero number → true. No rounding is applied first: 0.1 → true.
 - float → int: round to the nearest integer, with ties rounded away from zero: 1.5 → 2, -1.5 → -2. Overflow, NaN, and infinities are rejected.
 - Numbers → string: decimal representation without thousands separators, using a period as the decimal separator. Reverse conversion is not supported.
-- object → object: fields are matched by name and checked recursively using this table. `extra: true` on Input allows additional keys but does not waive required fields or validation of declared fields.
-- array → array: compatibility depends on item schemas and length limits. Items are converted recursively; an error in any item rejects the entire message.
+- object → object: Backend matches fields by name and variants by `action`, recursively. The Output must guarantee every required Input field. An Input with `extra: true` accepts additional keys. When the Input declares variants, every allowed string `action` from the Output must match an Input variant.
+- array → array: the entire Output length range must fit within the Input range. Item schemas are checked recursively. For an array with `max_items: 0`, the length check is sufficient.
 - any → a specific type: the link is allowed, but each message is evaluated using the value's actual type and this table. For example, a number from any can be passed to int, but an object cannot.
 - any contains JSON values, including null, but not raw bytes. Passing null to a specific type requires `nullable: true`.
 - Units and ranges: numeric conversion first converts units of the same physical quantity, then converts the type. Guaranteed compatibility requires the entire converted Output range to fit within the Input range.
