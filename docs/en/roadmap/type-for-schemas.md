@@ -520,6 +520,8 @@ The dictionary's `type_limits` section defines the base ranges for numeric IOs, 
 
 ## Type conversion and compatibility
 
+`POST /unit_ios/check_link_compatibility` checks a pair by `output_uuid` and `input_uuid`. Backend reads the schemas from both Units' selected commits. With `routing: selected-link`, it compares `data` with the Input schema. Link creation applies the same rules. When compatibility depends on an `any` value, the link is allowed and the preview response includes `depends_on_value: true`.
+
 General rules:
 
 - Compatibility is checked in the Output → Input direction.
