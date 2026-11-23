@@ -297,6 +297,12 @@ PU_AUTH_TOKEN=example-token
 
 ## io_topics.yml
 
+The Unit and its owner can download the file from `GET /units/io_topics/{uuid}` as `application/yaml`. Names and QoS come from the resolved schema at `selected_commit`. The file lists the Unit's own topics. If a declared IO is missing from storage, the backend returns an error identifying it.
+
+Every topic uses `domain.com/<unit_io_uuid>`, including the standard `reset` and `state` topics. The UUID comes from the corresponding UnitIO record. DataPipe can be enabled for any of these IOs.
+
+The file includes `qos` for value `1`. The device uses QoS 0 when the field is absent.
+
 ```yaml
 version: 1
 

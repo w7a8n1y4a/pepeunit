@@ -9,7 +9,7 @@ DataPipe на golang становится лишь 1 из этапов MessagePr
 2. Валидация согласно схемам из [Новые схемы](./type-for-schemas.md)
 3. Преобразование размерностей величин [Новые схемы](./type-for-schemas.md)
 4. Пересылка в другие топики UnitIO
-5. DataPipe обработка
+5. Обработка DataPipe, если он включён для UnitIO. DataPipe доступен для любого Input и Output, включая служебные.
 
 ## Перенос подписки из Backend в MessageProcessor
 
@@ -24,7 +24,7 @@ DataPipe на golang становится лишь 1 из этапов MessagePr
 
 ## Обработка базовых топиков
 
-Backend добавляет служебные топики, включая `state` и `log`, из `dictionary.yml` выбранного контракта при подготовке схемы Unit.
+Backend добавляет служебные IO, включая `state` и `log`, из `dictionary.yml` выбранного контракта при подготовке схемы Unit. У каждого Input и Output свой адрес `domain.com/<unit_io_uuid>`. Подписка MessageProcessor `domain.com/+` охватывает все эти адреса.
 
 - Обработка стандартных Output UnitIO идёт полностью на стороне MessageProcessor. Назначение определяется зарезервированным именем и направлением из словаря контракта; отдельного маркера `base` нет.
 - peepunit_server никаким образом не участвует (кроме auth на топики)

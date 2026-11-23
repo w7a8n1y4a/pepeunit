@@ -9,7 +9,7 @@ DataPipe in Go becomes just one stage of MessageProcessor.
 2. Validate against the schemas from [New schemas](./type-for-schemas.md)
 3. Convert units of measurement according to [New schemas](./type-for-schemas.md)
 4. Forward to other UnitIO topics
-5. DataPipe processing
+5. DataPipe processing, when enabled for the UnitIO. DataPipe can be enabled for any Input or Output, including standard IOs.
 
 ## Moving subscriptions from Backend to MessageProcessor
 
@@ -24,7 +24,7 @@ DataPipe in Go becomes just one stage of MessageProcessor.
 
 ## Processing base topics
 
-Backend adds standard topics, including `state` and `log`, from the selected contract's `dictionary.yml` when assembling the Unit schema.
+Backend adds standard IOs, including `state` and `log`, from the selected contract's `dictionary.yml` when assembling the Unit schema. Each Input and Output has its own `domain.com/<unit_io_uuid>` address. The MessageProcessor subscription `domain.com/+` covers all these addresses.
 
 - Standard Output UnitIO processing takes place entirely in MessageProcessor. The reserved name and direction in the contract dictionary identify its purpose; there is no separate `base` marker.
 - `pepeunit_server` does not participate, except for topic authorization

@@ -296,6 +296,12 @@ PU_AUTH_TOKEN=example-token
 
 ## io_topics.yml
 
+Владелец и само устройство получают файл через `GET /units/io_topics/{uuid}` с типом `application/yaml`. Ключи и QoS берутся из раскрытой схемы `selected_commit`. В файле есть собственные топики Unit. Если для поля схемы нет записи UnitIO, backend возвращает ошибку с именем IO.
+
+Каждый топик имеет вид `domain.com/<unit_io_uuid>`, включая служебные `reset` и `state`. UUID берётся из записи соответствующего UnitIO. DataPipe можно включить для любого из этих IO.
+
+Поле `qos` указывается для значения `1`. Если поля нет, устройство использует QoS 0.
+
 ```yaml
 version: 1
 
