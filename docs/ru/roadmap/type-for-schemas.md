@@ -28,17 +28,21 @@
 - `unit.yml` берётся как и раньше и таргет версии
 - `is_compilable_unit` теперь определяется из `unit.yml`
 - Соединяя `UnitIO` у которых одна величина но разные размерности, `messageProcessor` будет делать преобразование при пересылке
-- `Backend` научится считать максимальный размер `.env`, это сильно упростит автоматизированную прошивку в будущем
+- `Backend` будет рассчитывать максимальное число символов (кодовых точек Unicode) в `.env` для автоматизированной прошивки.
 - `unit.yml` и словарь схем пишутся строго на английском. Вынужденная мера для оптимизации `MCP`
 - добавляется ошибка обработки последнего сообщения у `UnitIO`, чтобы можно было понять почему `MessageProcessor` отклонил
 
 ## unit.yml
 
-Имена IO уникальны во всём файле: один и тот же ключ нельзя объявить дважды или одновременно в `input` и `output`. Имена из разделов `input` и `output` выбранного `dictionary.yml` зарезервированы вместе со своим направлением. Чтобы включить такой IO, автор пишет, например, `state: {}` в `output`. Его тип, ограничения, кодек и QoS берутся из словаря; любые свойства в объявлении зарезервированного IO, его перенос в другое направление и маркер `base` являются ошибкой. Обычный IO содержит собственное описание типа.
+`unit.yml` описывает пользовательские IO. Backend автоматически добавляет все служебные Input и Output из `dictionary.yml` выбранного контракта вместе с типом, ограничениями, кодеком и QoS. Имена уникальны во всей собранной схеме, включая оба направления. Прежнее пустое объявление вроде `state: {}` допустимо в исходном направлении. Свойства в таком объявлении и перенос зарезервированного имени в другое направление дают ошибку.
+
+Backend проверяет имя целиком по `name_patterns` из выбранного словаря. В версии `v1` имя IO состоит из латинских букв, цифр, `_`, `-` и `.`. Имя переменной `env` начинается с латинской буквы или `_`, дальше допустимы латинские буквы, цифры и `_`.
+
+В `unit.yml.env` и `dictionary.yml.env` действуют одни правила. `bool` требует `enum` с `true` или `false`, `int` и `float` — `min` и `max` либо `enum`, `string` — `max_length` в кодовых точках Unicode. Для `array` нужны `max_items` и ограничения `items`, для `object` — явное `extra: false` и ограничения всех полей и вариантов. Правило действует и для `optional`, и для `nullable`. Типы `any` и `bytes` доступны в схемах IO, где размер задаётся через `max_bytes`.
 
 ### Связь с UnitIO
 
-Единственный источник определений IO — `unit.yml` точного целевого Git-коммита Unit и `dictionary.yml` указанного контракта. Таблица `units_io` хранит UUID, `unit_uuid`, направление `type`, имя `topic_name` и изменяемые параметры конкретного IO: доступ, состояние и DataPipe. Связи хранятся в `links`. `topic_name` — ключ из `unit.yml.input` или `unit.yml.output`, например `state`. Отдельные `base` и `io_schema` в таблице не нужны.
+Источник определений IO — `unit.yml` из `selected_commit` и `dictionary.yml` указанного в нём контракта. Таблица `units_io` хранит UUID, `unit_uuid`, направление `type`, имя `topic_name` и изменяемые параметры IO: доступ, состояние и DataPipe. Связи хранятся в `links`. `topic_name` совпадает с ключом в собранной схеме, например `state` из словаря.
 
 `target_commit` хранит ручной выбор коммита и допускает NULL. `resolve_auto_commit_and_tag` вычисляет `(resolved_commit, resolved_tag)` в локальном Git по `target_branch` и флагам обновления. `get_selected_commit_and_tag` возвращает `(selected_commit, selected_tag)` для обоих режимов. Это проверенный ручной выбор или коммит, вычисленный для автообновления, вместе с его тегом. `current_commit_version` хранит SHA, сообщённый устройством (`device_commit`). Создание и обновление проверяют `unit.yml` по `selected_commit`, затем одной транзакцией сохраняют настройки версии, тип исполнения и набор UnitIO. У IO с тем же именем и направлением сохраняются UUID, связи и параметры. При ошибке проверки или записи прежнее состояние сохраняется целиком.
 
@@ -121,18 +125,17 @@ env:
   FAN_PIN:
     type: int
     min: 0
+    max: 39
     example: 4
     description: GPIO used to control the fan.
   WIFI_PASSWORD:
     type: string
-    max_bytes: 128
+    max_length: 128
     secret: true
     example: "example-password"
     description: Wi-Fi network password.
 
 input:
-  reset: {}
-
   set_speed:
     type: object
     qos: 1
@@ -142,8 +145,6 @@ input:
       duration: {type: int, min: 1, max: 3600, unit: s}
 
 output:
-  state: {}
-
   speed:
     type: int
     min: 0
@@ -224,7 +225,7 @@ input:
 env:
   CLICK_MESSAGE:
     type: string
-    max_bytes: 256
+    max_length: 256
     nullable: true
     default: null
     example: "click"
@@ -328,6 +329,10 @@ platforms: [esp8266, esp32, esp32s3, esp32c6, esp32c3, linux, windows, macos]
 formats: [uuid]
 routing: [broadcast, selected-link]
 
+name_patterns:
+  io: '[A-Za-z0-9_.-]+'
+  env: '[A-Za-z_][A-Za-z0-9_]*'
+
 units_of_measurement:
   standard: UCUM
   version: '2.2'
@@ -335,22 +340,27 @@ units_of_measurement:
 env:
   PU_DOMAIN:
     type: string
+    max_length: 128
     description: Hostname or IP address of the Pepeunit instance.
   PU_HTTP_TYPE:
     type: string
+    max_length: 5
     enum: [http, https]
     default: https
     description: URL scheme selected by the backend secure setting.
   PU_APP_PREFIX:
     type: string
+    max_length: 128
     default: /pepeunit
     description: Application path prefix on the backend.
   PU_API_ACTUAL_PREFIX:
     type: string
+    max_length: 128
     default: /api/v1
     description: Path prefix for the active backend API version.
   PU_MQTT_HOST:
     type: string
+    max_length: 128
     description: Hostname or IP address of the MQTT broker.
   PU_MQTT_PORT:
     type: int
@@ -360,39 +370,52 @@ env:
     description: MQTT broker port configured on the backend.
   PU_MQTT_PING_INTERVAL:
     type: int
+    min: 1
+    max: 600
     default: 20
     description: Interval between MQTT pings in seconds.
   PU_MQTT_KEEPALIVE:
     type: int
+    min: 1
+    max: 600
     default: 60
     description: MQTT keepalive interval in seconds from the instance settings.
   PU_AUTH_TOKEN:
     type: string
+    max_length: 163
     secret: true
     description: Unit token for the backend API and MQTT broker.
   PU_SECRET_KEY:
     type: string
+    max_length: 44
     secret: true
     description: Unit signing key encoded in Base64.
   PU_ENCRYPT_KEY:
     type: string
+    max_length: 44
     secret: true
     description: Unit encryption key encoded in Base64.
   PU_STATE_SEND_INTERVAL:
     type: int
+    min: 1
+    max: 600
     default: 60
     description: Interval between Unit state reports in seconds from the instance settings.
   PU_MIN_LOG_LEVEL:
     type: string
+    max_length: 8
     enum: [Debug, Info, Warning, Error, Critical]
     default: Debug
     description: Minimum severity of Unit log entries.
   PU_MAX_LOG_LENGTH:
     type: int
+    min: 0
+    max: 2147483647
     default: 64
     description: Maximum number of log entries stored on the Unit.
   PU_COMMIT_VERSION:
     type: string
+    max_length: 40
     description: Git commit selected for this Unit.
 
 input:
@@ -471,23 +494,7 @@ defaults:
   qos: 0
 ```
 
-### Подключение базовых IO
-
-В `unit.yml` базовые IO включаются явно в существующих разделах `input` и `output`. Например, фрагмент с полным базовым набором:
-
-```yaml
-input:
-  update: {}
-  env_update: {}
-  schema_update: {}
-  log_sync: {}
-  reset: {}
-output:
-  state: {}
-  log: {}
-```
-
-- Ранее эти UnitIO не создавались как сущности UnitIO, теперь будут.
+Каждый служебный Input и Output получает свою запись UnitIO при создании или штатной синхронизации Unit. SDK реализует все служебные команды контракта.
 
 ## Преобразование размерностей
 

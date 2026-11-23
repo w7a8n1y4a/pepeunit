@@ -24,11 +24,7 @@ DataPipe in Go becomes just one stage of MessageProcessor.
 
 ## Processing base topics
 
-```yaml
-output:
-  state: {}
-  log: {}
-```
+Backend adds standard topics, including `state` and `log`, from the selected contract's `dictionary.yml` when assembling the Unit schema.
 
 - Standard Output UnitIO processing takes place entirely in MessageProcessor. The reserved name and direction in the contract dictionary identify its purpose; there is no separate `base` marker.
 - `pepeunit_server` does not participate, except for topic authorization
@@ -133,7 +129,7 @@ The proposed MessageProcessor keeps a single in-memory snapshot of the schemas a
 
 ### Snapshot contents
 
-- PostgreSQL stores UnitIO UUIDs, directions and `topic_name`, plus the repository UUID and version settings for each Unit. For manual updates, the snapshot takes `selected_commit` from `target_commit`. For automatic updates, it uses the SHA recorded for the snapshot when UnitIO was last synchronized successfully. Backend reads `unit.yml` directly from local Git at that SHA and resolves standard IOs using `dictionary.yml` for the same `contract_version`.
+- PostgreSQL stores UnitIO UUIDs, directions and `topic_name`, plus the repository UUID and version settings for each Unit. For manual updates, the snapshot takes `selected_commit` from `target_commit`. For automatic updates, it uses the SHA recorded for the snapshot when UnitIO was last synchronized successfully. Backend reads `unit.yml` directly from local Git at that SHA and adds all standard IOs from `dictionary.yml` for the same `contract_version`.
 - The snapshot sends resolved definitions once per `(repo_uuid, selected_commit)`. Each `unit_io_uuid` references that pair, its direction and IO name, owning Unit and enabled DataPipe configuration. Go builds in-memory UUID lookups for validation rules, units of measurement, codec, QoS and routing mode. Standard `state` and `log` outputs are identified by direction and exact name.
 - For each Output, MessageProcessor reads the set of linked Input UUIDs from the `links` table. In `broadcast` mode, every Input in that set is a destination. In `selected-link` mode, MessageProcessor forwards only `data` to the Input identified by `input_uuid`. It rejects the message if that UUID is outside the sending Output's set.
 
