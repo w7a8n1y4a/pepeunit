@@ -12,7 +12,7 @@ The Unit manifest is the contract that defines the schemas of `unit.yml` and `di
 What will rely on the new schemas:
 
 1. Generation of `io_topics.yml` and `.env` from `unit.yml`
-1. More precise Unit search based on `unit.yml.search`
+1. Repo registry search using the `search` section of the front `unit.yml`
 1. Data validation within MessageProcessor
 1. Unit conversions within MessageProcessor
 1. QoS 0–1 handling throughout the stack, from the schema to the end Unit
@@ -255,6 +255,10 @@ The remote reads its Output UUID from the `send_command` topic in `io_topics.yml
 ```
 
 ### search and Unit Type
+
+The registry uses one front `unit.yml` per Repo. Backend selects the repository's most recent tag by creation date, using the commit date for a lightweight tag. With no tags, it selects the default branch HEAD. Backend looks for the file only at that commit.
+
+After Repo synchronization, `is_have_front_unit_yml` records whether the selected SHA contains the file. `front_unit_yml_search` stores the validated manifest's `search` section as JSONB. A missing file leaves the JSONB value NULL. An invalid file also leaves it NULL and reports the error in the synchronization status. The registry's existing `search_string` matches the Repo URL and `search` values. The `is_have_front_unit_yml` filter selects repositories by file presence.
 
 `search.type` specifies the Unit type:
 
