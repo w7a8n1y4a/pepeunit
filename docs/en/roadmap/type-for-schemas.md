@@ -559,6 +559,7 @@ Details:
 1. Partial typing for DataPipe, possibly with suggestions for some parameters (a separate endpoint)
     - `POST /unit_ios/check_data_pipe_config` checks YAML against the selected UnitIO schema when the request includes `uuid`. Without `uuid`, it checks the YAML fields and structure.
     - `Number`, numeric transformations, and aggregation require an `int` or `float` UnitIO. Slicing is available in `Text` mode. Numeric filter values and active thresholds must fit the schema's `min` and `max`.
+    - `GET /unit_ios/get_data_pipe_config_options/{uuid}` returns the available policies, filter thresholds, aggregation functions, and transformations per mode, plus the numeric filter range and time window sizes.
     - The client has an IDE for editing YAML.
 1. IO compatibility analysis (a separate endpoint)
     - Type compatibility is defined above.
