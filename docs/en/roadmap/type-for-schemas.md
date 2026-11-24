@@ -557,9 +557,8 @@ Details:
 
 1. `README.md` generation, similar to the existing endpoint
 1. Partial typing for DataPipe, possibly with suggestions for some parameters (a separate endpoint)
-    - The schema validates `datapipe.yml` configuration.
-    - Validation covers data types and numeric limits.
-    - For example, an array type cannot use aggregation or the number type.
+    - `POST /unit_ios/check_data_pipe_config` checks YAML against the selected UnitIO schema when the request includes `uuid`. Without `uuid`, it checks the YAML fields and structure.
+    - `Number`, numeric transformations, and aggregation require an `int` or `float` UnitIO. Slicing is available in `Text` mode. Numeric filter values and active thresholds must fit the schema's `min` and `max`.
     - The client has an IDE for editing YAML.
 1. IO compatibility analysis (a separate endpoint)
     - Type compatibility is defined above.
