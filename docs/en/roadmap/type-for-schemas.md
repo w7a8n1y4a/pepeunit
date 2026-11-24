@@ -566,6 +566,5 @@ Details:
     - Declared ranges must be compatible: the Output range must fit within the Input range; otherwise, the link is incompatible.
 1. Validation when entering Input values (a separate endpoint)
 1. Unit update hints (a separate endpoint)
-    - Compare the previous and target version schemas and highlight potential breaking changes, such as a type change.
-    - Warn without blocking the update.
-    - Only applies to manual updates; automatic updates have no place to display warnings.
+    - `POST /units/check_manual_update/{uuid}` accepts the same body as the Unit update. Backend compares the schemas of the commit selected by the server and the proposed manual `target_commit`.
+    - Warnings identify changed fields by path, including nested fields. Type changes include the previous and new types. The warnings are advisory, and the update remains available.
