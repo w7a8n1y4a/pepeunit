@@ -185,7 +185,6 @@ output:
   button:
     type: string
     max_bytes: 16
-    codec: utf8
     enum: [Left, Right, One, Double, Long]
     description: A user action expressed as text without JSON quotes.
 
@@ -325,6 +324,7 @@ output:
 - `dictionary.yml` defines allowed format values and base service Inputs/Outputs.
 - The backend reads `contract_version` from `unit.yml` and opens `app/schemas/unit_manifest/<contract_version>/dictionary.yml`. For `contract_version: v1`, this is `app/schemas/unit_manifest/v1/dictionary.yml`. The dictionary must declare the same `contract_version` as `unit.yml`.
 - The backend rejects an unsupported contract version before reading a dictionary. Search validation, reserved IO resolution by name and direction, defaults, and `.env` generation use the dictionary for the requested contract.
+- `defaults.codec` sets the codec for top-level IO by type. Strings without `nullable: true` use `utf8`, bytes use `raw`, and other values use `json`. An explicit IO `codec` overrides the default.
 - The dictionary's `env` section defines the standard `PU_*` variables for the device's `.env`. Unit authors only need to declare their own settings in `unit.yml`. The backend generates device values using the current instance settings and the individual Unit. The `default` field records the platform default where one exists.
 
 ```yaml
@@ -502,7 +502,10 @@ output:
         create_datetime: {type: string, max_bytes: 64, optional: true}
 
 defaults:
-  codec: json
+  codec:
+    default: json
+    string: utf8
+    bytes: raw
   optional: false
   nullable: false
   extra: false

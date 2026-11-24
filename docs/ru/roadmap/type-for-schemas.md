@@ -184,7 +184,6 @@ output:
   button:
     type: string
     max_bytes: 16
-    codec: utf8
     enum: [Left, Right, One, Double, Long]
     description: A user action expressed as text without JSON quotes.
 
@@ -324,6 +323,7 @@ output:
 - `dictionary.yml` описывает допустимые значения формата и базовые служебные Input/Output.
 - Backend читает `contract_version` из `unit.yml` и открывает `app/schemas/unit_manifest/<contract_version>/dictionary.yml`. Для `contract_version: v1` это `app/schemas/unit_manifest/v1/dictionary.yml`. Значение `contract_version` в словаре должно совпадать со значением в `unit.yml`.
 - Неизвестная версия контракта отклоняется до чтения словаря. Проверки `search`, раскрытие зарезервированных IO по имени и направлению, значения по умолчанию и генерация `.env` используют словарь запрошенного контракта.
+- `defaults.codec` задаёт кодек верхнеуровневых IO по типу. Строки без `nullable: true` используют `utf8`, байты — `raw`, остальные значения — `json`. Явный `codec` в IO переопределяет дефолт.
 - Раздел `env` словаря описывает стандартные переменные `PU_*` для файла `.env`. Автору Unit достаточно описать собственные настройки в `unit.yml`. При генерации Backend берёт актуальные параметры инстанса и значения конкретного Unit. Поле `default` указывает штатное значение, если оно предусмотрено.
 
 ```yaml
@@ -501,7 +501,10 @@ output:
         create_datetime: {type: string, max_bytes: 64, optional: true}
 
 defaults:
-  codec: json
+  codec:
+    default: json
+    string: utf8
+    bytes: raw
   optional: false
   nullable: false
   extra: false
