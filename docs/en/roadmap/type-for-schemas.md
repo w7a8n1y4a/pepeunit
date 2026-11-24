@@ -553,6 +553,8 @@ Details:
 
 ## Schema capabilities
 
+`POST /unit_ios/check_input_state/{uuid}` validates the `state` string using the same rules as `PATCH /unit_ios/set_state_input/{uuid}`. Use JSON text for `json`, text without a NUL character for `utf8`, and Base64 for `raw`. MQTT receives the decoded bytes for `raw` and the original UTF-8 bytes for the other codecs. The preview returns HTTP 204 without storing or publishing the value. Invalid values return HTTP 422.
+
 1. `README.md` generation, similar to the existing endpoint
 1. Partial typing for DataPipe, possibly with suggestions for some parameters (a separate endpoint)
     - The schema validates `datapipe.yml` configuration.
