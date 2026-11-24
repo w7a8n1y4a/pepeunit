@@ -123,24 +123,22 @@ The `instance_resources_samples` table in ClickHouse:
 
 ## Schema synchronization
 
-The Go module `pepeunit_server/data_pipe` already synchronizes pipeline configurations. In `internal/datapipe/data_pipe_config_sync.go`, `LoadNodeConfigs` reads the configurations of active pipelines from PostgreSQL. `StartConfigSync` reloads all of them on a timer and after a batch of notifications from the `backend_data_pipe_nodes` Redis stream.
+In the `pepeunit_server/data_pipe` Go module, MessageProcessor assembles an in-memory snapshot of schemas and links for every Input and Output on the instance. The existing DataPipe reads its configuration from PostgreSQL independently of schema loading.
 
-The proposed MessageProcessor keeps a single in-memory snapshot of the schemas and links for every Input and Output on the instance, including base IOs. The DataPipe flag controls only the pipeline processing stage.
+### How schemas are loaded
 
-### Snapshot contents
+1. Go reads Unit version settings, UnitIO entries and links from one PostgreSQL snapshot. Go starts one local Python process per refresh and passes it the settings for all Units. The process uses the existing `GitRepoRepository` rules to select commits from the shared Git cache. Manual mode uses the validated `target_commit` and automatic mode computes `resolved_commit` from the branch and update settings.
+2. Go reads `unit.yml` directly from the shared Git cache once per `(repo_uuid, selected_commit)` and applies standard IOs and defaults from `dictionary.yml` for the same `contract_version`. It maps schemas to UnitIO UUIDs by direction and `topic_name` and resolves links by UUID. Standard `state` and `log` outputs are identified by direction and exact name.
 
-- PostgreSQL stores UnitIO UUIDs, directions and `topic_name`, plus the repository UUID and version settings for each Unit. When assembling the snapshot, Backend resolves `selected_commit` through the usual version selection. For manual updates, it uses the validated `target_commit`. For automatic updates, it resolves the commit from local Git using the branch and update settings. Backend reads `unit.yml` at `selected_commit` and adds the standard IOs from `dictionary.yml` for the same `contract_version`.
-- The snapshot sends resolved definitions once per `(repo_uuid, selected_commit)`. Each `unit_io_uuid` references that pair, its direction and IO name, owning Unit and enabled DataPipe configuration. Go builds in-memory UUID lookups for validation rules, units of measurement, codec, QoS and routing mode. Standard `state` and `log` outputs are identified by direction and exact name.
-- For each Output, MessageProcessor reads the set of linked Input UUIDs from the `links` table. In `broadcast` mode, every Input in that set is a destination. In `selected-link` mode, MessageProcessor forwards only `data` to the Input identified by `input_uuid`. It rejects the message if that UUID is outside the sending Output's set.
+In `broadcast` mode, every linked Input is a destination. In `selected-link` mode, MessageProcessor forwards only `data` to the Input identified by `input_uuid` after checking that the Input is linked to the sender.
 
-### When the snapshot is refreshed
+### When schemas are refreshed
 
-At `:30`, Backend refreshes local repositories. At `:00`, the regular automatic update computes `selected_commit`, validates its `unit.yml` and synchronizes UnitIO. If `unit.yml` fails validation, the existing UnitIO set is preserved.
+At `:30`, Backend refreshes local repositories. At `:00`, the regular automatic update computes `selected_commit`, validates its `unit.yml` and synchronizes UnitIO. If the manifest fails validation, the existing UnitIO set is preserved. If the local branch has moved and IO names and directions still match, MessageProcessor can apply the new schema on a timer before the automatic Unit update runs.
 
-1. Before subscribing to `domain.com/+`, MessageProcessor requests a full snapshot through an authorized service HTTP endpoint. Backend reads Unit version settings, UnitIO entries, links and DataPipe settings in one PostgreSQL `REPEATABLE READ` transaction. It reads the manifests from local Git at each resolved `selected_commit` and resolves them through `UnitManifestService`. Backend keeps secrets and `env`.
-2. After committing changes to Units, links or DataPipe settings, Backend sends a reload signal to the `backend_message_processor` Redis stream. A successful Unit update sends the same signal even when the IO names stay the same.
-3. `StartConfigSync` collects notifications until the next `BufferFlushInterval` tick (5 seconds by default) or until it has `BufferMaxSize` events (1000), then loads one full snapshot for the batch. It also loads a snapshot every `ConfigSyncInterval` (60 seconds) independently of Redis to catch changes when a notification is lost.
-4. The synchronization goroutine publishes the snapshot through `atomic.Pointer` after successful assembly and checking that every UnitIO entry matches its manifest. On error, it keeps the previous snapshot, logs the cause and retries on the next timer tick. The MQTT handler reads the pointer once per message and uses that snapshot at every processing stage.
+After committing changes to Units, links or DataPipe, Backend signals the `backend_message_processor` Redis stream. A successful Unit update also signals when the IO names stay the same. `StartConfigSync` triggers a refresh at startup, once per batch of notifications, and on the `ConfigSyncInterval` timer.
+
+Go publishes the snapshot through `atomic.Pointer` after all schemas have been matched to UnitIO entries and links. On error it keeps the previous snapshot until the next refresh. The subscription for schema-based processing starts after the first successful load, and the handler uses one snapshot per message.
 
 While the device is updating, it may still send values of the previous type. After the snapshot switches, MessageProcessor validates them against the new schema and rejects incompatible values. The contract dictionary defines the formats for declared standard commands and messages, including `update` and `state`. Changes to application IOs preserve those formats.
 
