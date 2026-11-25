@@ -100,7 +100,7 @@ The `instance_resources_samples` table in ClickHouse:
 - An important metric that often limits what a VM can do under a hosting provider's plan
 - The Owner can set a monthly traffic limit, for example 3 TB
 - The instance can estimate consumption using `instance_resources_samples.network_width_percent` and `instance_resources_samples.pu_instance_network_speed_limit`
-- Checking traffic consumption therefore requires a separate query
+- The Owner retrieves the estimate with `GET /instances/resources/network_traffic`. The response includes the current period boundaries in UTC, estimated usage and the limit in bytes, the percentage of the limit, and counts of sampled and elapsed minutes.
 
 ## New instance_settings variables
 
@@ -123,12 +123,12 @@ The `instance_resources_samples` table in ClickHouse:
 
 ## Schema synchronization
 
-In the `pepeunit_server/data_pipe` Go module, MessageProcessor assembles an in-memory snapshot of schemas and links for every Input and Output on the instance. The existing DataPipe reads its configuration from PostgreSQL independently of schema loading.
+In the `pepeunit_server/message_processor` Go module, MessageProcessor assembles an in-memory snapshot of schemas and links for every Input and Output on the instance. The existing DataPipe reads its configuration from PostgreSQL independently of schema loading.
 
 ### How schemas are loaded
 
 1. Go reads Unit version settings, UnitIO entries and links from one PostgreSQL snapshot. Go starts one local Python process per refresh and passes it the settings for all Units. The process uses the existing `GitRepoRepository` rules to select commits from the shared Git cache. Manual mode uses the validated `target_commit` and automatic mode computes `resolved_commit` from the branch and update settings.
-2. Go reads `unit.yml` directly from the shared Git cache once per `(repo_uuid, selected_commit)` and applies standard IOs and defaults from `dictionary.yml` for the same `contract_version`. It maps schemas to UnitIO UUIDs by direction and `topic_name` and resolves links by UUID. Standard `state` and `log` outputs are identified by direction and exact name.
+2. Go reuses expanded schemas from the last published snapshot by `(repo_uuid, selected_commit)`. For each missing pair, it reads `unit.yml` once directly from the shared Git cache. If any files were read, Go sends them to Python in one batch. Python uses the same validator as REST to validate and expand the schemas using `dictionary.yml` for the same `contract_version`. It maps schemas to UnitIO UUIDs by direction and `topic_name` and resolves links by UUID. Standard `state` and `log` outputs are identified by direction and exact name.
 
 In `broadcast` mode, every linked Input is a destination. In `selected-link` mode, MessageProcessor forwards only `data` to the Input identified by `input_uuid` after checking that the Input is linked to the sender.
 
