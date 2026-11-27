@@ -439,33 +439,33 @@ input:
     qos: 1
     description: Update the Unit program to the specified version.
     fields:
-      COMMAND: {type: string, max_bytes: 16, enum: [Update]}
-      PU_COMMIT_VERSION: {type: string, max_bytes: 128}
-      COMPILED_FIRMWARE_LINK: {type: string, max_bytes: 2048, optional: true}
+      command: {type: string, max_bytes: 16, enum: [Update]}
+      pu_commit_version: {type: string, max_bytes: 128}
+      compiled_firmware_link: {type: string, max_bytes: 2048, optional: true}
   env_update:
     type: object
     qos: 1
     description: Download and apply the current .env.
     fields:
-      COMMAND: {type: string, max_bytes: 16, enum: [EnvUpdate]}
+      command: {type: string, max_bytes: 16, enum: [EnvUpdate]}
   schema_update:
     type: object
     qos: 1
     description: Download the current io_topics.yml and update subscriptions.
     fields:
-      COMMAND: {type: string, max_bytes: 16, enum: [SchemaUpdate]}
+      command: {type: string, max_bytes: 16, enum: [SchemaUpdate]}
   log_sync:
     type: object
     qos: 1
     description: Send stored logs through the log Output.
     fields:
-      COMMAND: {type: string, max_bytes: 16, enum: [LogSync]}
+      command: {type: string, max_bytes: 16, enum: [LogSync]}
   reset:
     type: object
     qos: 1
     description: Restart the device or program.
     fields:
-      COMMAND: {type: string, max_bytes: 16, enum: [Reset]}
+      command: {type: string, max_bytes: 16, enum: [Reset]}
 
 output:
   state:

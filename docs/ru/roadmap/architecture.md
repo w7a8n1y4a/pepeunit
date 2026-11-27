@@ -14,3 +14,21 @@
 1. Некоторые части кода должны стать более атомарыными при помощи транзакций
     - изменение состава UnitIO при изменение selected_commit
     - любые другие места где есть изменение зависимых между собой сущностей
+
+
+## Требования к любой клиентской библиотеке
+
+### Rest взаимодейтсвие
+
+- self_uuid - id текущего unit получаемый из PU_AUTH_TOKEN
+
+1. GET /units/io_topics/{self_uuid} - получение списка топиков в которые можно пушить, обязательно с локальным кешем
+2. GET /units/env/{self_uuid} - получение .env
+3. GET /units/firmware/tgz/{self_uuid}?wbits=9&level=9 - архив обновлений
+4. POST /units/set_state_storage/{self_uuid} - установка данных в storage
+5. GET /units/get_state_storage/{self_uuid} - получение данных из storage
+6. GET /unit_ios?output_uuid={i}&order_by_create_date=desc&limit=100&offset=0 - получение связанных input с выбранным output
+7. GET /units?is_include_output_unit_ios=true&unit_io_uuids={i}&unit_io_uuids={i2} - получение unit по io_uuid
+
+### MQTT взаимодействие
+
