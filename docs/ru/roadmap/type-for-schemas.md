@@ -46,7 +46,7 @@ Backend проверяет имя целиком по `name_patterns` из вы�
 
 `target_commit` хранит ручной выбор коммита и допускает NULL. `resolve_auto_commit_and_tag` вычисляет `(resolved_commit, resolved_tag)` в локальном Git по `target_branch` и флагам обновления. `get_selected_commit_and_tag` возвращает `(selected_commit, selected_tag)` для обоих режимов. Это проверенный ручной выбор или коммит, вычисленный для автообновления, вместе с его тегом. `current_commit_version` хранит SHA, сообщённый устройством (`device_commit`). Создание и обновление проверяют `unit.yml` по `selected_commit`, затем одной транзакцией сохраняют настройки версии, тип исполнения и набор UnitIO. У IO с тем же именем и направлением сохраняются UUID, связи и параметры. При ошибке проверки или записи прежнее состояние сохраняется целиком.
 
-Выдача файлов и команды используют манифест целевой версии. Если коммит или манифест недоступен, backend возвращает ошибку. Опубликованный словарь контракта неизменяем. Момент применения версии для снимка описан в [роадмапе MessageProcessor](./message-processor.md#синхронизация-схем).
+Выдача файлов и команды используют манифест целевой версии. Если коммит или манифест недоступен, backend возвращает ошибку. Опубликованный словарь контракта неизменяем. Момент применения версии для снимка описан в [роадмапе MessageProcessor](./message-processor.md#синхронизация-манифестов).
 
 ```yaml
 contract_version: v1
@@ -448,12 +448,12 @@ input:
     description: Download and apply the current .env.
     fields:
       command: {type: string, max_bytes: 16, enum: [EnvUpdate]}
-  schema_update:
+  io_topics_update:
     type: object
     qos: 1
     description: Download the current io_topics.yml and update subscriptions.
     fields:
-      command: {type: string, max_bytes: 16, enum: [SchemaUpdate]}
+      command: {type: string, max_bytes: 16, enum: [IOTopicsUpdate]}
   log_sync:
     type: object
     qos: 1

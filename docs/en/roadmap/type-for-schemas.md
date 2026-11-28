@@ -47,7 +47,7 @@ IO definitions come from `unit.yml` at `selected_commit` and `dictionary.yml` fo
 
 `target_commit` stores a manually chosen commit and allows NULL. `resolve_auto_commit_and_tag` computes `(resolved_commit, resolved_tag)` from local Git using `target_branch` and the update flags. `get_selected_commit_and_tag` returns `(selected_commit, selected_tag)` for either mode. The commit comes from the validated manual selection or the automatic lookup. `current_commit_version` stores the SHA reported by the device (`device_commit`). Creation and updates validate `unit.yml` at `selected_commit`, then save version settings, execution type and the UnitIO set in one transaction. An IO with the same name and direction retains its UUID, links and settings. If validation or writing fails, the previous state is preserved.
 
-Device files and commands use the target version's manifest. If the commit or manifest is unavailable, Backend returns an error. A published contract dictionary is immutable. The [MessageProcessor roadmap](./message-processor.md#schema-synchronization) describes when a version becomes active in the snapshot.
+Device files and commands use the target version's manifest. If the commit or manifest is unavailable, Backend returns an error. A published contract dictionary is immutable. The [MessageProcessor roadmap](./message-processor.md#manifest-synchronization) describes when a version becomes active in the snapshot.
 
 ```yaml
 contract_version: v1
@@ -449,12 +449,12 @@ input:
     description: Download and apply the current .env.
     fields:
       command: {type: string, max_bytes: 16, enum: [EnvUpdate]}
-  schema_update:
+  io_topics_update:
     type: object
     qos: 1
     description: Download the current io_topics.yml and update subscriptions.
     fields:
-      command: {type: string, max_bytes: 16, enum: [SchemaUpdate]}
+      command: {type: string, max_bytes: 16, enum: [IOTopicsUpdate]}
   log_sync:
     type: object
     qos: 1

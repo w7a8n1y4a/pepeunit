@@ -15,7 +15,7 @@ DataPipe in Go becomes just one stage of MessageProcessor.
 
 - Backend no longer subscribes to anything over MQTT
 - Backend configures EMQX, grants access, and publishes commands to base Inputs.
-- Backend sends `SchemaUpdate` only on request.
+- Backend sends `IOTopicsUpdate` only on request.
     - During an update, the Unit downloads `io_topics.yml` itself.
     - Link changes do not require the Unit to download the file again.
     - MessageProcessor synchronizes the links it uses to forward messages to other UnitIO topics.
@@ -24,7 +24,7 @@ DataPipe in Go becomes just one stage of MessageProcessor.
 
 ## Processing base topics
 
-Backend adds standard IOs, including `state` and `log`, from the selected contract's `dictionary.yml` when assembling the Unit schema. Each Input and Output has its own `domain.com/<unit_io_uuid>` address. The MessageProcessor subscription `domain.com/+` covers all these addresses.
+Backend adds standard IOs, including `state` and `log`, from the selected contract's `dictionary.yml` when resolving the Unit manifest. Each Input and Output has its own `domain.com/<unit_io_uuid>` address. The MessageProcessor subscription `domain.com/+` covers all these addresses.
 
 - Standard Output UnitIO processing takes place entirely in MessageProcessor. The reserved name and direction in the contract dictionary identify its purpose; there is no separate `base` marker.
 - `pepeunit_server` does not participate, except for topic authorization
@@ -121,25 +121,25 @@ The `instance_resources_samples` table in ClickHouse:
     - Default: 1
     - If the month does not have that day, use its last day
 
-## Schema synchronization
+## Manifest synchronization
 
-In the `pepeunit_server/message_processor` Go module, MessageProcessor assembles an in-memory snapshot of schemas and links for every Input and Output on the instance. The existing DataPipe reads its configuration from PostgreSQL independently of schema loading.
+In the `pepeunit_server/message_processor` Go module, MessageProcessor assembles an in-memory snapshot of manifest IO definitions and links for every Input and Output on the instance. The existing DataPipe reads its configuration from PostgreSQL independently of manifest loading.
 
-### How schemas are loaded
+### How manifests are loaded
 
 1. Go reads Unit version settings, UnitIO entries and links from one PostgreSQL snapshot. Go starts one local Python process per refresh and passes it the settings for all Units. The process uses the existing `GitRepoRepository` rules to select commits from the shared Git cache. Manual mode uses the validated `target_commit` and automatic mode computes `resolved_commit` from the branch and update settings.
-2. Go reuses expanded schemas from the last published snapshot by `(repo_uuid, selected_commit)`. For each missing pair, it reads `unit.yml` once directly from the shared Git cache. If any files were read, Go sends them to Python in one batch. Python uses the same validator as REST to validate and expand the schemas using `dictionary.yml` for the same `contract_version`. It maps schemas to UnitIO UUIDs by direction and `topic_name` and resolves links by UUID. Standard `state` and `log` outputs are identified by direction and exact name.
+2. Go reuses resolved IO definitions from the last published snapshot by `(repo_uuid, selected_commit)`. For each missing pair, it reads `unit.yml` once directly from the shared Git cache. If any files were read, Go sends them to Python in one batch. Python uses the same validator as REST to validate and resolve the manifests using `dictionary.yml` for the same `contract_version`. Go maps IO definitions to UnitIO UUIDs by direction and `topic_name` and resolves links by UUID. Standard `state` and `log` outputs are identified by direction and exact name.
 
 In `broadcast` mode, every linked Input is a destination. In `selected-link` mode, MessageProcessor forwards only `data` to the Input identified by `input_uuid` after checking that the Input is linked to the sender.
 
-### When schemas are refreshed
+### When manifests are refreshed
 
-At `:30`, Backend refreshes local repositories. At `:00`, the regular automatic update computes `selected_commit`, validates its `unit.yml` and synchronizes UnitIO. If the manifest fails validation, the existing UnitIO set is preserved. If the local branch has moved and IO names and directions still match, MessageProcessor can apply the new schema on a timer before the automatic Unit update runs.
+At `:30`, Backend refreshes local repositories. At `:00`, the regular automatic update computes `selected_commit`, validates its `unit.yml` and synchronizes UnitIO. If the manifest fails validation, the existing UnitIO set is preserved. If the local branch has moved and IO names and directions still match, MessageProcessor can apply the new manifest definitions on a timer before the automatic Unit update runs.
 
 After committing changes to Units, links or DataPipe, Backend signals the `backend_message_processor` Redis stream. A successful Unit update also signals when the IO names stay the same. `StartConfigSync` triggers a refresh at startup, once per batch of notifications, and on the `ConfigSyncInterval` timer.
 
-Go publishes the snapshot through `atomic.Pointer` after all schemas have been matched to UnitIO entries and links. On error it keeps the previous snapshot until the next refresh. The subscription for schema-based processing starts after the first successful load, and the handler uses one snapshot per message.
+Go publishes the snapshot through `atomic.Pointer` after matching the IO definitions to UnitIO entries and resolving links. On error it keeps the previous snapshot until the next refresh. The MQTT subscription starts after the first successful load, and the handler uses one snapshot per message.
 
-While the device is updating, it may still send values of the previous type. After the snapshot switches, MessageProcessor validates them against the new schema and rejects incompatible values. The contract dictionary defines the formats for declared standard commands and messages, including `update` and `state`. Changes to application IOs preserve those formats.
+While the device is updating, it may still send values of the previous type. After the snapshot switches, MessageProcessor validates them against the updated IO definitions and rejects incompatible values. The contract dictionary defines the formats for declared standard commands and messages, including `update` and `state`. Changes to application IOs preserve those formats.
 
 For example, if a sensor sends to two Inputs and one link is deleted, the new snapshot lists only the remaining Input. Messages may still reach both Inputs between the commit and the snapshot switch. The Unit listens on its own Input, and MessageProcessor updates the list of destinations.
